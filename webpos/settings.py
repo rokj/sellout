@@ -1,5 +1,5 @@
 # Django settings for webpos project.
-
+# some comment
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
