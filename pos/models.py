@@ -13,6 +13,9 @@ import json
 ### company ###
 class Company(SkeletonU):
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
+    url_name = models.CharField(_("Company name, used in URL address"),
+                                max_length=g.MISC['company_url_length'],
+                                null=False, blank=False, db_index=True)
     image = models.ImageField(_("Company logo"),
                              upload_to=get_image_path(g.DIRS['logo_dir'], "pos_company"),
                              null=True, blank=True)
@@ -21,6 +24,7 @@ class Company(SkeletonU):
     city = models.CharField(_("City"), max_length=50, null=True, blank=True)
     country = models.ForeignKey(Country, null=True, blank=True)
     email = models.CharField(_("E-mail address"), max_length=256, null=False, blank=False)
+    website = models.CharField(_("Website"), max_length=256, null=True, blank=True)
     phone = models.CharField(_("Phone number"), max_length = 30, null=True, blank=True)
     vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=True, blank=True)
     notes = models.TextField(_("Notes"), blank=True, null=True)
@@ -149,7 +153,6 @@ class Price(SkeletonU):
                               product = self.product, unit_price = self.unit_price)
             new_price.save(plain_save = True)
             
-
 ### contacts ###
 class Contact(SkeletonU):
     company = models.ForeignKey(Company)
@@ -270,6 +273,9 @@ def model_to_dict(obj, ignore=[], exclude=[]):
     return data
 
 def copy_bill_to_history(bill_id):
+    """ serializes Bill, BillItem and all foreign-keyed tables,
+        puts them in JSON format and saves to BillHistory. """
+    
     data = {}
     
     ignore_list = ['image']

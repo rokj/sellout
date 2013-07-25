@@ -12,6 +12,9 @@ class Country(models.Model):
     name = models.CharField(max_length=64, null=False)
     three_letter_code = models.CharField(max_length=3, null=False)
     
+    def __unicode__(self):
+        return self.name
+    
     class Meta:
         verbose_name_plural = _("Countries")
     

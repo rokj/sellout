@@ -1,3 +1,3 @@
-from data import *
-from project import *
-from task import *
+from manage import *
+from home import *
+from common import *

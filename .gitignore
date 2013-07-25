@@ -1,5 +1,7 @@
+tmp/*
 *.pyc
 *.*~
 *.swp
 *.pid
 *.zip
+*.tar.gz

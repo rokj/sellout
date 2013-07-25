@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block head %}
+<script type="text/javascript">// <![CDATA[
+function show_suggestions(data){
+    div_obj = $("#suggestion_list");
+    div_obj.empty();
+    
+    for(var i = 0; i < data.suggestions.length; i++){
+        s = data.suggestions[i]
+        
+        entry = $("<p>", {"class":"suggestion_list_item"});
+        entry.text(s);
+        
+        div_obj.append(entry);
+        
+        entry.click(function(){
+            $("#id_url_name").val($(this).text());
+        });
+    }
+}                                          
+                                           
+$(document).ready(function(){
+    // get url suggestions after #id_name loses focus
+    $("#id_name").blur(function(){
+        send_data("{% url 'pos:url_name_suggestions' %}",
+                {'name':$(this).val()},
+                "{{ csrf_token }}",
+                function(returned_data){
+                    show_suggestions(returned_data);
+                }
+        );
+    })
+
+});
+
+
+// ]]>
+</script>
+
+{% endblock %}
+
+{% block content %}
+<form action="{% url 'pos:register_company' %}" method="post" {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <!-- name -->
+    <div class="form_field">
+        {{ form.name.errors }}
+        <label for="id_name">{% trans 'Company name' %}:</label>
+        {{ form.name }}
+    </div>
+    <!-- url -->
+    <div class="form_field">
+        {{ form.url_name.errors }}
+        <label for="id_url_name">{% trans 'POS address' %}:</label>
+        <div>
+            {{ pos_url }} {{ form.url_name }} /
+            <div id="suggestion_list"></div> 
+        </div> 
+        <div class="help_text">
+        {% blocktrans %}Your POS system will be accessible at this address.
+        It can consist of characters, numbers and dashes only.
+        You can make up your own or choose from the suggestions below.
+        {% endblocktrans %}</div>
+    </div>
+    <!-- logo -->
+    <div class="form_field">
+        {{ form.image.errors }}
+        <label for="id_image">{% trans 'Company logo' %}:</label>
+        {{ form.image }}
+        <div class="help_text">{% trans 'Allowed formats: TODO' %}</div>
+    </div>
+    <!-- e-mail -->
+    <div class="form_field">
+        {{ form.email.errors }}
+        <label for="id_email">{% trans 'Contact e-mail' %}:</label>
+        {{ form.email }}
+        <div class="help_text">{% trans 'Official e-mail address of the company' %}</div>
+    </div>
+    <!-- street, number -->
+    <div class="form_field">
+        {{ form.street.errors }}
+        <label for="id_street">{% trans 'Street address and house number' %}:</label>
+        {{ form.street }}
+    </div>
+    <!-- post code -->
+    <div class="form_field">
+        {{ form.postcode.errors }}
+        <label for="id_postcode">{% trans 'ZIP/Postal code' %}:</label>
+        {{ form.postcode }}
+    </div>
+    <!-- city -->
+    <div class="form_field">
+        {{ form.city.errors }}
+        <label for="id_city">{% trans 'City' %}:</label>
+        {{ form.city }}
+    </div>
+    <!-- country -->
+    <div class="form_field">
+        {{ form.country.errors }}
+        <label for="id_country">{% trans 'Country' %}:</label>
+        {{ form.country }}
+    </div>
+    <!-- phone -->
+    <div class="form_field">
+        {{ form.phone.errors }}
+        <label for="id_phone">{% trans 'Phone number' %}:</label>
+        {{ form.phone }}
+    </div>
+    <!-- VAT exemption no. -->
+    <div class="form_field">
+        {{ form.vat_no.errors }}
+        <label for="id_vat_no">{% trans 'VAT exemption number' %}:</label>
+        {{ form.vat_no }}
+    </div>
+    <!-- notes -->
+    <div class="form_field">
+        {{ form.notes.errors }}
+        <label for="id_notes">{% trans 'Additional info/notes' %}:</label>
+        {{ form.notes }}
+    </div>
+    
+    <p><input type="submit" value="{% trans 'Submit' %}" /></p>
+</form>
+
+{% endblock %}
+

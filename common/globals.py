@@ -1,7 +1,6 @@
 from django.utils.translation import ugettext as _
 
-# Common stuff to be used anywhere in the script
-
+# Common stuff to be used anywhere throughout the site
 
 # directories
 DIRS = {
@@ -64,7 +63,8 @@ CONTACT_TYPES = (
 )
 
 # bills
-BILL_TYPES = ( ### TODO popraviti izrazoslovje
+# TODO popraviti izrazoslovje
+BILL_TYPES = (
     ("asdf",_("krneki")),
 )
 
@@ -74,3 +74,9 @@ BILL_STATUS = (
     ("Invoice", _("Invoice")), # racun
     ("Canceled", _("Canceled")),
 )
+
+# misc
+MISC = {
+        'company_url_length':50,
+        'site_title':'webpos',
+        }
