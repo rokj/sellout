@@ -3,11 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db import transaction
 from django.core.paginator import Paginator
-from django.forms import ModelForm
+from django.forms import ModelForm, ValidationError
 import re
 
 from pos.models import Company
-from util import error, JSON_response, JSON_parse
+from util import error, JSON_response, JSON_parse, resize_image, validate_image
 from common import globals as g
 from common import unidecode
 
@@ -16,88 +16,47 @@ from common import unidecode
 from django.http import HttpResponse
 from string import lower
 
-### editing company details
-class CompanyInfoForm(ModelForm):
-    """def clean_url_name(self):
-        data = self.cleaned_data['url_name']
-        
-        if data:
-            # check if url_name contains anything else but characters, numbers and dashes
-            match = re.match(r'^[\w-]{1,' + g.MISC['company_url_length'] + '}$', data)
-            if not match:
-                # there's something wrong with the name
-                raise ValidationError()
-            
-            
-import re
-
-        if matchObj:
-       print "matchObj.group() : ", matchObj.group()
-       print "matchObj.group(1) : ", matchObj.group(1)
-       print "matchObj.group(2) : ", matchObj.group(2)
-    else:
-       print "No match!!"
-            pass"""
+###
+### helper functions etc
+###
+def is_url_name_unique(url_name):
+    try:
+        Company.objects.get(url_name=url_name)
+        # select succeeded, url_name exists
+        return False
+    except Company.DoesNotExist:
+        # it does not exist.
+        return True
     
-    class Meta:
-        model = Company
-        fields = ['name',
-                  'image',
-                  'street',
-                  'postcode',
-                  'city',
-                  'country',
-                  'email',
-                  'phone',
-                  'vat_no',
-                  'notes',
-                  'url_name']
-
-
-# registration
-def register_company(request):
-    # show CompanyInfoForm, empty
-    if request.method == 'POST':
-        # submit data
-        form = CompanyInfoForm(request.POST)
-        if form.is_valid():
-            # checking
-            
-            form.save()
-    else:
-        # show an empty form
-        form = CompanyInfoForm()
-    
-    # some beautifixes:
-    # future store location: same as this, except what's after the last slash, i.e.:
-    # blocklogic.net/pos/register-company >> blocklogic.net/pos/company-name
-    full_url = request.build_absolute_uri()
-    pos_url = full_url[:full_url.rfind('/')+1]   
-    
-    context = {
-       'form':form,
-       'pos_url':pos_url,
-    }
-
-    return render(request, 'pos/register_company.html', context)
+    # ??? any other exceptions?
+    return False
 
 def check_url_name(url_name):
     # a valid url name:
-    #  - length between 1 and max_len
-    #  - allowed characters: alphanumeric and dash
-    #  - must not begin or end with dash
+    # 1. must not be equal to g.MISC['management_url']
+    if url_name == g.MISC['management_url']:
+        return False
     
-    # regex should match, otherwise it's not
+    #  2. length between 1 and max_len
+    #  3. allowed characters: alphanumeric and dash
+    #  4. must not begin or end with dash
     rem = re.match('^\w\w*(?:-\w+)*$', url_name)
     try:
         if rem.group(0) == url_name:
-            return True
+            #  5. must be unique within the database
+            if is_url_name_unique(url_name):
+                return True
+            else:
+                return False
         else:
             return False
     except:
         return False
     
 def unique_url_name(url_name):
+    # check if url exists already and if it does, append a number
+    # and return a unique url.
+    
     max_len = g.MISC['company_url_length']
     # first, check for length
     if len(url_name) > max_len:
@@ -107,15 +66,11 @@ def unique_url_name(url_name):
     n = 1
     try_name = url_name
     while True:
-        try:
-            Company.objects.get(url_name=try_name)
-            # succes, id exists, make a new name
-            # shorten for length of '-n', if necessary
+        if is_url_name_unique(try_name):
+            return try_name
+        else:
             try_name = url_name[0:max_len - 1 - len(str(n))] + '-' + str(n)
             n += 1
-        except Company.DoesNotExist:
-            # the name is available, return it 
-            return try_name
 
 def url_name_suggestions(request):
     # there's a 'name' in request:
@@ -128,19 +83,19 @@ def url_name_suggestions(request):
     except:
         return JSON_response(no_suggestions)
     
-    # 0. lowercasize
+    # 0. "lowercaseize"
     name = name.lower()
     
-    # 1. ascii-fy string
+    # 1. "asciify"
     s = unidecode.unidecode(name)
     
-    # 2. remove forbidden characters (everything but alphanumeric and dash
+    # 2. remove forbidden characters (everything but alphanumeric and dash) ("alphanumerify")
     s = re.sub(r'[^\w-]', ' ', s).strip()
     
     # first suggestion: full name - also remove duplicate -'s
     suggestions.append(unique_url_name(re.sub(r' +', '-', s)))
     
-    # 2. remove one-character words
+    # 2. remove one-character words ("unonecharacterify")
     # regex: one character followed by a space at the beginning OR
     # space followed by a character followed by a space OR
     # space followed by a character at the end
@@ -179,32 +134,121 @@ def url_name_suggestions(request):
     # pass on to the page
     return JSON_response({'suggestions':suggestions})
 
-def edit_company_details(request, company=None, company_id=None):
-    # get company
-    if company:
-        c = get_object_or_404(Company, url_name = company)
+
+###
+### editing company details
+###
+class CompanyInfoForm(ModelForm):
+    # take special case of urls
+    def clean_url_name(self):
+        url_name = self.cleaned_data['url_name']
+        
+        # if there was no change made, don't check
+        initial_url_name = self.initial['url_name']
+        if url_name == initial_url_name:
+            return url_name
+        
+        if not check_url_name(url_name):
+            raise ValidationError(_("Url of the company is invalid or exists already."))
+        else:
+            return url_name
+
+    def clean_image(self):
+        validate_image(self)
+
+    class Meta:
+        model = Company
+        fields = ['name',
+                  'url_name',
+                  'email',
+                  'image',
+                  'street',
+                  'postcode',
+                  'city',
+                  'country',
+                  'phone',
+                  'vat_no',
+                  'notes']
+
+# registration
+def register_company(request):
+    # show CompanyInfoForm, empty
+    if request.method == 'POST':
+        # submit data
+        form = CompanyInfoForm(request.POST, request.FILES)
+        if form.is_valid():
+            company = form.save(False)
+            company.created_by = request.user
+            form.save()
+            
+            # continue with registration
+            return redirect('pos:home', company=form.cleaned_data['url_name']) # home page
     else:
-        c = get_object_or_404(Company, id=company_id)
+        # show an empty form
+        form = CompanyInfoForm()
+    
+    # some beautifixes:
+    # future store url: same as this page's, excluding what's after the
+    # g.MISC['management_url'] string
+    # blocklogic.net/pos/app/register-company >> blocklogic.net/pos/company-name
+    full_url = request.build_absolute_uri()
+    pos_url = full_url[:full_url.rfind(g.MISC['management_url'] + '/')]   
+    
+    context = {
+       'form':form,
+       'pos_url':pos_url,
+    }
+
+    return render(request, 'pos/register_company.html', context)
+
+def edit_company_details(request, company):
+    # get company
+    c = get_object_or_404(Company, url_name = company)
+    
+    old_image = c.image.name      # c gets overwritten
+    old_image_path = c.image.path # on form submit
     
     # check if the user has permission to change it
     if not request.user.has_perm('pos.change_company'):
         return error(request, _("You have no permission to edit company details."))
     
     context = {}
-    context['id'] = c.id
     
     if request.method == 'POST':
         # submit data
-        form = CompanyInfoForm(request.POST, instance=c)
+        form = CompanyInfoForm(request.POST, request.FILES, instance=c)
+        
         if form.is_valid():
-            # check a  
+            # delete current file:
+            # if "clear" checkbox is selected (cleaned_data['image'] = False)
+            # if new image path is different than the old one
+            if form.cleaned_data['image'] != old_image:
+                if form.cleaned_data['image']: # django whines when accessing boolean's .properties
+                    import os
+                    if os.path.exists(old_image_path):
+                        print 'should be deleted'
+                        os.remove(old_image_path)
             
-            # OK, save and show the form with the new data
             form.save()
+            
+            # resize logo to normal dimensions
+            resize_image(c.image.path, g.IMAGE_DIMENSIONS['logo'])
+            
             context['saved'] = True
+            # if url_name was changed, redirect to new address
+            return redirect('pos:edit_company_details', company=c.url_name)
     else:
         form = CompanyInfoForm(instance=c)
         
     context['form'] = form
-
+    context['url_name'] = c.url_name
+    context['logo'] = c.image
+                    
     return render(request, 'pos/manage_company.html', context)
+
+###
+### adding/deleting categories
+###
+def edit_category(request, category_id):
+    pass
+    

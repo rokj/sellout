@@ -6,3 +6,4 @@ static/jquery*
 *.pid
 *.zip
 *.tar.gz
+settings_local.py

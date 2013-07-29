@@ -7,19 +7,19 @@
 {% endblock %}
 
 {% block content %}
-<form action="{% url 'pos:edit_company_details' company_id=id %}" method="post" {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
+<form action="{% url 'pos:edit_company_details' url_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% for field in form %}
         <div class="form_field_container">
         {% if field.name == 'image' %}{% comment %}display the currently uploaded image with the image field{% endcomment %}
-            <div class="upload_image_container"><img src="{{ form.instance.image.url }}"></div>
-        {% else %}
-            {% if field.errors %}
-                <div class="form_field_error">{{ field.errors }}</div>
-            {% endif %}
-            <div class="field_label_tag">{{ field.label_tag }}</div>
-            <div class="form_field">{{ field }}</div>
+            <div class="upload_image_container">
+            {% if logo %}<img src="{{ logo.url }}">{% endif %}</div>
         {% endif %}
+        {% if field.errors %}
+            <div class="form_field_error">{{ field.errors }}</div>
+        {% endif %}
+        <div class="field_label_tag">{{ field.label_tag }}</div>
+        <div class="form_field">{{ field }}</div>
         </div>
     {% endfor %}
     <p><input type="submit" value="{% trans 'Submit' %}" /></p>

@@ -9,6 +9,17 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 
     # POS
-    url(r'^pos/', include('pos.urls', namespace='pos')),
-    
+    url(r'^pos/', include('pos.urls', namespace='pos')),   
+)
+
+# TODO: remove from production
+from django.conf import settings
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
+            'document_root': settings.MEDIA_ROOT,
+        }),
+        url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {
+            'document_root': settings.STATIC_ROOT,
+        }),
 )

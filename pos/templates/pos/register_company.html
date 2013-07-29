@@ -20,7 +20,7 @@ function show_suggestions(data){
             $("#id_url_name").val($(this).text());
         });
     }
-}                                          
+}
                                            
 $(document).ready(function(){
     // get url suggestions after #id_name loses focus
@@ -32,10 +32,8 @@ $(document).ready(function(){
                     show_suggestions(returned_data);
                 }
         );
-    })
-
+    });
 });
-
 
 // ]]>
 </script>
@@ -43,6 +41,7 @@ $(document).ready(function(){
 {% endblock %}
 
 {% block content %}
+
 <form action="{% url 'pos:register_company' %}" method="post" {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
     {% csrf_token %}
     {{ form.non_field_errors }}
@@ -64,6 +63,7 @@ $(document).ready(function(){
         {% blocktrans %}Your POS system will be accessible at this address.
         It can consist of characters, numbers and dashes only.
         You can make up your own or choose from the suggestions below.
+        It can be changed later.
         {% endblocktrans %}</div>
     </div>
     <!-- logo -->

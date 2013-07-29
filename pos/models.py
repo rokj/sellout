@@ -13,7 +13,7 @@ import json
 ### company ###
 class Company(SkeletonU):
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
-    url_name = models.CharField(_("Company name, used in URL address"),
+    url_name = models.SlugField(_("Company name, used in URL address"),
                                 max_length=g.MISC['company_url_length'],
                                 null=False, blank=False, db_index=True)
     image = models.ImageField(_("Company logo"),

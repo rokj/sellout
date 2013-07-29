@@ -3,10 +3,10 @@ from django.utils.translation import ugettext as _
 # Common stuff to be used anywhere throughout the site
 
 # directories
-DIRS = {
+DIRS = { # goes to MEDIA folder
         'logo_dir':"img/logo",
-        'category_icon_dir':"img/category",
-        'product_image_dir':"img/product",
+        'category_icon_dir':"pos/img/category",
+        'product_image_dir':"pos/img/product",
 }
 
 # attributes' field lengths
@@ -79,4 +79,11 @@ BILL_STATUS = (
 MISC = {
         'company_url_length':50,
         'site_title':'webpos',
+        'management_url':'app', # must not be empty!
+                                # (to differentiate between company and management sites)
+        'max_upload_image_size':2*2**20, # 2 megabytes
         }
+
+IMAGE_DIMENSIONS = {
+    'logo':(128, 128),
+}

@@ -11,6 +11,7 @@ from pos.models import Company
 from django.http import HttpResponse
 
 ### index
-def terminal(request, company_id=None, company=None):
+def terminal(request, company):
+    c = get_object_or_404(Company, url_name=company)
     
-    return render(request, 'pos/terminal.html', {'company':company, 'id':company_id})
+    return render(request, 'pos/terminal.html', {'company':c})
