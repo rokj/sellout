@@ -10,6 +10,6 @@
 <p>home</p>
 <p>company: {{company}}</p>
 <p>id: {{id}}</p>
-<p><img src="{{company.image.url}}" /></p>
+<p>{% if company.image %}<img src="{{company.image.url}}" />{% endif %}</p>
 {% endblock %}
 

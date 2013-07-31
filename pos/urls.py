@@ -20,6 +20,10 @@ urlpatterns = patterns('',
     url(r_company + '/?$', home.terminal, name='home'), # by url_name
     
     # management urls
-    url(r_company + _('/manage/company') + '/?$', manage.edit_company_details, name='edit_company_details'),
+    url(r_company + _('/manage') + '/?$', manage.manage_home, name='manage_home'), # management home
+    url(r_company + _('/manage/company') + '/?$', manage.edit_company, name='edit_company'), # company
+    url(r_company + _('/manage/categories') + '/?$', manage.list_categories, name='list_categories'), # list of categories
+    url(r_company + _('/manage/category') + '/(?P<category_id>-?\d+)/?$', manage.edit_category, name='edit_category'), # category
+    url(r_company + _('/manage/contact') + '/(?P<contact_id>-?\d+)/?$', manage.edit_contact, name='edit_contact'), # contact
     
 )

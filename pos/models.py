@@ -16,7 +16,7 @@ class Company(SkeletonU):
     url_name = models.SlugField(_("Company name, used in URL address"),
                                 max_length=g.MISC['company_url_length'],
                                 null=False, blank=False, db_index=True)
-    image = models.ImageField(_("Company logo"),
+    image = models.ImageField(_("Logo"),
                              upload_to=get_image_path(g.DIRS['logo_dir'], "pos_company"),
                              null=True, blank=True)
     street = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
@@ -48,8 +48,8 @@ class Category(SkeletonU):
     company = models.ForeignKey(Company, null=False, blank=False)
     parent = models.ForeignKey('self', blank=True, null=True)
     name = models.CharField(_("Category name"), max_length=100, null=False, blank=False)
-    description = models.TextField(_("Category description"), null=True, blank=True)
-    image = models.ImageField(_("Category icon"),
+    description = models.TextField(_("Description"), null=True, blank=True)
+    image = models.ImageField(_("Icon"),
                              upload_to=get_image_path(g.DIRS['category_icon_dir'], "pos_category"),
                              null=True, blank=True)
     
@@ -106,6 +106,7 @@ class ProductAbstract(SkeletonU):
         abstract = True
 
 class Product(ProductAbstract):
+    # foreign keys, changed data in Company/Discount/... will be reflected in Product and BillItem
     company = models.ForeignKey(Company, null=False, blank=False)
     discount = models.ManyToManyField(Discount, null=True, blank=True)
     category = models.ForeignKey(Category, null=True, blank=True)

@@ -4,17 +4,16 @@ from django.utils.translation import ugettext as _
 from django.db import transaction
 from django.core.paginator import Paginator
 from django.forms import ModelForm, ValidationError
-import re
+from django.http import HttpResponse, Http404
 
-from pos.models import Company
+from pos.models import Company, Category, Contact
 from util import error, JSON_response, JSON_parse, resize_image, validate_image
 from common import globals as g
 from common import unidecode
+from common.functions import get_random_string
 
-
-
-from django.http import HttpResponse
-from string import lower
+import re
+import os
 
 ###
 ### helper functions etc
@@ -75,13 +74,12 @@ def unique_url_name(url_name):
 def url_name_suggestions(request):
     # there's a 'name' in request:
     # take it and return a list of a few company url suggestions
-    no_suggestions = {'suggestions':None}
     suggestions = []
     
     try: # get name from sent data
         name = JSON_parse(request.POST.get('data'))['name']
     except:
-        return JSON_response(no_suggestions)
+        return JSON_response({'suggestions':[]})
     
     # 0. "lowercaseize"
     name = name.lower()
@@ -116,6 +114,12 @@ def url_name_suggestions(request):
             break
         
         suggestions.append(unique_url_name(s))
+    
+    # only first characters of every word (a.k.a. acronym)
+    s = ''
+    for w in words:
+        s += w[0]
+    suggestions.append(unique_url_name(s))
 
     # 4. remove possible inapropriate suggestions
     valid = []
@@ -131,14 +135,28 @@ def url_name_suggestions(request):
     suggestions = valid
     del valid
     
+    # 3a. add a random string to suggestions
+    suggestions.append(unique_url_name(get_random_string(length=5).lower()))
+    
     # pass on to the page
     return JSON_response({'suggestions':suggestions})
 
+### 
+### manage home
+### 
+def manage_home(request, company):
+    company = get_object_or_404(Company, url_name=company)
+    
+    context = {
+               'company':company,
+               }
+    
+    return render(request, 'pos/manage/manage.html', context)
 
 ###
 ### editing company details
 ###
-class CompanyInfoForm(ModelForm):
+class CompanyForm(ModelForm):
     # take special case of urls
     def clean_url_name(self):
         url_name = self.cleaned_data['url_name']
@@ -154,7 +172,7 @@ class CompanyInfoForm(ModelForm):
             return url_name
 
     def clean_image(self):
-        validate_image(self)
+        return validate_image(self)
 
     class Meta:
         model = Company
@@ -172,10 +190,10 @@ class CompanyInfoForm(ModelForm):
 
 # registration
 def register_company(request):
-    # show CompanyInfoForm, empty
+    # show CompanyForm, empty
     if request.method == 'POST':
         # submit data
-        form = CompanyInfoForm(request.POST, request.FILES)
+        form = CompanyForm(request.POST, request.FILES)
         if form.is_valid():
             company = form.save(False)
             company.created_by = request.user
@@ -185,7 +203,7 @@ def register_company(request):
             return redirect('pos:home', company=form.cleaned_data['url_name']) # home page
     else:
         # show an empty form
-        form = CompanyInfoForm()
+        form = CompanyForm()
     
     # some beautifixes:
     # future store url: same as this page's, excluding what's after the
@@ -199,56 +217,276 @@ def register_company(request):
        'pos_url':pos_url,
     }
 
-    return render(request, 'pos/register_company.html', context)
+    return render(request, 'pos/manage/register.html', context)
 
-def edit_company_details(request, company):
-    # get company
+# edit after registration
+def edit_company(request, company):
+    # get company, it must exist
     c = get_object_or_404(Company, url_name = company)
-    
-    old_image = c.image.name      # c gets overwritten
-    old_image_path = c.image.path # on form submit
-    
+        
     # check if the user has permission to change it
     if not request.user.has_perm('pos.change_company'):
         return error(request, _("You have no permission to edit company details."))
+
+    if c.image:
+        old_image = c.image.name      # c gets overwritten
+        old_image_path = c.image.path # on form submit
+    else:
+        old_image = None
+        old_image_path = None
     
     context = {}
     
     if request.method == 'POST':
         # submit data
-        form = CompanyInfoForm(request.POST, request.FILES, instance=c)
+        form = CompanyForm(request.POST, request.FILES, instance=c)
         
         if form.is_valid():
-            # delete current file:
-            # if "clear" checkbox is selected (cleaned_data['image'] = False)
-            # if new image path is different than the old one
-            if form.cleaned_data['image'] != old_image:
-                if form.cleaned_data['image']: # django whines when accessing boolean's .properties
-                    import os
-                    if os.path.exists(old_image_path):
-                        print 'should be deleted'
-                        os.remove(old_image_path)
+            new_image = form.cleaned_data['image']
+            
+            # possible cases:
+            # 1. new image upload: new_image and not old_image; RESIZE
+            # 2. rewrite image: new_image != old_image; DELETE, RESIZE
+            # 3. delete image: new_image = False; DELETE
+            if new_image and not old_image: # 1.
+                delete = False
+                resize = True
+            elif not new_image: # 3.
+                delete = True
+                resize = False
+            elif new_image != old_image: # 2.
+                resize = True
+                delete = True
+            
+            if delete:
+                if os.path.exists(old_image_path):
+                    os.remove(old_image_path)
             
             form.save()
             
-            # resize logo to normal dimensions
-            resize_image(c.image.path, g.IMAGE_DIMENSIONS['logo'])
+            # resize logo to the desired dimensions (if needed)
+            if resize:
+                resize_image(c.image.path, g.IMAGE_DIMENSIONS['logo'])
             
             context['saved'] = True
             # if url_name was changed, redirect to new address
-            return redirect('pos:edit_company_details', company=c.url_name)
+            return redirect('pos:edit_company', company=c.url_name)
     else:
-        form = CompanyInfoForm(instance=c)
+        form = CompanyForm(instance=c)
         
     context['form'] = form
-    context['url_name'] = c.url_name
-    context['logo'] = c.image
+    context['company'] = c
+    context['logo_dimensions'] = g.IMAGE_DIMENSIONS['logo']
                     
-    return render(request, 'pos/manage_company.html', context)
+    return render(request, 'pos/manage/company.html', context)
 
 ###
-### adding/deleting categories
+### adding/editing categories
 ###
-def edit_category(request, category_id):
-    pass
+class CategoryForm(ModelForm):
+    # take special case of urls
+    def clean_image(self):
+        return validate_image(self)
+
+    class Meta:
+        model = Category
+        fields = ['name',
+                  'description',
+                  'image']
+
+def get_all_categories(company_id, category_id=None, sort='name', data=[], level=0):
+    # return a structured list of all categories (converted to dictionaries)
+    def category_to_dict(c, level): # c = Category object
+        return {'id':c.id,
+                'name':c.name,
+                'description':c.description,
+                'image':c.image,
+                'level':level
+        }
     
+    if category_id:
+        c = Category.objects.get(company__id=company_id, id=category_id)
+        # add current category to list
+        data.append(category_to_dict(c, level))
+        
+        # append all children
+        children = Category.objects.filter(company__id=company_id, parent__id=category_id).order_by(sort)
+        level += 1
+        for c in children:
+            get_all_categories(company_id, c.id, data=data, level=level, sort=sort)
+    else:
+        cs = Category.objects.filter(company__id=company_id, parent=None).order_by(sort)
+        print cs
+        for c in cs:
+            get_all_categories(c.company.id, c.id, data=data, level=level, sort=sort)
+
+    return data
+    
+def list_categories(request, company):
+    company = get_object_or_404(Company, url_name=company)
+    context = {
+               'company':company,
+               'categories':get_all_categories(company.id, data=[]),
+               }
+    
+    return render(request, 'pos/manage/categories.html', context)
+
+def add_category(request, company, parent_id):
+    pass
+
+def edit_category(request, company, category_id):
+    # get company
+    company = get_object_or_404(Company, url_name=company)
+        
+    # get category
+    category = get_object_or_404(Category, id=category_id)
+    # check if category actually belongs to the given company
+    if category.company != company:
+        raise Http404 # this category does not exist for the current user
+    # check if the user has permission to change it
+    if not request.user.has_perm('pos.change_category'):
+        return error(request, _("You have no permission to edit categories."))
+
+    # image handling
+    try:
+        old_image = category.image.name
+        old_image_path = category.image.path
+    except:
+        old_image = None
+        old_image_path = None
+    
+    context = {'company':company.url_name, 'category_id':category_id}
+    
+    if request.method == 'POST':
+        # submit data
+        form = CategoryForm(request.POST, request.FILES, instance=category)
+        
+        if form.is_valid():
+            # image
+            new_image = form.cleaned_data['image'] # see company form for comments
+            print new_image
+            print old_image
+            if new_image and not old_image:
+                delete = False
+                resize = True
+            elif not new_image:
+                delete = True
+                resize = False
+            elif new_image != old_image:
+                resize = True
+                delete = True
+            else:
+                delete = False
+                resize = False
+            
+            if delete:
+                if os.path.exists(old_image_path):
+                    os.remove(old_image_path)
+            
+            # created_by and company_id (only when creatine a new category)
+            category = form.save(False)
+            if 'created_by' not in form.cleaned_data:
+                category.created_by = request.user
+            if 'company_id' not in form.cleaned_data:
+                category.company_id = company.id
+        
+            form.save()
+            
+            if resize:
+                resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
+            
+            context['saved'] = True
+            context['image'] = category.image
+            return redirect('pos:edit_category', company=company.url_name, category_id=category.id)
+    else:
+        if category:
+            form = CategoryForm(instance=category) # update existing category
+        else:
+            form = CategoryForm() # create a new category
+        
+    context['form'] = form
+    context['company'] = company
+    
+    return render(request, 'pos/manage/category.html', context)
+
+def delete_category(request, company, category_id):
+    pass
+
+### 
+### contacts
+### 
+class ContactForm(ModelForm):
+    class Meta:
+        model = Contact
+        fields = ['type',
+                  'company_name',
+                  'first_name',
+                  'last_name',
+                  'date_of_birth',
+                  'street_address',
+                  'postcode',
+                  'city',
+                  'country', 
+                  'email',
+                  'phone',
+                  'vat']
+
+def edit_contact(request, company, contact_id):
+    pass
+"""
+    # get company
+    company = get_object_or_404(Company, url_name=company)
+    
+    # get category
+    contact = get_object_or_404(Category, id=contact_id)
+    
+    # check if contact actually belongs to the given company
+    if contact.company != company:
+        raise Http404 # this category does not exist for the current user
+
+    # check if the user has permission to change it
+    if not request.user.has_perm('pos.change_category'):
+        return error(request, _("You have no permission to edit company details."))
+
+    context = {'company':company.url_name, 'contact_id':contact_id}
+    
+    if request.method == 'POST':
+        # submit data
+        form = CategoryForm(request.POST, request.FILES, instance=category)
+        
+        if form.is_valid():
+            new_image = form.cleaned_data['image'] # see company form for comments
+            print new_image
+            print old_image
+            if new_image and not old_image:
+                delete = False
+                resize = True
+            elif not new_image:
+                delete = True
+                resize = False
+            elif new_image != old_image:
+                resize = True
+                delete = True
+            else:
+                delete = False
+                resize = False
+            
+            if delete:
+                if os.path.exists(old_image_path):
+                    os.remove(old_image_path)
+            
+            form.save()
+            
+            if resize:
+                resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
+            
+            context['saved'] = True
+            return redirect('pos:edit_category', company=company.url_name, category_id=category.id)
+    else:
+        form = CategoryForm(instance=category)
+        
+    context['form'] = form
+    context['image'] = category.image
+    
+    return render(request, 'pos/manage/category.html', context)
+"""

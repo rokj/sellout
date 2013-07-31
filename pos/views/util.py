@@ -8,10 +8,15 @@ from common import globals as g
 from django.http import HttpResponse
 import json
 import Image # PIL or pillow must be installed
+import re
 
 # requests and responses
 def error(request, message):
-    return render(request, 'pos/error.html', {'message':message})
+    
+    context = {'message':message,
+               'back_link':request.build_absolute_uri(),
+               }
+    return render(request, 'pos/error.html', context)
 
 def JSON_stringify(data):
     return json.dumps(data)
@@ -28,21 +33,23 @@ def resize_image(path, dimensions):
     
     width, height = image.size
     
-    if width < dimensions[0] and height < dimensions[1]:
+    if width <= dimensions[0] and height <= dimensions[1]:
         return # no need for resizing, image is smaller than requested
     
     image.thumbnail(dimensions, Image.ANTIALIAS)
     image.save(path)
 
 def validate_image(obj): # obj is actually "self"
-    # Kudos: stackoverflow.com/questions/6195478/max-image-size-on-file-upload
     image = obj.cleaned_data.get('image', False)
-    if image:
+    
+    # possible cases:
+    # 1. a new upload: image object will contain all data, including _size etc.; check for size
+    # 2. deletion: image = False; do nothing
+    # 3. no change: image object will exist, but image._size will not; do nothing    
+    try:
         if image._size > g.MISC['max_upload_image_size']:
             raise ValidationError(_("Image too large, maximum file size for upload is %s MB")%(g.MISC['max_upload_image_size']/2**20))
-        return image
-    else:
-        raise ValidationError(_("Reading of image file failed."))
-
+    except AttributeError: # case 3
+        pass
     
-    
+    return image
