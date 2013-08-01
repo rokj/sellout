@@ -2,6 +2,7 @@ from django.db import connection
 import string
 from random import choice
 import os
+import globals as g
 
 def get_random_string(length=8, chars=string.letters + string.digits):
     return ''.join([choice(chars) for _ in xrange(length)])
@@ -14,8 +15,10 @@ def get_image_path(path, table_name):
             filename = instance.image.name
         cursor = connection.cursor()
 
-        ext = os.path.splitext(filename)[1]
-        ext = ext.lower()
+        # image extension (format)
+        #ext = os.path.splitext(filename)[1] # for preserving the original format
+        #ext = ext.lower()
+        ext = '.' + g.MISC['image_format'].lower() # to apply a fixed default
 
         random_filename = get_random_string(length=16)
         row = True

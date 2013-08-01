@@ -82,6 +82,7 @@ MISC = {
         'management_url':'admin', # must not be empty!
                                 # (to differentiate between company and management sites)
         'max_upload_image_size':2*2**20, # 2 megabytes
+        'image_format':'png', # all images will be saved in this format
         }
 
 IMAGE_DIMENSIONS = {

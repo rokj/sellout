@@ -37,7 +37,7 @@ def resize_image(path, dimensions):
         return # no need for resizing, image is smaller than requested
     
     image.thumbnail(dimensions, Image.ANTIALIAS)
-    image.save(path)
+    image.save(path, g.MISC['image_format'])
 
 def validate_image(obj): # obj is actually "self"
     image = obj.cleaned_data.get('image', False)

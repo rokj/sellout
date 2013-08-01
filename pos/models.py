@@ -1,6 +1,10 @@
 from django.db import models
 from django.utils.translation import ugettext as _
 
+from django.db.models.signals import pre_save # image file cleanup signals
+from django.dispatch import receiver
+from config.models import Cleanup
+
 from common.models import SkeletonU
 from common.functions import get_image_path
 import common.globals as g
@@ -58,6 +62,22 @@ class Category(SkeletonU):
     
     class Meta:
         verbose_name_plural = _("Categories")
+
+@receiver(pre_save, sender=Category)
+@receiver(pre_save, sender=Company)
+def cleanup_images(**kwargs):
+    try:
+        prev_entry = kwargs['sender'].objects.get(id=kwargs['instance'].id)
+    except: # the entry does not exist, no need to do anything
+        return
+        
+    this_entry = kwargs['instance']
+    
+    if prev_entry.image.name != this_entry.image.name:
+        # add image to Cleanup for later deletion
+        c = Cleanup(filename=prev_entry.image.path)
+        c.save()
+        print prev_entry.image.name
 
 class CategoryAttribute(SkeletonU):
     category = models.ForeignKey(Category)

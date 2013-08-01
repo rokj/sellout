@@ -296,18 +296,21 @@ class CategoryForm(ModelForm):
 
 def get_all_categories(company_id, category_id=None, sort='name', data=[], level=0):
     # return a structured list of all categories (converted to dictionaries)
-    def category_to_dict(c, level): # c = Category object
-        return {'id':c.id,
-                'name':c.name,
-                'description':c.description,
-                'image':c.image,
-                'level':level
-        }
+    
+    #def category_to_dict(c, level): # c = Category object # currently not needed
+    #    return {'id':c.id,
+    #            'name':c.name,
+    #            'description':c.description,
+    #            'image':c.image,
+    #            'level':level
+    #    }
     
     if category_id:
         c = Category.objects.get(company__id=company_id, id=category_id)
         # add current category to list
-        data.append(category_to_dict(c, level))
+        c.level = level
+        #data.append(category_to_dict(c, level))
+        data.append(c)
         
         # append all children
         children = Category.objects.filter(company__id=company_id, parent__id=category_id).order_by(sort)
@@ -364,24 +367,29 @@ def edit_category(request, company, category_id):
         if form.is_valid():
             # image
             new_image = form.cleaned_data['image'] # see company form for comments
+            
             print new_image
             print old_image
-            if new_image and not old_image:
+            if not old_image and new_image: # currently no image exists
                 delete = False
                 resize = True
-            elif not new_image:
+            elif old_image and not new_image : # clear checkbox was checked 
                 delete = True
                 resize = False
-            elif new_image != old_image:
+            elif new_image != old_image: # image replacement
                 resize = True
                 delete = True
-            else:
+            else: # whatever
                 delete = False
                 resize = False
             
-            if delete:
-                if os.path.exists(old_image_path):
-                    os.remove(old_image_path)
+            #if delete:
+                # delete all files on old_image_path* (that includes all generated thumbnails)
+                #import glob
+                #for f in glob.glob(old_image_path + '*'):
+                #    print 'removing ' + f
+                #    #Do what you want with the file
+                #    os.remove(f)
             
             # created_by and company_id (only when creatine a new category)
             category = form.save(False)
@@ -395,9 +403,7 @@ def edit_category(request, company, category_id):
             if resize:
                 resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
             
-            context['saved'] = True
-            context['image'] = category.image
-            return redirect('pos:edit_category', company=company.url_name, category_id=category.id)
+            return redirect('pos:list_categories', company=company.url_name)
     else:
         if category:
             form = CategoryForm(instance=category) # update existing category
@@ -406,6 +412,7 @@ def edit_category(request, company, category_id):
         
     context['form'] = form
     context['company'] = company
+    context['category'] = category
     
     return render(request, 'pos/manage/category.html', context)
 
