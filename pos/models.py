@@ -63,22 +63,6 @@ class Category(SkeletonU):
     class Meta:
         verbose_name_plural = _("Categories")
 
-@receiver(pre_save, sender=Category)
-@receiver(pre_save, sender=Company)
-def cleanup_images(**kwargs):
-    try:
-        prev_entry = kwargs['sender'].objects.get(id=kwargs['instance'].id)
-    except: # the entry does not exist, no need to do anything
-        return
-        
-    this_entry = kwargs['instance']
-    
-    if prev_entry.image.name != this_entry.image.name:
-        # add image to Cleanup for later deletion
-        c = Cleanup(filename=prev_entry.image.path)
-        c.save()
-        print prev_entry.image.name
-
 class CategoryAttribute(SkeletonU):
     category = models.ForeignKey(Category)
     attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
@@ -321,4 +305,22 @@ def copy_bill_to_history(bill_id):
                           bill = b, data = serialized_data)
     history.save()
     return True
+
+
+@receiver(pre_save, sender=Category)
+@receiver(pre_save, sender=Company)
+def cleanup_images(**kwargs):
+    # if image was deleted or changed, add previous filename and path
+    # to config.Cleanup model. Cleanup will delete listed objects on post_save() signal.
+    try:
+        prev_entry = kwargs['sender'].objects.get(id=kwargs['instance'].id)
+    except: # the entry does not exist, no need to do anything
+        return
+        
+    this_entry = kwargs['instance']
     
+    if prev_entry.image.name != this_entry.image.name:
+        # add image to Cleanup for later deletion
+        c = Cleanup(filename=prev_entry.image.path)
+        c.save()
+        print prev_entry.image.name

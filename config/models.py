@@ -48,3 +48,4 @@ def my_handler(**kwargs):
             if os.path.exists(g):
                 if mr in g: # do not remove anything outside MEDIA dir
                     os.remove(g)
+        f.delete()

@@ -215,6 +215,7 @@ def register_company(request):
     context = {
        'form':form,
        'pos_url':pos_url,
+       'logo_dimensions':g.IMAGE_DIMENSIONS['logo'],
     }
 
     return render(request, 'pos/manage/register.html', context)
@@ -228,13 +229,6 @@ def edit_company(request, company):
     if not request.user.has_perm('pos.change_company'):
         return error(request, _("You have no permission to edit company details."))
 
-    if c.image:
-        old_image = c.image.name      # c gets overwritten
-        old_image_path = c.image.path # on form submit
-    else:
-        old_image = None
-        old_image_path = None
-    
     context = {}
     
     if request.method == 'POST':
@@ -242,32 +236,10 @@ def edit_company(request, company):
         form = CompanyForm(request.POST, request.FILES, instance=c)
         
         if form.is_valid():
-            new_image = form.cleaned_data['image']
-            
-            # possible cases:
-            # 1. new image upload: new_image and not old_image; RESIZE
-            # 2. rewrite image: new_image != old_image; DELETE, RESIZE
-            # 3. delete image: new_image = False; DELETE
-            if new_image and not old_image: # 1.
-                delete = False
-                resize = True
-            elif not new_image: # 3.
-                delete = True
-                resize = False
-            elif new_image != old_image: # 2.
-                resize = True
-                delete = True
-            
-            if delete:
-                if os.path.exists(old_image_path):
-                    os.remove(old_image_path)
-            
+            # save form and resize image to the maximum size that will ever be needed
             form.save()
-            
-            # resize logo to the desired dimensions (if needed)
-            if resize:
-                resize_image(c.image.path, g.IMAGE_DIMENSIONS['logo'])
-            
+            resize_image(c.image.path, g.IMAGE_DIMENSIONS['logo'])
+            # for an eventual message for the user
             context['saved'] = True
             # if url_name was changed, redirect to new address
             return redirect('pos:edit_company', company=c.url_name)
@@ -335,12 +307,56 @@ def list_categories(request, company):
     return render(request, 'pos/manage/categories.html', context)
 
 def add_category(request, company, parent_id):
-    pass
-
-def edit_category(request, company, category_id):
     # get company
     company = get_object_or_404(Company, url_name=company)
+     
+    # if parent_id == -1, this is a top-level category
+    parent_id = int(parent_id)
+    if parent_id == -1:
+        parent = None
+    else:
+        parent = get_object_or_404(Category, id=parent_id)
+        if parent.company != company:
+            raise Http404
+    # check permissions
+    if not request.user.has_perm('pos.add_category'):
+        return error(request, _("You have no permission to add categories."))
+    
+    context = {'company':company,
+               'parent_id':parent_id,
+               'add':True,
+               'image_dimensions':g.IMAGE_DIMENSIONS['category'],
+               }
+    
+    if request.method == 'POST':
+        # submit data
+        form = CategoryForm(request.POST, request.FILES) # instance = None
         
+        if form.is_valid():
+            # created_by and company_id (only when creatine a new category)
+            category = form.save(False)
+            category.parent = parent
+            if 'created_by' not in form.cleaned_data:
+                category.created_by = request.user
+            if 'company_id' not in form.cleaned_data:
+                category.company_id = company.id
+        
+            form.save()
+
+            if category.image:
+                resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
+            
+            return redirect('pos:list_categories', company=company.url_name)
+    else:
+        form = CategoryForm() # create a new category
+        
+    context['form'] = form
+
+    return render(request, 'pos/manage/category.html', context)
+
+def edit_category(request, company, category_id):
+    company = get_object_or_404(Company, url_name=company)
+    
     # get category
     category = get_object_or_404(Category, id=category_id)
     # check if category actually belongs to the given company
@@ -350,14 +366,6 @@ def edit_category(request, company, category_id):
     if not request.user.has_perm('pos.change_category'):
         return error(request, _("You have no permission to edit categories."))
 
-    # image handling
-    try:
-        old_image = category.image.name
-        old_image_path = category.image.path
-    except:
-        old_image = None
-        old_image_path = None
-    
     context = {'company':company.url_name, 'category_id':category_id}
     
     if request.method == 'POST':
@@ -365,32 +373,6 @@ def edit_category(request, company, category_id):
         form = CategoryForm(request.POST, request.FILES, instance=category)
         
         if form.is_valid():
-            # image
-            new_image = form.cleaned_data['image'] # see company form for comments
-            
-            print new_image
-            print old_image
-            if not old_image and new_image: # currently no image exists
-                delete = False
-                resize = True
-            elif old_image and not new_image : # clear checkbox was checked 
-                delete = True
-                resize = False
-            elif new_image != old_image: # image replacement
-                resize = True
-                delete = True
-            else: # whatever
-                delete = False
-                resize = False
-            
-            #if delete:
-                # delete all files on old_image_path* (that includes all generated thumbnails)
-                #import glob
-                #for f in glob.glob(old_image_path + '*'):
-                #    print 'removing ' + f
-                #    #Do what you want with the file
-                #    os.remove(f)
-            
             # created_by and company_id (only when creatine a new category)
             category = form.save(False)
             if 'created_by' not in form.cleaned_data:
@@ -399,8 +381,7 @@ def edit_category(request, company, category_id):
                 category.company_id = company.id
         
             form.save()
-            
-            if resize:
+            if category.image:
                 resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
             
             return redirect('pos:list_categories', company=company.url_name)
@@ -413,11 +394,21 @@ def edit_category(request, company, category_id):
     context['form'] = form
     context['company'] = company
     context['category'] = category
+    context['image_dimensions'] = g.IMAGE_DIMENSIONS['category']
     
     return render(request, 'pos/manage/category.html', context)
 
 def delete_category(request, company, category_id):
-    pass
+    company = get_object_or_404(Company, url_name=company)
+    
+    # get category
+    category = get_object_or_404(Category, id=category_id)
+    # check if category actually belongs to the given company
+    if category.company != company:
+        raise Http404 # this category does not exist for the current user
+    # check if the user has permission to change it
+    if not request.user.has_perm('pos.change_category'):
+        return error(request, _("You have no permission to edit categories."))
 
 ### 
 ### contacts
