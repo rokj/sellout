@@ -1,0 +1,51 @@
+{% extends "pos/manage/manage.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block head %}
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_image").change(function(){
+        preview_image(this, "#image", {{image_dimensions.0}}, {{image_dimensions.1}});
+    });
+})
+</script>
+
+{% endblock %}
+
+{% block manage_content %}
+{% if category.image %}<img id="image" src="{{ category.image.url }}">{% endif %}
+
+{% comment %} two different urls for adding and editing categories {% endcomment %}
+{% if add %}
+    <form action="{% url 'pos:add_category' company.url_name parent_id %}" method="post" enctype="multipart/form-data">
+{% else %}
+    <form action="{% url 'pos:edit_category' company.url_name category_id %}" method="post" enctype="multipart/form-data">
+{% endif %} 
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="form_field_container">
+        {% if field.errors %}
+            <div class="form_field_error">{{ field.errors }}</div>
+        {% endif %}
+        <div class="field_label_tag">{{ field.label_tag }}</div>
+        <div class="form_field">
+        {% ifequal field.name 'image' %}
+            {% comment %} take special care of the image upload field {% endcomment %}
+            <input id="image-clear_id" name="image-clear" type="checkbox" /> <label for="image-clear_id">{% trans 'Delete' %}</label>
+            <input id="id_image" name="image" type="file" />
+        {% else %}
+            {{ field }}
+        {% endifequal %}
+        </div>
+        </div>
+    {% endfor %}
+    <p><input type="submit" value="{% trans 'Save' %}" /></p>
+    <p><a href="{% url 'pos:list_categories' company.url_name %}">Cancel</a></p>
+    {% if not add %}
+        <p><a href="{% url 'pos:delete_category' company.url_name category_id %}">{% trans 'Delete' %}</a></p>
+    {% endif %}
+</form>
+
+{% endblock %}
+

@@ -80,9 +80,11 @@ MISC = {
         'company_url_length':50,
         'site_title':'webpos',
         'management_url':'admin', # must not be empty!
-                                # (to differentiate between company and management sites)
+                                  # (to differentiate between company and management sites)
         'max_upload_image_size':2*2**20, # 2 megabytes
         'image_format':'png', # all images will be saved in this format
+        'contacts_per_page':2, # only for
+        'discounts_per_page':2 # management pages
         }
 
 IMAGE_DIMENSIONS = {

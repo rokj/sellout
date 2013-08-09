@@ -162,18 +162,17 @@ class Price(SkeletonU):
 class Contact(SkeletonU):
     company = models.ForeignKey(Company)
     type = models.CharField(_("Type of contact"), max_length=20, choices=g.CONTACT_TYPES, null=False, blank=False, default=g.CONTACT_TYPES[0][0])
-    company_name = models.CharField(_("Company name (if contact is a company)"), max_length=50, null=True, blank=True)
-    first_name = models.CharField(_("First name (if contact is an individual)"), max_length=50, null=True, blank=True)
-    last_name = models.CharField(_("Last name (if contact is an individual"), max_length=50, null=True, blank=True)
-    date_of_birth = models.DateField(_("Date of birth (if contact is an individual)"), null=True, blank=True)
+    company_name = models.CharField(_("Company name"), max_length=50, null=True, blank=True)
+    first_name = models.CharField(_("First name"), max_length=50, null=True, blank=True)
+    last_name = models.CharField(_("Last name"), max_length=50, null=True, blank=True)
+    date_of_birth = models.DateField(_("Date of birth"), null=True, blank=True)
     street_address = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
     postcode = models.CharField(_("Post code/ZIP"), max_length=12, null=True, blank=True)
     city = models.CharField(_("City"), max_length=50, null=True, blank=True)
     country = models.ForeignKey(Country) 
     email = models.CharField(_("E-mail address"), max_length=255, blank=False, null=False)
     phone = models.CharField(_("Telephone number"), max_length=30, blank=True, null=True)
-    vat = models.CharField(_("VAT identification number (if contact is a company)"),
-                           max_length=30, null=True, blank=True)
+    vat = models.CharField(_("VAT identification number"), max_length=30, null=True, blank=True)
     
     def __unicode__(self):
         if type == "Individual":
@@ -318,6 +317,10 @@ def cleanup_images(**kwargs):
         return
         
     this_entry = kwargs['instance']
+    
+    if not prev_entry.image:
+        # no image in previous entry, nothing to delete
+        return
     
     if prev_entry.image.name != this_entry.image.name:
         # add image to Cleanup for later deletion

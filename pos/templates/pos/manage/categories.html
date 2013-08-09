@@ -1,0 +1,17 @@
+{% extends "pos/manage/manage.html" %}
+{% load staticfiles %}
+{% load thumbnail %}
+{% load i18n %}
+
+{% block manage_content %}
+
+<a href="{% url 'pos:add_category' company.url_name -1 %}">Add category</a><br />
+
+{% for c in categories %}
+    {{c.level}}
+{% if c.image %}<img src="{{ c.image|thumbnail_url:'icon_medium' }}">{% endif %}
+    <a href="{% url 'pos:edit_category' company.url_name c.id %}">{{c.name}}</a>
+    <a href="{% url 'pos:add_category' company.url_name c.id %}">Add subcagetory</a>
+    <a href="{% url 'pos:delete_category' company.url_name c.id %}">Delete</a><br />
+{% endfor %}
+{% endblock %}

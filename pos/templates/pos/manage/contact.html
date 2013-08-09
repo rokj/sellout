@@ -1,0 +1,66 @@
+{% extends "pos/manage/manage.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block head %}
+
+<script type="text/javascript">
+individual_fields = ["first_name", "last_name", "date_of_birth"];    
+company_fields = ["company_name", "vat"];
+
+function render_fields(fields, show){
+    for(var i = 0; i < fields.length; i++){
+        obj = $("#id_" + fields[i] + "_container");
+        if(show) obj.show();
+        else obj.hide();
+    }
+}
+
+$(document).ready(function(){
+    $("#id_type").change(function(){
+        // when the contact type listbox changes, hide and show relevant inputs
+        if($("#id_type").val() == "Individual") individual = true;
+        else individual = false;
+        
+        if(individual){
+            // show only field for individual contact type
+            render_fields(individual_fields, true);
+            render_fields(company_fields, false);
+        }
+        else{
+            // show only fields for company type
+            render_fields(individual_fields, false);
+            render_fields(company_fields, true);
+        }
+    });
+    
+    // force the correct fields from start
+    $("#id_type").change();
+})
+
+</script>
+
+{% endblock %}
+
+{% block manage_content %}
+{% if add %}
+    <form action="{% url 'pos:add_contact' company.url_name %}" method="post">
+{% else %}
+    <form action="{% url 'pos:edit_contact' company.url_name contact_id %}" method="post">
+{% endif %}
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="form_field_container" id="{{field.auto_id}}_container">
+        {% if field.errors %}
+            <div class="form_field_error">{{ field.errors }}</div>
+        {% endif %}
+        <div class="field_label_tag">{{ field.label_tag }}</div>
+        <div class="form_field">{{ field }}</div>
+        </div>
+    {% endfor %}
+    <p><input type="submit" value="{% trans 'Save' %}" />
+<a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Cancel' %}</a></p>
+</form>
+
+{% endblock %}
+

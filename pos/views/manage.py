@@ -1,12 +1,21 @@
+# author: nejc jurkovic
+# date: 9. 8. 2013
+#
+# Views for managing POS data: company, categories, products,
+# contacts, discounts.
+
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db import transaction
 from django.core.paginator import Paginator
-from django.forms import ModelForm, ValidationError
+from django import forms
 from django.http import HttpResponse, Http404
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from pos.models import Company, Category, Contact
+
+from pos.models import Company, Category, Contact, Discount
 from util import error, JSON_response, JSON_parse, resize_image, validate_image
 from common import globals as g
 from common import unidecode
@@ -141,9 +150,9 @@ def url_name_suggestions(request):
     # pass on to the page
     return JSON_response({'suggestions':suggestions})
 
-### 
-### manage home
-### 
+###################
+### manage home ###
+###################
 def manage_home(request, company):
     company = get_object_or_404(Company, url_name=company)
     
@@ -153,10 +162,10 @@ def manage_home(request, company):
     
     return render(request, 'pos/manage/manage.html', context)
 
-###
-### editing company details
-###
-class CompanyForm(ModelForm):
+###############
+### company ###
+###############
+class CompanyForm(forms.ModelForm):
     # take special case of urls
     def clean_url_name(self):
         url_name = self.cleaned_data['url_name']
@@ -167,7 +176,7 @@ class CompanyForm(ModelForm):
             return url_name
         
         if not check_url_name(url_name):
-            raise ValidationError(_("Url of the company is invalid or exists already."))
+            raise forms.ValidationError(_("Url of the company is invalid or exists already."))
         else:
             return url_name
 
@@ -252,10 +261,10 @@ def edit_company(request, company):
                     
     return render(request, 'pos/manage/company.html', context)
 
-###
-### adding/editing categories
-###
-class CategoryForm(ModelForm):
+####################
+###  categories  ###
+####################
+class CategoryForm(forms.ModelForm):
     # take special case of urls
     def clean_image(self):
         return validate_image(self)
@@ -306,7 +315,7 @@ def list_categories(request, company):
     
     return render(request, 'pos/manage/categories.html', context)
 
-def add_category(request, company, parent_id):
+def add_category(request, company, parent_id=-1):
     # get company
     company = get_object_or_404(Company, url_name=company)
      
@@ -409,11 +418,19 @@ def delete_category(request, company, category_id):
     # check if the user has permission to change it
     if not request.user.has_perm('pos.change_category'):
         return error(request, _("You have no permission to edit categories."))
+    
+    # delete the category and return to management page
+    try:
+        category.delete()
+    except:
+        pass
+    
+    return redirect('pos:list_categories', company=company.url_name)
 
-### 
-### contacts
-### 
-class ContactForm(ModelForm):
+################
+### contacts ###
+################
+class ContactForm(forms.ModelForm):
     class Meta:
         model = Contact
         fields = ['type',
@@ -429,62 +446,288 @@ class ContactForm(ModelForm):
                   'phone',
                   'vat']
 
-def edit_contact(request, company, contact_id):
-    pass
-"""
-    # get company
+class ContactFilterForm(forms.Form):
+    type = forms.ChoiceField(required=True,
+                             choices=g.CONTACT_TYPES)
+    name = forms.CharField(required=False)
+
+def list_contacts(request, company):
     company = get_object_or_404(Company, url_name=company)
     
-    # get category
-    contact = get_object_or_404(Category, id=contact_id)
+    contacts = Contact.objects.filter(company__id=company.id)
     
-    # check if contact actually belongs to the given company
-    if contact.company != company:
-        raise Http404 # this category does not exist for the current user
-
-    # check if the user has permission to change it
-    if not request.user.has_perm('pos.change_category'):
-        return error(request, _("You have no permission to edit company details."))
-
-    context = {'company':company.url_name, 'contact_id':contact_id}
-    
+    # show the filter form
     if request.method == 'POST':
-        # submit data
-        form = CategoryForm(request.POST, request.FILES, instance=category)
+        form = ContactFilterForm(request.POST)
         
         if form.is_valid():
-            new_image = form.cleaned_data['image'] # see company form for comments
-            print new_image
-            print old_image
-            if new_image and not old_image:
-                delete = False
-                resize = True
-            elif not new_image:
-                delete = True
-                resize = False
-            elif new_image != old_image:
-                resize = True
-                delete = True
+            # filter by whatever is in the form
+            if form.cleaned_data['type'] == 'individual':
+                contacts = contacts.filter(type='Individual')
+                
+                if 'name' in form.cleaned_data: # search by first and last name 
+                    first_names = contacts.filter(first_name__icontains=form.cleaned_data['name'])
+                    last_names = contacts.filter(last_name__icontains=form.cleaned_data['name'])
+                    contacts = (first_names | last_names).distinct()
             else:
-                delete = False
-                resize = False
+                contacts = contacts.filter(type='Company')
             
-            if delete:
-                if os.path.exists(old_image_path):
-                    os.remove(old_image_path)
-            
+                if 'name' in form.cleaned_data: # search by company name
+                    contacts = contacts.filter(company_name__icontains=form.cleaned_data['name'])
+    else:
+        form = ContactFilterForm()
+        
+    # show contacts
+    paginator = Paginator(contacts, g.MISC['contacts_per_page'])
+
+    page = request.GET.get('page')
+    try:
+        contacts = paginator.page(page)
+    except PageNotAnInteger:
+        contacts = paginator.page(1)
+    except EmptyPage:
+        contacts = paginator.page(paginator.num_pages)
+
+    context = {
+        'company':company,
+        'contacts':contacts,
+        'paginator':paginator,
+        'filter_form':form,
+    }
+
+    return render(request, 'pos/manage/contacts.html', context) 
+
+def add_contact(request, company):
+    # add a new contact
+    company = get_object_or_404(Company, url_name=company)
+    context = {}
+    context['company'] = company.url_name
+    
+    # check for permission for adding contacts
+    if not request.user.has_perm('pos.add_contact'):
+        return error(request, _("You have no permission to add contacts."))
+
+    if request.method == 'POST':
+        # submit data
+        form = ContactForm(request.POST)
+        
+        if form.is_valid():
+            # created_by and company_id
+            contact = form.save(False)
+            if 'created_by' not in form.cleaned_data:
+                contact.created_by = request.user
+            if 'company_id' not in form.cleaned_data:
+                contact.company_id = company.id
+        
             form.save()
             
-            if resize:
-                resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
-            
-            context['saved'] = True
-            return redirect('pos:edit_category', company=company.url_name, category_id=category.id)
+            return redirect('pos:list_contacts', company=company.url_name)
     else:
-        form = CategoryForm(instance=category)
+        form = ContactForm()
         
     context['form'] = form
-    context['image'] = category.image
+    context['company'] = company
+    context['add'] = True
     
-    return render(request, 'pos/manage/category.html', context)
-"""
+    return render(request, 'pos/manage/contact.html', context)
+
+
+def edit_contact(request, company, contact_id):
+    # edit an existing contact
+    company = get_object_or_404(Company, url_name=company)
+    context = {}
+    context['company'] = company
+    context['contact_id'] = contact_id
+    
+    # get contact id
+    contact = get_object_or_404(Contact, id=contact_id)
+        
+    # check if contact actually belongs to the given company
+    if contact.company != company:
+        raise Http404
+        
+        # check if user has permissions to change contacts
+        if not request.user.has_perm('pos.change_contact'):
+            return error(request, _("You have no permission to edit contacts."))
+
+    if request.method == 'POST':
+        # submit data
+        form = ContactForm(request.POST, instance=contact)
+        
+        if form.is_valid():
+            # created_by and company_id
+            contact = form.save(False)
+            if 'created_by' not in form.cleaned_data:
+                contact.created_by = request.user
+            if 'company_id' not in form.cleaned_data:
+                contact.company_id = company.id
+        
+            form.save()
+            
+            return redirect('pos:list_contacts', company=company.url_name)
+    else:
+        form = ContactForm(instance=contact)
+        
+    context['form'] = form
+    
+    return render(request, 'pos/manage/contact.html', context)
+
+def delete_contact(request, company, contact_id):
+    company = get_object_or_404(Company, url_name=company)
+    contact = get_object_or_404(Contact, id=contact_id)
+    
+    if contact.company != company:
+        raise Http404
+    
+    if not request.user.has_perm('pos.delete_contact'):
+        return error(_("You have no permission to delete contacts."))
+    
+    contact.delete()
+    
+    return redirect('pos:list_contacts', company=company.url_name)
+
+#################
+### discounts ###
+#################
+class DiscountForm(forms.ModelForm):
+    class Meta:
+        model = Discount
+        fields = ['description',
+                  'code',
+                  'type',
+                  'amount',
+                  'start_date',
+                  'end_date',
+                  'active']
+
+class DiscountFilterForm(forms.Form):
+    description = forms.CharField(required=False)    
+    code = forms.CharField(required=False)
+    start_date = forms.DateField(required=False)
+    end_date = forms.DateField(required=False)
+    active = forms.NullBooleanField(required=False)
+
+def list_discounts(request, company):
+    company = get_object_or_404(Company, url_name=company)
+    
+    discounts = Discount.objects.filter(company__id=company.id)
+    
+    # show the filter form
+    if request.method == 'POST':
+        form = DiscountFilterForm(request.POST)
+        
+        if form.is_valid():
+            # filter by whatever is in the form
+            if form.cleaned_data.get('description'):
+                discounts = discounts.filter(description__icontains=form.cleaned_data['description'])
+            
+            # TODO all other filtering options
+    else:
+        form = DiscountFilterForm()
+        
+    # show contacts
+    paginator = Paginator(discounts, g.MISC['discounts_per_page'])
+
+    page = request.GET.get('page')
+    try:
+        discounts = paginator.page(page)
+    except PageNotAnInteger:
+        discounts = paginator.page(1)
+    except EmptyPage:
+        discounts = paginator.page(paginator.num_pages)
+
+    context = {
+        'company':company,
+        'discounts':discounts,
+        'paginator':paginator,
+        'filter_form':form,
+    }
+
+    return render(request, 'pos/manage/discounts.html', context) 
+
+def add_discount(request, company):
+    company = get_object_or_404(Company, url_name=company)
+    context = {}
+    context['company'] = company.url_name
+    
+    # check for permission for adding discounts
+    if not request.user.has_perm('pos.add_discount'):
+        return error(request, _("You have no permission to add discounts."))
+
+    if request.method == 'POST':
+        # submit data
+        form = DiscountForm(request.POST)
+        
+        if form.is_valid():
+            # created_by and company_id
+            contact = form.save(False)
+            if 'created_by' not in form.cleaned_data:
+                contact.created_by = request.user
+            if 'company_id' not in form.cleaned_data:
+                contact.company_id = company.id
+        
+            form.save()
+            
+            return redirect('pos:list_discounts', company=company.url_name)
+    else:
+        form = DiscountForm()
+        
+    context['form'] = form
+    context['company'] = company
+    context['add'] = True
+    
+    return render(request, 'pos/manage/discount.html', context)
+
+
+def edit_discount(request, company, discount_id):
+    # edit an existing contact
+    company = get_object_or_404(Company, url_name=company)
+    context = {}
+    context['company'] = company
+    context['discount_id'] = discount_id
+    
+    discount = get_object_or_404(Discount, id=discount_id)
+        
+    # check if contact actually belongs to the given company
+    if discount.company != company:
+        raise Http404
+        
+        # check if user has permissions to change contacts
+        if not request.user.has_perm('pos.change_discount'):
+            return error(request, _("You have no permission to edit discounts."))
+
+    if request.method == 'POST':
+        # submit data
+        form = DiscountForm(request.POST, instance=discount)
+        
+        if form.is_valid():
+            # created_by and company_id
+            discount = form.save(False)
+            if 'created_by' not in form.cleaned_data:
+                discount.created_by = request.user
+            if 'company_id' not in form.cleaned_data:
+                discount.company_id = company.id
+        
+            form.save()
+            
+            return redirect('pos:list_discounts', company=company.url_name)
+    else:
+        form = DiscountForm(instance=discount)
+        
+    context['form'] = form
+    
+    return render(request, 'pos/manage/discount.html', context)
+
+def delete_discount(request, company, discount_id):
+    company = get_object_or_404(Company, url_name=company)
+    discount = get_object_or_404(Discount, id=discount_id)
+    
+    if discount.company != company:
+        raise Http404
+    
+    if not request.user.has_perm('pos.delete_discount'):
+        return error(_("You have no permission to delete discounts."))
+    
+    discount.delete()
+    
+    return redirect('pos:list_discounts', company=company.url_name)

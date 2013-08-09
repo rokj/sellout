@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% comment %} template for management section {% endcomment %}
+
+{% block content %}
+{% comment %} management menu {% endcomment %}
+
+<div id="manage_menu">
+    <ul id="manage">
+        <li><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
+        <li><a href="{% url 'pos:list_categories' company.url_name %}">{% trans 'Categories' %}</a></li>
+        <li><a href="#">{% trans 'Products' %}</a></li>
+        <li><a href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Discounts' %}</a></li>
+        <li><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
+    </ul>
+</div>
+<div id="management_content">
+{% comment %} block filled by manage/* templates {% endcomment %}
+{% block manage_content %}{% endblock %}
+</div>
+
+
+{% endblock %}

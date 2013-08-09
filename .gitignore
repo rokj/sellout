@@ -2,8 +2,10 @@ tmp/*
 static/jquery*
 *.pyc
 *.*~
+*~
 *.swp
 *.pid
 *.zip
 *.tar.gz
 settings_local.py
+

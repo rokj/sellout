@@ -1,0 +1,58 @@
+{% extends "pos/manage/manage.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+
+{% block manage_content %}
+
+{% comment %} filter contacts {% endcomment %}
+<form method="post" action="{% url 'pos:list_contacts' company.url_name %}">
+{{ filter_form.as_p }}
+{% csrf_token %}
+<input type="submit" value="submit" />
+</form>
+
+{% comment %} add contact {% endcomment %}
+<p><a href="{% url 'pos:add_contact' company.url_name %}">{% trans 'Add' %}</a></p>
+
+{% for c in contacts %}
+    {% comment %} two different layouts, for company and individual {% endcomment %}
+    <div class="{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}">
+    {% ifequal c.type 'Individual' %}
+        <p>{% trans 'Individual' %}</p>
+        <p>{{ c.first_name }} {{ c.last_name }}</p>
+        <p>{{ c.street_address }}, {{ c.postcode }} {{ c.city }} <br /> {{ c.country }}</p>
+        <p>{% trans 'E-mail' %}: <a href="mailto:{{ c.email }}">{{ c.email }}</a></p>
+        <p>{% trans 'Phone' %}: {{ c.phone }}</p>
+        <p>{% trans 'Birth date' %}: 
+    {% else %}
+        <p>{% trans 'Company' %}</p>
+        <p>{{ c.company_name }}</p>
+        <p>{{ c.street_address }}, {{ c.postcode }} {{ c.city }} <br /> {{ c.country }}</p>
+        <p>{% trans 'E-mail' %}: <a href="mailto:{{ c.email }}">{{ c.email }}</a></p>
+        <p>{% trans 'Phone' %}: {{ c.phone }}</p>
+        <p>{% trans 'VAT No.' %}: {{ c.vat }}</p>
+    {% endifequal%}
+    </div>
+    
+    {% comment %} edit this contact {% endcomment %}
+    
+    <a href="{% url 'pos:edit_contact' company.url_name c.id %}">{% trans 'Edit' %}</a>
+    
+    {% comment %} delete this contact {% endcomment %}
+    <a href="{% url 'pos:delete_contact' company.url_name c.id  %}">{% trans 'Delete' %}</a>
+{% endfor %}
+
+{% comment %} paginator pages {% endcomment %}
+<div class="paginator">
+    {% for p in paginator.page_range %}
+        <a href="?page={{p}}" {% comment %} django templates can only compare strings{% endcomment %}
+            {% if p|stringformat:"s" == current_page|stringformat:"s" %} class="current_page"{% endif %}>
+            &nbsp;{{p}}&nbsp;</a>
+        {% if not forloop.last %}|{% endif %}
+    {% endfor %}
+</div>
+
+
+{% endblock %}
+
