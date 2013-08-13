@@ -115,6 +115,9 @@ class Product(ProductAbstract):
     discount = models.ManyToManyField(Discount, null=True, blank=True)
     category = models.ForeignKey(Category, null=True, blank=True)
     stock = models.IntegerField(_("Number of items left in stock"), null=True, blank=True)
+    image = models.ImageField(_("Icon"),
+                             upload_to=get_image_path(g.DIRS['product_icon_dir'], "pos_producticon"),
+                             null=True, blank=True)
     images = models.ManyToManyField(ProductImage, null=True, blank=True)
     
     def __unicode__(self):
@@ -308,6 +311,8 @@ def copy_bill_to_history(bill_id):
 
 @receiver(pre_save, sender=Category)
 @receiver(pre_save, sender=Company)
+@receiver(pre_save, sender=Product)
+@receiver(pre_save, sender=ProductImage)
 def cleanup_images(**kwargs):
     # if image was deleted or changed, add previous filename and path
     # to config.Cleanup model. Cleanup will delete listed objects on post_save() signal.

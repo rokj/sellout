@@ -16,7 +16,8 @@
 <p><a href="{% url 'pos:add_discount' company.url_name %}">{% trans 'Add' %}</a></p>
 
 {% for d in discounts %}
-    <p>{{ d.code }}
+    <p>{{ d.code }}</p>
+    <p>{{ d.description }}
     <a href="{% url 'pos:edit_discount' company.url_name d.id %}">{% trans 'Edit' %}</a>
     <a href="{% url 'pos:delete_discount' company.url_name d.id  %}">{% trans 'Delete' %}</a>
     </p>

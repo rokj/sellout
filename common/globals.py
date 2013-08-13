@@ -6,6 +6,7 @@ from django.utils.translation import ugettext as _
 DIRS = { # goes to MEDIA folder
         'logo_dir':"img/logo",
         'category_icon_dir':"img/category",
+        'product_icon_dir':'img_product',
         'product_image_dir':"img/product",
 }
 

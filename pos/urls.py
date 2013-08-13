@@ -37,6 +37,15 @@ urlpatterns = patterns('',
     url(r_company + _('/manage/discount/add') + '/?$', manage.add_discount, name='add_discount'),
     url(r_company + _('/manage/discount/edit') + '/(?P<discount_id>\d+)/?$', manage.edit_discount, name='edit_discount'),
     url(r_company + _('/manage/discount/delete') + '/(?P<discount_id>\d+)/?$', manage.delete_discount, name='delete_discount'),
+    # products
+    url(r_company + _('/manage/products') + '/?$', manage.products, name='products'),
+    
+    # AJAX stuff:
+    # categories
+    url(r_company + _('/manage/json/categories') + '/?$', manage.JSON_categories, name='JSON_categories'),
+    # product list (after search)
+    url(r_company + _('/manage/json/products') + '/?$', manage.search_products, name='search_products'),
+    
     
     
 )

@@ -1,0 +1,162 @@
+{% extends "pos/manage/manage.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block head %}
+
+<script type="text/javascript">
+categories = [];
+
+function fill_categories(){
+    get_data("{% url 'pos:JSON_categories' company.url_name %}",
+        function(data){
+        // convert categories' data from the server to a list for autocomplete data:
+        // (server:client)
+        // name > label
+        // id > value
+        for(var i = 0; i < data.length; i++){
+            categories.push({label:data[i].name, value:data[i].id})
+        }
+        }
+    );
+}
+
+var last_value;
+var update_timeout;
+
+check_interval_duration = 500;
+update_timeout_duration = 1500;
+
+$(document).ready(function(){
+    // handle the search box
+    gf_obj = $("#general_filter")
+    
+    search_text = "{% trans 'Search' %}..." // search text appearance
+    last_value = search_text;
+    gf_obj.val(search_text);
+    gf_obj.focus(function(){
+        if($(this).val() == search_text){
+            $(this).val("");
+        }
+        return false;
+    });
+    gf_obj.blur(function(){
+        if($(this).val() == ""){
+            $(this).val(search_text);
+        }
+        return false;
+    });
+    gf_obj.focus();
+    
+    // general products search box timers
+    setInterval(function(){ // check for change
+        new_value = gf_obj.val(); 
+        if(last_value != new_value){
+            if(new_value.length < 2) return;
+            last_value = new_value; // changed, update products
+            clearTimeout(update_timeout);
+            update_timeout = setTimeout(update_products, update_timeout_duration);
+        }
+        return false;
+    }, check_interval_duration);
+        
+    // advanced search div
+    adv_div_obj = $("#advanced_search"); 
+    adv_div_obj.hide();
+    
+    adv_chk_obj = $("#advanced_search_toggle");
+    
+    adv_chk_obj.change(function(){
+       if(adv_chk_obj.prop("checked") == false){
+           adv_div_obj.hide();
+       }
+       else adv_div_obj.show();
+       
+       return false;
+    });
+    
+    // categories list
+    fill_categories();
+    cat_inp_obj = $("#category_list_filter");
+    cat_inp_obj.autocomplete({ source: categories, minLength:0 });
+    cat_inp_obj.autocomplete( "option", "delay", check_interval_duration );
+    
+    cat_inp_obj.focus(function(){
+        cat_inp_obj.autocomplete( "search", "" );
+    });
+    cat_inp_obj.on("autocompleteselect", function (e, ui) {
+        // override the default autocomplete behavior:
+        e.preventDefault(); // prevent the "value" being written to the edit box
+        this.value = ui.item.label; // write label
+        cat_inp_obj.data("id", ui.item.value); // save the value (category id) to data field
+    });
+    cat_inp_obj.blur(function(){
+        // if nothing is selected, remove data from the object
+        if(cat_inp_obj.val().length == 0){
+            cat_inp_obj.removeData();
+        }
+    });
+    
+    // update products when search criteria has changed (gets called on timeout)
+    function update_products(){
+        // assemble a JSON object with all search criteria and pass it to the view
+        search_criteria = {
+            general_filter:$("#general_filter").val(),  
+        };
+        
+        if(adv_chk_obj.prop("checked") == true){
+            // add criteria from the advanced div
+            // category
+            // shop code
+            // name
+            
+            
+        }
+        
+        // send to the view
+        send_data("{% url 'pos:search_products' company.url_name %}",
+                search_criteria, "{{ csrf_token }}", function(recv_data){
+                    //alert(recv_data.test);
+                });
+        
+        return false;
+    }
+    
+   
+});
+
+</script>
+
+{% endblock %}
+
+{% block manage_content %}
+
+{% comment %} filters {% endcomment %}
+<div id="filter_form">
+    <input id="general_filter" class="search_filter" />
+    <input type="checkbox" id="advanced_search_toggle" /><label for="advanced_search_toggle">{% trans 'Advanced' %}</label><br />
+
+    <div id="advanced_search">
+        {% trans 'Category' %}
+        <input id="category_list_filter" />
+        <div id="category_list_select"></div><br />
+        
+        
+        <label for="product_code_filter">{% trans 'Product code' %}</label><input type="text" id="product_code_filter">
+        <label for="shop_code_filter">{% trans 'Shop code' %}</label><input type="text" id="shop_code_filter">
+        <label for="name_filter">{% trans 'Name' %}</label><input type="text" id="name_filter">
+        <label for="description_filter">{% trans 'Description' %}</label><input type="text" id="description_filter">
+        <label for="notes_filter">{% trans 'Notes' %}</label><input type="text" id="notes_filter">
+        <label for="tax_filter">{% trans 'Tax' %}</label><input type="text" id="tax_filter">
+        <label for="price_filter">{% trans 'Price' %}</label><input type="text" id="price_filter">
+    </div>
+</div>
+
+{% comment %} add contact {% endcomment %}
+
+
+
+
+
+{% endblock %}
+

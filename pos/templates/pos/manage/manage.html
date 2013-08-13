@@ -11,7 +11,7 @@
     <ul id="manage">
         <li><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
         <li><a href="{% url 'pos:list_categories' company.url_name %}">{% trans 'Categories' %}</a></li>
-        <li><a href="#">{% trans 'Products' %}</a></li>
+        <li><a href="{% url 'pos:products' company.url_name %}">{% trans 'Products' %}</a></li>
         <li><a href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Discounts' %}</a></li>
         <li><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
     </ul>

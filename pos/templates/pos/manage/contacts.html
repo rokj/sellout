@@ -21,7 +21,8 @@
     {% ifequal c.type 'Individual' %}
         <p>{% trans 'Individual' %}</p>
         <p>{{ c.first_name }} {{ c.last_name }}</p>
-        <p>{{ c.street_address }}, {{ c.postcode }} {{ c.city }} <br /> {{ c.country }}</p>
+        <p>{{ c.street_address }} {% if c.street_address and c.postcode %},{% endif %} {{ c.postcode }} {{ c.city }}
+        {% if c.street_address and c.postcode %}<br />{% endif %} {{ c.country }}</p>
         <p>{% trans 'E-mail' %}: <a href="mailto:{{ c.email }}">{{ c.email }}</a></p>
         <p>{% trans 'Phone' %}: {{ c.phone }}</p>
         <p>{% trans 'Birth date' %}: 

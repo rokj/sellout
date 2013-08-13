@@ -8,21 +8,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
-from django.db import transaction
-from django.core.paginator import Paginator
 from django import forms
 from django.http import HttpResponse, Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-
-from pos.models import Company, Category, Contact, Discount
+from pos.models import Company, Category, Contact, Discount, Product, Price
 from util import error, JSON_response, JSON_parse, resize_image, validate_image
 from common import globals as g
 from common import unidecode
 from common.functions import get_random_string
 
 import re
-import os
+from decimal import *
 
 ###
 ### helper functions etc
@@ -231,6 +228,8 @@ def register_company(request):
 
 # edit after registration
 def edit_company(request, company):
+    import time
+    tic = time.time()
     # get company, it must exist
     c = get_object_or_404(Company, url_name = company)
         
@@ -258,6 +257,9 @@ def edit_company(request, company):
     context['form'] = form
     context['company'] = c
     context['logo_dimensions'] = g.IMAGE_DIMENSIONS['logo']
+               
+    toc = time.time()
+    print toc-tic
                     
     return render(request, 'pos/manage/company.html', context)
 
@@ -275,7 +277,7 @@ class CategoryForm(forms.ModelForm):
                   'description',
                   'image']
 
-def get_all_categories(company_id, category_id=None, sort='name', data=[], level=0):
+def get_all_categories(company_id, category_id=None, sort='name', data=[], level=0, json=False):
     # return a structured list of all categories (converted to dictionaries)
     
     #def category_to_dict(c, level): # c = Category object # currently not needed
@@ -291,18 +293,30 @@ def get_all_categories(company_id, category_id=None, sort='name', data=[], level
         # add current category to list
         c.level = level
         #data.append(category_to_dict(c, level))
-        data.append(c)
+        # if json == true, add to dictionary rather than queryset
+        if json:
+            entry = {'id':c.id,
+                'name':c.name,
+                'description':c.description,
+                'level':c.level}
+            if c.image:
+                entry['image'] = c.image.url
+            else:
+                entry['image'] = None
+                
+            data.append(entry)
+        else:
+            data.append(c)
         
         # append all children
         children = Category.objects.filter(company__id=company_id, parent__id=category_id).order_by(sort)
         level += 1
         for c in children:
-            get_all_categories(company_id, c.id, data=data, level=level, sort=sort)
+            get_all_categories(company_id, c.id, data=data, level=level, sort=sort, json=json)
     else:
         cs = Category.objects.filter(company__id=company_id, parent=None).order_by(sort)
-        print cs
         for c in cs:
-            get_all_categories(c.company.id, c.id, data=data, level=level, sort=sort)
+            get_all_categories(c.company.id, c.id, data=data, level=level, sort=sort, json=json)
 
     return data
     
@@ -617,11 +631,26 @@ def list_discounts(request, company):
         form = DiscountFilterForm(request.POST)
         
         if form.is_valid():
-            # filter by whatever is in the form
+            # filter by whatever is in the form: description
             if form.cleaned_data.get('description'):
                 discounts = discounts.filter(description__icontains=form.cleaned_data['description'])
             
-            # TODO all other filtering options
+            # code
+            if form.cleaned_data.get('code'):
+                discounts = discounts.filter(code__icontains=form.cleaned_data['code'])
+            
+            # start_date
+            if form.cleaned_data.get('start_date'):
+                discounts = discounts.filter(start_date__gte=form.cleaned_data['start_date'])
+            
+            # end_date
+            if form.cleaned_data.get('end_date'):
+                discounts = discounts.filter(end_date__lte=form.cleaned_data['end_date'])
+            
+            # active
+            if form.cleaned_data.get('active') is not None:
+                discounts = discounts.filter(active=form.cleaned_data['active'])
+            
     else:
         form = DiscountFilterForm()
         
@@ -731,3 +760,69 @@ def delete_discount(request, company, discount_id):
     discount.delete()
     
     return redirect('pos:list_discounts', company=company.url_name)
+
+###############
+## products ###
+###############
+def JSON_categories(request, company):
+    company = get_object_or_404(Company, url_name=company)
+    
+    # return all categories' data in JSON format
+    return JSON_response(get_all_categories(company.id, sort='name', data=[], json=True))
+
+
+def products(request, company):
+    company = get_object_or_404(Company, url_name = company)
+    
+    context = {
+               'company':company, 
+               # TODO add title & site title
+               }
+    return render(request, 'pos/manage/products.html', context)
+
+def search_products(request, company):
+    
+    import time
+    
+    tic = time.time()
+    
+    company = get_object_or_404(Company, url_name = company)
+    
+    # get all products from this company and filter them by entered criteria
+    products = Product.objects.filter(company=company)
+    
+    criteria = JSON_parse(request.POST['data'])
+    
+    # general filter: search 
+    general_filter = criteria['general_filter'].split(' ')
+    print general_filter
+    
+    for w in general_filter:
+        if w == '':
+            continue
+        # search categories, product_code, shop_code, name, description, notes, price
+        products = (products.filter(category__name__icontains=w) | 
+            products.filter(code__icontains=w) | 
+            products.filter(shop_code__icontains=w) |
+            products.filter(name__icontains=w) | 
+            products.filter(description__icontains=w) | 
+            products.filter(private_notes__icontains=w)) 
+            # price is in 
+        try:
+            products = products | Product.objects.filter(pk__in=Price.objects.filter(unit_price=Decimal(w))) 
+        except:
+            pass
+        
+        products = products.distinct()
+    
+    # advanced filter: search by field
+    
+    
+    
+    toc = time.time()
+    
+    print toc - tic
+    
+    print products
+
+    return JSON_response({'test':'tralala'});

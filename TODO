@@ -1,4 +1,10 @@
- - title/site title na vse strani
+ - title/site title for all views
  - login_required & security etc.
- - datepicker za vse date inpute
- - updated_by za vse update viewe
+ - datepicker for date inputs
+ - updated_by for update views
+ - <[ CDATA for <javascript>
+ - show/hide animations (jquery)
+ - base.html: remove unneeded jquery <script src=""> includes
+
+OPTIMIZE:
+  
