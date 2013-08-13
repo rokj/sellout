@@ -31,6 +31,7 @@ $(document).ready(function(){
     // handle the search box
     gf_obj = $("#general_filter")
     
+    /*// this is pointless, "search" will be written outside the edit field
     search_text = "{% trans 'Search' %}..." // search text appearance
     last_value = search_text;
     gf_obj.val(search_text);
@@ -45,7 +46,7 @@ $(document).ready(function(){
             $(this).val(search_text);
         }
         return false;
-    });
+    });*/
     gf_obj.focus();
     
     // general products search box timers
@@ -77,7 +78,7 @@ $(document).ready(function(){
     
     // categories list
     fill_categories();
-    cat_inp_obj = $("#category_list_filter");
+    cat_inp_obj = $("#category_filter");
     cat_inp_obj.autocomplete({ source: categories, minLength:0 });
     cat_inp_obj.autocomplete( "option", "delay", check_interval_duration );
     
@@ -106,22 +107,28 @@ $(document).ready(function(){
         
         if(adv_chk_obj.prop("checked") == true){
             // add criteria from the advanced div
-            // category
-            // shop code
-            // name
-            
-            
+            $(".filter").each(function(){
+                if($(this).val()){
+                    search_criteria[$(this).attr("id")] = $(this).val(); 
+                }
+            });
+            // add the category id (stored in .data())
+            cat_fil_id = "category_filter";
+            search_criteria['cat_fil_id'] = $("#" + cat_fil_id).data().id;
         }
         
         // send to the view
         send_data("{% url 'pos:search_products' company.url_name %}",
                 search_criteria, "{{ csrf_token }}", function(recv_data){
-                    //alert(recv_data.test);
-                });
-        
+                    alert(JSON.stringify(recv_data));
+        });
         return false;
     }
     
+    // update products on button click
+    $("#update_results").click(function(){
+        update_products();
+    });
    
 });
 
@@ -133,22 +140,24 @@ $(document).ready(function(){
 
 {% comment %} filters {% endcomment %}
 <div id="filter_form">
-    <input id="general_filter" class="search_filter" />
+    <label for="general_filter">{% trans 'Search' %}:</label><input id="general_filter" class="search_filter" />
     <input type="checkbox" id="advanced_search_toggle" /><label for="advanced_search_toggle">{% trans 'Advanced' %}</label><br />
 
     <div id="advanced_search">
         {% trans 'Category' %}
-        <input id="category_list_filter" />
+        <input id="category_filter" /><!-- this input does not have a "filter" class - the filtering value is stored in data() and needs to be accessed separately from the others -->
         <div id="category_list_select"></div><br />
         
         
-        <label for="product_code_filter">{% trans 'Product code' %}</label><input type="text" id="product_code_filter">
-        <label for="shop_code_filter">{% trans 'Shop code' %}</label><input type="text" id="shop_code_filter">
-        <label for="name_filter">{% trans 'Name' %}</label><input type="text" id="name_filter">
-        <label for="description_filter">{% trans 'Description' %}</label><input type="text" id="description_filter">
-        <label for="notes_filter">{% trans 'Notes' %}</label><input type="text" id="notes_filter">
-        <label for="tax_filter">{% trans 'Tax' %}</label><input type="text" id="tax_filter">
-        <label for="price_filter">{% trans 'Price' %}</label><input type="text" id="price_filter">
+        <label for="product_code_filter">{% trans 'Product code' %}</label><input type="text" id="product_code_filter" class="filter" />
+        <label for="shop_code_filter">{% trans 'Shop code' %}</label><input type="text" id="shop_code_filter" class="filter" />
+        <label for="name_filter">{% trans 'Name' %}</label><input type="text" id="name_filter" class="filter" />
+        <label for="description_filter">{% trans 'Description' %}</label><input type="text" id="description_filter" class="filter" />
+        <label for="notes_filter">{% trans 'Notes' %}</label><input type="text" id="notes_filter" class="filter" />
+        <label for="tax_filter">{% trans 'Tax' %}</label><input type="text" id="tax_filter" class="filter" />
+        <label for="price_filter">{% trans 'Price' %}</label><input type="text" id="price_filter" class="filter" />
+        <label for="discount_filter">{% trans 'Discount code' %}</label><input type="text" id="discount_filter" class="filter" />
+        <input type="button" id="update_results" value="{% trans 'Update' %}" />
     </div>
 </div>
 

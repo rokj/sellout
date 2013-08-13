@@ -19,7 +19,9 @@ from common import unidecode
 from common.functions import get_random_string
 
 import re
-from decimal import *
+from decimal import Decimal
+from datetime import date
+
 
 ###
 ### helper functions etc
@@ -780,49 +782,167 @@ def products(request, company):
                }
     return render(request, 'pos/manage/products.html', context)
 
+def serialize_product(p):
+    # returns all relevant product's data
+    ret = {}
+    
+    try: # only the last price from the price table
+        price = Price.objects.filter(product__id=p.id).order_by('-date_updated')[:1]
+    except:
+        pass
+    if price:
+        ret['price'] = str(price[0].unit_price)
+    
+    # all discounts in a list
+    discounts = []
+    for d in p.discount.all():
+        if d.active and d.start_date < date.today() and d.end_date > date.today():
+            dd = {
+                  'description':d.description,
+                  'code':d.code,
+                  'type':d.type,
+                  'amount':str(d.amount),
+                  }
+            discounts.append(dd)
+    if discounts:
+        ret['discount'] = discounts
+    
+    # check if product's image exists
+    if p.image:
+        ret['image'] = p.image.url
+    
+    # category?
+    if p.category:
+        ret['category'] = p.category.name
+    
+    if p.code:
+        ret['code'] = p.code
+    if p.shop_code:
+        ret['shop_code'] = p.shop_code
+    if p.name:
+        ret['name'] = p.name
+    if p.description:
+        ret['description'] = p.description
+    if p.private_notes:
+        ret['private_notes'] = p.private_notes
+    if p.unit_type:
+        ret['unit_type'] = p.unit_type
+    if p.tax:
+        ret['tax'] = str(p.tax)
+    if p.stock:
+        ret['stock'] = p.stock
+    
+    print ret
+    
+    return ret
+    
+
 def search_products(request, company):
-    
-    import time
-    
-    tic = time.time()
-    
     company = get_object_or_404(Company, url_name = company)
     
     # get all products from this company and filter them by entered criteria
     products = Product.objects.filter(company=company)
     
     criteria = JSON_parse(request.POST['data'])
+    # filter by: (values in criteria dict)
+    # name_filter
+    if criteria.get('name_filter'):
+        filter_by_name = True
+        products = products.filter(name__icontains=criteria.get('name_filter'))
+    else:
+        filter_by_name = False
+
+    # product_code_filter
+    if criteria.get('product_code_filter'):
+        filter_by_product_code = True
+        products = products.filter(product_code__icontains = criteria.get('product_code_filter'))
+    else:
+        filter_by_product_code = False
     
-    # general filter: search 
+    # shop_code_filter
+    if criteria.get('shop_code_filter'):
+        filter_by_shop_code = True
+        products = products.filter(shop_code__icontains = criteria.get('shop_code_filter'))
+    else:
+        filter_by_shop_code = False
+    
+    # notes_filter
+    if criteria.get('notes_filter'):
+        filter_by_notes = True
+        products = products.filter(private_notes__icontains = criteria.get('notes_filter'))
+    else:
+        filter_by_notes = False
+        
+    # description_filter
+    if criteria.get('description_filter'):
+        filter_by_description = True
+        products = products.filter(description__icontains = criteria.get('description_filter'))
+    else:
+        filter_by_description = False
+        
+    # category_list_filter
+    if criteria.get('category_filter'):
+        filter_by_category = True
+        products = products.filter(category__id = int(criteria.get('category_filter')))
+        print criteria.get('category_filter')
+    else:
+        filter_by_category = False
+        
+    # tax_filter
+    if criteria.get('tax_filter'):
+        #filter_by_tax = True
+        products = products.filter(tax = Decimal(criteria.get('tax_filter')))
+    else:
+        pass
+        #filter_by_tax = False
+    
+    # price_filter
+    if criteria.get('price_filter'):
+        try:
+            products = products.filter(pk__in=Price.objects.filter(unit_price=Decimal(criteria.get('price_filter'))).order_by('-date_updated')[:1])
+            #filter_by_price = True
+        except Price.DoesNotExist:
+            pass
+            #filter_by_price = False
+    else:
+        pass
+        #filter_by_price = False
+
+    # discount
+    if criteria.get('discount_filter'):
+        #filter_by_discount = True
+        products = products.filter(discount__code=criteria.get('discount_filter'))
+    else:
+        pass
+        #filter_by_discount = False
+
+    # general filter: search all fields that have not been searched yet 
     general_filter = criteria['general_filter'].split(' ')
-    print general_filter
     
     for w in general_filter:
         if w == '':
             continue
-        # search categories, product_code, shop_code, name, description, notes, price
-        products = (products.filter(category__name__icontains=w) | 
-            products.filter(code__icontains=w) | 
-            products.filter(shop_code__icontains=w) |
-            products.filter(name__icontains=w) | 
-            products.filter(description__icontains=w) | 
-            products.filter(private_notes__icontains=w)) 
-            # price is in 
-        try:
-            products = products | Product.objects.filter(pk__in=Price.objects.filter(unit_price=Decimal(w))) 
-        except:
-            pass
-        
-        products = products.distinct()
-    
-    # advanced filter: search by field
-    
-    
-    
-    toc = time.time()
-    
-    print toc - tic
-    
-    print products
+        # search categories, product_code, shop_code, name, description, notes, price,
+        # but only if it wasn't entered in the "advanced" filter
+        if not filter_by_name:
+            products = products | products.filter(name__icontains=w)
+        if not filter_by_product_code:
+            products = products | products.filter(code__icontains=w)
+        if not filter_by_shop_code:
+            products = products | products.filter(shop_code__icontains=w)
+        if not filter_by_notes:
+            products = products | products.filter(private_notes__icontains=w)
+        if not filter_by_description:
+            products = products | products.filter(description__icontains=w)
+        if not filter_by_category:
+            products = products | products.filter(category__name__icontains=w)
+        # omit search by tax, price, discount
 
-    return JSON_response({'test':'tralala'});
+    products = products.distinct()    
+    
+    # return serialized products
+    ps = []
+    for p in products:
+        ps.append(serialize_product(p))
+
+    return JSON_response(ps);

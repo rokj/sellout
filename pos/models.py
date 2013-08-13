@@ -84,8 +84,8 @@ class Discount(SkeletonU):
     end_date = models.DateField(_("Discount end date"), null=True, blank=True)
     active = models.BooleanField(_("Active"), null=False, blank=True, default=True)
     
-    def __unicode(self):
-        return str(self.amount) + " " + self.description
+    def __unicode__(self):
+        return self.code + " " + self.description
 
 ### product ###
 class ProductImage(SkeletonU):
