@@ -1,10 +1,10 @@
- - title/site title for all views
- - login_required & security etc.
- - datepicker for date inputs
- - updated_by for update views
- - <[ CDATA for <javascript>
- - show/hide animations (jquery)
- - base.html: remove unneeded jquery <script src=""> includes
+- title/site title for all views
+- login_required & security etc.
+- datepicker for date inputs
+- updated_by for update views
+- <[ CDATA for <javascript>
+- show/hide animations (jquery)
+- base.html: remove unneeded jquery <script src=""> includes
 
 OPTIMIZE:
-  
+ 	- sql queries or better getting of objects just with specific data
