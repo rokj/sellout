@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 MISC:
  - title/site title for all views
  - datepicker for date inputs
@@ -5,6 +6,15 @@ MISC:
  - <[ CDATA for <javascript>
  - show/hide animations (jquery)
  - base.html: remove unneeded jquery <script src=""> includes
+=======
+- title/site title for all views
+- login_required & security etc.
+- datepicker for date inputs
+- updated_by for update views
+- <[ CDATA for <javascript>
+- show/hide animations (jquery)
+- base.html: remove unneeded jquery <script src=""> includes
+>>>>>>> 059ff247745cf535e371f05adfcf5990d303d1c4
 
 QUESTIONS:
  - JSON-only urls: NOT translated
@@ -20,4 +30,4 @@ CONFIGURATION VARIABLES:
  - default tax (?)
 
 OPTIMIZE:
-  
+ 	- sql queries or better getting of objects just with specific data
