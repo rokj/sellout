@@ -1,10 +1,23 @@
+MISC:
  - title/site title for all views
- - login_required & security etc.
  - datepicker for date inputs
  - updated_by for update views
  - <[ CDATA for <javascript>
  - show/hide animations (jquery)
  - base.html: remove unneeded jquery <script src=""> includes
+
+QUESTIONS:
+ - JSON-only urls: NOT translated
+
+SECURITY:
+ - login_required
+ - check permissions for edit etc.
+
+CONFIGURATION VARIABLES:
+ - no. of contacts per page
+ - no. of discounts per page
+ - currency ($ €, ...)
+ - default tax (?)
 
 OPTIMIZE:
   

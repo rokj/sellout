@@ -4,13 +4,13 @@
 # Views for managing POS data: company, categories, products,
 # contacts, discounts.
 
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
 from django.http import HttpResponse, Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 
 from pos.models import Company, Category, Contact, Discount, Product, Price
 from util import error, JSON_response, JSON_parse, resize_image, validate_image
@@ -259,10 +259,7 @@ def edit_company(request, company):
     context['form'] = form
     context['company'] = c
     context['logo_dimensions'] = g.IMAGE_DIMENSIONS['logo']
-               
-    toc = time.time()
-    print toc-tic
-                    
+    
     return render(request, 'pos/manage/company.html', context)
 
 ####################
@@ -772,7 +769,10 @@ def JSON_categories(request, company):
     # return all categories' data in JSON format
     return JSON_response(get_all_categories(company.id, sort='name', data=[], json=True))
 
-
+def JSON_units(request, company): # G units!
+    # at the moment, company is not needed
+    return JSON_response(g.UNITS);
+    
 def products(request, company):
     company = get_object_or_404(Company, url_name = company)
     
@@ -786,9 +786,12 @@ def serialize_product(p):
     # returns all relevant product's data
     ret = {}
     
+    ret['id'] = p.id
+    
     try: # only the last price from the price table
         price = Price.objects.filter(product__id=p.id).order_by('-date_updated')[:1]
     except:
+        price = None
         pass
     if price:
         ret['price'] = str(price[0].unit_price)
@@ -796,7 +799,7 @@ def serialize_product(p):
     # all discounts in a list
     discounts = []
     for d in p.discount.all():
-        if d.active and d.start_date < date.today() and d.end_date > date.today():
+        if d.active and d.start_date <= date.today() and d.end_date >= date.today():
             dd = {
                   'description':d.description,
                   'code':d.code,
@@ -804,10 +807,12 @@ def serialize_product(p):
                   'amount':str(d.amount),
                   }
             discounts.append(dd)
+
     if discounts:
-        ret['discount'] = discounts
+        ret['discounts'] = discounts
     
     # check if product's image exists
+    # TODO: better image handling
     if p.image:
         ret['image'] = p.image.url
     
@@ -832,8 +837,6 @@ def serialize_product(p):
     if p.stock:
         ret['stock'] = p.stock
     
-    print ret
-    
     return ret
     
 
@@ -844,7 +847,8 @@ def search_products(request, company):
     products = Product.objects.filter(company=company)
     
     criteria = JSON_parse(request.POST['data'])
-    # filter by: (values in criteria dict)
+    
+    # filter by: ("advanced" values in criteria dict)
     # name_filter
     if criteria.get('name_filter'):
         filter_by_name = True
@@ -884,7 +888,6 @@ def search_products(request, company):
     if criteria.get('category_filter'):
         filter_by_category = True
         products = products.filter(category__id = int(criteria.get('category_filter')))
-        print criteria.get('category_filter')
     else:
         filter_by_category = False
         
@@ -918,27 +921,34 @@ def search_products(request, company):
 
     # general filter: search all fields that have not been searched yet 
     general_filter = criteria['general_filter'].split(' ')
-    
+    #g_products = Product.objects.none()
+
     for w in general_filter:
         if w == '':
             continue
-        # search categories, product_code, shop_code, name, description, notes, price,
+        
+        # search categories, product_code, shop_code, name, description, notes,
         # but only if it wasn't entered in the "advanced" filter
+        # assemble the Q() filter
+        f = Q()
         if not filter_by_name:
-            products = products | products.filter(name__icontains=w)
+            f = f | Q(name__icontains=w)
         if not filter_by_product_code:
-            products = products | products.filter(code__icontains=w)
+            f = f | Q(code__icontains=w)
         if not filter_by_shop_code:
-            products = products | products.filter(shop_code__icontains=w)
+            f = f | Q(shop_code__icontains=w)
         if not filter_by_notes:
-            products = products | products.filter(private_notes__icontains=w)
+            f = f | Q(private_notes__icontains=w)
         if not filter_by_description:
-            products = products | products.filter(description__icontains=w)
+            f = f | Q(description__icontains=w)
         if not filter_by_category:
-            products = products | products.filter(category__name__icontains=w)
+            f = f | Q(category__name=w)
+
+        if f:
+            products = products.filter(f)
         # omit search by tax, price, discount
 
-    products = products.distinct()    
+    products = products.distinct().order_by('name')
     
     # return serialized products
     ps = []

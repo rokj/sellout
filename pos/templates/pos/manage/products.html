@@ -5,7 +5,8 @@
 {% block head %}
 
 <script type="text/javascript">
-categories = [];
+categories = []; // list of pairs "label", "value"
+units = [];
 
 function fill_categories(){
     get_data("{% url 'pos:JSON_categories' company.url_name %}",
@@ -14,11 +15,66 @@ function fill_categories(){
         // (server:client)
         // name > label
         // id > value
-        for(var i = 0; i < data.length; i++){
-            categories.push({label:data[i].name, value:data[i].id})
-        }
+            for(var i = 0; i < data.length; i++){
+                categories.push({label:data[i].name, value:data[i].id})
+            }
+        return false;
         }
     );
+}
+
+function fill_units(){
+    get_data("{% url 'pos:JSON_units' company.url_name %}",
+            function(data){
+                for(var i=0; i<data.length; i++){
+                    // replace ^<whatever> with superscript<whatever>
+                    data[i][0] = data[i][0].replace(/\^(2|3)/g,"<sup>$1</sup>");
+                    units.push({"name":data[i][1], "value":data[i][0]});
+                }
+                return false;
+            }
+        );
+}
+
+function edit_box(css_class, value){
+    return $("<input>", {
+        "type":"text",
+        "class":css_class,
+        "value":value
+    });
+}
+
+function unit_box(css_class, selected){
+    sel_obj = $("<select>", {"class":css_class});    
+    
+    for(var i=0; i<units.length;i++){
+        opt_obj = $("<option>")
+            .attr("value", units[i].value)
+            .text(units[i].name);
+            
+        if(units[i].value == selected){
+            opt_obj.attr("selected", "selected");
+        }
+        
+        sel_obj.append(opt_obj);
+    }
+    return sel_obj;
+}
+
+function category_box(css_class, selected){
+    sel_obj = $("<select>", {"class":css_class});
+    
+    for(var i=0; i < categories.length; i++){
+        opt_obj = $("<option>")
+        .attr("value", categories[i].value)
+        .append(categories[i].label);
+        
+        if(categories[i].label == selected){
+            opt_obj.attr("selected", "selected");
+        }
+        sel_obj.append(opt_obj);
+    }
+    return sel_obj;
 }
 
 var last_value;
@@ -98,6 +154,9 @@ $(document).ready(function(){
         }
     });
     
+    // fill unit types
+    fill_units();
+    
     // update products when search criteria has changed (gets called on timeout)
     function update_products(){
         // assemble a JSON object with all search criteria and pass it to the view
@@ -114,13 +173,13 @@ $(document).ready(function(){
             });
             // add the category id (stored in .data())
             cat_fil_id = "category_filter";
-            search_criteria['cat_fil_id'] = $("#" + cat_fil_id).data().id;
+            search_criteria[cat_fil_id] = $("#" + cat_fil_id).data().id;
         }
         
         // send to the view
         send_data("{% url 'pos:search_products' company.url_name %}",
                 search_criteria, "{{ csrf_token }}", function(recv_data){
-                    alert(JSON.stringify(recv_data));
+                    show_products(recv_data);
         });
         return false;
     }
@@ -129,7 +188,99 @@ $(document).ready(function(){
     $("#update_results").click(function(){
         update_products();
     });
-   
+    
+    function render_product(product){
+        div_obj = $("<div>", {"class":"product_container"});
+        
+        // product details include:
+        // id - goes to $.data()
+        // name                    | price / unit_type
+        //       | category        | tax 
+        // image | description     | discounts
+        //       | private_notes   | stock
+        // code
+        // shop_code
+        // create a table with all details
+        tbl_obj = $("<table>", {"class":"product_details"});
+        div_obj.data({id:product.id});
+        div_obj.append(tbl_obj);
+        
+        
+        // first row: name (spans two columns) and price per unit type
+        tr_obj = $("<tr>");
+        tbl_obj.append(tr_obj);
+        // column 1-2: product name
+        td_obj = $("<td>", {"colspan":"2"});
+        td_obj.append(edit_box("product_name", product.name));
+        tr_obj.append(td_obj);
+        // column 3: price per unit type
+        td_obj = $("<td>");
+        // TODO: currency symbol etc
+	td_obj.append("{% trans 'Price' %}:");
+        td_obj.append(edit_box("product_price", product.price));
+        // (template comment){% comment %} <price> 'per' <unit type> {% endcomment %}
+        td_obj.append("{% trans 'per' %}");
+        td_obj.append(unit_box("product_units", product.unit_type));
+        tr_obj.append(td_obj);
+        
+        // second row: image (spans three rows), category, tax
+        tr_obj = $("<tr>");
+        tbl_obj.append(tr_obj);
+        //image
+        td_obj = $("<td>", {"rowspan":"3"});
+        td_obj.append("TODO " + product.image);
+        tr_obj.append(td_obj);
+        // category
+        td_obj = $("<td>");
+        td_obj.append("{% trans 'In category' %}:");
+        td_obj.append(category_box("product_category", product.category));
+        tr_obj.append(td_obj);
+        // tax
+        td_obj = $("<td>");
+        td_obj.append("{% trans 'Tax' %}:")
+        td_obj.append(edit_box("product_tax", product.tax));
+        tr_obj.append(td_obj);
+
+	// description
+	tr_obj = $("<tr>");
+	td_obj = $("<td>");
+	tx_obj = $("<textarea>", {"class":"product_description"});
+	tx_obj.append(product.description)
+	td_obj.append(tx_obj);
+        tr_obj.append(td_obj);
+	tbl_obj.append(tr_obj);
+
+	// list discounts
+	td_obj = $("<td>");
+	
+	var i;
+	for(i = 0; i < product.discounts.length; i++){
+		td_obj.append(product.discounts[i].code);
+		// TODO: add link
+		// TODO: remove link
+	}
+	tr_obj.append(td_obj);
+
+
+        $("#products_list").append(div_obj);
+    }
+    
+    
+    function show_products(data){
+        // clear products div
+        products_div = $("#products_list")
+        
+        products_div.empty();
+        
+        if(data.length == 0){
+            products_div.append("{% trans 'No products found' %}")
+        }
+        
+        var i;
+        for(i=0; i<data.length; i++){
+            render_product(data[i]);
+        }
+    }
 });
 
 </script>
@@ -161,9 +312,8 @@ $(document).ready(function(){
     </div>
 </div>
 
-{% comment %} add contact {% endcomment %}
-
-
+<div id="products_list">
+</div>
 
 
 
