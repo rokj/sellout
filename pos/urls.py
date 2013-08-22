@@ -40,11 +40,13 @@ urlpatterns = patterns('',
     # products
     url(r_company + _('/manage/products') + '/?$', manage.products, name='products'),
     
-    # AJAX stuff:
+    # AJAX stuff: URLs NOT TRANSLATED
     # categories
-    url(r_company + _('/manage/json/categories') + '/?$', manage.JSON_categories, name='JSON_categories'),
+    url(r_company + r'/manage/json/categories/?$', manage.JSON_categories, name='JSON_categories'),
+    # unit types
+    url(r_company + r'/manage/json/units/?$', manage.JSON_units, name='JSON_units'),
     # product list (after search)
-    url(r_company + _('/manage/json/products') + '/?$', manage.search_products, name='search_products'),
+    url(r_company + r'/manage/json/products/?$', manage.search_products, name='search_products'),
     
     
     
