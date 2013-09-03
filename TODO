@@ -1,23 +1,12 @@
-<<<<<<< HEAD
-MISC:
- - title/site title for all views
- - datepicker for date inputs
- - updated_by for update views
- - <[ CDATA for <javascript>
- - show/hide animations (jquery)
- - base.html: remove unneeded jquery <script src=""> includes
-=======
 - title/site title for all views
 - login_required & security etc.
 - datepicker for date inputs
 - updated_by for update views
 - <[ CDATA for <javascript>
+- change underscores for HTML and CSS ids and classes to dashes 
 - show/hide animations (jquery)
-- base.html: remove unneeded jquery <script src=""> includes
->>>>>>> 059ff247745cf535e371f05adfcf5990d303d1c4
-
-QUESTIONS:
- - JSON-only urls: NOT translated
+- base.html: remove unneeded jquery <script src=""> includes 
+- incompatibility warning/redirect for older browsers
 
 SECURITY:
  - login_required
@@ -31,3 +20,4 @@ CONFIGURATION VARIABLES:
 
 OPTIMIZE:
  	- sql queries or better getting of objects just with specific data
+    - images embedded in JSON instead of doing a special request for each image

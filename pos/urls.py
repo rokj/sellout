@@ -1,8 +1,9 @@
 from django.conf.urls import patterns, url
 from django.utils.translation import ugettext as _
 
-from views import manage, home
 from common import globals as g
+from pos.views import home
+import pos.views.manage as manage
 
 ### common URL prefixes: ###
 # company's site: /pos/blocklogic
@@ -13,40 +14,48 @@ r_manage = g.MISC['management_url'] + '/'
 
 urlpatterns = patterns('',
     # system pages
-    url(r_manage + _('register-company') + '$', manage.register_company, name='register_company'),
-    url(r_manage + r'url-name-suggestions$', manage.url_name_suggestions, name='url_name_suggestions'),
+    url(r_manage + _('register-company') + '$', manage.company.register_company, name='register_company'),
+    url(r_manage + r'url-name-suggestions$', manage.company.url_name_suggestions, name='url_name_suggestions'),
     
     # home: POS terminal, directly
     url(r_company + '/?$', home.terminal, name='home'), # by url_name
     
     # management urls: company
     url(r_company + _('/manage') + '/?$', manage.manage_home, name='manage_home'), # management home
-    url(r_company + _('/manage/company') + '/?$', manage.edit_company, name='edit_company'), # company
+    url(r_company + _('/manage/company') + '/?$', manage.company.edit_company, name='edit_company'), # company
     # categories
-    url(r_company + _('/manage/categories') + '/?$', manage.list_categories, name='list_categories'), # list of categories
-    url(r_company + _('/manage/category/add') + '/(?P<parent_id>-?\d+)/?$', manage.add_category, name='add_category'), # add
-    url(r_company + _('/manage/category/edit') + '/(?P<category_id>\d+)/?$', manage.edit_category, name='edit_category'), # edit
-    url(r_company + _('/manage/category/delete') + '/(?P<category_id>\d+)/?$', manage.delete_category, name='delete_category'), # delete
+    url(r_company + _('/manage/categories') + '/?$', manage.category.list_categories, name='list_categories'), # list of categories
+    url(r_company + _('/manage/category/add') + '/(?P<parent_id>-?\d+)/?$', manage.category.add_category, name='add_category'), # add
+    url(r_company + _('/manage/category/edit') + '/(?P<category_id>\d+)/?$', manage.category.edit_category, name='edit_category'), # edit
+    url(r_company + _('/manage/category/delete') + '/(?P<category_id>\d+)/?$', manage.category.delete_category, name='delete_category'), # delete
     # contacts
-    url(r_company + _('/manage/contacts') + '/?$', manage.list_contacts, name='list_contacts'),
-    url(r_company + _('/manage/contact/add') + '/?$', manage.add_contact, name='add_contact'),
-    url(r_company + _('/manage/contact/edit') + '/(?P<contact_id>\d+)/?$', manage.edit_contact, name='edit_contact'),
-    url(r_company + _('/manage/contact/delete') + '/(?P<contact_id>\d+)/?$', manage.delete_contact, name='delete_contact'),
+    url(r_company + _('/manage/contacts') + '/?$', manage.contact.list_contacts, name='list_contacts'),
+    url(r_company + _('/manage/contact/add') + '/?$', manage.contact.add_contact, name='add_contact'),
+    url(r_company + _('/manage/contact/edit') + '/(?P<contact_id>\d+)/?$', manage.contact.edit_contact, name='edit_contact'),
+    url(r_company + _('/manage/contact/delete') + '/(?P<contact_id>\d+)/?$', manage.contact.delete_contact, name='delete_contact'),
     # discounts
-    url(r_company + _('/manage/discounts') + '/?$', manage.list_discounts, name='list_discounts'),
-    url(r_company + _('/manage/discount/add') + '/?$', manage.add_discount, name='add_discount'),
-    url(r_company + _('/manage/discount/edit') + '/(?P<discount_id>\d+)/?$', manage.edit_discount, name='edit_discount'),
-    url(r_company + _('/manage/discount/delete') + '/(?P<discount_id>\d+)/?$', manage.delete_discount, name='delete_discount'),
+    url(r_company + _('/manage/discounts') + '/?$', manage.discount.list_discounts, name='list_discounts'),
+    url(r_company + _('/manage/discount/add') + '/?$', manage.discount.add_discount, name='add_discount'),
+    url(r_company + _('/manage/discount/edit') + '/(?P<discount_id>\d+)/?$', manage.discount.edit_discount, name='edit_discount'),
+    url(r_company + _('/manage/discount/delete') + '/(?P<discount_id>\d+)/?$', manage.discount.delete_discount, name='delete_discount'),
     # products
-    url(r_company + _('/manage/products') + '/?$', manage.products, name='products'),
+    url(r_company + _('/manage/products') + '/?$', manage.product.products, name='products'),
     
     # AJAX stuff: URLs NOT TRANSLATED
-    # categories
-    url(r_company + r'/manage/json/categories/?$', manage.JSON_categories, name='JSON_categories'),
-    # unit types
-    url(r_company + r'/manage/json/units/?$', manage.JSON_units, name='JSON_units'),
-    # product list (after search)
-    url(r_company + r'/manage/json/products/?$', manage.search_products, name='search_products'),
+    # categories list
+    url(r_company + r'/manage/json/categories/?$', manage.product.JSON_categories, name='JSON_categories'),
+    # unit types list
+    url(r_company + r'/manage/json/units/?$', manage.product.JSON_units, name='JSON_units'),
+    # available discounts list
+    url(r_company + r'/manage/json/discounts/?$', manage.product.JSON_discounts, name='JSON_discounts'),
+        
+    # product list (search)
+    url(r_company + r'/manage/json/products/?$', manage.product.search_products, name='search_products'),
+    # add new product
+    url(r_company + r'/manage/json/products/add/?$', manage.product.search_products, name='add_product'),
+    # edit (save) product
+    url(r_company + r'/manage/json/products/edit/(?P<product_id>\d+)/?$', manage.product.search_products, name='edit_product'),
+    
     
     
     

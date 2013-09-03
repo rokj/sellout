@@ -1,3 +1,4 @@
+# coding=UTF-8
 from django.utils.translation import ugettext as _
 
 # Common stuff to be used anywhere throughout the site
@@ -26,6 +27,7 @@ DECIMAL = {
 }
 
 # unit types
+# unicode superscripts: ² ³ (replacing ^* with <sup>*</sup> does not work for <select>)
 UNITS = (
     ("Piece", _("Piece")),
     ("g", "g"),
@@ -38,17 +40,18 @@ UNITS = (
     ("in", "in"),
     ("ft", "ft"),
     ("yd", "yd"),
-    ("in^2", "in^2"),
-    ("m^2", "m^2"),
-    ("ft^2", "ft^2"),
+    ("in^2", "in²"),
+    ("m^2", "m²"),
+    ("ft^2", "ft²"),
     ("l", "l"),
     ("dl", "dl"),
     ("cl", "cl"),
-    ("m^3", "m^3"),
+    ("m^3", "m³"),
     ("fl. oz.", "fl. oz."),
     ("pint", "pint"),
     ("gal", "gal"),
-    ("ft^3", "ft^3"),
+    ("ft^3", "ft³"),
+    ("h", _("Hour")),
 )
 
 # discounts

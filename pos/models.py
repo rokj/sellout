@@ -116,7 +116,7 @@ class Product(ProductAbstract):
     category = models.ForeignKey(Category, null=True, blank=True)
     stock = models.IntegerField(_("Number of items left in stock"), null=True, blank=True)
     image = models.ImageField(_("Icon"),
-                             upload_to=get_image_path(g.DIRS['product_icon_dir'], "pos_producticon"),
+                             upload_to=get_image_path(g.DIRS['product_icon_dir'], "pos_productimage"),
                              null=True, blank=True)
     images = models.ManyToManyField(ProductImage, null=True, blank=True)
     
