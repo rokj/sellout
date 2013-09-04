@@ -16,104 +16,9 @@ check_interval_duration = 500;
 update_timeout_duration = 1500;
 
 $(document).ready(function(){
-    ////////////////////
-    // data retrieval
-    ////////////////////
-    // categories list
-    get_data("{% url 'pos:JSON_categories' company.url_name %}",
-        function(data){
-        // convert categories' data from the server to a list for autocomplete data:
-        // (server:client)
-        // name > label
-        // id > value
-            for(var i = 0; i < data.length; i++){
-                categories.push({label:data[i].breadcrumbs, value:data[i].id})
-            }
-        return false;
-        }
-    );
-    
-    // unit types
-    get_data("{% url 'pos:JSON_units' company.url_name %}",
-        function(data){
-            for(var i=0; i<data.length; i++){
-                units.push({"value":data[i][0], "name":data[i][1]});
-            }
-            return false;
-        }
-    );
-
-    // discounts
-    get_data("{% url 'pos:JSON_discounts' company.url_name %}",
-        function(data){
-            all_discounts = data;
-        }
-    );
-    
-    ////////////////////
-    // searching
-    ////////////////////
-    gf_obj = $("#general_filter")
-    gf_obj.keypress(function(e){
-        if(e.which == 13){ // enter pressed
-            update_products();
-        }
-    });
-    
-    // hide the template
-    $("div#product_details_template").hide();
-    $("div#edit_dialog").hide();
-    
-    // general products search box timers
-    setInterval(function(){ // check for change
-        new_value = gf_obj.val(); 
-        if(last_value != new_value){
-            if(new_value.length < 2) return;
-            last_value = new_value; // changed, update products
-            clearTimeout(update_timeout);
-            update_timeout = setTimeout(update_products, update_timeout_duration);
-        }
-        return false;
-    }, check_interval_duration);
-        
-    // advanced search div
-    adv_div_obj = $("#advanced_search"); 
-    adv_div_obj.hide();
-    
-    adv_chk_obj = $("#advanced_search_toggle");
-    
-    adv_chk_obj.change(function(){
-       if(adv_chk_obj.prop("checked") == false){
-           adv_div_obj.hide();
-       }
-       else adv_div_obj.show();
-       
-       return false;
-    });
-    
-    // categories autocomplete list
-    cat_inp_obj = $("#category_filter");
-    cat_inp_obj.autocomplete({ source: categories, minLength:0 });
-    cat_inp_obj.autocomplete( "option", "delay", check_interval_duration );
-    
-    cat_inp_obj.focus(function(){
-        cat_inp_obj.autocomplete( "search", "" );
-    });
-    cat_inp_obj.on("autocompleteselect", function (e, ui) {
-        // override the default autocomplete behavior:
-        e.preventDefault(); // prevent the "value" being written to the edit box
-        this.value = ui.item.label; // write label
-        cat_inp_obj.data("id", ui.item.value); // save the value (category id) to data field
-    });
-    cat_inp_obj.blur(function(){
-        // if nothing is selected, remove data from the object
-        if(cat_inp_obj.val().length == 0){
-            cat_inp_obj.removeData();
-        }
-    });
-    
-    // update products when search criteria has changed (gets called on timeout)
+    // functions:
     function update_products(){
+        // update products when search criteria has changed (gets called on timeout or on click)
         // assemble a JSON object with all search criteria and pass it to the view
         search_criteria = {
             general_filter:$("#general_filter").val(),
@@ -139,14 +44,191 @@ $(document).ready(function(){
         return false;
     }
     
-    // update products on button click
-    $("#update_results").click(function(){
-        update_products();
-    });
+    function show_products(data){
+        // show products that search returned
+        // clear products div
+        products_div = $("#products_list");
+        
+        products_div.empty();
+        
+        if(data.length == 0){
+            products_div.append("{% trans 'No products found' %}");
+        }
+        
+        var i;
+        for(i=0; i<data.length; i++){
+            render_product(data[i]);
+        }
+    }
     
-    ////////////////////
-    // product list
-    ////////////////////
+    function add_discount(parent, product, key){
+        // add a list item and a delete link to product edit dialog
+        
+        discount = product.discounts[key];
+        
+        if(!discount) return;
+        
+        // tooltip - discount details
+        var tooltip = "";
+        
+        tooltip = discount.code + "<br/>" // discount code
+        tooltip += discount.description + "<br/>" // description
+        // TODO:
+        //tooltip += p.start_date + " - " + p.end_date // start and end date
+        // TODO: set style for inactive discount
+        if(!discount.active) tooltip += "<br/>{% trans 'inactive' %}" // active
+        
+        dt = discount.code + " " + discount.amount + " ";
+        if(discount.type == "Absolute") dt += "$€Ł"; // TODO: currency
+        else dt += "%";
+        
+        li_obj = $("<li>", {title:tooltip});
+        li_obj.append(dt);
+        li_obj.tooltip({content:tooltip});
+        
+        // delete button
+        btn_obj = $("<input>", {type:"button", value:"x","class":"delete_discount"});
+        btn_obj.click(function(){
+            delete product.discounts[key]
+            refresh_discounts(product);
+        });
+        li_obj.append(btn_obj);
+        
+        parent.append(li_obj);
+    }
+    
+    function refresh_discounts(product){
+        // clear everything discount-related and redraw
+        $("#edit_discounts", edit_div_obj).empty();
+        $("#edit_discount_list", edit_div_obj).empty();
+        $("#edit_add_discount", edit_div_obj).empty();
+        
+        // add discounts in product
+        for(var key in product.discounts){
+            add_discount(ul_obj, product, key);
+        }
+        
+        // add another item, this time with all available discounts
+        // in a listbox and an 'add' button
+        li_obj = $("<li>")
+        sel_obj = $("<select>", {id:"edit_discount_list"});
+        btn_obj = $("<input>", {type:"button",value:"{% trans 'Add' %}"});
+        li_obj.append(sel_obj);
+        li_obj.append(btn_obj);
+        ul_obj.append(li_obj);
+        
+        // add discounts NOT in product to add listbox
+        var added = 0;
+        for(var key in all_discounts){
+            if(key in product.discounts) continue;
+            
+            opt_obj = $("<option>")
+            .attr("value", key)
+            .append(all_discounts[key].code); // TODO: add amount and unit (% or currency)
+            
+            sel_obj.append(opt_obj);
+            added++;
+        }
+        // only add the listbox if there's anything to add
+        if(added > 0){
+        	// unselect the first item in listbox to avoid confusion
+        	sel_obj.prop("selectedIndex", -1);
+        	
+        	btn_obj.click(function(){ // add button
+                d_id = $(":selected", sel_obj).val();
+                
+                // add data to product
+                product.discounts[d_id] = all_discounts[d_id];
+                refresh_discounts(product);
+            });
+        }
+        else{
+        	// remove the last, 'add' entry
+        	li_obj.remove();
+        }
+    }
+    
+    function show_product_edit_dialog(product){
+        var i;
+        
+        // show edit dialog and fill it with current product's data
+        edit_div_obj = $("#edit_dialog");
+
+        $("#product_id", edit_div_obj).val(product.id);
+        $("#edit_product_name", edit_div_obj).val(product.name);
+        $("#edit_product_price", edit_div_obj).val(product.price);
+        // ... per unit (listbox with unit types)
+        var sel_obj = $("#edit_unit_type", edit_div_obj);    
+        
+        for(i=0; i<units.length;i++){
+            opt_obj = $("<option>")
+                .attr("value", units[i].value)
+                .text(units[i].name);
+            
+            if(units[i].value == product.unit_type){
+                opt_obj.attr("selected", "selected");
+            }
+            
+            sel_obj.append(opt_obj);
+        }
+        
+        // listbox with categories
+        sel_obj = $("#edit_product_category", edit_div_obj);
+        
+        for(i=0; i < categories.length; i++){
+            opt_obj = $("<option>")
+            .attr("value", categories[i].value)
+            .append(categories[i].label);
+            
+            if(categories[i].label == product.category){
+                opt_obj.attr("selected", "selected");
+            }
+            sel_obj.append(opt_obj);
+        }
+        
+        // images (?)
+        
+        // tax
+        $("#edit_product_tax", edit_div_obj).val(product.tax);
+        $("#edit_product_description", edit_div_obj).val(product.description);
+        $("#edit_product_price", edit_div_obj).val(product.price);
+        
+        // discounts
+        // add to list
+        ul_obj = $("#edit_discounts", edit_div_obj);
+        ul_obj.empty();
+        var discount = "";
+        var btn_obj = "";
+        
+        // for the first time
+        refresh_discounts(product);
+        
+        $("#edit_product_private_notes", edit_div_obj).val(product.private_notes);
+        $("#edit_product_stock", edit_div_obj).val(product.stock);
+        $("#edit_product_shop_code", edit_div_obj).val(product.shop_code);
+        $("#edit_product_code", edit_div_obj).val(product.code);
+        
+        // show the edit dialog
+        edit_div_obj.dialog({
+            modal: true
+        });
+        
+        // set dialog title
+        edit_div_obj.dialog('option', 'title',
+                "{% trans 'Edit product' %}: " + product.name);
+        edit_div_obj.dialog('option', 'width', 900);
+        
+        
+        // save and cancel buttons
+        save_obj = $("#edit_product_save", edit_div_obj);
+        cancel_obj = $("#edit_product_cancel", edit_div_obj);
+        
+        cancel_obj.click(function(){
+           // destroy the dialog and delete all content
+           edit_div_obj.dialog(edit_div_obj).dialog("destroy");
+        });
+    }
+    
     function render_product(product){
         var tmp_obj, i;
         
@@ -209,196 +291,135 @@ $(document).ready(function(){
         // code
         $(".product_code", div_obj).append(product.code);
         
-        ////////////////////
-        // editing product
-        ////////////////////
-        manage_obj = $(".product_management", div_obj); 
-        manage_obj.append($("<input>",
-            {type:"button", value:"{% trans 'Edit' %}", "class":"product-edit-button"}) // edit button
-            .click(function(){
-                var i;
-                
-                // show edit dialog and fill it with current product's data
-                edit_div_obj = $("#edit_dialog");
-                
-                // id
-                $("#product_id", edit_div_obj).val(product.id);
-                
-                // name
-                $("edit_product_name", edit_div_obj).val(product.name);
-                
-                // price
-                $("#edit_product_price", edit_div_obj).val(product.price);
-                // ... per unit (listbox with unit types)
-                var sel_obj = $("#edit_unit_type", edit_div_obj);    
-                
-                for(i=0; i<units.length;i++){
-                    opt_obj = $("<option>")
-                        .attr("value", units[i].value)
-                        .text(units[i].name);
-                    
-                    if(units[i].value == product.unit_type){
-                        opt_obj.attr("selected", "selected");
-                    }
-                    
-                    sel_obj.append(opt_obj);
-                }
-                
-                // listbox with categories
-                sel_obj = $("#edit_product_category", edit_div_obj);
-                
-                for(i=0; i < categories.length; i++){
-                    opt_obj = $("<option>")
-                    .attr("value", categories[i].value)
-                    .append(categories[i].label);
-                    
-                    if(categories[i].label == product.category){
-                        opt_obj.attr("selected", "selected");
-                    }
-                    sel_obj.append(opt_obj);
-                }
-                
-                // images (?)
-                
-                // tax
-                $("#edit_product_tax", edit_div_obj).val(product.tax);
-                
-                // description
-                $("#edit_product_description", edit_div_obj).empty().append(product.description);
-                
-                // price
-                $("#edit_product_price", edit_div_obj).val(product.price);
-                
-                // discounts
-                // add to list
-                ul_obj = $("#edit_discounts", edit_div_obj);
-                ul_obj.empty();
-                var discount = "";
-                var btn_obj = "";
-                
-                function add_discount(parent, d){
-                    // add a list item and a delete link
-                    // tooltip - discount details
-                    // assemble the tooltip text:
-                    if(!d) return;
-                        
-                    var tooltip = "";
-                    
-                    tooltip = d.code + "<br/>" // discount code
-                    tooltip += d.description + "<br/>" // description
-                    // TODO:
-                    //tooltip += p.start_date + " - " + p.end_date // start and end date
-                    // TODO: set style for inactive discount
-                    if(!d.active) tooltip += "<br/>{% trans 'inactive' %}" // active
-                    
-                    discount = d.code + " " + d.amount + " ";
-                    if(d.type == "Absolute") discount += "$€Ł"; // TODO: currency
-                    else discount += "%";
-                    
-                    li_obj = $("<li>", {title:tooltip});
-                    li_obj.append(discount);
-                    li_obj.tooltip({content:tooltip});
-                    
-                    // delete button
-                    btn_obj = $("<input>", {type:"button", value:"x","class":"delete_discount"});
-                    btn_obj.click(function(){
-                        delete product.discounts[d.id]
-                        refresh_discounts();
-                    });
-                    li_obj.append(btn_obj);
-                    
-                    parent.append(li_obj);
-                }
-                
-                function refresh_discounts(){
-                    // clear everything discount-related and redraw
-                    $("#edit_discounts", edit_div_obj).empty();
-                    $("#edit_discount_list", edit_div_obj).empty();
-                    $("#edit_add_discount", edit_div_obj).empty();
-                    
-                    // add discounts in product
-                    for(var key in product.discounts){
-                        add_discount(ul_obj, product.discounts[key]);
-                    }
-                    
-                    // add another item, this time with all available discounts
-                    // in a listbox and an 'add' button
-                    li_obj = $("<li>")
-                    sel_obj = $("<select>", {id:"edit_discount_list"});
-                    btn_obj = $("<input>", {type:"button",value:"{% trans 'Add' %}"});
-                    li_obj.append(sel_obj);
-                    li_obj.append(btn_obj);
-                    ul_obj.append(li_obj);
-                    
-                    // add discounts NOT in product to add listbox
-                    for(var key in all_discounts){
-                        if(key in product.discounts) continue;
-                        
-                        opt_obj = $("<option>")
-                        .attr("value", key)
-                        .append(all_discounts[key].code); // TODO: add amount and unit (% or currency)
-                        
-                        sel_obj.append(opt_obj);
-                    }
-                    btn_obj.click(function(){ // add button
-                        d_id = $(":selected", sel_obj).val();
-                        
-                        // add data to product
-                        product.discounts[d_id] = all_discounts[d_id];
-                        refresh_discounts();
-                    });
-                }
-                
-                // for the first time
-                refresh_discounts();
-                
-                $("#edit_product_private_notes", edit_div_obj).empty().append(product.private_notes);
-                $("#edit_product_stock", edit_div_obj).val(product.stock);
-                $("#edit_product_shop_code", edit_div_obj).val(product.shop_code);
-                $("#edit_product_code", edit_div_obj).val(product.code);
-                
-                // show the edit dialog
-                edit_div_obj.dialog({
-                    modal: true
-                });
-                
-                // set dialog title
-                edit_div_obj.dialog('option', 'title',
-                        "{% trans 'Edit product' %}: " + product.name);
-                
-                // save and cancel buttons
-                save_obj = $("#edit_product_save", edit_div_obj);
-                cancel_obj = $("#edit_product_cancel", edit_div_obj);
-                
-                cancel_obj.click(function(){
-                   // destroy the dialog and delete all content
-                   edit_div_obj.dialog("destroy");
-                });
-            }));
-        manage_obj.append($("<input>", {type:"button", value:"{% trans 'Delete' %}", "class":"product-delete-button"}) // delete button
-            .click(function(){
-                alert("delete!")
-            }));
-        
         div_obj.show();
         $("#products_list").append(div_obj);
+        
+        // edit button
+        manage_obj = $(".product_management", div_obj); 
+        $("input.product_edit_button", manage_obj).click(function(){
+        		show_product_edit_dialog(product);
+        });
+        
+        // delete button
+        $("input.product_delete_button", manage_obj).click(function(){
+           alert("delete"); 
+        });
     }
     
-    function show_products(data){
-        // clear products div
-        products_div = $("#products_list");
-        
-        products_div.empty();
-        
-        if(data.length == 0){
-            products_div.append("{% trans 'No products found' %}");
-        }
-        
-        var i;
-        for(i=0; i<data.length; i++){
-            render_product(data[i]);
-        }
+    function save_product(){
+    	todo
     }
+    
+    ////////////////////
+    // data retrieval
+    ////////////////////
+    // categories list
+    get_data("{% url 'pos:JSON_categories' company.url_name %}",
+        function(data){
+            // convert categories' data from the server to a list for autocomplete data:
+            // (server:client)
+            // name > label
+            // id > value
+            for(var i = 0; i < data.length; i++){
+                categories.push({label:data[i].breadcrumbs, value:data[i].id})
+            }
+            return false;
+        }
+    );
+    
+    // unit types
+    get_data("{% url 'pos:JSON_units' company.url_name %}",
+        function(data){
+            for(var i=0; i<data.length; i++){
+                units.push({"value":data[i][0], "name":data[i][1]});
+            }
+            return false;
+        }
+    );
+
+    // discounts
+    get_data("{% url 'pos:JSON_discounts' company.url_name %}",
+        function(data){
+            all_discounts = data;
+        }
+    );
+    
+    // behavior:
+    ////////////////////
+    // searching
+    ////////////////////
+    gf_obj = $("#general_filter");
+    gf_obj.keypress(function(e){
+        if(e.which == 13){ // enter pressed
+            update_products();
+        }
+    });
+    
+    // hide the template
+    $("div#product_details_template").hide();
+    $("div#edit_dialog").hide();
+    
+    // general products search box timers
+    setInterval(function(){ // check for change
+        new_value = gf_obj.val(); 
+        if(last_value != new_value){
+            if(new_value.length < 2) return;
+            last_value = new_value; // changed, update products
+            clearTimeout(update_timeout);
+            update_timeout = setTimeout(update_products, update_timeout_duration);
+        }
+        return false;
+    }, check_interval_duration);
+        
+    // advanced search div
+    adv_div_obj = $("#advanced_search"); 
+    adv_div_obj.hide();
+    
+    adv_chk_obj = $("#advanced_search_toggle");
+    
+    adv_chk_obj.change(function(){
+       if(adv_chk_obj.prop("checked") == false){
+           adv_div_obj.hide();
+       }
+       else adv_div_obj.show();
+       
+       return false;
+    });
+    
+    // categories autocomplete list
+    cat_inp_obj = $("#category_filter");
+    cat_inp_obj.autocomplete({ source: categories, minLength:0 });
+    cat_inp_obj.autocomplete( "option", "delay", check_interval_duration );
+    
+    cat_inp_obj.focus(function(){
+        cat_inp_obj.autocomplete( "search", "" );
+    });
+    
+    cat_inp_obj.on("autocompleteselect", function (e, ui) {
+        // override the default autocomplete behavior:
+        e.preventDefault(); // prevent the "value" being written to the edit box
+        this.value = ui.item.label; // write label
+        cat_inp_obj.data("id", ui.item.value); // save the value (category id) to data field
+    });
+    
+    cat_inp_obj.blur(function(){
+        // if nothing is selected, remove data from the object
+        if(cat_inp_obj.val().length == 0){
+            cat_inp_obj.removeData();
+        }
+    });
+    
+    // update products on button click
+    $("#update_results").click(function(){
+        update_products();
+    });
+    
+    ////////////////////
+    // product list
+    ////////////////////
+    
+        
+        
     
     gf_obj.focus();
 });
@@ -479,7 +500,6 @@ $(document).ready(function(){
             </td>
         </tr>
     </table>
-    
 </div>
 
 {% comment %} a template for viewing products {% endcomment %}
@@ -513,7 +533,9 @@ $(document).ready(function(){
         <tr>
             <td><p class="product_shop_code"></p></td> {% comment %} this row again has 3 columns {% endcomment %}
             <td><p class="product_code"></p></td>
-            <td><p class="product_management"></p></td>
+            <td><p class="product_management"><input type="button" value="{% trans 'Edit' %}" class="product_edit_button">
+                <input type="button" value="{% trans 'Delete' %}" class="product_delete_button"></p>
+            </td>
         </tr>
     </table>
 </div>
