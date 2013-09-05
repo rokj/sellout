@@ -63,7 +63,6 @@ $(document).ready(function(){
     
     function add_discount(parent, product, key){
         // add a list item and a delete link to product edit dialog
-        
         discount = product.discounts[key];
         
         if(!discount) return;
@@ -85,6 +84,7 @@ $(document).ready(function(){
         li_obj = $("<li>", {title:tooltip});
         li_obj.append(dt);
         li_obj.tooltip({content:tooltip});
+        li_obj.data({id:discount.id}); // store id in data() for later retrieval
         
         // delete button
         btn_obj = $("<input>", {type:"button", value:"x","class":"delete_discount"});
@@ -115,6 +115,7 @@ $(document).ready(function(){
         btn_obj = $("<input>", {type:"button",value:"{% trans 'Add' %}"});
         li_obj.append(sel_obj);
         li_obj.append(btn_obj);
+        li_obj.data({id:false}); // don't store or send this item
         ul_obj.append(li_obj);
         
         // add discounts NOT in product to add listbox
@@ -131,10 +132,10 @@ $(document).ready(function(){
         }
         // only add the listbox if there's anything to add
         if(added > 0){
-        	// unselect the first item in listbox to avoid confusion
-        	sel_obj.prop("selectedIndex", -1);
-        	
-        	btn_obj.click(function(){ // add button
+            // unselect the first item in listbox to avoid confusion
+            sel_obj.prop("selectedIndex", -1);
+            
+            btn_obj.click(function(){ // add button
                 d_id = $(":selected", sel_obj).val();
                 
                 // add data to product
@@ -143,8 +144,8 @@ $(document).ready(function(){
             });
         }
         else{
-        	// remove the last, 'add' entry
-        	li_obj.remove();
+            // remove the last, 'add' entry
+            li_obj.remove();
         }
     }
     
@@ -153,8 +154,10 @@ $(document).ready(function(){
         
         // show edit dialog and fill it with current product's data
         edit_div_obj = $("#edit_dialog");
-
-        $("#product_id", edit_div_obj).val(product.id);
+        edit_div_obj.data({id:product.id,
+        	edit_url:product.edit_url,
+        	delete_url:product.delete_url});
+        
         $("#edit_product_name", edit_div_obj).val(product.name);
         $("#edit_product_price", edit_div_obj).val(product.price);
         // ... per unit (listbox with unit types)
@@ -219,11 +222,11 @@ $(document).ready(function(){
         edit_div_obj.dialog('option', 'width', 900);
         
         
-        // save and cancel buttons
-        save_obj = $("#edit_product_save", edit_div_obj);
-        cancel_obj = $("#edit_product_cancel", edit_div_obj);
+        // save button
+        $("#edit_product_save", edit_div_obj).click(save_product);
         
-        cancel_obj.click(function(){
+        // cancel button
+        $("#edit_product_cancel", edit_div_obj).click(function(){
            // destroy the dialog and delete all content
            edit_div_obj.dialog(edit_div_obj).dialog("destroy");
         });
@@ -248,7 +251,6 @@ $(document).ready(function(){
         div_obj.data(product);
         // add id to hidden field
         $(".product_id", div_obj).append(product.id);
-        
         // name
         $(".product_name", div_obj).append(product.name);
         // price and unit
@@ -261,20 +263,19 @@ $(document).ready(function(){
         $(".product_category", div_obj).append("{% trans 'Category' %}: " + product.category);
         // tax
         $(".product_tax", div_obj).append(product.tax + "%");
-        
         // description
         $(".product_description", div_obj).append(product.description);
         // discount list
         tmp_obj = $(".product_discounts", div_obj);
         var li_obj;
-        for(i = 0; i < product.discounts.length; i++){
+        for(var key in product.discounts){
             li_obj = $("<li>");
             // code
-            li_obj.append(product.discounts[i].code);
+            li_obj.append(product.discounts[key].code);
             // amount
-            li_obj.append(" ("+product.discounts[i].amount);
+            li_obj.append(" ("+product.discounts[key].amount);
             // type
-            if(product.discounts[i].type == 'Percent') li_obj.append("%)");
+            if(product.discounts[key].type == 'Percent') li_obj.append("%)");
             else li_obj.append(")"); // TODO: currency symbol/code
             tmp_obj.append(li_obj);
         }
@@ -297,7 +298,7 @@ $(document).ready(function(){
         // edit button
         manage_obj = $(".product_management", div_obj); 
         $("input.product_edit_button", manage_obj).click(function(){
-        		show_product_edit_dialog(product);
+                show_product_edit_dialog(product);
         });
         
         // delete button
@@ -307,7 +308,47 @@ $(document).ready(function(){
     }
     
     function save_product(){
-    	todo
+        // get product's data from the dialog and send
+        // id
+        // price - numeric value
+        // unit type
+        // discounts - list of discount ids
+        // image - TODO
+        // category - id
+        // code
+        // shop code
+        // description
+        // private notes
+        // tax
+        // stock
+        
+        dlg_obj = $("#edit_dialog");
+        
+        data = {};
+        data['id'] = $("#edit_product_id", dlg_obj).val();
+        data['name'] = $("#edit_product_name", dlg_obj).val();
+        data['price'] = $("#edit_product_price", dlg_obj).val();
+        data['unit_type'] = $("#edit_unit_type :selected", dlg_obj).val();
+        // TODO: image
+        data['category'] = $("#edit_product_category", dlg_obj).val();
+        data['tax'] = $("#edit_product_tax", dlg_obj).val();
+        data['description'] = $("#edit_product_description", dlg_obj).val();
+        // discounts: get all <li> items and put them into an array
+        discounts = [];
+        $("ul#edit_discounts li", dlg_obj).each(function(){
+            id = $(this).data().id;
+            if(id) discounts.push(id); // the last entry is the listbox and button, don't add that
+        });
+        data['discounts'] = discounts;
+        data['private_notes'] = $("#edit_product_private_notes", dlg_obj).val();
+        data['stock'] = $("#edit_product_stock", dlg_obj).val();
+        data['shop_code'] = $("#edit_product_shop_code", dlg_obj).val();
+        data['code'] = $("#edit_product_code", dlg_obj).val();
+        
+        // send data to server; url is stored in div's data()
+        send_data(dlg_obj.data().edit_url, data, "{{csrf_token}}", function(response){
+        	alert(JSON.stringify(response))
+        });
     }
     
     ////////////////////
@@ -459,7 +500,6 @@ $(document).ready(function(){
     <table border="1"> <!-- TODO remove border -->
         <tr>
             <td colspan="2">
-                <p><input type="hidden" id="edit_product_id" />
                 <label for="edit_product_name">{% trans 'Name' %}</label> <input type="text" id="edit_product_name" /></p>
             </td>
             <td>{% comment %} price per unit {% endcomment %}
@@ -471,12 +511,12 @@ $(document).ready(function(){
             <td rowspan="3" class="product_image"><p>TODO: image</p></td> {% comment %} image spans over 3 rows {% endcomment %}
             {% comment %} list of categories {% endcomment %}
             <td><p><label for="edit_product_category">{% trans 'Category' %}</label>
-                <select id="edit_product_category" /></select></p></td>
+                <select id="edit_product_category"></select></p></td>
             <td><p><label for="edit_product_tax">{% trans 'Tax' %}</label> <input type="text" id="edit_product_tax" />%</p></td>
         </tr>
         <tr>
             <td><p><label for="edit_product_description">{% trans 'Description' %}</label></p>
-                <textarea id="edit_product_description" /></textarea></td>
+                <textarea id="edit_product_description"></textarea></td>
             <td>
                 {% comment %} discounts {% endcomment %}
                 <p>{% trans 'Discounts' %}</p>
@@ -485,7 +525,7 @@ $(document).ready(function(){
         </tr>
         <tr>
             <td><p>{% trans 'Private notes' %}:</p>
-                <textarea id="edit_product_private_notes" /></textarea>
+                <textarea id="edit_product_private_notes"></textarea>
             </td>
             <td><p><label for="edit_product_stock">{% trans 'Units left in stock' %}</label><input type="text" id="edit_product_stock" /></p></td>
         </tr>

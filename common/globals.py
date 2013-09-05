@@ -79,6 +79,30 @@ BILL_STATUS = (
     ("Canceled", _("Canceled")),
 )
 
+# date formats
+# specify all formats for each date:
+#  - regular expression for checking format
+#  - python's strftime format
+#  - django templates
+#  - jquery format string (for datepicker etc.)
+DATE_FORMATS = {
+    'dd.mm.yyyy':{'regex':"\d{1,2}\.\d{1,2}\.\d{4}", # with or without leading zeros
+                  'python':"%d.%m.%Y", # the docs say zero-padded decimal, but will also parse non-padded numbers
+                  'djago':"j.n.Y", # show no leading zeros in template
+                  'jquery':"dd.mm.yyyy",
+                  },
+    'mm/dd/yyyy':{'regex':"\d{1,2}\.\d{1,2}\.\d{4}", # with or without leading zeros
+                  'python':"%m/%d/%Y",
+                  'djago':"n/j/Y",
+                  'jquery':"mm/dd/yyyy",
+                  },
+    'yyyy-mm-dd':{'regex':"\d{4}\.\d{2}\.\d{2}", # strictly with leading zeros
+                  'python':"%Y-%m-%d",
+                  'djago':"Y-m-d",
+                  'jquery':"yyyy-mm-dd",
+                  },
+}
+
 # misc
 MISC = {
         'company_url_length':50,

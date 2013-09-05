@@ -1,4 +1,6 @@
 from django.contrib import admin
-from config.models import Country 
+from models import Config, Country 
 
-admin.site.register(Country) 
+admin.site.register(Config)
+admin.site.register(Country)
+ 

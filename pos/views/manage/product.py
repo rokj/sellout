@@ -38,7 +38,21 @@ def products(request, company):
     return render(request, 'pos/manage/products.html', context)
 
 def product_to_dict(p, company):
-    # returns all relevant product's data
+    # returns all relevant product's data:
+    # id
+    # price - numeric value
+    # unit type
+    # discounts - dictionary or all discounts for this product 
+    #    (see discounts.discount_to_dict for details)
+    # image - TODO
+    # category - name
+    # code
+    # shop code
+    # description
+    # private notes
+    # tax
+    # stock
+    # edit url
     ret = {}
     
     ret['id'] = p.id
@@ -86,7 +100,8 @@ def product_to_dict(p, company):
         ret['stock'] = p.stock
     
     # edit and delete urls
-    ret['edit_url'] = reverse('pos:edit_product', args=[company.url_name, p.id]) 
+    ret['edit_url'] = reverse('pos:edit_product', args=[company.url_name, p.id])
+    ret['delete_url'] = reverse('pos:delete_product', args=[company.url_name, p.id]) 
     
     return ret
 
@@ -207,3 +222,30 @@ def search_products(request, company):
 
     return JSON_response(ps);
 
+def create_product(request, company):
+    pass
+
+def edit_product(request, company, product_id):
+    # update existing product
+    
+    company = get_object_or_404(Company, url_name = company)
+    product = JSON_parse(request.POST['data'])
+    
+    # data format:
+    # id
+    # price - numeric value
+    # unit type
+    # discounts - list of discount ids
+    # image - TODO
+    # category - id
+    # code
+    # shop code
+    # description
+    # private notes
+    # tax
+    # stock
+    
+    # 
+    
+def delete_product(request, company, product_id):
+    pass

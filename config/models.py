@@ -2,10 +2,15 @@ from django.db import models
 from common.models import SkeletonU
 
 from django.utils.translation import ugettext as _
+from django.contrib.auth.models import User
 
 class Config(SkeletonU):
-    keyword = models.CharField(max_length=128, blank=False, null=False)
-    value = models.CharField(max_length=1024, blank=True, null=False)
+    user = models.ForeignKey(User)
+    # all settings are stored in json format
+    data = models.TextField(null=False)
+    
+    def __unicode__(self):
+        return str(self.user.id) + ":" + self.app
     
 class Country(models.Model):
     two_letter_code = models.CharField(max_length=2, null=False, primary_key=True)
@@ -18,7 +23,7 @@ class Country(models.Model):
     class Meta:
         verbose_name_plural = _("Countries")
     
-def fill_countries(): # will only be used once
+def fill_countries(): # will only be used once, after install
     from countries import country_list 
     for c in country_list:
         country = Country(

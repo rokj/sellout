@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils.translation import ugettext as _
-
 from django.db.models.signals import pre_save # image file cleanup signals
 from django.dispatch import receiver
 from config.models import Cleanup

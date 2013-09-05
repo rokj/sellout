@@ -39,24 +39,19 @@ urlpatterns = patterns('',
     url(r_company + _('/manage/discount/edit') + '/(?P<discount_id>\d+)/?$', manage.discount.edit_discount, name='edit_discount'),
     url(r_company + _('/manage/discount/delete') + '/(?P<discount_id>\d+)/?$', manage.discount.delete_discount, name='delete_discount'),
     # products
-    url(r_company + _('/manage/products') + '/?$', manage.product.products, name='products'),
+    url(r_company + _('/manage/products') + '/?$', manage.product.products, name='products'), # static (template) page
+    url(r_company + r'/manage/json/products/search/?$', manage.product.search_products, name='search_products'), # product list (search) - json
+    url(r_company + r'/manage/json/products/new/?$', manage.product.create_product, name='create_product'), # edit (save) product - json
+    url(r_company + r'/manage/json/products/edit/(?P<product_id>\d+)/?$', manage.product.edit_product, name='edit_product'), # edit (save) product - json
+    url(r_company + r'/manage/json/products/delete/(?P<product_id>\d+)/?$', manage.product.delete_product, name='delete_product'), # edit (save) product - json
     
-    # AJAX stuff: URLs NOT TRANSLATED
+    # misc (ajax): urls not translated
     # categories list
     url(r_company + r'/manage/json/categories/?$', manage.product.JSON_categories, name='JSON_categories'),
     # unit types list
     url(r_company + r'/manage/json/units/?$', manage.product.JSON_units, name='JSON_units'),
     # available discounts list
     url(r_company + r'/manage/json/discounts/?$', manage.product.JSON_discounts, name='JSON_discounts'),
-        
-    # product list (search)
-    url(r_company + r'/manage/json/products/?$', manage.product.search_products, name='search_products'),
-    # add new product
-    url(r_company + r'/manage/json/products/add/?$', manage.product.search_products, name='add_product'),
-    # edit (save) product
-    url(r_company + r'/manage/json/products/edit/(?P<product_id>\d+)/?$', manage.product.search_products, name='edit_product'),
-    
-    
     
     
 )
