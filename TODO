@@ -1,24 +1,26 @@
 - ! - tablet support
-- title/site title for all views
 - login_required & security etc.
-- datepicker for date inputs
+- DONE datepicker for date inputs
 - updated_by for update views
 - <[ CDATA for <javascript>
-- change underscores for HTML and CSS ids and classes to dashes 
+- change underscores for HTML and CSS ids and classes to dashes (django forms use underscores ?!)
 - show/hide animations (jquery)
-- base.html: remove unneeded jquery <script src=""> includes 
+- DONE base.html: remove unneeded jquery <script src=""> includes 
 - incompatibility warning/redirect for older browsers
+- DONE title/site title for all views
+- add {% spaceless %} to base.html (and all other 'bases')
 
 SECURITY:
  - login_required
  - check permissions for edit etc.
 
 CONFIGURATION VARIABLES:
- - no. of contacts per page
- - no. of discounts per page
- - currency ($ €, ...)
+ - DONE no. of contacts per page
+ - DONE no. of discounts per page
+ - DONE currency ($ €, ...)
  - default tax (?)
-
+ - DONE date format
+ 
 OPTIMIZE:
  	- sql queries or better getting of objects just with specific data
     - images embedded in JSON instead of doing a special request for each image

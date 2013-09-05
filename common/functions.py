@@ -1,7 +1,6 @@
 from django.db import connection
 import string
 from random import choice
-import os
 import globals as g
 
 def get_random_string(length=8, chars=string.letters + string.digits):

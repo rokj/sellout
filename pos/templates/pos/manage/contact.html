@@ -2,21 +2,28 @@
 {% load staticfiles %}
 {% load i18n %}
 
+{% comment %} add/edit contact form {% endcomment %}
+
 {% block head %}
 
 <script type="text/javascript">
 individual_fields = ["first_name", "last_name", "date_of_birth"];    
 company_fields = ["company_name", "vat"];
 
-function render_fields(fields, show){
-    for(var i = 0; i < fields.length; i++){
-        obj = $("#id_" + fields[i] + "_container");
-        if(show) obj.show();
-        else obj.hide();
-    }
-}
-
 $(document).ready(function(){
+    function render_fields(fields, show){
+        for(var i = 0; i < fields.length; i++){
+            obj = $("#id_" + fields[i] + "_container");
+            if(show) obj.show();
+            else obj.hide();
+        }
+    }
+
+    // use datepicker on all date inputs
+    $("#id_date_of_birth").datepicker({
+    	dateFormat:"{{ date_format_jquery }}"
+    });
+    
     $("#id_type").change(function(){
         // when the contact type listbox changes, hide and show relevant inputs
         if($("#id_type").val() == "Individual") individual = true;
@@ -36,7 +43,7 @@ $(document).ready(function(){
     
     // force the correct fields from start
     $("#id_type").change();
-})
+});
 
 </script>
 

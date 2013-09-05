@@ -7,15 +7,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from django.http import HttpResponse, Http404
+from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
 
-from pos.models import Company, Category, Contact, Discount, Product, Price
-from pos.views.util import error, JSON_response, JSON_parse, resize_image, validate_image
+from pos.models import Company, Contact
 from common import globals as g
-from common import unidecode
-from common.functions import get_random_string
+from config.functions import get_date_format
 
 ################
 ### contacts ###
@@ -83,6 +80,9 @@ def list_contacts(request, company):
         'contacts':contacts,
         'paginator':paginator,
         'filter_form':form,
+        'title':_("Contacts"),
+        'site_title':g.MISC['site_title'],
+        'date_format_django':get_date_format(request.user, 'django'),
     }
 
     return render(request, 'pos/manage/contacts.html', context) 
@@ -90,9 +90,15 @@ def list_contacts(request, company):
 def add_contact(request, company):
     # add a new contact
     company = get_object_or_404(Company, url_name=company)
-    context = {}
-    context['company'] = company.url_name
     
+    context = {
+        'add':True,
+        'company':company,
+        'title':_("Add contact"),
+        'site_title':g.MISC['site_title'],
+        'date_format_jquery':get_date_format(request.user, 'jquery')
+    }
+
     # check for permission for adding contacts
     if not request.user.has_perm('pos.add_contact'):
         return error(request, _("You have no permission to add contacts."))
@@ -116,8 +122,6 @@ def add_contact(request, company):
         form = ContactForm()
         
     context['form'] = form
-    context['company'] = company
-    context['add'] = True
     
     return render(request, 'pos/manage/contact.html', context)
 
@@ -125,11 +129,15 @@ def add_contact(request, company):
 def edit_contact(request, company, contact_id):
     # edit an existing contact
     company = get_object_or_404(Company, url_name=company)
-    context = {}
-    context['company'] = company
-    context['contact_id'] = contact_id
+    context = {
+        'company':company,
+        'contact_id':contact_id,
+        'title':_("Edit contact"),
+        'site_title':g.MISC['site_title'],
+        'date_format_jquery':get_date_format(request.user, 'jquery'),
+    }
     
-    # get contact id
+    # get contact
     contact = get_object_or_404(Contact, id=contact_id)
         
     # check if contact actually belongs to the given company

@@ -42,7 +42,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 import glob
 import os
-from settings import MEDIA_ROOT as mr
+from webpos.settings import MEDIA_ROOT as mr
 
 @receiver(post_save, sender=Cleanup)
 def my_handler(**kwargs):

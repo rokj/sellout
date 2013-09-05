@@ -7,15 +7,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from django.http import HttpResponse, Http404
+from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
 
-from pos.models import Company, Category, Contact, Discount, Product, Price
-from pos.views.util import error, JSON_response, JSON_parse, resize_image, validate_image
+from pos.models import Company, Discount
+from pos.views.util import error, JSON_response
 from common import globals as g
-from common import unidecode
-from common.functions import get_random_string
+from config.functions import get_date_format
 
 from datetime import date
 
@@ -143,14 +141,22 @@ def list_discounts(request, company):
         'discounts':discounts,
         'paginator':paginator,
         'filter_form':form,
+        'title':_("Discounts"),
+        'site_title':g.MISC['site_title'],
+        'date_format_django':get_date_format(request.user, 'django'),
+        'date_format_jquery':get_date_format(request.user, 'jquery'),
     }
 
     return render(request, 'pos/manage/discounts.html', context) 
 
 def add_discount(request, company):
     company = get_object_or_404(Company, url_name=company)
-    context = {}
-    context['company'] = company.url_name
+    context = {
+        'title':_("Add discount"),
+        'site_title':g.MISC['site_title'],
+        'company':company.url_name,
+        'date_format_jquery':get_date_format(request.user, 'jquery'),
+    }
     
     # check for permission for adding discounts
     if not request.user.has_perm('pos.add_discount'):
@@ -184,9 +190,11 @@ def add_discount(request, company):
 def edit_discount(request, company, discount_id):
     # edit an existing contact
     company = get_object_or_404(Company, url_name=company)
-    context = {}
-    context['company'] = company
-    context['discount_id'] = discount_id
+    context = {
+        'company':company,
+        'discount_id':discount_id,
+        'date_format_jquery':get_date_format(request.user, 'jquery'),
+    }
     
     discount = get_object_or_404(Discount, id=discount_id)
         

@@ -2,6 +2,16 @@
 {% load staticfiles %}
 {% load i18n %}
 
+{% block head %}
+<script type="text/javascript">
+$(document).ready(function(){
+	// append datepickers
+	$("#id_start_date, #id_end_date").datepicker({
+		dateFormat:"{{ date_format_jquery }}"
+	});
+});
+</script>
+{% endblock %}
 
 {% block manage_content %}
 
@@ -17,10 +27,11 @@
 
 {% for d in discounts %}
     <p>{{ d.code }}</p>
-    <p>{{ d.description }}
-    <a href="{% url 'pos:edit_discount' company.url_name d.id %}">{% trans 'Edit' %}</a>
-    <a href="{% url 'pos:delete_discount' company.url_name d.id  %}">{% trans 'Delete' %}</a>
-    </p>
+    <p>{{ d.description }}</p>
+    <p>{% trans 'Starts' %}: {{ d.start_date|date:date_format_django }}</p>
+    <p>{% trans 'Ends' %}: {{ d.end_date|date:date_format_django }}</p>
+    <p><a href="{% url 'pos:edit_discount' company.url_name d.id %}">{% trans 'Edit' %}</a>
+    <a href="{% url 'pos:delete_discount' company.url_name d.id  %}">{% trans 'Delete' %}</a></p>
 {% endfor %}
 
 {% comment %} paginator pages {% endcomment %}

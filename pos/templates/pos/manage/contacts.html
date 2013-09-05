@@ -25,7 +25,7 @@
         {% if c.street_address and c.postcode %}<br />{% endif %} {{ c.country }}</p>
         <p>{% trans 'E-mail' %}: <a href="mailto:{{ c.email }}">{{ c.email }}</a></p>
         <p>{% trans 'Phone' %}: {{ c.phone }}</p>
-        <p>{% trans 'Birth date' %}: 
+        <p>{% trans 'Birth date' %}: {{ c.date_of_birth|date:date_format_django }}</p>
     {% else %}
         <p>{% trans 'Company' %}</p>
         <p>{{ c.company_name }}</p>

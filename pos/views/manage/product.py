@@ -32,9 +32,10 @@ def products(request, company):
     company = get_object_or_404(Company, url_name = company)
     
     context = {
-               'company':company, 
-               # TODO add title & site title
-               }
+        'company':company, 
+        'title':_("Products"),
+        'site_title':g.MISC['site_title'],
+    }
     return render(request, 'pos/manage/products.html', context)
 
 def product_to_dict(p, company):

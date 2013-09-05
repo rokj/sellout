@@ -207,6 +207,8 @@ def register_company(request):
        'form':form,
        'pos_url':pos_url,
        'logo_dimensions':g.IMAGE_DIMENSIONS['logo'],
+       'title':_("Registration"),
+       'site_title':g.MISC['site_title'],
     }
 
     return render(request, 'pos/manage/register.html', context)
@@ -240,5 +242,7 @@ def edit_company(request, company):
     context['form'] = form
     context['company'] = c
     context['logo_dimensions'] = g.IMAGE_DIMENSIONS['logo']
+    context['title'] = _("Company details")
+    context['site_title'] = g.MISC['site_title']
     
     return render(request, 'pos/manage/company.html', context)

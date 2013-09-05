@@ -6,6 +6,10 @@
 
 <script type="text/javascript">
 $(document).ready(function(){
+	// append datepicker to form ids:
+	$("#id_start_date, #id_end_date").datepicker({
+		dateFormat:"{{ date_format_jquery }}"
+	});
 });
 
 </script>

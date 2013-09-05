@@ -13,6 +13,7 @@ from django.http import HttpResponse, Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from pos.models import Company
+import common.globals as g
 
 ###################
 ### manage home ###
@@ -21,7 +22,9 @@ def manage_home(request, company):
     company = get_object_or_404(Company, url_name=company)
     
     context = {
-               'company':company,
-               }
+        'title':_("Management"),
+        'site_title':g.MISC['site_title'],
+        'company':company,
+    }
     
     return render(request, 'pos/manage/manage.html', context)

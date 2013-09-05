@@ -13,5 +13,5 @@ from django.http import HttpResponse
 ### index
 def terminal(request, company):
     c = get_object_or_404(Company, url_name=company)
-    
+    # TODO: site_title! (?)
     return render(request, 'pos/terminal.html', {'company':c})

@@ -88,18 +88,18 @@ BILL_STATUS = (
 DATE_FORMATS = {
     'dd.mm.yyyy':{'regex':"\d{1,2}\.\d{1,2}\.\d{4}", # with or without leading zeros
                   'python':"%d.%m.%Y", # the docs say zero-padded decimal, but will also parse non-padded numbers
-                  'djago':"j.n.Y", # show no leading zeros in template
-                  'jquery':"dd.mm.yyyy",
+                  'django':"j.n.Y", # show no leading zeros in template
+                  'jquery':"dd.mm.yy",
                   },
     'mm/dd/yyyy':{'regex':"\d{1,2}\.\d{1,2}\.\d{4}", # with or without leading zeros
                   'python':"%m/%d/%Y",
-                  'djago':"n/j/Y",
-                  'jquery':"mm/dd/yyyy",
+                  'django':"n/j/Y",
+                  'jquery':"mm/dd/yy",
                   },
     'yyyy-mm-dd':{'regex':"\d{4}\.\d{2}\.\d{2}", # strictly with leading zeros
                   'python':"%Y-%m-%d",
-                  'djago':"Y-m-d",
-                  'jquery':"yyyy-mm-dd",
+                  'django':"Y-m-d",
+                  'jquery':"yy-mm-dd",
                   },
 }
 

@@ -102,9 +102,11 @@ class CategoryForm(forms.ModelForm):
 def list_categories(request, company):
     company = get_object_or_404(Company, url_name=company)
     context = {
-               'company':company,
-               'categories':get_all_categories(company.id, data=[]),
-               }
+        'company':company,
+        'categories':get_all_categories(company.id, data=[]),
+        'title':_("Categories"),
+        'site_title':g.MISC['site_title'],
+    }
     
     return render(request, 'pos/manage/categories.html', context)
 
@@ -124,11 +126,14 @@ def add_category(request, company, parent_id=-1):
     if not request.user.has_perm('pos.add_category'):
         return error(request, _("You have no permission to add categories."))
     
-    context = {'company':company,
-               'parent_id':parent_id,
-               'add':True,
-               'image_dimensions':g.IMAGE_DIMENSIONS['category'],
-               }
+    context = {
+        'company':company,
+        'parent_id':parent_id,
+        'add':True,
+        'image_dimensions':g.IMAGE_DIMENSIONS['category'],
+        'title':_("Add category"),
+        'site_title':g.MISC['site_title']
+    }
     
     if request.method == 'POST':
         # submit data
@@ -197,6 +202,8 @@ def edit_category(request, company, category_id):
     context['company'] = company
     context['category'] = category
     context['image_dimensions'] = g.IMAGE_DIMENSIONS['category']
+    context['title'] = _("Edit category")
+    context['site_title'] = g.MISC['site_title']
     
     return render(request, 'pos/manage/category.html', context)
 
