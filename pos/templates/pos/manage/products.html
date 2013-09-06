@@ -57,7 +57,10 @@ $(document).ready(function(){
         
         var i;
         for(i=0; i<data.length; i++){
-            render_product(data[i]);
+        	// TODO
+            div_obj = $("#product_details_template").clone();
+            div_obj.removeAttr("id");
+            render_product(div_obj, data[i]);
         }
     }
     
@@ -232,7 +235,7 @@ $(document).ready(function(){
         });
     }
     
-    function render_product(product){
+    function render_product(parent, product){
         var tmp_obj, i;
         
         // product details include:
@@ -244,8 +247,10 @@ $(document).ready(function(){
         // shop_code | code 
         
         // copy the product details template div and update values
-        div_obj = $("#product_details_template").clone();
-        div_obj.removeAttr("id");
+        //div_obj = $("#product_details_template").clone();
+        //div_obj.removeAttr("id");
+        // TODO
+        div_obj = parent;
         
         // add product data to data()
         div_obj.data(product);
@@ -347,7 +352,10 @@ $(document).ready(function(){
         
         // send data to server; url is stored in div's data()
         send_data(dlg_obj.data().edit_url, data, "{{csrf_token}}", function(response){
-        	alert(JSON.stringify(response))
+        	if(response.status != 'ok') alert(response.message);
+        	else{
+        		// close the dialog and redraw product div
+        	}
         });
     }
     

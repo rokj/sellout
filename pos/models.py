@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext as _
 from django.db.models.signals import pre_save # image file cleanup signals
+from django.contrib.auth.models import User
 from django.dispatch import receiver
 from config.models import Cleanup
 
@@ -9,9 +10,11 @@ from common.functions import get_image_path
 import common.globals as g
 
 from config.models import Country
+from config.functions import get_value
 
-from datetime import datetime
+import datetime as dtm
 import json
+import pytz
 
 ### company ###
 class Company(SkeletonU):
@@ -111,9 +114,12 @@ class ProductAbstract(SkeletonU):
 class Product(ProductAbstract):
     # foreign keys, changed data in Company/Discount/... will be reflected in Product and BillItem
     company = models.ForeignKey(Company, null=False, blank=False)
-    discount = models.ManyToManyField(Discount, null=True, blank=True)
+    discounts = models.ManyToManyField(Discount, null=True, blank=True)
     category = models.ForeignKey(Category, null=True, blank=True)
-    stock = models.IntegerField(_("Number of items left in stock"), null=True, blank=True)
+    stock = models.DecimalField(_("Number of items left in stock"),
+        max_digits=g.DECIMAL['quantity_digits'],
+        decimal_places=g.DECIMAL['quantity_decimal_places'],
+        null=False, blank=False)
     image = models.ImageField(_("Icon"),
                              upload_to=get_image_path(g.DIRS['product_icon_dir'], "pos_productimage"),
                              null=True, blank=True)
@@ -122,6 +128,26 @@ class Product(ProductAbstract):
     def __unicode__(self):
         return self.name
     
+    def update_price(self, user, new_price):
+        """ set a new price for product """
+        # change the old price's date_updated to now() (if it exists)
+        # and insert a new price withour date
+        try:
+            old_price = Price.objects.get(product = self, date_updated=None)
+            old_price.date_updated = dtm.datetime.now() \
+                .replace(tzinfo=pytz.timezone(get_value(user, 'pos_timezone')))
+            old_price.save()
+        except Price.DoesNotExist:
+            old_price = None
+            
+        if new_price == old_price:
+            return
+        
+        new_price = Price(created_by = user,
+            product = self,
+            unit_price = new_price)
+        new_price.save()
+
     class Meta:
         abstract = False
 
@@ -145,20 +171,21 @@ class Price(SkeletonU):
 
         return ret
     
-    def save(self, plain_save=False):
-        """ if the price has changed, set the old one's date and write a new entry """
-        """ also save if there's no need for any of the below logic """
-        if self.pk is None or plain_save is True:
-            super(Price, self).save()
-        else:
-            # find the last price of product
-            last_price = Price.objects.get(id=self.id)
-            last_price.date_updated = datetime.now()
-            last_price.save(plain_save = True)
-            
-            new_price = Price(created_by = last_price.created_by, 
-                              product = self.product, unit_price = self.unit_price)
-            new_price.save(plain_save = True)
+    # replaced by product.update_price() method
+    #def save(self, plain_save=False):
+    #    """ if the price has changed, set the old one's date and write a new entry """
+    #    """ also save if there's no need for any of the below logic """
+    #    if self.pk is None or plain_save is True:
+    #        super(Price, self).save()
+    #    else:
+    #        # find the last price of product
+    #        last_price = Price.objects.get(id=self.id)
+    #        last_price.date_updated = dtm.datetime.now()
+    #        last_price.save(plain_save = True)
+    #        
+    #        new_price = Price(created_by = last_price.created_by, 
+    #                          product = self.product, unit_price = self.unit_price)
+    #        new_price.save(plain_save = True)
             
 ### contacts ###
 class Contact(SkeletonU):
@@ -189,6 +216,12 @@ class ContactAttribute(SkeletonU):
     
     def __unicode(self):
         return str(self.contact) + ": " + self.attribute_name + " = " + self.attribute_value
+
+### permissions
+class Permission(SkeletonU):
+    user = models.ForeignKey(User)
+    company = models.ForeignKey(Company)
+    ### TODO ###
 
 ### bills ###
 class Bill(SkeletonU):

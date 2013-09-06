@@ -8,7 +8,7 @@
 - DONE base.html: remove unneeded jquery <script src=""> includes 
 - incompatibility warning/redirect for older browsers
 - DONE title/site title for all views
-- add {% spaceless %} to base.html (and all other 'bases')
+- add {% spaceless %} to base.html (and all other 'bases') and compress javascript (?)
 
 SECURITY:
  - login_required

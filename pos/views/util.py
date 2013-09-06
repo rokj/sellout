@@ -24,6 +24,12 @@ def JSON_stringify(data):
 def JSON_response(data):
     return HttpResponse(JSON_stringify(data), mimetype="application/json")
 
+def JSON_error(message):
+    return JSON_response({'status':'error', 'message':message})
+
+def JSON_ok():
+    return JSON_response({'status':'ok'})
+
 def JSON_parse(string_data):
     return json.loads(string_data)
 

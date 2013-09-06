@@ -9,16 +9,16 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
 
-from pos.models import Company, Discount, Product, Price
-from pos.views.util import error, JSON_response, JSON_parse, resize_image, validate_image
+from pos.models import Company, Category, Discount, Product, Price
+from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok
 
 from pos.views.manage.category import get_all_categories, JSON_categories
 from pos.views.manage.discount import is_discount_valid, discount_to_dict, JSON_discounts
 
 from common import globals as g
 
-from decimal import Decimal
-from datetime import date
+import datetime as dtm
+import decimal as d
 
 
 ###############
@@ -38,7 +38,7 @@ def products(request, company):
     }
     return render(request, 'pos/manage/products.html', context)
 
-def product_to_dict(p, company):
+def product_to_dict(p):
     # returns all relevant product's data:
     # id
     # price - numeric value
@@ -69,7 +69,7 @@ def product_to_dict(p, company):
     
     # all discounts in a list
     discounts = {}
-    for d in p.discount.all():
+    for d in p.discounts.all():
         discounts[str(d.id)] = discount_to_dict(d)
 
     ret['discounts'] = discounts
@@ -98,14 +98,21 @@ def product_to_dict(p, company):
     if p.tax:
         ret['tax'] = str(p.tax)
     if p.stock:
-        ret['stock'] = p.stock
+        ret['stock'] = str(p.stock)
     
     # edit and delete urls
-    ret['edit_url'] = reverse('pos:edit_product', args=[company.url_name, p.id])
-    ret['delete_url'] = reverse('pos:delete_product', args=[company.url_name, p.id]) 
+    ret['get_url'] = reverse('pos:get_product', args=[p.company.url_name, p.id])
+    ret['edit_url'] = reverse('pos:edit_product', args=[p.company.url_name, p.id])
+    ret['delete_url'] = reverse('pos:delete_product', args=[p.company.url_name, p.id]) 
     
     return ret
 
+def show_product(request, company, product_id):
+    company = get_object_or_404(Company, url_name = company)
+    product = get_object_or_404(Product, id = product_id, company = company)
+    
+    return JSON_response(product_to_dict(product))
+    
 def search_products(request, company):
     company = get_object_or_404(Company, url_name = company)
     
@@ -160,7 +167,7 @@ def search_products(request, company):
     # tax_filter
     if criteria.get('tax_filter'):
         #filter_by_tax = True
-        products = products.filter(tax = Decimal(criteria.get('tax_filter')))
+        products = products.filter(tax = d.Decimal(criteria.get('tax_filter')))
     else:
         pass
         #filter_by_tax = False
@@ -168,7 +175,7 @@ def search_products(request, company):
     # price_filter
     if criteria.get('price_filter'):
         try:
-            products = products.filter(pk__in=Price.objects.filter(unit_price=Decimal(criteria.get('price_filter'))).order_by('-date_updated')[:1])
+            products = products.filter(pk__in=Price.objects.filter(unit_price=d.Decimal(criteria.get('price_filter'))).order_by('-date_updated')[:1])
             #filter_by_price = True
         except Price.DoesNotExist:
             pass
@@ -219,22 +226,14 @@ def search_products(request, company):
     # return serialized products
     ps = []
     for p in products:
-        ps.append(product_to_dict(p, company))
+        ps.append(product_to_dict(p))
 
     return JSON_response(ps);
 
-def create_product(request, company):
-    pass
-
-def edit_product(request, company, product_id):
-    # update existing product
-    
-    company = get_object_or_404(Company, url_name = company)
-    product = JSON_parse(request.POST['data'])
-    
-    # data format:
+def validate_product(data):
+    # data format (*-validation needed):
     # id
-    # price - numeric value
+    # price - numeric value*
     # unit type
     # discounts - list of discount ids
     # image - TODO
@@ -243,10 +242,106 @@ def edit_product(request, company, product_id):
     # shop code
     # description
     # private notes
-    # tax
-    # stock
+    # tax*
+    # stock*
+    def r(status, msg):
+        return {'status':status,
+            'data':data,
+            'message':msg}
+
+    # return:
+    # {status:true/false - if cleaning succeeded
+    #  data:cleaned_data - empty dict if status = false
+    #  message:error_message - empty if status = true
     
-    # 
+    # price
+    try:
+        data['price'] = d.Decimal(data['price'])
+    except:
+        return r(False, _("Check price notation"))
+        
+    # unit type (probably doesn't need checking
+    if not data['unit_type'] in dict(g.UNITS):
+        return r(False, _("Invalid unit type"))
+
+    # image: todo
     
+    # code, shop code, description, notes - anything can be entered
+    try:
+        data['tax'] = d.Decimal(data['tax'])
+    except:
+        return r(False, _("Check tax notation"))
+    
+    try:
+        data['stock'] = d.Decimal(data['stock'])
+    except:
+        return r(False, _("Check stock notation"))
+    
+    return {'status':True, 'data':data} 
+    
+def create_product(request, company):
+    pass
+
+def edit_product(request, company, product_id):
+    # update existing product
+    company = get_object_or_404(Company, url_name = company)
+    data = JSON_parse(request.POST['data'])
+    
+    # see if product exists in database
+    try:
+        product = Product.objects.get(id=product_id)
+    except:
+        return JSON_error(_("Product does not exist"))
+    
+    # TODO: check for permissions
+    
+    # check if format is OK
+    valid = validate_product(data)
+    if not valid['status']:
+        return JSON_error(valid['message'])
+    data = valid['data']
+    
+    # update product
+    product.price = data['price']
+    product.unit_type = data['unit_type']
+
+    # update discounts: remove deleted
+    discounts = product.discounts.all();
+    for d in discounts:
+        if d.id not in data['discounts']:
+            product.discounts.remove(d)
+        else:
+            data['discounts'].remove(d.id)
+
+    # update discounts: add missing
+    # anything that is left in data['discounts'] must be added
+    for d in data['discounts']:
+        try:
+            discount = Discount.objects.get(id=int(d))
+            product.discounts.add(discount)
+        except Discount.DoesNotExist:
+            pass
+
+    # TODO: image
+    try:
+        category = Category.objects.get(id=data['category'])
+        product.category = category
+    except Category.DoesNotExist:
+        pass # do not change product's category
+
+    product.code = data['code']
+    product.shop_code = data['shop_code']
+    product.description = data['description']
+    product.private_notes = data['private_notes']
+    product.stock = data['stock']
+    product.tax = data['tax']
+    
+    product.save()
+    
+    # price has to be updated separately
+    product.update_price(request.user, data['price'])
+
+    return JSON_ok();
+
 def delete_product(request, company, product_id):
     pass

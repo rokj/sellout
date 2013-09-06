@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 # (this is used for shell, which defaults to ASCII if not specified)
+from models import Country
 
 country_list = (
     ("Afghanistan", "AF", "AFG"),
@@ -251,3 +252,13 @@ country_list = (
     ("Yemen", "YE", "YEM"),
     ("Zambia", "ZM", "ZMB"),
     ("Zimbabwe", "ZW", "ZWE"))
+
+def fill_countries():
+    """ fills the countries table;
+        data is in countries.py;
+        must be called from the shell after syncdb """
+    for c in country_list:
+        country = Country(two_letter_code = c[1],
+                          three_letter_code = c[2],
+                          name = c[0])
+        country.save()

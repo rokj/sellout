@@ -152,8 +152,11 @@ class CompanyForm(forms.ModelForm):
     def clean_url_name(self):
         url_name = self.cleaned_data['url_name']
         
-        # if there was no change made, don't check
-        initial_url_name = self.initial['url_name']
+        if 'url_name' in  self.initial:
+            initial_url_name = self.initial['url_name']
+        else:
+            initial_url_name = ""
+            
         if url_name == initial_url_name:
             return url_name
         

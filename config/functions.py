@@ -21,6 +21,7 @@ import json
 
 defaults = {
     'pos_date_format':'yyyy-mm-dd', # keys for DATE_FORMATS dictionary in globals
+    'pos_timezone':'utc', # keywords for pytz timezones
     'pos_currency':"$",
     'pos_contacts_per_page':10,
     'pos_discounts_per_page':10,
@@ -94,19 +95,3 @@ def set_value(user, key, value):
     data = get_config(user)
     data[key] = value
     save_config(user) # memcache is handled in save_cofig
-
-###########################
-### various other stuff ###
-###########################
-def fill_countries():
-    """ fills the countries table;
-        data is in countries.py;
-        must be called from the shell after syncdb """
-    from config.countries import country_list
-    from config.models import Country
-    
-    for c in country_list:
-        country = Country(two_letter_code = c[1],
-                          three_letter_code = c[2],
-                          name = c[0])
-        country.save()
