@@ -70,7 +70,7 @@ def get_config(user):
     if not data:
         data = load_config(user)
         cache.set(ckey, data)
-
+    
     return data
 
 def get_value(user, key):
@@ -88,12 +88,14 @@ def get_value(user, key):
         else:
             return "<invalid key: '" + "':'" + key + "'>"
 
-# shortcuts: date
-def get_date_format(user, variant):
-    """ returns g.DATE_FORMATS[user's date format][variant] """
-    return g.DATE_FORMATS[get_value(user, 'pos_date_format')][variant]
-
 def set_value(user, key, value):
     data = get_config(user)
     data[key] = value
     save_config(user) # memcache is handled in save_cofig
+
+# shortcuts: date format
+def get_date_format(user, variant):
+    """ returns g.DATE_FORMATS[user's date format][variant]
+        variant is one of 'python', 'django', 'jquery'
+    """
+    return g.DATE_FORMATS[get_value(user, 'pos_date_format')][variant]
