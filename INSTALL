@@ -1,0 +1,3 @@
+REQUIREMENTS:
+ - unidecode (unicode to ascii module)
+ - pytz (time zone collection)

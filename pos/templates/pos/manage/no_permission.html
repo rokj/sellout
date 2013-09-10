@@ -1,0 +1,9 @@
+{% extends "pos/manage/manage.html" %}
+{% load staticfiles %}
+{% load thumbnail %}
+{% load i18n %}
+
+{% block manage_content %}
+
+<p>{% trans 'You have no permission to' %} {{ action }}.</p>
+{% endblock %}
