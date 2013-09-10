@@ -11,7 +11,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 
 from pos.models import Company, Category, Contact, Discount, Product, Price
-from pos.views.util import error, JSON_response, JSON_parse, resize_image, validate_image
+from pos.views.util import error, JSON_response, JSON_parse, \
+                           resize_image, validate_image, has_permission, \
+                           no_permission_view
 from common import globals as g
 from common import unidecode
 from common.functions import get_random_string
@@ -184,6 +186,8 @@ class CompanyForm(forms.ModelForm):
 
 # registration
 def register_company(request):
+    # permissions: anybody can register a company
+    
     # show CompanyForm, empty
     if request.method == 'POST':
         # submit data
@@ -222,9 +226,10 @@ def edit_company(request, company):
     c = get_object_or_404(Company, url_name = company)
         
     # check if the user has permission to change it
-    if not request.user.has_perm('pos.change_company'):
-        return error(request, _("You have no permission to edit company details."))
-
+    # only admins can change company details
+    if not has_permission(request.user, c, 100):
+        return no_permission_view(request, c, _("edit company details"))
+    
     context = {}
     
     if request.method == 'POST':

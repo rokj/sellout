@@ -13,6 +13,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from pos.models import Company, Contact
 from common import globals as g
 from config.functions import get_date_format
+from pos.views.util import error, has_permission, no_permission_view
 
 ################
 ### contacts ###
@@ -39,9 +40,13 @@ class ContactFilterForm(forms.Form):
     name = forms.CharField(required=False)
 
 def list_contacts(request, company):
-    company = get_object_or_404(Company, url_name=company)
+    c = get_object_or_404(Company, url_name=company)
     
-    contacts = Contact.objects.filter(company__id=company.id)
+    # check permissions: needs to be guest
+    if not has_permission(request.user, c, 1):
+        return no_permission_view(request, c, _("view contacts"))
+    
+    contacts = Contact.objects.filter(company__id=c.id)
     
     # show the filter form
     if request.method == 'POST':
@@ -76,7 +81,7 @@ def list_contacts(request, company):
         contacts = paginator.page(paginator.num_pages)
 
     context = {
-        'company':company,
+        'company':c,
         'contacts':contacts,
         'paginator':paginator,
         'filter_form':form,
@@ -89,19 +94,19 @@ def list_contacts(request, company):
 
 def add_contact(request, company):
     # add a new contact
-    company = get_object_or_404(Company, url_name=company)
+    c = get_object_or_404(Company, url_name=company)
+    
+    # check permissions: needs to be manager
+    if not has_permission(request.user, c, 50):
+        return no_permission_view(request, c, _("add contacts"))
     
     context = {
         'add':True,
-        'company':company,
+        'company':c,
         'title':_("Add contact"),
         'site_title':g.MISC['site_title'],
         'date_format_jquery':get_date_format(request.user, 'jquery')
     }
-
-    # check for permission for adding contacts
-    if not request.user.has_perm('pos.add_contact'):
-        return error(request, _("You have no permission to add contacts."))
 
     if request.method == 'POST':
         # submit data
@@ -113,11 +118,11 @@ def add_contact(request, company):
             if 'created_by' not in form.cleaned_data:
                 contact.created_by = request.user
             if 'company_id' not in form.cleaned_data:
-                contact.company_id = company.id
+                contact.company_id = c.id
         
             form.save()
             
-            return redirect('pos:list_contacts', company=company.url_name)
+            return redirect('pos:list_contacts', company=c.url_name)
     else:
         form = ContactForm()
         
@@ -128,9 +133,14 @@ def add_contact(request, company):
 
 def edit_contact(request, company, contact_id):
     # edit an existing contact
-    company = get_object_or_404(Company, url_name=company)
+    c = get_object_or_404(Company, url_name=company)
+    
+    # check permissions: needs to be guest
+    if not has_permission(request.user, c, 50):
+        return no_permission_view(request, c, _("edit contacts"))
+    
     context = {
-        'company':company,
+        'company':c,
         'contact_id':contact_id,
         'title':_("Edit contact"),
         'site_title':g.MISC['site_title'],
@@ -141,13 +151,9 @@ def edit_contact(request, company, contact_id):
     contact = get_object_or_404(Contact, id=contact_id)
         
     # check if contact actually belongs to the given company
-    if contact.company != company:
+    if contact.company != c:
         raise Http404
         
-        # check if user has permissions to change contacts
-        if not request.user.has_perm('pos.change_contact'):
-            return error(request, _("You have no permission to edit contacts."))
-
     if request.method == 'POST':
         # submit data
         form = ContactForm(request.POST, instance=contact)
@@ -158,11 +164,11 @@ def edit_contact(request, company, contact_id):
             if 'created_by' not in form.cleaned_data:
                 contact.created_by = request.user
             if 'company_id' not in form.cleaned_data:
-                contact.company_id = company.id
+                contact.company_id = c.id
         
             form.save()
             
-            return redirect('pos:list_contacts', company=company.url_name)
+            return redirect('pos:list_contacts', company=c.url_name)
     else:
         form = ContactForm(instance=contact)
         
@@ -171,15 +177,17 @@ def edit_contact(request, company, contact_id):
     return render(request, 'pos/manage/contact.html', context)
 
 def delete_contact(request, company, contact_id):
-    company = get_object_or_404(Company, url_name=company)
+    c = get_object_or_404(Company, url_name=company)
+    
+    # check permissions: needs to be manager
+    if not has_permission(request.user, c, 50):
+        return no_permission_view(request, c, _("delete contacts"))
+    
     contact = get_object_or_404(Contact, id=contact_id)
     
-    if contact.company != company:
+    if contact.company != c:
         raise Http404
-    
-    if not request.user.has_perm('pos.delete_contact'):
-        return error(_("You have no permission to delete contacts."))
-    
+
     contact.delete()
     
-    return redirect('pos:list_contacts', company=company.url_name)
+    return redirect('pos:list_contacts', company=c.url_name)

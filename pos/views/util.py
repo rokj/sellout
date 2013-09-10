@@ -1,14 +1,14 @@
 from django.shortcuts import render
 from django.forms import ValidationError
 from django.utils.translation import ugettext as _
-
-from common import globals as g 
-
-
+from django.core.cache import cache
 from django.http import HttpResponse
+
+from common import globals as g
+from pos.models import Permission
+
 import json
 import Image # PIL or pillow must be installed
-import re
 
 # requests and responses
 def error(request, message):
@@ -59,3 +59,47 @@ def validate_image(obj): # obj is actually "self"
         pass
     
     return image
+
+# number output: show only non-zero decimal places
+def format_number(n):
+    """ returns string with decimal number n,
+        without trailing or leading zeros
+    """
+    # strip zeros and if there was no decimal places, also strip the dot
+    return str(n).strip('0').strip('.')
+    
+# permissions: cached
+def permission_cache_key(user, company):
+        return "permission_" + str(user.id) + "_" + str(company.id)
+
+def has_permission(user, company, required_level):
+    """ returns True if the user has the required permissions for the given company
+        and False otherwise """
+        
+    ckey = permission_cache_key(user, company)
+    permission = cache.get(ckey)
+    
+    if not permission:
+        try:
+            permission = Permission.objects.get(user__id=user.id)
+            cache.set(ckey, permission)
+        except Permission.DoesNotExist:
+            # no, user hasn't got it
+            return False
+     
+    if permission.permission >= required_level:
+        return True
+    else:
+        return False
+
+def no_permission_view(request, company, action):
+    """ the view that is called if user attempts to do shady business without permission """
+    
+    context = {
+        'title':_("Company details"),
+        'site_title':g.MISC['site_title'],
+        'company':company, # required for the 'manage' template: links need company parameter
+        'action':action,
+    }
+    
+    return render(request, 'pos/manage/no_permission.html', context)

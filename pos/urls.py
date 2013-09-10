@@ -41,8 +41,8 @@ urlpatterns = patterns('',
     # products
     url(r_company + _('/manage/products') + '/?$', manage.product.products, name='products'), # static (template) page
     url(r_company + r'/manage/json/products/search/?$', manage.product.search_products, name='search_products'), # product list (search) - json
-    url(r_company + r'/manage/json/products/new/?$', manage.product.create_product, name='create_product'), # edit (save) product - json
-    url(r_company + r'/manage/json/products/get/(?P<product_id>/d+)/?$', manage.product.show_product, name='show_product'), # product list (search) - json
+    url(r_company + r'/manage/json/products/add/?$', manage.product.create_product, name='create_product'), # edit (save) product - json
+    url(r_company + r'/manage/json/products/get/(?P<product_id>\d+)/?$', manage.product.get_product, name='get_product'), # product list (search) - json
     url(r_company + r'/manage/json/products/edit/(?P<product_id>\d+)/?$', manage.product.edit_product, name='edit_product'), # edit (save) product - json
     url(r_company + r'/manage/json/products/delete/(?P<product_id>\d+)/?$', manage.product.delete_product, name='delete_product'), # edit (save) product - json
     # config

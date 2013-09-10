@@ -1,3 +1,5 @@
+# coding=UTF-8
+
 # 2013-09-04, nejc
 # config's settings manipulation:
 """

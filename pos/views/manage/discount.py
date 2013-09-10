@@ -11,7 +11,8 @@ from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from pos.models import Company, Discount
-from pos.views.util import error, JSON_response
+from pos.views.util import error, JSON_response, has_permission, no_permission_view,\
+                           format_number
 from common import globals as g
 from config.functions import get_date_format
 
@@ -42,7 +43,7 @@ def discount_to_dict(d):
         'description':d.description,
         'code':d.code,
         'type':d.type,
-        'amount':str(d.amount),
+        'amount':format_number(d.amount),
         #'start_date':d.start_date, # TODO: format date
         #'end_date':d.end_date,
         'active':d.active,
@@ -93,9 +94,13 @@ class DiscountFilterForm(forms.Form):
     active = forms.NullBooleanField(required=False)
 
 def list_discounts(request, company):
-    company = get_object_or_404(Company, url_name=company)
+    c = get_object_or_404(Company, url_name=company)
     
-    discounts = Discount.objects.filter(company__id=company.id)
+    # check permissions: needs to be guest
+    if not has_permission(request.user, c, 1):
+        return no_permission_view(request, c, _("view discounts"))
+    
+    discounts = Discount.objects.filter(company__id=c.id)
     
     # show the filter form
     if request.method == 'POST':
@@ -137,7 +142,7 @@ def list_discounts(request, company):
         discounts = paginator.page(paginator.num_pages)
 
     context = {
-        'company':company,
+        'company':c,
         'discounts':discounts,
         'paginator':paginator,
         'filter_form':form,
@@ -150,11 +155,16 @@ def list_discounts(request, company):
     return render(request, 'pos/manage/discounts.html', context) 
 
 def add_discount(request, company):
-    company = get_object_or_404(Company, url_name=company)
+    c = get_object_or_404(Company, url_name=company)
+    
+    # check permissions: needs to be at least manager
+    if not has_permission(request.user, c, 50):
+        return no_permission_view(request, c, _("add discounts"))
+    
     context = {
         'title':_("Add discount"),
         'site_title':g.MISC['site_title'],
-        'company':company.url_name,
+        'company':c,
         'date_format_jquery':get_date_format(request.user, 'jquery'),
     }
     
@@ -172,11 +182,11 @@ def add_discount(request, company):
             if 'created_by' not in form.cleaned_data:
                 contact.created_by = request.user
             if 'company_id' not in form.cleaned_data:
-                contact.company_id = company.id
+                contact.company_id = c.id
         
             form.save()
             
-            return redirect('pos:list_discounts', company=company.url_name)
+            return redirect('pos:list_discounts', company=c.url_name)
     else:
         form = DiscountForm()
         
@@ -189,9 +199,14 @@ def add_discount(request, company):
 
 def edit_discount(request, company, discount_id):
     # edit an existing contact
-    company = get_object_or_404(Company, url_name=company)
+    c = get_object_or_404(Company, url_name=company)
+    
+    # check permissions: needs to be at least manager
+    if not has_permission(request.user, c, 50):
+        return no_permission_view(request, c, _("edit discounts"))
+    
     context = {
-        'company':company,
+        'company':c,
         'discount_id':discount_id,
         'date_format_jquery':get_date_format(request.user, 'jquery'),
     }
@@ -199,7 +214,7 @@ def edit_discount(request, company, discount_id):
     discount = get_object_or_404(Discount, id=discount_id)
         
     # check if contact actually belongs to the given company
-    if discount.company != company:
+    if discount.company != c:
         raise Http404
         
         # check if user has permissions to change contacts
@@ -216,11 +231,11 @@ def edit_discount(request, company, discount_id):
             if 'created_by' not in form.cleaned_data:
                 discount.created_by = request.user
             if 'company_id' not in form.cleaned_data:
-                discount.company_id = company.id
+                discount.company_id = c.id
         
             form.save()
             
-            return redirect('pos:list_discounts', company=company.url_name)
+            return redirect('pos:list_discounts', company=c.url_name)
     else:
         form = DiscountForm(instance=discount)
         
@@ -229,10 +244,15 @@ def edit_discount(request, company, discount_id):
     return render(request, 'pos/manage/discount.html', context)
 
 def delete_discount(request, company, discount_id):
-    company = get_object_or_404(Company, url_name=company)
+    c = get_object_or_404(Company, url_name=company)
+    
+    # check permissions: needs to be at least manager
+    if not has_permission(request.user, c, 50):
+        return no_permission_view(request, c, _("delete discounts"))
+    
     discount = get_object_or_404(Discount, id=discount_id)
     
-    if discount.company != company:
+    if discount.company != c:
         raise Http404
     
     if not request.user.has_perm('pos.delete_discount'):
@@ -240,4 +260,4 @@ def delete_discount(request, company, discount_id):
     
     discount.delete()
     
-    return redirect('pos:list_discounts', company=company.url_name)
+    return redirect('pos:list_discounts', company=c.url_name)

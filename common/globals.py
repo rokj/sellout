@@ -33,6 +33,7 @@ UNITS = (
     ("g", "g"),
     ("dag", "dag"),
     ("kg", "kg"),
+    ("t", "ton"),
     ("oz", "oz"),
     ("lb", "lb"),
     ("cm", "cm"),
@@ -119,3 +120,12 @@ IMAGE_DIMENSIONS = {
     'logo':(180, 180),
     'category':(160, 160)
 }
+
+PERMISSIONS = ( # retrieve readable format with get_permission_display()
+    (1,   _("Guest")),   # can only view stuff
+    (5,   _("Cashier")), # can write and edit bills
+    (10,  _("Seller")),  # can add and edit products
+    (50,  _("Manager")), # can add and edit discounts, contacts, categories, ...
+    (100, _("Admin")),   # can do anything 
+)
+    

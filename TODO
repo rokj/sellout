@@ -1,14 +1,19 @@
 - ! - tablet support
 - login_required & security etc.
-- DONE datepicker for date inputs
 - updated_by for update views
 - <[ CDATA for <javascript>
 - change underscores for HTML and CSS ids and classes to dashes (django forms use underscores ?!)
 - show/hide animations (jquery)
-- DONE base.html: remove unneeded jquery <script src=""> includes 
 - incompatibility warning/redirect for older browsers
-- DONE title/site title for all views
 - add {% spaceless %} to base.html (and all other 'bases') and compress javascript (?)
+- minify javascript
+- confirmation dialogs for deletion (category, discount, ...)
+- @transaction.atomic for update_price() (django 1.6?)
+
+- DONE title/site title for all views
+- DONE base.html: remove unneeded jquery <script src=""> includes
+- DONE datepicker for date inputs
+- DONE product.shop_code = unique - test for this and return error if not
 
 SECURITY:
  - login_required
@@ -22,5 +27,7 @@ CONFIGURATION VARIABLES:
  - DONE date format
  
 OPTIMIZE:
- 	- sql queries or better getting of objects just with specific data
-    - images embedded in JSON instead of doing a special request for each image
+ - memcached:
+    - get_object_or_404(Company) - in every view
+ - sql queries or better getting of objects just with specific data
+ - images embedded in JSON instead of doing a special request for each image

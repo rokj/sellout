@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext as _
-from django.db.models.signals import pre_save # image file cleanup signals
+from django.db.models.signals import pre_save, pre_delete
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from config.models import Cleanup
@@ -97,8 +97,8 @@ class ProductImage(SkeletonU):
 
 class ProductAbstract(SkeletonU):
     """ used for product and bill item """
-    code = models.CharField(_("Product code"), max_length=30, blank=True, null=True)
-    shop_code = models.IntegerField(_("Store's internal product number"), blank=False, null=False)
+    code = models.CharField(_("Product code"), max_length=30, blank=False, null=False)
+    shop_code = models.IntegerField(_("Store's internal product number"), blank=False, null=True)
     name = models.CharField(_("Product name"), max_length=50, blank=False, null=False)
     description = models.TextField(_("Product description"), blank=True, null=True)
     private_notes = models.TextField(_("Notes (only for internal use)"), null=True, blank=True)
@@ -128,26 +128,6 @@ class Product(ProductAbstract):
     def __unicode__(self):
         return self.name
     
-    def update_price(self, user, new_price):
-        """ set a new price for product """
-        # change the old price's date_updated to now() (if it exists)
-        # and insert a new price withour date
-        try:
-            old_price = Price.objects.get(product = self, date_updated=None)
-            old_price.date_updated = dtm.datetime.now() \
-                .replace(tzinfo=pytz.timezone(get_value(user, 'pos_timezone')))
-            old_price.save()
-        except Price.DoesNotExist:
-            old_price = None
-            
-        if new_price == old_price:
-            return
-        
-        new_price = Price(created_by = user,
-            product = self,
-            unit_price = new_price)
-        new_price.save()
-
     class Meta:
         abstract = False
 
@@ -166,27 +146,14 @@ class Price(SkeletonU):
     def __unicode__(self):
         ret = self.product.name + ": " + str(self.unit_price)
 
-        if not self.date_updated:
+        if self.date_updated:
             ret += " (inactive)"
 
         return ret
     
-    # replaced by product.update_price() method
-    #def save(self, plain_save=False):
-    #    """ if the price has changed, set the old one's date and write a new entry """
-    #    """ also save if there's no need for any of the below logic """
-    #    if self.pk is None or plain_save is True:
-    #        super(Price, self).save()
-    #    else:
-    #        # find the last price of product
-    #        last_price = Price.objects.get(id=self.id)
-    #        last_price.date_updated = dtm.datetime.now()
-    #        last_price.save(plain_save = True)
-    #        
-    #        new_price = Price(created_by = last_price.created_by, 
-    #                          product = self.product, unit_price = self.unit_price)
-    #        new_price.save(plain_save = True)
-            
+    class Meta:
+        unique_together = (('product', 'unit_price', 'date_updated'),)
+       
 ### contacts ###
 class Contact(SkeletonU):
     company = models.ForeignKey(Company)
@@ -214,15 +181,28 @@ class ContactAttribute(SkeletonU):
     attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
     attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
     
-    def __unicode(self):
+    def __unicode__(self):
         return str(self.contact) + ": " + self.attribute_name + " = " + self.attribute_value
 
 ### permissions
 class Permission(SkeletonU):
     user = models.ForeignKey(User)
     company = models.ForeignKey(Company)
-    ### TODO ###
-
+    permission = models.IntegerField(max_length=16, null=False, blank=False, choices=g.PERMISSIONS)
+    
+    def __unicode__(self):
+        return self.user.email + ": " + self.get_permission_display()
+        
+@receiver(pre_save, sender=Permission)
+@receiver(pre_delete, sender=Permission)
+def delete_permission_cache(**kwargs):
+    """ deletes cached permissions on save or delete """
+    from views.util import permission_cache_key
+    from django.core.cache import cache
+    
+    ckey = permission_cache_key(kwargs['instance'].user, kwargs['instance'].company)
+    cache.delete(ckey)
+    
 ### bills ###
 class Bill(SkeletonU):
     company = models.ForeignKey(Company, null=False, blank=False) # also an issuer of the bill
@@ -363,4 +343,3 @@ def cleanup_images(**kwargs):
         # add image to Cleanup for later deletion
         c = Cleanup(filename=prev_entry.image.path)
         c.save()
-        print prev_entry.image.name

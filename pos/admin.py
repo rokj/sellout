@@ -13,6 +13,7 @@ admin.site.register(Product)
 admin.site.register(Price)
 admin.site.register(Contact)
 admin.site.register(ContactAttribute)
+admin.site.register(Permission)
 admin.site.register(Bill)
 admin.site.register(BillItem)
 

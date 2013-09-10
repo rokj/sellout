@@ -6,15 +6,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from django.http import HttpResponse, Http404
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
+from django.http import Http404
 
-from pos.models import Company, Category, Contact, Discount, Product, Price
-from pos.views.util import error, JSON_response, JSON_parse, resize_image, validate_image
+from pos.models import Company, Category
+from pos.views.util import error, JSON_response, resize_image, validate_image, \
+                           has_permission, no_permission_view
 from common import globals as g
-from common import unidecode
-from common.functions import get_random_string
 
 ########################
 ### helper functions ###
@@ -100,10 +97,15 @@ class CategoryForm(forms.ModelForm):
                   'image']
         
 def list_categories(request, company):
-    company = get_object_or_404(Company, url_name=company)
+    c = get_object_or_404(Company, url_name=company)
+    
+    # check permissions: needs to be at least guest to view
+    if not has_permission(request.user, c, 1):
+        return no_permission_view(request, c, _("view categories"))
+    
     context = {
-        'company':company,
-        'categories':get_all_categories(company.id, data=[]),
+        'company':c,
+        'categories':get_all_categories(c.id, data=[]),
         'title':_("Categories"),
         'site_title':g.MISC['site_title'],
     }
@@ -112,22 +114,23 @@ def list_categories(request, company):
 
 def add_category(request, company, parent_id=-1):
     # get company
-    company = get_object_or_404(Company, url_name=company)
-     
+    c = get_object_or_404(Company, url_name=company)
+    
+    # check permissions: needs to be at least manager
+    if not has_permission(request.user, c, 50):
+        return no_permission_view(request, c, _("add categories"))
+    
     # if parent_id == -1, this is a top-level category
     parent_id = int(parent_id)
     if parent_id == -1:
         parent = None
     else:
         parent = get_object_or_404(Category, id=parent_id)
-        if parent.company != company:
+        if parent.company != c:
             raise Http404
-    # check permissions
-    if not request.user.has_perm('pos.add_category'):
-        return error(request, _("You have no permission to add categories."))
     
     context = {
-        'company':company,
+        'company':c,
         'parent_id':parent_id,
         'add':True,
         'image_dimensions':g.IMAGE_DIMENSIONS['category'],
@@ -146,14 +149,14 @@ def add_category(request, company, parent_id=-1):
             if 'created_by' not in form.cleaned_data:
                 category.created_by = request.user
             if 'company_id' not in form.cleaned_data:
-                category.company_id = company.id
+                category.company_id = c.id
         
             form.save()
 
             if category.image:
                 resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
             
-            return redirect('pos:list_categories', company=company.url_name)
+            return redirect('pos:list_categories', company=c.url_name)
     else:
         form = CategoryForm() # create a new category
         
@@ -162,18 +165,19 @@ def add_category(request, company, parent_id=-1):
     return render(request, 'pos/manage/category.html', context)
 
 def edit_category(request, company, category_id):
-    company = get_object_or_404(Company, url_name=company)
+    c = get_object_or_404(Company, url_name=company)
     
     # get category
     category = get_object_or_404(Category, id=category_id)
     # check if category actually belongs to the given company
-    if category.company != company:
+    if category.company != c:
         raise Http404 # this category does not exist for the current user
-    # check if the user has permission to change it
-    if not request.user.has_perm('pos.change_category'):
-        return error(request, _("You have no permission to edit categories."))
-
-    context = {'company':company.url_name, 'category_id':category_id}
+    
+    # check permissions: needs to be at least manager
+    if not has_permission(request.user, c, 50):
+        return no_permission_view(request, c, _("edit categories"))
+    
+    context = {'company':c, 'category_id':category_id}
     
     if request.method == 'POST':
         # submit data
@@ -185,13 +189,13 @@ def edit_category(request, company, category_id):
             if 'created_by' not in form.cleaned_data:
                 category.created_by = request.user
             if 'company_id' not in form.cleaned_data:
-                category.company_id = company.id
+                category.company_id = c.id
         
             form.save()
             if category.image:
                 resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
             
-            return redirect('pos:list_categories', company=company.url_name)
+            return redirect('pos:list_categories', company=c)
     else:
         if category:
             form = CategoryForm(instance=category) # update existing category
@@ -199,7 +203,7 @@ def edit_category(request, company, category_id):
             form = CategoryForm() # create a new category
         
     context['form'] = form
-    context['company'] = company
+    context['company'] = c
     context['category'] = category
     context['image_dimensions'] = g.IMAGE_DIMENSIONS['category']
     context['title'] = _("Edit category")
@@ -208,16 +212,17 @@ def edit_category(request, company, category_id):
     return render(request, 'pos/manage/category.html', context)
 
 def delete_category(request, company, category_id):
-    company = get_object_or_404(Company, url_name=company)
+    c = get_object_or_404(Company, url_name=company)
+    
+     # check permissions: needs to be at least manager
+    if not has_permission(request.user, c, 50):
+        return no_permission_view(request, c, _("delete categories"))
     
     # get category
     category = get_object_or_404(Category, id=category_id)
     # check if category actually belongs to the given company
-    if category.company != company:
+    if category.company != c:
         raise Http404 # this category does not exist for the current user
-    # check if the user has permission to change it
-    if not request.user.has_perm('pos.change_category'):
-        return error(request, _("You have no permission to edit categories."))
     
     # delete the category and return to management page
     try:
@@ -225,4 +230,4 @@ def delete_category(request, company, category_id):
     except:
         pass
     
-    return redirect('pos:list_categories', company=company.url_name)
+    return redirect('pos:list_categories', company=c.url_name)
