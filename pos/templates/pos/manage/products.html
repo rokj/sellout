@@ -4,10 +4,39 @@
 
 {% block head %}
 
+{% comment %}
+javascript:
+    1. get from server:
+        - list of categories
+        - list of units
+        - list of available discounts (all_discounts)
+    2. if search criteria has changed, get results from server:
+        on change or 'update' button press: update_products() >
+         > after data is received: show_products > for each product: render_product()
+    3. show product:
+        - render_product(product) > show all product data in a cloned product_details div >
+         > edit button: show_product_edit_dialog(), delete button > delete_product()
+    4. editing product:
+        - show_product_edit_dialog() > clear edit_dialog div and add all product's data to edit boxes etc.
+        - adding/deleting discounts > add_discount(): adds a list item to discounts' ul >
+         > refresh() discounts: clears ul and re-adds all selected products > discounts that are available to add are in all_discounts
+        - save: save_product(): if it's a new product, id = -1, send to server > update_products();
+           if it's an existing product, send to server > redraw the existing product in its parent div > render_product()
+        - delete: ask for confirmation > send to server
+        
+product's data:
+    show_products() assigns a new parent_div to product > parent_div.data({product:product}) holds all info on this product
+     > gets overwritten on save, is untouched on cancel
+
+reference to a product is its parent div (that contains product's .data()).
+
+{% endcomment %}
 <script type="text/javascript">
-categories = []; // list of pairs "label", "value"
-units = [];
-all_discounts = {};
+
+
+var categories = []; // list of pairs "label", "value"
+var units = [];
+var all_discounts = {};
 
 var last_value;
 var update_timeout;
@@ -57,20 +86,19 @@ $(document).ready(function(){
         var i;
         for(i=0; i<data.length; i++){
             // make a div for each product
-            div_obj = $("<div>", {"class":"product_details"});
-            products_div.append(div_obj);
+            parent_div = $("<div>", {"class":"product_details"});
+            products_div.append(parent_div);
             
-            // save this div to product for future updating
-            data[i].parent = div_obj;
-            render_product(data[i]);
+            // save product to .data()
+            parent_div.data({product:data[i]});
+            render_product(parent_div);
         }
     }
     
-    function render_product(product){
+    function render_product(parent){
         var tmp_obj, i;
         
         // product details include:
-        // id - goes to $.data() and hidden field
         // name                        | price / unit_type
         //           | category        | tax 
         //   image   | description     | discounts
@@ -78,7 +106,8 @@ $(document).ready(function(){
         // shop_code | code 
         
         // update this div
-        div_obj = product.parent;
+        div_obj = parent;
+        product = parent.data().product;
         
         // empty parent and copy all stuff from #product_details_template to it
         div_obj.empty();
@@ -86,8 +115,6 @@ $(document).ready(function(){
         
         // add product data to data()
         div_obj.data(product);
-        // add id to hidden field
-        $(".product_id", div_obj).append(product.id);
         // name
         $(".product_name", div_obj).append(product.name);
         // price and unit
@@ -104,17 +131,14 @@ $(document).ready(function(){
         $(".product_description", div_obj).append(product.description);
         // discount list
         tmp_obj = $(".product_discounts", div_obj);
-        var li_obj, dd;
+        var li_obj;
         for(var key in product.discounts){
-            li_obj = $("<li>");
+            li_obj = $("<li>", {title:""});
+            li_obj.append(product.discounts[key].code + " " +
+                discount_amount(product.discounts[key]));
             
-            dd = product.discounts[key].code;
-            if(product.discounts[key].type == 'Percent')
-                dd += " (" + product.discounts[key].amount + "%)";
-            else
-                dd += " ({{currency}}" + product.discounts[key].amount + ")";
-                
-            li_obj.append(dd);
+            // tooltip: discount description
+            li_obj.tooltip({content:product.discounts[key].description});
             tmp_obj.append(li_obj);
         }
         
@@ -140,7 +164,7 @@ $(document).ready(function(){
             // edit button
             edit_button.prop('disabled', false);
             edit_button.click(function(){
-                show_product_edit_dialog(product);
+                show_product_edit_dialog(parent);
             });
             // delete button
             delete_button.prop('disabled', false);
@@ -157,27 +181,28 @@ $(document).ready(function(){
         div_obj.show();
     }
     
-    function add_discount(parent, product, key){
+    function discount_amount(discount){
+        if(discount.type == 'Percent') return " (" + discount.amount + "%)";
+        else return " ({{currency}} " + discount.amount + ")";
+    }
+    
+    function add_discount(ul_obj, product, key){
         // add a list item and a delete link to product edit dialog
-        discount = product.discounts[key];
-        
-        if(!discount) return;
+        if(!product.discounts[key]) return;
+        else discount = product.discounts[key];
         
         // tooltip - discount details
         var tooltip = "";
         
         tooltip = discount.code + "<br/>" // discount code
         tooltip += discount.description + "<br/>" // description
-        // TODO:
-        //tooltip += p.start_date + " - " + p.end_date // start and end date
+        tooltip += discount.start_date + " - " + discount.end_date // start and end date
         // TODO: set style for inactive discount
         if(!discount.active) tooltip += "<br/>{% trans 'inactive' %}" // active
+
+        dt = discount.code + " " + discount_amount(discount);
         
-        dt = discount.code + " " + discount.amount + " ";
-        if(discount.type == "Absolute") dt += "$€Ł"; // TODO: currency
-        else dt += "%";
-        
-        li_obj = $("<li>", {title:tooltip});
+        li_obj = $("<li>", {title:""});
         li_obj.append(dt);
         li_obj.tooltip({content:tooltip});
         li_obj.data({id:discount.id}); // store id in data() for later retrieval
@@ -190,14 +215,13 @@ $(document).ready(function(){
         });
         li_obj.append(btn_obj);
         
-        parent.append(li_obj);
+        ul_obj.append(li_obj);
     }
     
     function refresh_discounts(product){
         // clear everything discount-related and redraw
-        $("#edit_discounts", edit_div_obj).empty();
-        $("#edit_discount_list", edit_div_obj).empty();
-        $("#edit_add_discount", edit_div_obj).empty();
+        ul_obj = $("#edit_dialog #edit_discounts");
+        ul_obj.empty();
         
         // add discounts in product
         for(var key in product.discounts){
@@ -221,7 +245,7 @@ $(document).ready(function(){
             
             opt_obj = $("<option>")
             .attr("value", key)
-            .append(all_discounts[key].code); // TODO: add amount and unit (% or currency)
+            .append(all_discounts[key].code + " " + discount_amount(all_discounts[key]));
             
             sel_obj.append(opt_obj);
             added++;
@@ -245,23 +269,16 @@ $(document).ready(function(){
         }
     }
     
-    function show_product_edit_dialog(product){
+    function show_product_edit_dialog(parent){
         var i;
         
-        // show edit dialog and fill it with current product's data
-        edit_div_obj = $("#edit_dialog");
+        product = parent.data().product;
         
-        edit_div_obj.data({
-            id:product.id,
-            get_url:product.get_url, // urls:   retrieve data
-            edit_url:product.edit_url, //       save product
-            delete_url:product.delete_url
-        }); // delete product
-        
-        $("#edit_product_name", edit_div_obj).val(product.name).focus();
-        $("#edit_product_price", edit_div_obj).val(product.price);
+        edit_obj = $("#edit_dialog");
+        $("#edit_product_name", edit_obj).val(product.name).focus();
+        $("#edit_product_price", edit_obj).val(product.price);
         // ... per unit (listbox with unit types)
-        var sel_obj = $("#edit_unit_type", edit_div_obj);    
+        var sel_obj = $("#edit_unit_type", edit_obj);
         
         for(i=0; i<units.length;i++){
             opt_obj = $("<option>")
@@ -276,7 +293,7 @@ $(document).ready(function(){
         }
         
         // listbox with categories
-        sel_obj = $("#edit_product_category", edit_div_obj);
+        sel_obj = $("#edit_product_category", edit_obj).empty();
         
         for(i=0; i < categories.length; i++){
             opt_obj = $("<option>")
@@ -292,13 +309,13 @@ $(document).ready(function(){
         // TODO: images (?)
         
         // tax
-        $("#edit_product_tax", edit_div_obj).val(product.tax);
-        $("#edit_product_description", edit_div_obj).val(product.description);
-        $("#edit_product_price", edit_div_obj).val(product.price);
+        $("#edit_product_tax", edit_obj).val(product.tax);
+        $("#edit_product_description", edit_obj).val(product.description);
+        $("#edit_product_price", edit_obj).val(product.price);
         
         // discounts
         // add to list
-        ul_obj = $("#edit_discounts", edit_div_obj);
+        ul_obj = $("#edit_discounts", edit_obj);
         ul_obj.empty();
         var discount = "";
         var btn_obj = "";
@@ -306,51 +323,52 @@ $(document).ready(function(){
         // for the first time
         refresh_discounts(product);
         
-        $("#edit_product_private_notes", edit_div_obj).val(product.private_notes);
-        $("#edit_product_stock", edit_div_obj).val(product.stock);
-        $("#edit_product_shop_code", edit_div_obj).val(product.shop_code);
-        $("#edit_product_code", edit_div_obj).val(product.code);
+        $("#edit_product_private_notes", edit_obj).val(product.private_notes);
+        $("#edit_product_stock", edit_obj).val(product.stock);
+        $("#edit_product_shop_code", edit_obj).val(product.shop_code);
+        $("#edit_product_code", edit_obj).val(product.code);
         
         // show the edit dialog
-        edit_div_obj.dialog({
+        edit_obj.dialog({
             modal: true
         });
         
         // set dialog title: if there's no name, it's for adding new product
         if(product.name)
-            edit_div_obj.dialog('option', 'title', "{% trans 'Edit product' %}: " + product.name);
+            edit_obj.dialog('option', 'title', "{% trans 'Edit product' %}: " + product.name);
         else
-            edit_div_obj.dialog('option', 'title', "{% trans 'Add product' %}");
+            edit_obj.dialog('option', 'title', "{% trans 'Add product' %}");
         
-        edit_div_obj.dialog('option', 'width', 900); // TODO: remove fixed width
+        edit_obj.dialog('option', 'width', 900); // TODO: remove fixed width
         
         
         // save button (unbind previously bound objects)
-        $("#edit_product_save", edit_div_obj).unbind().click(function(){
-            save_product(product);
+        $("#edit_product_save", edit_obj).unbind().click(function(){
+            save_product(parent);
         });
         
         // cancel button
-        $("#edit_product_cancel", edit_div_obj).unbind().click(function(){
-           // destroy the dialog (content will be deleted when it opens again)
-           edit_div_obj.dialog(edit_div_obj).dialog("destroy");
+        $("#edit_product_cancel", edit_obj).unbind().click(function(){
+            // reload the product
+            get_product(parent);
+            // destroy the dialog (content will be deleted when it opens again)
+            edit_obj.dialog(edit_obj).dialog("destroy");
         });
     }
     
-    function get_product(product){
+    function get_product(parent){
         // get product's data from the server and put
         // it where it was before (product.parent)
-        url = product.parent.data().get_url;
-        get_data(url, function(data){
-            data.parent = product.parent;
-            render_product(data);
+        get_data(parent.data().product.get_url, function(data){
+            parent.data({product:data});
+            render_product(parent);
         });
         
         // close the dialog
         $("#edit_dialog").dialog("destroy");
     }
     
-    function save_product(product){
+    function save_product(parent){
         // get product's data from the dialog and send
         // id
         // price - numeric value
@@ -364,6 +382,7 @@ $(document).ready(function(){
         // private notes
         // tax
         // stock
+        product = parent.data().product;
         
         dlg_obj = $("#edit_dialog");
         
@@ -395,7 +414,7 @@ $(document).ready(function(){
                 function(response){
                     if(response.status != 'ok') alert(response.message);
                     else{
-                        alert("updating products");
+                        // re-do the current search and close the dialog
                         update_products();
                         dlg_obj.dialog("destroy");
                     }
@@ -408,7 +427,7 @@ $(document).ready(function(){
             send_data(product.edit_url, data, "{{csrf_token}}",
                 function(response){
                     if(response.status != 'ok') alert(response.message);
-                    else get_product(product);
+                    else get_product(parent);
                 }
             );
         }
@@ -439,6 +458,7 @@ $(document).ready(function(){
             // (server:client)
             // name > label
             // id > value
+            categories = [];
             for(var i = 0; i < data.length; i++){
                 categories.push({label:data[i].breadcrumbs, value:data[i].id})
             }
@@ -449,6 +469,7 @@ $(document).ready(function(){
     // unit types
     get_data("{% url 'pos:JSON_units' company.url_name %}",
         function(data){
+            units = [];
             for(var i=0; i<data.length; i++){
                 units.push({"value":data[i][0], "name":data[i][1]});
             }
@@ -535,15 +556,21 @@ $(document).ready(function(){
     ///////////////////////////
     // creating new products
     ///////////////////////////
-    if({{can_edit|lower}}){
+    if({{can_edit|lower}}){ {% comment %} |lower: python: True, javascript: true {% endcomment %}
         $("#add_product").click(function(){
             // show the edit dialog with nothing but default values
+            
+            // empty product
             product = {
                 "id":-1,// new product's id = -1 until the server assigns an id
                 "discounts":{}, // no discounts so far
                 "tax":{{default_tax}} // tax from config
             };
-            show_product_edit_dialog(product);
+            // save it to a dummy div
+            parent = $("#new_product_dummy");
+            parent.data({product:product});
+            
+            show_product_edit_dialog(parent);
         });
     }
     else{
@@ -671,6 +698,9 @@ $(document).ready(function(){
         </tr>
     </table>
 </div>
+
+{% comment %} a dummy div for creating new products {% endcomment %}
+<div id="new_product_dummy"></div>
 
 {% endblock %}
 

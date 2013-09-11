@@ -10,11 +10,7 @@ from common.functions import get_image_path
 import common.globals as g
 
 from config.models import Country
-from config.functions import get_value
-
-import datetime as dtm
 import json
-import pytz
 
 ### company ###
 class Company(SkeletonU):
@@ -188,7 +184,7 @@ class ContactAttribute(SkeletonU):
 class Permission(SkeletonU):
     user = models.ForeignKey(User)
     company = models.ForeignKey(Company)
-    permission = models.IntegerField(max_length=16, null=False, blank=False, choices=g.PERMISSIONS)
+    permission = models.CharField(max_length=16, null=False, blank=False, choices=g.PERMISSION_GROUPS)
     
     def __unicode__(self):
         return self.user.email + ": " + self.get_permission_display()

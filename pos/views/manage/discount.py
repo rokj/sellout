@@ -12,9 +12,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from pos.models import Company, Discount
 from pos.views.util import error, JSON_response, has_permission, no_permission_view,\
-                           format_number
+                           format_number, format_date
 from common import globals as g
-from config.functions import get_date_format
+from config.functions import get_date_format, get_value
 
 from datetime import date
 
@@ -37,15 +37,15 @@ def is_discount_valid(d):
         
     return valid
 
-def discount_to_dict(d):
+def discount_to_dict(user, d):
     return {
         'id':d.id,
         'description':d.description,
         'code':d.code,
         'type':d.type,
         'amount':format_number(d.amount),
-        #'start_date':d.start_date, # TODO: format date
-        #'end_date':d.end_date,
+        'start_date':format_date(user, d.start_date),
+        'end_date':format_date(user, d.end_date),
         'active':d.active,
     }
     
@@ -67,7 +67,7 @@ def JSON_discounts(request, company, product_id=None):
     
     for d in discounts:
         if is_discount_valid(d):
-            ds[d.id] = discount_to_dict(d)
+            ds[d.id] = discount_to_dict(request.user, d)
     
     # serialize
     return JSON_response(ds)
@@ -130,8 +130,8 @@ def list_discounts(request, company):
     else:
         form = DiscountFilterForm()
         
-    # show contacts
-    paginator = Paginator(discounts, g.MISC['discounts_per_page'])
+    # show discounts
+    paginator = Paginator(discounts, get_value(request.user, 'pos_discounts_per_page'))
 
     page = request.GET.get('page')
     try:

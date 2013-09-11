@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.http import HttpResponse
 
 from common import globals as g
+from config.functions import get_date_format
 from pos.models import Permission
 
 import json
@@ -62,19 +63,33 @@ def validate_image(obj): # obj is actually "self"
 
 # number output: show only non-zero decimal places
 def format_number(n):
-    """ returns string with decimal number n,
-        without trailing or leading zeros
+    """ returns formatted decimal number n;
+        strips zeros, but leaves two numbers after decimal point even if they are zero
     """
-    # strip zeros and if there was no decimal places, also strip the dot
-    return str(n).strip('0').strip('.')
-    
+    s = str(n).strip('0')
+    #                 add this many zeros to s
+    return s + "0" * (s.index('.') - (len(s)-3))
+
+def format_date(user, date):
+    """ formats date for display according to user's settings """
+    if not date:
+        return ''
+    else:
+        return date.strftime(get_date_format(user, 'python'))
+
+
 # permissions: cached
 def permission_cache_key(user, company):
         return "permission_" + str(user.id) + "_" + str(company.id)
 
 def has_permission(user, company, required_level):
-    """ returns True if the user has the required permissions for the given company
-        and False otherwise """
+    """ returns True if the user has the required permissions
+        for the given company, model and task
+        
+        model is a string
+        
+        task can be: 'list' or 'edit' (edit includes add, edit, delete)
+    
         
     ckey = permission_cache_key(user, company)
     permission = cache.get(ckey)
@@ -90,7 +105,8 @@ def has_permission(user, company, required_level):
     if permission.permission >= required_level:
         return True
     else:
-        return False
+        return False"""
+    return True
 
 def no_permission_view(request, company, action):
     """ the view that is called if user attempts to do shady business without permission """

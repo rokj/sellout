@@ -5,25 +5,25 @@ from django.utils.translation import ugettext as _
 
 # directories
 DIRS = { # goes to MEDIA folder
-        'logo_dir':"img/logo",
-        'category_icon_dir':"img/category",
-        'product_icon_dir':'img_product',
-        'product_image_dir':"img/product",
+    'logo_dir':"img/logo",
+    'category_icon_dir':"img/category",
+    'product_icon_dir':'img_product',
+    'product_image_dir':"img/product",
 }
 
 # attributes' field lengths
 ATTR_LEN = {
-            'name':30,
-            'value':100,
-            }
+    'name':30,
+    'value':100,
+}
 
 # number of digits for decimal database field
 DECIMAL = {
-          'currency_digits':12, # number of digits for money values (big money) (INCLUDING DECIMAL PLACES)
-          'currency_decimal_places':4, # number of decimal places for money values
-          'percentage_decimal_places':4, # number of decimal places for percentage values
-          'quantity_digits':9,
-          'quantity_decimal_places':4,
+    'currency_digits':12, # number of digits for money values (big money) (INCLUDING DECIMAL PLACES)
+    'currency_decimal_places':4, # number of decimal places for money values
+    'percentage_decimal_places':4, # number of decimal places for percentage values
+    'quantity_digits':9,
+    'quantity_decimal_places':4,
 }
 
 # unit types
@@ -57,9 +57,9 @@ UNITS = (
 
 # discounts
 DISCOUNT_TYPES = (
-                  ("Percent", _("Percentage")),
-                  ("Absolute", _("Absolute value")),
-                  )
+    ("Percent", _("Percentage")),
+    ("Absolute", _("Absolute value")),
+)
 
 # contacts
 CONTACT_TYPES = (
@@ -106,26 +106,48 @@ DATE_FORMATS = {
 
 # misc
 MISC = {
-        'company_url_length':50,
-        'site_title':'webpos',
-        'management_url':'admin', # must not be empty!
-                                  # (to differentiate between company and management sites)
-        'max_upload_image_size':2*2**20, # 2 megabytes
-        'image_format':'png', # all images will be saved in this format
-        'contacts_per_page':2, # only for
-        'discounts_per_page':2 # management pages
-        }
+    'company_url_length':50,
+    'site_title':'webpos',
+    'management_url':'admin', # must not be empty!
+                              # (to differentiate between company and management sites)
+    'max_upload_image_size':2*2**20, # 2 megabytes
+    'image_format':'png', # all images will be saved in this format
+}
 
 IMAGE_DIMENSIONS = {
     'logo':(180, 180),
     'category':(160, 160)
 }
 
-PERMISSIONS = ( # retrieve readable format with get_permission_display()
-    (1,   _("Guest")),   # can only view stuff
-    (5,   _("Cashier")), # can write and edit bills
-    (10,  _("Seller")),  # can add and edit products
-    (50,  _("Manager")), # can add and edit discounts, contacts, categories, ...
-    (100, _("Admin")),   # can do anything 
+# premissions
+PERMISSION_GROUPS = ( # retrieve readable format with get_permission_display()
+    ('guest',   _("Guest")),   # can only view stuff
+    ('cashier', _("Cashier")), # can write and edit bills
+    ('seller',  _("Seller")),  # can add and edit products
+    ('manager', _("Manager")), # can add and edit discounts, contacts, categories, ...
+    ('admin',   _("Admin")),   # can do anything 
 )
-    
+
+PERMISSIONS = { # 'chapters' that each group can view or manage
+    # choices: company, category, discount, product, contact, permission, bill
+    'guest':{
+        'list':('company','category','discount','product','contact','bill'),
+        'edit':(),
+        },
+    'cashier':{
+        'list':('company','category','discount','product','contact','bill'),
+        'edit':('bill'),
+        },
+    'seller':{
+        'list':('company','category','discount','product','contact','bill'),
+        'edit':('bill','product'),
+        },
+    'manager':{
+        'list':('company','category','discount','product','contact','bill','permission'),
+        'edit':('category','discount','product','contact','bill'),
+        },
+    'admin':{
+        'list':('company','category','discount','product','contact','bill', 'permission'),
+        'edit':('company','category','discount','product','contact','bill', 'permission'),
+        },
+}

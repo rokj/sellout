@@ -12,7 +12,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from pos.models import Company, Contact
 from common import globals as g
-from config.functions import get_date_format
+from config.functions import get_date_format, get_value
 from pos.views.util import error, has_permission, no_permission_view
 
 ################
@@ -70,7 +70,7 @@ def list_contacts(request, company):
         form = ContactFilterForm()
         
     # show contacts
-    paginator = Paginator(contacts, g.MISC['contacts_per_page'])
+    paginator = Paginator(contacts, get_value(request.user, 'pos_contacts_per_page'))
 
     page = request.GET.get('page')
     try:

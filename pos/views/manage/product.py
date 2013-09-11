@@ -51,7 +51,7 @@ def products(request, company):
     }
     return render(request, 'pos/manage/products.html', context)
 
-def product_to_dict(product):
+def product_to_dict(user, product):
     # returns all relevant product's data:
     # id
     # price - numeric value
@@ -83,7 +83,7 @@ def product_to_dict(product):
     # all discounts in a list
     discounts = {}
     for d in product.discounts.all():
-        discounts[str(d.id)] = discount_to_dict(d)
+        discounts[str(d.id)] = discount_to_dict(user, d)
 
     ret['discounts'] = discounts
     
@@ -159,7 +159,7 @@ def get_product(request, company, product_id):
     
     product = get_object_or_404(Product, id = product_id, company = c)
     
-    return JSON_response(product_to_dict(product))
+    return JSON_response(product_to_dict(request.user, product))
     
 def search_products(request, company):
     c = get_object_or_404(Company, url_name = company)
@@ -184,7 +184,7 @@ def search_products(request, company):
     # product_code_filter
     if criteria.get('product_code_filter'):
         filter_by_product_code = True
-        products = products.filter(product_code__icontains = criteria.get('product_code_filter'))
+        products = products.filter(code__icontains = criteria.get('product_code_filter'))
     else:
         filter_by_product_code = False
     
@@ -281,7 +281,7 @@ def search_products(request, company):
     # return serialized products
     ps = []
     for p in products:
-        ps.append(product_to_dict(p))
+        ps.append(product_to_dict(request.user, p))
 
     return JSON_response(ps)
 

@@ -32,7 +32,11 @@ defaults = {
     
 # caching helpers
 def cache_key(user):
-    return "config_" + str(user.id)
+    # TODO: anonymous users
+    if user.is_authenticated():
+        return "config_" + str(user.id)
+    else:
+        return "config_default"
 
 def load_config(user):
     try:
@@ -40,10 +44,10 @@ def load_config(user):
     except Config.DoesNotExist:
         # use defaults
         c = Config(created_by = user,
-                   user = user,
-                   data = json.dumps(defaults))
+            user = user,
+            data = json.dumps(defaults))
         c.save()
-    
+
     # parse json from the database (or defaults)
     return json.loads(c.data)
 
@@ -63,15 +67,21 @@ def save_config(user, data):
     cache.delete(cache_key(user))
     
 def get_config(user):
-    """ get user's config either from memcache or from database """
-    ckey = cache_key(user)
-    data = cache.get(ckey)
-    
-    if not data:
-        data = load_config(user)
-        cache.set(ckey, data)
-    
-    return data
+    """ 
+        get user's config either from memcache or from database
+        if user is not authenticated, return defaults
+    """
+    if user.is_authenticated():
+        ckey = cache_key(user)
+        data = cache.get(ckey)
+        
+        if not data:
+            data = load_config(user)
+            cache.set(ckey, data)
+        
+        return data
+    else:
+        return defaults
 
 def get_value(user, key):
     data = get_config(user)
@@ -84,6 +94,7 @@ def get_value(user, key):
         if key in defaults:
             data[key] = defaults[key]
             save_config(user, data)
+            print data[key]
             return data[key]
         else:
             return "<invalid key: '" + "':'" + key + "'>"
