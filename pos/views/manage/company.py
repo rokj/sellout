@@ -227,7 +227,7 @@ def edit_company(request, company):
         
     # check if the user has permission to change it
     # only admins can change company details
-    if not has_permission(request.user, c, 100):
+    if not has_permission(request.user, c, 'company', 'edit'):
         return no_permission_view(request, c, _("edit company details"))
     
     context = {}

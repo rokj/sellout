@@ -97,7 +97,7 @@ def list_discounts(request, company):
     c = get_object_or_404(Company, url_name=company)
     
     # check permissions: needs to be guest
-    if not has_permission(request.user, c, 1):
+    if not has_permission(request.user, c, 'discount', 'list'):
         return no_permission_view(request, c, _("view discounts"))
     
     discounts = Discount.objects.filter(company__id=c.id)
@@ -158,7 +158,7 @@ def add_discount(request, company):
     c = get_object_or_404(Company, url_name=company)
     
     # check permissions: needs to be at least manager
-    if not has_permission(request.user, c, 50):
+    if not has_permission(request.user, c, 'discount', 'edit'):
         return no_permission_view(request, c, _("add discounts"))
     
     context = {
@@ -202,7 +202,7 @@ def edit_discount(request, company, discount_id):
     c = get_object_or_404(Company, url_name=company)
     
     # check permissions: needs to be at least manager
-    if not has_permission(request.user, c, 50):
+    if not has_permission(request.user, c, 'discount', 'edit'):
         return no_permission_view(request, c, _("edit discounts"))
     
     context = {
@@ -247,7 +247,7 @@ def delete_discount(request, company, discount_id):
     c = get_object_or_404(Company, url_name=company)
     
     # check permissions: needs to be at least manager
-    if not has_permission(request.user, c, 50):
+    if not has_permission(request.user, c, 'discount', 'edit'):
         return no_permission_view(request, c, _("delete discounts"))
     
     discount = get_object_or_404(Discount, id=discount_id)

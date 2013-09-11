@@ -43,7 +43,7 @@ def list_contacts(request, company):
     c = get_object_or_404(Company, url_name=company)
     
     # check permissions: needs to be guest
-    if not has_permission(request.user, c, 1):
+    if not has_permission(request.user, c, 'contact', 'list'):
         return no_permission_view(request, c, _("view contacts"))
     
     contacts = Contact.objects.filter(company__id=c.id)
@@ -97,7 +97,7 @@ def add_contact(request, company):
     c = get_object_or_404(Company, url_name=company)
     
     # check permissions: needs to be manager
-    if not has_permission(request.user, c, 50):
+    if not has_permission(request.user, c, 'contact', 'edit'):
         return no_permission_view(request, c, _("add contacts"))
     
     context = {
@@ -136,7 +136,7 @@ def edit_contact(request, company, contact_id):
     c = get_object_or_404(Company, url_name=company)
     
     # check permissions: needs to be guest
-    if not has_permission(request.user, c, 50):
+    if not has_permission(request.user, c, 'contact', 'edit'):
         return no_permission_view(request, c, _("edit contacts"))
     
     context = {
@@ -180,7 +180,7 @@ def delete_contact(request, company, contact_id):
     c = get_object_or_404(Company, url_name=company)
     
     # check permissions: needs to be manager
-    if not has_permission(request.user, c, 50):
+    if not has_permission(request.user, c, 'contact', 'edit'):
         return no_permission_view(request, c, _("delete contacts"))
     
     contact = get_object_or_404(Contact, id=contact_id)

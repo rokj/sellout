@@ -35,7 +35,7 @@ def products(request, company):
     c = get_object_or_404(Company, url_name = company)
     
     # needs to be ay least guest to view products
-    if not has_permission(request.user, c, 1):
+    if not has_permission(request.user, c, 'product', 'list'):
         return no_permission_view(request, c, _("view products"))
     
     context = {
@@ -45,7 +45,7 @@ def products(request, company):
         # urls for ajax calls
         'add_url':reverse('pos:create_product', args=[c.url_name]),
         # config variables 
-        'can_edit':has_permission(request.user, c, 10),  # must be a seller to edit products
+        'can_edit':has_permission(request.user, c, 'product', 'edit'),
         'default_tax':get_value(request.user, 'pos_default_tax'),
         'currency':get_value(request.user, 'pos_currency'),
     }
@@ -154,7 +154,7 @@ def get_product(request, company, product_id):
     c = get_object_or_404(Company, url_name = company)
     
     # permissions: needs to be guest to view products
-    if not has_permission(request.user, c, 1):
+    if not has_permission(request.user, c, 'product', 'list'):
         return error(_("You have no permission to view products"))
     
     product = get_object_or_404(Product, id = product_id, company = c)
@@ -165,7 +165,7 @@ def search_products(request, company):
     c = get_object_or_404(Company, url_name = company)
     
     # permissions: needs to be guest
-    if not has_permission(request.user, c, 1):
+    if not has_permission(request.user, c, 'product', 'list'):
         return error(_("You have no permission to view products"))
     
     # get all products from this company and filter them by entered criteria
@@ -386,7 +386,7 @@ def create_product(request, company):
     c = get_object_or_404(Company, url_name = company)
     
     # sellers can add product
-    if not has_permission(request.user, c, 10):
+    if not has_permission(request.user, c, 'product', 'edit'):
         return JSON_error(_("You have no permission to add products"))
 
     data = JSON_parse(request.POST['data'])
@@ -437,7 +437,7 @@ def edit_product(request, company, product_id):
     c = get_object_or_404(Company, url_name = company)
     
     # sellers can edit product
-    if not has_permission(request.user, c, 10):
+    if not has_permission(request.user, c, 'product', 'edit'):
         return JSON_error(_("You have no permission to edit products"))
 
     data = JSON_parse(request.POST['data'])
@@ -498,7 +498,7 @@ def delete_product(request, company, product_id):
     c = get_object_or_404(Company, url_name = company)
     
     # sellers can delete products
-    if not has_permission(request.user, c, 10):
+    if not has_permission(request.user, c, 'product', 'edit'):
         return JSON_error(_("You have no permission to delete products"))
     
     try:

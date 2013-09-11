@@ -82,31 +82,33 @@ def format_date(user, date):
 def permission_cache_key(user, company):
         return "permission_" + str(user.id) + "_" + str(company.id)
 
-def has_permission(user, company, required_level):
+def has_permission(user, company, model, task):
     """ returns True if the user has the required permissions
         for the given company, model and task
         
         model is a string
         
         task can be: 'list' or 'edit' (edit includes add, edit, delete)
-    
-        
+    """
+
+    # get permission from memcache... 
     ckey = permission_cache_key(user, company)
     permission = cache.get(ckey)
     
+    # ...or database
     if not permission:
         try:
             permission = Permission.objects.get(user__id=user.id)
             cache.set(ckey, permission)
         except Permission.DoesNotExist:
-            # no, user hasn't got it
+            # there's no entry in the database,
+            # therefore the user has no permissions whatsoever
             return False
-     
-    if permission.permission >= required_level:
+    
+    if model in g.PERMISSIONS[permission.permission][task]:
         return True
     else:
-        return False"""
-    return True
+        return False
 
 def no_permission_view(request, company, action):
     """ the view that is called if user attempts to do shady business without permission """
