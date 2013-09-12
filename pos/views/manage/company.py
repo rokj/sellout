@@ -185,6 +185,7 @@ class CompanyForm(forms.ModelForm):
                   'notes']
 
 # registration
+@login_required
 def register_company(request):
     # permissions: anybody can register a company
     
@@ -221,6 +222,7 @@ def register_company(request):
     return render(request, 'pos/manage/register.html', context)
 
 # edit after registration
+@login_required
 def edit_company(request, company):
     # get company, it must exist
     c = get_object_or_404(Company, url_name = company)

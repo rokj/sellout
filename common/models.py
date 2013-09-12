@@ -6,32 +6,38 @@ from django.utils.timezone import now
 
 # a custom object manager:
 class SkeletonManager(models.Manager):
-    #def filter(self, *args, **kwargs):
-    #    """ filter out results that were 'deleted' - their datetime_deleted is not None """
-    #    return super(SkeletonManager, self).get_query_set().filter(datetime_deleted=None).filter(*args, **kwargs)
+    """ filter out results that were 'deleted' - their datetime_deleted is not None """
+    def get_query_set(self):
+        return super(SkeletonManager, self).get_query_set().filter(datetime_deleted=None)
     
-    #def delete(self):
-    #    """ instead of deleting objects from database, just set their datetime_deleted to now() """
-    #    print "custom delete method"
-    #    self.datetime_deleted = now()
-    #    self.save()
-    pass
-    #def get_query_set(self):
-    #    return super(SkeletonManager, self).get_query_set().filter(datetime_deleted=None)
+    #def delete(self): this method is not called from here (see Skeleton.delete())
     
-    #def all_with_deleted(self):
-    #    return super(SkeletonManager, self).get_query_set()
-    
-    #def deleted_set(self):
-    #    return super(SkeletonManager, self).get_query_set().filter(datetime_deleted)
-        
-        
+    def deleted(self, *args, **kwargs):
+        """ in case anyone will want to see deleted objects """
+        return super(SkeletonManager, self).get_query_set().filter(*args, **kwargs).exclude(datetime_deleted=None)
 
 class Skeleton(models.Model):
-    datetime_created = models.DateTimeField(auto_now=False, auto_now_add=True, null=False, blank=False)
-    datetime_updated = models.DateTimeField(auto_now=True, auto_now_add=True, null=False, blank=False)
+    #datetime_created = models.DateTimeField(auto_now=False, auto_now_add=True, null=False, blank=False)
+    #datetime_updated = models.DateTimeField(auto_now=True, auto_now_add=True, null=False, blank=False)
+    #datetime_deleted = models.DateTimeField(null=True, blank=True)
+    # removed auto_now and auto_now_add field attributes: http://stackoverflow.com/questions/1737017/django-auto-now-and-auto-now-add
+    datetime_created = models.DateTimeField(null=False, blank=True)
+    datetime_updated = models.DateTimeField(null=True, blank=True) # only set updated after first editing - after first save()
     datetime_deleted = models.DateTimeField(null=True, blank=True)
 
+    def save(self, *args, **kwargs): 
+        """ add datetime_created on first and datetime_updated on each subsequent save """
+        if not self.id:
+            self.datetime_created = now()
+        else:
+            self.datetime_updated = now()
+        return super(Skeleton, self).save(*args, **kwargs)
+
+    def delete(self):
+        # just set datetime_deleted to now()
+        self.datetime_deleted=now()#.replace(tzinfo=timezone('utc'))
+        self.save()
+    
     objects = SkeletonManager()
     
     class Meta:

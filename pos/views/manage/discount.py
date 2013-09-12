@@ -48,7 +48,8 @@ def discount_to_dict(user, d):
         'end_date':format_date(user, d.end_date),
         'active':d.active,
     }
-    
+
+@login_required
 def JSON_discounts(request, company, product_id=None):
     # send all available discounts for this company
     # available:
@@ -93,6 +94,7 @@ class DiscountFilterForm(forms.Form):
     end_date = forms.DateField(required=False)
     active = forms.NullBooleanField(required=False)
 
+@login_required
 def list_discounts(request, company):
     c = get_object_or_404(Company, url_name=company)
     
@@ -154,6 +156,7 @@ def list_discounts(request, company):
 
     return render(request, 'pos/manage/discounts.html', context) 
 
+@login_required
 def add_discount(request, company):
     c = get_object_or_404(Company, url_name=company)
     
@@ -196,7 +199,7 @@ def add_discount(request, company):
     
     return render(request, 'pos/manage/discount.html', context)
 
-
+@login_required
 def edit_discount(request, company, discount_id):
     # edit an existing contact
     c = get_object_or_404(Company, url_name=company)
@@ -243,6 +246,7 @@ def edit_discount(request, company, discount_id):
     
     return render(request, 'pos/manage/discount.html', context)
 
+@login_required
 def delete_discount(request, company, discount_id):
     c = get_object_or_404(Company, url_name=company)
     

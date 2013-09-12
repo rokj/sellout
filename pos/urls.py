@@ -45,7 +45,12 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/products/get/(?P<product_id>\d+)/?$', manage.product.get_product, name='get_product'), # product list (search) - json
     url(r_company + r'/manage/json/products/edit/(?P<product_id>\d+)/?$', manage.product.edit_product, name='edit_product'), # edit (save) product - json
     url(r_company + r'/manage/json/products/delete/(?P<product_id>\d+)/?$', manage.product.delete_product, name='delete_product'), # edit (save) product - json
+    # users
+    #url(r_company + _('/manage/users') + '/?$', manage.users.edit_company, name='edit_users'), # company
     # config
+    url(r_company + _('/manage/configuration') + '/?$', manage.configuration.edit_configuration, name='edit_config'), # company
+    
+    
     # misc (ajax): urls not translated
     # categories list
     url(r_company + r'/manage/json/categories/?$', manage.product.JSON_categories, name='JSON_categories'),

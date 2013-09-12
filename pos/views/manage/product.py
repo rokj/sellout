@@ -22,15 +22,18 @@ from config.functions import get_value
 import datetime as dtm
 import decimal as d
 import pytz
+import sys
 
 
 ###############
 ## products ###
 ###############
+@login_required
 def JSON_units(request, company):
     # at the moment, company is not needed
     return JSON_response(g.UNITS) # G units!
-    
+
+@login_required
 def products(request, company):
     c = get_object_or_404(Company, url_name = company)
     
@@ -139,8 +142,6 @@ def update_price(product, user, new_unit_price):
             return old_price
     
         # update the old price
-        old_price.date_updated = dtm.datetime.now() \
-                .replace(tzinfo=pytz.timezone(get_value(user, 'pos_timezone')))
         old_price.save()
             
     # create new
@@ -148,8 +149,10 @@ def update_price(product, user, new_unit_price):
                       product = product,
                       unit_price = new_unit_price)
     new_price.save()
+    
     return new_price
 
+@login_required
 def get_product(request, company, product_id):
     c = get_object_or_404(Company, url_name = company)
     
@@ -160,7 +163,8 @@ def get_product(request, company, product_id):
     product = get_object_or_404(Product, id = product_id, company = c)
     
     return JSON_response(product_to_dict(request.user, product))
-    
+
+@login_required
 def search_products(request, company):
     c = get_object_or_404(Company, url_name = company)
     
@@ -368,7 +372,6 @@ def validate_product(data, company):
     data['description'] = data['description'].strip()
     data['private_notes'] = data['private_notes'].strip()
     
-    
     try:
         data['tax'] = d.Decimal(data['tax'].strip())
     except:
@@ -380,7 +383,8 @@ def validate_product(data, company):
         return r(False, _("Check stock notation"))
     
     return {'status':True, 'data':data} 
-    
+
+@login_required
 def create_product(request, company):
     # create new product
     c = get_object_or_404(Company, url_name = company)
@@ -402,8 +406,8 @@ def create_product(request, company):
     except Category.DoesNotExist:
         return JSON_error(_("Category does not exist"))
     
-    # update product:
-    # TODO: image
+    # save product:
+    
     product = Product(
         company = c,
         created_by = request.user,
@@ -432,6 +436,7 @@ def create_product(request, company):
 
     return JSON_ok()
 
+@login_required
 def edit_product(request, company, product_id):
     # update existing product
     c = get_object_or_404(Company, url_name = company)
@@ -490,10 +495,13 @@ def edit_product(request, company, product_id):
     # price has to be updated separately
     product.price = update_price(product, request.user, data['price'])
     
+    product.updated_by = request.user
+    
     product.save()
 
     return JSON_ok()
 
+@login_required
 def delete_product(request, company, product_id):
     c = get_object_or_404(Company, url_name = company)
     

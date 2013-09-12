@@ -18,6 +18,7 @@ import common.globals as g
 ###################
 ### manage home ###
 ###################
+@login_required
 def manage_home(request, company):
     company = get_object_or_404(Company, url_name=company)
     

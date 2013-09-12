@@ -66,7 +66,7 @@ def format_number(n):
     """ returns formatted decimal number n;
         strips zeros, but leaves two numbers after decimal point even if they are zero
     """
-    s = str(n).strip('0')
+    s = str(n).rstrip('0')
     #                 add this many zeros to s
     return s + "0" * (s.index('.') - (len(s)-3))
 

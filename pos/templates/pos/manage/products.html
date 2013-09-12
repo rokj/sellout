@@ -169,7 +169,7 @@ $(document).ready(function(){
             // delete button
             delete_button.prop('disabled', false);
             delete_button.click(function(){
-                delete_product(product);
+                delete_product(parent);
             });
         }
         else{
@@ -210,7 +210,6 @@ $(document).ready(function(){
         // delete button
         btn_obj = $("<input>", {type:"button", value:"x","class":"delete_discount"});
         btn_obj.click(function(){
-            delete product.discounts[key]
             refresh_discounts(product);
         });
         li_obj.append(btn_obj);
@@ -433,7 +432,8 @@ $(document).ready(function(){
         }
     }
     
-    function delete_product(product){
+    function delete_product(parent){
+    	product = parent.data().product;
         // confirm deletion
         if(confirm("{% trans 'Delete product ' %} '" + product.name + "'?")){
             // TODO: GET or POST method? CSRF tokens? security?
@@ -441,8 +441,7 @@ $(document).ready(function(){
                 if(data.status != 'ok') alert(data.message);
                 else{
                     // remove the product's div and delete the variable
-                    product.parent.remove();
-                    delete product;
+                    parent.remove();
                 }
             });
         }

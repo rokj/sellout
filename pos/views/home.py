@@ -11,6 +11,7 @@ from pos.models import Company
 from django.http import HttpResponse
 
 ### index
+@login_required
 def terminal(request, company):
     c = get_object_or_404(Company, url_name=company)
     # TODO: site_title! (?)

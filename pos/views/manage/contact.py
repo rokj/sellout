@@ -13,7 +13,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from pos.models import Company, Contact
 from common import globals as g
 from config.functions import get_date_format, get_value
-from pos.views.util import error, has_permission, no_permission_view
+from pos.views.util import has_permission, no_permission_view
 
 ################
 ### contacts ###
@@ -39,6 +39,7 @@ class ContactFilterForm(forms.Form):
                              choices=g.CONTACT_TYPES)
     name = forms.CharField(required=False)
 
+@login_required
 def list_contacts(request, company):
     c = get_object_or_404(Company, url_name=company)
     
@@ -92,6 +93,7 @@ def list_contacts(request, company):
 
     return render(request, 'pos/manage/contacts.html', context) 
 
+@login_required
 def add_contact(request, company):
     # add a new contact
     c = get_object_or_404(Company, url_name=company)
@@ -130,7 +132,7 @@ def add_contact(request, company):
     
     return render(request, 'pos/manage/contact.html', context)
 
-
+@login_required
 def edit_contact(request, company, contact_id):
     # edit an existing contact
     c = get_object_or_404(Company, url_name=company)
@@ -176,6 +178,7 @@ def edit_contact(request, company, contact_id):
     
     return render(request, 'pos/manage/contact.html', context)
 
+@login_required
 def delete_contact(request, company, contact_id):
     c = get_object_or_404(Company, url_name=company)
     
