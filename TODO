@@ -1,5 +1,4 @@
 - ! - tablet support
-- login_required & security etc.
 - updated_by for update views
 - <[ CDATA for <javascript>
 - change underscores for HTML and CSS ids and classes to dashes (django forms use underscores ?!)
@@ -16,15 +15,16 @@
 - DONE product.shop_code = unique - test for this and return error if not
 
 SECURITY:
- - login_required
- - check permissions for edit etc.
+ - DONE login_required
+ - DONE check permissions for edit etc.
 
 CONFIGURATION VARIABLES:
  - DONE no. of contacts per page
  - DONE no. of discounts per page
  - DONE currency ($ €, ...)
- - default tax (?)
+ - DONE default tax (?)
  - DONE date format
+ - DONE decimal separator
  
 OPTIMIZE:
  - memcached:

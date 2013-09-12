@@ -5,11 +5,12 @@ from django.core.cache import cache
 from django.http import HttpResponse
 
 from common import globals as g
-from config.functions import get_date_format
+from config.functions import get_date_format, get_value
 from pos.models import Permission
 
 import json
 import Image # PIL or pillow must be installed
+from decimal import Decimal
 
 # requests and responses
 def error(request, message):
@@ -61,14 +62,15 @@ def validate_image(obj): # obj is actually "self"
     
     return image
 
-# number output: show only non-zero decimal places
-def format_number(n):
+# numbers
+def format_number(user, n):
     """ returns formatted decimal number n;
         strips zeros, but leaves two numbers after decimal point even if they are zero
     """
-    s = str(n).rstrip('0')
+    sep = get_value(user, 'pos_decimal_separator')
+    s = str(n).rstrip('0').replace('.', sep)
     #                 add this many zeros to s
-    return s + "0" * (s.index('.') - (len(s)-3))
+    return s + "0" * (s.index(sep) - (len(s)-3))
 
 def format_date(user, date):
     """ formats date for display according to user's settings """
@@ -77,6 +79,20 @@ def format_date(user, date):
     else:
         return date.strftime(get_date_format(user, 'python'))
 
+def parse_decimal(user, string):
+    """ replace user's decimal separator with dot and parse
+        return dictionary with result status and parsed number:
+        
+        {'success':True/False, number:<num>/None}
+    """
+    
+    string = string.replace(get_value(user, 'pos_decimal_separator'), '.')
+    
+    try:
+        number = Decimal(string)
+        return {'success':True, 'number':number}
+    except:
+        return {'success':False, 'number':None}
 
 # permissions: cached
 def permission_cache_key(user, company):

@@ -94,7 +94,7 @@ class ProductImage(SkeletonU):
 class ProductAbstract(SkeletonU):
     """ used for product and bill item """
     code = models.CharField(_("Product code"), max_length=30, blank=False, null=False)
-    shop_code = models.IntegerField(_("Store's internal product number"), blank=False, null=True)
+    shop_code = models.CharField(_("Store's internal product number"), max_length=5, blank=False, null=True)
     name = models.CharField(_("Product name"), max_length=50, blank=False, null=False)
     description = models.TextField(_("Product description"), blank=True, null=True)
     private_notes = models.TextField(_("Notes (only for internal use)"), null=True, blank=True)
@@ -137,18 +137,19 @@ class Price(SkeletonU):
     product = models.ForeignKey(Product)
     unit_price = models.DecimalField(_("Price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],
                                      decimal_places=g.DECIMAL['currency_decimal_places'], blank=False, null=False)
-    date_updated = models.DateTimeField(blank=True, null=True) # determines whether that's the current price for product (if this field is empty)
+    # use Skeleton.datetime_updated() instead of this: (the same functionality)
+    # date_updated = models.DateTimeField(blank=True, null=True) # determines whether that's the current price for product (if this field is empty)
     
     def __unicode__(self):
         ret = self.product.name + ": " + str(self.unit_price)
 
-        if self.date_updated:
+        if self.datetime_updated:
             ret += " (inactive)"
 
         return ret
     
     class Meta:
-        unique_together = (('product', 'unit_price', 'date_updated'),)
+        unique_together = (('product', 'unit_price', 'datetime_updated'),)
        
 ### contacts ###
 class Contact(SkeletonU):

@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 
 class Config(SkeletonU):
     user = models.ForeignKey(User)
+    
     # all settings are stored in json format
     data = models.TextField(null=False)
     

@@ -43,7 +43,7 @@ def discount_to_dict(user, d):
         'description':d.description,
         'code':d.code,
         'type':d.type,
-        'amount':format_number(d.amount),
+        'amount':format_number(user, d.amount),
         'start_date':format_date(user, d.start_date),
         'end_date':format_date(user, d.end_date),
         'active':d.active,
@@ -77,6 +77,11 @@ def JSON_discounts(request, company, product_id=None):
 ### views ###
 #############
 class DiscountForm(forms.ModelForm):
+    TODO DOOTDOOTDO ODOTODO
+    def clean_amount(self):
+        print "cleaning"
+        return '10'
+    
     class Meta:
         model = Discount
         fields = ['description',
@@ -194,7 +199,7 @@ def add_discount(request, company):
         form = DiscountForm()
         
     context['form'] = form
-    context['company'] = company
+    context['company'] = c
     context['add'] = True
     
     return render(request, 'pos/manage/discount.html', context)

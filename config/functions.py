@@ -27,7 +27,8 @@ defaults = {
     'pos_currency':"$",
     'pos_contacts_per_page':10,
     'pos_discounts_per_page':10,
-    'pos_default_tax':0.0,
+    'pos_default_tax':'0.0',
+    'decimal_separator':'.',
 }
     
 # caching helpers
@@ -102,7 +103,7 @@ def get_value(user, key):
 def set_value(user, key, value):
     data = get_config(user)
     data[key] = value
-    save_config(user) # memcache is handled in save_cofig
+    save_config(user, data) # memcache is handled in save_cofig
 
 # shortcuts: date format
 def get_date_format(user, variant):

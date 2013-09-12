@@ -12,7 +12,7 @@ from django.db.models import Q
 from pos.models import Company, Category, Discount, Product, Price
 from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
-                           format_number
+                           format_number, parse_decimal
 from pos.views.manage.category import get_all_categories, JSON_categories
 from pos.views.manage.discount import is_discount_valid, discount_to_dict, JSON_discounts
 
@@ -75,8 +75,8 @@ def product_to_dict(user, product):
     ret['id'] = product.id
     
     try: # only the last price from the price table
-        price = Price.objects.filter(product__id=product.id).order_by('-date_updated')[0]
-        price = format_number(price.unit_price)
+        price = Price.objects.filter(product__id=product.id).order_by('-datetime_updated')[0]
+        price = format_number(user, price.unit_price)
     except:
         price = ''
         pass
@@ -113,9 +113,9 @@ def product_to_dict(user, product):
         ret['unit_type'] = product.unit_type
         ret['unit_type_display'] = product.get_unit_type_display()
     if product.tax:
-        ret['tax'] = format_number(product.tax)
+        ret['tax'] = format_number(user, product.tax)
     if product.stock:
-        ret['stock'] = format_number(product.stock)
+        ret['stock'] = format_number(user, product.stock)
     
     # urls
     ret['get_url'] = reverse('pos:get_product', args=[product.company.url_name, product.id])
@@ -127,12 +127,12 @@ def product_to_dict(user, product):
 def update_price(product, user, new_unit_price):
     """ set a new price for product:
          - if there's no price, just create new
-         - if there is a price, update its date_updated to now() and create new
+         - if there is a price, update its datetime_updated to now() and create new
            (only if value is different)
          - return current price
     """
     try:
-        old_price = Price.objects.get(product=product, date_updated=None)
+        old_price = Price.objects.get(product=product, datetime_updated=None)
     except Price.DoesNotExist:
         old_price = None
 
@@ -141,7 +141,7 @@ def update_price(product, user, new_unit_price):
             # nothing has changed, so do nothing
             return old_price
     
-        # update the old price
+        # update the old price (datetime_updated will be set)
         old_price.save()
             
     # create new
@@ -234,7 +234,7 @@ def search_products(request, company):
             products = products.filter( \
                 pk__in=Price.objects.filter( \
                     unit_price=d.Decimal(\
-                        criteria.get('price_filter'))).order_by('-date_updated')[:1])
+                        criteria.get('price_filter'))).order_by('-datetime_updated')[:1])
             #filter_by_price = True
         except Price.DoesNotExist:
             pass
@@ -289,7 +289,7 @@ def search_products(request, company):
 
     return JSON_response(ps)
 
-def validate_product(data, company):
+def validate_product(user, company, data):
     # data format (*-validation needed):
     # id
     # name*
@@ -326,10 +326,12 @@ def validate_product(data, company):
     data['name'] = data['name'].strip()
     
     # price
-    try:
-        data['price'] = d.Decimal(data['price'])
-    except:
+    # replace decimal separator with dot
+    ret = parse_decimal(user, data['price'])
+    if not ret['success']:
         return r(False, _("Check price notation"))
+    else:
+        data['price'] = ret['number']
         
     # unit type (probably doesn't need checking
     if not data['unit_type'] in dict(g.UNITS):
@@ -356,11 +358,6 @@ def validate_product(data, company):
     data['shop_code'] = data['shop_code'].strip()
     if data['shop_code']:
         try:
-            data['shop_code'] = int(data['shop_code'])
-        except:
-            return r(False, _("Check shop code"))
-        
-        try:
             p = Product.objects.get(company=company, shop_code=data['shop_code'])
             if p.id != data['id']:
                 return r(False,
@@ -372,16 +369,19 @@ def validate_product(data, company):
     data['description'] = data['description'].strip()
     data['private_notes'] = data['private_notes'].strip()
     
-    try:
-        data['tax'] = d.Decimal(data['tax'].strip())
-    except:
+    ret = parse_decimal(user, data['tax'])
+    if not ret['success']:
         return r(False, _("Check tax notation"))
+    else:
+        data['tax'] = ret['number']
     
-    try:
-        data['stock'] = d.Decimal(data['stock'].strip())
-    except:
+    # stock
+    ret = parse_decimal(user, data['stock'])
+    if not ret['success']:
         return r(False, _("Check stock notation"))
-    
+    else:
+        data['stock'] = ret['number']
+        
     return {'status':True, 'data':data} 
 
 @login_required
@@ -396,7 +396,7 @@ def create_product(request, company):
     data = JSON_parse(request.POST['data'])
     
     # validate data
-    valid = validate_product(data, c)
+    valid = validate_product(request.user, c, data)
     if not valid['status']:
         return JSON_error(valid['message'])
     data = valid['data']
@@ -454,7 +454,7 @@ def edit_product(request, company, product_id):
         return JSON_error(_("Product does not exist"))
     
     # validate data
-    valid = validate_product(data, c)
+    valid = validate_product(request.user, c, data)
     if not valid['status']:
         return JSON_error(valid['message'])
     data = valid['data']
