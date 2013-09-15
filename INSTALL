@@ -1,3 +1,4 @@
 REQUIREMENTS:
+ - pillow (DO NOT install using pip - use easy_install)
  - unidecode (unicode to ascii module)
  - pytz (time zone collection)

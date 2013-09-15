@@ -150,7 +150,7 @@ def url_name_suggestions(request):
 ### company ###
 ###############
 class CompanyForm(forms.ModelForm):
-    # take special case of urls
+    # take special care of urls
     def clean_url_name(self):
         url_name = self.cleaned_data['url_name']
         
@@ -241,7 +241,8 @@ def edit_company(request, company):
         if form.is_valid():
             # save form and resize image to the maximum size that will ever be needed
             form.save()
-            resize_image(c.image.path, g.IMAGE_DIMENSIONS['logo'])
+            if c.image:
+                resize_image(c.image.path, g.IMAGE_DIMENSIONS['logo'])
             # for an eventual message for the user
             context['saved'] = True
             # if url_name was changed, redirect to new address

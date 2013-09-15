@@ -60,6 +60,11 @@ class Category(SkeletonU):
     
     class Meta:
         verbose_name_plural = _("Categories")
+    
+    # only used once for debugging - will not be needed with Pillow (debugged with PIL) 
+    #def get_thumbnail(self, size):
+    #    from easy_thumbnails.files import get_thumbnailer
+    #    get_thumbnailer(self.image)[size].url
 
 class CategoryAttribute(SkeletonU):
     category = models.ForeignKey(Category)
@@ -73,14 +78,17 @@ class CategoryAttribute(SkeletonU):
 class Discount(SkeletonU):
     company = models.ForeignKey(Company)
     description = models.TextField(_("Discount description"), null=True, blank=True)
-    code = models.CharField(_("Discount code"), max_length=50, null=True, blank=True)
+    code = models.CharField(_("Code"), max_length=50, null=True, blank=True)
     type = models.CharField(_("Discount type"), max_length=30, choices=g.DISCOUNT_TYPES, null=False, blank=False, default=g.DISCOUNT_TYPES[0][0])
-    amount = models.DecimalField(_("Discount amount"),
+    amount = models.DecimalField(_("Amount"),
                                  max_digits=g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
                                  null=False, blank=False)
-    start_date = models.DateField(_("Discount start date"), null=True, blank=True)
-    end_date = models.DateField(_("Discount end date"), null=True, blank=True)
+    start_date = models.DateField(_("Start date"), null=True, blank=True)
+    end_date = models.DateField(_("End date"), null=True, blank=True)
     active = models.BooleanField(_("Active"), null=False, blank=True, default=True)
+    
+    class Meta:
+        unique_together = (('company', 'code'),)
     
     def __unicode__(self):
         return self.code + " " + self.description

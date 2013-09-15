@@ -21,9 +21,9 @@ class Skeleton(models.Model):
     #datetime_updated = models.DateTimeField(auto_now=True, auto_now_add=True, null=False, blank=False)
     #datetime_deleted = models.DateTimeField(null=True, blank=True)
     # removed auto_now and auto_now_add field attributes: http://stackoverflow.com/questions/1737017/django-auto-now-and-auto-now-add
-    datetime_created = models.DateTimeField(null=False, blank=True)
-    datetime_updated = models.DateTimeField(null=True, blank=True) # only set updated after first editing - after first save()
-    datetime_deleted = models.DateTimeField(null=True, blank=True)
+    datetime_created = models.DateTimeField(null=False, blank=True, editable=False) # editable = false: never show in forms
+    datetime_updated = models.DateTimeField(null=True, blank=True, editable=False) # only set updated after first editing - after first save()
+    datetime_deleted = models.DateTimeField(null=True, blank=True, editable=False)
 
     def save(self, *args, **kwargs): 
         """ add datetime_created on first and datetime_updated on each subsequent save """

@@ -137,8 +137,8 @@ $(document).ready(function(){
             li_obj.append(product.discounts[key].code + " " +
                 discount_amount(product.discounts[key]));
             
-            // tooltip: discount description
-            li_obj.tooltip({content:product.discounts[key].description});
+            // tooltip:
+            discount_tooltip(product.discounts[key], li_obj);
             tmp_obj.append(li_obj);
         }
         
@@ -186,34 +186,45 @@ $(document).ready(function(){
         else return " ({{currency}} " + discount.amount + ")";
     }
     
+    function discount_tooltip(discount, li_obj){
+    	// tooltip - discount details
+        var tooltip = "";
+        
+        // tooltip = discount.code + "<br/>" // discount code (already in the <li>)
+        tooltip += discount.description + "<br/>" // description
+        
+        // if no dates are set, show 'no date limit', otherwise 'from ... to ...'
+        if(!discount.start_date && !discount.end_date){
+        	tooltip += "{% trans 'No date limits' %}"
+        }
+        else{
+        	if(discount.start_date) tooltip += "{% trans 'from' %} " + discount.start_date 
+    		if(discount.end_date) tooltip += " {% trans 'to' %} " + discount.end_date
+        }
+        
+        // TODO: set style for inactive discount
+        if(!discount.active) tooltip += "<br/>{% trans 'inactive' %}" // active
+        
+        li_obj.tooltip({content:tooltip});
+    }
+    
     function add_discount(ul_obj, product, key){
         // add a list item and a delete link to product edit dialog
         if(!product.discounts[key]) return;
         else discount = product.discounts[key];
         
-        // tooltip - discount details
-        var tooltip = "";
-        
-        tooltip = discount.code + "<br/>" // discount code
-        tooltip += discount.description + "<br/>" // description
-        tooltip += discount.start_date + " - " + discount.end_date // start and end date
-        // TODO: set style for inactive discount
-        if(!discount.active) tooltip += "<br/>{% trans 'inactive' %}" // active
-
-        dt = discount.code + " " + discount_amount(discount);
-        
         li_obj = $("<li>", {title:""});
-        li_obj.append(dt);
-        li_obj.tooltip({content:tooltip});
         li_obj.data({id:discount.id}); // store id in data() for later retrieval
+        
+        discount_tooltip(discount, li_obj);
         
         // delete button
         btn_obj = $("<input>", {type:"button", value:"x","class":"delete_discount"});
         btn_obj.click(function(){
             refresh_discounts(product);
         });
+        li_obj.append(discount.code + " " + discount_amount(discount));
         li_obj.append(btn_obj);
-        
         ul_obj.append(li_obj);
     }
     

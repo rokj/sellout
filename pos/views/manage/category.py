@@ -195,7 +195,7 @@ def edit_category(request, company, category_id):
             if category.image:
                 resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
             
-            return redirect('pos:list_categories', company=c)
+            return redirect('pos:list_categories', company=c.url_name)
     else:
         if category:
             form = CategoryForm(instance=category) # update existing category
@@ -214,7 +214,7 @@ def edit_category(request, company, category_id):
 def delete_category(request, company, category_id):
     c = get_object_or_404(Company, url_name=company)
     
-     # check permissions: needs to be at least manager
+    # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'category', 'edit'):
         return no_permission_view(request, c, _("delete categories"))
     

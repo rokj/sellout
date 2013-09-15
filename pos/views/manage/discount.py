@@ -12,7 +12,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from pos.models import Company, Discount
 from pos.views.util import error, JSON_response, has_permission, no_permission_view,\
-                           format_number, format_date
+                           format_number, format_date, parse_decimal
 from common import globals as g
 from config.functions import get_date_format, get_value
 
@@ -77,12 +77,42 @@ def JSON_discounts(request, company, product_id=None):
 ### views ###
 #############
 class DiscountForm(forms.ModelForm):
-    TODO DOOTDOOTDO ODOTODO
+    user = None
+    company = None
+    
+    # override the amount widget with plain text and clean manually;
+    # this is to support arbitrary decimal separators
+    amount = forms.CharField(max_length = g.DECIMAL['currency_digits'])
+    
     def clean_amount(self):
-        print "cleaning"
-        return '10'
+        r = parse_decimal(self.user, self.cleaned_data['amount'])
+        if not r['success']:
+            raise forms.ValidationError(_("Check amount"))
+        else:
+            return r['number']
+    
+    def clean_code(self):
+        
+        
+        
+
+        code = self.cleaned_data['code']
+        
+        if 'code' in self.initial:
+            # this discount is being edited
+            if code == self.initial['code']:
+                # and code hasn't been changed
+                return code 
+        
+        if Discount.objects.filter(company=self.company, code=code).exists():
+            raise forms.ValidationError(_("A discount with this code already exists"))
+        else:
+            return code
     
     class Meta:
+        # override the decimal field for custom decimal separator
+        amount = forms.CharField()
+        
         model = Discount
         fields = ['description',
                   'code',
@@ -183,20 +213,24 @@ def add_discount(request, company):
     if request.method == 'POST':
         # submit data
         form = DiscountForm(request.POST)
+        form.user = request.user
+        form.company = c
         
         if form.is_valid():
+            discount = form.save(False)
             # created_by and company_id
-            contact = form.save(False)
             if 'created_by' not in form.cleaned_data:
-                contact.created_by = request.user
+                discount.created_by = request.user
             if 'company_id' not in form.cleaned_data:
-                contact.company_id = c.id
+                discount.company_id = c.id
         
             form.save()
             
             return redirect('pos:list_discounts', company=c.url_name)
     else:
         form = DiscountForm()
+        form.user = request.user
+        form.company = c
         
     context['form'] = form
     context['company'] = c
@@ -232,6 +266,8 @@ def edit_discount(request, company, discount_id):
     if request.method == 'POST':
         # submit data
         form = DiscountForm(request.POST, instance=discount)
+        form.user = request.user
+        form.company = c
         
         if form.is_valid():
             # created_by and company_id
@@ -246,6 +282,8 @@ def edit_discount(request, company, discount_id):
             return redirect('pos:list_discounts', company=c.url_name)
     else:
         form = DiscountForm(instance=discount)
+        form.user = request.user
+        form.company = c
         
     context['form'] = form
     
