@@ -28,7 +28,7 @@ defaults = {
     'pos_contacts_per_page':10,
     'pos_discounts_per_page':10,
     'pos_default_tax':'0.0',
-    'decimal_separator':'.',
+    'pos_decimal_separator':'.',
 }
     
 # caching helpers

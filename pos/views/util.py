@@ -62,6 +62,21 @@ def validate_image(obj): # obj is actually "self"
     
     return image
 
+def image_from_base64(data):
+    # data is in this format:
+    # data:image/<ext>;base64,<image data>
+    requested_header = "data:image/" + g.MISC['image_format'] + ";base64,"
+    header_length = len(requested_header)
+    header = data[:header_length]
+    
+    if header != requested_header:
+        return None
+    
+    data = data[header_length:]
+    
+    return data.decode("base64")
+    
+
 # numbers
 def format_number(user, n):
     """ returns formatted decimal number n;

@@ -53,11 +53,11 @@ urlpatterns = patterns('',
     
     # misc (ajax): urls not translated
     # categories list
-    url(r_company + r'/manage/json/categories/?$', manage.product.JSON_categories, name='JSON_categories'),
+    url(r_company + r'/manage/json/categories/?$', manage.category.JSON_categories, name='JSON_categories'),
     # unit types list
     url(r_company + r'/manage/json/units/?$', manage.product.JSON_units, name='JSON_units'),
     # available discounts list
-    url(r_company + r'/manage/json/discounts/?$', manage.product.JSON_discounts, name='JSON_discounts'),
+    url(r_company + r'/manage/json/discounts/?$', manage.discount.JSON_discounts, name='JSON_discounts'),
     
     
 )

@@ -94,10 +94,11 @@ class Discount(SkeletonU):
         return self.code + " " + self.description
 
 ### product ###
-class ProductImage(SkeletonU):
-    description = models.TextField(_('Image description'), blank=True, null=True)
-    image = models.ImageField(upload_to=get_image_path(g.DIRS['product_image_dir'], "pos_productimage"), null=False)
-    original_filename = models.CharField(_('Original filename'), max_length=255, blank=True, null=True)
+# so far, one image per product is enough (pos != store)
+#class ProductImage(SkeletonU):
+#    description = models.TextField(_('Image description'), blank=True, null=True)
+#    image = models.ImageField(upload_to=get_image_path(g.DIRS['product_image_dir'], "pos_productimage"), null=False)
+#    original_filename = models.CharField(_('Original filename'), max_length=255, blank=True, null=True)
 
 class ProductAbstract(SkeletonU):
     """ used for product and bill item """
@@ -125,9 +126,9 @@ class Product(ProductAbstract):
         decimal_places=g.DECIMAL['quantity_decimal_places'],
         null=False, blank=False)
     image = models.ImageField(_("Icon"),
-                             upload_to=get_image_path(g.DIRS['product_icon_dir'], "pos_productimage"),
-                             null=True, blank=True)
-    images = models.ManyToManyField(ProductImage, null=True, blank=True)
+         upload_to=get_image_path(g.DIRS['product_icon_dir'], "pos_product"),
+         null=True, blank=True)
+    # images = models.ManyToManyField(ProductImage, null=True, blank=True) # one image per product is enough
     
     def __unicode__(self):
         return self.name
@@ -329,7 +330,7 @@ def copy_bill_to_history(bill_id):
 @receiver(pre_save, sender=Category)
 @receiver(pre_save, sender=Company)
 @receiver(pre_save, sender=Product)
-@receiver(pre_save, sender=ProductImage)
+#@receiver(pre_save, sender=ProductImage)
 def cleanup_images(**kwargs):
     # if image was deleted or changed, add previous filename and path
     # to config.Cleanup model. Cleanup will delete listed objects on post_save() signal.

@@ -7,7 +7,7 @@ from django.utils.translation import ugettext as _
 DIRS = { # goes to MEDIA folder
     'logo_dir':"img/logo",
     'category_icon_dir':"img/category",
-    'product_icon_dir':'img_product',
+    'product_icon_dir':'img/product',
     'product_image_dir':"img/product",
 }
 
@@ -116,7 +116,8 @@ MISC = {
 
 IMAGE_DIMENSIONS = {
     'logo':(180, 180),
-    'category':(160, 160)
+    'category':(160, 160),
+    'product':(120,120),
 }
 
 # premissions

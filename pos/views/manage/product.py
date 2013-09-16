@@ -12,17 +12,14 @@ from django.db.models import Q
 from pos.models import Company, Category, Discount, Product, Price
 from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
-                           format_number, parse_decimal
-from pos.views.manage.category import get_all_categories, JSON_categories
-from pos.views.manage.discount import is_discount_valid, discount_to_dict, JSON_discounts
+                           format_number, parse_decimal, image_from_base64
+from pos.views.manage.discount import discount_to_dict
 
 from common import globals as g
 from config.functions import get_value
 
-import datetime as dtm
 import decimal as d
-import pytz
-import sys
+import os
 
 
 ###############
@@ -51,6 +48,9 @@ def products(request, company):
         'can_edit':has_permission(request.user, c, 'product', 'edit'),
         'default_tax':get_value(request.user, 'pos_default_tax'),
         'currency':get_value(request.user, 'pos_currency'),
+        # images
+        'image_dimensions':g.IMAGE_DIMENSIONS['product'],
+        'image_format':g.MISC['image_format'],
     }
     return render(request, 'pos/manage/products.html', context)
 
@@ -90,10 +90,24 @@ def product_to_dict(user, product):
 
     ret['discounts'] = discounts
     
-    # check if product's image exists
-    # TODO: better image handling
-    if product.image:
-        ret['image'] = product.image.url
+    if product.image: # check if product's image exists
+        # TODO: thumbnails
+        # get the thumbnail and encode it to base64
+        
+        from easy_thumbnails.files import get_thumbnailer
+
+        thumbnailer = get_thumbnailer(product.image.path)
+        image_path = thumbnailer.get_thumbnail({'crop': True, 'size':g.IMAGE_DIMENSIONS['product']}).name
+ 
+        with open(image_path, "rb") as f:
+            # get thumbnail from the required image
+                        
+            # get extension
+            extension = os.path.splitext(image_path)[-1] # extension is in the last item
+            extension = extension[1:] # omit the dot
+            
+            # first, send file type and data:image/png;base64,<then comes the base64 encoded image>
+            ret['image'] = "data:image/%s;base64,%s"%(extension,f.read().encode("base64"))
     
     # category?
     if product.category:
@@ -274,7 +288,7 @@ def search_products(request, company):
         if not filter_by_description:
             f = f | Q(description__icontains=w)
         if not filter_by_category:
-            f = f | Q(category__name=w)
+            f = f | Q(category__name__icontains=w)
 
         if f:
             products = products.filter(f)
@@ -337,7 +351,7 @@ def validate_product(user, company, data):
     if not data['unit_type'] in dict(g.UNITS):
         return r(False, _("Invalid unit type"))
 
-    # TODO: image
+    # image: TODO 
     
     # code: must exist and must be unique
     data['code'] = data['code'].strip()
@@ -485,7 +499,16 @@ def edit_product(request, company, product_id):
         except Discount.DoesNotExist:
             pass
 
-    # TODO: image
+    # image
+    if 'image' in data: # a new image to save
+        from django.core.files.base import ContentFile
+        product.image.save('tmp_name',
+            ContentFile(image_from_base64(data['image']), 'fakename'),
+            save=False)
+    else:
+        product.image.delete()
+        
+    # category
     try:
         category = Category.objects.get(id=data['category'])
         product.category = category

@@ -122,7 +122,9 @@ $(document).ready(function(){
         tmp_obj.append("{% trans 'Price' %}: {{ currency }}" + product.price +
                 " / " + product.unit_type_display);
         
-        // image TODO
+        // image
+        $(".product_image", div_obj).append(
+            $("<img>", {"src":product.image, "alt":product.name}));
         // category
         $(".product_category", div_obj).append("{% trans 'Category' %}: " + product.category);
         // tax
@@ -146,7 +148,8 @@ $(document).ready(function(){
         $(".product_private_notes", div_obj).append(product.private_notes);
         // stock
         if(product.stock){
-            $(".product_stock", div_obj).append(product.stock + " {% trans 'left in stock' %}");
+            $(".product_stock", div_obj).append(product.stock + " " + 
+                product.unit_type_display + " {% trans 'left in stock' %}");
         }
         
         // shop code
@@ -316,7 +319,46 @@ $(document).ready(function(){
             sel_obj.append(opt_obj);
         }
         
-        // TODO: images (?)
+        // image: if there is no images, hide the delete button
+        del_obj = $("#edit_product_delete_image", edit_obj);
+        upl_obj = $("#edit_product_image_upload", edit_obj);
+        img_obj = $("#edit_product_image", edit_obj);
+        
+        product.image_changed = false; // don't handle images if it wasn't changed (too much overhead)
+        
+        // preview image before upload
+        upl_obj.unbind().change(function(){
+            preview_image(this, "#edit_product_image", {{ image_dimensions.0 }}, {{ image_dimensions.1 }})
+            product.image_changed = true;
+            
+            del_obj.show();
+            upl_obj.hide();
+        });
+        
+        del_obj.unbind().click(function(){
+            // delete image source and name
+            img_obj.attr("src", "");
+            img_obj.attr("alt", "");
+            
+            del_obj.hide();
+            upl_obj.show();
+            
+            product.image = true;
+        });
+        
+        if(product.image){
+        	// product already has an image: show it
+        	$("#edit_product_image", edit_obj).attr("src", product.image);
+        	
+        	// show delete button
+        	upl_obj.hide();
+            del_obj.show();
+        }
+        else{
+        	// no image for this product: show upload <input>
+        	del_obj.hide();
+        	upl_obj.show();
+        }
         
         // tax
         $("#edit_product_tax", edit_obj).val(product.tax);
@@ -338,6 +380,19 @@ $(document).ready(function(){
         $("#edit_product_shop_code", edit_obj).val(product.shop_code);
         $("#edit_product_code", edit_obj).val(product.code);
         
+     // save button (unbind previously bound objects)
+        $("#edit_product_save", edit_obj).unbind().click(function(){
+            save_product(parent);
+        });
+        
+        // cancel button
+        $("#edit_product_cancel", edit_obj).unbind().click(function(){
+            // reload the product
+            get_product(parent);
+            // destroy the dialog (content will be deleted when it opens again)
+            edit_obj.dialog(edit_obj).dialog("destroy");
+        });
+        
         // show the edit dialog
         edit_obj.dialog({
             modal: true
@@ -350,20 +405,6 @@ $(document).ready(function(){
             edit_obj.dialog('option', 'title', "{% trans 'Add product' %}");
         
         edit_obj.dialog('option', 'width', 900); // TODO: remove fixed width
-        
-        
-        // save button (unbind previously bound objects)
-        $("#edit_product_save", edit_obj).unbind().click(function(){
-            save_product(parent);
-        });
-        
-        // cancel button
-        $("#edit_product_cancel", edit_obj).unbind().click(function(){
-            // reload the product
-            get_product(parent);
-            // destroy the dialog (content will be deleted when it opens again)
-            edit_obj.dialog(edit_obj).dialog("destroy");
-        });
     }
     
     function get_product(parent){
@@ -401,7 +442,14 @@ $(document).ready(function(){
         data['name'] = $("#edit_product_name", dlg_obj).val();
         data['price'] = $("#edit_product_price", dlg_obj).val();
         data['unit_type'] = $("#edit_unit_type :selected", dlg_obj).val();
-        // TODO: image
+        
+        // image: if changed, encode uploaded image to base64
+        img_upl_obj = $("#edit_product_image_upload", dlg_obj);
+        if(product.image_changed && img_upl_obj.val() != ""){
+        	//$("#edit_product_image", dlg_obj);
+            data['image'] = getBase64Image("edit_product_image", "{{ image_format }}");
+        }
+        
         data['category'] = $("#edit_product_category", dlg_obj).val();
         data['tax'] = $("#edit_product_tax", dlg_obj).val();
         data['description'] = $("#edit_product_description", dlg_obj).val();
@@ -566,7 +614,7 @@ $(document).ready(function(){
     ///////////////////////////
     // creating new products
     ///////////////////////////
-    if({{can_edit|lower}}){ {% comment %} |lower: python: True, javascript: true {% endcomment %}
+    if({{can_edit|lower}}){ {% comment %} |lower because: python: True, javascript: true {% endcomment %}
         $("#add_product").click(function(){
             // show the edit dialog with nothing but default values
             
@@ -637,7 +685,13 @@ $(document).ready(function(){
             </td>
         </tr>
         <tr>
-            <td rowspan="3" class="product_image"><p>TODO: image</p></td> {% comment %} image spans over 3 rows {% endcomment %}
+            <td rowspan="3">{% comment %} image spans over 3 rows {% endcomment %}
+                <p><img id="edit_product_image" src="#" alt="" /></p>
+                <p>
+                    <input type="file" id="edit_product_image_upload" />
+                    <input type="button" id="edit_product_delete_image" value="{% trans 'Delete image' %}" />
+                </p>
+            </td> 
             {% comment %} list of categories {% endcomment %}
             <td><p><label for="edit_product_category">{% trans 'Category' %}</label>
                 <select id="edit_product_category"></select></p></td>
