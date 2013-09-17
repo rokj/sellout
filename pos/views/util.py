@@ -39,10 +39,11 @@ def JSON_parse(string_data):
 def resize_image(path, dimensions):
     image = Image.open(path)
     
-    width, height = image.size
-    
-    if width <= dimensions[0] and height <= dimensions[1]:
-        return # no need for resizing, image is smaller than requested
+    # always "resize" - convert image to maintain consistent format for all uploads
+    # width, height = image.size
+    # if width <= dimensions[0] and height <= dimensions[1]:
+    #     return # no need for resizing, image is smaller than requested
+    # also resize to un-animate any animated GIFs
     
     image.thumbnail(dimensions, Image.ANTIALIAS)
     image.save(path, g.MISC['image_format'])
@@ -62,20 +63,17 @@ def validate_image(obj): # obj is actually "self"
     
     return image
 
-def image_from_base64(data):
-    # data is in this format:
-    # data:image/<ext>;base64,<image data>
-    requested_header = "data:image/" + g.MISC['image_format'] + ";base64,"
-    header_length = len(requested_header)
-    header = data[:header_length]
+def image_dimensions(size):
+    """ accepts string - key in g.IMAGE_DIMENSIONS and returns
+        a list: [width, height, sorl_string]
+        sorl_string = <width>x<height>
+    """
+    if size not in g.IMAGE_DIMENSIONS:
+        return None # an exception will be raised on access
     
-    if header != requested_header:
-        return None
+    dim = g.IMAGE_DIMENSIONS[size]
     
-    data = data[header_length:]
-    
-    return data.decode("base64")
-    
+    return [dim[0], dim[1], str(dim[0]) + "x" + str(dim[1])]
 
 # numbers
 def format_number(user, n):

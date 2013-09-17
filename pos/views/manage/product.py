@@ -12,7 +12,7 @@ from django.db.models import Q
 from pos.models import Company, Category, Discount, Product, Price
 from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
-                           format_number, parse_decimal, image_from_base64
+                           format_number, parse_decimal, image_dimensions
 from pos.views.manage.discount import discount_to_dict
 
 from common import globals as g
@@ -20,7 +20,7 @@ from config.functions import get_value
 
 import decimal as d
 import os
-
+from sorl.thumbnail import get_thumbnail
 
 ###############
 ## products ###
@@ -91,23 +91,8 @@ def product_to_dict(user, product):
     ret['discounts'] = discounts
     
     if product.image: # check if product's image exists
-        # TODO: thumbnails
-        # get the thumbnail and encode it to base64
-        
-        from easy_thumbnails.files import get_thumbnailer
-
-        thumbnailer = get_thumbnailer(product.image.path)
-        image_path = thumbnailer.get_thumbnail({'crop': True, 'size':g.IMAGE_DIMENSIONS['product']}).name
- 
-        with open(image_path, "rb") as f:
-            # get thumbnail from the required image
-                        
-            # get extension
-            extension = os.path.splitext(image_path)[-1] # extension is in the last item
-            extension = extension[1:] # omit the dot
-            
-            # first, send file type and data:image/png;base64,<then comes the base64 encoded image>
-            ret['image'] = "data:image/%s;base64,%s"%(extension,f.read().encode("base64"))
+        # get the thumbnail
+        ret['image'] = get_thumbnail(product.image, image_dimensions('product')[2]).url
     
     # category?
     if product.category:
@@ -421,7 +406,6 @@ def create_product(request, company):
         return JSON_error(_("Category does not exist"))
     
     # save product:
-    
     product = Product(
         company = c,
         created_by = request.user,
@@ -500,13 +484,7 @@ def edit_product(request, company, product_id):
             pass
 
     # image
-    if 'image' in data: # a new image to save
-        from django.core.files.base import ContentFile
-        product.image.save('tmp_name',
-            ContentFile(image_from_base64(data['image']), 'fakename'),
-            save=False)
-    else:
-        product.image.delete()
+    
         
     # category
     try:

@@ -46,11 +46,11 @@ import os
 from webpos.settings import MEDIA_ROOT as mr
 
 @receiver(post_save, sender=Cleanup)
-def my_handler(**kwargs):
+def cleanup_handler(**kwargs):
     filenames = Cleanup.objects.all()
     
     for f in filenames:
-        for g in glob.glob(f.filename + '*'):
+        for g in glob.glob(f.filename):
             if os.path.exists(g):
                 if mr in g: # do not remove anything outside MEDIA dir
                     os.remove(g)

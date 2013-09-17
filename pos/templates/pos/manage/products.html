@@ -86,7 +86,7 @@ $(document).ready(function(){
         var i;
         for(i=0; i<data.length; i++){
             // make a div for each product
-            parent_div = $("<div>", {"class":"product_details"});
+            parent_div = $("<div>", {"class":"product-details"});
             products_div.append(parent_div);
             
             // save product to .data()
@@ -116,23 +116,24 @@ $(document).ready(function(){
         // add product data to data()
         div_obj.data(product);
         // name
-        $(".product_name", div_obj).append(product.name);
+        $(".product-name", div_obj).append(product.name);
         // price and unit
-        tmp_obj = $(".product_price", div_obj);
+        tmp_obj = $(".product-price", div_obj);
         tmp_obj.append("{% trans 'Price' %}: {{ currency }}" + product.price +
                 " / " + product.unit_type_display);
-        
         // image
-        $(".product_image", div_obj).append(
-            $("<img>", {"src":product.image, "alt":product.name}));
+        if(product.image){
+            $(".product-image", div_obj)
+                .append($("<img>", {"src":product.image, "alt":product.name}));
+        }
         // category
-        $(".product_category", div_obj).append("{% trans 'Category' %}: " + product.category);
+        $(".product-category", div_obj).append("{% trans 'Category' %}: " + product.category);
         // tax
-        $(".product_tax", div_obj).append("{% trans 'Tax' %}: " + product.tax + "%");
+        $(".product-tax", div_obj).append("{% trans 'Tax' %}: " + product.tax + "%");
         // description
-        $(".product_description", div_obj).append(product.description);
+        $(".product-description", div_obj).append(product.description);
         // discount list
-        tmp_obj = $(".product_discounts", div_obj);
+        tmp_obj = $(".product-discounts", div_obj);
         var li_obj;
         for(var key in product.discounts){
             li_obj = $("<li>", {title:""});
@@ -145,22 +146,22 @@ $(document).ready(function(){
         }
         
         // private notes
-        $(".product_private_notes", div_obj).append(product.private_notes);
+        $(".product-private-notes", div_obj).append(product.private_notes);
         // stock
         if(product.stock){
-            $(".product_stock", div_obj).append(product.stock + " " + 
+            $(".product-stock", div_obj).append(product.stock + " " + 
                 product.unit_type_display + " {% trans 'left in stock' %}");
         }
         
         // shop code
-        $(".product_shop_code", div_obj).append(product.shop_code);
+        $(".product-shop-code", div_obj).append(product.shop_code);
         // code
-        $(".product_code", div_obj).append(product.code);
+        $(".product-code", div_obj).append(product.code);
         
         // if a user has no permission to edit/delete, don't show buttons
-        manage_obj = $(".product_management", div_obj);
-        edit_button = $("input.product_edit_button", manage_obj);
-        delete_button = $("input.product_delete_button", manage_obj);
+        manage_obj = $(".product-management", div_obj);
+        edit_button = $("input.product-edit-button", manage_obj);
+        delete_button = $("input.product-delete-button", manage_obj);
         
         if({{can_edit|lower}}){
             // enable and add functionality to:
@@ -222,8 +223,9 @@ $(document).ready(function(){
         discount_tooltip(discount, li_obj);
         
         // delete button
-        btn_obj = $("<input>", {type:"button", value:"x","class":"delete_discount"});
+        btn_obj = $("<input>", {type:"button", value:"x","class":"delete-discount"});
         btn_obj.click(function(){
+        	if(key in product.discounts) delete product.discounts[key];
             refresh_discounts(product);
         });
         li_obj.append(discount.code + " " + discount_amount(discount));
@@ -245,9 +247,9 @@ $(document).ready(function(){
         // in a listbox and an 'add' button
         li_obj = $("<li>")
         sel_obj = $("<select>", {id:"edit_discount_list"});
-        btn_obj = $("<input>", {type:"button",value:"{% trans 'Add' %}"});
+        //btn_obj = $("<input>", {type:"button",value:"{% trans 'Add' %}"});
         li_obj.append(sel_obj);
-        li_obj.append(btn_obj);
+        //li_obj.append(btn_obj);
         li_obj.data({id:false}); // don't store or send this item
         ul_obj.append(li_obj);
         
@@ -268,7 +270,8 @@ $(document).ready(function(){
             // unselect the first item in listbox to avoid confusion
             sel_obj.prop("selectedIndex", -1);
             
-            btn_obj.click(function(){ // add button
+            //btn_obj.click(function(){ // add button
+            sel_obj.unbind().change(function(){
                 d_id = $(":selected", sel_obj).val();
                 
                 // add data to product
@@ -646,7 +649,7 @@ $(document).ready(function(){
 
 {% comment %} filters {% endcomment %}
 <div id="filter_form">
-    <label for="general_filter">{% trans 'Search' %}:</label><input id="general_filter" class="search_filter" />
+    <label for="general_filter">{% trans 'Search' %}:</label><input id="general_filter" class="search-filter" />
     <input type="checkbox" id="advanced_search_toggle" /><label for="advanced_search_toggle">{% trans 'Advanced' %}</label><br />
 
     <div id="advanced_search">
@@ -730,34 +733,34 @@ $(document).ready(function(){
     <table border="1"> <!-- TODO remove border -->
         <tr>
             <td colspan="2">
-                <input type="hidden" class="product_id" />
-                <p class="product_name"></p>
+                <input type="hidden" class="product-id" />
+                <p class="product-name"></p>
             </td>
-            <td><p class="product_price"></p> {% comment %} price per unit {% endcomment %}
+            <td><p class="product-price"></p> {% comment %} price per unit {% endcomment %}
             </td>
         </tr>
         <tr>
-            <td rowspan="3" class="product_image"></td> {% comment %} image spans over 3 rows {% endcomment %}
-            <td><p class="product_category"></p></td>
-            <td><p class="product_tax"></p></td>
+            <td rowspan="3" class="product-image"></td> {% comment %} image spans over 3 rows {% endcomment %}
+            <td><p class="product-category"></p></td>
+            <td><p class="product-tax"></p></td>
         </tr>
         <tr>
-            <td><p class="product_description"></p></td>
+            <td><p class="product-description"></p></td>
             <td>
-                <ul class="product_discounts">
+                <ul class="product-discounts">
                     {% comment %} a list of discounts {% endcomment %}
                 </ul>
             </td>
         </tr>
         <tr>
-            <td><p class="product_private_notes"></p></td>
-            <td><p class="product_stock"></p></td>
+            <td><p class="product-private-notes"></p></td>
+            <td><p class="product-stock"></p></td>
         </tr>
         <tr>
-            <td><p class="product_shop_code"></p></td> {% comment %} this row again has 3 columns {% endcomment %}
-            <td><p class="product_code"></p></td>
-            <td><div class="product_management"><input type="button" value="{% trans 'Edit' %}" class="product_edit_button">
-                <input type="button" value="{% trans 'Delete' %}" class="product_delete_button"></div>
+            <td><p class="product-shop-code"></p></td> {% comment %} this row again has 3 columns {% endcomment %}
+            <td><p class="product-code"></p></td>
+            <td><div class="product-management"><input type="button" value="{% trans 'Edit' %}" class="product-edit-button">
+                <input type="button" value="{% trans 'Delete' %}" class="product-delete-button"></div>
             </td>
         </tr>
     </table>

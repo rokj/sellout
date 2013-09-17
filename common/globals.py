@@ -118,6 +118,8 @@ IMAGE_DIMENSIONS = {
     'logo':(180, 180),
     'category':(160, 160),
     'product':(120,120),
+    'thumb_small':(32, 32), # for thumbnails
+    'thumb_large':(64, 64),
 }
 
 # premissions

@@ -3,6 +3,13 @@
 {% load i18n %}
 
 {% block head %}
+<style type="text/css">
+img.category-placeholder{
+    width:{{ image_dimensions.0 }}px;
+    height:{{ image_dimensions.1 }}px;
+}
+</style>
+
 <script type="text/javascript">
 $(document).ready(function(){
     $("#id_image").change(function(){
@@ -14,7 +21,11 @@ $(document).ready(function(){
 {% endblock %}
 
 {% block manage_content %}
-{% if category.image %}<img id="image" src="{{ category.image.url }}">{% endif %}
+{% if category.image %}
+    <img id="image" src="{{ category.image.url }}" />
+{% else %}
+    <img id="image" src="{% static 'placeholder.png' %}" class="category-placeholder" />
+{% endif %}
 
 {% comment %} two different urls for adding and editing categories {% endcomment %}
 {% if add %}
@@ -24,20 +35,12 @@ $(document).ready(function(){
 {% endif %} 
     {% csrf_token %}
     {% for field in form %}
-        <div class="form_field_container">
+        <div class="form-field-container">
         {% if field.errors %}
-            <div class="form_field_error">{{ field.errors }}</div>
+            <div class="form-field-error">{{ field.errors }}</div>
         {% endif %}
-        <div class="field_label_tag">{{ field.label_tag }}</div>
-        <div class="form_field">
-        {% ifequal field.name 'image' %}
-            {% comment %} take special care of the image upload field {% endcomment %}
-            <input id="image-clear_id" name="image-clear" type="checkbox" /> <label for="image-clear_id">{% trans 'Delete' %}</label>
-            <input id="id_image" name="image" type="file" />
-        {% else %}
-            {{ field }}
-        {% endifequal %}
-        </div>
+        <div class="field-label-tag">{{ field.label_tag }}</div>
+        <div class="form-field">{{ field }}</div>
         </div>
     {% endfor %}
     <p><input type="submit" value="{% trans 'Save' %}" /></p>

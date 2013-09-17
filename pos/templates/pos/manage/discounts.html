@@ -38,7 +38,7 @@ $(document).ready(function(){
 <div class="paginator">
     {% for p in paginator.page_range %}
         <a href="?page={{p}}" {% comment %} django templates can only compare strings{% endcomment %}
-            {% if p|stringformat:"s" == current_page|stringformat:"s" %} class="current_page"{% endif %}>
+            {% if p|stringformat:"s" == current_page|stringformat:"s" %} class="current-page"{% endif %}>
             &nbsp;{{p}}&nbsp;</a>
         {% if not forloop.last %}|{% endif %}
     {% endfor %}

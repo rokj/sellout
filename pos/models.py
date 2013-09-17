@@ -334,6 +334,7 @@ def copy_bill_to_history(bill_id):
 def cleanup_images(**kwargs):
     # if image was deleted or changed, add previous filename and path
     # to config.Cleanup model. Cleanup will delete listed objects on post_save() signal.
+    # this is only needed for django forms, sorl-thumbnails have a delete() method that do all this
     try:
         prev_entry = kwargs['sender'].objects.get(id=kwargs['instance'].id)
     except: # the entry does not exist, no need to do anything

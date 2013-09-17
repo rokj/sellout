@@ -183,6 +183,9 @@ class CompanyForm(forms.ModelForm):
                   'phone',
                   'vat_no',
                   'notes']
+        widgets = {
+            'image': forms.ClearableFileInput,
+        }
 
 # registration
 @login_required
@@ -232,7 +235,13 @@ def edit_company(request, company):
     if not has_permission(request.user, c, 'company', 'edit'):
         return no_permission_view(request, c, _("edit company details"))
     
-    context = {}
+    context = {
+        'company':c,
+        'logo_dimensions':g.IMAGE_DIMENSIONS['logo'],
+        'title':_("Company details"),
+        'site_title':g.MISC['site_title'],
+        'logo_dimensions':g.IMAGE_DIMENSIONS['logo'],
+    }
     
     if request.method == 'POST':
         # submit data
@@ -243,6 +252,7 @@ def edit_company(request, company):
             form.save()
             if c.image:
                 resize_image(c.image.path, g.IMAGE_DIMENSIONS['logo'])
+            print form.cleaned_data
             # for an eventual message for the user
             context['saved'] = True
             # if url_name was changed, redirect to new address
@@ -251,9 +261,5 @@ def edit_company(request, company):
         form = CompanyForm(instance=c)
         
     context['form'] = form
-    context['company'] = c
-    context['logo_dimensions'] = g.IMAGE_DIMENSIONS['logo']
-    context['title'] = _("Company details")
-    context['site_title'] = g.MISC['site_title']
     
     return render(request, 'pos/manage/company.html', context)

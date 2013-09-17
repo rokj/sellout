@@ -30,4 +30,14 @@ OPTIMIZE:
  - memcached:
     - get_object_or_404(Company) - in every view
  - sql queries or better getting of objects just with specific data
- - images embedded in JSON instead of doing a special request for each image
+ - NOT DOING images embedded in JSON instead of doing a special request for each image
+ 
+CODING STYLE (word separators in variable/function/object names):
+ - underscore _:
+   - python functions
+   - view names and namespaces
+   - javascript functions
+   - html id's
+ - dash -:
+   - css classes: -
+   - urls: -

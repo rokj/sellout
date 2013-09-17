@@ -24,12 +24,12 @@ $(document).ready(function(){
 {% endif %}
     {% csrf_token %}
     {% for field in form %}
-        <div class="form_field_container" id="{{field.auto_id}}_container">
+        <div class="form-field-container" id="{{field.auto_id}}_container">
         {% if field.errors %}
-            <div class="form_field_error">{{ field.errors }}</div>
+            <div class="form-field-error">{{ field.errors }}</div>
         {% endif %}
-        <div class="field_label_tag">{{ field.label_tag }}</div>
-        <div class="form_field">{{ field }}</div>
+        <div class="field-label-tag">{{ field.label_tag }}</div>
+        <div class="form-field">{{ field }}</div>
         </div>
     {% endfor %}
     <p><input type="submit" value="{% trans 'Save' %}" />

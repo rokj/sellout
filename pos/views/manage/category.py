@@ -10,7 +10,8 @@ from django.http import Http404
 
 from pos.models import Company, Category
 from pos.views.util import error, JSON_response, resize_image, validate_image, \
-                           has_permission, no_permission_view
+                           has_permission, no_permission_view, \
+                           image_dimensions
 from common import globals as g
 
 ########################
@@ -108,6 +109,7 @@ def list_categories(request, company):
         'categories':get_all_categories(c.id, data=[]),
         'title':_("Categories"),
         'site_title':g.MISC['site_title'],
+        'image_dimensions':image_dimensions('thumb_small'),
     }
     
     return render(request, 'pos/manage/categories.html', context)
@@ -133,7 +135,7 @@ def add_category(request, company, parent_id=-1):
         'company':c,
         'parent_id':parent_id,
         'add':True,
-        'image_dimensions':g.IMAGE_DIMENSIONS['category'],
+        'image_dimensions':image_dimensions('category'),
         'title':_("Add category"),
         'site_title':g.MISC['site_title']
     }
