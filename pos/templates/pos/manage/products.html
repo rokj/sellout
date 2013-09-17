@@ -3,6 +3,14 @@
 {% load i18n %}
 
 {% block head %}
+<style type="text/css">
+img.preview-product{
+    max-width:{{ image_dimensions.0 }}px;
+    max-height:{{ image_dimensions.1 }}px;
+}
+</style>
+
+
 
 {% comment %}
 javascript:
@@ -119,13 +127,13 @@ $(document).ready(function(){
         $(".product-name", div_obj).append(product.name);
         // price and unit
         tmp_obj = $(".product-price", div_obj);
-        tmp_obj.append("{% trans 'Price' %}: {{ currency }}" + product.price +
+        tmp_obj.append("{% trans 'Price' %}: {{ currency }} " + product.price +
                 " / " + product.unit_type_display);
         // image
-        if(product.image){
-            $(".product-image", div_obj)
-                .append($("<img>", {"src":product.image, "alt":product.name}));
-        }
+        tmp_obj = $("<img>");
+        show_image(product, tmp_obj);
+        $(".product-image", div_obj).append(tmp_obj);
+
         // category
         $(".product-category", div_obj).append("{% trans 'Category' %}: " + product.category);
         // tax
@@ -271,7 +279,7 @@ $(document).ready(function(){
             sel_obj.prop("selectedIndex", -1);
             
             //btn_obj.click(function(){ // add button
-            sel_obj.unbind().change(function(){
+            sel_obj.unbind().change(function(){ // no add buttons
                 d_id = $(":selected", sel_obj).val();
                 
                 // add data to product
@@ -285,12 +293,68 @@ $(document).ready(function(){
         }
     }
     
+    function upload_image_status(status, save_obj, del_obj, upl_obj, img_obj){
+    	var show, hide;
+    	
+    	switch(status){
+    	   case 'image':
+    		   // product has image and it is not being edited
+    		   show = [save_obj, del_obj, img_obj];
+    		   hide = [upl_obj];
+    		   break;
+    	   case 'no_image':
+               // product has no image and it is not being edited
+               show = [save_obj, upl_obj, img_obj];
+               hide = [del_obj];
+    		   break;
+    	   case 'uploading':
+    		   // image is uploading
+    		   show = [img_obj];
+    		   hide = [save_obj, del_obj, upl_obj];
+    		   break;
+    	}
+    	
+    	for(i = 0; i < show.length; i++) show[i].show();
+    	for(i = 0; i < hide.length; i++) hide[i].hide();
+    }
+        
+    function show_image(product, obj){
+    	if(!product.image){
+    		// show 'placeholder' image
+    		obj.attr("src", "{% static 'placeholder.png' %}");
+    		obj.attr("alt", product.name);
+    		obj.addClass("preview-product");
+    	}
+    	else{
+    		// show the real image
+    		obj.attr("src", product.image);
+    		obj.attr("alt", "{% trans 'No image' %}");
+    		obj.removeClass("preview-product");
+    	}
+    }
+    
     function show_product_edit_dialog(parent){
         var i;
         
         product = parent.data().product;
         
         edit_obj = $("#edit_dialog");
+        
+        // save button (unbind previously bound objects)
+        save_btn_obj = $("#edit_product_save", edit_obj) 
+        save_btn_obj.unbind().click(function(){
+            save_product(parent);
+        });
+        
+        // cancel button
+        $("#edit_product_cancel", edit_obj).unbind().click(function(){
+            // reload the product
+            get_product(parent);
+            // destroy the dialog (content will be deleted when it opens again)
+            edit_obj.dialog(edit_obj).dialog("destroy");
+        });
+        
+        // init all fields
         $("#edit_product_name", edit_obj).val(product.name).focus();
         $("#edit_product_price", edit_obj).val(product.price);
         // ... per unit (listbox with unit types)
@@ -322,45 +386,87 @@ $(document).ready(function(){
             sel_obj.append(opt_obj);
         }
         
-        // image: if there is no images, hide the delete button
+        // product image
         del_obj = $("#edit_product_delete_image", edit_obj);
         upl_obj = $("#edit_product_image_upload", edit_obj);
         img_obj = $("#edit_product_image", edit_obj);
+
+        // reset the upload control (.val() doesn't work for security reasons)
+        $("#edit_product_image_input_form").get(0).reset();
+
+        // show product image, if it exists
+        show_image(product, img_obj);
+
+        product.change_image = false;
         
-        product.image_changed = false; // don't handle images if it wasn't changed (too much overhead)
-        
-        // preview image before upload
+        // upload <input>: preview image on upload and store base64 data for sending to server
         upl_obj.unbind().change(function(){
-            preview_image(this, "#edit_product_image", {{ image_dimensions.0 }}, {{ image_dimensions.1 }})
-            product.image_changed = true;
+        	// get image (base64) and store it to .data()
+            obj = upl_obj.get(0);
+
+            // filetype filter
+            rFilter = /^image\/(?:{{ image_upload_formats }})$/i; {% comment %}  {% endcomment %}
+
+            f = f = obj.files[0]
+            if(obj.files && f){ // check for browser compatibility
+            	var reader = new FileReader();
+                // read the file
+                reader.onload = function(e){
+                    // check file type
+                    if (!rFilter.test(f.type)){
+                    	alert("{% trans 'Wrong file type for the uploaded image!' %}");
+                    	upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
+                        return null;
+                    }
+                    if(f.size > {{ max_upload_size_bytes }}){
+                    	alert("{% trans 'File too large, maximum size for upload is' %} {{ max_upload_size }} MB");
+                    	upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
+                    	return null;
+                    }
+                    
+                    // store the file in output
+                    product.image_data = e.target.result;
+                    
+                    // preview image
+                    // show_image() cannot be used here because we're showing image from data:, no from url
+                    img_obj.attr("src", product.image_data);
+                    img_obj.attr("alt", product.name);
+                    
+                    // update dialog
+                    upload_image_status('image', save_btn_obj, del_obj, upl_obj, img_obj);
+                }
+                reader.readAsDataURL(obj.files[0]);
+                // disable the save() button until everything is uploaded
+                upload_image_status('uploading', save_btn_obj, del_obj, upl_obj, img_obj);
+                // image will have to be uploaded
+                product.change_image = true;
+            }
             
             del_obj.show();
             upl_obj.hide();
         });
         
         del_obj.unbind().click(function(){
+            // show/hide controls
+            upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
+            
+            // image was changed
+            product.change_image = true;
+            // nothing to upload
+            product.image_data = null;
+            // and also nothing to show
+            product.image = null;
             // delete image source and name
-            img_obj.attr("src", "");
-            img_obj.attr("alt", "");
-            
-            del_obj.hide();
-            upl_obj.show();
-            
-            product.image = true;
+            show_image(product, img_obj);
         });
         
         if(product.image){
         	// product already has an image: show it
-        	$("#edit_product_image", edit_obj).attr("src", product.image);
-        	
-        	// show delete button
-        	upl_obj.hide();
-            del_obj.show();
+        	show_image(product, img_obj);
+        	upload_image_status('image', save_btn_obj, del_obj, upl_obj, img_obj);
         }
         else{
-        	// no image for this product: show upload <input>
-        	del_obj.hide();
-        	upl_obj.show();
+        	upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
         }
         
         // tax
@@ -382,19 +488,6 @@ $(document).ready(function(){
         $("#edit_product_stock", edit_obj).val(product.stock);
         $("#edit_product_shop_code", edit_obj).val(product.shop_code);
         $("#edit_product_code", edit_obj).val(product.code);
-        
-     // save button (unbind previously bound objects)
-        $("#edit_product_save", edit_obj).unbind().click(function(){
-            save_product(parent);
-        });
-        
-        // cancel button
-        $("#edit_product_cancel", edit_obj).unbind().click(function(){
-            // reload the product
-            get_product(parent);
-            // destroy the dialog (content will be deleted when it opens again)
-            edit_obj.dialog(edit_obj).dialog("destroy");
-        });
         
         // show the edit dialog
         edit_obj.dialog({
@@ -428,7 +521,8 @@ $(document).ready(function(){
         // price - numeric value
         // unit type
         // discounts - list of discount ids
-        // image - TODO
+        // image_changed
+        // image
         // category - id
         // code
         // shop code
@@ -445,13 +539,9 @@ $(document).ready(function(){
         data['name'] = $("#edit_product_name", dlg_obj).val();
         data['price'] = $("#edit_product_price", dlg_obj).val();
         data['unit_type'] = $("#edit_unit_type :selected", dlg_obj).val();
-        
         // image: if changed, encode uploaded image to base64
-        img_upl_obj = $("#edit_product_image_upload", dlg_obj);
-        if(product.image_changed && img_upl_obj.val() != ""){
-        	//$("#edit_product_image", dlg_obj);
-            data['image'] = getBase64Image("edit_product_image", "{{ image_format }}");
-        }
+        data['change_image'] = product.change_image;
+        if(product.change_image) data['image'] = product.image_data
         
         data['category'] = $("#edit_product_category", dlg_obj).val();
         data['tax'] = $("#edit_product_tax", dlg_obj).val();
@@ -689,9 +779,9 @@ $(document).ready(function(){
         </tr>
         <tr>
             <td rowspan="3">{% comment %} image spans over 3 rows {% endcomment %}
-                <p><img id="edit_product_image" src="#" alt="" /></p>
-                <p>
-                    <input type="file" id="edit_product_image_upload" />
+                <p><img id="edit_product_image" src="#" alt="" class="preview-product"/></p>
+                <p>{% comment %} the form that follows is here only because input type="file" cannot be reset unless the form it belongs to is reset {% endcomment %}
+                    <form id="edit_product_image_input_form"><input type="file" id="edit_product_image_upload" /></form>
                     <input type="button" id="edit_product_delete_image" value="{% trans 'Delete image' %}" />
                 </p>
             </td> 
@@ -740,7 +830,7 @@ $(document).ready(function(){
             </td>
         </tr>
         <tr>
-            <td rowspan="3" class="product-image"></td> {% comment %} image spans over 3 rows {% endcomment %}
+            <td rowspan="3"><p class="product-image"></p></td> {% comment %} image spans over 3 rows {% endcomment %}
             <td><p class="product-category"></p></td>
             <td><p class="product-tax"></p></td>
         </tr>

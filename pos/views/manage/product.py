@@ -12,7 +12,8 @@ from django.db.models import Q
 from pos.models import Company, Category, Discount, Product, Price
 from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
-                           format_number, parse_decimal, image_dimensions
+                           format_number, parse_decimal, image_dimensions, \
+                           image_from_base64
 from pos.views.manage.discount import discount_to_dict
 
 from common import globals as g
@@ -20,7 +21,7 @@ from config.functions import get_value
 
 import decimal as d
 import os
-from sorl.thumbnail import get_thumbnail
+from sorl.thumbnail import get_thumbnail, delete
 
 ###############
 ## products ###
@@ -50,7 +51,10 @@ def products(request, company):
         'currency':get_value(request.user, 'pos_currency'),
         # images
         'image_dimensions':g.IMAGE_DIMENSIONS['product'],
-        'image_format':g.MISC['image_format'],
+        'image_upload_formats':g.MISC['image_upload_formats'], # what can be uploaded
+        'max_upload_size':round(g.MISC['max_upload_image_size']/2**20, 2), # show in megabytes
+        'max_upload_size_bytes':g.MISC['max_upload_image_size'], # bytes for javascript
+        
     }
     return render(request, 'pos/manage/products.html', context)
 
@@ -61,7 +65,7 @@ def product_to_dict(user, product):
     # unit type
     # discounts - dictionary or all discounts for this product 
     #    (see discounts.discount_to_dict for details)
-    # image - TODO
+    # image
     # category - name
     # code
     # shop code
@@ -295,7 +299,7 @@ def validate_product(user, company, data):
     # price - numeric value*
     # unit type
     # discounts - list of discount ids (checked in create/edit_product)
-    # image - TODO
+    # image
     # category - id (checked in create/edit_product)
     # code*
     # shop code*
@@ -337,6 +341,7 @@ def validate_product(user, company, data):
         return r(False, _("Invalid unit type"))
 
     # image: TODO 
+    convert image to file and store it in data['something'] ???
     
     # code: must exist and must be unique
     data['code'] = data['code'].strip()
@@ -484,8 +489,16 @@ def edit_product(request, company, product_id):
             pass
 
     # image
+    if data['change_image'] == True:
+        if data['image']: # new image is uploaded
+            # create a file from the base64 data and save it to product.image
+            if product.image:
+                product.image.delete()
+            # save a new image
+            product.image = image_from_base64(data['image'])
+        else: # delete the old image
+            product.image.delete()
     
-        
     # category
     try:
         category = Category.objects.get(id=data['category'])
@@ -495,9 +508,7 @@ def edit_product(request, company, product_id):
 
     # price has to be updated separately
     product.price = update_price(product, request.user, data['price'])
-    
     product.updated_by = request.user
-    
     product.save()
 
     return JSON_ok()

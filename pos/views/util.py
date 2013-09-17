@@ -3,6 +3,7 @@ from django.forms import ValidationError
 from django.utils.translation import ugettext as _
 from django.core.cache import cache
 from django.http import HttpResponse
+from django.core.files.base import ContentFile
 
 from common import globals as g
 from config.functions import get_date_format, get_value
@@ -10,6 +11,7 @@ from pos.models import Permission
 
 import json
 import Image # PIL or pillow must be installed
+import re
 from decimal import Decimal
 
 # requests and responses
@@ -38,13 +40,11 @@ def JSON_parse(string_data):
 # image and file handling
 def resize_image(path, dimensions):
     image = Image.open(path)
-    
     # always "resize" - convert image to maintain consistent format for all uploads
     # width, height = image.size
     # if width <= dimensions[0] and height <= dimensions[1]:
     #     return # no need for resizing, image is smaller than requested
     # also resize to un-animate any animated GIFs
-    
     image.thumbnail(dimensions, Image.ANTIALIAS)
     image.save(path, g.MISC['image_format'])
 
@@ -74,6 +74,23 @@ def image_dimensions(size):
     dim = g.IMAGE_DIMENSIONS[size]
     
     return [dim[0], dim[1], str(dim[0]) + "x" + str(dim[1])]
+
+def image_from_base64(data):
+    """ receives base64 data and returns a file for saving to ImageField """
+    # see if header is right (if it's not at the beginning of data, it' not there at all
+    m = re.search(r"^data:image\/(" + g.MISC['image_upload_formats'] + ");base64,", data[:30])
+    if not m:
+        return None
+    header = m.group(0)
+    
+    # get file type from header
+    start = header.index("data:image/") + len("data:image/") # search between these substrings
+    end = header.index(";base64,", start)
+    filetype = header[start:end]
+
+    image_data = data[len(header)-1:].decode("base64")
+
+    return ContentFile(image_data, "fakename." + filetype)
 
 # numbers
 def format_number(user, n):

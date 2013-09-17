@@ -8,6 +8,7 @@
 - minify javascript
 - confirmation dialogs for deletion (category, discount, ...)
 - @transaction.atomic for update_price() (django 1.6?)
+- product validation: lengths of all fields
 
 - DONE title/site title for all views
 - DONE base.html: remove unneeded jquery <script src=""> includes

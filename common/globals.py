@@ -112,6 +112,7 @@ MISC = {
                               # (to differentiate between company and management sites)
     'max_upload_image_size':2*2**20, # 2 megabytes
     'image_format':'png', # all images will be saved in this format
+    'image_upload_formats':'jpg|jpeg|gif|png|bmp|tiff', # supported image formats (as regex "options" for use in... regexes)
 }
 
 IMAGE_DIMENSIONS = {

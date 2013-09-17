@@ -3,13 +3,13 @@ from django.utils.translation import ugettext as _
 from django.db.models.signals import pre_save, pre_delete
 from django.contrib.auth.models import User
 from django.dispatch import receiver
-from config.models import Cleanup
+from sorl import thumbnail
 
 from common.models import SkeletonU
 from common.functions import get_image_path
+from config.models import Cleanup, Country
 import common.globals as g
 
-from config.models import Country
 import json
 
 ### company ###
@@ -125,7 +125,7 @@ class Product(ProductAbstract):
         max_digits=g.DECIMAL['quantity_digits'],
         decimal_places=g.DECIMAL['quantity_decimal_places'],
         null=False, blank=False)
-    image = models.ImageField(_("Icon"),
+    image = thumbnail.ImageField(_("Icon"),
          upload_to=get_image_path(g.DIRS['product_icon_dir'], "pos_product"),
          null=True, blank=True)
     # images = models.ManyToManyField(ProductImage, null=True, blank=True) # one image per product is enough
@@ -332,8 +332,11 @@ def copy_bill_to_history(bill_id):
 @receiver(pre_save, sender=Product)
 #@receiver(pre_save, sender=ProductImage)
 def cleanup_images(**kwargs):
-    # if image was deleted or changed, add previous filename and path
-    # to config.Cleanup model. Cleanup will delete listed objects on post_save() signal.
+    # new: since sorl-thumbnail's thumbnail.delete() does all this automatically
+    # and also cleans up cache, config.Cleanup is no longer needed
+
+    # if image was deleted or changed, add previous filename and path to
+    # config.Cleanup model. Cleanup will delete listed objects on post_save() signal.
     # this is only needed for django forms, sorl-thumbnails have a delete() method that do all this
     try:
         prev_entry = kwargs['sender'].objects.get(id=kwargs['instance'].id)
@@ -347,6 +350,9 @@ def cleanup_images(**kwargs):
         return
     
     if prev_entry.image.name != this_entry.image.name:
+        # delete thumbnails and stuff, if it exists
+        thumbnail.delete(prev_entry.image.name)
+
         # add image to Cleanup for later deletion
-        c = Cleanup(filename=prev_entry.image.path)
-        c.save()
+        #c = Cleanup(filename=prev_entry.image.path)
+        #c.save()
