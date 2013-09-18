@@ -1,0 +1,18 @@
+REQUIREMENTS/INSTALL:
+ - apt-get install memcached
+ - pip install python-memcached
+ - easy_install pillow (DO NOT install using pip - use easy_install)
+ - pip install pytz (time zone collection)
+ - pip install sorl-thumbnail
+
+ - pip install unidecode (unicode to ascii module) (install not needed, 'bundled' in sources)
+
+CODING STYLE: (word separators in variable/function/object names):
+ - underscore _:
+   - python functions
+   - view names and namespaces
+   - javascript functions
+   - html id's
+ - dash -:
+   - css classes: -
+   - urls: -

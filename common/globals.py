@@ -112,7 +112,7 @@ MISC = {
                               # (to differentiate between company and management sites)
     'max_upload_image_size':2*2**20, # 2 megabytes
     'image_format':'png', # all images will be saved in this format
-    'image_upload_formats':'jpg|jpeg|gif|png|bmp|tiff', # supported image formats (as regex "options" for use in... regexes)
+    'image_upload_formats':'jpg|jpeg|gif|png|bmp|tiff', # supported image formats (as regex "options")
 }
 
 IMAGE_DIMENSIONS = {
@@ -133,25 +133,36 @@ PERMISSION_GROUPS = ( # retrieve readable format with get_permission_display()
 )
 
 PERMISSIONS = { # 'chapters' that each group can view or manage
-    # choices: company, category, discount, product, contact, permission, bill
+    # model choices: company, category, discount, product, contact, permission, bill, config
+    # views (to prevent users exploring other companies' terminals):
+    # manage, terminal
     'guest':{
-        'list':('company','category','discount','product','contact','bill'),
+        'list':('company','category','discount','product','contact','bill',
+            'terminal',),
         'edit':(),
         },
     'cashier':{
-        'list':('company','category','discount','product','contact','bill'),
-        'edit':('bill'),
+        'list':('company','category','discount','product','contact','bill','config',
+            'terminal',),
+        'edit':('bill',
+            'terminal','config',),
         },
     'seller':{
-        'list':('company','category','discount','product','contact','bill'),
-        'edit':('bill','product'),
+        'list':('company','category','discount','product','contact','bill','config',
+            'terminal','manage',),
+        'edit':('bill','product',
+            'terminal','manage','config',),
         },
     'manager':{
-        'list':('company','category','discount','product','contact','bill','permission'),
-        'edit':('category','discount','product','contact','bill'),
+        'list':('company','category','discount','product','contact','bill','permission','config',
+            'terminal','manage',),
+        'edit':('category','discount','product','contact','bill','config',
+            'terminal','manage',),
         },
     'admin':{
-        'list':('company','category','discount','product','contact','bill', 'permission'),
-        'edit':('company','category','discount','product','contact','bill', 'permission'),
+        'list':('company','category','discount','product','contact','bill', 'permission','config',
+            'terminal','manage',),
+        'edit':('company','category','discount','product','contact','bill', 'permission','config',
+            'terminal','manage',),
         },
 }

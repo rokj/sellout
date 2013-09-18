@@ -770,10 +770,10 @@ $(document).ready(function(){
     <table border="1"> <!-- TODO remove border -->
         <tr>
             <td colspan="2">
-                <p><label for="edit_product_name">{% trans 'Name' %}</label> <input type="text" id="edit_product_name" /></p>
+                <p><label for="edit_product_name">{% trans 'Name' %}</label> <input type="text" id="edit_product_name" maxlength="{{field_lengths.name}}" /></p>
             </td>
             <td>{% comment %} price per unit {% endcomment %}
-                <p><label for="edit_product_price">{% trans 'Price' %}</label> <input id="edit_product_price" />
+                <p><label for="edit_product_price">{% trans 'Price' %}</label> <input type="text" id="edit_product_price" maxlength="{{field_lengths.price }}"/>
                    <label for="edit_unit_type">{% trans 'per' %}</label><select id="edit_unit_type"></select>
             </td>
         </tr>
@@ -788,11 +788,12 @@ $(document).ready(function(){
             {% comment %} list of categories {% endcomment %}
             <td><p><label for="edit_product_category">{% trans 'Category' %}</label>
                 <select id="edit_product_category"></select></p></td>
-            <td><p><label for="edit_product_tax">{% trans 'Tax' %}</label> <input type="text" id="edit_product_tax" />%</p></td>
+            <td><p><label for="edit_product_tax">{% trans 'Tax' %}</label> <input type="text" id="edit_product_tax" maxlength="{{ field_lengths.tax }}" />%</p></td>
         </tr>
         <tr>
             <td><p><label for="edit_product_description">{% trans 'Description' %}</label></p>
-                <textarea id="edit_product_description"></textarea></td>
+            {% comment %} max length for textarea: an artibrary value, not set in database {% endcomment %}
+                <textarea id="edit_product_description" maxlength="1000"></textarea></td>
             <td>
                 {% comment %} discounts {% endcomment %}
                 <p>{% trans 'Discounts' %}</p>
@@ -801,13 +802,13 @@ $(document).ready(function(){
         </tr>
         <tr>
             <td><p>{% trans 'Private notes' %}:</p>
-                <textarea id="edit_product_private_notes"></textarea>
+                <textarea id="edit_product_private_notes" maxlength="1000"></textarea>
             </td>
-            <td><p><label for="edit_product_stock">{% trans 'Units left in stock' %}</label><input type="text" id="edit_product_stock" /></p></td>
+            <td><p><label for="edit_product_stock">{% trans 'Units left in stock' %}</label><input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}" /></p></td>
         </tr>
         <tr>
-            <td><p><label for="edit_product_shop_code">{% trans 'Shop code' %}</label><input type="text" id="edit_product_shop_code" /></p></td> {% comment %} this row again has 3 columns {% endcomment %}
-            <td><p><label for="edit_product_code">{% trans 'Product code' %}</label><input type="text" id="edit_product_code" /></p></td>
+            <td><p><label for="edit_product_shop_code">{% trans 'Shop code' %}</label><input type="text" id="edit_product_shop_code" maxlength="{{ field_lengths.shop_code }}" /></p></td> {% comment %} this row again has 3 columns {% endcomment %}
+            <td><p><label for="edit_product_code">{% trans 'Product code' %}</label><input type="text" id="edit_product_code" maxlength="{{ field_lengths.code }}" /></p></td>
             
             <td>
                 {% comment %} save/cancel buttons {% endcomment %}

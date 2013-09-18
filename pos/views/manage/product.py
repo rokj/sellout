@@ -4,7 +4,7 @@
 # Views for managing POS data: product
 
 from django.core.urlresolvers import reverse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
@@ -13,15 +13,14 @@ from pos.models import Company, Category, Discount, Product, Price
 from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, image_dimensions, \
-                           image_from_base64
+                           image_from_base64, max_field_length
 from pos.views.manage.discount import discount_to_dict
 
 from common import globals as g
 from config.functions import get_value
 
 import decimal as d
-import os
-from sorl.thumbnail import get_thumbnail, delete
+from sorl.thumbnail import get_thumbnail
 
 ###############
 ## products ###
@@ -39,6 +38,16 @@ def products(request, company):
     if not has_permission(request.user, c, 'product', 'list'):
         return no_permission_view(request, c, _("view products"))
     
+    # fields that need to be limited in length:
+    lengths = {
+        'code':max_field_length(Product, 'code'),
+        'price':g.DECIMAL['currency_digits'] + 1,
+        'shop_code':max_field_length(Product, 'shop_code'),
+        'stock':g.DECIMAL['quantity_digits'],
+        'name':max_field_length(Product, 'name'),
+        'tax':g.DECIMAL['percentage_decimal_places'] + 4, # up to '100.' + 'decimal_digits'
+    }
+
     context = {
         'company':c, 
         'title':_("Products"),
@@ -54,7 +63,7 @@ def products(request, company):
         'image_upload_formats':g.MISC['image_upload_formats'], # what can be uploaded
         'max_upload_size':round(g.MISC['max_upload_image_size']/2**20, 2), # show in megabytes
         'max_upload_size_bytes':g.MISC['max_upload_image_size'], # bytes for javascript
-        
+        'field_lengths':lengths,
     }
     return render(request, 'pos/manage/products.html', context)
 
@@ -323,18 +332,35 @@ def validate_product(user, company, data):
         # this shouldn't happen
         return r(_("Wrong product id"))
     
+    
+    if data['id'] != -1:
+        # check if product belongs to this company and if he has the required permissions
+        try:
+            p = Product.objects.get(id=data['id'], company=company)
+        except Product.DoesNotExist:
+            return r(False, _("Cannot edit product: it does not exist"))
+        
+        if p.company != company or not has_permission(user, company, 'product', 'edit'):
+            return r(False, _("You have no permission to edit this product"))
+    
     # name
     if not data['name']:
         return r(False, _("No name entered"))
+    else:
+        if len(data['name']) > max_field_length(Product, 'name'):
+            return r(False, _("Name too long"))
     data['name'] = data['name'].strip()
     
     # price
     # replace decimal separator with dot
+    if len(data['price']) > g.DECIMAL['currency_digits']+1:
+        return r(False, _("Price too long"))
+    
     ret = parse_decimal(user, data['price'])
     if not ret['success']:
         return r(False, _("Check price notation"))
-    else:
-        data['price'] = ret['number']
+    data['price'] = ret['number']
+    
         
     # unit type (probably doesn't need checking
     if not data['unit_type'] in dict(g.UNITS):
@@ -359,6 +385,9 @@ def validate_product(user, company, data):
     if not data['code']:
         return r(False, _("No code entered"))
     else:
+        if len(data['code']) > max_field_length(Product, 'code'):
+            return r(False, _("Code too long"))
+        
         try:
             p = Product.objects.get(company=company, code=data['code'])
             if p.id != data['id']:
@@ -372,6 +401,9 @@ def validate_product(user, company, data):
     # shop code: if exists, must be unique
     data['shop_code'] = data['shop_code'].strip()
     if data['shop_code']:
+        if len(data['shop_code']) > max_field_length(Product, 'shop_code'):
+            return r(False, _("Shop code too long"))
+        
         try:
             p = Product.objects.get(company=company, shop_code=data['shop_code'])
             if p.id != data['id']:
@@ -391,6 +423,9 @@ def validate_product(user, company, data):
         data['tax'] = ret['number']
     
     # stock
+    if len(data['stock']) > g.DECIMAL['quantity_digits']+1:
+        return r(False, _("Stock too long"))
+    
     ret = parse_decimal(user, data['stock'])
     if not ret['success']:
         return r(False, _("Check stock notation"))

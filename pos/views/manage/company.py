@@ -6,12 +6,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from django.http import HttpResponse, Http404
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
 
-from pos.models import Company, Category, Contact, Discount, Product, Price
-from pos.views.util import error, JSON_response, JSON_parse, \
+from pos.models import Company
+from pos.views.util import JSON_response, JSON_parse, \
                            resize_image, validate_image, has_permission, \
                            no_permission_view
 from common import globals as g
@@ -202,6 +199,8 @@ def register_company(request):
             form.save()
             
             # continue with registration
+            
+            # TODO: add 'admin' permissions for newly registered company to request.user
             return redirect('pos:home', company=form.cleaned_data['url_name']) # home page
     else:
         # show an empty form

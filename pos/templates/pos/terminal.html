@@ -7,9 +7,17 @@
 {% endblock %}
 
 {% block content %}
-<p>home</p>
-<p>company: {{company}}</p>
-<p>id: {{id}}</p>
-<p>{% if company.image %}<img src="{{company.image.url}}" />{% endif %}</p>
+
+{% comment %} management, logout, ... links {% endcomment %}
+<div id="manage_bar">manage bar</div>
+
+{% comment %} the bill {% endcomment %}
+<div id="bill">bill</div>
+
+{% comment %} product selector and other controls {% endcomment %}
+<div id="controls">controls</div>
+
+{% comment %}  {% endcomment %}
+
 {% endblock %}
 

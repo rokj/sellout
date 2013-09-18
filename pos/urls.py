@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url
 from django.utils.translation import ugettext as _
 
 from common import globals as g
-from pos.views import home
+import pos.views as pos
 import pos.views.manage as manage
 
 ### common URL prefixes: ###
@@ -18,7 +18,7 @@ urlpatterns = patterns('',
     url(r_manage + r'url-name-suggestions$', manage.company.url_name_suggestions, name='url_name_suggestions'),
     
     # home: POS terminal, directly
-    url(r_company + '/?$', home.terminal, name='home'), # by url_name
+    url(r_company + '/?$', pos.terminal, name='home'), # by url_name
     
     # management urls: company
     url(r_company + _('/manage') + '/?$', manage.manage_home, name='manage_home'), # management home

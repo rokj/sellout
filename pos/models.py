@@ -197,7 +197,7 @@ class Permission(SkeletonU):
     permission = models.CharField(max_length=16, null=False, blank=False, choices=g.PERMISSION_GROUPS)
     
     def __unicode__(self):
-        return self.user.email + ": " + self.get_permission_display()
+        return self.user.email + " | " + self.company.name + ": " + self.get_permission_display()
         
 @receiver(pre_save, sender=Permission)
 @receiver(pre_delete, sender=Permission)

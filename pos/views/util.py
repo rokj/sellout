@@ -37,6 +37,10 @@ def JSON_ok():
 def JSON_parse(string_data):
     return json.loads(string_data)
 
+# misc
+def max_field_length(model, field_name):
+    return model._meta.get_field(field_name).max_length
+
 # image and file handling
 def resize_image(path, dimensions):
     image = Image.open(path)
@@ -140,18 +144,22 @@ def has_permission(user, company, model, task):
     # get permission from memcache... 
     ckey = permission_cache_key(user, company)
     permission = cache.get(ckey)
-    
+    print ckey
     # ...or database
     if not permission:
         try:
-            permission = Permission.objects.get(user__id=user.id)
+            permission = Permission.objects.get(user__id=user.id, company=company)
             cache.set(ckey, permission)
         except Permission.DoesNotExist:
             # there's no entry in the database,
             # therefore the user has no permissions whatsoever
+            print 'no permission'
             return False
     
     if model in g.PERMISSIONS[permission.permission][task]:
+        
+        print company
+        print 'has permission'
         return True
     else:
         return False
@@ -160,10 +168,10 @@ def no_permission_view(request, company, action):
     """ the view that is called if user attempts to do shady business without permission """
     
     context = {
-        'title':_("Company details"),
+        'title':_("Permission denied"),
         'site_title':g.MISC['site_title'],
         'company':company, # required for the 'manage' template: links need company parameter
         'action':action,
     }
     
-    return render(request, 'pos/manage/no_permission.html', context)
+    return render(request, 'pos/no_permission.html', context)

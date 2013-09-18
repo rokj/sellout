@@ -1,5 +1,4 @@
 - ! - tablet support
-- updated_by for update views
 - <[ CDATA for <javascript>
 - change underscores for HTML and CSS ids and classes to dashes (django forms use underscores ?!)
 - show/hide animations (jquery)
@@ -8,12 +7,13 @@
 - minify javascript
 - confirmation dialogs for deletion (category, discount, ...)
 - @transaction.atomic for update_price() (django 1.6?)
-- product validation: lengths of all fields
 
+- DONE product validation: lengths of all fields
 - DONE title/site title for all views
 - DONE base.html: remove unneeded jquery <script src=""> includes
 - DONE datepicker for date inputs
 - DONE product.shop_code = unique - test for this and return error if not
+- DONE updated_by for update views (changes made in common.Skeleton)
 
 SECURITY:
  - DONE login_required
@@ -33,12 +33,13 @@ OPTIMIZE:
  - sql queries or better getting of objects just with specific data
  - NOT DOING images embedded in JSON instead of doing a special request for each image
  
-CODING STYLE (word separators in variable/function/object names):
- - underscore _:
-   - python functions
-   - view names and namespaces
-   - javascript functions
-   - html id's
- - dash -:
-   - css classes: -
-   - urls: -
+JQUERY PLUGINS:
+ - on-site keyboard: http://plugins.jquery.com/keyboard/
+ - select: http://harvesthq.github.io/chosen/
+ - scrollbar: http://www.yuiazu.net/perfect-scrollbar/
+ - splitter: http://plugins.jquery.com/splitter/
+ - key navigator: http://nekman.github.io/keynavigator/
+ - multi-touch gestures: http://eightmedia.github.io/hammer.js/
+ - carousel: https://github.com/artpolikarpov/scrollyeah
+             http://i-like-robots.github.io/jQuery-Slideshow/
+ - design: http://drewgreenwell.com/projects/metrojs#fiddleAround

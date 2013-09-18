@@ -1,2 +1,1 @@
-from home import *
-from common import *
+from terminal import *
