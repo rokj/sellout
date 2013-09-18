@@ -66,7 +66,7 @@ def validate_image(obj): # obj is actually "self"
 def image_dimensions(size):
     """ accepts string - key in g.IMAGE_DIMENSIONS and returns
         a list: [width, height, sorl_string]
-        sorl_string = <width>x<height>
+        sorl_string = <width>x<height> (for use in templates)
     """
     if size not in g.IMAGE_DIMENSIONS:
         return None # an exception will be raised on access
@@ -90,7 +90,7 @@ def image_from_base64(data):
 
     image_data = data[len(header)-1:].decode("base64")
 
-    return ContentFile(image_data, "fakename." + filetype)
+    return ContentFile(image_data, "fakename." + filetype) # name will be replaced when saving to ImageField
 
 # numbers
 def format_number(user, n):

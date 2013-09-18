@@ -340,9 +340,20 @@ def validate_product(user, company, data):
     if not data['unit_type'] in dict(g.UNITS):
         return r(False, _("Invalid unit type"))
 
-    # image: TODO 
-    convert image to file and store it in data['something'] ???
-    
+    # image:
+    if data['change_image'] == True:
+        if data['image']: # new image has been uploaded
+            data['image'] = image_from_base64(data['image'])
+            if not data['image']:
+                # something has gone wrong during conversion
+                return r(False, _("Image upload failed"))
+        else:
+            # image will be deleted in view
+            pass
+    else:
+        # no change regarding images
+        data['image'] = None
+            
     # code: must exist and must be unique
     data['code'] = data['code'].strip()
     if not data['code']:
@@ -436,7 +447,13 @@ def create_product(request, company):
     
     # price has to be updated separately
     product.price = update_price(product, request.user, data['price'])
-
+    
+    # add image, if it's there
+    if data['change_image']:
+        if data['image']:
+            product.image = data['image']
+            product.save()
+    
     return JSON_ok()
 
 @login_required
@@ -495,7 +512,7 @@ def edit_product(request, company, product_id):
             if product.image:
                 product.image.delete()
             # save a new image
-            product.image = image_from_base64(data['image'])
+            product.image = data['image'] # conversion from base64 is done in validate_product
         else: # delete the old image
             product.image.delete()
     
