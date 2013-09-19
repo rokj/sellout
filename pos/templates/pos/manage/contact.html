@@ -21,7 +21,7 @@ $(document).ready(function(){
 
     // use datepicker on all date inputs
     $("#id_date_of_birth").datepicker({
-    	dateFormat:"{{ date_format_jquery }}"
+    	dateFormat:"{{ date_format_jquery|escapejs }}"
     });
     
     $("#id_type").change(function(){

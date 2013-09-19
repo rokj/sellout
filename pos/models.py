@@ -131,7 +131,7 @@ class Product(ProductAbstract):
     # images = models.ManyToManyField(ProductImage, null=True, blank=True) # one image per product is enough
     
     def __unicode__(self):
-        return self.name
+        return self.company.name + ":" + self.name
     
     class Meta:
         abstract = False

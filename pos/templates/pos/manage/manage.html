@@ -6,8 +6,9 @@
 
 {% block content %}
 {% comment %} management menu {% endcomment %}
-
 <div id="manage_menu">
+    <p><a href="{% url 'pos:terminal' company.url_name %}">Terminal</a></p>
+
     <ul id="manage">
         <li><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
         <li><a href="{% url 'pos:list_categories' company.url_name %}">{% trans 'Categories' %}</a></li>

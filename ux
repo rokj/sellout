@@ -1,0 +1,20 @@
+Operate with:
+ - keyboard:
+   1. focus shop code (tab: focus shop code)
+   2. type code > press enter
+   3. show matching products:
+     - if more than one: choose with arrow keys, then > press enter
+     - if one: goto 4.
+   4. add product to bill
+   5. focus quantity, default = 1
+   6. type quantity > press enter
+   7. clear code/shop code
+   8. goto 1.
+   
+   ideal scenario:
+     AN<enter>2<enter> (shop code, quantity) 3-4 keys
+   worst-case scenario:
+     129380-210-<enter><arrow arrow>
+     
+ - touch screen/mouse:
+ 

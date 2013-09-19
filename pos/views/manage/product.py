@@ -346,9 +346,16 @@ def validate_product(user, company, data):
     # name
     if not data['name']:
         return r(False, _("No name entered"))
+    elif len(data['name']) > max_field_length(Product, 'name'):
+        return r(False, _("Name too long"))
     else:
-        if len(data['name']) > max_field_length(Product, 'name'):
-            return r(False, _("Name too long"))
+        if data['id'] == -1: # when adding new products:
+            # check if a product with that name exists
+            p = Product.objects.filter(company=company,name=data['name'])
+            if p.count() > 0:
+                return r(False,
+                    _("There is already a product with that name") +  \
+                    " (" + _("code") + ": " + p[0].code + ")")
     data['name'] = data['name'].strip()
     
     # price
@@ -515,6 +522,7 @@ def edit_product(request, company, product_id):
     data = valid['data']
     
     # update product:
+    product.name = data['name']
     product.unit_type = data['unit_type']
     product.code = data['code']
     product.shop_code = data['shop_code']

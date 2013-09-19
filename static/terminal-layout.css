@@ -1,0 +1,48 @@
+/* TODO: remove */
+div{
+    border: 1px solid black;
+}
+
+/*              */
+/* main content */
+/*              */
+
+/* topmost bar */
+div#manage_bar{
+    position:absolute;
+    top:5px;
+    left:5px;
+    right:5px;
+    height:25px;
+}
+
+div#manage_bar #blocklogic{
+    /* blocklogic link in top-left corner */
+    float:left;
+}
+
+div#manage_bar #messages{
+    /*overflow:hidden; no difference for text that doesn't overflow*/
+    text-align:center;
+    width:auto;
+}
+
+div#manage_bar .management-bar-button{
+    float:right;
+}
+
+div#bill{
+    width:360px;
+    position:absolute;
+    top:35px;
+    bottom:5px;
+    left:5px;
+}
+
+div#controls{
+    position:absolute;
+    left:370px;
+    right:5px;
+    top:35px;
+    bottom:5px;
+}

@@ -12,3 +12,22 @@ function preview_image(input, preview_img_id, max_width, max_height) {
         reader.readAsDataURL(input.files[0]);
     }
 }
+
+function escape(text){
+    if(!text) return "" // avoid writing "undefined"
+    
+    // kudos: 
+    // http://stackoverflow.com/questions/24816/escaping-html-strings-with-jquery
+    var entityMap = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': '&quot;',
+        "'": '&#39;',
+        "/": '&#x2F;'
+    };
+
+    return String(text).replace(/[&<>"'\/]/g, function (s) {
+        return entityMap[s];
+    });
+}

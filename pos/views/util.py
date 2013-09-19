@@ -144,7 +144,6 @@ def has_permission(user, company, model, task):
     # get permission from memcache... 
     ckey = permission_cache_key(user, company)
     permission = cache.get(ckey)
-    print ckey
     # ...or database
     if not permission:
         try:
@@ -153,13 +152,9 @@ def has_permission(user, company, model, task):
         except Permission.DoesNotExist:
             # there's no entry in the database,
             # therefore the user has no permissions whatsoever
-            print 'no permission'
             return False
     
     if model in g.PERMISSIONS[permission.permission][task]:
-        
-        print company
-        print 'has permission'
         return True
     else:
         return False

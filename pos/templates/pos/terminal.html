@@ -3,21 +3,24 @@
 {% load i18n %}
 
 {% block head %}
-
+<link type="text/css" rel="stylesheet" href="{% static 'terminal-layout.css' %}" />
 {% endblock %}
 
 {% block content %}
 
 {% comment %} management, logout, ... links {% endcomment %}
-<div id="manage_bar">manage bar</div>
+<div id="manage_bar">
+    <div id="blocklogic"><a href="http://www.blocklogic.net">BlockLogic</a></div>
+    <div class="management-bar-button"><a href="{% url 'pos:manage_home' company.url_name %}">{% trans 'Manage' %}</a></div>
+    <div class="management-bar-button"><a href="#">{% trans 'Logout' %}</a></div>
+    <div id="messages">messages</div> {% comment %} actually in center, but with overflow:hidden {% endcomment %}
+</div>
 
 {% comment %} the bill {% endcomment %}
 <div id="bill">bill</div>
 
 {% comment %} product selector and other controls {% endcomment %}
 <div id="controls">controls</div>
-
-{% comment %}  {% endcomment %}
 
 {% endblock %}
 
