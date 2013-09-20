@@ -4,6 +4,26 @@
 
 {% block head %}
 <link type="text/css" rel="stylesheet" href="{% static 'terminal-layout.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'terminal-controls.css' %}" />
+
+{% comment %} scrollyeah {% endcomment %}
+<link  href="{% static 'scrollyeah/scrollyeah.css' %}" rel="stylesheet" />
+<script src="{% static 'scrollyeah/scrollyeah.js' %}"></script>
+
+{% comment %} custom widgets {% endcomment %}
+<script src="{% static 'widgets.js' %}"></script>
+{% comment %} 'embedded' javascript {% endcomment %}
+<script type="text/javascript">
+$(document).ready(function() {
+	{% comment %} data from view, stored in json {% endcomment %}
+	data = {% autoescape off %}{{data}}{% endautoescape %};
+	
+	/* widgets */
+	categories_selector($("div#controls #categories"), data['categories']);
+	
+});  
+</script>
+
 {% endblock %}
 
 {% block content %}
@@ -20,7 +40,9 @@
 <div id="bill">bill</div>
 
 {% comment %} product selector and other controls {% endcomment %}
-<div id="controls">controls</div>
+<div id="controls">
+    <div id="categories" class="scrollyeah"></div>
+</div>
 
 {% endblock %}
 

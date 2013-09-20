@@ -28,6 +28,7 @@ from sorl.thumbnail import get_thumbnail
 @login_required
 def JSON_units(request, company):
     # at the moment, company is not needed
+    # also, no permission checking is required
     return JSON_response(g.UNITS) # G units!
 
 @login_required
@@ -166,7 +167,10 @@ def update_price(product, user, new_unit_price):
 
 @login_required
 def get_product(request, company, product_id):
-    c = get_object_or_404(Company, url_name = company)
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
     
     # permissions: needs to be guest to view products
     if not has_permission(request.user, c, 'product', 'list'):
@@ -178,7 +182,10 @@ def get_product(request, company, product_id):
 
 @login_required
 def search_products(request, company):
-    c = get_object_or_404(Company, url_name = company)
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
     
     # permissions: needs to be guest
     if not has_permission(request.user, c, 'product', 'list'):
@@ -363,7 +370,8 @@ def validate_product(user, company, data):
     if len(data['price']) > g.DECIMAL['currency_digits']+1:
         return r(False, _("Price too long"))
     
-    ret = parse_decimal(user, data['price'])
+    ret = parse_decimal(user, data['price'],
+        g.DECIMAL['currency_digits'] -g.DECIMAL['currency_decimal_places']-1)
     if not ret['success']:
         return r(False, _("Check price notation"))
     data['price'] = ret['number']
@@ -375,7 +383,7 @@ def validate_product(user, company, data):
 
     # image:
     if data['change_image'] == True:
-        if data['image']: # new image has been uploaded
+        if 'image' in data: # new image has been uploaded
             data['image'] = image_from_base64(data['image'])
             if not data['image']:
                 # something has gone wrong during conversion
@@ -423,7 +431,7 @@ def validate_product(user, company, data):
     data['description'] = data['description'].strip()
     data['private_notes'] = data['private_notes'].strip()
     
-    ret = parse_decimal(user, data['tax'])
+    ret = parse_decimal(user, data['tax'], 3)
     if not ret['success']:
         return r(False, _("Check tax notation"))
     else:
@@ -433,7 +441,8 @@ def validate_product(user, company, data):
     if len(data['stock']) > g.DECIMAL['quantity_digits']+1:
         return r(False, _("Stock too long"))
     
-    ret = parse_decimal(user, data['stock'])
+    ret = parse_decimal(user, data['stock'],
+        g.DECIMAL['quantity_digits']-g.DECIMAL['quantity_decimal_places']-1)
     if not ret['success']:
         return r(False, _("Check stock notation"))
     else:
@@ -444,7 +453,10 @@ def validate_product(user, company, data):
 @login_required
 def create_product(request, company):
     # create new product
-    c = get_object_or_404(Company, url_name = company)
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
     
     # sellers can add product
     if not has_permission(request.user, c, 'product', 'edit'):
@@ -492,7 +504,7 @@ def create_product(request, company):
     
     # add image, if it's there
     if data['change_image']:
-        if data['image']:
+        if 'image' in data:
             product.image = data['image']
             product.save()
     
@@ -501,7 +513,10 @@ def create_product(request, company):
 @login_required
 def edit_product(request, company, product_id):
     # update existing product
-    c = get_object_or_404(Company, url_name = company)
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
     
     # sellers can edit product
     if not has_permission(request.user, c, 'product', 'edit'):
@@ -575,7 +590,10 @@ def edit_product(request, company, product_id):
 
 @login_required
 def delete_product(request, company, product_id):
-    c = get_object_or_404(Company, url_name = company)
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
     
     # sellers can delete products
     if not has_permission(request.user, c, 'product', 'edit'):

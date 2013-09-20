@@ -7,6 +7,10 @@
 - minify javascript
 - confirmation dialogs for deletion (category, discount, ...)
 - @transaction.atomic for update_price() (django 1.6?)
+- paypal
+
+- products with no categories: 'no category' entry in listboxes
+- bug: category select in 'advanced product search'
 
 - DONE product validation: lengths of all fields
 - DONE title/site title for all views
@@ -43,3 +47,8 @@ JQUERY PLUGINS:
  - carousel: https://github.com/artpolikarpov/scrollyeah
              http://i-like-robots.github.io/jQuery-Slideshow/
  - design: http://drewgreenwell.com/projects/metrojs#fiddleAround
+ 
+ 
+ 
+ 
+ - CSS??? http://sass-lang.com/

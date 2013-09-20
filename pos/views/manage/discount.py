@@ -11,7 +11,8 @@ from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from pos.models import Company, Discount
-from pos.views.util import error, JSON_response, has_permission, no_permission_view,\
+from pos.views.util import error, JSON_response, JSON_error, \
+                           has_permission, no_permission_view, \
                            format_number, format_date, parse_decimal
 from common import globals as g
 from config.functions import get_date_format, get_value
@@ -60,6 +61,15 @@ def JSON_discounts(request, company, product_id=None):
     #  - only start date: it must be before today
     #  - only end date: it must be after today
     #  - both start and end date: today must be between them
+    # (see discount_to_dict)
+    
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+    
+    # permissions
+    
 
     discounts = Discount.objects.filter(company__url_name=company, active=True)
     

@@ -1,0 +1,15 @@
+/* TODO: remove */
+div{
+    border: 1px solid black;
+}
+
+/*             */
+/* categories  */
+/*             */
+div .category{
+    float:left;
+}
+
+.focused{
+    color:red;
+}

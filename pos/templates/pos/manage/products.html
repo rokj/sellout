@@ -40,8 +40,6 @@ reference to a product is its parent div (that contains product's .data()).
 
 {% endcomment %}
 <script type="text/javascript">
-
-
 var categories = []; // list of pairs "label", "value"
 var units = [];
 var all_discounts = {};
@@ -51,6 +49,9 @@ var update_timeout;
 
 check_interval_duration = 500;
 update_timeout_duration = 1500;
+
+// remember the category of last added product and show it in new dialog
+last_chosen_category = null;
 
 $(document).ready(function(){
     // functions:
@@ -199,7 +200,7 @@ $(document).ready(function(){
     }
     
     function discount_tooltip(discount, li_obj){
-    	// tooltip - discount details
+        // tooltip - discount details
         var tooltip = "";
         
         // tooltip = discount.code + "<br/>" // discount code (already in the <li>)
@@ -207,11 +208,11 @@ $(document).ready(function(){
         
         // if no dates are set, show 'no date limit', otherwise 'from ... to ...'
         if(!discount.start_date && !discount.end_date){
-        	tooltip += "{% trans 'No date limits' %}"
+            tooltip += "{% trans 'No date limits' %}"
         }
         else{
-        	if(discount.start_date) tooltip += "{% trans 'from' %} " + escape(discount.start_date); 
-    		if(discount.end_date) tooltip += " {% trans 'to' %} " + escape(discount.end_date);
+            if(discount.start_date) tooltip += "{% trans 'from' %} " + escape(discount.start_date); 
+            if(discount.end_date) tooltip += " {% trans 'to' %} " + escape(discount.end_date);
         }
         
         // TODO: set style for inactive discount
@@ -233,7 +234,7 @@ $(document).ready(function(){
         // delete button
         btn_obj = $("<input>", {type:"button", value:"x", "class":"delete-discount"});
         btn_obj.click(function(){
-        	if(key in product.discounts) delete product.discounts[key];
+            if(key in product.discounts) delete product.discounts[key];
             refresh_discounts(product);
         });
         li_obj.append(discount.code + " " + discount_amount(discount));
@@ -294,43 +295,43 @@ $(document).ready(function(){
     }
     
     function upload_image_status(status, save_obj, del_obj, upl_obj, img_obj){
-    	var show, hide;
-    	
-    	switch(status){
-    	   case 'image':
-    		   // product has image and it is not being edited
-    		   show = [save_obj, del_obj, img_obj];
-    		   hide = [upl_obj];
-    		   break;
-    	   case 'no_image':
+        var show, hide;
+        
+        switch(status){
+           case 'image':
+               // product has image and it is not being edited
+               show = [save_obj, del_obj, img_obj];
+               hide = [upl_obj];
+               break;
+           case 'no_image':
                // product has no image and it is not being edited
                show = [save_obj, upl_obj, img_obj];
                hide = [del_obj];
-    		   break;
-    	   case 'uploading':
-    		   // image is uploading
-    		   show = [img_obj];
-    		   hide = [save_obj, del_obj, upl_obj];
-    		   break;
-    	}
-    	
-    	for(i = 0; i < show.length; i++) show[i].show();
-    	for(i = 0; i < hide.length; i++) hide[i].hide();
+               break;
+           case 'uploading':
+               // image is uploading
+               show = [img_obj];
+               hide = [save_obj, del_obj, upl_obj];
+               break;
+        }
+        
+        for(i = 0; i < show.length; i++) show[i].show();
+        for(i = 0; i < hide.length; i++) hide[i].hide();
     }
         
     function show_image(product, obj){
-    	if(!product.image){
-    		// show 'placeholder' image
-    		obj.attr("src", "{% static 'placeholder.png' %}");
-    		obj.attr("alt", escape(product.name));
-    		obj.addClass("preview-product");
-    	}
-    	else{
-    		// show the real image
-    		obj.attr("src", product.image);
-    		obj.attr("alt", "{% trans 'No image' %}");
-    		obj.removeClass("preview-product");
-    	}
+        if(!product.image){
+            // show 'placeholder' image
+            obj.attr("src", "{% static 'placeholder.png' %}");
+            obj.attr("alt", escape(product.name));
+            obj.addClass("preview-product");
+        }
+        else{
+            // show the real image
+            obj.attr("src", product.image);
+            obj.attr("alt", "{% trans 'No image' %}");
+            obj.removeClass("preview-product");
+        }
     }
     
     function show_product_edit_dialog(parent){
@@ -377,10 +378,11 @@ $(document).ready(function(){
         
         for(i=0; i < categories.length; i++){
             opt_obj = $("<option>")
-            .attr("value", escape(categories[i].value))
+            .attr("value", categories[i].value)
             .append(escape(categories[i].label));
             
-            if(categories[i].label == product.category){
+            if((categories[i].label == product.category) || // current product's category (editing)
+                (last_chosen_category == categories[i].value)){ // last product's category (adding)
                 opt_obj.attr("selected", "selected");
             }
             sel_obj.append(opt_obj);
@@ -401,7 +403,7 @@ $(document).ready(function(){
         
         // upload <input>: preview image on upload and store base64 data for sending to server
         upl_obj.unbind().change(function(){
-        	// get image (base64) and store it to .data()
+            // get image (base64) and store it to .data()
             obj = upl_obj.get(0);
 
             // filetype filter
@@ -409,19 +411,19 @@ $(document).ready(function(){
 
             f = f = obj.files[0]
             if(obj.files && f){ // check for browser compatibility
-            	var reader = new FileReader();
+                var reader = new FileReader();
                 // read the file
                 reader.onload = function(e){
                     // check file type
                     if (!rFilter.test(f.type)){
-                    	alert("{% trans 'Wrong file type for the uploaded image!' %}");
-                    	upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
+                        alert("{% trans 'Wrong file type for the uploaded image!' %}");
+                        upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
                         return null;
                     }
                     if(f.size > {{ max_upload_size_bytes|escapejs }}){
-                    	alert("{% trans 'File too large, maximum size for upload is' %} {{ max_upload_size|escapejs }} MB");
-                    	upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
-                    	return null;
+                        alert("{% trans 'File too large, maximum size for upload is' %} {{ max_upload_size|escapejs }} MB");
+                        upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
+                        return null;
                     }
                     
                     // store the file in output
@@ -461,12 +463,12 @@ $(document).ready(function(){
         });
         
         if(product.image){
-        	// product already has an image: show it
-        	show_image(product, img_obj);
-        	upload_image_status('image', save_btn_obj, del_obj, upl_obj, img_obj);
+            // product already has an image: show it
+            show_image(product, img_obj);
+            upload_image_status('image', save_btn_obj, del_obj, upl_obj, img_obj);
         }
         else{
-        	upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
+            upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
         }
         
         // tax
@@ -544,6 +546,7 @@ $(document).ready(function(){
         if(product.change_image) data['image'] = product.image_data
         
         data['category'] = $("#edit_product_category", dlg_obj).val();
+        last_chosen_category = data['category']; // remember the last used
         data['tax'] = $("#edit_product_tax", dlg_obj).val();
         data['description'] = $("#edit_product_description", dlg_obj).val();
         // discounts: get all <li> items and put them into an array
@@ -585,7 +588,7 @@ $(document).ready(function(){
     }
     
     function delete_product(parent){
-    	product = parent.data().product;
+        product = parent.data().product;
         // confirm deletion
         if(confirm("{% trans 'Delete product ' %} '" + product.name + "'?")){
             // TODO: GET or POST method? CSRF tokens? security?
@@ -773,7 +776,7 @@ $(document).ready(function(){
                 <p><label for="edit_product_name">{% trans 'Name' %}</label> <input type="text" id="edit_product_name" maxlength="{{field_lengths.name}}" /></p>
             </td>
             <td>{% comment %} price per unit {% endcomment %}
-                <p><label for="edit_product_price">{% trans 'Price' %}</label> <input type="text" id="edit_product_price" maxlength="{{field_lengths.price }}"/>
+                <p><label for="edit_product_price">{% trans 'Price' %}</label> {{ currency }} <input type="text" id="edit_product_price" maxlength="{{field_lengths.price }}"/>
                    <label for="edit_unit_type">{% trans 'per' %}</label><select id="edit_unit_type"></select>
             </td>
         </tr>

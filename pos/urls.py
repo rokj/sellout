@@ -19,6 +19,8 @@ urlpatterns = patterns('',
     
     # home: POS terminal, directly
     url(r_company + '/?$', pos.terminal, name='terminal'), # by url_name
+    # ajax calls for POS terminal
+    
     
     # management urls: company
     url(r_company + _('/manage') + '/?$', manage.manage_home, name='manage_home'), # management home
@@ -52,7 +54,6 @@ urlpatterns = patterns('',
     
     
     # misc (ajax): urls not translated
-    # categories list
     url(r_company + r'/manage/json/categories/?$', manage.category.JSON_categories, name='JSON_categories'),
     # unit types list
     url(r_company + r'/manage/json/units/?$', manage.product.JSON_units, name='JSON_units'),

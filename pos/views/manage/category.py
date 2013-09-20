@@ -9,7 +9,7 @@ from django import forms
 from django.http import Http404
 
 from pos.models import Company, Category
-from pos.views.util import error, JSON_response, resize_image, validate_image, \
+from pos.views.util import JSON_response, JSON_error, resize_image, validate_image, \
                            has_permission, no_permission_view, \
                            image_dimensions
 from common import globals as g
@@ -33,8 +33,20 @@ def category_breadcrumbs(category):
     
     return name
 
+def category_to_dict(c):
+    r = {
+        'id':c.id,
+        'name':c.name,
+        'description':c.description,
+        'image':"",
+    }
+    if c.image:
+        r['image'] = c.image.url
+    return r
+
+
 def get_all_categories(company_id, category_id=None, sort='name', data=[], level=0, json=False):
-    # return a structured list of all categories (converted to dictionaries)
+    """ return a 'flat' list of all categories (converted to dictionaries/json) """
     
     #def category_to_dict(c, level): # c = Category object # currently not needed
     #    return {'id':c.id,
@@ -51,16 +63,9 @@ def get_all_categories(company_id, category_id=None, sort='name', data=[], level
         #data.append(category_to_dict(c, level))
         # if json == true, add to dictionary rather than queryset
         if json:
-            entry = {'id':c.id,
-                'name':c.name,
-                'description':c.description,
-                'level':c.level,
-                'breadcrumbs':category_breadcrumbs(c)}
-            if c.image:
-                entry['image'] = c.image.url
-            else:
-                entry['image'] = None
-                
+            entry = category_to_dict(c) 
+            entry['level'] = c.level # some additional data
+            entry['breadcrumbs'] = category_breadcrumbs(c)
             data.append(entry)
         else:
             data.append(c)
@@ -77,15 +82,48 @@ def get_all_categories(company_id, category_id=None, sort='name', data=[], level
 
     return data
 
-def JSON_categories(request, company):
-    company = get_object_or_404(Company, url_name=company)
+def get_all_categories_structured(company, category=None, data=[], sort='name'):
+    """ return a structured list of all categories of given company """
     
-    # return all categories' data in JSON format
-    return JSON_response(get_all_categories(company.id, sort='name', data=[], json=True))
+    if not category:
+        # list all categories that have no parent
+        category = Category.objects.filter(company=company, parent=None).order_by(sort)
+        
+        for c in category:
+            data.append(get_all_categories_structured(company, c, data, sort))
+            
+        return data
+    else:
+        # add current category to list
+        current = category_to_dict(category)
+        current['children'] = [] # will contain subcategories
+        
+        # list all categories with this parent
+        children = Category.objects.filter(company=company, parent=category).order_by(sort)
+        
+        # add them to the list
+        for c in children:
+            current['children'].append(get_all_categories_structured(company, c))
+
+    return current
 
 #############
 ### views ###
 #############
+@login_required
+def JSON_categories(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+    
+    # permissions
+    if not has_permission(request.user, c, 'category', 'list'):
+        return JSON_error("no permission")
+    
+    # return all categories' data in JSON format
+    return JSON_response(get_all_categories(c.id, sort='name', data=[], json=True))
+
 class CategoryForm(forms.ModelForm):
     # take special case of urls
     def clean_image(self):

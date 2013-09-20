@@ -113,7 +113,7 @@ def format_date(user, date):
     else:
         return date.strftime(get_date_format(user, 'python'))
 
-def parse_decimal(user, string):
+def parse_decimal(user, string, max_digits=None):
     """ replace user's decimal separator with dot and parse
         return dictionary with result status and parsed number:
         
@@ -121,6 +121,11 @@ def parse_decimal(user, string):
     """
     
     string = string.replace(get_value(user, 'pos_decimal_separator'), '.')
+    
+    # check for entries too big
+    if max_digits:
+        if string.find('.') > max_digits:
+            return {'success':False, 'number':None}
     
     try:
         number = Decimal(string)
