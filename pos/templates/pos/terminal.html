@@ -3,12 +3,25 @@
 {% load i18n %}
 
 {% block head %}
+{% comment %} translation {% endcomment %}
+<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
+
+{% comment %} the terminal {% endcomment %}
 <link type="text/css" rel="stylesheet" href="{% static 'terminal-layout.css' %}" />
-<link type="text/css" rel="stylesheet" href="{% static 'terminal-controls.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'widgets.css' %}" />
 
 {% comment %} scrollyeah {% endcomment %}
 <link  href="{% static 'scrollyeah/scrollyeah.css' %}" rel="stylesheet" />
 <script src="{% static 'scrollyeah/scrollyeah.js' %}"></script>
+
+{% comment %} keyboard {% endcomment %}
+<link href="{% static 'keyboard/css/keyboard.css' %}" rel="stylesheet">
+<script src="{% static 'keyboard/js/jquery.keyboard.js' %}"></script>
+
+<!-- keyboard extensions (optional) -->
+<script src="{% static 'keyboard/js/jquery.mousewheel.js' %}"></script>
+<script src="{% static 'keyboard/js/jquery.keyboard.extension-typing.js' %}"></script>
+<script src="{% static 'keyboard/js/jquery.keyboard.extension-autocomplete.js' %}"></script>
 
 {% comment %} custom widgets {% endcomment %}
 <script src="{% static 'widgets.js' %}"></script>
@@ -17,9 +30,17 @@
 $(document).ready(function() {
 	{% comment %} data from view, stored in json {% endcomment %}
 	data = {% autoescape off %}{{data}}{% endautoescape %};
+	data['spacer'] = "{% static 'spacer.png' %}";
+	data['t'] = 250; // duration of show/hide events
 	
 	/* widgets */
-	categories_selector($("div#controls #categories"), data['categories']);
+	categories_selector($("div#controls #categories"), data['categories']); // categories selector
+	
+	// initialize the scrollyeah on the new div(s)
+	//_scrollyeah();
+
+	/* handle the keyboard */
+	$(document).keypress(handle_keypress);
 	
 });  
 </script>

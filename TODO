@@ -7,7 +7,8 @@
 - minify javascript
 - confirmation dialogs for deletion (category, discount, ...)
 - @transaction.atomic for update_price() (django 1.6?)
-- paypal
+- discount > category
+- paypal, bitcoin, ...
 
 - products with no categories: 'no category' entry in listboxes
 - bug: category select in 'advanced product search'

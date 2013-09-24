@@ -6,6 +6,7 @@ from pos.models import Company
 from pos.views.manage import get_all_categories_structured
 
 from pos.views.util import has_permission, no_permission_view
+from config.functions import get_value
 import common.globals as g
 
 import json
@@ -20,11 +21,13 @@ def terminal(request, company):
         return no_permission_view(request, c, _("visit this page"))
     
     data = json.dumps({ # javascript 'constants' (printed {{data}} in javascript)
+        'interface':get_value(request.user, 'pos_interface'),
         'categories':get_all_categories_structured(c, data=[]),
     }) # these characters need escaping:  
     data = data.replace("<","&lt;") # < becomes &lt;
-    data = data.replace(">","&lt;") # > becomes &gt;
-    data = data.replace("&","&amp;") # & becomes &amp;# otherwise, a </script> in data will render the entire page useless.
+    data = data.replace(">","&gt;") # > becomes &gt;
+    data = data.replace("&","&amp;") # & becomes &amp;
+    # otherwise, a </script> in data will render the entire page useless.
     
     context = {
         'company':c,

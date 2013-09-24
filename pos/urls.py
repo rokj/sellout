@@ -59,6 +59,4 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/units/?$', manage.product.JSON_units, name='JSON_units'),
     # available discounts list
     url(r_company + r'/manage/json/discounts/?$', manage.discount.JSON_discounts, name='JSON_discounts'),
-    
-    
 )

@@ -29,6 +29,7 @@ defaults = {
     'pos_discounts_per_page':10,
     'pos_default_tax':'0.0',
     'pos_decimal_separator':'.',
+    'pos_interface':'keyboard', # options: 
 }
     
 # caching helpers

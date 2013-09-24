@@ -9,7 +9,8 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 
     # POS
-    url(r'^pos/', include('pos.urls', namespace='pos')),   
+    url(r'^pos/', include('pos.urls', namespace='pos')),
+    (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', {'packages': ('webpos',)}),
 )
 
 # TODO: remove from production

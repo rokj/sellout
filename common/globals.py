@@ -166,3 +166,9 @@ PERMISSIONS = { # 'chapters' that each group can view or manage
             'terminal','manage',),
         },
 }
+
+INTERFACES = {
+    'touch', # also for mouse (first entry is default)
+    'keyboard',
+    
+}
