@@ -1,5 +1,4 @@
 tmp/*
-static/jquery*
 *.pyc
 *.*~
 *~

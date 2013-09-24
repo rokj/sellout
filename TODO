@@ -9,6 +9,7 @@
 - @transaction.atomic for update_price() (django 1.6?)
 - discount > category
 - paypal, bitcoin, ...
+- check 'var' (local) and undeclared variables (global) in products.html
 
 - products with no categories: 'no category' entry in listboxes
 - bug: category select in 'advanced product search'

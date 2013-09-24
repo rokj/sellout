@@ -1,20 +1,20 @@
 /* categories selector */
 function categories_selector(div, categories){
 	// add a div and add categories from 'categories' to it. for each 'child' category, do everything again
-	category_div = $("<div>", {"class":"scrollyeah"});
+	var category_div = $("<div>", {"class":"scrollyeah"});
 	div.append(category_div);
 	
 	// create parent categories
 	function add_category(parent, cat_data){
 		// create a custom button for category
 		// it's a div
-	    btn_obj = $("<div>", {"class":"category-select"});
+	    var btn_obj = $("<div>", {"class":"category-select"});
 	    
-	    p_obj = $("<p>", {"class":"category-name"});
+	    var p_obj = $("<p>", {"class":"category-name"});
 	    btn_obj.append(p_obj);
 	    
 	    // add an image, if it has one
-	    img_obj = $("<img>", {"class":"category-select-icon"});
+	    var img_obj = $("<img>", {"class":"category-select-icon"});
 	    
 	    if(cat_data.image) img_obj.attr("src", cat_data.image);
 	    else img_obj.attr("src", data['spacer']); // data is a global variable, set in terminal.html
@@ -32,15 +32,17 @@ function categories_selector(div, categories){
 	}
 
 	// first, the 'no category' button
-	no_category = {name:gettext("No Category"), id:-1};
+	var no_category = {name:gettext("No Category"), id:-1};
 	add_category(category_div, no_category).addClass("category-select-none");
 	
 	for(var i = 0; i < categories.length; i++){
 		add_category(category_div, categories[i]);
 		if(categories[i].children.length > 0){
-			categories_selector(div, categories[i].children);
+			categories_selector(div, categories[i].children);//.hide();
 		}
 	}
+	
+	return category_div;
 }
 
 function handle_keypress(e){
