@@ -1,0 +1,40 @@
+/*             */
+/* categories  */
+/*             */
+div .category-select{ /* category selection buttons (the scrolling ones) */
+    float:left;
+    min-width:100px;
+    max-width:150px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    padding:3px;
+}
+
+div .category-select:hover{ /* hover - only for mouse over event */
+    background-color:#eeeeff;
+    cursor:pointer;
+}
+
+div .category-select-active{ /* active: also for keyboard arrow navigation */
+    background-color:#9999ff;
+}
+
+.category-select-icon{ /* category image in selection buttons */
+    display:inline-block;
+    vertical-align:middle;
+    height:24px; /* icons are thumbnails, which are already cropped to a square */
+    width:24px;
+}
+
+p.category-name{
+    margin:0px;
+}
+
+p.category-select-none{
+    font-style:italic;
+}
+
+.focused{
+    color:red;
+}
