@@ -33,12 +33,11 @@ $(document).ready(function() {
 	data['spacer'] = "{% static 'spacer.png' %}";
 	data['t'] = 250; // duration of show/hide events
 	
-	/* widgets */
-	categories_selector($("div#controls #categories"), data['categories']); // categories selector
+	focused_item = null; // will be assigned a jquery element as soon as a key is pressed/mouse clicked
 	
-	// initialize the scrollyeah on the new div(s)
-	_scrollyeah();
-
+	/* widgets */
+	categories_selector($("div#controls #categories"), data['categories'], 0, -1); // categories selector (level 0 is the topmost category)
+	
 	/* handle the keyboard */
 	$(document).keypress(handle_keypress);
 	

@@ -1,26 +1,33 @@
 /*             */
 /* categories  */
 /*             */
-div .category-select{ /* category selection buttons (the scrolling ones) */
+/*
+  category buttons are in three states:
+    inactive (class category-button) - when not touched
+    active (class category-button-active) - when on path of the currently selected category/product
+    selected (class category-button-selected) - when this is the currently focused button
+
+*/
+div .category-select{
+    /* container for category-button */
+}
+div .category-button{ /* category selection buttons (the scrolling ones) */
     float:left;
     min-width:100px;
     max-width:150px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
     padding:3px;
-}
-
-div .category-select:hover{ /* hover - only for mouse over event */
-    background-color:#eeeeff;
     cursor:pointer;
 }
 
-div .category-select-active{ /* active: also for keyboard arrow navigation */
+div .category-button-active{ /* active: also for keyboard arrow navigation */
     background-color:#9999ff;
 }
 
-.category-select-icon{ /* category image in selection buttons */
+div .category-button-selected{
+    background-color:red;
+}
+
+.category-button-icon{ /* category image in selection buttons */
     display:inline-block;
     vertical-align:middle;
     height:24px; /* icons are thumbnails, which are already cropped to a square */
@@ -28,7 +35,11 @@ div .category-select-active{ /* active: also for keyboard arrow navigation */
 }
 
 p.category-name{
+    width:100%;
     margin:0px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 p.category-select-none{

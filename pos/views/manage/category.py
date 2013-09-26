@@ -34,6 +34,16 @@ def category_breadcrumbs(category):
     return name
 
 def category_to_dict(c):
+    # get list: topmost category > sub > subsub > c
+    # it's hard on database, but is only called once per terminal load or in management
+    cid = [c.id]
+    cc = c;
+    while cc.parent:
+        cc = cc.parent;
+        cid.append(cc.id)
+    
+    cid.reverse()
+    print cid 
     r = {
         'id':c.id,
         'name':c.name,
