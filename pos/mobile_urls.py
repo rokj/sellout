@@ -17,7 +17,6 @@ r_company = r'^(?P<company>[\w-]{1,' + str(g.MISC['company_url_length']) + '})'
 # system pages (registration, login, logout, ...: /pos/app/register-company
 r_manage = g.MISC['management_url'] + '/'
 
-
 urlpatterns = patterns('',
     # system pages
     url(r_manage + _('register-company') + '$', manage.company.register_company, name='register_company'),
@@ -71,7 +70,7 @@ urlpatterns = patterns('',
     #
     # TODO
     #
-    url(r_company + r'/manage/json/units/?$', manage.product.web_JSON_units, name='web_JSON_units'),
+    url(r_company + r'/manage/json/units/?$', manage.product.mobile_JSON_units, name='mobile_JSON_units'),
     
     # available discounts list
     url(r_company + r'/manage/json/discounts/?$', manage.discount.JSON_discounts, name='JSON_discounts'),

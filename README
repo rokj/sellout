@@ -6,6 +6,7 @@ REQUIREMENTS/INSTALL:
  - pip install sorl-thumbnail
 
  - pip install unidecode (unicode to ascii module) (install not needed, 'bundled' in sources)
+ - pip install django-tastypie (also pip install django-tastypie --upgrade)
 
 CODING STYLE: (word separators in variable/function/object names):
  - underscore _:

@@ -21,11 +21,26 @@ from config.functions import get_value
 
 import decimal as d
 from sorl.thumbnail import get_thumbnail
+from rest_framework.decorators import api_view, permission_classes,\
+    authentication_classes
+from rest_framework.permissions import IsAuthenticated
 
 ###############
 ## products ###
 ###############
+
+#
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_JSON_units(request, company):
+    return JSON_units(request, company)
+
 @login_required
+def web_JSON_units(request, company):
+    return JSON_units(request, company)
+
+
 def JSON_units(request, company):
     # at the moment, company is not needed
     # also, no permission checking is required
