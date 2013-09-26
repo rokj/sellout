@@ -29,14 +29,14 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	{% comment %} data from view, stored in json {% endcomment %}
-	data = {% autoescape off %}{{data}}{% endautoescape %};
-	data['spacer'] = "{% static 'spacer.png' %}";
-	data['t'] = 250; // duration of show/hide events
+	window.data = {% autoescape off %}{{data}}{% endautoescape %};
+	window.data.spacer = "{% static 'spacer.png' %}";
+	window.data.t = 50; // duration of show/hide events
 	
-	focused_item = null; // will be assigned a jquery element as soon as a key is pressed/mouse clicked
+	window.focused_item = null; // will be assigned a jquery element as soon as a key is pressed/mouse clicked
 	
 	/* widgets */
-	categories_selector($("div#controls #categories"), data['categories'], 0, -1); // categories selector (level 0 is the topmost category)
+	categories_selector($("div#controls #categories"), window.data['categories'], 0, -1); // categories selector (level 0 is the topmost category)
 	
 	/* handle the keyboard */
 	$(document).keypress(handle_keypress);

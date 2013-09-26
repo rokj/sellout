@@ -12,6 +12,8 @@ div .category-select{
     /* container for category-button */
 }
 div .category-button{ /* category selection buttons (the scrolling ones) */
+    /* ! margins and paddings must be in pixels (javascript positioning) */
+    /* keep left and right margin/padding equal */
     float:left;
     min-width:100px;
     max-width:150px;
