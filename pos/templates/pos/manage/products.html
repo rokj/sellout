@@ -621,7 +621,7 @@ $(document).ready(function(){
     );
     
     // unit types
-    get_data("{% url 'pos:JSON_units' company.url_name %}",
+    get_data("{% url 'pos:web_JSON_units' company.url_name %}",
         function(data){
             units = [];
             for(var i=0; i<data.length; i++){
