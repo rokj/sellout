@@ -10,10 +10,12 @@
 */
 div .category-select{
     /* container for category-button */
+    overflow:hidden; /* 'auto' prevents floating divs to break out of parent container */
+    height:30px;
+    white-space:nowrap;
+
 }
 div .category-button{ /* category selection buttons (the scrolling ones) */
-    /* ! margins and paddings must be in pixels (javascript positioning) */
-    /* keep left and right margin/padding equal */
     float:left;
     min-width:100px;
     max-width:150px;
