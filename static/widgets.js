@@ -27,15 +27,11 @@ function categories_selector(control_div, categories, level, parent_btn){
 	// child: handle to *div* that contains children
 	// category: all category's data
 	
-	function add_category_button(cc, parent_div, parent_btn, prev){
-		var btn_div, p_obj, img_obj, cc, data, first_btn;
+	function add_category_button(cc, parent_div, prev){
+		// parent_obj = button
+		var btn_div, p_obj, img_obj, cc, first_btn;
 
 		// cc - data for one category
-		// if this category contains subcategories, add them
-		if(cc.children.length > 0)
-			first_btn = categories_selector(control_div, cc.children, level+1, parent_btn);
-		else first_btn = null;
-
 		// create a custom button for category
 	    btn_div = $("<div>", {"class":"category-button", "data-id":cc.id});
 	    p_obj = $("<p>", {"class":"category-name"}); // a paragraph with the name
@@ -48,8 +44,13 @@ function categories_selector(control_div, categories, level, parent_btn){
 	    else img_obj.attr("src", window.data.spacer); // data is a global variable, set in terminal.html
 	    p_obj.append(img_obj); // add image
 	    
+		// if this category contains subcategories, add them
+		if(cc.children.length > 0)
+			first_btn = categories_selector(control_div, cc.children, level+1, btn_div);
+		else first_btn = null;
+
 	    // append category's data
-	    data = {
+	    btn_div.data({
 	    	category:cc,
 	    	level:level,
 	    	parent:parent_btn,
@@ -58,10 +59,9 @@ function categories_selector(control_div, categories, level, parent_btn){
     		next:null, // will be added later
     		first:null, // -||-
     		last:null // -||-
-	    };
-	    btn_div.data(data);
+	    });
 	    scroll_div.append(btn_div);
-	    
+
 	    // register events
 	    btn_div.click(select_category);
 	    return btn_div;
@@ -77,7 +77,7 @@ function categories_selector(control_div, categories, level, parent_btn){
 	// append a 'button' (div) for each category
 	var prev_obj = null, this_obj, first_obj = null, last_obj = null;
 	for(var i = 0; i < categories.length; i++){
-		this_obj = add_category_button(categories[i], scroll_div, parent_btn, prev_obj);
+		this_obj = add_category_button(categories[i], scroll_div, prev_obj, prev_obj);
 		
 		// store the first and last objects
 		if(i == 0) first_obj = this_obj;
@@ -102,105 +102,60 @@ function categories_selector(control_div, categories, level, parent_btn){
 }
 
 function select_category(e){
-	// the plan:
-	// $(this) is the currently selected button
-	// get the button's parent div
-	// hide categories that are lower level than $(this)
-	// show $(this)'s subcategories, if any)
-	// highlight the path to this category
-	var prev_item, this_item, item;
+	// this events is called on click and on keyboard press (arrow buttons)
+	var this_item = $(this);
+	var prev_item = $("div.category-button-selected");
+	var item;
 	
-	// compare both paths and hide things that don't match
-	prev_item = window.prev_focused_item;
-	this_item = $(this);
-
-	if(prev_item){
-		if(this_item.data().level == prev_item.data().level){
-			alert("same level");
-			// a different category on the same level has been selected
-			prev_item.removeClass("category-button-selected");
-			// hide the previous 'subcategory' div and show the current one
-			if(prev_item.data.child){
-				prev_item.data().child.parent().slideUp(window.data.t);
-				this_item.data().child.parent().slideDown(window.data.t);
-			}
+	if(prev_item.length == 0){
+		// highlight this item and show its children
+		this_item.addClass("category-button-selected");
+		if(this_item.data().child){
+			this_item.data().child.parent().slideDown(window.data.t);
 		}
-		else if(this_item.data().level > prev_item.data().level){
-			alert("dafak");
-			// a subcategory of current category has been selected
-			// change class of previous item
+		// TODO: products
+	}
+	else{
+		// there's already a button selected: 
+		// unselect and hide everything until the current item matches this_item
+		if(prev_item.data().level < this_item.data().level){
+			// a subcategory has been selected, highlight the previous item with 'active' class and highlight this with 'selected'
+			// and open subcategory div, if any
 			prev_item.removeClass("category-button-selected");
 			prev_item.addClass("category-button-active");
+			
+			this_item.addClass("category-button-selected");
+		}
+		else if(prev_item.data().level == this_item.data().level){
+			// a 'neighbor' item selected
+			prev_item.removeClass("category-button-selected category-button-active");
+			// hide subcategories
+			if(prev_item.data().child) prev_item.data().child.parent().hide();
+			this_item.addClass("category-button-selected");
+			// show this item's subcategory
+			if(this_item.data().child) this_item.data().child.parent().slideDown(window.data.t);
 		}
 		else{
-			// one of parent (sub)categories has been selected
-			// go through previously selected item's path and see where it matches with the current path
+			// a parent is selected
 			item = prev_item;
-			alert("bla")
 			while(item){
-				if(item == this_item) break;
-				else{
-					// un-highlight anything inside this div and hide it
-					$(".category-button-selected, .category-button-active", item.parent()).hide();
+				if(item.data().category.id == this_item.data().category.id){
+					item.addClass("category-button-selected");
+					if(item.data().child){
+						if(!item.data().child.parent().is("visible"))
+							item.data().child.parent().slideDown(window.data.t);
+					}
+					break; // from here on paths are the same
 				}
-			}
-			
-		}
-					/*item.removeClass("category-button-selected category-button-active");
+				else{
+					item.removeClass("category-button-selected category-button-active");
+					item.parent().hide();
 					item = item.data().parent;
 				}
 			}
-		}*/
-	}
-	item = this_item;
-	while(item){
-		// highlight: everything on the path with 'active' style, the last with 'selected'
-		if(item == this_item) item.addClass("category-button-selected");
-		else item.addClass("category-button-active");
-
-		item.parent().show();
-		item = item.data().parent;
-	}
-	
-	/*
-	$("div.category-select").each(hide_subs);
-	
-
-	var i;
-	for(i = 0; i < data.category.path.length-1; i++){ // for each 'super'-category
-		// find the div
-		$("div.category-button[data-id='" + data.category.path[i].toString() + "']").addClass("category-button-active");
-	}
-	$("div.category-button[data-id='" + data.category.path[data.category.path.length-1].toString() + "']").addClass("category-button-selected");
-
-	// show the current category's subcategory, but only if it is not yet visible
-	if(!show_div.is("visible")) show_div.slideDown(window.data.t);
-	
-	// scroll the scrollyeah to show the selected button
-	var container = $("#controls");
-	var margin = parseInt($(this).css("margin-left"));
-	var padding = parseInt($(this).css("padding-left"));
-
-	var button_pos = $(this).offset(); // positions
-	var parent_pos = container.offset();
-
-	var button_width = $(this).width() + 2*margin + 2*padding;
-	var parent_width = container.width();
-	
-	var new_pos;
-	
-	// when moving right
-	/*if(button_pos.left + button_width > parent_pos.left + parent_width){
-		// move this button to the left
-		// if this is the last button in the div, move it so that it just touches the margin
-		// if not, show a bit of the next button
-		if($(this).is($(this).siblings(":last"))){
-			new_pos = parent_pos.left + parent_width - button_width - margin - padding; // this is the last button
 		}
-		else{
-			new_pos = parent_pos.left + parent_width - button_width*3/2 - margin - padding; // there are more buttons on the right
-		}
-	}*/
+	}
+	window.focused_item = this_item;
 }
 
 function handle_keypress(e){
@@ -221,57 +176,28 @@ function handle_keypress(e){
 			prev_item = window.focused_item.data().prev;
 			if(!prev_item) prev_item = window.focused_item.data().last; // jump to the first item
 
-			window.prev_focused_item = window.focused_item;
 			window.focused_item = prev_item;
 			window.focused_item.click();
 			break;
 		case 38: // up
-			// find the currently selected button's parent and click() it
-			// if it's the topmost button, do nothing
-			// (three parents(): two of them are scrollyeah's wrap divs)
-			//prev_item = $("div.category-button[data-id='" + window.focused_item.parent().attr("data-parent-id") + "']");
-			//if(prev_item.length < 1) break;
-			// store last selected button
-			// TODO
-			//window.focused_item = prev_item;
-			//prev_item.click();
-			
-			// store this item to parent's child
 			prev_item = window.focused_item.data().parent;
-			alert(JSON.stringify(window.focused_item.data()));
 			if(prev_item){
 				window.focused_item.data().child = window.focused_item;
 				
-				window.prev_focused_item = window.focused_item;
 				window.focused_item = prev_item;
 				window.focused_item.click();
-				alert("click")
 			}
 			break;
 		case 39: // right
 			next_item = window.focused_item.data().next;
 			if(!next_item) next_item = window.focused_item.data().first; // jump to the first item
 
-			window.prev_focused_item = window.focused_item;
 			window.focused_item = next_item;
 			window.focused_item.click();
 			break;
 		case 40: // down
-			// select the first subcategory of the selected one
-			// if there is no more subcategories, jump to products
-			// else, find the first subcategory
-			//if(window.focused_item.data().children.length > 0){
-				//next_item = $("div.category-select[data-parent-id='" + window.focused_item.data().id.toString() + "']");
-				//focused_item = $("div.category-button:first", next_item);
-				//focused_item.click();
-			//}
-			//else{
-				//// jump to products
-				//alert("Products!");
-			//}
 			next_item = window.focused_item.data().child;
 			if(next_item){
-				window.prev_focused_item = window.focused_item;
 				window.focused_item = next_item; // select sub-item
 				window.focused_item.click();
 			}
