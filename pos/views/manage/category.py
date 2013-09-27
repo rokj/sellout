@@ -14,6 +14,11 @@ from pos.views.util import JSON_response, JSON_error, resize_image, validate_ima
                            image_dimensions
 from common import globals as g
 
+
+from rest_framework.decorators import api_view, permission_classes,\
+    authentication_classes
+from rest_framework.permissions import IsAuthenticated
+
 ########################
 ### helper functions ###
 ########################
@@ -36,18 +41,19 @@ def category_breadcrumbs(category):
 def category_to_dict(c):
     # get list: topmost category > sub > subsub > c
     # it's hard on database, but is only called once per terminal load or in management
-    cid = [c.id]
-    cc = c;
-    while cc.parent:
-        cc = cc.parent;
-        cid.append(cc.id)
-    
-    cid.reverse()
+    # NOT NEEDED
+    #cid = [c.id]
+    #cc = c;
+    #while cc.parent:
+    #    cc = cc.parent;
+    #    cid.append(cc.id)
+    #
+    #cid.reverse()
     r = {
         'id':c.id,
         'name':c.name,
         'description':c.description,
-        'path':cid,
+        #'path':cid,
         'image':"",
     }
     if c.image:
@@ -56,6 +62,7 @@ def category_to_dict(c):
 
 
 def get_all_categories(company_id, category_id=None, sort='name', data=[], level=0, json=False):
+    
     """ return a 'flat' list of all categories (converted to dictionaries/json) """
     
     #def category_to_dict(c, level): # c = Category object # currently not needed
@@ -121,6 +128,16 @@ def get_all_categories_structured(company, category=None, data=[], sort='name'):
 ### views ###
 #############
 @login_required
+def web_JSON_categories(request, company):
+    return JSON_categories(request, company)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_JSON_categories(request,company):
+    return JSON_categories(request, company)
+
+
 def JSON_categories(request, company):
     try:
         c = Company.objects.get(url_name=company)

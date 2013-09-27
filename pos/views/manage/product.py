@@ -69,7 +69,7 @@ def products(request, company):
         'title':_("Products"),
         'site_title':g.MISC['site_title'],
         # urls for ajax calls
-        'add_url':reverse('pos:create_product', args=[c.url_name]),
+        'add_url':reverse('pos:web_create_product', args=[c.url_name]),
         # config variables 
         'can_edit':has_permission(request.user, c, 'product', 'edit'),
         'default_tax':get_value(request.user, 'pos_default_tax'),
@@ -466,6 +466,15 @@ def validate_product(user, company, data):
     return {'status':True, 'data':data} 
 
 @login_required
+def web_create_product(request, company):
+    return create_product(request, company)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_create_product(request, company):
+    return create_product(request, company)
+
 def create_product(request, company):
     # create new product
     try:
