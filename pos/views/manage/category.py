@@ -43,11 +43,11 @@ def category_to_dict(c):
         cid.append(cc.id)
     
     cid.reverse()
-    print cid 
     r = {
         'id':c.id,
         'name':c.name,
         'description':c.description,
+        'path':cid,
         'image':"",
     }
     if c.image:

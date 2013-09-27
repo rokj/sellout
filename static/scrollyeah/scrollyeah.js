@@ -2,6 +2,7 @@
 * https://github.com/artpolikarpov/scrollyeah
 * Copyright (c) 2013 Artem Polikarpov; Licensed MIT */
 //(function($){
+
 function _scrollyeah(object){
     /*!
      * Bez v1.0.10-g5ae0136
@@ -41,7 +42,7 @@ function _scrollyeah(object){
 
     var _options = [
         ['maxWidth', 'number', 999999],
-        ['shadows', 'boolean', true],
+        ['shadows', 'boolean', false],
         ['disableIfFit', 'boolean', true],
         ['centerIfFit', 'boolean', false],
         ['triggerScrollyeah', 'boolean', false]
@@ -95,6 +96,7 @@ function _scrollyeah(object){
         return this;
     }
 
+    // changed: do not auto-update: require a function call to start
     /*$(function(){
         // auto-initialize by class
         $('.scrollyeah').each(function(){
@@ -102,7 +104,6 @@ function _scrollyeah(object){
             $this.scrollyeah(collectOptions($this));
         });
     });*/
-    // change: do not auto-update: require a function call to start
     object.scrollyeah(collectOptions(object));
 
     var _prefix = ['-webkit-', '-moz-', '-o-', '-ms-', ''];
@@ -188,8 +189,6 @@ function _scrollyeah(object){
                     clearInterval(animateInterval);
                 }, time + 100);
             }
-
-
         }
 
         function setPos(pos, block, extra) {
