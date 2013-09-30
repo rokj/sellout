@@ -18,12 +18,15 @@ function custom_draggable(obj) {
             			last_button = $(".category-button", obj).filter(":first").data().last;
             			container = $("div#controls");
             			
-            			if(first_button.offset().left > container.offset().left){
-            				first_button.parent().animate({left:0}, "fast");
+            			if(first_button.parent().outerWidth() > container.width()){
+	            			if(first_button.offset().left > container.offset().left){
+	            				first_button.parent().animate({left:0}, "fast");
+	            			}
+	            			else if(last_button.offset().left + last_button.outerWidth() < container.offset().left + container.width()){
+	            				first_button.parent().animate({left:-last_button.position().left + container.width() - last_button.outerWidth()}, "fast");
+	            			}
             			}
-            			else if(last_button.offset().left + last_button.outerWidth() < container.offset().left + container.width()){
-            				first_button.parent().animate({left:-last_button.position().left + container.width() - last_button.outerWidth()}, "fast");
-            			}
+
             		});
         },
         axis:"x"
@@ -257,3 +260,12 @@ function handle_keypress(e){
 }
 
 /* products selector */
+
+
+/* keyboard */
+function show_product(){
+	// assemble search criteria based on:
+	//  - selected category
+	//  - product code
+	//  - shortcut
+}

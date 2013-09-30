@@ -58,7 +58,7 @@ def products(request, company):
     lengths = {
         'code':max_field_length(Product, 'code'),
         'price':g.DECIMAL['currency_digits'] + 1,
-        'shop_code':max_field_length(Product, 'shop_code'),
+        'shortcut':max_field_length(Product, 'shortcut'),
         'stock':g.DECIMAL['quantity_digits'],
         'name':max_field_length(Product, 'name'),
         'tax':g.DECIMAL['percentage_decimal_places'] + 4, # up to '100.' + 'decimal_digits'
@@ -129,8 +129,8 @@ def product_to_dict(user, product):
     
     if product.code:
         ret['code'] = product.code
-    if product.shop_code:
-        ret['shop_code'] = product.shop_code
+    if product.shortcut:
+        ret['shortcut'] = product.shortcut
     if product.name:
         ret['name'] = product.name
     if product.description:
@@ -226,12 +226,12 @@ def search_products(request, company):
     else:
         filter_by_product_code = False
     
-    # shop_code_filter
-    if criteria.get('shop_code_filter'):
-        filter_by_shop_code = True
-        products = products.filter(shop_code__icontains = criteria.get('shop_code_filter'))
+    # shortcut_filter
+    if criteria.get('shortcut_filter'):
+        filter_by_shortcut = True
+        products = products.filter(shortcut__icontains = criteria.get('shortcut_filter'))
     else:
-        filter_by_shop_code = False
+        filter_by_shortcut = False
     
     # notes_filter
     if criteria.get('notes_filter'):
@@ -293,7 +293,7 @@ def search_products(request, company):
         if w == '':
             continue
         
-        # search categories, product_code, shop_code, name, description, notes,
+        # search categories, product_code, shortcut, name, description, notes,
         # but only if it wasn't entered in the "advanced" filter
         # assemble the Q() filter
         f = Q()
@@ -301,8 +301,8 @@ def search_products(request, company):
             f = f | Q(name__icontains=w)
         if not filter_by_product_code:
             f = f | Q(code__icontains=w)
-        if not filter_by_shop_code:
-            f = f | Q(shop_code__icontains=w)
+        if not filter_by_shortcut:
+            f = f | Q(shortcut__icontains=w)
         if not filter_by_notes:
             f = f | Q(private_notes__icontains=w)
         if not filter_by_description:
@@ -429,13 +429,13 @@ def validate_product(user, company, data):
             pass # there is no product with this code, everything is ok
     
     # shop code: if exists, must be unique
-    data['shop_code'] = data['shop_code'].strip()
-    if data['shop_code']:
-        if len(data['shop_code']) > max_field_length(Product, 'shop_code'):
+    data['shortcut'] = data['shortcut'].strip()
+    if data['shortcut']:
+        if len(data['shortcut']) > max_field_length(Product, 'shortcut'):
             return r(False, _("Shop code too long"))
         
         try:
-            p = Product.objects.get(company=company, shop_code=data['shop_code'])
+            p = Product.objects.get(company=company, shortcut=data['shortcut'])
             if p.id != data['id']:
                 return r(False,
                     _("A product with this shop code already exists: ") + p.name)
@@ -507,7 +507,7 @@ def create_product(request, company):
         name = data['name'],
         unit_type = data['unit_type'],
         code = data['code'],
-        shop_code = data['shop_code'],
+        shortcut = data['shortcut'],
         description = data['description'],
         private_notes = data['private_notes'],
         stock = data['stock'],
@@ -564,7 +564,7 @@ def edit_product(request, company, product_id):
     product.name = data['name']
     product.unit_type = data['unit_type']
     product.code = data['code']
-    product.shop_code = data['shop_code']
+    product.shortcut = data['shortcut']
     product.description = data['description']
     product.private_notes = data['private_notes']
     product.stock = data['stock']

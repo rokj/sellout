@@ -10,8 +10,6 @@ img.preview-product{
 }
 </style>
 
-
-
 {% comment %}
 javascript:
     1. get from server:
@@ -112,7 +110,7 @@ $(document).ready(function(){
         //           | category        | tax 
         //   image   | description     | discounts
         //           | private_notes   | stock
-        // shop_code | code 
+        // shortcut | code 
         
         // update this div
         div_obj = parent;
@@ -162,8 +160,8 @@ $(document).ready(function(){
                 product.unit_type_display + " {% trans 'left in stock' %}");
         }
         
-        // shop code
-        $(".product-shop-code", div_obj).append(escape(product.shop_code));
+        // shortcut
+        $(".product-shop-code", div_obj).append(escape(product.shortcut));
         // code
         $(".product-code", div_obj).append(escape(product.code));
         
@@ -488,7 +486,7 @@ $(document).ready(function(){
         
         $("#edit_product_private_notes", edit_obj).val(product.private_notes);
         $("#edit_product_stock", edit_obj).val(product.stock);
-        $("#edit_product_shop_code", edit_obj).val(product.shop_code);
+        $("#edit_product_shortcut", edit_obj).val(product.shortcut);
         $("#edit_product_code", edit_obj).val(product.code);
         
         // show the edit dialog
@@ -527,7 +525,7 @@ $(document).ready(function(){
         // image
         // category - id
         // code
-        // shop code
+        // shortcut
         // description
         // private notes
         // tax
@@ -558,7 +556,7 @@ $(document).ready(function(){
         data['discounts'] = discounts;
         data['private_notes'] = $("#edit_product_private_notes", dlg_obj).val();
         data['stock'] = $("#edit_product_stock", dlg_obj).val();
-        data['shop_code'] = $("#edit_product_shop_code", dlg_obj).val();
+        data['shortcut'] = $("#edit_product_shortcut", dlg_obj).val();
         data['code'] = $("#edit_product_code", dlg_obj).val();
         
         if(data['id'] == "-1"){
@@ -751,7 +749,7 @@ $(document).ready(function(){
         <div id="category_list_select"></div><br />
         
         <label for="product_code_filter">{% trans 'Product code' %}</label><input type="text" id="product_code_filter" class="filter" />
-        <label for="shop_code_filter">{% trans 'Shop code' %}</label><input type="text" id="shop_code_filter" class="filter" />
+        <label for="shortcut_filter">{% trans 'Shortcut' %}</label><input type="text" id="shortcut_filter" class="filter" />
         <label for="name_filter">{% trans 'Name' %}</label><input type="text" id="name_filter" class="filter" />
         <label for="description_filter">{% trans 'Description' %}</label><input type="text" id="description_filter" class="filter" />
         <label for="notes_filter">{% trans 'Notes' %}</label><input type="text" id="notes_filter" class="filter" />
@@ -809,7 +807,7 @@ $(document).ready(function(){
             <td><p><label for="edit_product_stock">{% trans 'Units left in stock' %}</label><input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}" /></p></td>
         </tr>
         <tr>
-            <td><p><label for="edit_product_shop_code">{% trans 'Shop code' %}</label><input type="text" id="edit_product_shop_code" maxlength="{{ field_lengths.shop_code }}" /></p></td> {% comment %} this row again has 3 columns {% endcomment %}
+            <td><p><label for="edit_product_shortcut">{% trans 'Shortcut' %}</label><input type="text" id="edit_product_shortcut" maxlength="{{ field_lengths.shortcut }}" /></p></td> {% comment %} this row again has 3 columns {% endcomment %}
             <td><p><label for="edit_product_code">{% trans 'Product code' %}</label><input type="text" id="edit_product_code" maxlength="{{ field_lengths.code }}" /></p></td>
             
             <td>
