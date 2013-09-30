@@ -473,6 +473,7 @@ def web_create_product(request, company):
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_create_product(request, company):
+    print request.POST
     return create_product(request, company)
 
 def create_product(request, company):

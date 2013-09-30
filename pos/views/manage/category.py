@@ -132,7 +132,7 @@ def web_JSON_categories(request, company):
     return JSON_categories(request, company)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_JSON_categories(request,company):
     return JSON_categories(request, company)
