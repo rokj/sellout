@@ -103,7 +103,7 @@ class Discount(SkeletonU):
 class ProductAbstract(SkeletonU):
     """ used for product and bill item """
     code = models.CharField(_("Product code"), max_length=30, blank=False, null=False)
-    shop_code = models.CharField(_("Store's internal product number"), max_length=5, blank=False, null=True)
+    shortcut = models.CharField(_("Store's internal product number"), max_length=5, blank=False, null=True)
     name = models.CharField(_("Product name"), max_length=50, blank=False, null=False)
     description = models.TextField(_("Product description"), blank=True, null=True)
     private_notes = models.TextField(_("Notes (only for internal use)"), null=True, blank=True)
