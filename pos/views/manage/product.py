@@ -352,7 +352,7 @@ def validate_product(user, company, data):
         data['id'] = int(data['id'])
     except:
         # this shouldn't happen
-        return r(_("Wrong product id"))
+        return r(False, _("Wrong product id"))
     
     
     if data['id'] != -1:
@@ -473,6 +473,7 @@ def web_create_product(request, company):
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_create_product(request, company):
+    print request.POST
     return create_product(request, company)
 
 def create_product(request, company):
