@@ -167,8 +167,14 @@ PERMISSIONS = { # 'chapters' that each group can view or manage
         },
 }
 
-INTERFACES = {
+### terminal page configuration ###
+INTERFACES = [
     'touch', # also for mouse (first entry is default)
     'keyboard',
-    
+]
+
+PRODUCT_BUTTON_DIMENSIONS = {
+    'small':90, # all squares
+    'medium':125,
+    'large':160
 }

@@ -8,19 +8,33 @@
     selected (class category-button-selected) - when this is the currently focused button
 
 */
+
+
+div .scroll-wrap-outer{ /* scrolling: outer div*/
+    
+}
+
+div .category-scroll-wrap{ /* scrolling: inner div */
+    overflow:auto;
+    overflow-x:hidden;
+}
+
+
 div .category-select{
     /* container for category-button */
-    overflow:hidden; /* 'auto' prevents floating divs to break out of parent container */
-    height:30px;
-    white-space:nowrap;
-
+    height:34px;
+    overflow:hidden;
+    float:left;
+    position:relative;
 }
+
 div .category-button{ /* category selection buttons (the scrolling ones) */
     float:left;
     min-width:100px;
     max-width:150px;
     padding:3px;
     cursor:pointer;
+    border:1px solid black;
 }
 
 div .category-button-active{ /* active: also for keyboard arrow navigation */
@@ -50,6 +64,8 @@ p.category-select-none{
     font-style:italic;
 }
 
-.focused{
-    color:red;
+div#products{
+    border: 1px solid black;
 }
+
+div .

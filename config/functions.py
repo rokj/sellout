@@ -29,7 +29,8 @@ defaults = {
     'pos_discounts_per_page':10,
     'pos_default_tax':'0.0',
     'pos_decimal_separator':'.',
-    'pos_interface':'keyboard', # options: 
+    'pos_interface':'keyboard', # options: 'keyboard', 'mouse'
+    'pos_product_button_size':'medium', # keys for PRODUCT_BUTTON_DIMENSIONS in globals
 }
     
 # caching helpers

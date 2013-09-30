@@ -34,6 +34,7 @@ CONFIGURATION VARIABLES:
  - DONE decimal separator
  
 OPTIMIZE:
+ - ! product search in terminal: ajax/client caching
  - memcached:
     - get_object_or_404(Company) - in every view
  - sql queries or better getting of objects just with specific data

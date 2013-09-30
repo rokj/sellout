@@ -28,6 +28,7 @@ $(document).ready(function() {
 	window.data = {% autoescape off %}{{data}}{% endautoescape %};
 	window.data.spacer = "{% static 'spacer.png' %}";
 	window.data.t = 50; // duration of show/hide events
+	window.data.t_easing = 200; // duration of easing functions (drag start/stop)
 	
 	window.focused_item = null; // will be assigned a jquery element as soon as a key is pressed/mouse clicked
 	

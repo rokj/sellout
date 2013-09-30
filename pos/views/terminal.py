@@ -22,6 +22,7 @@ def terminal(request, company):
     
     data = json.dumps({ # javascript 'constants' (printed {{data}} in javascript)
         'interface':get_value(request.user, 'pos_interface'),
+        'product_button_size':g.PRODUCT_BUTTON_DIMENSIONS[get_value(request.user, 'pos_product_button_size')],
         'categories':get_all_categories_structured(c, data=[]),
     }) # these characters need escaping:  
     data = data.replace("<","&lt;") # < becomes &lt;
