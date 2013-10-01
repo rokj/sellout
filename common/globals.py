@@ -118,7 +118,7 @@ MISC = {
 IMAGE_DIMENSIONS = {
     'logo':(180, 180),
     'category':(160, 160),
-    'product':(120,120),
+    'product':(160,160), # must be as large as the largest PRODUCT_BUTTON_DIMENSIONS
     'thumb_small':(32, 32), # for thumbnails
     'thumb_large':(64, 64),
 }
@@ -176,5 +176,5 @@ INTERFACES = [
 PRODUCT_BUTTON_DIMENSIONS = {
     'small':90, # all squares
     'medium':125,
-    'large':160
+    'large':160 # check IMAGE_DIMENSIONS['product']
 }

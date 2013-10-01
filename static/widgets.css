@@ -9,12 +9,11 @@
 
 */
 
-
-div .scroll-wrap-outer{ /* scrolling: outer div*/
+div .scroll-wrap-outer{ /* category scrolling: outer div*/
     
 }
 
-div .category-scroll-wrap{ /* scrolling: inner div */
+div .category-scroll-inner{ /* scrolling: inner div */
     overflow:auto;
     overflow-x:hidden;
 }
@@ -26,6 +25,8 @@ div .category-select{
     overflow:hidden;
     float:left;
     position:relative;
+    padding-left:auto;
+    padding-right:auto;
 }
 
 div .category-button{ /* category selection buttons (the scrolling ones) */
@@ -60,12 +61,44 @@ p.category-name{
     text-overflow:ellipsis;
 }
 
-p.category-select-none{
-    font-style:italic;
+
+/*          */
+/* products */
+/*          */
+div#products_scroll_outer{
+    
+}
+
+div#products_scroll_inner{
+    overflow:auto;
+    overflow-x:hidden;
 }
 
 div#products{
+    position:relative;
     border: 1px solid black;
 }
 
-div .
+div.product-button{
+    border:1px solid red;
+    padding:3px;
+    margin:2px;
+    background-position:center;
+    background-repeat:no-repeat;
+}
+
+div.product-button-name{
+    background:solid white;
+    font-weight:bolder;
+    color:white;
+    box-shadow: 10px 10px 5px #888888;
+
+}
+
+div.product-button-code{
+    padding-top:auto;
+    padding-bottom:auto;
+}
+div.product-button-shortcut{
+    
+}

@@ -26,14 +26,23 @@
 $(document).ready(function() {
 	{% comment %} data from view, stored in json {% endcomment %}
 	window.data = {% autoescape off %}{{data}}{% endautoescape %};
-	window.data.spacer = "{% static 'spacer.png' %}";
+	window.data.spacer = "{% static 'spacer.png' %}"; // {% comment %} stuff that javascript can't see {% endcomment %}
+	window.data.csrf_token = "{{csrf_token}}";
+	// ui settings
 	window.data.t = 50; // duration of show/hide events
 	window.data.t_easing = 200; // duration of easing functions (drag start/stop)
+	window.data.last_search = ""; // last searched query
+	window.data.search_update_interval = 1000; // checking if search query has changed
 	
-	window.focused_item = null; // will be assigned a jquery element as soon as a key is pressed/mouse clicked
+	window.items = {
+    	focused_item:null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
+    	search_field:$("input#search_products_filter"),
+    	products_list:$("div#products")
+	}
 	
 	/* widgets */
-	categories_selector($("div#controls #categories"), window.data['categories'], 0, null); // categories selector (level 0 is the topmost category)
+	categories_selector($("div#selection #categories"), window.data['categories'], 0, null); // categories selector (level 0 is the topmost category)
+	products_selector($("div#products"));
 	
 	/* handle the keyboard */
 	$(document).keypress(handle_keypress);
@@ -57,9 +66,18 @@ $(document).ready(function() {
 <div id="bill">bill</div>
 
 {% comment %} product selector and other controls {% endcomment %}
-<div id="controls">
+<div id="selection">
     <div id="categories"></div>
-    <div id="products"></div>
+    <div id="products_scroll_outer">
+        <div id="products_scroll_inner">
+            <div id="products"></div>
+        </div>
+    </div>
+    <div>
+        <input type="text" id="search_products_filter" /><input type="button" id="search_products_submit" value="search" onclick="get_products()" />
+    </div>
+    <div id="controls">
+    </div>
 </div>
 
 {% endblock %}
