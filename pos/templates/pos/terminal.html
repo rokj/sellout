@@ -7,8 +7,13 @@
 <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
 
 {% comment %} the terminal {% endcomment %}
-<link type="text/css" rel="stylesheet" href="{% static 'terminal-layout.css' %}" />
-<link type="text/css" rel="stylesheet" href="{% static 'widgets.css' %}" />
+<script src="{% static 'terminal.js' %}"></script>
+<link type="text/css" rel="stylesheet" href="{% static 'terminal.css' %}" />
+{% comment %} widgets {% endcomment %}
+<script src="{% static 'widgets/categories.js' %}"></script>
+<link type="text/css" rel="stylesheet" href="{% static 'widgets/categories.css' %}" />
+<script src="{% static 'widgets/products.js' %}"></script>
+<link type="text/css" rel="stylesheet" href="{% static 'widgets/products.css' %}" />
 
 {% comment %} keyboard {% endcomment %}
 <link href="{% static 'keyboard/css/keyboard.css' %}" rel="stylesheet">
@@ -19,21 +24,20 @@
 <script src="{% static 'keyboard/js/jquery.keyboard.extension-typing.js' %}"></script>
 <script src="{% static 'keyboard/js/jquery.keyboard.extension-autocomplete.js' %}"></script>
 
-{% comment %} custom widgets {% endcomment %}
-<script src="{% static 'widgets.js' %}"></script>
 {% comment %} 'embedded' javascript {% endcomment %}
 <script type="text/javascript">
 $(document).ready(function() {
-	{% comment %} data from view, stored in json {% endcomment %}
-	window.data = {% autoescape off %}{{data}}{% endautoescape %};
-	window.data.spacer = "{% static 'spacer.png' %}"; // {% comment %} stuff that javascript can't see {% endcomment %}
+	// first, get settings and other data
+	load_data("{% url 'pos:terminal_init' company.url_name %}");
+	// add some additional data
+	window.data.spacer = "{% static 'graphics/spacer.png' %}"; // {% comment %} stuff that javascript can't see {% endcomment %}
 	window.data.csrf_token = "{{csrf_token}}";
 	// ui settings
 	window.data.t = 50; // duration of show/hide events
 	window.data.t_easing = 200; // duration of easing functions (drag start/stop)
 	window.data.last_search = ""; // last searched query
 	window.data.search_update_interval = 1000; // checking if search query has changed
-	
+
 	window.items = {
     	focused_item:null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
     	search_field:$("input#search_products_filter"),
@@ -41,7 +45,8 @@ $(document).ready(function() {
 	}
 	
 	/* layout (change some things programmaticaly) */
-	size_layout(); $(window).resize(size_layout);
+	init_layout();
+
 	/* widgets */
 	categories_selector($("div#selection #categories"), window.data['categories'], 0, null); // categories selector (level 0 is the topmost category)
 	products_selector($("div#products"));
@@ -49,13 +54,17 @@ $(document).ready(function() {
 	/* handle the keyboard */
 	$(document).keypress(handle_keypress);
 	
+	/* on exit */
+	$(window).on("beforeunload", on_exit);
+	
 });  
 </script>
 
 {% endblock %}
 
 {% block content %}
-
+{% comment %} the 'loading' div {% endcomment %}
+<div id="loading">loading...</div>
 {% comment %} management, logout, ... links {% endcomment %}
 <div id="manage_bar">
     <div id="blocklogic"><a href="http://www.blocklogic.net">BlockLogic</a></div>
@@ -67,21 +76,24 @@ $(document).ready(function() {
 {% comment %} the bill {% endcomment %}
 <div id="bill">bill</div>
 
+{% comment %} separator: draggable div for resizing bill/controls {% endcomment %}
+<div id="splitter"></div>
+
 {% comment %} product selector and other controls {% endcomment %}
 <div id="selection">
-    <div id="categories"></div>
+    <div id="categories">
+        <div id="parents"></div>
+        <div id="children"></div>
+    </div>
     <div id="products_scroll_outer">
         <div id="products_scroll_inner">
             <div id="products"></div>
         </div>
     </div>
-    <div>
-    </div>
     <div id="controls">
-        <input type="text" id="search_products_filter" /><button type="button" id="search_products_submit" onclick="get_products()"><img src="{% static 'icons/search.png'%}" /></button>
-        <p>"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</p>
+        <input type="text" id="search_products_filter" />
+        <button type="button" id="search_products_submit" onclick="get_products()"><img src="{% static 'graphics/search.png'%}" /></button>
     </div>
 </div>
 
 {% endblock %}
-

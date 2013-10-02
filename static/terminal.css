@@ -4,15 +4,28 @@
     margin:1px;
 }*/
 
+/* splitter */
+div#splitter{
+    position:absolute;
+    width:6px;
+    background-color:black;
+    opacity:0.6;
+    cursor:move;
+    z-index:15;
+}
+
 /*              */
 /* main content */
 /*              */
-
-/* topmost bar */
-body, html{
-    height:100%;
+div#loading{
+    position:absolute;
+    top:0;
+    left:0;
+    opacity:.9;
+    background-color:white;
+    z-index:999;
 }
-
+/* topmost bar */
 div#manage_bar{
     position:absolute;
     top:5px;
@@ -58,7 +71,7 @@ div#products{
 
 div#controls{
     position:absolute;
-    bottom:0px;
+    bottom:5px;
     height:200px;
     border:1px solid black;
 }
