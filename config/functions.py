@@ -30,7 +30,8 @@ defaults = {
     'pos_default_tax':'0.0',
     'pos_decimal_separator':'.',
     'pos_interface':'keyboard', # options: 'keyboard', 'mouse'
-    'pos_product_button_size':'medium', # keys for PRODUCT_BUTTON_DIMENSIONS in globals
+    'pos_interface_product_button_size':'medium', # keys for PRODUCT_BUTTON_DIMENSIONS in globals
+    'pos_interface_bill_width':370, # width of the bill area in terminal (in pixels)
 }
     
 # caching helpers
