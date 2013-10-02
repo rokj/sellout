@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 
 from pos.models import Company
@@ -24,6 +25,7 @@ def terminal(request, company):
         'interface':get_value(request.user, 'pos_interface'),
         'product_button_size':g.PRODUCT_BUTTON_DIMENSIONS[get_value(request.user, 'pos_product_button_size')],
         'categories':get_all_categories_structured(c, data=[]),
+        'search_products_url':reverse('pos:search_products', args={company:c.url_name}),
     }) # these characters need escaping:  
     data = data.replace("<","&lt;") # < becomes &lt;
     data = data.replace(">","&gt;") # > becomes &gt;
