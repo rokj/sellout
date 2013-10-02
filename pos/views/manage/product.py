@@ -196,6 +196,14 @@ def get_product(request, company, product_id):
     return JSON_response(product_to_dict(request.user, product))
 
 @login_required
+def web_search_products(request, company):
+    return search_products(request, company)
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_search_products(request, company):
+    return search_products(request, company)
+
 def search_products(request, company):
     try:
         c = Company.objects.get(url_name = company)
@@ -286,6 +294,7 @@ def search_products(request, company):
         #filter_by_discount = False
 
     # general filter: search all fields that have not been searched yet 
+    print criteria
     general_filter = criteria['general_filter'].split(' ')
     #g_products = Product.objects.none()
 
