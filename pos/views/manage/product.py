@@ -181,6 +181,14 @@ def update_price(product, user, new_unit_price):
     return new_price
 
 @login_required
+def web_get_product(request, company, product_id):
+    return get_product(request, company, product_id)
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_get_product(request, company, product_id):
+    return get_product(request, company, product_id)
+
 def get_product(request, company, product_id):
     try:
         c = Company.objects.get(url_name = company)
@@ -294,7 +302,6 @@ def search_products(request, company):
         #filter_by_discount = False
 
     # general filter: search all fields that have not been searched yet 
-    print criteria
     general_filter = criteria['general_filter'].split(' ')
     #g_products = Product.objects.none()
 
@@ -482,7 +489,6 @@ def web_create_product(request, company):
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_create_product(request, company):
-    print request.POST
     return create_product(request, company)
 
 def create_product(request, company):
@@ -545,6 +551,14 @@ def create_product(request, company):
     return JSON_ok()
 
 @login_required
+def web_edit_product(request, company, product_id):
+    return edit_product(request, company, product_id)
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_edit_product(request, company, product_id):
+    return edit_product(request, company, product_id)
+
 def edit_product(request, company, product_id):
     # update existing product
     try:
