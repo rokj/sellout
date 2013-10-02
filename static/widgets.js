@@ -1,4 +1,9 @@
-/* draggable easing */
+/* sizing of elements */
+function size_layout(){
+	// 
+}
+
+/* categories draggable with easing */
 function category_draggable(obj) {
 	var params = {
 		// Kudos:

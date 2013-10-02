@@ -40,6 +40,8 @@ $(document).ready(function() {
     	products_list:$("div#products")
 	}
 	
+	/* layout (change some things programmaticaly) */
+	size_layout(); $(window).resize(size_layout);
 	/* widgets */
 	categories_selector($("div#selection #categories"), window.data['categories'], 0, null); // categories selector (level 0 is the topmost category)
 	products_selector($("div#products"));
@@ -74,9 +76,10 @@ $(document).ready(function() {
         </div>
     </div>
     <div>
-        <input type="text" id="search_products_filter" /><input type="button" id="search_products_submit" value="search" onclick="get_products()" />
     </div>
     <div id="controls">
+        <input type="text" id="search_products_filter" /><button type="button" id="search_products_submit" onclick="get_products()"><img src="{% static 'icons/search.png'%}" /></button>
+        <p>"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</p>
     </div>
 </div>
 

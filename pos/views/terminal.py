@@ -23,7 +23,7 @@ def terminal(request, company):
     
     data = json.dumps({ # javascript 'constants' (printed {{data}} in javascript)
         'interface':get_value(request.user, 'pos_interface'),
-        'product_button_size':g.PRODUCT_BUTTON_DIMENSIONS[get_value(request.user, 'pos_product_button_size')],
+        'product_button_size':g.PRODUCT_BUTTON_DIMENSIONS[get_value(request.user, 'pos_interface_product_button_size')],
         'categories':get_all_categories_structured(c, data=[]),
         'search_products_url':reverse('pos:search_products', args={company:c.url_name}),
     }) # these characters need escaping:  

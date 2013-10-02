@@ -9,6 +9,10 @@
 /*              */
 
 /* topmost bar */
+body, html{
+    height:100%;
+}
+
 div#manage_bar{
     position:absolute;
     top:5px;
@@ -46,4 +50,15 @@ div#selection{
     right:5px;
     top:35px;
     bottom:5px;
+}
+
+div#products{
+    /* height is set in javascript */
+}
+
+div#controls{
+    position:absolute;
+    bottom:0px;
+    height:200px;
+    border:1px solid black;
 }
