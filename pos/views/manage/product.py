@@ -127,6 +127,9 @@ def product_to_dict(user, product):
     if product.category:
         ret['category'] = product.category.name
     
+    if product.category:
+        ret['category_id'] = product.category.id
+    
     if product.code:
         ret['code'] = product.code
     if product.shortcut:
@@ -181,6 +184,14 @@ def update_price(product, user, new_unit_price):
     return new_price
 
 @login_required
+def web_get_product(request, company, product_id):
+    return get_product(request, company, product_id)
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_get_product(request, company, product_id):
+    return get_product(request, company, product_id)
+
 def get_product(request, company, product_id):
     try:
         c = Company.objects.get(url_name = company)
@@ -294,7 +305,6 @@ def search_products(request, company):
         #filter_by_discount = False
 
     # general filter: search all fields that have not been searched yet 
-    print criteria
     general_filter = criteria['general_filter'].split(' ')
     #g_products = Product.objects.none()
 
@@ -347,6 +357,8 @@ def validate_product(user, company, data):
     # private notes
     # tax*
     # stock*
+    
+    
     def r(status, msg):
         return {'status':status,
             'data':data,
@@ -482,7 +494,6 @@ def web_create_product(request, company):
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_create_product(request, company):
-    print request.POST
     return create_product(request, company)
 
 def create_product(request, company):
@@ -503,6 +514,7 @@ def create_product(request, company):
     if not valid['status']:
         return JSON_error(valid['message'])
     data = valid['data']
+    
     
     try:
         category = Category.objects.get(id=data['category'])
@@ -526,12 +538,13 @@ def create_product(request, company):
     product.save()
     
     # add discounts
-    for d in data['discounts']:
-        try:
-            discount = Discount.objects.get(id=int(d))
-            product.discounts.add(discount)
-        except Discount.DoesNotExist:
-            pass
+    if data.get('discounts'):
+        for d in data['discounts']:
+            try:
+                discount = Discount.objects.get(id=int(d))
+                product.discounts.add(discount)
+            except Discount.DoesNotExist:
+                pass
     
     # price has to be updated separately
     product.price = update_price(product, request.user, data['price'])
@@ -545,6 +558,14 @@ def create_product(request, company):
     return JSON_ok()
 
 @login_required
+def web_edit_product(request, company, product_id):
+    return edit_product(request, company, product_id)
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_edit_product(request, company, product_id):
+    return edit_product(request, company, product_id)
+
 def edit_product(request, company, product_id):
     # update existing product
     try:
@@ -557,7 +578,7 @@ def edit_product(request, company, product_id):
         return JSON_error(_("You have no permission to edit products"))
 
     data = JSON_parse(request.POST['data'])
-    
+
     # see if product exists in database
     try:
         product = Product.objects.get(id=product_id)
@@ -590,12 +611,13 @@ def edit_product(request, company, product_id):
 
     # update discounts: add missing
     # anything that is left in data['discounts'] must be added
-    for d in data['discounts']:
-        try:
-            discount = Discount.objects.get(id=int(d))
-            product.discounts.add(discount)
-        except Discount.DoesNotExist:
-            pass
+    if data.get('discoints'):
+        for d in data['discounts']:
+            try:
+                discount = Discount.objects.get(id=int(d))
+                product.discounts.add(discount)
+            except Discount.DoesNotExist:
+                pass
 
     # image
     if data['change_image'] == True:

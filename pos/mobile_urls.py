@@ -38,7 +38,8 @@ urlpatterns = patterns('',
     url(r_company + _('/manage/company') + '/?$', manage.company.edit_company, name='edit_company'), # company
     # categories
     url(r_company + _('/manage/categories') + '/?$', manage.category.list_categories, name='list_categories'), # list of categories
-    url(r_company + _('/manage/category/add') + '/(?P<parent_id>-?\d+)/?$', manage.category.add_category, name='add_category'), # add
+    url(r_company + r'/manage/json/category/add' + '/(?P<parent_id>-?\d+)/?$', manage.category.mobile_add_category, name='add_category'), # add
+    url(r_company + r'/manage/json/category/get/(?P<category_id>\d+)/?$', manage.category.mobile_get_category, name='get_category'),
     url(r_company + _('/manage/category/edit') + '/(?P<category_id>\d+)/?$', manage.category.edit_category, name='edit_category'), # edit
     url(r_company + _('/manage/category/delete') + '/(?P<category_id>\d+)/?$', manage.category.delete_category, name='delete_category'), # delete
     # contacts
@@ -55,8 +56,8 @@ urlpatterns = patterns('',
     url(r_company + _('/manage/products') + '/?$', manage.product.products, name='products'), # static (template) page
     url(r_company + r'/manage/json/products/search/?$', manage.product.mobile_search_products, name='search_products'), # product list (search) - json
     url(r_company + r'/manage/json/products/add/?$', manage.product.mobile_create_product, name='mobile_create_product'), # edit (save) product - json
-    url(r_company + r'/manage/json/products/get/(?P<product_id>\d+)/?$', manage.product.get_product, name='get_product'), # product list (search) - json
-    url(r_company + r'/manage/json/products/edit/(?P<product_id>\d+)/?$', manage.product.edit_product, name='edit_product'), # edit (save) product - json
+    url(r_company + r'/manage/json/products/get/(?P<product_id>\d+)/?$', manage.product.mobile_get_product, name='get_product'), # product list (search) - json
+    url(r_company + r'/manage/json/products/edit/(?P<product_id>\d+)/?$', manage.product.mobile_edit_product, name='edit_product'), # edit (save) product - json
     url(r_company + r'/manage/json/products/delete/(?P<product_id>\d+)/?$', manage.product.delete_product, name='delete_product'), # edit (save) product - json
     # users
     #url(r_company + _('/manage/users') + '/?$', manage.users.edit_company, name='edit_users'), # company
