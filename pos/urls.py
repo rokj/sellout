@@ -41,7 +41,7 @@ urlpatterns = patterns('',
     url(r_company + _('/manage/company') + '/?$', manage.company.edit_company, name='edit_company'), # company
     # categories
     url(r_company + _('/manage/categories') + '/?$', manage.category.list_categories, name='list_categories'), # list of categories
-    url(r_company + _('/manage/category/add') + '/(?P<parent_id>-?\d+)/?$', manage.category.add_category, name='add_category'), # add
+    url(r_company + _('/manage/category/add') + '/(?P<parent_id>-?\d+)/?$', manage.category.web_add_category, name='add_category'), # add
     url(r_company + _('/manage/category/edit') + '/(?P<category_id>\d+)/?$', manage.category.edit_category, name='edit_category'), # edit
     url(r_company + _('/manage/category/delete') + '/(?P<category_id>\d+)/?$', manage.category.delete_category, name='delete_category'), # delete
     # contacts

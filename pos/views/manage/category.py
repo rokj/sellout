@@ -9,9 +9,9 @@ from django import forms
 from django.http import Http404
 
 from pos.models import Company, Category
-from pos.views.util import JSON_response, JSON_error, resize_image, validate_image, \
+from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, resize_image, validate_image, \
                            has_permission, no_permission_view, \
-                           image_dimensions
+                           image_dimensions, max_field_length, image_from_base64
 from common import globals as g
 
 
@@ -53,12 +53,95 @@ def category_to_dict(c):
         'id':c.id,
         'name':c.name,
         'description':c.description,
+        'parent_id:': c.parent_id,
         #'path':cid,
         'image':"",
     }
     if c.image:
         r['image'] = c.image.url
     return r
+
+
+
+def validate_category(user, company, data, parent_id):
+    # data format (*-validation needed):
+    # id
+    # name*
+    # description
+    # image
+        
+    def r(status, msg):
+        return {'status':status,
+            'data':data,
+            'message':msg}
+
+    # return:
+    # {status:true/false - if cleaning succeeded
+    #  data:cleaned_data - empty dict if status = false
+    #  message:error_message - empty if status = true
+    
+    try:
+        data['id'] = int(data['id'])
+    except:
+        # this shouldn't happen
+        return r(False, _("Wrong product id"))
+    
+    if data['id'] != -1:
+        # check if product belongs to this company and if he has the required permissions
+        try:
+            p = Category.objects.get(id=data['id'], company=company)
+        except Category.DoesNotExist:
+            return r(False, _("Cannot edit product: it does not exist"))
+        
+        if p.company != company or not has_permission(user, company, 'product', 'edit'):
+            return r(False, _("You have no permission to edit this product"))
+    
+    # parent
+    if int(parent_id) != -1:
+        # check if product belongs to this company and if he has the required permissions
+        try:
+            p = Category.objects.get(id=parent_id, company=company)
+        except Category.DoesNotExist:
+            return r(False, _("Cannot edit product: parent id does not exist"))
+        
+        if p.company != company or not has_permission(user, company, 'product', 'edit'):
+            return r(False, _("You have no permission to edit this product"))
+    
+    # name
+    if not data['name']:
+        return r(False, _("No name entered"))
+    elif len(data['name']) > max_field_length(Category, 'name'):
+        return r(False, _("Name too long"))
+    else:
+        if data['id'] == -1: # when adding new products:
+            # check if a product with that name exists
+            p = Category.objects.filter(company=company,name=data['name'])
+            if p.count() > 0:
+                return r(False,
+                    _("There is already a product with that name") +  \
+                    " (" + _("code") + ": " + p[0].code + ")")
+    data['name'] = data['name'].strip()
+    
+
+    # image:
+    if data['change_image'] == True:
+        if 'image' in data: # new image has been uploaded
+            data['image'] = image_from_base64(data['image'])
+            if not data['image']:
+                # something has gone wrong during conversion
+                return r(False, _("Image upload failed"))
+        else:
+            # image will be deleted in view
+            pass
+    else:
+        # no change regarding images
+        data['image'] = None
+    
+    # description, notes - anything can be entered
+    data['description'] = data['description'].strip()
+    
+        
+    return {'status':True, 'data':data} 
 
 
 def get_all_categories(company_id, category_id=None, sort='name', data=[], level=0, json=False):
@@ -179,7 +262,61 @@ def list_categories(request, company):
     
     return render(request, 'pos/manage/categories.html', context)
 
-def add_category(request, company, parent_id=-1):
+
+
+@login_required
+def web_add_category(request, company, parent_id=-1):
+    return add_category(request, company, parent_id)
+
+
+@api_view(['POST', 'GET'])
+@permission_classes((IsAuthenticated,))
+def mobile_add_category(request, company, parent_id=-1):
+    return m_add_category(request, company, parent_id)
+
+
+def m_add_category(request, company, parent_id=-1):
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+    
+    # sellers can add category
+    if not has_permission(request.user, c, 'category', 'edit'):
+        return JSON_error(_("You have no permission to add products"))
+
+    data = JSON_parse(request.POST['data'])
+    
+    # validate data
+    valid = validate_category(request.user, c, data, parent_id)
+    if not valid['status']:
+        return JSON_error(valid['message'])
+    data = valid['data']
+        
+    if int(parent_id) == -1:
+        parent = None
+    else:
+        parent = Category.objects.get(id=parent_id)
+    
+    # save category:
+    product = Category(
+        company = c,
+        parent = parent,
+        name = data['name'],
+        description = data['description'],
+        created_by = request.user,
+    )
+    product.save()
+    
+    # add image, if it's there
+    if data['change_image']:
+        if 'image' in data:
+            product.image = data['image']
+            product.save()
+    
+    return JSON_ok()
+
+def add_category(request, company, parent_id):
     # get company
     c = get_object_or_404(Company, url_name=company)
     
@@ -230,6 +367,59 @@ def add_category(request, company, parent_id=-1):
     context['form'] = form
 
     return render(request, 'pos/manage/category.html', context)
+
+@login_required
+def web_edit_category(request, company, category_id):
+    return edit_category(request, company, category_id)
+
+
+@api_view(['POST', 'GET'])
+@permission_classes((IsAuthenticated,))
+def mobile_edit_category(request, company, category_id):
+    return m_edit_category(request, company, category_id)
+
+def m_edit_category(request, company, category_id):
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+    
+    # sellers can edit product
+    if not has_permission(request.user, c, 'category', 'edit'):
+        return JSON_error(_("You have no permission to edit products"))
+
+    data = JSON_parse(request.POST['data'])
+
+    # see if product exists in database
+    try:
+        category = Category.objects.get(id=category_id)
+    except:
+        return JSON_error(_("Product does not exist"))
+    
+    # validate data
+    valid = validate_category(request.user, c, data)
+    
+    if not valid['status']:
+        return JSON_error(valid['message'])
+    data = valid['data']
+    
+    # update category:
+    category.name = data['name']
+    category.description = data['description']
+    
+
+    # image
+    if data['change_image'] == True:
+        if data['image']: # new image is uploaded
+            # create a file from the base64 data and save it to product.image
+            if category.image:
+                category.image.delete()
+            # save a new image
+            category.image = data['image'] # conversion from base64 is done in validate_product
+        else: # delete the old image
+            category.image.delete()
+    
+    return JSON_ok()
 
 def edit_category(request, company, category_id):
     c = get_object_or_404(Company, url_name=company)
@@ -298,3 +488,24 @@ def delete_category(request, company, category_id):
         pass
     
     return redirect('pos:list_categories', company=c.url_name)
+
+
+@api_view(['POST', 'GET'])
+@permission_classes((IsAuthenticated,))
+def mobile_get_category(request, company, category_id):
+    return get_category(request, company, category_id)
+
+def get_category(request, company, category_id):
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+    
+    # permissions: needs to be guest to view products
+    if not has_permission(request.user, c, 'product', 'list'):
+        return JSON_error(_("You have no permission to view products"))
+    
+    category = get_object_or_404(Category, id = category_id, company = c)
+    
+    return JSON_response(category_to_dict(category))
+

@@ -180,7 +180,6 @@ def update_price(product, user, new_unit_price):
                       product = product,
                       unit_price = new_unit_price)
     new_price.save()
-    print new_price
     
     return new_price
 
@@ -359,7 +358,6 @@ def validate_product(user, company, data):
     # tax*
     # stock*
     
-    print data
     
     def r(status, msg):
         return {'status':status,
@@ -517,7 +515,6 @@ def create_product(request, company):
         return JSON_error(valid['message'])
     data = valid['data']
     
-    print data
     
     try:
         category = Category.objects.get(id=data['category'])
