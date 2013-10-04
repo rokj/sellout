@@ -40,7 +40,6 @@ def category_breadcrumbs(category):
 
 def category_to_dict(c):
     # get list: topmost category > sub > subsub > c
-    # it's hard on database, but is only called once per terminal load or in management
     # NOT NEEDED
     #cid = [c.id]
     #cc = c;

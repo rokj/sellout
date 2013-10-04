@@ -9,20 +9,27 @@
     selected (class category-button-selected) - when this is the currently focused button
 
 */
-
-div .category-scroll-outer{ /* category scrolling: outer div*/
-    
+div#children, div#parents{
+    height:38px;
+    /* prevent text selection (interferes with dragging) */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-div .category-scroll-inner{ /* scrolling: inner div */
+div#children_scroll_outer, div#parents_scroll_outer{ /* category scrolling: outer div*/
+    height:34px;
     overflow:auto;
     overflow-x:hidden;
 }
 
-
-div .category-select{
+div#children_scroll_inner, div#parents_scroll_inner{ /* scrolling: inner div */
     /* container for category-button */
-    height:34px;
+    height:32px;
+    width:12800000px; /* this will hold 100,000 buttons */
     overflow:hidden;
     float:left;
     position:relative;
@@ -32,19 +39,28 @@ div .category-select{
 
 div .category-button{ /* category selection buttons (the scrolling ones) */
     float:left;
-    min-width:100px;
-    max-width:150px;
+    width:120px; /* width must be fixed to determine *_scroll_* width */
     padding:3px;
+    margin-left:3px;
+    margin-right:3px;
     cursor:pointer;
     border:1px solid black;
 }
 
-div .category-button-active{ /* active: also for keyboard arrow navigation */
-    background-color:#9999ff;
+div .category-button-focused{ /* only for keyboard-arrow selection */
+    border:1px dotted gray;
 }
 
-div .category-button-selected{
-    background-color:red;
+div .category-button-active{ /* like selected, but this category's products aren't shown */
+    background-color:yellow;
+}
+
+div .category-button-selected{ /* selected and products are shown*/
+    background-color:orange;
+}
+
+div .category-button-subcategories{ /* this category has more subcategories */
+    border-color:red;
 }
 
 .category-button-icon{ /* category image in selection buttons */

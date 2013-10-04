@@ -19,10 +19,13 @@
 <link href="{% static 'keyboard/css/keyboard.css' %}" rel="stylesheet">
 <script src="{% static 'keyboard/js/jquery.keyboard.js' %}"></script>
 
+{% comment %} other {% endcomment %}
+<script src="{% static 'fuckyeah/fuckyeah.jquery.js' %}"></script>
 <!-- keyboard extensions (optional) -->
 <script src="{% static 'keyboard/js/jquery.mousewheel.js' %}"></script>
 <script src="{% static 'keyboard/js/jquery.keyboard.extension-typing.js' %}"></script>
 <script src="{% static 'keyboard/js/jquery.keyboard.extension-autocomplete.js' %}"></script>
+
 
 {% comment %} 'embedded' javascript {% endcomment %}
 <script type="text/javascript">
@@ -33,13 +36,15 @@ $(document).ready(function() {
 	window.data.spacer = "{% static 'graphics/spacer.png' %}"; // {% comment %} stuff that javascript can't see {% endcomment %}
 	window.data.csrf_token = "{{csrf_token}}";
 	// ui settings
-	window.data.t = 50; // duration of show/hide events
+	window.data.t = 100; // duration of show/hide events
 	window.data.t_easing = 200; // duration of easing functions (drag start/stop)
 	window.data.last_search = ""; // last searched query
 	window.data.search_update_interval = 1000; // checking if search query has changed
 
 	window.items = {
-    	focused_item:null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
+    	focused:null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
+    	parents_div:$("div#parents_scroll_inner"),
+    	children_div:$("div#children_scroll_inner"),
     	search_field:$("input#search_products_filter"),
     	products_list:$("div#products")
 	}
@@ -48,7 +53,7 @@ $(document).ready(function() {
 	init_layout();
 
 	/* widgets */
-	categories_selector($("div#selection #categories"), window.data['categories'], 0, null); // categories selector (level 0 is the topmost category)
+	categories_selector(); // categories selector (level 0 is the topmost category)
 	products_selector($("div#products"));
 	
 	/* handle the keyboard */
@@ -57,6 +62,8 @@ $(document).ready(function() {
 	/* on exit */
 	$(window).on("beforeunload", on_exit);
 	
+	/* show the terminal */
+	$("#loading").remove();
 });  
 </script>
 
@@ -80,10 +87,24 @@ $(document).ready(function() {
 <div id="splitter"></div>
 
 {% comment %} product selector and other controls {% endcomment %}
+    
 <div id="selection">
     <div id="categories">
-        <div id="parents"></div>
-        <div id="children"></div>
+        <div id="parents">
+            {% comment %} fixed buttons: favorites and 'home' {% endcomment %}
+            <div class="category-button" id="category_button_favorites"><p class="category-name"><img class="category-button-icon" src="{% static 'graphics/favorites.png' %}" alt="favorites icon" />{% trans 'Favorites' %}</p></div>
+            <div class="category-button"><p class="category-name" id="category_button_home"><img class="category-button-icon" src="{% static 'graphics/home.png' %}" alt="favorites icon" />{% trans 'All' %}</p></div>
+            
+            
+            <div id="parents_scroll_outer">
+                <div id="parents_scroll_inner"></div>
+            </div>
+        </div>
+        <div id="children">
+            <div id="children_scroll_outer">
+                <div id="children_scroll_inner"></div>
+            </div>
+        </div>
     </div>
     <div id="products_scroll_outer">
         <div id="products_scroll_inner">
@@ -92,7 +113,7 @@ $(document).ready(function() {
     </div>
     <div id="controls">
         <input type="text" id="search_products_filter" />
-        <button type="button" id="search_products_submit" onclick="get_products()"><img src="{% static 'graphics/search.png'%}" /></button>
+        <button type="button" id="search_products_submit" onclick="get_products()"><img src="{% static 'graphics/search.png'%}" style="height:16px;"/></button>
     </div>
 </div>
 

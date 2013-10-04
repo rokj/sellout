@@ -21,7 +21,7 @@ img.category-placeholder{
     {% thumbnail c.image image_dimensions.2 as im %}
         <img src="{{ im.url }}">
     {% empty %}
-        <img src="{% static 'placeholder.png' %}" class="category-placeholder">
+        <img src="{% static 'graphics/placeholder.png' %}" class="category-placeholder">
     {% endthumbnail %}
 
 {% if c.image %}{% endif %}

@@ -23,7 +23,7 @@ $(document).ready(function(){
 {% if company.image %}
     <img id="logo" src="{{ company.image.url }}" alt="company_logo">
 {% else %}
-    <img id="logo" src="{% static 'placeholder.png' %}" alt="company_logo" class="logo-placeholder">
+    <img id="logo" src="{% static 'graphics/placeholder.png' %}" alt="company_logo" class="logo-placeholder">
 {% endif %}
 
 <form action="{% url 'pos:edit_company' company.url_name %}" method="post" enctype="multipart/form-data">

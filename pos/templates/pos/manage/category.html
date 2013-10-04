@@ -24,7 +24,7 @@ $(document).ready(function(){
 {% if category.image %}
     <img id="image" src="{{ category.image.url }}" />
 {% else %}
-    <img id="image" src="{% static 'placeholder.png' %}" class="category-placeholder" />
+    <img id="image" src="{% static 'graphics/placeholder.png' %}" class="category-placeholder" />
 {% endif %}
 
 {% comment %} two different urls for adding and editing categories {% endcomment %}

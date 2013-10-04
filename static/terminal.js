@@ -7,8 +7,6 @@ function load_data(url){
     get_data(url,
     		function(recv_data){window.data = recv_data;});
 
-	// show the terminal
-	$("#loading").remove();
 }
 
 /* sizing of elements */
@@ -31,7 +29,7 @@ function init_layout(){
 	// products
 	$("#products").height(
 		// 
-			100
+			300
 	);
 
 	// resize everything now and on resize
@@ -39,13 +37,21 @@ function init_layout(){
 }
 
 function size_layout(){
-	var pos = $("#splitter").position().left;
+	var obj = $("#splitter");
+	var pos = obj.position().left;
+	
+	// splitter
+	obj.height($(window).height() - obj.position().top);
 	// bill width
-	var obj = $("#bill");
-	obj.width(pos);
+	$("#bill").width(pos);
 	// selection
-	obj = $("#selection");
-	obj.css({left:pos});
+	$("#selection").css({left:pos});
+	// products
+	$("#products").outerHeight(
+		$("#controls").offset().top - 
+		$("#products").offset().top 
+	)
+	
 }
 
 /* save layout and other after leaving the page */
