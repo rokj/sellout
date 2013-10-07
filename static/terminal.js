@@ -50,8 +50,7 @@ function size_layout(){
 	$("#products").outerHeight(
 		$("#controls").offset().top - 
 		$("#products").offset().top 
-	)
-	
+	).empty(); // if the new height is less than previous, product buttons will break out of their parent
 }
 
 /* save layout and other after leaving the page */

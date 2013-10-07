@@ -29,11 +29,15 @@
 
 {% comment %} 'embedded' javascript {% endcomment %}
 <script type="text/javascript">
+window.request = null; // the (possibly) pending ajax request
+
 $(document).ready(function() {
 	// first, get settings and other data
 	load_data("{% url 'pos:terminal_init' company.url_name %}");
 	// add some additional data
 	window.data.spacer = "{% static 'graphics/spacer.png' %}"; // {% comment %} stuff that javascript can't see {% endcomment %}
+	window.data.loading = "{% static 'graphics/loading.gif' %}";
+	window.data.subcategory = "{% static 'graphics/subcategory.png' %}";
 	window.data.csrf_token = "{{csrf_token}}";
 	// ui settings
 	window.data.t = 100; // duration of show/hide events
@@ -95,7 +99,6 @@ $(document).ready(function() {
             {% comment %} fixed buttons: favorites and 'home' {% endcomment %}
             <div class="category-button" id="category_button_favorites"><p class="category-name"><img class="category-button-icon" src="{% static 'graphics/favorites.png' %}" alt="favorites icon" />{% trans 'Favorites' %}</p></div>
             <div class="category-button" id="category_button_home"><p class="category-name"><img class="category-button-icon" src="{% static 'graphics/home.png' %}" alt="favorites icon" />{% trans 'All' %}</p></div>
-            
             
             <div id="parents_scroll_outer">
                 <div id="parents_scroll_inner"></div>

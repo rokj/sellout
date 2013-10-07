@@ -78,3 +78,16 @@ p.category-name{
     overflow:hidden;
     text-overflow:ellipsis;
 }
+
+/* subcategories indicator */
+img.subcategory{
+    height:15px;
+}
+div#children img.subcategory{
+    visibility:hidden;
+}
+div#parents img.subcategory{
+    position:relative;
+    margin-top:auto;
+    margin-bottom:auto;
+}

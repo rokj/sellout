@@ -78,10 +78,11 @@ function show_products(pl){
 	for(i = 0; i < pl.length; i++){
 		// create a temp 'column' div
 		tmp_div = $("<div>", {"class":"products-column"});
-		for(j = 0; j < n, i < pl.length; j++){
+		for(j = 0; j < n; j++){
 			// add buttons to that div
 			tmp_div.append(product_button(pl[i]));
-			i++;
+			
+			if(++i >= pl.length) break;
 		}
 		window.items.products_list.append(tmp_div);
 	}

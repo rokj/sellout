@@ -15,6 +15,7 @@ from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok
                            format_number, parse_decimal, image_dimensions, \
                            image_from_base64, max_field_length
 from pos.views.manage.discount import discount_to_dict
+from pos.views.manage.category import get_subcategories
 
 from common import globals as g
 from config.functions import get_value
@@ -121,8 +122,11 @@ def product_to_dict(user, product):
     
     if product.image: # check if product's image exists
         # get the thumbnail
-        ret['image'] = get_thumbnail(product.image, image_dimensions('product')[2]).url
-    
+        try:
+            ret['image'] = get_thumbnail(product.image, image_dimensions('product')[2]).url
+        except:
+            pass
+            
     # category?
     if product.category:
         ret['category'] = product.category.name
@@ -266,10 +270,10 @@ def search_products(request, company):
     else:
         filter_by_description = False
         
-    # category_list_filter
+    # category_filter
     if criteria.get('category_filter'):
         filter_by_category = True
-        products = products.filter(category__id = int(criteria.get('category_filter')))
+        products = products.filter(category__id__in=get_subcategories(int(criteria.get('category_filter')), data=[]))
     else:
         filter_by_category = False
         
@@ -327,7 +331,9 @@ def search_products(request, company):
         if not filter_by_description:
             f = f | Q(description__icontains=w)
         if not filter_by_category:
-            f = f | Q(category__name__icontains=w)
+            # get the categories that match this string and search by their subcategories also
+            c = Category.objects.get(name__icontains=w)
+            f = f | Q(category__id__in=get_subcategories(c.id, data=[]))
 
         if f:
             products = products.filter(f)
