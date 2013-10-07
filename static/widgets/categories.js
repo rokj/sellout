@@ -12,7 +12,7 @@ function category_draggable(obj) {
             $(this).stop().animate(
 		        { left: pos },
 		        window.data.t_easing,
-		        'easeOutSine',
+		        'easeOutCirc',
 		        function(){
 		            // check if this has scrolled past the last (first) button
 		            var first_button = $(".category-button", obj).filter(":first");
@@ -73,6 +73,9 @@ function categories_home(){
 		btn.click(select_child);
 		window.items.children_div.append(btn);
 	}
+    
+    // add some class to the button
+    window.items.all_cat_button.addClass("category-button-selected");
 }
 
 function scroll_into_view(btn){
@@ -100,7 +103,7 @@ function categories_selector(){
     //  - after selecting parent, a button goes to #parent and all its children are shown in children
     // add buttons for all categories to the children div
     
-    // each button holds data() for its category
+    // each button holds data() for its cate("#category_button_home")gory
     
     // add parent references to all children
     function add_parent(cat, parent_cat){
@@ -121,7 +124,7 @@ function categories_selector(){
     	
     });
 
-    $("#category_button_home").click(categories_home);
+    window.items.all_cat_button.click(categories_home);
     
     // show initial window
     categories_home();
@@ -132,6 +135,9 @@ function select_parent(){
 	var c = $(this).data();
 	var children = c.children;
 	var i, btn;
+	
+	// we're not in 'all categories' anymore
+	window.items.all_cat_button.removeClass("category-button-selected");
 	
 	// remove everything from children div and add current parent's children
 	window.items.children_div.empty(); // WARNING: $(this) does not exist anymore
@@ -170,6 +176,9 @@ function select_child(){
 	var c = $(this).data();
 	var children = c.children;
 	var i, btn;
+	
+	// we're not in 'all categories' anymore
+	window.items.all_cat_button.removeClass("category-button-selected");
 
 	if(c.children.length > 0){
 		// remove the last button's class
@@ -211,10 +220,8 @@ function select_child(){
 function handle_keypress(e){
 	// keyboard commands:
 	// - left, right: neighbors (leap to first if last and vv)
-	// - up: select last parent in parents_div
-	// - down:
-	//   - if in children div: select subcategory
-	//   - if in parents div: go to last selected category in children div
+	// - up: go to parent category (click the parent button)
+	// - down: go to subcategory (click the current button)
 	// - num 0: go to products
 	
 	var code = (e.keyCode ? e.keyCode : e.which);
@@ -244,7 +251,18 @@ function handle_keypress(e){
 		case 38: // up
 			window.items.focused.removeClass("category-button-focused");
 			// get the last button in parents_div and click it
-			window.items.parents_div.children().filter(":last").click().fuckyeah();
+			if(window.items.parents_div.children().length <= 1){
+				// no parent buttons to click, click the "all" (home) button
+				$("#category_button_home").click();
+				window.items.focused = window.items.children_div.children().filter(":first");
+			}
+			else{
+				// click the last parent
+				item = window.items.parents_div.children().filter(":last").prev();
+				item.click();
+				window.items.focused = item;
+			}
+			window.items.focused.addClass("category-button-focused");
 			break;
 		case 39: // right
 			// get the next item
@@ -259,7 +277,13 @@ function handle_keypress(e){
 			scroll_into_view(item);
 			break;
 		case 40: // down
+			window.items.focused.removeClass("category-button-focused");
 			window.items.focused.click();
+			
+			item = window.items.children_div.children().filter(":first");
+			item.addClass("category-button-focused");
+			
+			window.items.focused = item;
 			break;
 		default: return;
 	}

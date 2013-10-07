@@ -1,10 +1,10 @@
-
 /*             */
 /* categories  */
 /*             */
 /*
-  category buttons are in three states:
+  category buttons are in four states:
     inactive (class category-button) - when not touched
+    focused (class category-button-focused) - for keyboard navigation
     active (class category-button-active) - when on path of the currently selected category/product
     selected (class category-button-selected) - when this is the currently focused button
 
@@ -39,7 +39,8 @@ div#children_scroll_inner, div#parents_scroll_inner{ /* scrolling: inner div */
 
 div .category-button{ /* category selection buttons (the scrolling ones) */
     float:left;
-    width:120px; /* width must be fixed to determine *_scroll_* width */
+    min-width:120px;
+    max-width:150px;
     padding:3px;
     margin-left:3px;
     margin-right:3px;
@@ -76,46 +77,4 @@ p.category-name{
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
-}
-
-
-/*          */
-/* products */
-/*          */
-div#products_scroll_outer{
-    
-}
-
-div#products_scroll_inner{
-    overflow:auto;
-    overflow-x:hidden;
-}
-
-div#products{
-    position:relative;
-    border: 1px solid black;
-}
-
-div.product-button{
-    border:1px solid red;
-    padding:3px;
-    margin:2px;
-    background-position:center;
-    background-repeat:no-repeat;
-}
-
-div.product-button-name{
-    background:solid white;
-    font-weight:bolder;
-    color:white;
-    box-shadow: 10px 10px 5px #888888;
-
-}
-
-div.product-button-code{
-    padding-top:auto;
-    padding-bottom:auto;
-}
-div.product-button-shortcut{
-    
 }

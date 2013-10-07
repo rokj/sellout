@@ -45,6 +45,7 @@ $(document).ready(function() {
     	focused:null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
     	parents_div:$("div#parents_scroll_inner"),
     	children_div:$("div#children_scroll_inner"),
+    	all_cat_button:$("div#category_button_home"),
     	search_field:$("input#search_products_filter"),
     	products_list:$("div#products")
 	}
@@ -54,7 +55,7 @@ $(document).ready(function() {
 
 	/* widgets */
 	categories_selector(); // categories selector (level 0 is the topmost category)
-	products_selector($("div#products"));
+	products_selector();
 	
 	/* handle the keyboard */
 	$(document).keypress(handle_keypress);
@@ -93,7 +94,7 @@ $(document).ready(function() {
         <div id="parents">
             {% comment %} fixed buttons: favorites and 'home' {% endcomment %}
             <div class="category-button" id="category_button_favorites"><p class="category-name"><img class="category-button-icon" src="{% static 'graphics/favorites.png' %}" alt="favorites icon" />{% trans 'Favorites' %}</p></div>
-            <div class="category-button"><p class="category-name" id="category_button_home"><img class="category-button-icon" src="{% static 'graphics/home.png' %}" alt="favorites icon" />{% trans 'All' %}</p></div>
+            <div class="category-button" id="category_button_home"><p class="category-name"><img class="category-button-icon" src="{% static 'graphics/home.png' %}" alt="favorites icon" />{% trans 'All' %}</p></div>
             
             
             <div id="parents_scroll_outer">
