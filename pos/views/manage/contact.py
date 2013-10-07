@@ -13,7 +13,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from pos.models import Company, Contact
 from common import globals as g
 from config.functions import get_date_format, get_value
-from pos.views.util import has_permission, no_permission_view
+from pos.views.util import JSON_parse, JSON_error, has_permission, no_permission_view
 
 ################
 ### contacts ###
@@ -39,7 +39,90 @@ class ContactFilterForm(forms.Form):
                              choices=g.CONTACT_TYPES)
     name = forms.CharField(required=False)
 
+
+def contact_to_dict(user, c):
+    # returns all relevant contact's data
+    # id
+    # type
+    # company_name
+    # first_name
+    # last_name
+    # date_of_birth
+    # street_address
+    # postcode
+    # city
+    # country
+    # email
+    # phone
+    # vat
+    ret = {}
+    ret['id'] = c.id
+    ret['name'] = c.name
+    
+    if c.company_name:
+        ret['company_name'] = c.company_name
+    if c.first_name:
+        ret['first_name'] = c.first_name
+    if c.last_name:
+        ret['last_name'] = c.last_name
+    if c.date_ob_birth:
+        ret['date_of_birth'] = c.date_of_birth
+    if c.street_adress:
+        ret['street_address'] = c.street_address
+    if c.postcode:
+        ret['postcode'] = c.postcode
+    if c.city:
+        ret['city'] = c.city
+    if c.coutnry:
+        ret['country'] = c.country
+    if c.email:
+        ret['email'] = c.email
+    if c.phone:
+        ret['phone'] = c.phone
+    if c.vat:
+        ret['vat'] = c.vat
+      
+    return ret
+
+
 @login_required
+def web_list_contacts(request, company):
+    return list_contacts(request, company)
+
+
+def mobile_list_contacts(request, company):
+    return m_list_contacts(request, company)
+
+def m_list_contacts(request, company):
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+     
+    # check permissions: needs to be guest
+    if not has_permission(request.user, c, 'contact', 'list'):
+        return JSON_error(_("You have no permission to view products"))
+    
+    contacts = Contact.objects.filter(company__id=c.id)
+    
+    criteria = JSON_parse(request.POST['data'])
+    
+    if criteria.get('type') == 'Individual':
+        contacts = contacts.filter(type='Individual')
+        if 'name' in criteria:
+            first_names = contacts.filter(first_name__icontains=criteria.get('name'))
+            last_names = contacts.filter(last_name__icontains=criteria.get('name'))
+            contacts = (first_names | last_names).distinct()
+    elif criteria.get('type') == 'Company':
+      contacts = contacts.filter(type='Company')
+      if 'name' in criteria:
+          contacts = contacts.filter(company_name__icontains=criteria.get('name'))  
+    
+    cs = []
+    for c in contacts:
+        cs.appenct(contact_to_dict(request.user, c))
+    return cs
+
 def list_contacts(request, company):
     c = get_object_or_404(Company, url_name=company)
     
@@ -52,19 +135,16 @@ def list_contacts(request, company):
     # show the filter form
     if request.method == 'POST':
         form = ContactFilterForm(request.POST)
-        
         if form.is_valid():
             # filter by whatever is in the form
-            if form.cleaned_data['type'] == 'individual':
+            if form.cleaned_data['type'] == 'Individual':
                 contacts = contacts.filter(type='Individual')
-                
                 if 'name' in form.cleaned_data: # search by first and last name 
                     first_names = contacts.filter(first_name__icontains=form.cleaned_data['name'])
                     last_names = contacts.filter(last_name__icontains=form.cleaned_data['name'])
                     contacts = (first_names | last_names).distinct()
             else:
                 contacts = contacts.filter(type='Company')
-            
                 if 'name' in form.cleaned_data: # search by company name
                     contacts = contacts.filter(company_name__icontains=form.cleaned_data['name'])
     else:

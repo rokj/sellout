@@ -396,7 +396,7 @@ def m_edit_category(request, company, category_id):
         return JSON_error(_("Product does not exist"))
     
     # validate data
-    valid = validate_category(request.user, c, data)
+    valid = validate_category(request.user, c, data, category_id)
     
     if not valid['status']:
         return JSON_error(valid['message'])
@@ -417,7 +417,7 @@ def m_edit_category(request, company, category_id):
             category.image = data['image'] # conversion from base64 is done in validate_product
         else: # delete the old image
             category.image.delete()
-    
+    category.save()
     return JSON_ok()
 
 def edit_category(request, company, category_id):
