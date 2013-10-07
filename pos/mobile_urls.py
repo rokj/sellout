@@ -40,11 +40,11 @@ urlpatterns = patterns('',
     url(r_company + _('/manage/categories') + '/?$', manage.category.list_categories, name='list_categories'), # list of categories
     url(r_company + r'/manage/json/category/add' + '/(?P<parent_id>-?\d+)/?$', manage.category.mobile_add_category, name='add_category'), # add
     url(r_company + r'/manage/json/category/get/(?P<category_id>\d+)/?$', manage.category.mobile_get_category, name='get_category'),
-    url(r_company + _('/manage/category/edit') + '/(?P<category_id>\d+)/?$', manage.category.edit_category, name='edit_category'), # edit
+    url(r_company + r'/manage/json/category/edit/(?P<category_id>\d+)/?$', manage.category.mobile_edit_category, name='edit_category'), # edit
     url(r_company + _('/manage/category/delete') + '/(?P<category_id>\d+)/?$', manage.category.delete_category, name='delete_category'), # delete
     # contacts
-    url(r_company + _('/manage/contacts') + '/?$', manage.contact.list_contacts, name='list_contacts'),
-    url(r_company + _('/manage/contact/add') + '/?$', manage.contact.add_contact, name='add_contact'),
+    url(r_company + r'/manage/json/contacts/?$', manage.contact.mobile_list_contacts, name='list_contacts'),
+    url(r_company + r'/manage/json/contact/add/?$', manage.contact.add_contact, name='add_contact'),
     url(r_company + _('/manage/contact/edit') + '/(?P<contact_id>\d+)/?$', manage.contact.edit_contact, name='edit_contact'),
     url(r_company + _('/manage/contact/delete') + '/(?P<contact_id>\d+)/?$', manage.contact.delete_contact, name='delete_contact'),
     # discounts
