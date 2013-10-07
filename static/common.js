@@ -31,3 +31,13 @@ function escape(text){
         return entityMap[s];
     });
 }
+
+function get_size(element){ // get computed element size before it's inserted into document
+    element.hide();
+    $("body").append(element); // add to DOM, in order to read the CSS property
+    try {
+        return [element.outerWidth(), element.outerHeight()];
+    } finally {
+        element.remove(); // and remove from DOM
+    }
+};

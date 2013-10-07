@@ -320,7 +320,7 @@ $(document).ready(function(){
     function show_image(product, obj){
         if(!product.image){
             // show 'placeholder' image
-            obj.attr("src", "{% static 'placeholder.png' %}");
+            obj.attr("src", "{% static 'graphics/placeholder.png' %}");
             obj.attr("alt", escape(product.name));
             obj.addClass("preview-product");
         }

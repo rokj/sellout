@@ -1,0 +1,45 @@
+/*          */
+/* products */
+/*          */
+div#products_scroll_outer{
+    
+}
+
+div#products_scroll_inner{
+    overflow:auto;
+    overflow-x:hidden;
+}
+
+div#products{
+    position:relative;
+    border: 1px solid black;
+    width:200000px; /* should be enough for cca. 5000 products*/
+}
+
+div .products-column{
+    float:left;    
+}
+
+div.product-button{
+    border:1px solid red;
+    padding:3px;
+    /* do not set margin: it will be set by javascript every time products are rendered for even spacing */
+    background-position:center;
+    background-repeat:no-repeat;
+}
+
+div.product-button-name{
+    background:solid white;
+    font-weight:bolder;
+    color:white;
+    box-shadow: 10px 10px 5px #888888;
+
+}
+
+div.product-button-code{
+    padding-top:auto;
+    padding-bottom:auto;
+}
+div.product-button-shortcut{
+    
+}

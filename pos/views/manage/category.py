@@ -181,6 +181,18 @@ def get_all_categories(company_id, category_id=None, sort='name', data=[], level
 
     return data
 
+def get_subcategories(category_id, sort='name', data=[]):
+    """ return a 'flat' list of all subcategories' ids """
+    c = Category.objects.get(id=category_id)
+    data.append(c.id)
+        
+    # append all children
+    children = Category.objects.filter(parent__id=category_id).order_by(sort)
+    for c in children:
+        get_subcategories(c.id, data=data, sort=sort)
+    
+    return data
+
 def get_all_categories_structured(company, category=None, data=[], sort='name'):
     """ return a structured list of all categories of given company """
     

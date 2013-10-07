@@ -1,19 +1,20 @@
 - ! - tablet support
+- missing images (deleted from disk) trigger IOException
 - <[ CDATA for <javascript>
-- change underscores for HTML and CSS ids and classes to dashes (django forms use underscores ?!)
 - show/hide animations (jquery) (management only)
 - incompatibility warning/redirect for older browsers
 - add {% spaceless %} to base.html (and all other 'bases') and compress javascript (?)
 - minify javascript
 - confirmation dialogs for deletion (management only)
 - @transaction.atomic for update_price() (django 1.6?)
-- discount > category
+- append discount to all products in a category
 - paypal, bitcoin, ...
 - check 'var' (local) and undeclared variables (global) in products.html
 
 - products with no categories: 'no category' entry in listboxes (?)
 - bug: category select in 'advanced product search'
 
+- DONE change underscores for HTML and CSS ids and classes to dashes (django forms use underscores ?!)
 - DONE product validation: lengths of all fields
 - DONE title/site title for all views
 - DONE base.html: remove unneeded jquery <script src=""> includes
