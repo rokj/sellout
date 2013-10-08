@@ -34,7 +34,9 @@ window.request = null; // the (possibly) pending ajax request
 $(document).ready(function() {
 	// first, get settings and other data
 	load_data("{% url 'pos:terminal_init' company.url_name %}");
-	// add some additional data
+    // add some other data
+    window.data.categories_list = {}; // a dictionary of all categories by id
+	// stuff from template
 	window.data.spacer = "{% static 'graphics/spacer.png' %}"; // {% comment %} stuff that javascript can't see {% endcomment %}
 	window.data.loading = "{% static 'graphics/loading.gif' %}";
 	window.data.subcategory = "{% static 'graphics/subcategory.png' %}";
@@ -63,10 +65,7 @@ $(document).ready(function() {
 	
 	/* handle the keyboard */
 	$(document).keypress(handle_keypress);
-	
-	/* on exit */
-	$(window).on("beforeunload", on_exit);
-	
+
 	/* show the terminal */
 	$("#loading").remove();
 });  

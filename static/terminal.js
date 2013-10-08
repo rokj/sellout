@@ -54,7 +54,7 @@ function size_layout(){
 }
 
 /* save layout and other after leaving the page */
-function on_exit(){
+function save_settings(){
 	// get splitter position
 	var ld = {};
 	ld.bill_width = $("#splitter").position().left;

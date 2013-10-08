@@ -335,11 +335,9 @@ def search_products(request, company):
             f = f | Q(description__icontains=w)
         if not filter_by_category:
             # get the categories that match this string and search by their subcategories also
-            try:
-                c = Category.objects.get(name__icontains=w)
-                f = f | Q(category__id__in=get_subcategories(c.id, data=[]))
-            except Category.DoesNotExist:
-                pass
+            tmpcat = Category.objects.filter(name__icontains=w)
+            for t in tmpcat:
+                f = f | Q(category__id__in=get_subcategories(t.id, data=[]))
 
         if f:
             products = products.filter(f)

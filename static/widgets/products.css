@@ -21,12 +21,16 @@ div .products-column{
 
 div.product-button{
     position:relative; /* this is required for product image to work correctly (to position another div aboce it) */
-    border:1px solid red;
+    border:1px solid black;
     /* do not set margin: it will be set by javascript every time products are rendered for even spacing */
     background-position:center;
     background-repeat:no-repeat;
 
     z-index:1;
+}
+
+div.product-button-focused{
+    border:1px solid red;
 }
 
 img.product-button-image{

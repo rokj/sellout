@@ -81,14 +81,13 @@ function show_products(pl){
 	
 	n = Math.floor(div_height/p_size[1]);
 	i = 0;
-	for(i = 0; i < pl.length; i++){
+	for(i = 0; i < pl.length;){
 		// create a temp 'column' div
 		tmp_div = $("<div>", {"class":"products-column"});
 		for(j = 0; j < n; j++){
 			// add buttons to that div
-			tmp_div.append(product_button(pl[i]));
-			
-			if(++i >= pl.length) break;
+			tmp_div.append(product_button(pl[i++]));
+            if(i == pl.length) break;
 		}
 		window.items.products_list.append(tmp_div);
 	}
@@ -128,5 +127,21 @@ function product_button(product){
 	info_div.append(shortcut);
     div.append(info_div);
 
+    div.data(product); // everything about the product
+
+    // when clicked...
+    div.click(select_product);
+
 	return div;
+}
+
+function select_product(){
+    // $(this) is the product div
+    // 'unstyle' any currently selected product
+    // change style
+    // show the product's category
+    $(".product-button-focused").removeClass("product-button-focused");
+    $(this).addClass("product-button-focused");
+
+    select_category(null, $(this).data().category_id)
 }

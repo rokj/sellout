@@ -5,7 +5,6 @@
   category buttons are in four states:
     inactive (class category-button) - when not touched
     focused (class category-button-focused) - for keyboard navigation
-    active (class category-button-active) - when on path of the currently selected category/product
     selected (class category-button-selected) - when this is the currently focused button
 
 */
@@ -49,10 +48,6 @@ div .category-button{ /* category selection buttons (the scrolling ones) */
 
 div .category-button-focused{ /* only for keyboard-arrow selection */
     border:1px dotted gray;
-}
-
-div .category-button-active{ /* like selected, but this category's products aren't shown */
-    background-color:yellow;
 }
 
 div .category-button-selected{ /* selected and products are shown*/
