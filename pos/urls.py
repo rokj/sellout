@@ -33,7 +33,7 @@ urlpatterns = patterns('',
     url(r_company + '/?$', pos.terminal, name='terminal'), # by url_name
     # ajax calls for POS terminal
     url(r_company + '/init/?$', pos.terminal_init, name='terminal_init'),
-    url(r_company + '/exit/?$', pos.terminal_exit, name='terminal_exit'),
+    url(r_company + '/save/?$', pos.terminal_save, name='terminal_save'),
     
     
     # management urls: company

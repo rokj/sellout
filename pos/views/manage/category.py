@@ -193,7 +193,7 @@ def get_subcategories(category_id, sort='name', data=[]):
     
     return data
 
-def get_all_categories_structured(company, category=None, data=[], sort='name'):
+def get_all_categories_structured(company, category=None, data=[], sort='name', level=0):
     """ return a structured list of all categories of given company """
     
     if not category:
@@ -201,12 +201,14 @@ def get_all_categories_structured(company, category=None, data=[], sort='name'):
         category = Category.objects.filter(company=company, parent=None).order_by(sort)
         
         for c in category:
-            data.append(get_all_categories_structured(company, c, data, sort))
+            data.append(get_all_categories_structured(company, c, data, sort, 0))
             
         return data
     else:
         # add current category to list
         current = category_to_dict(category)
+        level += 1
+        current['level'] = level;
         current['children'] = [] # will contain subcategories
         
         # list all categories with this parent
@@ -214,7 +216,7 @@ def get_all_categories_structured(company, category=None, data=[], sort='name'):
         
         # add them to the list
         for c in children:
-            current['children'].append(get_all_categories_structured(company, c))
+            current['children'].append(get_all_categories_structured(company, c, level))
 
     return current
 

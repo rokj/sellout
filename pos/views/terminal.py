@@ -37,18 +37,18 @@ def terminal_init(request, company):
     """ return all terminal settings and other static data in JSON format """
     data = {
         # user's data
-        'categories':get_all_categories_structured(c, data=[]),
+        'categories':get_all_categories_structured(c, data=[], level=0),
         # interface parameters
         'interface':get_value(request.user, 'pos_interface'),
         'product_button_size':g.PRODUCT_BUTTON_DIMENSIONS[get_value(request.user, 'pos_interface_product_button_size')],
         'bill_width':get_value(request.user, 'pos_interface_bill_width'),
         # urls for various things
         'search_products_url':reverse('pos:search_products', args={company:c.url_name}),
-        'exit_url':reverse('pos:terminal_exit', args={company:c.url_name}),
+        'exit_url':reverse('pos:terminal_save', args={company:c.url_name}),
     }
     return JSON_response(data)
 
-def terminal_exit(request, company):
+def terminal_save(request, company):
     """ save stuff when the terminal page closes/unloads """
     data = JSON_parse(request.POST.get('data'))
 

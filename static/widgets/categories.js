@@ -47,28 +47,28 @@ function create_button(cc) {
     // stuff to add:
     // a div
     var btn_div = $("<div>", {
-    	"class" : "category-button",
-    	"data-id" : cc.id
+        "class" : "category-button",
+        "data-id" : cc.id
     });
 
     if (cc.children.length > 0)
-    	btn_div.addClass("category-button-subcategories");
+        btn_div.addClass("category-button-subcategories");
     
-	// a paragraph with category name
-	var p_obj = $("<p>", {"class" : "category-name"}); // a paragraph with the name
-	p_obj.append(cc.name);
-	btn_div.append(p_obj);
-	// an image, if the category has one
-	var img_obj = $("<img>", {"class" : "category-button-icon"});
-	if (cc.image)
-		img_obj.attr("src", cc.image);
-	else
-		img_obj.attr("src", window.data.spacer); // data is a global
-                        						 // variable, set in
-                        						 // terminal.html
-	p_obj.prepend(img_obj); // add image
-	// a subcategory image (only shown if in parents div)
-	p_obj.prepend($("<img>", {src : window.data.subcategory,"class" : "subcategory"}));
+    // a paragraph with category name
+    var p_obj = $("<p>", {"class" : "category-name"}); // a paragraph with the name
+    p_obj.append(cc.name);
+    btn_div.append(p_obj);
+    // an image, if the category has one
+    var img_obj = $("<img>", {"class" : "category-button-icon"});
+    if (cc.image)
+        img_obj.attr("src", cc.image);
+    else
+        img_obj.attr("src", window.data.spacer); // data is a global
+                                                 // variable, set in
+                                                 // terminal.html
+    p_obj.prepend(img_obj); // add image
+    // a subcategory image (only shown if in parents div)
+    p_obj.prepend($("<img>", {src : window.data.subcategory,"class" : "subcategory"}));
 
     btn_div.data(cc);
 
@@ -84,9 +84,9 @@ function categories_home() {
 
     // create children
     for (i = 0; i < c.length; i++) {
-    	btn = create_button(c[i]);
-    	btn.click(select_child);
-    	window.items.children_div.append(btn);
+        btn = create_button(c[i]);
+        btn.click(select_category);
+        window.items.children_div.append(btn);
     }
 
     // add some class to the button
@@ -99,16 +99,16 @@ function scroll_into_view(btn) {
 
     // scrolling left: if button.left is less than container.left, scroll it into view
     if (btn.offset().left < frame.offset().left) {
-    	scroller.animate({left : -btn.position().left});
+        scroller.animate({left : -btn.position().left});
     }
     else if(btn.offset().left + btn.outerWidth() > frame.offset().left + frame.width()) {
-    	// scrolling right: if button.left + button.width > container.left + container.width, scroll it into view
-    	scroller.animate({left:-btn.position().left + frame.width() - btn.outerWidth()});
+        // scrolling right: if button.left + button.width > container.left + container.width, scroll it into view
+        scroller.animate({left:-btn.position().left + frame.width() - btn.outerWidth()});
     }
 }
 
 /* categories selector */
-function categories_selector() {
+function categories_selector(){
     var c = window.data.categories;
     // there are two divs in terminal: #parents and #children;
     // parent shows:
@@ -120,15 +120,18 @@ function categories_selector() {
     // are shown in children
     // add buttons for all categories to the children div
 
-    // each button holds data() for its cate("#category_button_home")gory
+    // each button holds data() for its category
 
-    // add parent references to all children
+    // add parent references to all children and
+    // create a dictionary of all categories by id for quick selection on product button click
     function add_parent(cat, parent_cat) {
-	    var i;
-	    for (i = 0; i < cat.length; i++) {
-	        if (parent_cat) cat[i].parent = parent_cat;
-	        if (cat[i].children.length > 0) add_parent(cat[i].children, cat[i]);
-	    }
+        var i;
+        for(i = 0; i < cat.length; i++) {
+            if(parent_cat) cat[i].parent = parent_cat;
+            if(cat[i].children.length > 0) add_parent(cat[i].children, cat[i]);
+
+            window.data.categories_list[cat[i].id.toString()] = cat[i];
+        }
     }
     add_parent(c, null);
 
@@ -137,115 +140,104 @@ function categories_selector() {
     category_draggable(window.items.children_div);
 
     // bind events to 'favorites' and 'home' buttons
-    $("#category_button_favorites").click(function() {
+    window.items.all_cat_button.click(categories_home);
+    
+    $("#category_button_favorites").click(function(){
 
     });
 
-    window.items.all_cat_button.click(categories_home);
-
-    // show initial window
+    // in the beginning, there was the first category selected
     categories_home();
 }
 
-function select_parent() {
-    // gets called on buttons that are in parents div
-    var c = $(this).data();
+function select_category(e, id) { // gets called on buttons that are in parents div
+    // e - jQuery event
+    // id - id of category to select (if none, take data from $(this).data() )
+    var c;
+
+    // get category details from parameter or $(this).data if no parameter was added
+    if(id != null) c = window.data.categories_list[id.toString()];
+    else c = $(this).data();
+
+    var i, btn, siblings, d;
+    var selected;
     var children = c.children;
-    var i, btn;
-
-    // we're not in 'all categories' anymore
-    window.items.all_cat_button.removeClass("category-button-selected");
-
-    // remove everything from children div and add current parent's children
-    window.items.children_div.empty(); // WARNING: $(this) does not exist
-                    // anymore
-
-    for (i = 0; i < children.length; i++) {
-	    btn = create_button(children[i]);
-	    btn.click(select_child);
-	    window.items.children_div.append(btn);
-    }
-
-    // remove everything from parents div and add parent>parent>parent...
+    var parent = c.parent;
+    
+    // clear parents
+    window.items.children_div.empty();
     window.items.parents_div.empty();
-    var item = c;
-    var last_btn;
-    i = 0;
-    while (item) {
-    	btn = create_button(item);
-    	window.items.parents_div.prepend(btn.click(select_parent));
-
-    	// the last button in parents_div is added first:
-    	if (i == 0)
-    		last_btn = btn;
-
-    	item = item.parent;
-    	i++;
+    
+    // if this category has no children, just select it
+    if(c.children.length < 1){
+        // this category also has no parent, so its siblings are topmost categories
+        if(!c.parent) siblings = window.data.categories;
+        else siblings = c.parent.children;
+        
+        for(i = 0; i < siblings.length; i++){
+            btn = create_button(siblings[i]);
+            btn.click(select_category);
+            
+            // selected?
+            if(siblings[i].id == c.id) selected = btn;
+            
+            window.items.children_div.append(btn);
+        }
+        
+        // add parents to parents_div
+        d = c.parent;
+        i = 0;
+        while(d){
+            btn = create_button(d);
+            btn.click(select_category);
+            
+            window.items.parents_div.prepend(btn);
+            
+            d = d.parent;
+        }
     }
+    else{
+        // this category has children: add it and all its parents to parents_div
+        d = c;
+        i = 0;
+        while(d){
+            btn = create_button(d);
+            btn.click(select_category);
+            
+            if(d.id == c.id) selected = btn;
 
-    last_btn.addClass("category-button-selected"); // add selected class
-    get_category_products(last_btn.data().id);
-    scroll_into_view(last_btn); // scroll it into view
-    window.items.focused = last_btn;
-}
+            window.items.parents_div.prepend(btn);
+            
+            d = d.parent;
+        }
 
-function select_child() {
-    // gets called on buttons that are in children div
-    var c = $(this).data();
-    var children = c.children;
-    var i, btn;
-
-    // we're not in 'all categories' anymore
-    window.items.all_cat_button.removeClass("category-button-selected");
-
-    if (c.children.length > 0) {
-        // remove the last button's class
-        window.items.parents_div.children().removeClass(
-            "category-button-selected category-button-active");
-    
-        // add current button to parents div
-        btn = $(this).clone(true) // clone won't clone data and events unless
-            // called with clone(true)
-            .unbind() // but we need to bind a different event to it
-            .click(select_parent).addClass("category-button-selected");
-
-        window.items.parents_div.append(btn);
-        scroll_into_view(btn);
-    
-        // empty children div
-        window.items.children_div.empty();
-    
-        // show current button's subcategories
-        for (i = 0; i < children.length; i++) {
+        
+        // add all its children to children_div
+        for(i = 0; i < children.length; i++){
             btn = create_button(children[i]);
-            btn.click(select_child);
+            btn.click(select_category);
+
+            if(children[i].id == c.id) selected = btn;
+
             window.items.children_div.append(btn);
         }
     }
-    else {
-        btn = $(this);
-        // unselect other buttons in this div
-        window.items.children_div.children().removeClass(
-            "category-button-selected");
-        window.items.parents_div.children().filter(":last").removeClass(
-            "category-button-selected").addClass("category-button-active");
+       
+    if(selected) selected.addClass("category-button-selected");
     
-        // select this button
-        btn.addClass("category-button-selected");
-        scroll_into_view(btn);
-    }
-
-    // get data for this category
-    get_category_products(c.id);
-
-    window.items.focused = btn;
+    // the 'all' button is no more
+    window.items.all_cat_button.removeClass("category-button-selected");
+    
+    // show products from this category, but only if the function wasn't called
+    // on click of a product button (that is, id is not defined)
+    if(!id) get_category_products(c.id);
 }
 
 function handle_keypress(e) {
     // keyboard commands:
     // - left, right: neighbors (leap to first if last and vv)
     // - up: go to parent category (click the parent button)
-    // - down: go to subcategory (click the current button)
+    // - down/enter: go to subcategory (click the current button)
     // - num 0: go to products
 
     var code = (e.keyCode ? e.keyCode : e.which);
@@ -329,8 +321,8 @@ function get_category_products(category_id) {
     // get products list
     send_data(window.data.search_products_url, criteria,
         window.data.csrf_token, function(recv_data) {
-        	waiting_img.remove();
-        	show_products(recv_data);
+            waiting_img.remove();
+            show_products(recv_data);
     });
 
 }
