@@ -1,42 +1,43 @@
 /* categories draggable with easing */
 function category_draggable(obj) {
     var params = {
-	    // Kudos:
-	    // http://stackoverflow.com/questions/6602568/jquery-ui-draggable-deaccelerate-on-stop
-	    helper : function() {
-	        return $("<div>").css("opacity", 0);
-	    },
-	    drag : function(event, ui) {
-	        // the position of parent obviously has to be taken into account
-	        var pos = ui.helper.position().left - obj.parent().position().left;
-	        $(this).stop().animate({left : pos},
-	            window.data.t_easing,
-	            'easeOutCirc',
-	            function() {
-	                // check if this has scrolled past the last
-	                // (first) button
-	                var first_button = $(".category-button", obj).filter(":first");
-	                var last_button = $(".category-button", obj).filter(":last");
-	                var container = obj.parent();
-	
-	                // if the whole scroller's width is less than
-	                // container's, always slide it back to left
-	                // border
-	                if (first_button.position().left + last_button.position().left + last_button.outerWidth() < container .width()) {
-	                    first_button.parent().animate({left:0}, "fast");
-	                }
-	                else{
-	                    if(first_button.offset().left > container.offset().left){
-	                    	first_button.parent().animate({left:0}, "fast");
-	                    }
-	                    else if(last_button.offset().left+ last_button.outerWidth() < container.offset().left + container.width()) {
-	                    	first_button.parent().animate({left:-last_button.position().left + container.width() - last_button.outerWidth()}, "fast");
-	                    }
-	                }
-	            });
-	    	},
-	    axis : "x"
-    }
+        // Kudos:
+        // http://stackoverflow.com/questions/6602568/jquery-ui-draggable-deaccelerate-on-stop
+        helper: function () {
+            return $("<div>").css("opacity", 0);
+        },
+        drag: function (event, ui) {
+            // the position of parent obviously has to be taken into account
+            var pos = ui.helper.position().left - obj.parent().position().left;
+            $(this).stop().animate({left: pos},
+                window.data.t_easing,
+                'easeOutCirc',
+                function () {
+                    // check if this has scrolled past the last
+                    // (first) button
+                    var first_button = $(".category-button", obj).filter(":first");
+                    var last_button = $(".category-button", obj).filter(":last");
+                    var container = obj.parent();
+
+                    if(first_button.length < 1 || last_button.length < 1) return;
+
+                    // if the whole scroller's width is less than
+                    // container's, always slide it back to left border
+                    if (first_button.position().left + last_button.position().left + last_button.outerWidth() < container.width()) {
+                        first_button.parent().animate({left: 0}, "fast");
+                    }
+                    else {
+                        if (first_button.offset().left > container.offset().left) {
+                            first_button.parent().animate({left: 0}, "fast");
+                        }
+                        else if (last_button.offset().left + last_button.outerWidth() < container.offset().left + container.width()) {
+                            first_button.parent().animate({left: -last_button.position().left + container.width() - last_button.outerWidth()}, "fast");
+                        }
+                    }
+                });
+        },
+        axis: "x"
+    };
 
     obj.draggable(params);
 }
@@ -49,6 +50,7 @@ function create_button(cc) {
     	"class" : "category-button",
     	"data-id" : cc.id
     });
+
     if (cc.children.length > 0)
     	btn_div.addClass("category-button-subcategories");
     
@@ -78,6 +80,7 @@ function categories_home() {
     // remove stuff from parent and children div
     window.items.parents_div.empty();
     window.items.children_div.empty();
+    window.items.products_list.empty();
 
     // create children
     for (i = 0; i < c.length; i++) {
@@ -94,14 +97,12 @@ function scroll_into_view(btn) {
     var scroller = btn.parent();
     var frame = scroller.parent();
 
-    // scrolling left: if button.left is less than container.left, scroll it
-    // into view
+    // scrolling left: if button.left is less than container.left, scroll it into view
     if (btn.offset().left < frame.offset().left) {
     	scroller.animate({left : -btn.position().left});
     }
     else if(btn.offset().left + btn.outerWidth() > frame.offset().left + frame.width()) {
-    	// scrolling right: if button.left + button.width > container.left +
-    	// container.width, scroll it into view
+    	// scrolling right: if button.left + button.width > container.left + container.width, scroll it into view
     	scroller.animate({left:-btn.position().left + frame.width() - btn.outerWidth()});
     }
 }
@@ -183,9 +184,9 @@ function select_parent() {
     }
 
     last_btn.addClass("category-button-selected"); // add selected class
-    scroll_into_view(btn); // scroll it into view
+    get_category_products(last_btn.data().id);
+    scroll_into_view(last_btn); // scroll it into view
     window.items.focused = last_btn;
-
 }
 
 function select_child() {
@@ -204,11 +205,12 @@ function select_child() {
     
         // add current button to parents div
         btn = $(this).clone(true) // clone won't clone data and events unless
-                        		  // called with clone(true)
-        			 .unbind() // but we need to bind a different event to it
-    			 	 .click(select_parent).addClass("category-button-selected")
-    
+            // called with clone(true)
+            .unbind() // but we need to bind a different event to it
+            .click(select_parent).addClass("category-button-selected");
+
         window.items.parents_div.append(btn);
+        scroll_into_view(btn);
     
         // empty children div
         window.items.children_div.empty();
@@ -230,11 +232,12 @@ function select_child() {
     
         // select this button
         btn.addClass("category-button-selected");
-    
-        // get products
-        get_category_products(c.id);
+        scroll_into_view(btn);
     }
-    scroll_into_view(btn);
+
+    // get data for this category
+    get_category_products(c.id);
+
     window.items.focused = btn;
 }
 
@@ -248,12 +251,9 @@ function handle_keypress(e) {
     var code = (e.keyCode ? e.keyCode : e.which);
 
     if (!window.items.focused) {
-    window.items.focused = $(".category-button", window.items.children_div)
-        .filter(":last"); // assign the first item (only in the
-                    // beginning)
-    // if nothing is selected, any key must select something, so override
-    // 'code'
-    code = 39;
+        window.items.focused = $(".category-button", window.items.children_div).filter(":last"); // assign the first item (only in the beginning)
+        // if nothing is selected, any key must select something, so override 'code'
+        code = 39;
     }
 
     var item;
@@ -279,6 +279,9 @@ function handle_keypress(e) {
             $("#category_button_home").click();
         }
         else {
+            // show products
+            get_category_products(window.items.focused.data().id);
+
             // click the item before the last parent
             item = window.items.parents_div.children().filter(":last").prev();
             item.click();
@@ -299,11 +302,11 @@ function handle_keypress(e) {
         window.items.focused = item;
         scroll_into_view(item);
         break;
-    case 13: // enter and 
-    case 40: // down
+    case 13: // enter: same as down, but also show products from the selected category
+        case 40: // down
         window.items.focused.removeClass("category-button-focused");
         window.items.focused.click();
-    
+
         item = window.items.children_div.children().filter(":first");
         item.addClass("category-button-focused");
         window.items.focused = item;
@@ -314,25 +317,20 @@ function handle_keypress(e) {
 }
 
 function get_category_products(category_id) {
-    criteria = {
-    category_filter : category_id,
-    general_filter : ''
-    };
+    criteria = {category_filter:category_id, general_filter : ''};
 
     // clear the products div
     window.items.products_list.empty();
 
     // show the 'loading' image
-    waiting_img = $("<img>", {
-    src : window.data.loading
-    });
+    waiting_img = $("<img>", {src:window.data.loading});
     window.items.products_list.append(waiting_img);
 
     // get products list
     send_data(window.data.search_products_url, criteria,
         window.data.csrf_token, function(recv_data) {
-        waiting_img.remove();
-        show_products(recv_data);
-        });
+        	waiting_img.remove();
+        	show_products(recv_data);
+    });
 
 }

@@ -1,35 +1,41 @@
-/* products selector */
+/* products draggable with easing */
 function products_draggable(obj) {
-	var params = {
-		// Kudos:
-		// http://stackoverflow.com/questions/6602568/jquery-ui-draggable-deaccelerate-on-stop
-        helper: function(){
-            return $('<div></div>').css('opacity',0);
+    var params = {
+        // Kudos:
+        // http://stackoverflow.com/questions/6602568/jquery-ui-draggable-deaccelerate-on-stop
+        helper: function () {
+            return $("<div>").css("opacity", 0);
         },
-        drag: function(event, ui){
-            var p = ui.helper.position();
-            $(this).stop().animate(
-            		{ left: p.left },
-            		window.data.t_easing,
-            		'easeOutCirc',
-            		function(){
-        				// check if this has scrolled past the last button
-            			/*first_button = $(".category-button", obj).filter(":first").data().first;
-            			last_button = $(".category-button", obj).filter(":first").data().last;
-            			container = $("div#selection");
+        drag: function (event, ui) {
+            var pos = ui.helper.position().left - obj.parent().position().left;
+            $(this).stop().animate({left: pos},
+                window.data.t_easing,
+                'easeOutCirc',
+                function() {
+	                // see categories.js for more info
+	                var first_button = $("div.products-column", obj).filter(":first");
+	                var last_button = $("div.products-column", obj).filter(":last");
+	                var container = obj.parent();
 
-            			// either left border is inside the scroll area or 
-            			if(first_button.offset().left > container.offset().left || first_button.parent().outerWidth() < container.width()){
-            				first_button.parent().animate({left:0}, "fast");
-            			}
-            			else if(last_button.offset().left + last_button.outerWidth() < container.offset().left + container.width()){
-		    				first_button.parent().animate({left:-last_button.position().left + container.width() - last_button.outerWidth()}, "fast");
-            			}*/
+                    if(first_button.length < 1 || last_button.length < 1) return;
 
-            		});
+
+	                if (first_button.position().left + last_button.position().left + last_button.outerWidth() < container .width()) {
+	                    first_button.parent().animate({left:0}, "fast");
+	                }
+	                else{
+	                    if(first_button.offset().left > container.offset().left){
+	                    	first_button.parent().animate({left:0}, "fast");
+	                    }
+	                    else if(last_button.offset().left+ last_button.outerWidth() < container.offset().left + container.width()) {
+	                    	first_button.parent().animate({left:-last_button.position().left + container.width() - last_button.outerWidth()}, "fast");
+	                    }
+	                }
+	            });
+
         },
-        axis:"x"
-    }
+        axis: "x"
+    };
 
     obj.draggable(params);
 }
@@ -48,9 +54,10 @@ function products_selector(){
 	window.items.search_field.val()
 }
 
-function get_products(){
-	// send JSON: {general_filter:#search_products_filter.val()} to data['search_url']
-	var criteria = {general_filter:window.items.search_field.val()};
+function get_products(category_id){
+    // send JSON: {general_filter:#search_products_filter.val()} to data['search_url']
+    var criteria = {general_filter:window.items.search_field.val()};
+
 	send_data(window.data.search_products_url, criteria, window.data.csrf_token, show_products);
 }
 
@@ -63,7 +70,6 @@ function show_products(pl){
 	
 	// put products in the div:
 	// list them in columns, first down then right to next column
-	
 	var i, j, // loop indexes: i - current product index, j - index in current column
 		n, // number of products in one column
 		div_height, // height of #products div
@@ -88,12 +94,12 @@ function show_products(pl){
 	}
 	
 	// space product buttons evenly:
-	i = (div_height - n*p_size[1])/(n+1);
+	i = Math.floor((div_height - n*p_size[1])/(n+1));
 	$("div .product-button")
 		.css("margin-top", i.toString() + "px")
 		.css("margin-bottom", i.toString() + "px")
-		.css("margin-left", (i/2).toString() + "px")
-		.css("margin-right", (i/2).toString() + "px");
+		.css("margin-left", Math.floor((i/2).toString()) + "px")
+		.css("margin-right", Math.floor((i/2).toString()) + "px");
 }
 
 function product_button(product){
@@ -102,9 +108,13 @@ function product_button(product){
 	var div = $("<div>", {"class":"product-button"});
 	div.css({
 		width:window.data.product_button_size,
-		height:window.data.product_button_size,
+		height:window.data.product_button_size
 	});
-	if(product.image) backgroundImage:"url("+product.image+")"
+	if(product.image){
+        div.append($("<img>", {src:product.image, "class":"product-button-image"}));
+    }
+
+    info_div = $("<div>", {"class":"shade"});
 
 	var name = $("<p>", {"class":"product-button-name"});
 	name.append(product.name);
@@ -112,10 +122,11 @@ function product_button(product){
 	code.append(product.code);
 	var shortcut = $("<p>", {"class":"product-button-shortcut"});
 	shortcut.append(product.shortcut);
-	
-	div.append(name);
-	div.append(code);
-	div.append(shortcut);
-	
+
+    info_div.append(name);
+	info_div.append(code);
+	info_div.append(shortcut);
+    div.append(info_div);
+
 	return div;
 }

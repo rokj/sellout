@@ -24,17 +24,16 @@ div#children_scroll_outer, div#parents_scroll_outer{ /* category scrolling: oute
     height:34px;
     overflow:auto;
     overflow-x:hidden;
+    border:1px solid black;
 }
 
 div#children_scroll_inner, div#parents_scroll_inner{ /* scrolling: inner div */
     /* container for category-button */
     height:32px;
-    width:12800000px; /* this will hold 100,000 buttons */
+    width:1280000px; /* this will hold 10,000 buttons */
     overflow:hidden;
     float:left;
     position:relative;
-    padding-left:auto;
-    padding-right:auto;
 }
 
 div .category-button{ /* category selection buttons (the scrolling ones) */

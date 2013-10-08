@@ -233,6 +233,7 @@ def search_products(request, company):
     products = Product.objects.filter(company=c)
     
     criteria = JSON_parse(request.POST['data'])
+    print criteria
     
     # filter by: ("advanced" values in criteria dict)
     # name_filter
@@ -272,8 +273,10 @@ def search_products(request, company):
         
     # category_filter
     if criteria.get('category_filter'):
+        print 'filtering by category'
         filter_by_category = True
         products = products.filter(category__id__in=get_subcategories(int(criteria.get('category_filter')), data=[]))
+        print products
     else:
         filter_by_category = False
         
@@ -332,8 +335,11 @@ def search_products(request, company):
             f = f | Q(description__icontains=w)
         if not filter_by_category:
             # get the categories that match this string and search by their subcategories also
-            c = Category.objects.get(name__icontains=w)
-            f = f | Q(category__id__in=get_subcategories(c.id, data=[]))
+            try:
+                c = Category.objects.get(name__icontains=w)
+                f = f | Q(category__id__in=get_subcategories(c.id, data=[]))
+            except Category.DoesNotExist:
+                pass
 
         if f:
             products = products.filter(f)

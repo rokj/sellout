@@ -2,7 +2,7 @@
 /* products */
 /*          */
 div#products_scroll_outer{
-    
+    border: 1px solid black;
 }
 
 div#products_scroll_inner{
@@ -12,7 +12,6 @@ div#products_scroll_inner{
 
 div#products{
     position:relative;
-    border: 1px solid black;
     width:200000px; /* should be enough for cca. 5000 products*/
 }
 
@@ -21,25 +20,50 @@ div .products-column{
 }
 
 div.product-button{
+    position:relative; /* this is required for product image to work correctly (to position another div aboce it) */
     border:1px solid red;
-    padding:3px;
     /* do not set margin: it will be set by javascript every time products are rendered for even spacing */
     background-position:center;
     background-repeat:no-repeat;
+
+    z-index:1;
 }
 
-div.product-button-name{
-    background:solid white;
+img.product-button-image{
+    position:absolute; /* positioned above product-button */
+    top:0px;
+    left:0px;
+    max-width:100%;
+    max-height:100%;
+    z-index:2;
+}
+
+div.product-button div.shade{
+    position:absolute; /* positioned above product-button-image */
+    top:0px;
+    left:0px;
+    bottom:0px;
+    right:0px;
+    background-color: white;
+    opacity:0.8;
+    z-index: 3;
+}
+
+p.product-button-name{
+    font-size:10pt;
+    margin:0px;
+    padding:0px;
     font-weight:bolder;
-    color:white;
-    box-shadow: 10px 10px 5px #888888;
-
+    text-align: center;
 }
 
-div.product-button-code{
-    padding-top:auto;
-    padding-bottom:auto;
+p.product-button-code{
+    font-size:8pt;
+    text-align: center;
 }
-div.product-button-shortcut{
-    
+
+p.product-button-shortcut{
+    font-size:8pt;
+    text-align:center;
 }
+
