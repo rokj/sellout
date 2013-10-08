@@ -144,4 +144,6 @@ function select_product(){
     $(this).addClass("product-button-focused");
 
     select_category(null, $(this).data().category_id)
+    
+    // on click: add to bill
 }

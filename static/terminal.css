@@ -50,6 +50,7 @@ div#manage_bar .management-bar-button{
 }
 
 div#bill{
+border: 1px solid black;
     width:360px;
     position:absolute;
     top:35px;

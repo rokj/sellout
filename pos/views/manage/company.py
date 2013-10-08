@@ -12,7 +12,7 @@ from pos.views.util import JSON_response, JSON_parse, \
                            resize_image, validate_image, has_permission, \
                            no_permission_view
 from common import globals as g
-from common import unidecode
+import unidecode
 from common.functions import get_random_string
 
 import re
