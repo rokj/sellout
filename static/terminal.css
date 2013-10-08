@@ -49,7 +49,7 @@ div#manage_bar .management-bar-button{
     float:right;
 }
 
-div#bill{
+table#bill{
 border: 1px solid black;
     width:360px;
     position:absolute;

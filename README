@@ -1,4 +1,5 @@
 REQUIREMENTS/INSTALL:
+ - pip install unidecode (transliteration to ascii)
  - apt-get install memcached
  - pip install python-memcached
  - easy_install pillow (DO NOT install using pip - use easy_install)

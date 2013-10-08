@@ -15,6 +15,8 @@
 <script src="{% static 'widgets/products.js' %}"></script>
 <link type="text/css" rel="stylesheet" href="{% static 'widgets/products.css' %}" />
 
+<link type="text/css" rel="stylesheet" href="{% static 'widgets/bill.css' %}" />
+
 {% comment %} keyboard {% endcomment %}
 <link href="{% static 'keyboard/css/keyboard.css' %}" rel="stylesheet">
 <script src="{% static 'keyboard/js/jquery.keyboard.js' %}"></script>
@@ -85,24 +87,38 @@ $(document).ready(function() {
 </div>
 
 {% comment %} the bill {% endcomment %}
-<div id="bill">bill</div>
+{% comment %} bill header has the same layout as items and will be copied when adding new (items) {% endcomment %}
+<table id="bill">
+    <tr id="bill_header">
+        <td>
+            <p class="bill-item-name">{% trans 'Name' %}</p>
+            <p class="bill-item-code">{% trans 'Code' %}</p></td>
+        <td class="bill-item-qty-container">{% trans 'Qty' %}</td>
+        <td class="bill-item-price-container">{% trans 'Price' %} ({{ currency }})</td>
+        <td class="bill-item-tax-container">{% trans 'Tax' %} (%)</td>
+        <td class="bill-item-discount-container">{% trans 'Discount' %}</td>
+        <td class="bill-item-total-container">{% trans 'Total' %}</td>
+    </tr>
+</table>
 
 {% comment %} separator: draggable div for resizing bill/controls {% endcomment %}
 <div id="splitter"></div>
 
 {% comment %} product selector and other controls {% endcomment %}
-    
+
 <div id="selection">
     <div id="categories">
         <div id="parents">
             {% comment %} fixed buttons: favorites and 'home' {% endcomment %}
             <div class="category-button" id="category_button_favorites"><p class="category-name"><img class="category-button-icon" src="{% static 'graphics/favorites.png' %}" alt="favorites icon" />{% trans 'Favorites' %}</p></div>
             <div class="category-button" id="category_button_home"><p class="category-name"><img class="category-button-icon" src="{% static 'graphics/home.png' %}" alt="favorites icon" />{% trans 'All' %}</p></div>
-            
+            {% comment %} scrolling: parents {% endcomment %}
             <div id="parents_scroll_outer">
                 <div id="parents_scroll_inner"></div>
             </div>
         </div>
+        
+        {% comment %} scrolling: children {% endcomment %}
         <div id="children">
             <div id="children_scroll_outer">
                 <div id="children_scroll_inner"></div>

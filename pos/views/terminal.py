@@ -25,6 +25,8 @@ def terminal(request, company):
         'company':c,
         'title':c.name,
         'site_title':g.MISC['site_title'],
+        # some static properties
+        'currency':get_value(request.user, 'pos_currency'),
     }
     return render(request, 'pos/terminal.html', context)
 
@@ -53,7 +55,6 @@ def terminal_save(request, company):
     data = JSON_parse(request.POST.get('data'))
 
     if data.get('bill_width'):
-        print data.get('bill_width')
         set_value(request.user, 'pos_interface_bill_width', int(data['bill_width']))
 
     # save stuff from data to config
