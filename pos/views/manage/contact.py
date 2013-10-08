@@ -13,7 +13,11 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from pos.models import Company, Contact
 from common import globals as g
 from config.functions import get_date_format, get_value
-from pos.views.util import JSON_parse, JSON_error, has_permission, no_permission_view
+from pos.views.util import JSON_response, JSON_parse, JSON_error, has_permission, no_permission_view, format_date
+
+from rest_framework.decorators import api_view, permission_classes,\
+    authentication_classes
+from rest_framework.permissions import IsAuthenticated
 
 ################
 ### contacts ###
@@ -56,8 +60,8 @@ def contact_to_dict(user, c):
     # phone
     # vat
     ret = {}
+    
     ret['id'] = c.id
-    ret['name'] = c.name
     
     if c.company_name:
         ret['company_name'] = c.company_name
@@ -65,16 +69,16 @@ def contact_to_dict(user, c):
         ret['first_name'] = c.first_name
     if c.last_name:
         ret['last_name'] = c.last_name
-    if c.date_ob_birth:
-        ret['date_of_birth'] = c.date_of_birth
-    if c.street_adress:
+    if c.date_of_birth:
+        ret['date_of_birth'] = format_date(user, c.date_of_birth)
+    if c.street_address:
         ret['street_address'] = c.street_address
     if c.postcode:
         ret['postcode'] = c.postcode
     if c.city:
         ret['city'] = c.city
-    if c.coutnry:
-        ret['country'] = c.country
+    if c.country:
+        ret['country'] = c.country.name
     if c.email:
         ret['email'] = c.email
     if c.phone:
@@ -90,6 +94,8 @@ def web_list_contacts(request, company):
     return list_contacts(request, company)
 
 
+@api_view(['POST', 'GET'])
+@permission_classes((IsAuthenticated,))
 def mobile_list_contacts(request, company):
     return m_list_contacts(request, company)
 
@@ -120,8 +126,9 @@ def m_list_contacts(request, company):
     
     cs = []
     for c in contacts:
-        cs.appenct(contact_to_dict(request.user, c))
-    return cs
+        cs.append(contact_to_dict(request.user, c))
+    print cs
+    return JSON_response(cs)
 
 def list_contacts(request, company):
     c = get_object_or_404(Company, url_name=company)
