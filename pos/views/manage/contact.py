@@ -13,11 +13,13 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from pos.models import Company, Contact
 from common import globals as g
 from config.functions import get_date_format, get_value
-from pos.views.util import JSON_response, JSON_parse, JSON_error, has_permission, no_permission_view, format_date
+from pos.views.util import JSON_response, JSON_ok, JSON_parse, JSON_error, has_permission, no_permission_view, format_date,\
+    max_field_length
 
 from rest_framework.decorators import api_view, permission_classes,\
     authentication_classes
 from rest_framework.permissions import IsAuthenticated
+from config.models import Country
 
 ################
 ### contacts ###
@@ -42,6 +44,82 @@ class ContactFilterForm(forms.Form):
     type = forms.ChoiceField(required=True,
                              choices=g.CONTACT_TYPES)
     name = forms.CharField(required=False)
+
+def validate_contact(user, company, data):
+    # data format (*-required data):
+    # type*
+    # company_name* (only if Company)
+    # first_name* (only if Individual)
+    # last_name* (only if Individual)
+    # date_of_birth - list of discount ids (checked in create/edit_product)
+    # street_address
+    # postcode - id (checked in create/edit_product)
+    # city
+    # country
+    # email*
+    # phone
+    # vat
+    
+
+    def r(status, msg):
+        return {'status':status,
+            'data':data,
+            'message':msg}
+
+    # return:
+    # {status:true/false - if cleaning succeeded
+    #  data:cleaned_data - empty dict if status = false
+    #  message:error_message - empty if status = true
+    
+    type = data['type']
+    if not data['type']:
+        return r(False, _("No type specified"))
+    else:
+        # check credentials for Individual
+        if type == 'Individual':
+            if not data['first_name']:
+                return r(False, _("No first name"))
+            elif len(data['first_name']) > max_field_length(Contact, 'first_name'):
+                return r(False, _("First name too long"))
+            if not data['last_name']:
+                return r(False, _("No last name"))
+            elif len(data['last_name']) > max_field_length(Contact, 'last_name'):
+                return r(False, _("Last name too long"))
+        # check credentials for company
+        elif type == 'Company':
+            if not data['company']:
+                return r(False, _("No company name"))
+            elif len(data['company'] > max_field_length(Contact, 'company')):
+                return r(False, _("Last name too long"))
+    
+    try:
+        data['id'] = int(data['id'])
+    except:
+        # this shouldn't happen
+        return r(False, _("Wrong product id"))
+    
+    
+    if data['id'] != -1:
+        # check if contact belongs to this company and if he has the required permissions
+        try:
+            c = Contact.objects.get(id=data['id'], company=company)
+        except Contact.DoesNotExist:
+            return r(False, _("Cannot edit product: it does not exist"))
+        
+        if c.company != company or not has_permission(user, company, 'product', 'edit'):
+            return r(False, _("You have no permission to edit this product"))
+    
+    
+    # email: must exist
+    if not data['email']:
+        return r(False, _("No email entered"))
+    else:
+        if len(data['email']) > max_field_length(Contact, 'email'):
+            return r(False, _("Email too long"))
+
+    
+        
+    return {'status':True, 'data':data} 
 
 
 def contact_to_dict(user, c):
@@ -181,6 +259,57 @@ def list_contacts(request, company):
     return render(request, 'pos/manage/contacts.html', context) 
 
 @login_required
+def web_add_contact(request, company):
+    return add_contact(request, company)
+
+
+@api_view(['POST', 'GET'])
+@permission_classes((IsAuthenticated,))
+def mobile_add_contact(request, company):
+    return m_add_contact(request, company)
+
+def m_add_contact(request, company):
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+    
+    # sellers can add product
+    if not has_permission(request.user, c, 'product', 'edit'):
+        return JSON_error(_("You have no permission to add products"))
+
+    data = JSON_parse(request.POST['data'])
+    
+    # validate data
+    valid = validate_contact(request.user, c, data)
+    if not valid['status']:
+        return JSON_error(valid['message'])
+    data = valid['data']
+    
+    print ("bla")
+    
+    try:
+        country = Country.objects.get(two_letter_code=data['country'])
+    except Country.DoesNotExist:
+        return JSON_error(_("Country does not exist"))
+    contact = Contact(
+        company = c,
+        created_by = request.user,
+        type = data['type'],
+        first_name = data['first_name'],
+        last_name = data['last_name'],
+        #date_of_birth = data['date_of_birth'],
+        street_address = data['street_address'],
+        postcode = data['postcode'],
+        city = data['city'],
+        country = country,
+        email = data['email'],
+        phone = data['phone'],
+        #vat = data['vat']
+    )
+    contact.save()
+    return JSON_ok()
+
 def add_contact(request, company):
     # add a new contact
     c = get_object_or_404(Company, url_name=company)
