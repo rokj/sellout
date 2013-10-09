@@ -259,6 +259,30 @@ def list_contacts(request, company):
     return render(request, 'pos/manage/contacts.html', context) 
 
 @login_required
+def web_get_contact(request, company, contact_id):
+    return get_contact(request, company, contact_id)
+
+@api_view(['POST', 'GET'])
+@permission_classes((IsAuthenticated,))
+def mobile_get_contact(request, company, contact_id):
+    return get_contact(request, company, contact_id)
+
+def get_contact(request, company, contact_id):
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company doest not exist"))
+    
+    # permissions: needs to be guest to view contacts
+    if not has_permission(request.user, c, 'contact', 'list'):
+        return JSON_error(_("You have no permission to view products"))
+   
+    contact = get_object_or_404(Contact, id = contact_id, company = c)
+   
+    return JSON_response(contact_to_dict(request.user, contact))
+   
+   
+@login_required
 def web_add_contact(request, company):
     return add_contact(request, company)
 
@@ -309,6 +333,7 @@ def m_add_contact(request, company):
     )
     contact.save()
     return JSON_ok()
+
 
 def add_contact(request, company):
     # add a new contact

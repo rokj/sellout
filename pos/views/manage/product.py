@@ -212,7 +212,7 @@ def get_product(request, company, product_id):
     
     # permissions: needs to be guest to view products
     if not has_permission(request.user, c, 'product', 'list'):
-        return error(_("You have no permission to view products"))
+        return JSON_error(_("You have no permission to view products"))
     
     product = get_object_or_404(Product, id = product_id, company = c)
     
