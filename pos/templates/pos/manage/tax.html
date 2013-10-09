@@ -1,0 +1,16 @@
+{% extends "pos/manage/manage.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block manage_content %}
+
+{% for t in taxes %}
+  {{ t.amount }}
+{% endfor %}
+
+{% endblock %}
+
