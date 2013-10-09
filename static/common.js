@@ -40,4 +40,15 @@ function get_size(element){ // get computed element size before it's inserted in
     } finally {
         element.remove(); // and remove from DOM
     }
-};
+}
+
+function get_bignumber(string, separator){
+    // receives a string with number with decimal separator <separator> and returns BigNumber
+    // bignumber: https://github.com/MikeMcl/bignumber.js/
+    return BigNumber(string.replace(separator, "."))
+}
+
+function display_number(number, separator){
+    // receives a BigNumber as a parameter and returns a string with user specified decimal separator
+    return number.toString().replace('.', separator);
+}

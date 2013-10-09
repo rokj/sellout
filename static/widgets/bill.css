@@ -2,38 +2,27 @@
 /* bill */
 /*      */
 table#bill{
-    background-color:#dddddd;
     overflow:hidden;
 }
 
-tr#bill-item-header{
+tr#bill_header{
     border-bottom:3px solid black;
+    background-color:#dddddd;
 }
 
-td.bill-item-name-container{
+td.bill-item-name{
 }
-    p.bill-item-name{
-        margin-top:0px;
-        margin-bottom:3px;
-    }
-
-    p.bill-item-code{
-        font-size:12px;
-        font-family:"Courier New", "Courier", monospace;
-        margin-top:5px;
-        margin-bottom:0px;
-    }
 
 td.bill-item-qty-container{
-    width:60px;
+    width:70px;
 }
 
 td.bill-item-price-container{
-    width:50px;
+    width:70px;
 }
 
 td.bill-item-tax-container{
-    width:50px;
+    width:70px;
 }
 
 td.bill-item-discount-container{
@@ -41,5 +30,21 @@ td.bill-item-discount-container{
 }
 
 td.bill-item-total-container{
-    width:50px;
+    width:80px;
+}
+
+p.bill-title{
+    margin-top:0px;
+    margin-bottom:3px;
+}
+
+p.bill-subtitle{
+    font-size:12px;
+    font-family:"Courier New", "Courier", monospace;
+    margin-top:5px;
+    margin-bottom:0px;
+}
+
+input.qty{
+    width:30px;
 }

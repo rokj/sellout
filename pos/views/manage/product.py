@@ -20,7 +20,7 @@ from pos.views.manage.category import get_subcategories
 from common import globals as g
 from config.functions import get_value
 
-import decimal as d
+import decimal
 from sorl.thumbnail import get_thumbnail
 from rest_framework.decorators import api_view, permission_classes,\
     authentication_classes
@@ -115,10 +115,18 @@ def product_to_dict(user, product):
     
     # all discounts in a list
     discounts = {}
+    dsum_absolute = decimal.Decimal('0') # sum of all absolute discounts
+    dsum_percent = decimal.Decimal('0') # sum of all percentage discounts
     for d in product.discounts.all():
         discounts[str(d.id)] = discount_to_dict(user, d)
-
+        if d.type == 'Percent':
+            dsum_percent += d.amount
+        else:
+            dsum_absolute += d.amount
+        
     ret['discounts'] = discounts
+    ret['discount_percent'] = format_number(user, dsum_percent)
+    ret['discount_absolute'] = format_number(user, dsum_absolute)
     
     if product.image: # check if product's image exists
         # get the thumbnail
@@ -283,7 +291,7 @@ def search_products(request, company):
     # tax_filter
     if criteria.get('tax_filter'):
         #filter_by_tax = True
-        products = products.filter(tax = d.Decimal(criteria.get('tax_filter')))
+        products = products.filter(tax = decimal.Decimal(criteria.get('tax_filter')))
     else:
         pass
         #filter_by_tax = False
@@ -293,7 +301,7 @@ def search_products(request, company):
         try:
             products = products.filter( \
                 pk__in=Price.objects.filter( \
-                    unit_price=d.Decimal(\
+                    unit_price=decimal.Decimal(\
                         criteria.get('price_filter'))).order_by('-datetime_updated')[:1])
             #filter_by_price = True
         except Price.DoesNotExist:

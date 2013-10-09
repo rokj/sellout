@@ -10,12 +10,14 @@
 <script src="{% static 'terminal.js' %}"></script>
 <link type="text/css" rel="stylesheet" href="{% static 'terminal.css' %}" />
 {% comment %} widgets {% endcomment %}
-<script src="{% static 'widgets/categories.js' %}"></script>
+<script src="{% static 'widgets/categories.js' %}"></script> {% comment %} categories selector {% endcomment %}
 <link type="text/css" rel="stylesheet" href="{% static 'widgets/categories.css' %}" />
-<script src="{% static 'widgets/products.js' %}"></script>
+<script src="{% static 'widgets/products.js' %}"></script> {% comment %} products selector {% endcomment %}
 <link type="text/css" rel="stylesheet" href="{% static 'widgets/products.css' %}" />
-
+<script src="{% static 'widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 <link type="text/css" rel="stylesheet" href="{% static 'widgets/bill.css' %}" />
+
+<script src="{% static 'bignumber.js' %}"></script>
 
 {% comment %} keyboard {% endcomment %}
 <link href="{% static 'keyboard/css/keyboard.css' %}" rel="stylesheet">
@@ -34,42 +36,48 @@
 window.request = null; // the (possibly) pending ajax request
 
 $(document).ready(function() {
-	// first, get settings and other data
-	load_data("{% url 'pos:terminal_init' company.url_name %}");
+    {% comment %} see terminal.py to see what data is loaded {% endcomment %}
+    load_data("{% url 'pos:terminal_init' company.url_name %}");
     // add some other data
     window.data.categories_list = {}; // a dictionary of all categories by id
-	// stuff from template
-	window.data.spacer = "{% static 'graphics/spacer.png' %}"; // {% comment %} stuff that javascript can't see {% endcomment %}
-	window.data.loading = "{% static 'graphics/loading.gif' %}";
-	window.data.subcategory = "{% static 'graphics/subcategory.png' %}";
-	window.data.csrf_token = "{{csrf_token}}";
-	// ui settings
-	window.data.t = 100; // duration of show/hide events
-	window.data.t_easing = 200; // duration of easing functions (drag start/stop)
-	window.data.last_search = ""; // last searched query
-	window.data.search_update_interval = 1000; // checking if search query has changed
+    // stuff from template
+    window.data.spacer = "{% static 'graphics/spacer.png' %}"; // {% comment %} stuff that javascript can't see {% endcomment %}
+    window.data.loading = "{% static 'graphics/loading.gif' %}";
+    window.data.subcategory = "{% static 'graphics/subcategory.png' %}";
+    window.data.csrf_token = "{{csrf_token}}";
+    // ui settings
+    window.data.t = 100; // duration of show/hide events
+    window.data.t_easing = 200; // duration of easing functions (drag start/stop)
+    window.data.last_search = ""; // last searched query
+    window.data.search_update_interval = 1000; // checking if search query has changed
 
-	window.items = {
-    	focused:null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
-    	parents_div:$("div#parents_scroll_inner"),
-    	children_div:$("div#children_scroll_inner"),
-    	all_cat_button:$("div#category_button_home"),
-    	search_field:$("input#search_products_filter"),
-    	products_list:$("div#products")
-	}
-	
-	/* layout (change some things programmaticaly) */
-	init_layout();
+    window.items = {
+        focused:null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
+        parents_div:$("div#parents_scroll_inner"),
+        children_div:$("div#children_scroll_inner"),
+        all_cat_button:$("div#category_button_home"),
+        search_field:$("input#search_products_filter"),
+        products_list:$("div#products"),
+        bill_header:$("#bill_header"),
+        bill_items:$("#bill_items"),
+        
+    }
+    
+    // a list of products added to bill
+    window.products_in_bill = {}; // key:product_id, value: $(bill_item) // TODO: empty when starting a new bill
+    
+    /* layout (change some things programmaticaly) */
+    init_layout();
 
-	/* widgets */
-	categories_selector(); // categories selector (level 0 is the topmost category)
-	products_selector();
-	
-	/* handle the keyboard */
-	$(document).keypress(handle_keypress);
+    /* widgets */
+    categories_selector(); // categories selector (level 0 is the topmost category)
+    products_selector();
+    
+    /* handle the keyboard */
+    $(document).keypress(handle_keypress);
 
-	/* show the terminal */
-	$("#loading").remove();
+    /* show the terminal */
+    $("#loading").remove();
 });  
 </script>
 
@@ -89,17 +97,44 @@ $(document).ready(function() {
 {% comment %} the bill {% endcomment %}
 {% comment %} bill header has the same layout as items and will be copied when adding new (items) {% endcomment %}
 <table id="bill">
+    <thead>
     <tr id="bill_header">
-        <td>
-            <p class="bill-item-name">{% trans 'Name' %}</p>
-            <p class="bill-item-code">{% trans 'Code' %}</p></td>
-        <td class="bill-item-qty-container">{% trans 'Qty' %}</td>
-        <td class="bill-item-price-container">{% trans 'Price' %} ({{ currency }})</td>
-        <td class="bill-item-tax-container">{% trans 'Tax' %} (%)</td>
-        <td class="bill-item-discount-container">{% trans 'Discount' %}</td>
-        <td class="bill-item-total-container">{% trans 'Total' %}</td>
+        <td class="bill-item-name-container">
+            <p class="bill-title">{% trans 'Name' %}</p>
+            <p class="bill-subtitle">{% trans 'Code' %}</p></td>
+        <td class="bill-item-qty-container">
+            <p class="bill-title">{% trans 'Qty' %}</p>
+            <p class="bill-subtitle">[{% trans 'Unit' %}]</p></td>
+        <td class="bill-item-price-container">
+            <p class="bill-title">{% trans 'Price' %}</p>
+            <p class="bill-subtitle">[{{ currency }}]   </p></td>
+        <td class="bill-item-tax-container">
+            <p class="bill-title">{% trans 'Tax' %}</p>
+            <p class="bill-subtitle">[%]</p></td>
+        <td class="bill-item-discount-container">
+            <p class="bill-title">{% trans 'Discount' %}</p>
+            <p class="bill-subtitle">[%/{{ currency }}]</p>
+            </td>
+        <td class="bill-item-total-container">
+            <p class="bill-title">{% trans 'Total' %}</p></td>
+        <td class="bill-item-edit"></td> {% comment %} edit buttons {%  endcomment %}
+    </tr>
+    </thead>
+    
+    <tbody id="bill_items">
+        {% comment %} bill items come here {% endcomment %}
+    </tbody>
+</table>
+
+{% comment %} the grand total {% endcomment %}
+<table id="bill_total">
+    <tr>
+        <td>{% comment %}  {% endcomment %}
+            
+        </td>
     </tr>
 </table>
+
 
 {% comment %} separator: draggable div for resizing bill/controls {% endcomment %}
 <div id="splitter"></div>

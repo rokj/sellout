@@ -137,33 +137,33 @@ PERMISSIONS = { # 'chapters' that each group can view or manage
     # views (to prevent users exploring other companies' terminals):
     # manage, terminal
     'guest':{
-        'list':('company','category','discount','product','contact','bill',
+        'list':('company','category','discount','product','contact','bill','tax',
             'terminal',),
         'edit':(),
         },
     'cashier':{
-        'list':('company','category','discount','product','contact','bill','config',
+        'list':('company','category','discount','product','contact','bill','config','tax',
             'terminal',),
         'edit':('bill',
             'terminal','config',),
         },
     'seller':{
-        'list':('company','category','discount','product','contact','bill','config',
+        'list':('company','category','discount','product','contact','bill','config','tax',
             'terminal','manage',),
         'edit':('bill','product',
-            'terminal','manage','config',),
+            'terminal','manage','config','tax',),
         },
     'manager':{
-        'list':('company','category','discount','product','contact','bill','permission','config',
+        'list':('company','category','discount','product','contact','bill','permission','config','tax',
             'terminal','manage',),
-        'edit':('category','discount','product','contact','bill','config',
+        'edit':('category','discount','product','contact','bill','config','tax',
             'terminal','manage',),
         },
     'admin':{
         'list':('company','category','discount','product','contact','bill', 'permission','config',
-            'terminal','manage',),
+            'terminal','manage','tax',),
         'edit':('company','category','discount','product','contact','bill', 'permission','config',
-            'terminal','manage',),
+            'terminal','manage','tax',),
         },
 }
 

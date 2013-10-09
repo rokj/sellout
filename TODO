@@ -1,4 +1,8 @@
+- ! - management: enter base price OR price including tax
+- ! - tax groups
+- ! - tax rates
 - ! - tablet support
+
 - missing images (deleted from disk) trigger IOException
 - <[ CDATA for <javascript>
 - show/hide animations (jquery) (management only)

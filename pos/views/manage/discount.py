@@ -102,10 +102,6 @@ class DiscountForm(forms.ModelForm):
             return r['number']
     
     def clean_code(self):
-        
-        
-        
-
         code = self.cleaned_data['code']
         
         if 'code' in self.initial:

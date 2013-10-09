@@ -54,6 +54,9 @@ urlpatterns = patterns('',
     url(r_company + _('/manage/discount/add') + '/?$', manage.discount.add_discount, name='add_discount'),
     url(r_company + _('/manage/discount/edit') + '/(?P<discount_id>\d+)/?$', manage.discount.edit_discount, name='edit_discount'),
     url(r_company + _('/manage/discount/delete') + '/(?P<discount_id>\d+)/?$', manage.discount.delete_discount, name='delete_discount'),
+    # taxes: edit all taxes at once (there will never be more than a few tax rates in any country)
+    url(r_company + _('/manage/taxes') + '/?$', manage.misc.list_taxes, name='list_taxes'),
+    #url(r_company + _('/manage/taxes/edit') + '/?$', manage.misc.edit_taxes, name='edit_taxes'),
     # products
     url(r_company + _('/manage/products') + '/?$', manage.product.products, name='products'), # static (template) page
     url(r_company + r'/manage/json/products/search/?$', manage.product.search_products, name='search_products'), # product list (search) - json

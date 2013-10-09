@@ -146,4 +146,5 @@ function select_product(){
     select_category(null, $(this).data().category_id)
     
     // on click: add to bill
+    add_to_bill($(this).data());
 }

@@ -93,6 +93,13 @@ class Discount(SkeletonU):
     def __unicode__(self):
         return self.code + " " + self.description
 
+### tax rates ###
+class Tax(SkeletonU):
+    company = models.ForeignKey(Company, null=False, blank=False)
+    amount = models.DecimalField(_("Tax amount"), max_digits=g.DECIMAL['percentage_decimal_places']+3,
+                          decimal_places=g.DECIMAL['percentage_decimal_places'], null=False, blank=False)
+    name = models.CharField(_("Name"), max_length=15, null=True, blank=True)
+
 ### product ###
 # so far, one image per product is enough (pos != store)
 #class ProductImage(SkeletonU):

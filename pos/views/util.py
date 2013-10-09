@@ -102,10 +102,11 @@ def format_number(user, n):
         strips zeros, but leaves two numbers after decimal point even if they are zero
     """
     sep = get_value(user, 'pos_decimal_separator')
-    s = str(n).rstrip('0').replace('.', sep)
-    #                 add this many zeros to s
-    return s + "0" * (s.index(sep) - (len(s)-3))
-
+    
+    s = str(n.quantize(Decimal('1.00'))) # round to two decimal places
+    
+    return s.replace('.', sep)
+        
 def format_date(user, date):
     """ formats date for display according to user's settings """
     if not date:
