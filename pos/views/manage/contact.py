@@ -283,6 +283,30 @@ def list_contacts(request, company):
     return render(request, 'pos/manage/contacts.html', context) 
 
 @login_required
+def web_get_contact(request, company, contact_id):
+    return get_contact(request, company, contact_id)
+
+@api_view(['POST', 'GET'])
+@permission_classes((IsAuthenticated,))
+def mobile_get_contact(request, company, contact_id):
+    return get_contact(request, company, contact_id)
+
+def get_contact(request, company, contact_id):
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company doest not exist"))
+    
+    # permissions: needs to be guest to view contacts
+    if not has_permission(request.user, c, 'contact', 'list'):
+        return JSON_error(_("You have no permission to view products"))
+   
+    contact = get_object_or_404(Contact, id = contact_id, company = c)
+   
+    return JSON_response(contact_to_dict(request.user, contact))
+   
+   
+@login_required
 def web_add_contact(request, company):
     return add_contact(request, company)
 
@@ -334,6 +358,7 @@ def m_add_contact(request, company):
     contact.save()
     return JSON_ok()
 
+
 def add_contact(request, company):
     # add a new contact
     c = get_object_or_404(Company, url_name=company)
@@ -373,6 +398,57 @@ def add_contact(request, company):
     return render(request, 'pos/manage/contact.html', context)
 
 @login_required
+def web_edit_contact(request, company, contact_id):
+    return edit_contact(request, company, contact_id)
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_edit_contact(request, company, contact_id):
+    return m_edit_contact(request, company, contact_id)
+
+def m_edit_contact(request, company, contact_id):
+    # update existing contact
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+    
+    # sellers can edit product
+    if not has_permission(request.user, c, 'product', 'edit'):
+        return JSON_error(_("You have no permission to edit products"))
+
+    data = JSON_parse(request.POST['data'])
+    
+    try:
+        contact = Contact.objects.get(id=contact_id)
+    except:
+        return JSON_error(_("Contact doest not exist"))
+    
+    valid = validate_contact(request.user, c, data)
+    if not valid['status']:
+        return JSON_error(valid['messege'])
+    data = valid[data]
+    
+    contact.company = data['company']
+    contact.type = data['type']
+    contact.company_name = data['company_name']
+    contact.first_name = data['first_name']
+    contact.last_name = data['last_name']
+    contact.date_of_birth = data['date_of_birth']
+    contact.street_address = data['street_address']
+    contact.postcode = data['postcode']
+    contact.city = data['city']
+    contact.country = data['country']
+    contact.email = data['email']
+    contact.phone = data['phone']
+    contact.vat = data['vat']
+    
+    contact.save()
+    
+    return JSON_ok()
+    
+    
+
 def edit_contact(request, company, contact_id):
     # edit an existing contact
     c = get_object_or_404(Company, url_name=company)
@@ -419,6 +495,12 @@ def edit_contact(request, company, contact_id):
     return render(request, 'pos/manage/contact.html', context)
 
 @login_required
+def web_delete_contact(request, company, contact_id):
+    return delete_contact(request, company, contact_id)
+
+def mobile_delete_contact(request, company, contact_id):
+    return
+
 def delete_contact(request, company, contact_id):
     c = get_object_or_404(Company, url_name=company)
     
