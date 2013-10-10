@@ -37,27 +37,18 @@ class ContactForm(forms.ModelForm):
         if self.user:
             if 'date_of_birth' in self.initial:
                 self.initial['date_of_birth'] = format_date(self.user, self.initial['date_of_birth'])
+    
+    def clean_date_of_birth():
+        print 'cleaning'
+        return self.cleaned_data['date_of_birth']
 
-    """def clean_date_of_birth(self):
-        print 'cleaning date of birth'
-        r = parse_date(self.user, self.cleaned_data['date_of_birth'])
-        if not r['success']:
-            raise forms.ValidationError(_("Check date of birth"))
-        else:
-            return r['date']
-    """
-    def clean(self): # this obviously has to be called in order to trigger clean_date_of_birth (and other)
-        data = super(ContactForm, self).clean()
-        print data
-        return data
-        
     class Meta:
         model = Contact
+        date_of_birth = forms.CharField(max_length=11)    
         fields = ['type',
                   'company_name',
                   'first_name',
                   'last_name',
-                  'date_of_birth',
                   'street_address',
                   'postcode',
                   'city',
@@ -65,6 +56,7 @@ class ContactForm(forms.ModelForm):
                   'email',
                   'phone',
                   'vat']
+        
 
 class ContactFilterForm(forms.Form):
     type = forms.ChoiceField(required=True,
@@ -229,7 +221,6 @@ def m_list_contacts(request, company):
     cs = []
     for c in contacts:
         cs.append(contact_to_dict(request.user, c))
-    print cs
     return JSON_response(cs)
 
 def list_contacts(request, company):
@@ -340,6 +331,7 @@ def m_add_contact(request, company):
         country = Country.objects.get(two_letter_code=data['country'])
     except Country.DoesNotExist:
         return JSON_error(_("Country does not exist"))
+        
     contact = Contact(
         company = c,
         created_by = request.user,

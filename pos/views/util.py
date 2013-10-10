@@ -13,6 +13,7 @@ import json
 import Image # PIL or pillow must be installed
 import re
 from decimal import Decimal
+from datetime import datetime
 
 # requests and responses
 def error(request, message):
@@ -135,15 +136,13 @@ def parse_decimal(user, string, max_digits=None):
         return {'success':False, 'number':None}
 
 def parse_date(user, string):
-    print 'parse_date'
-    print get_date_format(user, 'python')
     """ parses date in string according to user selected preferences
         return dictionary with result status and parsed datetime:
         
         {'success':True/False, date:<num>/None}
     """
     try:
-        d = date.strptime(string, get_date_format(user, 'python'))
+        d = datetime.strptime(string, get_date_format(user, 'python'))
     except:
         return {'success':False, 'date':None}
    
