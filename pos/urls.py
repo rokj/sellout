@@ -42,13 +42,13 @@ urlpatterns = patterns('',
     # categories
     url(r_company + _('/manage/categories') + '/?$', manage.category.list_categories, name='list_categories'), # list of categories
     url(r_company + _('/manage/category/add') + '/(?P<parent_id>-?\d+)/?$', manage.category.web_add_category, name='add_category'), # add
-    url(r_company + _('/manage/category/edit') + '/(?P<category_id>\d+)/?$', manage.category.edit_category, name='edit_category'), # edit
+    url(r_company + _('/manage/category/edit') + '/(?P<category_id>\d+)/?$', manage.category.web_edit_category, name='edit_category'), # edit
     url(r_company + _('/manage/category/delete') + '/(?P<category_id>\d+)/?$', manage.category.delete_category, name='delete_category'), # delete
     # contacts
-    url(r_company + _('/manage/contacts') + '/?$', manage.contact.list_contacts, name='list_contacts'),
-    url(r_company + _('/manage/contact/add') + '/?$', manage.contact.add_contact, name='add_contact'),
-    url(r_company + _('/manage/contact/edit') + '/(?P<contact_id>\d+)/?$', manage.contact.edit_contact, name='edit_contact'),
-    url(r_company + _('/manage/contact/delete') + '/(?P<contact_id>\d+)/?$', manage.contact.delete_contact, name='delete_contact'),
+    url(r_company + _('/manage/contacts') + '/?$', manage.contact.web_list_contacts, name='list_contacts'),
+    url(r_company + _('/manage/contact/add') + '/?$', manage.contact.web_add_contact, name='add_contact'),
+    url(r_company + _('/manage/contact/edit') + '/(?P<contact_id>\d+)/?$', manage.contact.web_edit_contact, name='edit_contact'),
+    url(r_company + _('/manage/contact/delete') + '/(?P<contact_id>\d+)/?$', manage.contact.web_delete_contact, name='delete_contact'),
     # discounts
     url(r_company + _('/manage/discounts') + '/?$', manage.discount.list_discounts, name='list_discounts'),
     url(r_company + _('/manage/discount/add') + '/?$', manage.discount.add_discount, name='add_discount'),
