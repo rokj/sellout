@@ -7,10 +7,29 @@
 {% endblock %}
 
 {% block manage_content %}
+{% if edit_permission %}
+    {% comment %} the user has edit permission, show a tax edit form {% endcomment %}
+    <form method="post" action="{% url 'pos:list_taxes' company.url_name %}">
+        {% csrf_token %}
+        {% for t in taxes %}
+            <p>
+                <input type="text" id="tax_name_{{forloop.counter}}" name="tax_name_{{forloop.counter}}" />
+                <input type="text" id="tax_amount_{{forloop.counter}}" name="tax_amount_{{forloop.counter}}" />
+            </p>
+        {% endfor %}
+        {% comment %} show a new entry (can be duplicated) {% endcomment %}
+        <input type="text" name="tax_name_new" />
+        <input type="text" name="tax_amount_new" />
+        
+        <input type="submit" id="submit" value="{% trans 'submit' %}" />
+    </form>
+{% else %}
+    {% comment %} the user has no permissions, only show read-only table {% endcomment %}
+    {% for t in taxes %}
+        {{ t.amount }}
+    {% endfor %}
+{% endif %}
 
-{% for t in taxes %}
-  {{ t.amount }}
-{% endfor %}
 
 {% endblock %}
 

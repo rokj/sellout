@@ -2,7 +2,8 @@
 - ! - tax groups
 - ! - tax rates
 - ! - tablet support
-
+- ! - custom decimal separator on all management forms
+- ! - add 'state' to contact fields
 - missing images (deleted from disk) trigger IOException
 - <[ CDATA for <javascript>
 - show/hide animations (jquery) (management only)

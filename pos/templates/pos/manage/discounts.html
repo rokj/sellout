@@ -20,6 +20,8 @@ $(document).ready(function(){
 {{ filter_form.as_p }}
 {% csrf_token %}
 <input type="submit" value="submit" />
+    {% comment %} only display if search results are being displayed (it's just a link back to 'discounts') {% endcomment %}
+    {% if results_display %}<a href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Clear results' %}</a>{% endif %}
 </form>
 
 {% comment %} add contact {% endcomment %}

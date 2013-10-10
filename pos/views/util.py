@@ -134,6 +134,21 @@ def parse_decimal(user, string, max_digits=None):
     except:
         return {'success':False, 'number':None}
 
+def parse_date(user, string):
+    print 'parse_date'
+    print get_date_format(user, 'python')
+    """ parses date in string according to user selected preferences
+        return dictionary with result status and parsed datetime:
+        
+        {'success':True/False, date:<num>/None}
+    """
+    try:
+        d = date.strptime(string, get_date_format(user, 'python'))
+    except:
+        return {'success':False, 'date':None}
+   
+    return {'success':True, 'date':d}
+
 # permissions: cached
 def permission_cache_key(user, company):
         return "permission_" + str(user.id) + "_" + str(company.id)
