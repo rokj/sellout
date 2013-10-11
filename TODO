@@ -1,8 +1,7 @@
 - ! - management: enter base price OR price including tax
-- ! - tax groups
 - ! - tax rates
 - ! - tablet support
-- ! - custom decimal separator on all management forms
+
 - ! - add 'state' to contact fields
 - missing images (deleted from disk) trigger IOException
 - <[ CDATA for <javascript>
@@ -26,6 +25,7 @@
 - DONE datepicker for date inputs
 - DONE product.shop_code = unique - test for this and return error if not
 - DONE updated_by for update views (changes made in common.Skeleton)
+- DONE ! - custom decimal separator on all management forms
 
 SECURITY:
  - DONE login_required

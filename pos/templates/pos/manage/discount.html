@@ -23,6 +23,7 @@ $(document).ready(function(){
     <form action="{% url 'pos:edit_discount' company.url_name discount_id %}" method="post">
 {% endif %}
     {% csrf_token %}
+    {{ form.non_field_errors }}
     {% for field in form %}
         <div class="form-field-container" id="{{field.auto_id}}_container">
         {% if field.errors %}
