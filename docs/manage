@@ -1,0 +1,8 @@
+DISCOUNTS:
+Validation:
+    validate_discount() - checks for input errors
+    is_discount_active() - returns true if discount is active (by 'active' field) and is inside its date boundaries
+    error reporting in submitted forms - 
+        view sends a tuple ('field_name', 'error message') (created by validate_discount()) to template;
+        template checks for that and if there are any, shows them
+

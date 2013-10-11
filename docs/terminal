@@ -1,0 +1,10 @@
+KEY BINDINGS
+ - left, right: select neighbor items
+ - up:
+   - focus on category selector: go to parent category
+   - focus on product selector: select product above (or jump to bottom)
+ - down:
+   - focus on category selector: 
+     - select the first child of current category, or (if category has no more children)
+     - list the products and 
+   - focus on product selector: select product below (or jump to top)
