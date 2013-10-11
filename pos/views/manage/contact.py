@@ -14,7 +14,7 @@ from pos.models import Company, Contact
 from common import globals as g
 from config.functions import get_date_format, get_value
 from pos.views.util import JSON_response, JSON_ok, JSON_parse, JSON_error, has_permission, no_permission_view, format_date,\
-    max_field_length
+    max_field_length, parse_date
 
 from rest_framework.decorators import api_view, permission_classes,\
     authentication_classes
@@ -25,13 +25,30 @@ from config.models import Country
 ### contacts ###
 ################
 class ContactForm(forms.ModelForm):
+    # override the default field display: see discount.DiscountForm for more info 
+    # date_of_birth is the only field that needs to be re-formatted
+    def __init__(self, *args, **kwargs):
+        if 'user' in kwargs:
+            self.user = kwargs['user']
+            del kwargs['user']
+        
+        super(ContactForm, self).__init__(*args, **kwargs)
+        
+        if self.user:
+            if 'date_of_birth' in self.initial:
+                self.initial['date_of_birth'] = format_date(self.user, self.initial['date_of_birth'])
+    
+    def clean_date_of_birth():
+        print 'cleaning'
+        return self.cleaned_data['date_of_birth']
+
     class Meta:
         model = Contact
+        date_of_birth = forms.CharField(max_length=11)    
         fields = ['type',
                   'company_name',
                   'first_name',
                   'last_name',
-                  'date_of_birth',
                   'street_address',
                   'postcode',
                   'city',
@@ -39,6 +56,7 @@ class ContactForm(forms.ModelForm):
                   'email',
                   'phone',
                   'vat']
+        
 
 class ContactFilterForm(forms.Form):
     type = forms.ChoiceField(required=True,
@@ -59,7 +77,6 @@ def validate_contact(user, company, data):
     # email*
     # phone
     # vat
-    
 
     def r(status, msg):
         return {'status':status,
@@ -91,7 +108,7 @@ def validate_contact(user, company, data):
                 return r(False, _("No company name"))
             elif len(data['company'] > max_field_length(Contact, 'company')):
                 return r(False, _("Last name too long"))
-    
+    # ALO NAPISAL SEM NOVO F00NKCIJO, parse_date(), za preverjat datum, ofkors.
     try:
         data['id'] = int(data['id'])
     except:
@@ -108,7 +125,6 @@ def validate_contact(user, company, data):
         
         if c.company != company or not has_permission(user, company, 'product', 'edit'):
             return r(False, _("You have no permission to edit this product"))
-    
     
     # email: must exist
     if not data['email']:
@@ -205,7 +221,6 @@ def m_list_contacts(request, company):
     cs = []
     for c in contacts:
         cs.append(contact_to_dict(request.user, c))
-    print cs
     return JSON_response(cs)
 
 def list_contacts(request, company):
@@ -316,6 +331,7 @@ def m_add_contact(request, company):
         country = Country.objects.get(two_letter_code=data['country'])
     except Country.DoesNotExist:
         return JSON_error(_("Country does not exist"))
+        
     contact = Contact(
         company = c,
         created_by = request.user,
@@ -353,7 +369,7 @@ def add_contact(request, company):
 
     if request.method == 'POST':
         # submit data
-        form = ContactForm(request.POST)
+        form = ContactForm(request.POST, user=request.user)
         
         if form.is_valid():
             # created_by and company_id
@@ -367,7 +383,7 @@ def add_contact(request, company):
             
             return redirect('pos:list_contacts', company=c.url_name)
     else:
-        form = ContactForm()
+        form = ContactForm(user=request.user)
         
     context['form'] = form
     
@@ -450,7 +466,7 @@ def edit_contact(request, company, contact_id):
         
     if request.method == 'POST':
         # submit data
-        form = ContactForm(request.POST, instance=contact)
+        form = ContactForm(request.POST, instance=contact, user=request.user)
         
         if form.is_valid():
             # created_by and company_id
@@ -464,7 +480,7 @@ def edit_contact(request, company, contact_id):
             
             return redirect('pos:list_contacts', company=c.url_name)
     else:
-        form = ContactForm(instance=contact)
+        form = ContactForm(instance=contact, user=request.user)
         
     context['form'] = form
     

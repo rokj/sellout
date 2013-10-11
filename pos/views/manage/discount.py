@@ -90,6 +90,24 @@ class DiscountForm(forms.ModelForm):
     user = None
     company = None
     
+    # override amount and date fields for custom field formatting
+    # when initializing DiscountForm, a 'user' parameter is required
+    def __init__(self, *args, **kwargs):
+        if 'user' in kwargs:
+            self.user = kwargs['user']
+            # if 'user' is passed to the original __init__ function, it will complain
+            del kwargs['user']
+        
+        super(DiscountForm, self).__init__(*args, **kwargs)
+        
+        if self.user:
+            if 'amount' in self.initial:
+                self.initial['amount'] = format_number(self.user, self.initial['amount'])
+            if 'start_date' in self.initial:
+                self.initial['start_date'] = format_date(self.user, self.initial['start_date'])
+            if 'end_date' in self.initial:
+                self.initial['end_date'] = format_date(self.user, self.initial['end_date'])
+
     # override the amount widget with plain text and clean manually;
     # this is to support arbitrary decimal separators
     amount = forms.CharField(max_length = g.DECIMAL['currency_digits'])
@@ -135,6 +153,20 @@ class DiscountFilterForm(forms.Form):
     end_date = forms.DateField(required=False)
     active = forms.NullBooleanField(required=False)
 
+    # custom display of 'custom-formatted' fields: see __init__ for DiscountForm    
+    def __init__(self, *args, **kwargs):
+        if 'user' in kwargs:
+            self.user = kwargs['user']
+            del kwargs['user']
+        
+        super(DiscountFilterForm, self).__init__(*args, **kwargs)
+        
+        if self.user:
+            if 'start_date' in self.initial:
+                self.initial['start_date'] = format_date(self.user, self.initial['start_date'])
+            if 'end_date' in self.initial:
+                self.initial['end_date'] = format_date(self.user, self.initial['end_date'])
+
 @login_required
 def list_discounts(request, company):
     c = get_object_or_404(Company, url_name=company)
@@ -147,7 +179,7 @@ def list_discounts(request, company):
     
     # show the filter form
     if request.method == 'POST':
-        form = DiscountFilterForm(request.POST)
+        form = DiscountFilterForm(request.POST, user=request.user)
         
         if form.is_valid():
             # filter by whatever is in the form: description
@@ -169,9 +201,12 @@ def list_discounts(request, company):
             # active
             if form.cleaned_data.get('active') is not None:
                 discounts = discounts.filter(active=form.cleaned_data['active'])
+                
+            results_display = True # search results are being displayed
             
     else:
-        form = DiscountFilterForm()
+        form = DiscountFilterForm(user=request.user)
+        results_display = False # no results are being displayed, so don't show the 'clear results' link in template
         
     # show discounts
     paginator = Paginator(discounts, get_value(request.user, 'pos_discounts_per_page'))
@@ -193,6 +228,7 @@ def list_discounts(request, company):
         'site_title':g.MISC['site_title'],
         'date_format_django':get_date_format(request.user, 'django'),
         'date_format_jquery':get_date_format(request.user, 'jquery'),
+        'results_display':results_display,
     }
 
     return render(request, 'pos/manage/discounts.html', context) 
@@ -218,8 +254,7 @@ def add_discount(request, company):
 
     if request.method == 'POST':
         # submit data
-        form = DiscountForm(request.POST)
-        form.user = request.user
+        form = DiscountForm(request.POST, user=request.user)
         form.company = c
         
         if form.is_valid():
@@ -234,8 +269,7 @@ def add_discount(request, company):
             
             return redirect('pos:list_discounts', company=c.url_name)
     else:
-        form = DiscountForm()
-        form.user = request.user
+        form = DiscountForm(user=request.user)
         form.company = c
         
     context['form'] = form
@@ -271,8 +305,7 @@ def edit_discount(request, company, discount_id):
 
     if request.method == 'POST':
         # submit data
-        form = DiscountForm(request.POST, instance=discount)
-        form.user = request.user
+        form = DiscountForm(request.POST, instance=discount, user=request.user)
         form.company = c
         
         if form.is_valid():
@@ -287,8 +320,7 @@ def edit_discount(request, company, discount_id):
             
             return redirect('pos:list_discounts', company=c.url_name)
     else:
-        form = DiscountForm(instance=discount)
-        form.user = request.user
+        form = DiscountForm(user=request.user, instance=discount)
         form.company = c
         
     context['form'] = form
