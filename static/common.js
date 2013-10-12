@@ -42,6 +42,17 @@ function get_size(element){ // get computed element size before it's inserted in
     }
 }
 
+function check_number(string, separator){
+    // returns true if string parsed to BigNumber successfully, or false otherwise
+    try{
+        get_bignumber(string, separator);
+        return true;
+    }
+    catch (error) {
+        return false;
+    }
+}
+
 function get_bignumber(string, separator){
     // receives a string with number with decimal separator <separator> and returns BigNumber
     // bignumber: https://github.com/MikeMcl/bignumber.js/

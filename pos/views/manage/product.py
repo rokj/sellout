@@ -1,8 +1,3 @@
-# author: nejc jurkovic
-# date: 9. 8. 2013
-#
-# Views for managing POS data: product
-
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -29,9 +24,6 @@ from rest_framework.permissions import IsAuthenticated
 ###############
 ## products ###
 ###############
-
-#
-
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_JSON_units(request, company):
@@ -241,7 +233,6 @@ def search_products(request, company):
     products = Product.objects.filter(company=c)
     
     criteria = JSON_parse(request.POST['data'])
-    print criteria
     
     # filter by: ("advanced" values in criteria dict)
     # name_filter

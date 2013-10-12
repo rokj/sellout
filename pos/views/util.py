@@ -36,8 +36,11 @@ def JSON_ok():
     return JSON_response({'status':'ok'})
 
 def JSON_parse(string_data):
-    return json.loads(string_data)
-
+    try:
+        return json.loads(string_data)
+    except:
+        return None
+        
 # misc
 def max_field_length(model, field_name):
     return model._meta.get_field(field_name).max_length
