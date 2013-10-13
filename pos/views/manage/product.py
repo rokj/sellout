@@ -56,7 +56,7 @@ def products(request, company):
         'name':max_field_length(Product, 'name'),
         'tax':g.DECIMAL['percentage_decimal_places'] + 4, # up to '100.' + 'decimal_digits'
     }
-
+    
     context = {
         'company':c, 
         'title':_("Products"),
@@ -65,7 +65,6 @@ def products(request, company):
         'add_url':reverse('pos:web_create_product', args=[c.url_name]),
         # config variables 
         'can_edit':has_permission(request.user, c, 'product', 'edit'),
-        'default_tax':get_value(request.user, 'pos_default_tax'),
         'currency':get_value(request.user, 'pos_currency'),
         # images
         'image_dimensions':g.IMAGE_DIMENSIONS['product'],
