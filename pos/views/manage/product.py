@@ -490,8 +490,8 @@ def validate_product(user, company, data):
     data['tax'] = tax
     
     # stock
-    if len(data['stock']) > g.DECIMAL['quantity_digits']+1:
-        return r(False, _("Stock too long"))
+    if len(data['stock']) > g.DECIMAL['quantity_digits']:
+        return r(False, _("Stock number too big"))
     
     ret = parse_decimal(user, data['stock'],
         g.DECIMAL['quantity_digits']-g.DECIMAL['quantity_decimal_places']-1)

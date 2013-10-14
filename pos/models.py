@@ -37,10 +37,11 @@ class Company(SkeletonU):
     class Meta:
         verbose_name_plural = _("Companies")
 
-class CompanyAttribute(SkeletonU):
-    company = models.ForeignKey(Company)
-    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
-    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
+# not in use at the moment
+#class CompanyAttribute(SkeletonU):
+#    company = models.ForeignKey(Company)
+#    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
+#    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
     
     def __unicode__(self):
         return self.company.name + ": " + self.attribute_name + " = " + self.attribute_value
@@ -66,10 +67,11 @@ class Category(SkeletonU):
     #    from easy_thumbnails.files import get_thumbnailer
     #    get_thumbnailer(self.image)[size].url
 
-class CategoryAttribute(SkeletonU):
-    category = models.ForeignKey(Category)
-    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
-    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
+# not in use at the moment
+#class CategoryAttribute(SkeletonU):
+#    category = models.ForeignKey(Category)
+#    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
+#    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
     
     def __unicode(self):
         return self.category.name + ": " + self.attribute_name + " = " + self.attribute_value
@@ -149,10 +151,11 @@ class Product(ProductAbstract):
     class Meta:
         abstract = False
 
-class ProductAttribute(SkeletonU): # currently not in plan
-    product = models.ForeignKey(Product, null=False, blank=False)
-    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
-    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
+# not in use at the moment
+#class ProductAttribute(SkeletonU): # currently not in plan
+#    product = models.ForeignKey(Product, null=False, blank=False)
+#    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
+#    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
 
 ### prices ###
 class Price(SkeletonU):
@@ -195,11 +198,12 @@ class Contact(SkeletonU):
             return "Individual: " + self.first_name + " " + self.last_name
         else:
             return "Company: " + self.company_name
-    
-class ContactAttribute(SkeletonU):
-    contact = models.ForeignKey(Contact)
-    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
-    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
+ 
+# not in use at the moment   
+#class ContactAttribute(SkeletonU):
+#    contact = models.ForeignKey(Contact)
+#    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
+#    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
     
     def __unicode__(self):
         return str(self.contact) + ": " + self.attribute_name + " = " + self.attribute_value

@@ -134,7 +134,10 @@ def parse_decimal(user, string, max_digits=None):
     
     # check for entries too big
     if max_digits:
-        if string.find('.') > max_digits:
+        if string.find('.') == -1: # it's an integer, it has no 'decimal point'
+            if len(string) > max_digits:
+                return {'success':False, 'number':None}
+        if string.find('.') > max_digits: # it's a float, the integer part shouldn't be longer than max_digits
             return {'success':False, 'number':None}
     
     try:

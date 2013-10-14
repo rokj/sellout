@@ -1,5 +1,5 @@
 - ! - check if there are taxes and categories entered (?) before adding products
-- ! - pagination of returned products
+- ! - pagination (offset) of returned products ("More" button)
 - ! - tablet support
 - <input> text field lengths in templates (from max_field_length) on all JSON 'forms'
 - missing images (deleted from disk) trigger IOException
