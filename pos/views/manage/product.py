@@ -4,13 +4,14 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
 
-from pos.models import Company, Category, Discount, Product, Price
+from pos.models import Company, Category, Discount, Product, Price, Tax
 from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, image_dimensions, \
                            image_from_base64, max_field_length
 from pos.views.manage.discount import discount_to_dict
 from pos.views.manage.category import get_subcategories
+from pos.views.manage.tax import get_default_tax
 
 from common import globals as g
 from config.functions import get_value
@@ -43,7 +44,7 @@ def JSON_units(request, company):
 def products(request, company):
     c = get_object_or_404(Company, url_name = company)
     
-    # needs to be ay least guest to view products
+    # needs to be at least guest to view products
     if not has_permission(request.user, c, 'product', 'list'):
         return no_permission_view(request, c, _("view products"))
     
@@ -71,7 +72,13 @@ def products(request, company):
         'image_upload_formats':g.MISC['image_upload_formats'], # what can be uploaded
         'max_upload_size':round(g.MISC['max_upload_image_size']/2**20, 2), # show in megabytes
         'max_upload_size_bytes':g.MISC['max_upload_image_size'], # bytes for javascript
+        # html fields
         'field_lengths':lengths,
+        'separator':get_value(request.user, 'pos_decimal_separator'),
+        # numbers etc
+        'default_tax_id':get_default_tax(request.user, c)['id'],
+        'min_decimal_places':2,
+        'max_decimal_places':g.DECIMAL['currency_decimal_places'],
     }
     return render(request, 'pos/manage/products.html', context)
 
@@ -125,6 +132,10 @@ def product_to_dict(user, product):
             ret['image'] = get_thumbnail(product.image, image_dimensions('product')[2]).url
         except:
             pass
+    
+    # tax: it's a not-null foreign key
+    ret['tax_id'] = product.tax.id
+    ret['tax'] = format_number(user, product.tax.amount)
             
     # category?
     if product.category:
@@ -146,8 +157,6 @@ def product_to_dict(user, product):
     if product.unit_type:
         ret['unit_type'] = product.unit_type
         ret['unit_type_display'] = product.get_unit_type_display()
-    if product.tax:
-        ret['tax'] = format_number(user, product.tax)
     if product.stock:
         ret['stock'] = format_number(user, product.stock)
     
@@ -271,10 +280,8 @@ def search_products(request, company):
         
     # category_filter
     if criteria.get('category_filter'):
-        print 'filtering by category'
         filter_by_category = True
         products = products.filter(category__id__in=get_subcategories(int(criteria.get('category_filter')), data=[]))
-        print products
     else:
         filter_by_category = False
         
@@ -410,12 +417,10 @@ def validate_product(user, company, data):
     data['name'] = data['name'].strip()
     
     # price
-    # replace decimal separator with dot
     if len(data['price']) > g.DECIMAL['currency_digits']+1:
         return r(False, _("Price too long"))
     
-    ret = parse_decimal(user, data['price'],
-        g.DECIMAL['currency_digits'] -g.DECIMAL['currency_decimal_places']-1)
+    ret = parse_decimal(user, data['price'], g.DECIMAL['currency_digits'])
     if not ret['success']:
         return r(False, _("Check price notation"))
     data['price'] = ret['number']
@@ -475,11 +480,14 @@ def validate_product(user, company, data):
     data['description'] = data['description'].strip()
     data['private_notes'] = data['private_notes'].strip()
     
-    ret = parse_decimal(user, data['tax'], 3)
-    if not ret['success']:
-        return r(False, _("Check tax notation"))
-    else:
-        data['tax'] = ret['number']
+    # tax: id should be among tax rates for this company
+    try:
+        tax = Tax.objects.get(id=int(data['tax_id']))
+    except:
+        return r(False, _("Invalid tax rate"))
+
+    del data['tax_id']
+    data['tax'] = tax
     
     # stock
     if len(data['stock']) > g.DECIMAL['quantity_digits']+1:
@@ -619,7 +627,7 @@ def edit_product(request, company, product_id):
 
     # update discounts: add missing
     # anything that is left in data['discounts'] must be added
-    if data.get('discoints'):
+    if data.get('discounts'):
         for d in data['discounts']:
             try:
                 discount = Discount.objects.get(id=int(d))

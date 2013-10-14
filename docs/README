@@ -9,6 +9,12 @@ REQUIREMENTS/INSTALL:
  - pip install unidecode (unicode to ascii module) (install not needed, 'bundled' in sources)
  - pip install django-tastypie (also pip install django-tastypie --upgrade)
 
+AFTER INSTALL:
+ - fill countries:
+   ~$ python manage.py shell
+   >>> from config import countries
+   >>> countries.fill_countries()
+
 CODING STYLE: (word separators in variable/function/object names):
  - underscore _:
    - python functions

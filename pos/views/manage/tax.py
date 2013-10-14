@@ -25,6 +25,24 @@ def tax_to_dict(user, tax):
         'default':tax.default,
     }
 
+def get_default_tax(user, company):
+    """ returns the default tax id and formatted value in dictionary: {id:<id>, amount:<amount>} 
+        if there's no default tax, return the first one
+        if there's no taxes at all, return zeros
+        if there are many default taxes, return the one with the lowest id """
+    try:
+        # the 'normal' scenario: there's one default tax
+        tax = Tax.objects.get(company=company, default=True)
+    except Tax.MultipleObjectsReturned: # more than one default tax, use the first by id
+        tax = Tax.objects.filter(company=company, default=True).order_by('id')[0]
+    except Tax.DoesNotExist: # no default tax specified, use the first by id
+        try:
+            tax = Tax.objects.filter(company=company).order_by('id')[0]
+        except: # even that doesn't work
+            return {'id':0,'amount':0}
+
+    return {'id':tax.id, 'amount':format_number(user, tax.amount)}
+
 def validate_tax(user, tax):
     # validate_product, validate_discount, validate_contact for more info
     def err(msg):
@@ -90,7 +108,6 @@ def get_taxes(request, company):
     for t in taxes:
         r.append(tax_to_dict(request.user, t))
     
-    print r
     return JSON_response(r)
     
 

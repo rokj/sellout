@@ -201,7 +201,7 @@ def register_company(request):
             # continue with registration
             
             # TODO: add 'admin' permissions for newly registered company to request.user
-            return redirect('pos:home', company=form.cleaned_data['url_name']) # home page
+            return redirect('pos:terminal', company=form.cleaned_data['url_name']) # home page
     else:
         # show an empty form
         form = CompanyForm()

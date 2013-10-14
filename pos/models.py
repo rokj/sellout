@@ -124,8 +124,7 @@ class ProductAbstract(SkeletonU):
     unit_type = models.CharField(_("Product unit type"), max_length=15,
                                     choices = g.UNITS, blank=False, null=False, default=g.UNITS[0][0])
     # price is in a separate model
-    tax = models.DecimalField(_("Tax amount"), max_digits=g.DECIMAL['percentage_decimal_places']+3,
-                              decimal_places=g.DECIMAL['percentage_decimal_places'], null=False, blank=False)
+    tax = models.ForeignKey(Tax, null=False, blank=False)
     
     class Meta:
         abstract = True
@@ -185,6 +184,7 @@ class Contact(SkeletonU):
     street_address = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
     postcode = models.CharField(_("Post code/ZIP"), max_length=12, null=True, blank=True)
     city = models.CharField(_("City"), max_length=50, null=True, blank=True)
+    state = models.CharField(_("State"), max_length=50, null=True, blank=True)
     country = models.ForeignKey(Country) 
     email = models.CharField(_("E-mail address"), max_length=255, blank=False, null=False)
     phone = models.CharField(_("Telephone number"), max_length=30, blank=True, null=True)

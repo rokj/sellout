@@ -41,6 +41,7 @@ class ContactForm(forms.Form):
     street_address = forms.CharField(required=False, max_length=max_field_length(Contact, 'street_address'))
     postcode = forms.CharField(required=False, max_length=max_field_length(Contact, 'postcode'))
     city = forms.CharField(required=False, max_length=max_field_length(Contact, 'city'))
+    state = forms.CharField(required=False, max_length=max_field_length(Contact, 'state'))
     country = forms.ChoiceField(required=False, choices=countries)
     # except that email is required in any case
     email = forms.EmailField(required=True, max_length=max_field_length(Contact, 'email'))
@@ -166,7 +167,11 @@ def validate_contact(user, company, data):
     # city
     if not check_length(data.get('city'), max_field_length(Contact, 'city')):
         return err(_("City name too long"))
-        
+    
+    # state 
+    if not check_length(data.get('state'), max_field_length(Contact, 'state')):
+        return err(_("State name too long"))
+    
     # phone
     if not check_length(data.get('phone'), max_field_length(Contact, 'phone')):
         return err(_("Phone number too long"))
@@ -211,6 +216,8 @@ def contact_to_dict(user, c):
         ret['postcode'] = c.postcode
     if c.city:
         ret['city'] = c.city
+    if c.state:
+        ret['state'] = c.state
     if c.country:
         ret['country'] = c.country.name
     if c.email:
@@ -382,6 +389,7 @@ def m_add_contact(request, company):
         street_address = data['street_address'],
         postcode = data['postcode'],
         city = data['city'],
+        state = data['state'],
         country = country,
         email = data['email'],
         phone = data['phone'],
@@ -423,6 +431,7 @@ def add_contact(request, company):
                 street_address = form.cleaned_data.get('street_address'),
                 postcode = form.cleaned_data.get('postcode'),
                 city = form.cleaned_data.get('city'),
+                state = form.cleaned_data.get('state'),
                 country = form.cleaned_data.get('country'),
                 email = form.cleaned_data.get('email'),
                 phone = form.cleaned_data.get('phone'),
@@ -486,6 +495,7 @@ def m_edit_contact(request, company, contact_id):
     contact.street_address = data['street_address']
     contact.postcode = data['postcode']
     contact.city = data['city']
+    contact.state = data['state']
     contact.country = data['country']
     contact.email = data['email']
     contact.phone = data['phone']
