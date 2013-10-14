@@ -16,6 +16,7 @@ javascript:
         - list of categories
         - list of units
         - list of available discounts (all_discounts)
+        - list of tax rates (tax_rates)
     2. if search criteria has changed, get results from server:
         on change or 'update' button press: update_products() >
          > after data is received: show_products > for each product: render_product()
@@ -41,6 +42,7 @@ reference to a product is its parent div (that contains product's .data()).
 var categories = []; // list of pairs "label", "value"
 var units = [];
 var all_discounts = {};
+var tax_rates = [];
 
 var last_value;
 var update_timeout;
@@ -56,7 +58,7 @@ $(document).ready(function(){
     function update_products(){
         // update products when search criteria has changed (gets called on timeout or on click)
         // assemble a JSON object with all search criteria and pass it to the view
-        search_criteria = {
+        var search_criteria = {
             general_filter:$("#general_filter").val(),
         };
         
@@ -68,7 +70,7 @@ $(document).ready(function(){
                 }
             });
             // add the category id (stored in .data())
-            cat_fil_id = "category_filter";
+            var cat_fil_id = "category_filter";
             search_criteria[cat_fil_id] = $("#" + cat_fil_id).data().id;
         }
         
@@ -201,8 +203,8 @@ $(document).ready(function(){
         // tooltip - discount details
         var tooltip = "";
         
-        // tooltip = discount.code + "<br/>" // discount code (already in the <li>)
-        tooltip += escape(discount.description) + "<br/>" // description
+        // tooltip = discount.code + "<br />" // discount code (already in the li)
+        tooltip += escape(discount.description) + "<br />" // description
         
         // if no dates are set, show 'no date limit', otherwise 'from ... to ...'
         if(!discount.start_date && !discount.end_date){
@@ -636,6 +638,13 @@ $(document).ready(function(){
         }
     );
     
+    // tax rates
+    get_data("{% url 'pos:get_taxes' company.url_name %}",
+        function(data){
+            taxes = data;
+        }
+    );
+    
     ////////////////////
     // searching
     ////////////////////
@@ -716,7 +725,8 @@ $(document).ready(function(){
             product = {
                 "id":-1,// new product's id = -1 until the server assigns an id
                 "discounts":{}, // no discounts so far
-                "tax":{{default_tax|escapejs}} // tax from config
+                // #####
+                //"tax":{{default_tax|escapejs}} // tax from config
             };
             // save it to a dummy div
             parent = $("#new_product_dummy");
@@ -773,7 +783,7 @@ $(document).ready(function(){
             <td colspan="2">
                 <p><label for="edit_product_name">{% trans 'Name' %}</label> <input type="text" id="edit_product_name" maxlength="{{field_lengths.name}}" /></p>
             </td>
-            <td>{% comment %} price per unit {% endcomment %}
+            <td>{% comment %} price per unit - can be entered in two ways: including or excluding tax {% endcomment %}
                 <p><label for="edit_product_price">{% trans 'Price' %}</label> {{ currency }} <input type="text" id="edit_product_price" maxlength="{{field_lengths.price }}"/>
                    <label for="edit_unit_type">{% trans 'per' %}</label><select id="edit_unit_type"></select>
             </td>

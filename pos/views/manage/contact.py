@@ -21,42 +21,39 @@ from rest_framework.decorators import api_view, permission_classes,\
 from rest_framework.permissions import IsAuthenticated
 from config.models import Country
 
+import re
+
 ################
 ### contacts ###
 ################
-class ContactForm(forms.ModelForm):
-    # override the default field display: see discount.DiscountForm for more info 
-    # date_of_birth is the only field that needs to be re-formatted
-    def __init__(self, *args, **kwargs):
-        if 'user' in kwargs:
-            self.user = kwargs['user']
-            del kwargs['user']
-        
-        super(ContactForm, self).__init__(*args, **kwargs)
-        
-        if self.user:
-            if 'date_of_birth' in self.initial:
-                self.initial['date_of_birth'] = format_date(self.user, self.initial['date_of_birth'])
-    
-    def clean_date_of_birth():
-        print 'cleaning'
-        return self.cleaned_data['date_of_birth']
+class ContactForm(forms.Form):
+    # do not use forms.ModelForm - we're formatting numbers and dates in our way
 
-    class Meta:
-        model = Contact
-        date_of_birth = forms.CharField(max_length=11)    
-        fields = ['type',
-                  'company_name',
-                  'first_name',
-                  'last_name',
-                  'street_address',
-                  'postcode',
-                  'city',
-                  'country', 
-                  'email',
-                  'phone',
-                  'vat']
-        
+    # countries list for ChoiceField
+    countries = [(c.two_letter_code, c.name) for c in Country.objects.all()]
+
+    type = forms.ChoiceField(choices=g.CONTACT_TYPES)
+    # none of the fields are required (the form doesn't know for the company/individual whatchamacallit -
+    # stuff will be checked in validate_contact)
+    company_name = forms.CharField(required=False, max_length=max_field_length(Contact, 'company_name'))
+    first_name = forms.CharField(required=False, max_length=max_field_length(Contact, 'first_name'))
+    last_name = forms.CharField(required=False, max_length=max_field_length(Contact, 'last_name'))
+    street_address = forms.CharField(required=False, max_length=max_field_length(Contact, 'street_address'))
+    postcode = forms.CharField(required=False, max_length=max_field_length(Contact, 'postcode'))
+    city = forms.CharField(required=False, max_length=max_field_length(Contact, 'city'))
+    country = forms.ChoiceField(required=False, choices=countries)
+    # except that email is required in any case
+    email = forms.EmailField(required=True, max_length=max_field_length(Contact, 'email'))
+    phone = forms.CharField(required=False, max_length=max_field_length(Contact, 'phone'))
+    vat = forms.CharField(required=False, max_length=max_field_length(Contact, 'vat'))
+    date_of_birth = forms.CharField(required=False, max_length=g.DATE_FORMATS['max_date_length'])
+    
+    def clean(self):
+        r = validate_contact(self.user, self.company, self.cleaned_data)
+        if not r['success']:
+            raise forms.ValidationError(r['message'])
+        else:
+            return r['data']
 
 class ContactFilterForm(forms.Form):
     type = forms.ChoiceField(required=True,
@@ -71,72 +68,115 @@ def validate_contact(user, company, data):
     # last_name* (only if Individual)
     # date_of_birth - list of discount ids (checked in create/edit_product)
     # street_address
-    # postcode - id (checked in create/edit_product)
+    # postcode
     # city
     # country
     # email*
     # phone
     # vat
 
-    def r(status, msg):
-        return {'status':status,
-            'data':data,
-            'message':msg}
+    def err(msg): # the value that is returned if anything goes wrong
+        return {'success':False, 'data':None, 'message':msg}
 
     # return:
-    # {status:true/false - if cleaning succeeded
-    #  data:cleaned_data - empty dict if status = false
-    #  message:error_message - empty if status = true
-    
-    type = data['type']
-    if not data['type']:
-        return r(False, _("No type specified"))
+    # status: True if validation passed, else False
+    #  data: 'cleaned' data if validation succeeded, else False
+    #  message: error message or empty if validation succeeded
+
+    if 'type' not in data:
+        return err(_("No type specified"))
+    if data['type'] not in [x[0] for x in g.CONTACT_TYPES]:
+        return err(_("Wrong contact type"))
+
+    # check credentials for Individual
+    if data['type'] == 'Individual':
+        # first name: check length (mandatory)
+        if not data.get('first_name'):
+            return err(_("No first name"))
+        elif len(data['first_name']) > max_field_length(Contact, 'first_name'):
+            return err(_("First name too long"))
+        
+        # last name: check length (mandatory)
+        if not data.get('last_name'):
+            return err(_("No last name"))
+        elif len(data['last_name']) > max_field_length(Contact, 'last_name'):
+            return err(_("Last name too long"))
+            
+        # date of birth: parse date
+        if len(data['date_of_birth']) > 0:
+            r = parse_date(user, data['date_of_birth'])
+            if not r['success']:
+                return err(_("Wrong format of date of birth"))
+            else:
+                data['date_of_birth'] = r['date']
+        else:
+            del data['date_of_birth']
+        
+    # check credentials for company
     else:
-        # check credentials for Individual
-        if type == 'Individual':
-            if not data['first_name']:
-                return r(False, _("No first name"))
-            elif len(data['first_name']) > max_field_length(Contact, 'first_name'):
-                return r(False, _("First name too long"))
-            if not data['last_name']:
-                return r(False, _("No last name"))
-            elif len(data['last_name']) > max_field_length(Contact, 'last_name'):
-                return r(False, _("Last name too long"))
-        # check credentials for company
-        elif type == 'Company':
-            if not data['company']:
-                return r(False, _("No company name"))
-            elif len(data['company'] > max_field_length(Contact, 'company')):
-                return r(False, _("Last name too long"))
-    # ALO NAPISAL SEM NOVO F00NKCIJO, parse_date(), za preverjat datum, ofkors.
-    try:
-        data['id'] = int(data['id'])
-    except:
-        # this shouldn't happen
-        return r(False, _("Wrong product id"))
-    
-    
-    if data['id'] != -1:
-        # check if contact belongs to this company and if he has the required permissions
+        print data
+        if not data.get('company_name'):
+            return err(_("No company name"))
+            
+        if len(data['company_name']) > max_field_length(Contact, 'company_name'):
+            return err(_("Company name too long"))
+        
+        # one shalt not save u'' into date field.
+        del data['date_of_birth']
+            
+    # common fields:
+    # email*
+    if 'email' not in data:
+        return err(_("Email is required"))
+    if len(data['email']) > max_field_length(Contact, 'email'):
+        return err(_("Email address too long"))
+    # validate email with regex:
+    # ^[\w\d._+%]+  a string with any number of characters, numbers, and ._+% signs
+    # @[\w\d.-]{2,} an @ sign followed by domain name of at least 2 characters long (can contain . and -)
+    # \.\w{2,4}$'   domain (2-4 alphabetic characters)
+    m = re.search('^[\w\d._+%]+@[\w\d.-]{2,}\.\w{2,4}$', data['email'])
+    if data['email'] not in m.group(0):
+        return err(_("Invalid email address"))
+
+    # country: check for correct code
+    if data['country']:
         try:
-            c = Contact.objects.get(id=data['id'], company=company)
-        except Contact.DoesNotExist:
-            return r(False, _("Cannot edit product: it does not exist"))
-        
-        if c.company != company or not has_permission(user, company, 'product', 'edit'):
-            return r(False, _("You have no permission to edit this product"))
+            data['country'] = Country.objects.get(two_letter_code=data['country'])
+        except Country.DoesNotExist:
+            return err(_("Country does not exist"))
     
-    # email: must exist
-    if not data['email']:
-        return r(False, _("No email entered"))
-    else:
-        if len(data['email']) > max_field_length(Contact, 'email'):
-            return r(False, _("Email too long"))
-
-    
+    # other, non-mandatory fields: check length only
+    def check_length(d, l):
+        if d:
+            if len(d) > l:
+                return False
+            else:
+                return True
+        else:
+            return True
         
-    return {'status':True, 'data':data} 
+    # street_address
+    if not check_length(data.get('street_address'), max_field_length(Contact, 'street_address')):
+        return err(_("Street address too long"))
+        
+    # postcode
+    if not check_length(data.get('postcode'), max_field_length(Contact, 'postcode')):
+        return err(_("Post code too long"))
+        
+    # city
+    if not check_length(data.get('city'), max_field_length(Contact, 'city')):
+        return err(_("City name too long"))
+        
+    # phone
+    if not check_length(data.get('phone'), max_field_length(Contact, 'phone')):
+        return err(_("Phone number too long"))
 
+    # vat
+    if not check_length(data.get('vat'), max_field_length(Contact, 'vat')):
+        return err(_("VAT number too long"))
+
+    # everything OK
+    return {'success':True, 'data':data, 'message':None}
 
 def contact_to_dict(user, c):
     # returns all relevant contact's data
@@ -154,9 +194,9 @@ def contact_to_dict(user, c):
     # phone
     # vat
     ret = {}
-    
+
     ret['id'] = c.id
-    ret['type'] = c.type
+
     if c.company_name:
         ret['company_name'] = c.company_name
     if c.first_name:
@@ -179,7 +219,7 @@ def contact_to_dict(user, c):
         ret['phone'] = c.phone
     if c.vat:
         ret['vat'] = c.vat
-      
+
     return ret
 
 
@@ -216,8 +256,8 @@ def m_list_contacts(request, company):
     elif criteria.get('type') == 'Company':
       contacts = contacts.filter(type='Company')
       if 'name' in criteria:
-          contacts = contacts.filter(company_name__icontains=criteria.get('name'))  
-    
+          contacts = contacts.filter(company_name__icontains=criteria.get('name'))
+
     cs = []
     for c in contacts:
         cs.append(contact_to_dict(request.user, c))
@@ -271,7 +311,7 @@ def list_contacts(request, company):
         'date_format_django':get_date_format(request.user, 'django'),
     }
 
-    return render(request, 'pos/manage/contacts.html', context) 
+    return render(request, 'pos/manage/contacts.html', context)
 
 @login_required
 def web_get_contact(request, company, contact_id):
@@ -369,22 +409,38 @@ def add_contact(request, company):
 
     if request.method == 'POST':
         # submit data
-        form = ContactForm(request.POST, user=request.user)
-        
+        form = ContactForm(request.POST)
+        form.user = request.user
+        form.company = c
+
         if form.is_valid():
-            # created_by and company_id
-            contact = form.save(False)
-            if 'created_by' not in form.cleaned_data:
-                contact.created_by = request.user
-            if 'company_id' not in form.cleaned_data:
-                contact.company_id = c.id
-        
-            form.save()
-            
+            # create a new Contact
+            contact = Contact(
+                type = form.cleaned_data.get('type'),
+                company_name = form.cleaned_data.get('company_name'),
+                first_name = form.cleaned_data.get('first_name'),
+                last_name = form.cleaned_data.get('last_name'), 
+                street_address = form.cleaned_data.get('street_address'),
+                postcode = form.cleaned_data.get('postcode'),
+                city = form.cleaned_data.get('city'),
+                country = form.cleaned_data.get('country'),
+                email = form.cleaned_data.get('email'),
+                phone = form.cleaned_data.get('phone'),
+                vat = form.cleaned_data.get('vat'),
+                date_of_birth = form.cleaned_data.get('date_of_birth'),
+                
+                created_by = request.user,
+                company = c
+
+            )
+            contact.save()
+
             return redirect('pos:list_contacts', company=c.url_name)
     else:
-        form = ContactForm(user=request.user)
-        
+        form = ContactForm()
+        form.user = request.user
+        form.company = c
+
     context['form'] = form
     
     return render(request, 'pos/manage/contact.html', context)
@@ -420,8 +476,8 @@ def m_edit_contact(request, company, contact_id):
     if not valid['status']:
         return JSON_error(valid['messege'])
     data = valid[data]
-    
-    contact.company = data['company']
+
+    contact.company = data['company_name']
     contact.type = data['type']
     contact.company_name = data['company_name']
     contact.first_name = data['first_name']
@@ -466,8 +522,8 @@ def edit_contact(request, company, contact_id):
         
     if request.method == 'POST':
         # submit data
-        form = ContactForm(request.POST, instance=contact, user=request.user)
-        
+        form = ContactForm(request.POST, instance=contact)
+
         if form.is_valid():
             # created_by and company_id
             contact = form.save(False)
@@ -480,8 +536,8 @@ def edit_contact(request, company, contact_id):
             
             return redirect('pos:list_contacts', company=c.url_name)
     else:
-        form = ContactForm(instance=contact, user=request.user)
-        
+        form = ContactForm(instance=contact)
+
     context['form'] = form
     
     return render(request, 'pos/manage/contact.html', context)
@@ -506,5 +562,5 @@ def delete_contact(request, company, contact_id):
         raise Http404
 
     contact.delete()
-    
-    return redirect('pos:list_contacts', company=c.url_name)
+
+

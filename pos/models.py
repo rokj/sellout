@@ -99,6 +99,13 @@ class Tax(SkeletonU):
     amount = models.DecimalField(_("Tax amount"), max_digits=g.DECIMAL['percentage_decimal_places']+3,
                           decimal_places=g.DECIMAL['percentage_decimal_places'], null=False, blank=False)
     name = models.CharField(_("Name"), max_length=15, null=True, blank=True)
+    default = models.BooleanField(_("Use by default when creating new products"))
+    
+    class Meta:
+        verbose_name_plural = _("Taxes")
+        
+    def __unicode__(self):
+        return self.company.name + ": " + self.name
 
 ### product ###
 # so far, one image per product is enough (pos != store)

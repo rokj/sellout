@@ -4,32 +4,156 @@
 
 {% block head %}
 
+<script type="text/javascript">
+$(document).ready(function(){
+    var taxes = [];
+    var table = $("#taxes");
+    
+    // get all taxes
+    function get_taxes(){
+        get_data("{% url 'pos:get_taxes' company.url_name %}", function(data){
+            taxes = data;
+            update_taxes();
+        });
+    }
+    // do it right away
+    get_taxes();
+    
+    $("#save_taxes").click(save_taxes);
+    $("#cancel").click(update_taxes);
+    
+    function update_taxes(){
+        table.empty();
+    
+        var i;
+        for(i = 0; i < taxes.length; i++){
+            table.append(tax_entry(taxes[i]));
+        }
+        
+        // the last row: nothing but an "add" button in the last column (only if the user has edit permission)
+        if({{ edit_permission|lower }}){
+            var tr_obj = $("<tr>", {"class":"empty"});
+            for(i = 0; i < 3; i++){
+                tr_obj.append($("<td>"));
+            }
+            var td_obj = $("<td>");
+            td_obj.append(
+                $("<button>", {id:"add-tax"})
+                    .click(function(){
+                        // create an empty tax and insert it above $this button
+                        // $this.parent(=td).parent(=tr).parent(=table)
+                        $(this).parent().parent().parent().prepend(
+                            tax_entry({name:'', amount:'', default:false, id:-1})
+                        );
+                    })
+                    .append("+"));
+            tr_obj.append(td_obj);
+            
+            table.append(tr_obj);
+        }
+    }
+    
+    // (re)draw the taxes table
+    function tax_entry(tax){
+        var tr_obj = $("<tr>");
+        tr_obj.data(tr_obj); // store id and that
+        
+        // first column: 'default' radio button
+        var td_obj = $("<td>");
+        {% comment %} only append 'default' radio button if user has permission to edit taxes {% endcomment %}
+        if({{ edit_permission|lower }}) td_obj.append(
+            $("<input>", {type:"radio", name:"default", "class":"default", value:""}).attr("checked", tax.default));
+        else if(tax.default) td_obj.append("x"); // TODO: icon? or something
+        tr_obj.append(td_obj);
+        
+        // second column: name
+        td_obj = $("<td>");
+        if({{ edit_permission|lower}}) td_obj.append($("<input>", {type:"text", "class":"name", value:tax.name}));
+        else td_obj.append(tax.name);
+        tr_obj.append(td_obj);
+        
+        // third column: tax amount
+        td_obj = $("<td>");
+        if({{ edit_permission|lower }}) td_obj.append($("<input>", {type:"text", "class":"amount", value:tax.amount}));
+        else td_obj.append(tax.amount);
+        tr_obj.append(td_obj);
+        
+        // fourth column: delete button
+        td_obj = $("<td>");
+        // TODO: button icons
+        if({{ edit_permission|lower }}) td_obj.append($("<button>", {"class":"delete-tax"}).append("X").click(delete_tax));
+        tr_obj.append(td_obj);
+        
+        // append to the table
+        return tr_obj;
+    }
+    
+    function delete_tax(){
+        // $this is the button, first parent: td, next: tr
+        $(this).parent().parent().remove();
+    }
+    
+    function save_taxes(){
+        // cycle through the taxes table and add them to a json object, then send it
+        var data_to_send = [];
+        var valid = true; // if a number is typed in in wrong format, nothing will be sent
+        
+        $("tr", table).each(function(){
+            var name = $("input.name", this).val();
+            var amount = $("input.amount", this).val();
+            
+            // if there's no name and no amount, ignore that row (the last row is one of them)
+            if(!name && !amount) return;
+            
+            if(!check_number(amount, '{{separator}}')){
+                alert("{% trans 'Wrong number format' %}: " + amount);
+                valid = false;
+            }
+            
+            var def = $("input.default", this).is(":checked");
+            
+            data_to_send.push({
+                'name':name,
+                'amount':amount,
+                'default':def,
+                'id':$(this).data().id,
+            });
+        });
+        
+        if(valid){
+            send_data("{% url 'pos:save_taxes' company.url_name %}", data_to_send, "{{ csrf_token }}", function(recv_data){
+                if(recv_data.status != 'ok') alert(recv_data.message);
+                else{
+                    // TODO: show the 'received' info in a more civilized way than alert
+                    alert("{% trans 'Saved' %}");
+                    get_taxes();
+                }
+            });
+        }
+    }
+});
+</script>
+
 {% endblock %}
 
 {% block manage_content %}
-{% if edit_permission %}
-    {% comment %} the user has edit permission, show a tax edit form {% endcomment %}
-    <form method="post" action="{% url 'pos:list_taxes' company.url_name %}">
-        {% csrf_token %}
-        {% for t in taxes %}
-            <p>
-                <input type="text" id="tax_name_{{forloop.counter}}" name="tax_name_{{forloop.counter}}" />
-                <input type="text" id="tax_amount_{{forloop.counter}}" name="tax_amount_{{forloop.counter}}" />
-            </p>
-        {% endfor %}
-        {% comment %} show a new entry (can be duplicated) {% endcomment %}
-        <input type="text" name="tax_name_new" />
-        <input type="text" name="tax_amount_new" />
-        
-        <input type="submit" id="submit" value="{% trans 'submit' %}" />
-    </form>
-{% else %}
-    {% comment %} the user has no permissions, only show read-only table {% endcomment %}
-    {% for t in taxes %}
-        {{ t.amount }}
-    {% endfor %}
-{% endif %}
+<table>
+    <thead>
+        <tr>
+            <td>{% trans 'Default' %}</td>
+            <td>{% trans 'Name (optional)' %}</td>
+            <td>{% trans 'Amount' %} (%)</td>
+            <td></td>{% comment %} new and delete buttons {% endcomment %}
+        </tr>
+    </thead>
+    
+    <tbody id="taxes">
 
+    </tbody>
+</table>
+
+<input type="button" id="save_taxes" value="{% trans 'Save' %}" />
+<input type="button" id="cancel" value="{% trans 'Cancel' %}" />
 
 {% endblock %}
 

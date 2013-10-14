@@ -1,8 +1,3 @@
-# author: nejc jurkovic
-# date: 9. 8. 2013
-#
-# Views for managing POS data: product
-
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -29,9 +24,6 @@ from rest_framework.permissions import IsAuthenticated
 ###############
 ## products ###
 ###############
-
-#
-
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_JSON_units(request, company):
@@ -64,7 +56,7 @@ def products(request, company):
         'name':max_field_length(Product, 'name'),
         'tax':g.DECIMAL['percentage_decimal_places'] + 4, # up to '100.' + 'decimal_digits'
     }
-
+    
     context = {
         'company':c, 
         'title':_("Products"),
@@ -73,7 +65,6 @@ def products(request, company):
         'add_url':reverse('pos:web_create_product', args=[c.url_name]),
         # config variables 
         'can_edit':has_permission(request.user, c, 'product', 'edit'),
-        'default_tax':get_value(request.user, 'pos_default_tax'),
         'currency':get_value(request.user, 'pos_currency'),
         # images
         'image_dimensions':g.IMAGE_DIMENSIONS['product'],
@@ -241,7 +232,6 @@ def search_products(request, company):
     products = Product.objects.filter(company=c)
     
     criteria = JSON_parse(request.POST['data'])
-    print criteria
     
     # filter by: ("advanced" values in criteria dict)
     # name_filter

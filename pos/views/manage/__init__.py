@@ -6,5 +6,5 @@ from manage import *
 from product import *
 from configuration import *
 from users import *
-from misc import *
+from tax import *
 

@@ -36,8 +36,11 @@ def JSON_ok():
     return JSON_response({'status':'ok'})
 
 def JSON_parse(string_data):
-    return json.loads(string_data)
-
+    try:
+        return json.loads(string_data)
+    except:
+        return None
+        
 # misc
 def max_field_length(model, field_name):
     return model._meta.get_field(field_name).max_length
@@ -98,13 +101,16 @@ def image_from_base64(data):
     return ContentFile(image_data, "fakename." + filetype) # name will be replaced when saving to ImageField
 
 # numbers
-def format_number(user, n):
+def format_number(user, n, high_precision=False):
     """ returns formatted decimal number n;
         strips zeros, but leaves two numbers after decimal point even if they are zero
     """
     sep = get_value(user, 'pos_decimal_separator')
     
-    s = str(n.quantize(Decimal('1.00'))) # round to two decimal places
+    if high_precision:
+        s = str(n.quantize(Decimal('1.00000'))) # round to four decimal places (for management etc.)
+    else:
+        s = str(n.quantize(Decimal('1.00'))) # round to two decimal places
     
     return s.replace('.', sep)
         
@@ -122,7 +128,9 @@ def parse_decimal(user, string, max_digits=None):
         {'success':True/False, number:<num>/None}
     """
     
-    string = string.replace(get_value(user, 'pos_decimal_separator'), '.')
+    if user: # if user is None, try with the dot (user should never be None - 
+             # this is to avoid checking on every function call)
+        string = string.replace(get_value(user, 'pos_decimal_separator'), '.')
     
     # check for entries too big
     if max_digits:
