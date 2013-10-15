@@ -59,7 +59,15 @@ function get_bignumber(string, separator){
     return BigNumber(string.replace(separator, "."))
 }
 
-function display_number(number, separator){
+function display_bignumber(number, separator, decimal_places){
     // receives a BigNumber as a parameter and returns a string with user specified decimal separator
-    return number.toString().replace('.', separator);
+    return number.toFixed(decimal_places).replace('.', separator);
+}
+
+function add_tax(p, t){ // returns a decimal object with added tax t
+    
+}
+
+function cut_tax(P){ // returns a decimal object without tax t
+    
 }

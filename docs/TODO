@@ -1,6 +1,6 @@
-- ! - management: enter base price OR price including tax
+- ! - check if there are taxes and categories entered (?) before adding products
+- ! - pagination (offset) of returned products ("More" button)
 - ! - tablet support
-- ! - add 'state' to contact fields
 - <input> text field lengths in templates (from max_field_length) on all JSON 'forms'
 - missing images (deleted from disk) trigger IOException
 - <[ CDATA for <javascript>
@@ -26,6 +26,8 @@
 - DONE updated_by for update views (changes made in common.Skeleton)
 - DONE ! - custom decimal separator on all management forms
 - DONE ! - tax rates
+- DONE ! - management: enter base price OR price including tax
+- DONE ! - add 'state' to contact fields
 
 SECURITY:
  - DONE login_required
