@@ -64,6 +64,6 @@ function save_settings(){
     var ld = {};
     ld.bill_width = $("#splitter").position().left;
     
-    send_data_blocking(window.data.exit_url, ld, window.data.csrf_token, null);
+    send_data_blocking(window.data.save_url, ld, window.data.csrf_token, null);
     return true;
 }

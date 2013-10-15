@@ -48,7 +48,7 @@ def terminal_init(request, company):
         'bill_width':get_value(request.user, 'pos_interface_bill_width'),
         # urls for various things
         'search_products_url':reverse('pos:search_products', args={company:c.url_name}),
-        'exit_url':reverse('pos:terminal_save', args={company:c.url_name}),
+        'save_url':reverse('pos:terminal_save', args={company:c.url_name}), # 
     }
     return JSON_response(data)
 

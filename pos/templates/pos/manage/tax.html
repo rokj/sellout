@@ -42,9 +42,8 @@ $(document).ready(function(){
                     .click(function(){
                         // create an empty tax and insert it above $this button
                         // $this.parent(=td).parent(=tr).parent(=table)
-                        $(this).parent().parent().parent().prepend(
-                            tax_entry({name:'', amount:'', default:false, id:-1})
-                        );
+                        tax_entry({name:'', amount:'', default:false, id:-1}).
+                            insertBefore($(this).parent().parent());
                     })
                     .append("+"));
             tr_obj.append(td_obj);

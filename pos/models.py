@@ -24,6 +24,7 @@ class Company(SkeletonU):
     street = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
     postcode = models.CharField(_("Postal code"), max_length=20, null=True, blank=True)
     city = models.CharField(_("City"), max_length=50, null=True, blank=True)
+    state = models.CharField(_("State"), max_length=50, null=True, blank=True)
     country = models.ForeignKey(Country, null=True, blank=True)
     email = models.CharField(_("E-mail address"), max_length=256, null=False, blank=False)
     website = models.CharField(_("Website"), max_length=256, null=True, blank=True)

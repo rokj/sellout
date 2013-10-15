@@ -22,16 +22,22 @@ from django.core.cache import cache
 import json
 
 defaults = {
+    # localization
     'pos_date_format':'yyyy-mm-dd', # keys for DATE_FORMATS dictionary in globals
     'pos_timezone':'utc', # keywords for pytz timezones
     'pos_currency':"$",
+    'pos_decimal_separator':'.',
+    # ux
     'pos_contacts_per_page':10,
     'pos_discounts_per_page':10,
-    'pos_default_tax':'0.0',
-    'pos_decimal_separator':'.',
+    # interface
     'pos_interface':'keyboard', # options: 'keyboard', 'mouse'
     'pos_interface_product_button_size':'medium', # keys for PRODUCT_BUTTON_DIMENSIONS in globals
     'pos_interface_bill_width':370, # width of the bill area in terminal (in pixels)
+    # billing and calculation defaults
+    'pos_discount_calculation':None,
+    # fallback defaults
+    'pos_default_tax':'0.0',
 }
     
 # caching helpers

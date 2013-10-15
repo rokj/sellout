@@ -5,10 +5,7 @@ from common import globals as g
 import pos.views as pos
 import pos.views.manage as manage
 
-
 from rest_framework.authtoken import views as authtoken_views
-
-
 
 ### common URL prefixes: ###
 # company's site: /pos/blocklogic
@@ -34,6 +31,12 @@ urlpatterns = patterns('',
     # ajax calls for POS terminal
     url(r_company + '/init/?$', pos.terminal_init, name='terminal_init'),
     url(r_company + '/save/?$', pos.terminal_save, name='terminal_save'),
+    
+    # views for bill and items on it
+    # get_active_bill - returns the same as add_bill_item if there's an active account, or nothing (new bill)
+    # add_bill_item - adds product to bill and returns updated bill info
+    # remove_bill_item - 
+    # save_bill - 
     
     
     # management urls: company
