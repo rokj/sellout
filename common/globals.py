@@ -74,6 +74,7 @@ BILL_TYPES = (
 )
 
 BILL_STATUS = (
+    ("Active", _("Active")), # the bill that's currently open in POS (only one can exist!)
     ("Offer", _("Offer")), # ponudba # TODO preveriti izrazoslovje
     ("Quote", _("Quote")), # predracun
     ("Invoice", _("Invoice")), # racun
