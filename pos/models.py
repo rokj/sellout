@@ -42,9 +42,9 @@ class Company(SkeletonU):
 #    company = models.ForeignKey(Company)
 #    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
 #    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
-    
-    def __unicode__(self):
-        return self.company.name + ": " + self.attribute_name + " = " + self.attribute_value
+#    
+#    def __unicode__(self):
+#        return self.company.name + ": " + self.attribute_name + " = " + self.attribute_value
     
 ### category ###
 class Category(SkeletonU):
@@ -72,9 +72,9 @@ class Category(SkeletonU):
 #    category = models.ForeignKey(Category)
 #    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
 #    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
-    
-    def __unicode(self):
-        return self.category.name + ": " + self.attribute_name + " = " + self.attribute_value
+#    
+#    def __unicode(self):
+#        return self.category.name + ": " + self.attribute_name + " = " + self.attribute_value
 
 ### discounts ### 
 class Discount(SkeletonU):
@@ -204,9 +204,9 @@ class Contact(SkeletonU):
 #    contact = models.ForeignKey(Contact)
 #    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
 #    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
-    
-    def __unicode__(self):
-        return str(self.contact) + ": " + self.attribute_name + " = " + self.attribute_value
+#    
+#    def __unicode__(self):
+#        return str(self.contact) + ": " + self.attribute_name + " = " + self.attribute_value
 
 ### permissions
 class Permission(SkeletonU):
