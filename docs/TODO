@@ -43,10 +43,10 @@ CONFIGURATION VARIABLES:
  
 OPTIMIZE:
  - ! product search in terminal: ajax/client caching
+ - calculations for bill
  - memcached:
     - get_object_or_404(Company) - in every view
  - sql queries or better getting of objects just with specific data
- - NOT DOING images embedded in JSON instead of doing a special request for each image
  
 JQUERY PLUGINS:
  - on-site keyboard: http://plugins.jquery.com/keyboard/

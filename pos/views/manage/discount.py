@@ -157,8 +157,8 @@ class DiscountForm(forms.Form):
     # this should be decimal, but we're formatting it our way
     amount = forms.CharField(max_length=g.DECIMAL['percentage_decimal_places'] + 4, required=True)
     # this should be date...
-    start_date = forms.CharField(g.DATE_FORMATS['max_date_length'], required=False)
-    end_date = forms.CharField(g.DATE_FORMATS['max_date_length'], required=False)
+    start_date = forms.CharField(g.DATE['max_date_length'], required=False)
+    end_date = forms.CharField(g.DATE['max_date_length'], required=False)
     active = forms.BooleanField(initial=True, required=False)
     
     def clean(self):
@@ -172,8 +172,8 @@ class DiscountForm(forms.Form):
 class DiscountFilterForm(forms.Form):
     description = forms.CharField(required=False)    
     code = forms.CharField(required=False)
-    start_date = forms.CharField(required=False, max_length=g.DATE_FORMATS['max_date_length'])
-    end_date = forms.CharField(required=False, max_length=g.DATE_FORMATS['max_date_length'])
+    start_date = forms.CharField(required=False, max_length=g.DATE['max_date_length'])
+    end_date = forms.CharField(required=False, max_length=g.DATE['max_date_length'])
     active = forms.NullBooleanField(required=False)
 
 @login_required

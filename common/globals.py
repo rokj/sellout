@@ -103,8 +103,12 @@ DATE_FORMATS = {
                   'django':"Y-m-d",
                   'jquery':"yy-mm-dd",
                   },
+}
+
+DATE = {
     'max_date_length':10,
 }
+
 
 # misc
 MISC = {

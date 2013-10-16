@@ -47,7 +47,7 @@ class ContactForm(forms.Form):
     email = forms.EmailField(required=True, max_length=max_field_length(Contact, 'email'))
     phone = forms.CharField(required=False, max_length=max_field_length(Contact, 'phone'))
     vat = forms.CharField(required=False, max_length=max_field_length(Contact, 'vat'))
-    date_of_birth = forms.CharField(required=False, max_length=g.DATE_FORMATS['max_date_length'])
+    date_of_birth = forms.CharField(required=False, max_length=g.DATE['max_date_length'])
     
     def clean(self):
         r = validate_contact(self.user, self.company, self.cleaned_data)

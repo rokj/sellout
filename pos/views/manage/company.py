@@ -176,6 +176,7 @@ class CompanyForm(forms.ModelForm):
                   'street',
                   'postcode',
                   'city',
+                  'state',
                   'country',
                   'phone',
                   'vat_no',
@@ -183,6 +184,21 @@ class CompanyForm(forms.ModelForm):
         widgets = {
             'image': forms.ClearableFileInput,
         }
+
+# for json etc.
+def company_to_dict(company):
+    c = {}
+    c['name'] = company.name
+    c['email'] = company.email
+    c['street'] = company.street
+    c['postcode'] = company.postcode
+    c['city'] = company.city
+    c['state'] = company.state
+    c['country'] = company.country
+    c['phone'] = company.phone
+    c['vat_no'] = company.vat_no
+    
+    return c
 
 # registration
 @login_required
