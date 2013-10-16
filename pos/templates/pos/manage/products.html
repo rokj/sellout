@@ -151,7 +151,7 @@ $(document).ready(function(){
                 discount_amount(product.discounts[i]));
             
             // tooltip:
-            discount_tooltip(product.discounts[key], li_obj);
+            discount_tooltip(product.discounts[i], li_obj);
             tmp_obj.append(li_obj);
         }
         
@@ -222,10 +222,18 @@ $(document).ready(function(){
         li_obj.tooltip({content:tooltip});
     }
     
-    function add_discount(ul_obj, product, key){
-        // add a list item and a delete link to product edit dialog
-        if(!product.discounts[key]) return;
-        else discount = product.discounts[key];
+    function find_discount_by_id(discounts, id){
+        for(var i = 0; i < discounts.length; i++){
+            if(discounts[i].id == id) return i;
+        }
+        
+        // discount not found
+        return null;
+    }
+    
+    function add_discount(ul_obj, product, i){ // i - index in product.discounts
+        // add a list item and a delete button to product edit dialog
+        var discount = product.discounts[i];
         
         li_obj = $("<li>", {title:""});
         li_obj.data({id:discount.id}); // store id in data() for later retrieval
@@ -235,9 +243,11 @@ $(document).ready(function(){
         // delete button
         btn_obj = $("<input>", {type:"button", value:"x", "class":"delete-discount"});
         btn_obj.click(function(){
-            if(key in product.discounts) delete product.discounts[key];
+            // delete this list item
+            $(this).parent().remove();
             refresh_discounts(product);
         });
+        
         li_obj.append(discount.code + " " + discount_amount(discount));
         li_obj.append(btn_obj);
         ul_obj.append(li_obj);
@@ -249,28 +259,33 @@ $(document).ready(function(){
         ul_obj.empty();
         
         // add discounts in product
-        for(var key in product.discounts){
-            add_discount(ul_obj, product, key);
+        var i;
+        for(i = 0; i < product.discounts.length; i++){
+            add_discount(ul_obj, product, i);
         }
         
         // add another item, this time with all available discounts
         // in a listbox and an 'add' button
-        li_obj = $("<li>")
+        li_obj = $("<li>");
         sel_obj = $("<select>", {id:"edit_discount_list"});
-        //btn_obj = $("<input>", {type:"button",value:"{% trans 'Add' %}"});
         li_obj.append(sel_obj);
-        //li_obj.append(btn_obj);
         li_obj.data({id:false}); // don't store or send this item
         ul_obj.append(li_obj);
         
         // add discounts NOT in product to add listbox
         var added = 0;
-        for(var key in all_discounts){
-            if(key in product.discounts) continue;
+
+        alert(JSON.stringify(product.discounts))
+        for(i = 0; i < all_discounts.length; i++){
+            alert(all_discounts[i].id)
+            if(find_discount_by_id(product.discounts, all_discounts[i].id)){
+                alert("found discount id " + all_discounts[i].id)
+                continue;
+            }
             
             opt_obj = $("<option>")
-            .attr("value", key)
-            .append(all_discounts[key].code + " " + discount_amount(all_discounts[key]));
+            .attr("value", i)
+            .append(all_discounts[i].code + " " + discount_amount(all_discounts[i]));
             
             sel_obj.append(opt_obj);
             added++;
@@ -280,12 +295,12 @@ $(document).ready(function(){
             // unselect the first item in listbox to avoid confusion
             sel_obj.prop("selectedIndex", -1);
             
-            //btn_obj.click(function(){ // add button
             sel_obj.unbind().change(function(){ // no add buttons
-                d_id = $(":selected", sel_obj).val();
+                d_i = $(":selected", sel_obj).val(); // currently selected discount's list index
+                id = all_discounts[find_discount_by_id(all_discounts, d_i)];
                 
                 // add data to product
-                product.discounts[d_id] = all_discounts[d_id];
+                product.discounts.push(id);
                 refresh_discounts(product);
             });
         }
