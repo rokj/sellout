@@ -112,19 +112,12 @@ def product_to_dict(user, product):
     ret['price'] = price
     
     # all discounts in a list
-    discounts = {}
-    dsum_absolute = decimal.Decimal('0') # sum of all absolute discounts
-    dsum_percent = decimal.Decimal('0') # sum of all percentage discounts
-    for d in product.discounts.all():
-        discounts[str(d.id)] = discount_to_dict(user, d)
-        if d.type == 'Percent':
-            dsum_percent += d.amount
-        else:
-            dsum_absolute += d.amount
+    discounts = []
+    for d in product.discounts.all().order_by('topping_relationship__order_to_add_topping'):
+        print d
+        discounts.append(discount_to_dict(user, d))
         
     ret['discounts'] = discounts
-    ret['discount_percent'] = format_number(user, dsum_percent)
-    ret['discount_absolute'] = format_number(user, dsum_absolute)
     
     if product.image: # check if product's image exists
         # get the thumbnail

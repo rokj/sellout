@@ -145,10 +145,10 @@ $(document).ready(function(){
         // discount list
         tmp_obj = $(".product-discounts", div_obj);
         var li_obj;
-        for(var key in product.discounts){
+        for(i = 0; i < product.discounts.length; i++){
             li_obj = $("<li>", {title:""});
-            li_obj.append(product.discounts[key].code + " " +
-                discount_amount(product.discounts[key]));
+            li_obj.append(product.discounts[i].code + " " +
+                discount_amount(product.discounts[i]));
             
             // tooltip:
             discount_tooltip(product.discounts[key], li_obj);
@@ -293,6 +293,9 @@ $(document).ready(function(){
             // remove the last, 'add' entry
             li_obj.remove();
         }
+        
+        // make the list sortable, but exclude the last item
+        ul_obj.sortable({items:"li:not(:last)"});
     }
     
     function upload_image_status(status, save_obj, del_obj, upl_obj, img_obj){
@@ -611,11 +614,11 @@ $(document).ready(function(){
         // private notes
         // tax
         // stock
-        product = parent.data().product;
+        var product = parent.data().product;
         
-        dlg_obj = $("#edit_dialog");
+        var dlg_obj = $("#edit_dialog");
         
-        data = {};
+        var data = {};
         data['id'] = product.id;
         data['name'] = $("#edit_product_name", dlg_obj).val();
         data['price'] = $("#edit_product_price", dlg_obj).val();
@@ -629,7 +632,8 @@ $(document).ready(function(){
         data['tax_id'] = $("#edit_product_tax", dlg_obj).val();
         data['description'] = $("#edit_product_description", dlg_obj).val();
         // discounts: get all <li> items and put them into an array
-        discounts = [];
+        var discounts = [];
+        var i = 0;
         $("ul#edit_discounts li", dlg_obj).each(function(){
             id = $(this).data().id;
             if(id){
@@ -873,10 +877,10 @@ $(document).ready(function(){
                 <p><label for="edit_product_name">{% trans 'Name' %}</label> <input type="text" id="edit_product_name" maxlength="{{field_lengths.name}}" /></p>
             </td>
             <td>{% comment %} price per unit - can be entered in two ways: including or excluding tax {% endcomment %}
-                <p>{% trans 'Price' %}:
-                    {{ currency }} <input type="text" id="edit_product_price" maxlength="{{field_lengths.price }}"/><label for="edit_product_price">{% trans 'excl. tax' %}</label>
+                <p><label for="edit_unit_type">{% trans 'Price per' %} </label><select id="edit_unit_type"></select>:<br />
+                    {{ currency }} <input type="text" id="edit_product_price" maxlength="{{field_lengths.price }}"/><label for="edit_product_price">{% trans 'excl. tax' %}</label><br />
                     {{ currency }} <input type="text" id="edit_product_price_total" maxlength="{{ field_lengths.price }}"/><label for="edit_product_price_total">{% trans 'incl. tax' %}</label>
-                   <label for="edit_unit_type">{% trans 'per' %}</label><select id="edit_unit_type"></select>
+                   
             </td>
         </tr>
         <tr>
@@ -900,6 +904,7 @@ $(document).ready(function(){
             <td>
                 {% comment %} discounts {% endcomment %}
                 <p>{% trans 'Discounts' %}</p>
+                <p>{% blocktrans %} Drag to reorder. Total discount will be calculated in the same order as shown here. {% endblocktrans %}</p>
                 <ul id="edit_discounts"></ul>
             </td>
         </tr>

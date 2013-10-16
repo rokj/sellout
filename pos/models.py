@@ -135,7 +135,7 @@ class ProductAbstract(SkeletonU):
 class Product(ProductAbstract):
     # foreign keys, changed data in Company/Discount/... will be reflected in Product and BillItem
     company = models.ForeignKey(Company, null=False, blank=False)
-    discounts = models.ManyToManyField(Discount, null=True, blank=True)
+    discounts = models.ManyToManyField(Discount, null=True, blank=True, through='ProductDiscount')
     category = models.ForeignKey(Category, null=True, blank=True)
     stock = models.DecimalField(_("Number of items left in stock"),
         max_digits=g.DECIMAL['quantity_digits'],
@@ -157,6 +157,15 @@ class Product(ProductAbstract):
 #    product = models.ForeignKey(Product, null=False, blank=False)
 #    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
 #    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
+
+class ProductDiscount(models.Model):
+    """ custom many-to-many field for products' discounts: order is important so it must be saved """
+    product = models.ForeignKey(Product)
+    discount = models.ForeignKey(Discount)
+    seq_no = models.IntegerField(_("Order of discount on a product"), null=False)
+    
+    def __unicode__(self):
+        return self.product.name + ": " + self.discount.description + ": " + str(self.seq_no)
 
 ### prices ###
 class Price(SkeletonU):

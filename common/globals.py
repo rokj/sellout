@@ -61,6 +61,11 @@ DISCOUNT_TYPES = (
     ("Absolute", _("Absolute value")),
 )
 
+DISCOUNT_CALCULATION = (
+    ("Tax first", _("Add tax, then subtract discount")),
+    ("Discount first", _("Subtract discount, then add tax")),
+)
+
 # contacts
 CONTACT_TYPES = (
     ("Individual", _("Individual")),

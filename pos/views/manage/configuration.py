@@ -49,7 +49,8 @@ class ConfigForm(forms.Form):
     discounts_per_page = forms.IntegerField(required=True)
     default_tax = forms.DecimalField(required=True)
     decimal_separator = forms.CharField(max_length=1, required=True)
-    interface_product_button_size = forms.ChoiceField(choices=button_sizes)
+    interface_product_button_size = forms.ChoiceField(choices=button_sizes, label=_("Product button size"))
+    discount_calculation = forms.ChoiceField(g.DISCOUNT_CALCULATION, required=True)
     
 @login_required
 def edit_config(request, company):
@@ -73,6 +74,7 @@ def edit_config(request, company):
         'default_tax':get_value(request.user, 'pos_default_tax'),
         'decimal_separator':get_value(request.user, 'pos_decimal_separator'),
         'interface_product_button_size':get_value(request.user, 'pos_interface_product_button_size'),
+        'discount_calculation':get_value(request.user, 'pos_discount_calculation'),
     }
     
     if request.method == 'POST':

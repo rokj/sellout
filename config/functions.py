@@ -35,7 +35,7 @@ defaults = {
     'pos_interface_product_button_size':'medium', # keys for PRODUCT_BUTTON_DIMENSIONS in globals
     'pos_interface_bill_width':370, # width of the bill area in terminal (in pixels)
     # billing and calculation defaults
-    'pos_discount_calculation':None,
+    'pos_discount_calculation':"Tax first", # DISCOUNT_CALCULATION in globals
     # fallback defaults
     'pos_default_tax':'0.0',
 }
