@@ -230,7 +230,7 @@ def search_products(request, company):
     
     # permissions: needs to be guest
     if not has_permission(request.user, c, 'product', 'list'):
-        return error(_("You have no permission to view products"))
+        return JSON_error(_("You have no permission to view products"))
     
     # get all products from this company and filter them by entered criteria
     products = Product.objects.filter(company=c)
