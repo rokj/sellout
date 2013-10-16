@@ -201,7 +201,8 @@ def contact_to_dict(user, c):
     ret = {}
 
     ret['id'] = c.id
-
+    ret['type'] = c.type
+    
     if c.company_name:
         ret['company_name'] = c.company_name
     if c.first_name:
