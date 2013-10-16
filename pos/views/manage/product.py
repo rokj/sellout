@@ -91,11 +91,13 @@ def product_to_dict(user, product):
     #    (see discounts.discount_to_dict for details)
     # image
     # category - name
+    # category - id
     # code
     # shop code
     # description
     # private notes
     # tax
+    # tax - id
     # stock
     # edit url
     ret = {}

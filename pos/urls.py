@@ -55,9 +55,9 @@ urlpatterns = patterns('',
     url(r_company + _('/manage/discount/edit') + '/(?P<discount_id>\d+)/?$', manage.discount.edit_discount, name='edit_discount'),
     url(r_company + _('/manage/discount/delete') + '/(?P<discount_id>\d+)/?$', manage.discount.delete_discount, name='delete_discount'),
     # taxes
-    url(r_company + _('/manage/taxes') + '/?$', manage.tax.list_taxes, name='list_taxes'), # template view
-    url(r_company + r'/manage/json/taxes/?$', manage.tax.get_taxes, name='get_taxes'), # get all taxes in a json list
-    url(r_company + r'/manage/json/taxes/save/?$', manage.tax.save_taxes, name='save_taxes'), # save (override existing) taxes
+    url(r_company + _('/manage/taxes') + '/?$', manage.tax.web_list_taxes, name='list_taxes'), # template view
+    url(r_company + r'/manage/json/taxes/?$', manage.tax.web_get_taxes, name='get_taxes'), # get all taxes in a json list
+    url(r_company + r'/manage/json/taxes/save/?$', manage.tax.web_save_taxes, name='save_taxes'), # save (override existing) taxes
 
     #url(r_company + _('/manage/taxes/edit') + '/?$', manage.misc.edit_taxes, name='edit_taxes'),
     # products

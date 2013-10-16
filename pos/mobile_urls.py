@@ -49,6 +49,13 @@ urlpatterns = patterns('',
 
     url(r_company + _('/manage/contact/edit') + '/(?P<contact_id>\d+)/?$', manage.contact.edit_contact, name='edit_contact'),
     url(r_company + _('/manage/contact/delete') + '/(?P<contact_id>\d+)/?$', manage.contact.delete_contact, name='delete_contact'),
+    
+    # taxes
+    url(r_company + _('/manage/taxes') + '/?$', manage.tax.mobile_list_taxes, name='list_taxes'), # template view
+    url(r_company + r'/manage/json/taxes/?$', manage.tax.mobile_get_taxes, name='get_taxes'), # get all taxes in a json list
+    url(r_company + r'/manage/json/taxes/save/?$', manage.tax.mobile_save_taxes, name='save_taxes'), # save (override existing) taxes
+
+    
     # discounts
     url(r_company + _('/manage/discounts') + '/?$', manage.discount.list_discounts, name='list_discounts'),
     url(r_company + _('/manage/discount/add') + '/?$', manage.discount.add_discount, name='add_discount'),
