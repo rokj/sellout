@@ -164,8 +164,12 @@ class ProductDiscount(models.Model):
     discount = models.ForeignKey(Discount)
     seq_no = models.IntegerField(_("Order of discount on a product"), null=False)
     
+    class Meta:
+        ordering = ["seq_no"] # always order by sequence number
+    
     def __unicode__(self):
         return self.product.name + ": " + self.discount.description + ": " + str(self.seq_no)
+        
 
 ### prices ###
 class Price(SkeletonU):

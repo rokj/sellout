@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
 
-from pos.models import Company, Category, Discount, Product, Price, Tax
+from pos.models import Company, Category, Discount, Product, ProductDiscount, Price, Tax
 from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, image_dimensions, \
@@ -34,11 +34,20 @@ def mobile_JSON_units(request, company):
 def web_JSON_units(request, company):
     return JSON_units(request, company)
 
-
 def JSON_units(request, company):
     # at the moment, company is not needed
     # also, no permission checking is required
     return JSON_response(g.UNITS) # G units!
+
+def get_product_discounts(product):
+    """ returns discount objects, ordered by seq_no in intermediate table """
+    m2mids = [x.discount.id for x in ProductDiscount.objects.filter(product=product).order_by('seq_no')]
+    
+    discounts = []
+    for i in m2mids: # this is the only way to NOT sort the queryset by 'whatever, not but seq_no'
+        discounts.append(Discount.objects.get(id=i))
+    
+    return discounts
 
 @login_required
 def products(request, company):
@@ -115,11 +124,12 @@ def product_to_dict(user, product):
     
     # all discounts in a list
     discounts = []
-    for d in product.discounts.all().order_by('topping_relationship__order_to_add_topping'):
+    all_discounts = get_product_discounts(product)
+    for d in all_discounts:
         print d
         discounts.append(discount_to_dict(user, d))
-        
     ret['discounts'] = discounts
+    print discounts
     
     if product.image: # check if product's image exists
         # get the thumbnail
