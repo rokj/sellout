@@ -48,8 +48,8 @@ var last_value;
 var update_timeout;
 var last_offset = 0; 
 
-check_interval_duration = 500;
-update_timeout_duration = 1500;
+var check_interval_duration = 500;
+var update_timeout_duration = 1500;
 
 // remember the category of last added product and show it in new dialog
 last_chosen_category = null;
@@ -231,8 +231,10 @@ $(document).ready(function(){
         return null;
     }
     
-    function add_discount(ul_obj, product, i){ // i - index in product.discounts
+    function add_discount(ul_obj, product, id){ // i - index in product.discounts
         // add a list item and a delete button to product edit dialog
+        // add a discount from all_discounts to product
+        var i = find_discount_by_id(product.discounts, id)
         var discount = product.discounts[i];
         
         li_obj = $("<li>", {title:""});
@@ -245,6 +247,9 @@ $(document).ready(function(){
         btn_obj.click(function(){
             // delete this list item
             $(this).parent().remove();
+            // delete this id from product.discounts
+            product.discounts.splice(i, 1);
+            // redraw discounts
             refresh_discounts(product);
         });
         
@@ -258,10 +263,10 @@ $(document).ready(function(){
         ul_obj = $("#edit_dialog #edit_discounts");
         ul_obj.empty();
         
-        // add discounts in product
+        // add discounts currently in product
         var i;
         for(i = 0; i < product.discounts.length; i++){
-            add_discount(ul_obj, product, i);
+            add_discount(ul_obj, product, product.discounts[i].id);
         }
         
         // add another item, this time with all available discounts
@@ -275,17 +280,16 @@ $(document).ready(function(){
         // add discounts NOT in product to add listbox
         var added = 0;
 
-        alert(JSON.stringify(product.discounts))
         for(i = 0; i < all_discounts.length; i++){
-            alert(all_discounts[i].id)
-            if(find_discount_by_id(product.discounts, all_discounts[i].id)){
-                alert("found discount id " + all_discounts[i].id)
+            // ignore discounts that are already in product
+            if(find_discount_by_id(product.discounts, all_discounts[i].id) != null){
+                
                 continue;
             }
             
             opt_obj = $("<option>")
-            .attr("value", i)
-            .append(all_discounts[i].code + " " + discount_amount(all_discounts[i]));
+                .attr("value", all_discounts[i].id)
+                .append(all_discounts[i].code + " " + discount_amount(all_discounts[i]));
             
             sel_obj.append(opt_obj);
             added++;
@@ -297,10 +301,9 @@ $(document).ready(function(){
             
             sel_obj.unbind().change(function(){ // no add buttons
                 d_i = $(":selected", sel_obj).val(); // currently selected discount's list index
-                id = all_discounts[find_discount_by_id(all_discounts, d_i)];
                 
                 // add data to product
-                product.discounts.push(id);
+                product.discounts.push(all_discounts[find_discount_by_id(all_discounts, d_i)]);
                 refresh_discounts(product);
             });
         }
@@ -310,7 +313,9 @@ $(document).ready(function(){
         }
         
         // make the list sortable, but exclude the last item
-        ul_obj.sortable({items:"li:not(:last)"});
+        if(added > 0) ul_obj.sortable({items:"li:not(:last)"});
+        else ul_obj.sortable({items:"li"});
+        
     }
     
     function upload_image_status(status, save_obj, del_obj, upl_obj, img_obj){
@@ -831,7 +836,7 @@ $(document).ready(function(){
             // empty product
             product = {
                 "id":-1,// new product's id = -1 until the server assigns an id
-                "discounts":{}, // no discounts so far
+                "discounts":[], // no discounts so far
                 // #####
                 //"tax":{{default_tax|escapejs}} // tax from config
             };

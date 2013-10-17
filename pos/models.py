@@ -126,7 +126,7 @@ class ProductAbstract(SkeletonU):
     private_notes = models.TextField(_("Notes (only for internal use)"), null=True, blank=True)
     unit_type = models.CharField(_("Product unit type"), max_length=15,
                                     choices = g.UNITS, blank=False, null=False, default=g.UNITS[0][0])
-    # price is in a separate model
+    # price - in a separate model
     tax = models.ForeignKey(Tax, null=False, blank=False)
     
     class Meta:
@@ -158,7 +158,7 @@ class Product(ProductAbstract):
 #    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
 #    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
 
-class ProductDiscount(models.Model):
+class ProductDiscount(SkeletonU):
     """ custom many-to-many field for products' discounts: order is important so it must be saved """
     product = models.ForeignKey(Product)
     discount = models.ForeignKey(Discount)
@@ -244,49 +244,63 @@ def delete_permission_cache(**kwargs):
 ### bills ###
 class Bill(SkeletonU):
     company = models.ForeignKey(Company, null=False, blank=False) # also an issuer of the bill
+    user = models.ForeignKey(User, null=False)
+    till = models.CharField(_("Cash register id"), max_length = 50, null=True) # is null only when saving a fresh bill
+    
     type = models.CharField(_("Bill type"), max_length=20, choices=g.BILL_TYPES, null=False, blank=False, default=g.BILL_TYPES[0][0])
-    recipient_company = models.ForeignKey(Company, null=True, blank=True, related_name='bill_recipient_company')
-    recipient_contact = models.ForeignKey(Contact, null=True, blank=True) 
+    recipient_contact = models.ForeignKey(Contact, null=True, blank=True, related_name='bill_recipient_company')
     note = models.CharField(_("Notes"), max_length=1000, null=True, blank=True)
     sub_total = models.DecimalField(_("Sub total"),
                                     max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                                    null=False, blank=False)
+                                    null=True, blank=True)
     discount = models.DecimalField(_("Discount on the whole bill, in percentage"), 
                                    max_digits = g.DECIMAL['percentage_decimal_places']+3, decimal_places=g.DECIMAL['percentage_decimal_places'],
                                    null=True, blank=True)
     tax = models.DecimalField(_("Tax amount, absolute value, derived from products"), 
                                    max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
                                    null=True, blank=True)
-    timestamp = models.DateTimeField(_("Date and time of bill creation"), auto_now_add=True)
+    total = models.DecimalField(_("Total amount to be paid"), 
+                         max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
+                         null=True, blank=True)
+                         
+    timestamp = models.DateTimeField(_("Date and time of bill creation"), null=False)
+    due_date = models.DateTimeField(_("Due date"), null=True)
     status = models.CharField(_("Bill status"), max_length=20, choices=g.BILL_STATUS, default=g.BILL_STATUS[0][0])
     
     def __unicode__(self):
         return self.company.name + ": " + str(self.sub_total)
     
-    def save(self):
-        super(Bill, self).save()
-        copy_bill_to_history(self.id) # always put a copy in history
+    #def save(self):
+    #    super(Bill, self).save()
+    #    copy_bill_to_history(self.id) # always put a copy in history
 
 class BillItem(ProductAbstract): # include all data from Product
     bill = models.ForeignKey(Bill)
     quantity = models.DecimalField(_("Quantity"), max_digits = g.DECIMAL['quantity_digits'],
                                  decimal_places = g.DECIMAL['quantity_decimal_places'],
                                  null=False, blank=False)
-    price = models.DecimalField(_("Sub total"), # hard-coded price from current Price table
-                                max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                                null=False, blank=False)
-    discount_sum = models.DecimalField(_("Discount, absolute value, sum of all current discounts"), 
-                                   max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                                   null=True, blank=True)
-    bill_notes = models.CharField(_("Bill notes") ,max_length=1000, null=True, blank=True,
-                                  help_text=_("Notes shown on bill, like expiration date or serial number"))
+    base_price = models.DecimalField(_("Base price"), # hard-coded price from current Price table
+                                     max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
+                                     null=False, blank=False)
+    tax_absolute = models.DecimalField(_("Tax amount (absolute value)"), # hard-coded price from current Price table
+                              max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
+                              null=False, blank=False)
+    discount_absolute = models.DecimalField(_("Discount, absolute value, sum of all valid discounts on this product"), 
+                                            max_digits = g.DECIMAL['currency_digits'],
+                                            decimal_places=g.DECIMAL['currency_decimal_places'], null=True, blank=True)
+    total = models.DecimalField(_("Total price"),
+                              max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
+                              null=False, blank=False)
+    
+    bill_notes = models.CharField(_("Bill notes"), max_length=1000, null=True, blank=True,
+                                  help_text=_("Notes for this item, shown on bill (like expiration date or serial number)"))
     
     def __unicode__(self):
         return str(self.bill.id) + ": " + self.name
     
-    def save(self):
-        super(BillItem, self).save()
-        copy_bill_to_history(self.bill.id) # always put a copy in history
+    #def save(self):
+    #    super(BillItem, self).save()
+    #    copy_bill_to_history(self.bill.id) # always put a copy in history
 
 ### history
 class BillHistory(SkeletonU):
@@ -297,7 +311,7 @@ class BillHistory(SkeletonU):
         verbose_name_plural = _("Bill history")
 
 def model_to_dict(obj, ignore=[], exclude=[]):
-    """ converts django model to dictionary.
+    """ converts django model object to dictionary.
         ignores data that is in ignore list.
         includes data from foreign key objects, if it's not in exclude[] list.
         ignore takes precedence over exclude. """
@@ -358,7 +372,6 @@ def copy_bill_to_history(bill_id):
     history.save()
     return True
 
-
 @receiver(pre_save, sender=Category)
 @receiver(pre_save, sender=Company)
 @receiver(pre_save, sender=Product)
@@ -387,4 +400,4 @@ def cleanup_images(**kwargs):
 
         # add image to Cleanup for later deletion
         #c = Cleanup(filename=prev_entry.image.path)
-        #c.save()
+        #c.save()        

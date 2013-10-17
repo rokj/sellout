@@ -24,6 +24,7 @@ import json
 defaults = {
     # localization
     'pos_date_format':'yyyy-mm-dd', # keys for DATE_FORMATS dictionary in globals
+    'pos_time_format':'23:59', # keys for TIME_FORMATS dictionary in globals
     'pos_timezone':'utc', # keywords for pytz timezones
     'pos_currency':"$",
     'pos_decimal_separator':'.',
@@ -104,7 +105,6 @@ def get_value(user, key):
         if key in defaults:
             data[key] = defaults[key]
             save_config(user, data)
-            print data[key]
             return data[key]
         else:
             return "<invalid key: '" + "':'" + key + "'>"
@@ -120,3 +120,10 @@ def get_date_format(user, variant):
         variant is one of 'python', 'django', 'jquery'
     """
     return g.DATE_FORMATS[get_value(user, 'pos_date_format')][variant]
+    
+# time format
+def get_time_format(user, variant):
+    """ returns g.TIME_FORMATS[user's date format][variant]
+        variant is one of 'python', 'django', 'jquery'
+    """
+    return g.TIME_FORMATS[get_value(user, 'pos_time_format')][variant]

@@ -27,7 +27,7 @@ def list_date_formats():
     
         could belong to ConfigForm, but will eventually be used in other parts of the app
     """
-    return [(key, key) for key in g.DATE_FORMATS]
+    return sorted([(key, key) for key in g.DATE_FORMATS])
 
 def list_timezones():
     timezones = []
@@ -36,13 +36,19 @@ def list_timezones():
         
     return timezones
 
+def list_time_formats():
+    """ lists first-level keys in g.TIME_FORMATS (see list_date_formats)
+    """
+    return sorted([(key, key) for key in g.TIME_FORMATS])
+
 #######################
 ### forms and views ###
 #######################
 class ConfigForm(forms.Form):
     button_sizes = [(key,key) for key,value in g.PRODUCT_BUTTON_DIMENSIONS.iteritems()]
 
-    date_format = forms.ChoiceField(choices=list_date_formats(),required=True)
+    date_format = forms.ChoiceField(choices=list_date_formats(), required=True)
+    time_format = forms.ChoiceField(choices=list_time_formats(), required=True)
     timezone = forms.ChoiceField(choices=list_timezones(), required=True)
     currency = forms.CharField(max_length=4, required=True)
     contacts_per_page = forms.IntegerField(required=True)
@@ -67,6 +73,7 @@ def edit_config(request, company):
     # get_value is needed because dict['key'] will fail if new keys are added but not yet saved
     initial = {
         'date_format':get_value(request.user, 'pos_date_format'),
+        'time_format':get_value(request.user, 'pos_time_format'),
         'timezone':get_value(request.user, 'pos_timezone'),
         'currency':get_value(request.user, 'pos_currency'),
         'contacts_per_page':get_value(request.user, 'pos_contacts_per_page'),

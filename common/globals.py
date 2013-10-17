@@ -73,9 +73,9 @@ CONTACT_TYPES = (
 )
 
 # bills
-# TODO popraviti izrazoslovje
-BILL_TYPES = (
-    ("asdf",_("krneki")),
+BILL_TYPES = ( 
+    ("Normal",_("Normal")),
+    # TODO add type for company
 )
 
 BILL_STATUS = (
@@ -93,22 +93,51 @@ BILL_STATUS = (
 #  - django templates
 #  - jquery format string (for datepicker etc.)
 DATE_FORMATS = {
-    'dd.mm.yyyy':{'regex':"\d{1,2}\.\d{1,2}\.\d{4}", # with or without leading zeros
+    'dd.mm.yyyy':{'regex':"^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros
                   'python':"%d.%m.%Y", # the docs say zero-padded decimal, but will also parse non-padded numbers
                   'django':"j.n.Y", # show no leading zeros in template
                   'jquery':"dd.mm.yy",
                   },
-    'mm/dd/yyyy':{'regex':"\d{1,2}\.\d{1,2}\.\d{4}", # with or without leading zeros
+    'mm/dd/yyyy':{'regex':"^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros
                   'python':"%m/%d/%Y",
                   'django':"n/j/Y",
                   'jquery':"mm/dd/yy",
                   },
-    'yyyy-mm-dd':{'regex':"\d{4}\.\d{2}\.\d{2}", # strictly with leading zeros
+    'yyyy-mm-dd':{'regex':"^\d{4}\.\d{2}\.\d{2}$", # strictly with leading zeros
                   'python':"%Y-%m-%d",
                   'django':"Y-m-d",
                   'jquery':"yy-mm-dd",
                   },
 }
+
+TIME_FORMATS = {
+    '23:59':{ # 24-hour clock
+            'regex':"^[0-2][0-4]:[0-5][0-9]$",
+            'python':"%H:%M",
+            'django':"H:i",
+            'js':"HH:mm", # jquery has nothing to do with time, so it will have to be formatted using javascript
+            },
+    '23:59:59':{ # 24-hour clock with seconds
+            'regex':"^[0-2][0-4]:[0-5][0-9]:[0-5][0-9]$",
+            'python':"%H:%M:%S",
+            'django':"H:i:s",
+            'js':"HH:mm:ss",
+            },
+    '12:59 AM/PM':{ # 12-hour clock with AM/PM
+            'regex':"^[0-2][0-4]:[0-5][0-9] (AM|PM)$",
+            'python':"%I:%M %p",
+            'django':"",
+            'js':"hh:mm <AMPM>", # <AMPM> will have to be replaced in javascript (python?)
+            },
+    '12:59:59 AM/PM':{ # 12-hour clock with AM/PM
+            'regex':"^[0-2][0-4]:[0-5][0-9]:[0-5][0-9] (AM|PM)$",
+            'python':"%r",
+            'django':"",
+            'js':"hh:mm:ss <AMPM>", # <AMPM> will have to be replaced in javascript (python?)
+            },
+}
+
+
 
 DATE = {
     'max_date_length':10,

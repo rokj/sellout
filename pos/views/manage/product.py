@@ -48,7 +48,39 @@ def get_product_discounts(product):
         discounts.append(Discount.objects.get(id=i))
     
     return discounts
-
+    
+def update_product_discounts(request, product, discount_ids):
+    """ smartly handles ProductDiscount m2m fields with as little repetition/deletion as possible
+        discount_ids: list of discount ids (integers) """
+    # first remove discounts that are not in discount_ids
+    ProductDiscount.objects.filter(product=product).exclude(discount__id__in=discount_ids).delete()
+    # then add missing discounts with a valid sequence
+    i = 1
+    modify = False
+    for did in discount_ids:
+        # see if this discount exists at all
+        try:
+            discount = Discount.objects.get(id=int(did))
+            m2m = ProductDiscount.objects.get(product=product, discount__id=did)
+            modify = True # modify existing m2m entry
+        except ProductDiscount.DoesNotExist:
+            # it does not exist, add it and assign sequence number
+            m2m = ProductDiscount(
+                created_by = request.user,
+                product = product,
+                discount = discount,
+                seq_no = i
+            )
+            m2m.save()
+            # modification is not required
+            modify = False
+            
+        if modify:
+            m2m.seq_no = i
+            m2m.save()
+        
+        i += 1
+    
 @login_required
 def products(request, company):
     c = get_object_or_404(Company, url_name = company)
@@ -126,10 +158,8 @@ def product_to_dict(user, product):
     discounts = []
     all_discounts = get_product_discounts(product)
     for d in all_discounts:
-        print d
         discounts.append(discount_to_dict(user, d))
     ret['discounts'] = discounts
-    print discounts
     
     if product.image: # check if product's image exists
         # get the thumbnail
@@ -558,14 +588,8 @@ def create_product(request, company):
     )
     product.save()
     
-    # add discounts
-    if data.get('discounts'):
-        for d in data['discounts']:
-            try:
-                discount = Discount.objects.get(id=int(d))
-                product.discounts.add(discount)
-            except Discount.DoesNotExist:
-                pass
+    # update discounts
+    update_product_discounts(request, product, data['discounts'])
     
     # price has to be updated separately
     product.price = update_price(product, request.user, data['price'])
@@ -622,24 +646,9 @@ def edit_product(request, company, product_id):
     product.stock = data['stock']
     product.tax = data['tax']
     
-    # update discounts: remove deleted
-    discounts = product.discounts.all()
-    for d in discounts:
-        if d.id not in data['discounts']:
-            product.discounts.remove(d)
-        else:
-            data['discounts'].remove(d.id)
-
-    # update discounts: add missing
-    # anything that is left in data['discounts'] must be added
-    if data.get('discounts'):
-        for d in data['discounts']:
-            try:
-                discount = Discount.objects.get(id=int(d))
-                product.discounts.add(discount)
-            except Discount.DoesNotExist:
-                pass
-
+    # update discounts
+    update_product_discounts(request, product, data['discounts'])
+    
     # image
     if data['change_image'] == True:
         if data['image']: # new image is uploaded

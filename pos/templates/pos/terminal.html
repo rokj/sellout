@@ -43,13 +43,15 @@ $(document).ready(function() {
     window.data.loading = "{% static 'graphics/loading.gif' %}";
     window.data.subcategory = "{% static 'graphics/subcategory.png' %}";
     window.data.csrf_token = "{{csrf_token}}";
+    // urls
+    window.data.get_bill_url = "{% url 'pos:get_active_bill' company.url_name %}";
     // ui settings
     window.data.t = 100; // duration of show/hide events
     window.data.t_easing = 200; // duration of easing functions (drag start/stop)
     window.data.last_search = ""; // last searched query
     window.data.search_update_interval = 1000; // checking if search query has changed
 
-    window.items = {
+    window.items = { // jQuery objects only (to avoid searching each time something updates)
         focused:null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
         parents_div:$("div#parents_scroll_inner"),
         children_div:$("div#children_scroll_inner"),
@@ -60,9 +62,9 @@ $(document).ready(function() {
         bill_items:$("#bill_items"),
         
     }
-    
-    // a list of products added to bill
-    window.products_in_bill = {}; // key:product_id, value: $(bill_item) // TODO: empty when starting a new bill
+
+    window.bill = {}; // all about the current bill
+    window.bill.last_item = null; // the last added/edited item (none in the beginning)
     
     /* layout (change some things programmaticaly) */
     init_layout();
@@ -74,6 +76,10 @@ $(document).ready(function() {
     /* handle the keyboard */
     $(document).keypress(handle_keypress);
 
+    /* get the last unfinished bill or start a new one (server will tell) */
+    get_bill();
+
+    
     /* show the terminal */
     $("#loading").remove();
 });  

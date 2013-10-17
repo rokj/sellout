@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.core.files.base import ContentFile
 
 from common import globals as g
-from config.functions import get_date_format, get_value
+from config.functions import get_date_format, get_time_format, get_value
 from pos.models import Permission
 
 import json
@@ -107,8 +107,11 @@ def format_number(user, n, high_precision=False):
     """
     sep = get_value(user, 'pos_decimal_separator')
     
+    if not n:
+        return '0'
+    
     if high_precision:
-        s = str(n.quantize(Decimal('1.00000'))) # round to four decimal places (for management etc.)
+        s = str(n.quantize(Decimal('1.0000'))) # round to four decimal places (for management etc.)
     else:
         s = str(n.quantize(Decimal('1.00'))) # round to two decimal places
     
@@ -120,6 +123,13 @@ def format_date(user, date):
         return ''
     else:
         return date.strftime(get_date_format(user, 'python'))
+
+def format_time(user, date):
+    """ formats time for display according to user's settings """
+    if not date:
+        return ''
+    else:
+        return date.strftime(get_time_format(user, 'python'))
 
 def parse_decimal(user, string, max_digits=None):
     """ replace user's decimal separator with dot and parse

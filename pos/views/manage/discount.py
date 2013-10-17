@@ -101,7 +101,7 @@ def JSON_discounts(request, company, product_id=None):
     if not has_permission(request.user, c, 'discount', 'list'):
         return JSON_error(_("You have no permission to view discounts"))
 
-    discounts = Discount.objects.filter(company__url_name=company, active=True)
+    discounts = Discount.objects.filter(company__url_name=company, active=True).order_by('code')
     
     ds = []
     for d in discounts:

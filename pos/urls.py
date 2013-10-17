@@ -14,7 +14,6 @@ r_company = r'^(?P<company>[\w-]{1,' + str(g.MISC['company_url_length']) + '})'
 # system pages (registration, login, logout, ...: /pos/app/register-company
 r_manage = g.MISC['management_url'] + '/'
 
-
 urlpatterns = patterns('',
     # system pages
     url(r_manage + _('register-company') + '$', manage.company.register_company, name='register_company'),
@@ -32,11 +31,18 @@ urlpatterns = patterns('',
     url(r_company + '/init/?$', pos.terminal_init, name='terminal_init'),
     url(r_company + '/save/?$', pos.terminal_save, name='terminal_save'),
     
-    # views for bill and items on it
+    # views for bill
     # get_active_bill - returns the same as add_bill_item if there's an active account, or nothing (new bill)
+    url(r_company + '/bill/active/?$', pos.get_active_bill, name='get_active_bill'),
+    # save_bill - saves the bill as <TODO>
+    # url(r_company + '/bill/save/?$', pos.add_item_to_bill, name='add_item_to_bill'),
+    
+    # views for bill items
     # add_bill_item - adds product to bill and returns updated bill info
-    # remove_bill_item - 
-    # save_bill - 
+    url(r_company + '/bill/item/add/?$', pos.add_item_to_bill, name='add_item_to_bill'),
+    # edit_bill_item - updates item info or removes it, returns new item data
+    url(r_company + '/bill/item/edit/?$', pos.add_item_to_bill, name='add_item_to_bill'),
+    
     
     
     # management urls: company
