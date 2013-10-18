@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 
-from pos.models import Company, Bill, BillItem, Price
+from pos.models import Company, Bill, BillItem, Price, Product
 from pos.views.manage import get_all_categories_structured
 
 from pos.views.util import has_permission, no_permission_view, JSON_response, JSON_ok, JSON_parse, JSON_error, \
@@ -14,6 +14,7 @@ import common.globals as g
 import json
 from pytz import timezone
 from datetime import datetime as dtm
+from decimal import Decimal
 
 def get_item_price():
     pass
@@ -139,21 +140,27 @@ def add_item_to_bill(request, company):
     # permissions
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JSON_error(_("You have no permission to edit bills"))
-        
+    
+    # data
+    try:
+        data = JSON_parse(request.POST.get('data'))
+    except:
+        return JSON_error(_("No data in POST"))
+    
     # get bill
     try:
-        bill = Bill.objects.get(company=c, id=request.POST.get('data').get('bill'))
+        bill = Bill.objects.get(company=c, id=data.get('bill_id'))
     except Bill.DoesNotExist:
         return JSON_error(_("This bill does not exist"))
     
     # get product
     try:
-        product = Product.objects.get(company=c, id=int(request.POST.get('data').get('product_id')))
+        product = Product.objects.get(company=c, id=int(data.get('product_id')))
     except Product.DoesNotExist:
         return JSON_error(_("Product with this id does not exist"))
 
     # parse quantity    
-    r = parse_decimal(request.user, request.POST.get('data').get('qty'), g.DECIMAL['quantity_digits'])
+    r = parse_decimal(request.user, data.get('qty'), g.DECIMAL['quantity_digits'])
     if not r['success']:
         return JSON_error(_("Invalid quantity value"))
     else:
@@ -171,6 +178,7 @@ def add_item_to_bill(request, company):
     
     # tax:
     tax = product.tax.amount
+    discounts = product.discounts.all()
     
     # calculate discounts and tax: equation depends on configuration (first tax or first discounts)
     if get_value(request.user, 'pos_discount_calculation') == "Tax first":
@@ -184,8 +192,9 @@ def add_item_to_bill(request, company):
     # discount_absolute = models.DecimalField(_("Discount, absolute value, sum of all valid discounts on this product"), 
     # total = models.DecimalField(_("Total price"),
     
-    bill_notes = request.POST.get('data').get('notes')
+    bill_notes = data.get('notes')
 
+    # create a bill item and save it to database, then return JSON with its data
     
     
     

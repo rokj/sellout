@@ -18,7 +18,7 @@ function render_bill(bill){
 
 /* handling bill items */
 function update_item(item_obj, item_data){ // updates the bill item after it was received from the server
-    
+    alert(JSON.stringify(item_data));
 }
 
 function edit_item(){ // sends the last item to the server and creates 
@@ -37,9 +37,17 @@ function add_item(product){
         // JSON to send:
         // {'bill':bill_id, 'product_id':<id>, 'qty':<qty>, 'notes':<notes>}
         data_to_send = {
-            
+            bill_id:window.bill.bill.id,
+            product_id:product.id,
+            qty:"1", // TODO BigNumber
+            notes:"SOMENOTES"
         }
-    }
+        
+        // send request to server
+        send_data(window.data.add_bill_item, data_to_send, window.data.csrf_token, function(recv_data){
+            update_item(window.bill.last_item, recv_data);
+        });
+    } // while waiting for response, draw the item
     
     // create a new item for the currently 'added' product
     // only add it if there's not such item in the bill yet
@@ -48,7 +56,7 @@ function add_item(product){
     // rather add a new item without those discounts
     if(get_bill_item(product.id) == null){
         // item not found, add a new to the product
-        create_item(product, false); // add 'unexploded' item
+        last_item = create_item(product, false); // add 'unexploded' item
     }
     else{
         // item found, add 1 to its quantity
@@ -56,6 +64,7 @@ function add_item(product){
     }
     
     // set last item to this
+    window.bill.last_item = last_item;
 }
 
 function get_bill_item(product_id){
@@ -135,9 +144,9 @@ function create_item(product, exploded){
         new_item.attr('data-exploded', 'true');
     }
     
-    // add to bill
-    window.items.bill_items.append(new_item);
-    
     // init ui 'gadgets'
+    
+    
+    return new_item;
 }
 
