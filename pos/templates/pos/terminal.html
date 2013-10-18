@@ -105,24 +105,28 @@ $(document).ready(function() {
     <thead>
     <tr id="bill_header">
         <td class="bill-item-name-container">
-            <p class="bill-title">{% trans 'Name' %}</p>
+            <p class="bill-title">{% trans 'Name' %}</p> {% comment %} product name and code {% endcomment %}
             <p class="bill-subtitle">{% trans 'Code' %}</p></td>
         <td class="bill-item-qty-container">
-            <p class="bill-title">{% trans 'Qty' %}</p>
+            <p class="bill-title">{% trans 'Qty' %}</p> {% comment %} quantity and unit type {% endcomment %}
             <p class="bill-subtitle">[{% trans 'Unit' %}]</p></td>
         <td class="bill-item-price-container">
-            <p class="bill-title">{% trans 'Price' %}</p>
+            <p class="bill-title">{% trans 'Price' %}</p> {% comment %} base price {% endcomment %}
             <p class="bill-subtitle">[{{ currency }}]   </p></td>
         <td class="bill-item-tax-container">
-            <p class="bill-title">{% trans 'Tax' %}</p>
-            <p class="bill-subtitle">[%]</p></td>
+            <p class="bill-title">{% trans 'Tax' %}</p>{% comment %} tax, percent and absolute value {% endcomment %}
+            <p class="bill-subtitle">[%/{{currency}}]</p></td>
         <td class="bill-item-discount-container">
-            <p class="bill-title">{% trans 'Discount' %}</p>
-            <p class="bill-subtitle">[%/{{ currency }}]</p>
-            </td>
+            <p class="bill-title">{% trans 'Discount' %}</p> {% comment %} discount, absolute value and a 'mode' button {% endcomment %}
+            <p class="bill-subtitle">[{{ currency }}]</p></td>
+        <td class="bill-item-single-total-container">
+            <p class="bill-title">{% trans 'Single total' %}</p> {% comment %} single item total {% endcomment %}
+            <p class="bill-subtitle">[{{ currency }}]</p></td>
         <td class="bill-item-total-container">
-            <p class="bill-title">{% trans 'Total' %}</p></td>
-        <td class="bill-item-edit"></td> {% comment %} edit buttons {%  endcomment %}
+            <p class="bill-title">{% trans 'Total' %}</p> {% comment %} total of this item(s) {% endcomment %}
+            <p class="bill-subtitle">[{{ currency }}]</p></td>
+            
+        <td class="bill-item-edit"></td> {% comment %} edit buttons for this row {%  endcomment %}
     </tr>
     </thead>
     

@@ -9,7 +9,7 @@ from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, image_dimensions, \
                            image_from_base64, max_field_length
-from pos.views.manage.discount import discount_to_dict
+from pos.views.manage.discount import discount_to_dict, get_discounts
 from pos.views.manage.category import get_subcategories
 from pos.views.manage.tax import get_default_tax
 
@@ -41,7 +41,8 @@ def JSON_units(request, company):
 
 def get_product_discounts(product):
     """ returns discount objects, ordered by seq_no in intermediate table """
-    m2mids = [x.discount.id for x in ProductDiscount.objects.filter(product=product).order_by('seq_no')]
+    product_discounts = get_discounts(product)
+    m2mids = [x.discount.id for x in product_discounts]
     
     discounts = []
     for i in m2mids: # this is the only way to NOT sort the queryset by 'whatever, not but seq_no'
@@ -53,7 +54,7 @@ def update_product_discounts(request, product, discount_ids):
     """ smartly handles ProductDiscount m2m fields with as little repetition/deletion as possible
         discount_ids: list of discount ids (integers) """
     # first remove discounts that are not in discount_ids
-    ProductDiscount.objects.filter(product=product).exclude(discount__id__in=discount_ids).delete()
+    get_discounts(product).exclude(discount__id__in=discount_ids).delete()
     # then add missing discounts with a valid sequence
     i = 1
     modify = False
@@ -146,7 +147,7 @@ def product_to_dict(user, product):
     ret['id'] = product.id
     
     try: # only the last price from the price table
-        price = Price.objects.filter(product__id=product.id).order_by('-datetime_updated')[0]
+        price = Price.objects.filter(product=product).order_by('-datetime_updated')[0]
         price = format_number(user, price.unit_price)
     except:
         price = ''
