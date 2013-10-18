@@ -60,12 +60,13 @@ $(document).ready(function() {
         search_field:$("input#search_products_filter"),
         products_list:$("div#products"),
         bill_header:$("#bill_header"),
-        bill_items:$("#bill_items"),
-        
+        bill_items:$("#bill_items")
     }
 
-    window.bill = {}; // all about the current bill
-    window.bill.last_item = null; // the last added/edited item (none in the beginning)
+    window.bill = { // all about the current bill
+        last_item:null // the last added/edited item (none in the beginning)
+        // more comes from the server dynamically        
+    };
     
     /* layout (change some things programmaticaly) */
     init_layout();

@@ -45,7 +45,7 @@ function get_size(element){ // get computed element size before it's inserted in
 function check_number(string, separator){
     // returns true if string parsed to BigNumber successfully, or false otherwise
     try{
-        get_bignumber(string, separator);
+        get_number(string, separator);
         return true;
     }
     catch (error) {
@@ -53,21 +53,13 @@ function check_number(string, separator){
     }
 }
 
-function get_bignumber(string, separator){
+function get_number(string, separator){
     // receives a string with number with decimal separator <separator> and returns BigNumber
     // bignumber: https://github.com/MikeMcl/bignumber.js/
     return BigNumber(string.replace(separator, "."))
 }
 
-function display_bignumber(number, separator, decimal_places){
+function display_number(number, separator, decimal_places){
     // receives a BigNumber as a parameter and returns a string with user specified decimal separator
     return number.toFixed(decimal_places).replace('.', separator);
-}
-
-function add_tax(p, t){ // returns a decimal object with added tax t
-    
-}
-
-function cut_tax(P){ // returns a decimal object without tax t
-    
 }

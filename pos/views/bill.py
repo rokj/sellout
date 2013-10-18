@@ -31,7 +31,7 @@ def bill_item_to_dict(user, item):
     i['unit_type'] = item.unit_type,
     i['tax'] = format_number(user, item.tax.amount)
     # values from bill item
-    i['bill'] = item.bill.id
+    i['bill_id'] = item.bill.id
     i['quantity'] = format_number(user, item.quantity)
     i['base_price'] = format_number(user, item.base_price)
     i['tax_percent'] = format_number(user, item.tax_percent)
@@ -94,7 +94,7 @@ def new_bill(user, company):
     bdict = bill_to_dict(user, b)
     
     # this is a new bill, the terminal ought to know this
-    bdict['new'] = True
+    bdict['new'] = True # (this item will be deleted (ignored) on next save)
 
     return bdict
 
@@ -149,8 +149,12 @@ def add_item_to_bill(request, company):
         return JSON_error(_("No data in POST"))
     
     # get bill
+    if not data.get('bill_id'):
+        print data
+        return JSON_error(_("No bill specified"))
+        
     try:
-        bill = Bill.objects.get(company=c, id=data.get('bill_id'))
+        bill = Bill.objects.get(company=c, id=int(data.get('bill_id')))
     except Bill.DoesNotExist:
         return JSON_error(_("This bill does not exist"))
     
@@ -161,7 +165,7 @@ def add_item_to_bill(request, company):
         return JSON_error(_("Product with this id does not exist"))
 
     # parse quantity    
-    r = parse_decimal(request.user, data.get('qty'), g.DECIMAL['quantity_digits'])
+    r = parse_decimal(request.user, data.get('quantity'), g.DECIMAL['quantity_digits'])
     if not r['success']:
         return JSON_error(_("Invalid quantity value"))
     else:
