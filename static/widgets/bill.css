@@ -45,6 +45,12 @@ p.bill-subtitle{
     margin-bottom:0px;
 }
 
-input.qty{
+input.item-qty{
     width:30px;
 }
+
+input.item-notes{
+    width:50px;
+    font-size:10px;
+}
+    

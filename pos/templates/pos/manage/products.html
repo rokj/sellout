@@ -576,13 +576,13 @@ $(document).ready(function(){
         if(!check_number(s, "{{separator}}")) alert("{% trans 'Check price value' %}");
         else{
             // get base price from edit box
-            p = get_bignumber(s, "{{separator}}");
+            p = get_number(s, "{{separator}}");
             // get tax from the drop down (when adding new product, the default is already selected in the drop-down)
-            t = get_bignumber(get_tax($("#edit_product_tax").val()).amount, "{{separator}}"); // tax
+            t = get_number(get_tax($("#edit_product_tax").val()).amount, "{{separator}}"); // tax
             // calculate total price
             P = p.times(t.dividedBy(100).plus(1)); // price including tax
             // set the other edit's value
-            total_price_obj.val(display_bignumber(P, "{{separator}}", {{max_decimal_places}}));
+            total_price_obj.val(display_number(P, "{{separator}}", {{max_decimal_places}}));
         }
     }
     
@@ -597,13 +597,13 @@ $(document).ready(function(){
         if(!check_number(s, "{{separator}}")) alert("{% trans 'Check price value' %}");
         else{
             // get base price from edit box
-            P = get_bignumber(s, "{{separator}}");
+            P = get_number(s, "{{separator}}");
             // get tax from the drop down (when adding new product, the default is already selected in the drop-down)
-            t = get_bignumber(get_tax($("#edit_product_tax").val()).amount, "{{separator}}"); // tax
+            t = get_number(get_tax($("#edit_product_tax").val()).amount, "{{separator}}"); // tax
             // calculate total price
             p = P.dividedBy(t.dividedBy(100).plus(1)); // price including tax
             // set the other edit's value
-            price_obj.val(display_bignumber(p, "{{separator}}", {{max_decimal_places}}));
+            price_obj.val(display_number(p, "{{separator}}", {{max_decimal_places}}));
         }
     }
     

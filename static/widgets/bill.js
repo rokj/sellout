@@ -13,7 +13,7 @@ function get_item_data(item_obj){
     // discount TODO
     
     // check quantity format
-    qty = $("input.qty", item_obj).val();
+    qty = $("input.itme-qty", item_obj).val();
     if(!check_number(qty, window.data.separator)){
         alert(gettext("Invalid quantity format"));
         return null;
@@ -61,7 +61,7 @@ function add_item(product){
         existing_item = get_bill_item(product.id);
         if(existing_item){
             // there is, add 1 to existing item's quantity
-            qty_obj = $("input.qty", existing_item);
+            qty_obj = $("input.item-qty", existing_item);
             qty = qty_obj.val();
             if(check_number(qty, window.data.separator)){
                 qty = get_number(qty, window.data.separator).plus(BigNumber(1));
@@ -141,16 +141,23 @@ function update_item(product, item, replace_obj, exploded){
 
     new_item.removeAttr("id"); // no duplicate ids in document
 
-    // create a new item    
+    // create a new item
     // product name
     $("td.bill-item-name-container p.bill-title", new_item).text(item.name);
     // code
-    $("td.bill-item-name-container p.bill-subtitle", new_item).text(item.code);
-    // notes TODO
+    tmp_obj = $("td.bill-item-name-container p.bill-subtitle", new_item);
+    tmp_obj.text(item.code);
+    tmp_obj.append("<br />");
+    // notes
+    tmp_obj.append(
+        $("<input>", {type:"text", "class":"item-notes"})
+    );
+    
     
     // quantity: an edit box
     tmp_obj = $("td.bill-item-qty-container p.bill-title", new_item);
-    tmp_obj.append($("<input>", {"class":"qty", type:"text"}).val(item.quantity));
+    tmp_obj.empty();
+    tmp_obj.append($("<input>", {"class":"item-qty", type:"text"}).val(item.quantity));
     // 'plus' button
     btn_obj = $("<input>", {type:"button", "class":"qty-button", value:"+"});
     tmp_obj.append(btn_obj);
@@ -190,8 +197,16 @@ function update_item(product, item, replace_obj, exploded){
         new_item.attr('data-exploded', 'true');
     }
     
-    // init ui 'gadgets'
+    // remove and 'explode' buttons
+    tmp_obj = $("td.bill-item-edit", new_item);
+    btn_obj = $("<button>").append("X"); // delete button
     
+    tmp_obj.append(btn_obj).append("<br />");
+    
+    if(!exploded){
+        btn_obj = $("<button>").append("폭"); // 'explode' button
+        tmp_obj.append(btn_obj);
+    }
     
     // create a new item or replace an existing one
     if(!replace_obj){

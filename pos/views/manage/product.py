@@ -223,13 +223,19 @@ def update_price(product, user, new_unit_price):
             return old_price
     
         # update the old price (datetime_updated will be set)
-        old_price.save()
+        try:
+            old_price.save()
+        except:
+            return None
             
     # create new
     new_price = Price(created_by = user,
                       product = product,
                       unit_price = new_unit_price)
-    new_price.save()
+    try:
+        new_price.save()
+    except:
+        return None
     
     return new_price
 
@@ -592,16 +598,21 @@ def create_product(request, company):
     product.save()
     
     # update discounts
-    update_product_discounts(request, product, data['discounts'])
+    if not update_product_discounts(request, product, data['discounts']):
+        product.delete()
+        return JSON_error(_("Error while setting product price"))
+    
     
     # price has to be updated separately
     product.price = update_price(product, request.user, data['price'])
+    if not product.price
     
     # add image, if it's there
     if data['change_image']:
         if 'image' in data:
             product.image = data['image']
-            product.save()
+    
+    product.save()
     
     return JSON_ok()
 
