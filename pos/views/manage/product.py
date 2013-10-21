@@ -598,14 +598,13 @@ def create_product(request, company):
     product.save()
     
     # update discounts
-    if not update_product_discounts(request, product, data['discounts']):
-        product.delete()
-        return JSON_error(_("Error while setting product price"))
-    
+    update_product_discounts(request, product, data['discounts']):
     
     # price has to be updated separately
     product.price = update_price(product, request.user, data['price'])
-    if not product.price
+    if not product.price:
+        product.delete()
+        return JSON_error(_("Error while setting product price"))
     
     # add image, if it's there
     if data['change_image']:
