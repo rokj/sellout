@@ -673,6 +673,7 @@ def edit_product(request, company, product_id):
     # price has to be updated separately
     product.price = update_price(product, request.user, data['price'])
     product.updated_by = request.user
+    
     product.save()
 
     return JSON_ok()
