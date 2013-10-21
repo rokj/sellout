@@ -10,7 +10,7 @@ from django import forms
 from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from pos.models import Company, Discount
+from pos.models import Company, Discount, ProductDiscount
 from pos.views.util import error, JSON_response, JSON_error, \
                            has_permission, no_permission_view, \
                            format_number, format_date, parse_date, parse_decimal, \
@@ -51,41 +51,9 @@ def discount_to_dict(user, d):
         'end_date':format_date(user, d.end_date),
         'active':d.active,
     }
-    
-"""@login_required
-def JSON_discounts(request, company, product_id=None):
-    # send all available discounts for this company
-    # available:
-    #  - active = True
-    #  - valid date
-    # valid dates: 
-    #  - if no dates entered
-    #  - only start date: it must be before today
-    #  - only end date: it must be after today
-    #  - both start and end date: today must be between them
-    # (see discount_to_dict)
-    
-    try:
-        c = Company.objects.get(url_name=company)
-    except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
-    
-    # permissions
-    if not has_permission(request.user, c, 'discount', 'list'):
-        return JSON_error(_("You have no permission to view discounts"))
 
-    discounts = Discount.objects.filter(company__url_name=company, active=True)
-    
-    # put discounts in a dictionary[key=id] for easier searching and handling
-    ds = {}
-    
-    for d in discounts:
-        if is_discount_active(d):
-            ds[d.id] = discount_to_dict(request.user, d)
-    
-    # serialize
-    return JSON_response(ds)
-"""
+def get_discounts(product):
+    return ProductDiscount.objects.filter(product=product).order_by('seq_no')
 
 @login_required
 def JSON_discounts(request, company, product_id=None):

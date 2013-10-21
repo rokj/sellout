@@ -3,39 +3,41 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 
-from pos.models import Company, Bill, BillItem, Price
+from pos.models import Company, Bill, BillItem, Price, Product
 from pos.views.manage import get_all_categories_structured
-
 from pos.views.util import has_permission, no_permission_view, JSON_response, JSON_ok, JSON_parse, JSON_error, \
                            format_number, parse_decimal, format_date, format_time
+from pos.views.manage.discount import get_discounts
 from config.functions import get_value, set_value
 import common.globals as g
 
 import json
 from pytz import timezone
 from datetime import datetime as dtm
-
-def get_item_price():
-    pass
+from decimal import Decimal
 
 def bill_item_to_dict(user, item):
-    # fields in bill_item: (all fields are Decimal)
-    
-    # bill (id > bill FK)   
-    # quantity              |
-    # base_price            |
-    # tax_absolute          | all Decimal fields
-    # discount_absolute     |
-    # total                 |
-    # bill_notes            
     i = {}
     
     i['id'] = item.id
-    i['bill'] = item.bill.id
+    
+    # values from product
+    i['product_id'] = item.product_id
+    i['code'] = item.code,
+    i['shortcut'] = item.shortcut,
+    i['name'] = item.name,
+    i['description'] = item.description,
+    i['private_notes'] = item.private_notes,
+    i['unit_type'] = item.unit_type,
+    i['tax'] = format_number(user, item.tax.amount)
+    # values from bill item
+    i['bill_id'] = item.bill.id
     i['quantity'] = format_number(user, item.quantity)
     i['base_price'] = format_number(user, item.base_price)
+    i['tax_percent'] = format_number(user, item.tax_percent)
     i['tax_absolute'] = format_number(user, item.tax_absolute)
     i['discount_absolute'] = format_number(user, item.discount_absolute)
+    i['single_total'] = format_number(user, item.single_total)
     i['total'] = format_number(user, item.total)
     i['bill_notes'] = item.bill_notes
     
@@ -70,7 +72,7 @@ def bill_to_dict(user, bill):
     items = BillItem.objects.filter(bill=bill)
     i = []
     for item in items:
-        i.append(bill_item_to_dict(user, i))
+        i.append(bill_item_to_dict(user, item))
         
     b['items'] = i
     
@@ -92,7 +94,7 @@ def new_bill(user, company):
     bdict = bill_to_dict(user, b)
     
     # this is a new bill, the terminal ought to know this
-    bdict['new'] = True
+    bdict['new'] = True # (this item will be deleted (ignored) on next save)
 
     return bdict
 
@@ -139,21 +141,31 @@ def add_item_to_bill(request, company):
     # permissions
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JSON_error(_("You have no permission to edit bills"))
-        
-    # get bill
+    
+    # data
     try:
-        bill = Bill.objects.get(company=c, id=request.POST.get('data').get('bill'))
+        data = JSON_parse(request.POST.get('data'))
+    except:
+        return JSON_error(_("No data in POST"))
+    
+    # get bill
+    if not data.get('bill_id'):
+        print data
+        return JSON_error(_("No bill specified"))
+        
+    try:
+        bill = Bill.objects.get(company=c, id=int(data.get('bill_id')))
     except Bill.DoesNotExist:
         return JSON_error(_("This bill does not exist"))
     
     # get product
     try:
-        product = Product.objects.get(company=c, id=int(request.POST.get('data').get('product_id')))
+        product = Product.objects.get(company=c, id=int(data.get('product_id')))
     except Product.DoesNotExist:
         return JSON_error(_("Product with this id does not exist"))
 
     # parse quantity    
-    r = parse_decimal(request.user, request.POST.get('data').get('qty'), g.DECIMAL['quantity_digits'])
+    r = parse_decimal(request.user, data.get('quantity'), g.DECIMAL['quantity_digits'])
     if not r['success']:
         return JSON_error(_("Invalid quantity value"))
     else:
@@ -170,24 +182,76 @@ def add_item_to_bill(request, company):
         return JSON_error(_("Price for this product is not defined"))
     
     # tax:
-    tax = product.tax.amount
-    
+    tax = product.tax.amount/Decimal('100') # percent!
+    discounts = get_discounts(product)
+    def abs_discounts_val(p, ds):
+        """ from price p subtract all discounts in list d and return result """
+        dabs = Decimal('0')
+        for d in ds:
+            d = d.discount
+            # if discount is absolute, just subtract the price from p
+            if d.type == "Absolute":
+                dabs = dabs + d.amount
+            else:
+                dabs = dabs + p*d.amount/Decimal('100') # percent!
+                
+        return dabs
+        
     # calculate discounts and tax: equation depends on configuration (first tax or first discounts)
+    # for quantity = 1, then multiply
     if get_value(request.user, 'pos_discount_calculation') == "Tax first":
         # first add tax to base price, then subtract discounts
-        print 'tax first'
+        tax_absolute = base_price * tax   # absolute tax value
+        price = base_price + tax_absolute # price with tax
+        discount_absolute = abs_discounts_val(price, discounts) # absolute discount value
+        single_total = price - discount_absolute # price with discounts subtracted
     else:
         # first subtract discounts from base price, then add tax
-        print 'discount first'
+        discount_absolute = abs_discounts_val(price, discounts)
+        price = base_price - discount_absolute
+        tax_absolute = price*tax
+        single_total = price + tax_absolute
     
-    # tax_absolute = models.DecimalField(_("Tax amount (absolute value)"), # hard-coded price from current Price table
-    # discount_absolute = models.DecimalField(_("Discount, absolute value, sum of all valid discounts on this product"), 
-    # total = models.DecimalField(_("Total price"),
+    total = single_total * quantity    
     
-    bill_notes = request.POST.get('data').get('notes')
+    # what's in 'price' var is not relevant and should not be used
+    del price
+    
+    print "base " + str(base_price)
+    print "discount " + str(discount_absolute)
+    print "tax " + str(tax_absolute)
+    print "total " + str(total)
 
+    # notes, if any    
+    bill_notes = data.get('notes')
+
+    # TODO: subtract quantity from stock (if there's enough left)
+
+    # create a bill item and save it to database, then return JSON with its data
+    item = BillItem(
+        created_by = request.user,
+        # copy ProductAbstract's values:
+        code = product.code,
+        shortcut = product.shortcut,
+        name = product.name,
+        description = product.description,
+        private_notes = product.private_notes,
+        unit_type = product.get_unit_type_display(), # !
+        tax = product.tax,
+        # billItem's fields        
+        bill = bill,
+        product_id = product.id,
+        quantity = quantity,
+        base_price = base_price,
+        tax_percent = product.tax.amount,
+        tax_absolute = tax_absolute,
+        discount_absolute = discount_absolute,
+        single_total = single_total,
+        total = total,
+        bill_notes = bill_notes
+    )
+    item.save()
     
-    
-    
-    
+    # return the item in JSON
+    return JSON_response(bill_item_to_dict(request.user, item))
     
