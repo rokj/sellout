@@ -52,7 +52,7 @@ urlpatterns = patterns('',
     url(r_company + _('/manage/categories') + '/?$', manage.category.list_categories, name='list_categories'), # list of categories
     url(r_company + _('/manage/category/add') + '/(?P<parent_id>-?\d+)/?$', manage.category.web_add_category, name='add_category'), # add
     url(r_company + _('/manage/category/edit') + '/(?P<category_id>\d+)/?$', manage.category.web_edit_category, name='edit_category'), # edit
-    url(r_company + _('/manage/category/delete') + '/(?P<category_id>\d+)/?$', manage.category.delete_category, name='delete_category'), # delete
+    url(r_company + _('/manage/category/delete') + '/(?P<category_id>\d+)/?$', manage.category.web_delete_category, name='delete_category'), # delete
     # contacts
     url(r_company + _('/manage/contacts') + '/?$', manage.contact.web_list_contacts, name='list_contacts'),
     url(r_company + _('/manage/contact/add') + '/?$', manage.contact.web_add_contact, name='add_contact'),

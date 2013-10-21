@@ -257,7 +257,8 @@ class CategoryForm(forms.ModelForm):
         fields = ['name',
                   'description',
                   'image']
-        
+    
+@login_required
 def list_categories(request, company):
     c = get_object_or_404(Company, url_name=company)
     
@@ -481,6 +482,15 @@ def edit_category(request, company, category_id):
     
     return render(request, 'pos/manage/category.html', context)
 
+@login_required
+def web_delete_category(request, company, category_id):
+    return delete_category(request, company, category_id)
+
+@api_view(['POST', 'GET'])
+@permission_classes((IsAuthenticated,))
+def mobile_delete_category(request, company, category_id):
+    return delete_category(request, company, category_id)
+
 def delete_category(request, company, category_id):
     c = get_object_or_404(Company, url_name=company)
     
@@ -507,6 +517,8 @@ def delete_category(request, company, category_id):
 @permission_classes((IsAuthenticated,))
 def mobile_get_category(request, company, category_id):
     return get_category(request, company, category_id)
+
+
 
 def get_category(request, company, category_id):
     try:

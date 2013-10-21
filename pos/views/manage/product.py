@@ -39,6 +39,8 @@ def JSON_units(request, company):
     # also, no permission checking is required
     return JSON_response(g.UNITS) # G units!
 
+
+
 def get_product_discounts(product):
     """ returns discount objects, ordered by seq_no in intermediate table """
     m2mids = [x.discount.id for x in ProductDiscount.objects.filter(product=product).order_by('seq_no')]
@@ -675,6 +677,14 @@ def edit_product(request, company, product_id):
     return JSON_ok()
 
 @login_required
+def web_delete_product(request, company, prodcut_id):
+    return delete_product(request, company, prodcut_id)
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_delete_prodcut(request, company, product_id):
+    return delete_product(request, company, product_id)
+
 def delete_product(request, company, product_id):
     try:
         c = Company.objects.get(url_name = company)

@@ -235,7 +235,6 @@ def contact_to_dict(user, c):
 def web_list_contacts(request, company):
     return list_contacts(request, company)
 
-
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_list_contacts(request, company):
