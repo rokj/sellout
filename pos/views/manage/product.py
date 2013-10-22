@@ -55,7 +55,7 @@ def update_product_discounts(request, product, discount_ids):
     """ smartly handles ProductDiscount m2m fields with as little repetition/deletion as possible
         discount_ids: list of discount ids (integers) """
     # first remove discounts that are not in discount_ids
-    get_discounts(product).exclude(discount__id__in=discount_ids).delete()
+    get_product_discounts(product).exclude(discount__id__in=discount_ids).delete()
     # then add missing discounts with a valid sequence
     i = 1
     modify = False
@@ -208,7 +208,7 @@ def product_to_dict(user, product):
         ret['unit_type'] = product.unit_type
         ret['unit_type_display'] = product.get_unit_type_display()
     if product.unit_amount:
-        ret['unit_amount'] = product.unit_amount
+        ret['unit_amount'] = format_number(user, product.unit_amount)
 
     # urls
     ret['get_url'] = reverse('pos:get_product', args=[product.company.url_name, product.id])
@@ -628,6 +628,7 @@ def create_product(request, company):
         category = category,
         name = data['name'],
         unit_type = data['unit_type'],
+        unit_amount = data['unit_amount'],  
         code = data['code'],
         shortcut = data['shortcut'],
         description = data['description'],

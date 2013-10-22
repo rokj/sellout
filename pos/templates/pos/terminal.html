@@ -3,9 +3,6 @@
 {% load i18n %}
 
 {% block head %}
-{% comment %} translation {% endcomment %}
-<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
-
 {% comment %} the terminal {% endcomment %}
 <script src="{% static 'terminal.js' %}"></script>
 <link type="text/css" rel="stylesheet" href="{% static 'terminal.css' %}" />
