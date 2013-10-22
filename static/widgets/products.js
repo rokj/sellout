@@ -103,7 +103,8 @@ function show_products(pl){
 
 function product_button(product){
 	// create a 'product' div
-	// show: dimensions, name, code, and background image
+	// show: name, code, shortcut and background image
+	// gray out if there's no products left
 	var div = $("<div>", {"class":"product-button"});
 	div.css({
 		width:window.data.product_button_size,
@@ -129,8 +130,13 @@ function product_button(product){
 
     div.data(product); // everything about the product
 
-    // when clicked...
-    div.click(select_product);
+    if(get_number(product.stock, window.data.separator).comparedTo(BigNumber(0)) <= 0){
+        info_div.addClass("out-of-stock");
+        // this product cannot be clicked
+    }
+    else{
+        div.click(select_product);
+    }
 
 	return div;
 }

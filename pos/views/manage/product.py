@@ -4,12 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
 
-from pos.models import Company, Category, Discount, Product, ProductDiscount, Price, Tax
+from pos.models import Company, Category, Discount, Product, ProductDiscount, Price, PurchasePrice, Tax
 from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, image_dimensions, \
                            image_from_base64, max_field_length
-from pos.views.manage.discount import discount_to_dict, get_discounts
+from pos.views.manage.discount import discount_to_dict
 from pos.views.manage.category import get_subcategories
 from pos.views.manage.tax import get_default_tax
 
@@ -39,11 +39,10 @@ def JSON_units(request, company):
     # also, no permission checking is required
     return JSON_response(g.UNITS) # G units!
 
-
-
 def get_product_discounts(product):
     """ returns discount objects, ordered by seq_no in intermediate table """
-    product_discounts = get_discounts(product)
+    product_discounts = ProductDiscount.objects.filter(product=product).order_by('seq_no')
+
     m2mids = [x.discount.id for x in product_discounts]
     
     discounts = []
@@ -81,7 +80,6 @@ def update_product_discounts(request, product, discount_ids):
         if modify:
             m2m.seq_no = i
             m2m.save()
-        
         i += 1
     
 @login_required
@@ -96,11 +94,17 @@ def products(request, company):
     lengths = {
         'code':max_field_length(Product, 'code'),
         'price':g.DECIMAL['currency_digits'] + 1,
+        'purchase_price':g.DECIMAL['currency_digits'] + 1,
         'shortcut':max_field_length(Product, 'shortcut'),
         'stock':g.DECIMAL['quantity_digits'],
         'name':max_field_length(Product, 'name'),
         'tax':g.DECIMAL['percentage_decimal_places'] + 4, # up to '100.' + 'decimal_digits'
     }
+    
+    if get_value(request.user, 'pos_discount_calculation') == 'Tax first':
+        tax_first = True
+    else:
+        tax_first = False
     
     context = {
         'company':c, 
@@ -121,15 +125,16 @@ def products(request, company):
         'separator':get_value(request.user, 'pos_decimal_separator'),
         # numbers etc
         'default_tax_id':get_default_tax(request.user, c)['id'],
-        'min_decimal_places':2,
-        'max_decimal_places':g.DECIMAL['currency_decimal_places'],
+        'decimal_places':get_value(request.user, 'pos_decimal_places'),
+        'tax_first':tax_first,
     }
     return render(request, 'pos/manage/products.html', context)
 
 def product_to_dict(user, product):
     # returns all relevant product's data:
     # id
-    # price - numeric value
+    # price (sale price, excluding tax) - numeric value
+    # purchase price - numeric value
     # unit type
     # discounts - dictionary or all discounts for this product 
     #    (see discounts.discount_to_dict for details)
@@ -147,15 +152,20 @@ def product_to_dict(user, product):
     ret = {}
     
     ret['id'] = product.id
-    
-    try: # only the last price from the price table
-        price = Price.objects.filter(product=product).order_by('-datetime_updated')[0]
-        price = format_number(user, price.unit_price)
-    except:
-        price = ''
-        pass
-    
-    ret['price'] = price
+
+    # purchase price
+    purchase_price = get_price(PurchasePrice, product)
+    if not purchase_price:
+        ret['purchase_price'] = ''
+    else:    
+        ret['purchase_price'] = format_number(user, purchase_price)
+
+    # sale price
+    price = get_price(Price, product)
+    if not price:
+        ret['price'] = ''
+    else:    
+        ret['price'] = format_number(user, price)
     
     # all discounts in a list
     discounts = []
@@ -174,6 +184,8 @@ def product_to_dict(user, product):
     # tax: it's a not-null foreign key
     ret['tax_id'] = product.tax.id
     ret['tax'] = format_number(user, product.tax.amount)
+    # stock: it cannot be 'undefined'
+    ret['stock'] = format_number(user, product.stock)
             
     # category?
     if product.category:
@@ -195,9 +207,9 @@ def product_to_dict(user, product):
     if product.unit_type:
         ret['unit_type'] = product.unit_type
         ret['unit_type_display'] = product.get_unit_type_display()
-    if product.stock:
-        ret['stock'] = format_number(user, product.stock)
-    
+    if product.unit_amount:
+        ret['unit_amount'] = product.unit_amount
+
     # urls
     ret['get_url'] = reverse('pos:get_product', args=[product.company.url_name, product.id])
     ret['edit_url'] = reverse('pos:edit_product', args=[product.company.url_name, product.id])
@@ -205,16 +217,34 @@ def product_to_dict(user, product):
     
     return ret
 
-def update_price(product, user, new_unit_price):
+def get_price(model, product):
+    """ returns the purchase/sell price (depending on <model>)
+        for the product, as decimal """
+    try:
+        return model.objects.filter(product=product).order_by('-datetime_updated')[0].unit_price
+    except:
+        return None
+
+def get_sell_price(user, product):
+    """ calculates the selling price of the current product, including taxes and all discounts
+        returns dictionary:
+        {'base':..., 'discount':..., 'tax':..., 'total':... }
+    """
+    
+    pass
+
+def update_price(model, product, user, new_unit_price):
     """ set a new price for product:
          - if there's no price, just create new
          - if there is a price, update its datetime_updated to now() and create new
            (only if value is different)
          - return current price
+         
+         - can be used both for Price and PurchasePrice
     """
     try:
-        old_price = Price.objects.get(product=product, datetime_updated=None)
-    except Price.DoesNotExist:
+        old_price = model.objects.get(product=product, datetime_updated=None)
+    except model.DoesNotExist:
         old_price = None
 
     if old_price:
@@ -229,7 +259,7 @@ def update_price(product, user, new_unit_price):
             return None
             
     # create new
-    new_price = Price(created_by = user,
+    new_price = model(created_by = user,
                       product = product,
                       unit_price = new_unit_price)
     try:
@@ -407,6 +437,7 @@ def validate_product(user, company, data):
     # name*
     # price - numeric value*
     # unit type
+    # unit amount*
     # discounts - list of discount ids (checked in create/edit_product)
     # image
     # category - id (checked in create/edit_product)
@@ -473,6 +504,15 @@ def validate_product(user, company, data):
     # unit type (probably doesn't need checking
     if not data['unit_type'] in dict(g.UNITS):
         return r(False, _("Invalid unit type"))
+        
+    # unit size: must be a number and must not be 0
+    ret = parse_decimal(user, data['unit_amount'], g.DECIMAL['quantity_digits'])
+    if not ret['success']:
+        return r(False, _("Check unit amount notation"))
+    elif ret['number'] == decimal.Decimal('0'):
+        # amount must not be null
+        return r(False, _("Unit amount must not be zero"))
+    data['unit_amount'] = ret['number']
 
     # image:
     if data['change_image'] == True:
@@ -598,20 +638,24 @@ def create_product(request, company):
     product.save()
     
     # update discounts
-    update_product_discounts(request, product, data['discounts']):
+    update_product_discounts(request, product, data['discounts'])
     
-    # price has to be updated separately
-    product.price = update_price(product, request.user, data['price'])
-    if not product.price:
+    # prices have to be updated separately
+    price = update_price(PurchasePrice, product, request.user, data['price']) # purchase price
+    if not price:
         product.delete()
-        return JSON_error(_("Error while setting product price"))
+        return JSON_error(_("Error while setting purchase price"))
+    
+    price = update_price(Price, product, request.user, data['purchase_price'])
+    if not price:
+        product.delete()
+        return JSON_error(_("Error while setting sell price"))
     
     # add image, if it's there
     if data['change_image']:
         if 'image' in data:
             product.image = data['image']
-    
-    product.save()
+            product.save()
     
     return JSON_ok()
 
@@ -652,6 +696,7 @@ def edit_product(request, company, product_id):
     # update product:
     product.name = data['name']
     product.unit_type = data['unit_type']
+    product.unit_amount = data['unit_amount']
     product.code = data['code']
     product.shortcut = data['shortcut']
     product.description = data['description']
@@ -681,7 +726,7 @@ def edit_product(request, company, product_id):
         pass # do not change product's category
 
     # price has to be updated separately
-    product.price = update_price(product, request.user, data['price'])
+    product.price = update_price(Price, product, request.user, data['price'])
     product.updated_by = request.user
     product.save()
 

@@ -38,6 +38,7 @@ class ContactForm(forms.Form):
     company_name = forms.CharField(required=False, max_length=max_field_length(Contact, 'company_name'))
     first_name = forms.CharField(required=False, max_length=max_field_length(Contact, 'first_name'))
     last_name = forms.CharField(required=False, max_length=max_field_length(Contact, 'last_name'))
+    sex = forms.ChoiceField(choices=g.SEXES, required=True)
     street_address = forms.CharField(required=False, max_length=max_field_length(Contact, 'street_address'))
     postcode = forms.CharField(required=False, max_length=max_field_length(Contact, 'postcode'))
     city = forms.CharField(required=False, max_length=max_field_length(Contact, 'city'))
@@ -102,7 +103,11 @@ def validate_contact(user, company, data):
             return err(_("No last name"))
         elif len(data['last_name']) > max_field_length(Contact, 'last_name'):
             return err(_("Last name too long"))
-            
+        
+        # sex: must be in g.SEXES
+        if data['sex'] not in [x[0] for x in g.SEXES]:
+            return err(_("Wrong sex"))
+        
         # date of birth: parse date
         if len(data['date_of_birth']) > 0:
             r = parse_date(user, data['date_of_birth'])
@@ -209,6 +214,8 @@ def contact_to_dict(user, c):
         ret['first_name'] = c.first_name
     if c.last_name:
         ret['last_name'] = c.last_name
+    if c.sex:
+        ret['sex'] = c.sex
     if c.date_of_birth:
         ret['date_of_birth'] = format_date(user, c.date_of_birth)
     if c.street_address:
@@ -385,6 +392,7 @@ def m_add_contact(request, company):
         type = data['type'],
         first_name = data['first_name'],
         last_name = data['last_name'],
+        sex = data['sex'],
         #date_of_birth = data['date_of_birth'],
         street_address = data['street_address'],
         postcode = data['postcode'],
@@ -428,6 +436,7 @@ def add_contact(request, company):
                 company_name = form.cleaned_data.get('company_name'),
                 first_name = form.cleaned_data.get('first_name'),
                 last_name = form.cleaned_data.get('last_name'), 
+                sex = form.cleaned_data.get('sex'),
                 street_address = form.cleaned_data.get('street_address'),
                 postcode = form.cleaned_data.get('postcode'),
                 city = form.cleaned_data.get('city'),
@@ -491,6 +500,7 @@ def m_edit_contact(request, company, contact_id):
     contact.company_name = data['company_name']
     contact.first_name = data['first_name']
     contact.last_name = data['last_name']
+    contact.sex = data['sex']
     contact.date_of_birth = data['date_of_birth']
     contact.street_address = data['street_address']
     contact.postcode = data['postcode']

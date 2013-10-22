@@ -10,4 +10,20 @@ KEY BINDINGS
    - focus on product selector: select product below (or jump to top)
    
 BILL CREATION & ITEMS:
-    TODO: potek stvari, funkcije, atributi
+ - on terminal open: check if there's an active bill that has not been saved
+   - if there's no bill:
+       - create a new bill with no items and save it to db
+       - mark it as 'new' (dictionary['new'] = True) so that JS knows that
+   - if there is a bill:
+       - send it along with all items on it to client
+       - on client, alert the user that it's an old, unsaved bill in which
+         the last item may not be present or its data may be wrong
+ - searching for product:
+   - with category selection:
+     - locate category
+     - show products from that category
+   - with search:
+     - type in and show search matches on click of 'search' button or after <n> seconds
+ - on click of product button:
+   - add a new item to bill
+   - calculate tax, discount, single total and total

@@ -109,11 +109,19 @@ $(document).ready(function(){
         var tmp_obj, i;
         
         // product details include:
-        // name                        | price / unit_type
-        //           | category        | tax
-        //   image   | description     | discounts
-        //           | private_notes   | stock
+        // name                        | tax
+        //           | category        | stock
+        //   image   | description     | price*
+        //           | private_notes   | discounts
         //  shortcut | code
+        
+        // price details:
+        // - per unit type
+        // - purchase price
+        // - sale price: 
+        //   - excluding tax
+        //   - including tax
+        // - including tax and discounts (readonly)
         
         // update this div
         div_obj = parent;
@@ -359,7 +367,7 @@ $(document).ready(function(){
     }
     
     function show_product_edit_dialog(parent){
-        var i;
+        var i, sel_obj;
         
         product = parent.data().product;
         
@@ -382,12 +390,18 @@ $(document).ready(function(){
         // init all fields
         $("#edit_product_name", edit_obj).val(product.name).focus();
         
-        // price: when any of (edit_product_price, edit_product_price_total) has changed, calculate the other's value
-        $("#edit_product_price", edit_obj).unbind().val("").change(update_total_price);
-        $("#edit_product_price_total", edit_obj).unbind().val("").change(update_base_price);
+        // always show price excluding tax first
+        sel_obj = $("#edit_product_price", edit_obj);
+        sel_obj.val(product.price);
+        // show price excluding tax first
+        $(".product-price-type", edit_obj).each(function(){
+            if($(this).val() == "excl"){
+                $(this).click();
+            }
+        });
         
         // ... per unit (listbox with unit types)
-        var sel_obj = $("#edit_unit_type", edit_obj).empty();
+        sel_obj = $("#edit_product_unit_type", edit_obj).empty();
 
         for(i=0; i<units.length;i++){
             opt_obj = $("<option>")
@@ -399,6 +413,12 @@ $(document).ready(function(){
             }
             sel_obj.append(opt_obj);
         }
+        // when changed, update units
+        sel_obj.change(update_unit_types);        
+        // unit amount
+        sel_obj = $("#edit_product_unit_amount", edit_obj);
+        sel_obj.val(product.unit_amount);
+        sel_obj.change(update_unit_types); // when changed...
         
         // listbox with taxes
         sel_obj = $("#edit_product_tax", edit_obj).empty();
@@ -422,9 +442,6 @@ $(document).ready(function(){
             }
             sel_obj.append(opt_obj);
         }
-        
-        // update total (!) price when tax changes
-        sel_obj.change(update_total_price);
         
         // listbox with categories
         sel_obj = $("#edit_product_category", edit_obj).empty();
@@ -548,8 +565,26 @@ $(document).ready(function(){
         $("#edit_product_shortcut", edit_obj).val(product.shortcut);
         $("#edit_product_code", edit_obj).val(product.code);
         
-        // update total price
-        update_total_price();
+        // update total price when tax, price or discounts change
+        $("#edit_product_tax, #edit_product_price, input.product-price-type, ul#edit_discounts", edit_obj).change(function(){
+            // get data from edits and calculate the final price
+            t = get_tax($("#edit_product_tax", edit_obj).val()).amount;
+            
+            price = $("#edit_product_price", edit_obj).val();
+            if(!check_number(price, "{{separator}}")){
+                alert("{% trans 'Check product price format' %}");
+                return;
+            }
+            
+            if($("input.product-price-type", edit_obj).val() == 'incl'){
+                // remove tax from base price in #edit_product_tax
+                price = tax(price, null, t, "{{ separator }}").toFixed({{decimal_places}});
+            }
+            
+            // gather all discounts
+            discounts = [];
+            
+        });
         
         // show the edit dialog
         edit_obj.dialog({
@@ -565,52 +600,13 @@ $(document).ready(function(){
         edit_obj.dialog('option', 'width', 900); // TODO: remove fixed width
     }
     
-    // update base price when total price changes
-    function update_total_price(){
-        var price_obj = $("#edit_product_price");
-        var total_price_obj = $("#edit_product_price_total");
-        
-        var s = price_obj.val();
-        if(s.length == 0) return; // no price set, don't bother
-        
-        if(!check_number(s, "{{separator}}")) alert("{% trans 'Check price value' %}");
-        else{
-            // get base price from edit box
-            p = get_number(s, "{{separator}}");
-            // get tax from the drop down (when adding new product, the default is already selected in the drop-down)
-            t = get_number(get_tax($("#edit_product_tax").val()).amount, "{{separator}}"); // tax
-            // calculate total price
-            P = p.times(t.dividedBy(100).plus(1)); // price including tax
-            // set the other edit's value
-            total_price_obj.val(display_number(P, "{{separator}}", {{max_decimal_places}}));
-        }
-    }
-    
-    // update total price when base price changes
-    function update_base_price(product){
-        var price_obj = $("#edit_product_price");
-        var total_price_obj = $("#edit_product_price_total");
-        
-        var s = total_price_obj.val();
-        if(s.length == 0) return; // no price set, don't bother
-        
-        if(!check_number(s, "{{separator}}")) alert("{% trans 'Check price value' %}");
-        else{
-            // get base price from edit box
-            P = get_number(s, "{{separator}}");
-            // get tax from the drop down (when adding new product, the default is already selected in the drop-down)
-            t = get_number(get_tax($("#edit_product_tax").val()).amount, "{{separator}}"); // tax
-            // calculate total price
-            p = P.dividedBy(t.dividedBy(100).plus(1)); // price including tax
-            // set the other edit's value
-            price_obj.val(display_number(p, "{{separator}}", {{max_decimal_places}}));
-        }
-    }
-    
     function get_product(parent){
         // get product's data from the server and put
         // it where it was before (product.parent)
         get_data(parent.data().product.get_url, function(data){
+            // add some fields to product that are not returned from the server
+            data.p_incl = tax(null, data.price, data.tax);
+            
             parent.data({product:data});
             render_product(parent);
         });
@@ -641,8 +637,8 @@ $(document).ready(function(){
         var data = {};
         data['id'] = product.id;
         data['name'] = $("#edit_product_name", dlg_obj).val();
-        data['price'] = $("#edit_product_price", dlg_obj).val();
-        data['unit_type'] = $("#edit_unit_type :selected", dlg_obj).val();
+        data['unit_type'] = $("#edit_product_unit_type :selected", dlg_obj).val();
+        data['unit_amount'] = $("#edit_unit_amount", dlg_obj).val();
         // image: if changed, encode uploaded image to base64
         data['change_image'] = product.change_image;
         if(product.change_image) data['image'] = product.image_data
@@ -665,6 +661,11 @@ $(document).ready(function(){
         data['stock'] = $("#edit_product_stock", dlg_obj).val();
         data['shortcut'] = $("#edit_product_shortcut", dlg_obj).val();
         data['code'] = $("#edit_product_code", dlg_obj).val();
+        // price: remove tax if price is set including tax
+        if($("input.product-price-type:checked", dlg_obj).val() == 'incl') // remove tax from price
+            data['price'] = tax($("#edit_product_price", dlg_obj).val(), null, get_tax(data['tax_id']).amount);
+        else // just save the existing price
+            data['price'] = $("#edit_product_price", dlg_obj).val();
         
         if(data['id'] == "-1"){
             // it's a new product
@@ -693,7 +694,7 @@ $(document).ready(function(){
     }
     
     function delete_product(parent){
-        product = parent.data().product;
+        var product = parent.data().product;
         // confirm deletion
         if(confirm("{% trans 'Delete product ' %} '" + product.name + "'?")){
             // TODO: GET or POST method? CSRF tokens? security?
@@ -705,6 +706,16 @@ $(document).ready(function(){
                 }
             });
         }
+    }
+    
+    function update_unit_types(){
+        // when the unit types edit changes, update all static labels with the changed units
+        var unit = $("#edit_product_unit_amount").val() + 
+            $("#edit_product_unit_type").val();
+        
+        $("span.unit-amount-readonly").each(function(){
+            $(this).text(unit);
+        });
     }
     
     ////////////////////
@@ -896,12 +907,9 @@ $(document).ready(function(){
             <td colspan="2">
                 <p><label for="edit_product_name">{% trans 'Name' %}</label> <input type="text" id="edit_product_name" maxlength="{{field_lengths.name}}" /></p>
             </td>
-            <td>{% comment %} price per unit - can be entered in two ways: including or excluding tax {% endcomment %}
-                <p><label for="edit_unit_type">{% trans 'Price per' %} </label><select id="edit_unit_type"></select>:<br />
-                    {{ currency }} <input type="text" id="edit_product_price" maxlength="{{field_lengths.price }}"/><label for="edit_product_price">{% trans 'excl. tax' %}</label><br />
-                    {{ currency }} <input type="text" id="edit_product_price_total" maxlength="{{ field_lengths.price }}"/><label for="edit_product_price_total">{% trans 'incl. tax' %}</label>
-                   
-            </td>
+            {% comment %} list of tax rates {% endcomment %}
+            <td><p><label for="edit_product_tax">{% trans 'Tax' %}</label>
+                <select id="edit_product_tax" name="edit_product_tax"></select></p></td>
         </tr>
         <tr>
             <td rowspan="3">{% comment %} image spans over 3 rows {% endcomment %}
@@ -909,37 +917,61 @@ $(document).ready(function(){
                 {% comment %} the form that follows is here only because input type="file" cannot be reset unless the form it belongs to is reset {% endcomment %}
                     <form id="edit_product_image_input_form"><input type="file" id="edit_product_image_upload" /></form>
                     <p><input type="button" id="edit_product_delete_image" value="{% trans 'Delete image' %}" /></p>
-            </td> 
+            </td>
+            
             {% comment %} list of categories {% endcomment %}
             <td><p><label for="edit_product_category">{% trans 'Category' %}</label>
                 <select id="edit_product_category" name="edit_product_category"></select></p></td>
-            {% comment %} list of tax rates {% endcomment %}
-            <td><p><label for="edit_product_tax">{% trans 'Tax' %}</label>
-                <select id="edit_product_tax" name="edit_product_tax"></select></p></td>
+            {% comment %} unit type: [scale] x [unit type] {% endcomment %}
+            <td><p>{% trans 'Unit' %}<br />
+                <input type="text" id="edit_product_unit_amount" name="edit_product_unit_amount" value="1" /> {% comment %} default value = 1 {% endcomment %}
+                × <select id="edit_product_unit_type"></select>
+                </p>
+            
+            <p><label for="edit_product_stock">{% trans 'Units in stock' %}</label>
+                <input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}" /></p></td>
+                
         </tr>
         <tr>
             <td><p><label for="edit_product_description">{% trans 'Description' %}</label></p>
             {% comment %} max length for textarea: an artibrary value, not set in database {% endcomment %}
                 <textarea id="edit_product_description" maxlength="1000"></textarea></td>
-            <td>
-                {% comment %} discounts {% endcomment %}
-                <p>{% trans 'Discounts' %}</p>
-                <p>{% blocktrans %} Drag to reorder. Total discount will be calculated in the same order as shown here. {% endblocktrans %}</p>
-                <ul id="edit_discounts"></ul>
+            <td>{% comment %} price per unit - can be entered in two ways: including or excluding tax {% endcomment %}
+                <p><label for="edit_product_purchase_price">{% trans 'Purchase price' %}: </label>
+                    {{ currency }} <input type="text" id="edit_product_purchase_price" maxlength="{{ field_lengths.purchase_price}}" />
+                    {% trans 'per' %} <span class="unit-amount-readonly">?</span>
+                </p>
+                <p>
+                    {{ currency }} <input type="text" id="edit_product_price" maxlength="{{ field_lengths.price }}"/>
+                    {% trans 'per' %} <span class="unit-amount-readonly">?</span>
+                    <input type="radio" name="price_type" class="product-price-type" value="incl" />{% trans 'Incl. tax' %}
+                    <input type="radio" name="price_type" class="product-price-type" value="excl" checked="checked" />{% trans 'Excl. tax' %} <br />
+                </p>
             </td>
         </tr>
         <tr>
             <td><p>{% trans 'Private notes' %}:</p>
                 <textarea id="edit_product_private_notes" maxlength="1000"></textarea>
             </td>
-            <td><p><label for="edit_product_stock">{% trans 'Units left in stock' %}</label><input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}" /></p></td>
+            <td>
+                {% comment %} discounts {% endcomment %}
+                <p>{% trans 'Discounts' %}</p>
+                <p>{% blocktrans %} Drag to reorder. Total discount will be calculated in the same order as shown here. {% endblocktrans %}</p>
+                <ul id="edit_discounts"></ul>
+                {% comment %} total price, including tax and discounts {% endcomment %}
+            </td>
         </tr>
         <tr>
             <td><p><label for="edit_product_shortcut">{% trans 'Shortcut' %}</label><input type="text" id="edit_product_shortcut" maxlength="{{ field_lengths.shortcut }}" /></p></td> {% comment %} this row again has 3 columns {% endcomment %}
             <td><p><label for="edit_product_code">{% trans 'Product code' %}</label><input type="text" id="edit_product_code" maxlength="{{ field_lengths.code }}" /></p></td>
             
             <td>
-                {% comment %} save/cancel buttons {% endcomment %}
+                {% comment %} total price {% endcomment %}
+                {% trans 'Total price' %}: <span id="total_price">&nbsp;</span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">{% comment %} save/cancel buttons {% endcomment %}
                 <p><input type="button" id="edit_product_save" value="{% trans 'Save' %}">
                    <input type="button" id="edit_product_cancel" value="{% trans 'Cancel' %}"></p>
             </td>
@@ -955,17 +987,24 @@ $(document).ready(function(){
                 <input type="hidden" class="product-id" />
                 <p class="product-name"></p>
             </td>
-            <td><p class="product-base-price"></p> {% comment %} price per unit (excl. tax) {% endcomment %}
-                <p class="product-total-price"></p> {% comment %} price per unit (incl. tax){% endcomment %}
+            <td>
+                <p class="product-base-price"></p> {% comment %} price per unit (excl. tax) {% endcomment %}
             </td>
         </tr>
         <tr>
-            <td rowspan="3"><p class="product-image"></p></td> {% comment %} image spans over 3 rows {% endcomment %}
-            <td><p class="product-category"></p></td>
-            <td><p class="product-tax"></p></td>
+            <td rowspan="3">
+                <p class="product-image"></p></td> {% comment %} image spans over 3 rows {% endcomment %}
+            <td>
+                <p class="product-category"></p>
+            </td>
+            <td>
+                <p class="product-tax"></p>
+            </td>
         </tr>
         <tr>
-            <td><p class="product-description"></p></td>
+            <td>
+                <p class="product-description"></p>
+            </td>
             <td>
                 <ul class="product-discounts">
                     {% comment %} a list of discounts {% endcomment %}

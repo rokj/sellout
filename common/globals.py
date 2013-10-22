@@ -72,6 +72,11 @@ CONTACT_TYPES = (
     ("Company", _("Company")),
 )
 
+SEXES = (
+    ("M", _("Male")),
+    ("F", _("Female")),
+)
+
 # bills
 BILL_TYPES = ( 
     ("Normal",_("Normal")),

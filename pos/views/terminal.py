@@ -42,6 +42,7 @@ def terminal_init(request, company):
         'categories':get_all_categories_structured(c, data=[], level=0),
         'currency':get_value(request.user, 'pos_currency'),
         'separator':get_value(request.user, 'pos_decimal_separator'),
+        'decimal_places':get_value(request.user, 'pos_decimal_places'),
         # interface parameters
         'interface':get_value(request.user, 'pos_interface'),
         'product_button_size':g.PRODUCT_BUTTON_DIMENSIONS[get_value(request.user, 'pos_interface_product_button_size')],

@@ -13,9 +13,9 @@ function get_item_data(item_obj){
     // discount TODO
     
     // check quantity format
-    qty = $("input.itme-qty", item_obj).val();
+    qty = $("input.item-qty", item_obj).val();
     if(!check_number(qty, window.data.separator)){
-        alert(gettext("Invalid quantity format"));
+        alert(gettext("Invalid quantity format: "));
         return null;
     }
     
@@ -65,7 +65,7 @@ function add_item(product){
             qty = qty_obj.val();
             if(check_number(qty, window.data.separator)){
                 qty = get_number(qty, window.data.separator).plus(BigNumber(1));
-                qty_obj.val(display_number(qty, window.data.separator, 2)); // TODO: remove hardcoded decimals
+                qty_obj.val(display_number(qty, window.data.separator, window.data.decimal_places));
             }
             // window.bill.last_item stays the same
         }
@@ -130,7 +130,7 @@ function update_item(product, item, replace_obj, exploded){
             bill_id:window.bill.bill.id, // the current bill
             name:product.name,
             code:product.code,
-            quantity:display_number(BigNumber(1), window.data.separator, 2), // TODO remove hardcoded decimal places (?)
+            quantity:display_number(BigNumber(1), window.data.separator, window.data.decimal_places),
             unit_type:product.unit_type_display,
             base_price:product.price,
             tax_absolute:product.tax,
@@ -140,6 +140,7 @@ function update_item(product, item, replace_obj, exploded){
     }
 
     new_item.removeAttr("id"); // no duplicate ids in document
+    var stock = new_item.data().stock;
 
     // create a new item
     // product name
@@ -153,6 +154,33 @@ function update_item(product, item, replace_obj, exploded){
         $("<input>", {type:"text", "class":"item-notes"})
     );
     
+    // add/remove quantity
+    function change_qty(q, add, stock){ // if 'add' is false subtract
+        if(check_number(q)){
+            if(!add){
+                // don't set a value of 0
+                n = get_number(q).minus(BigNumber(1));
+                
+                if(n.comparedTo(BigNumber(0)) <= 0){
+                    return q;
+                }
+            }
+            else{
+                // when adding, check stock - do not add more items than there are in stock
+                n = get_number(q).plus(BigNumber(1));
+                stock = get_number(stock);
+                if(n.comparedTo(stock) > 0){
+                    return q; // do not add anything
+                }
+            }
+            
+            return display_number(n, window.data.separator, window.data.decimal_places);
+        }
+        else{
+            alert(gettext("Check quantity format"));
+            return display_number(BigNumber(1), window.data.separator, window.data.decimal_places);
+        }
+    }
     
     // quantity: an edit box
     tmp_obj = $("td.bill-item-qty-container p.bill-title", new_item);
@@ -160,9 +188,19 @@ function update_item(product, item, replace_obj, exploded){
     tmp_obj.append($("<input>", {"class":"item-qty", type:"text"}).val(item.quantity));
     // 'plus' button
     btn_obj = $("<input>", {type:"button", "class":"qty-button", value:"+"});
+    btn_obj.click(function(){
+        var obj = $("input.item-qty", $(this).parent());
+        obj.val(change_qty(obj.val(), true, stock));
+        
+    });
     tmp_obj.append(btn_obj);
     // 'minus' button
     btn_obj = $("<input>", {type:"button", "class":"qty-button", value:"-"});
+    btn_obj.click(function(){
+        var obj = $("input.item-qty", $(this).parent());
+        obj.val(change_qty(obj.val(), false, stock));
+        
+    });
     tmp_obj.append(btn_obj);
     // unit type        
     $("td.bill-item-qty-container p.bill-subtitle", new_item).empty().append("[" + item.unit_type + "]");

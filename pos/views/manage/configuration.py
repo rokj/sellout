@@ -46,6 +46,11 @@ def list_time_formats():
 #######################
 class ConfigForm(forms.Form):
     button_sizes = [(key,key) for key,value in g.PRODUCT_BUTTON_DIMENSIONS.iteritems()]
+    decimal_places_choices = (
+        ('2', 2),
+        ('3', 3),
+        ('4', 4),
+    )
 
     date_format = forms.ChoiceField(choices=list_date_formats(), required=True)
     time_format = forms.ChoiceField(choices=list_time_formats(), required=True)
@@ -55,6 +60,7 @@ class ConfigForm(forms.Form):
     discounts_per_page = forms.IntegerField(required=True)
     default_tax = forms.DecimalField(required=True)
     decimal_separator = forms.CharField(max_length=1, required=True)
+    decimal_places = forms.ChoiceField(choices=decimal_places_choices, required=True)
     interface_product_button_size = forms.ChoiceField(choices=button_sizes, label=_("Product button size"))
     discount_calculation = forms.ChoiceField(g.DISCOUNT_CALCULATION, required=True)
     
@@ -82,6 +88,7 @@ def edit_config(request, company):
         'decimal_separator':get_value(request.user, 'pos_decimal_separator'),
         'interface_product_button_size':get_value(request.user, 'pos_interface_product_button_size'),
         'discount_calculation':get_value(request.user, 'pos_discount_calculation'),
+        'decimal_places':get_value(request.user, 'pos_decimal_places'),
     }
     
     if request.method == 'POST':
