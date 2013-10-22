@@ -117,12 +117,12 @@ def format_number(user, n, high_precision=False):
     
     return s.replace('.', sep)
         
-def format_date(user, date):
+def format_date(user, date, send_to='python'):
     """ formats date for display according to user's settings """
     if not date:
         return ''
     else:
-        return date.strftime(get_date_format(user, 'python'))
+        return date.strftime(get_date_format(user, send_to))
 
 def format_time(user, date):
     """ formats time for display according to user's settings """

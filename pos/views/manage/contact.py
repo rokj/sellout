@@ -183,7 +183,7 @@ def validate_contact(user, company, data):
     # everything OK
     return {'success':True, 'data':data, 'message':None}
 
-def contact_to_dict(user, c):
+def contact_to_dict(user, c, send_to="python"):
     # returns all relevant contact's data
     # id
     # type
@@ -210,7 +210,7 @@ def contact_to_dict(user, c):
     if c.last_name:
         ret['last_name'] = c.last_name
     if c.date_of_birth:
-        ret['date_of_birth'] = format_date(user, c.date_of_birth)
+        ret['date_of_birth'] = format_date(user, c.date_of_birth, send_to=send_to)
     if c.street_address:
         ret['street_address'] = c.street_address
     if c.postcode:
@@ -227,6 +227,7 @@ def contact_to_dict(user, c):
         ret['phone'] = c.phone
     if c.vat:
         ret['vat'] = c.vat
+    
 
     return ret
 
@@ -267,7 +268,7 @@ def m_list_contacts(request, company):
 
     cs = []
     for c in contacts:
-        cs.append(contact_to_dict(request.user, c))
+        cs.append(contact_to_dict(request.user, c, "android"))
     return JSON_response(cs)
 
 def list_contacts(request, company):

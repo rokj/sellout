@@ -598,7 +598,8 @@ def create_product(request, company):
     product.save()
     
     # update discounts
-    update_product_discounts(request, product, data['discounts']):
+
+    update_product_discounts(request, product, data['discounts'])
     
     # price has to be updated separately
     product.price = update_price(product, request.user, data['price'])

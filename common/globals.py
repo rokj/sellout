@@ -96,16 +96,19 @@ DATE_FORMATS = {
     'dd.mm.yyyy':{'regex':"^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros
                   'python':"%d.%m.%Y", # the docs say zero-padded decimal, but will also parse non-padded numbers
                   'django':"j.n.Y", # show no leading zeros in template
+                  'android':"dd-MM-yyyy",
                   'jquery':"dd.mm.yy",
                   },
     'mm/dd/yyyy':{'regex':"^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros
                   'python':"%m/%d/%Y",
                   'django':"n/j/Y",
+                  'android':"MM-dd-yyyy",
                   'jquery':"mm/dd/yy",
                   },
     'yyyy-mm-dd':{'regex':"^\d{4}\.\d{2}\.\d{2}$", # strictly with leading zeros
                   'python':"%Y-%m-%d",
                   'django':"Y-m-d",
+                  'android':"yyyy-MM-dd",
                   'jquery':"yy-mm-dd",
                   },
 }
@@ -115,24 +118,28 @@ TIME_FORMATS = {
             'regex':"^[0-2][0-4]:[0-5][0-9]$",
             'python':"%H:%M",
             'django':"H:i",
+            'android':"hh:mm",
             'js':"HH:mm", # jquery has nothing to do with time, so it will have to be formatted using javascript
             },
     '23:59:59':{ # 24-hour clock with seconds
             'regex':"^[0-2][0-4]:[0-5][0-9]:[0-5][0-9]$",
             'python':"%H:%M:%S",
             'django':"H:i:s",
+            'android':"hh:mm:ss",
             'js':"HH:mm:ss",
             },
     '12:59 AM/PM':{ # 12-hour clock with AM/PM
             'regex':"^[0-2][0-4]:[0-5][0-9] (AM|PM)$",
             'python':"%I:%M %p",
             'django':"",
+            'android':"",
             'js':"hh:mm <AMPM>", # <AMPM> will have to be replaced in javascript (python?)
             },
     '12:59:59 AM/PM':{ # 12-hour clock with AM/PM
             'regex':"^[0-2][0-4]:[0-5][0-9]:[0-5][0-9] (AM|PM)$",
             'python':"%r",
             'django':"",
+            'android':"",
             'js':"hh:mm:ss <AMPM>", # <AMPM> will have to be replaced in javascript (python?)
             },
 }
