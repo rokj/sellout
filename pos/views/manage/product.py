@@ -57,7 +57,7 @@ def update_product_discounts(request, product, discount_ids):
     """ smartly handles ProductDiscount m2m fields with as little repetition/deletion as possible
         discount_ids: list of discount ids (integers) """
     # first remove discounts that are not in discount_ids
-    get_discounts(product).exclude(discount__id__in=discount_ids).delete()
+    get_product_discounts(product).exclude(discount__id__in=discount_ids).delete()
     # then add missing discounts with a valid sequence
     i = 1
     modify = False
