@@ -52,9 +52,6 @@ def discount_to_dict(user, d):
         'active':d.active,
     }
 
-def get_discounts(product):
-    return ProductDiscount.objects.filter(product=product).order_by('seq_no')
-
 @login_required
 def JSON_discounts(request, company, product_id=None):
     """ returns all available discounts for this company in a list of dictionaries

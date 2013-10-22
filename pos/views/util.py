@@ -103,17 +103,18 @@ def image_from_base64(data):
 # numbers
 def format_number(user, n, high_precision=False):
     """ returns formatted decimal number n;
-        strips zeros, but leaves two numbers after decimal point even if they are zero
+        strips zeros, but leaves <p> numbers after decimal point even if they are zero
     """
     sep = get_value(user, 'pos_decimal_separator')
+    p = int(get_value(user, 'pos_decimal_places'))
     
     if not n:
         return '0'
     
     if high_precision:
-        s = str(n.quantize(Decimal('1.0000'))) # round to four decimal places (for management etc.)
+        s = str(n.quantize(Decimal('1.'+'0'*p*2)))
     else:
-        s = str(n.quantize(Decimal('1.00'))) # round to two decimal places
+        s = str(n.quantize(Decimal('1.'+'0'*p)))
     
     return s.replace('.', sep)
         

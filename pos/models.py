@@ -125,7 +125,11 @@ class ProductAbstract(SkeletonU):
     description = models.TextField(_("Product description"), blank=True, null=True)
     private_notes = models.TextField(_("Notes (only for internal use)"), null=True, blank=True)
     unit_type = models.CharField(_("Product unit type"), max_length=15,
-                                    choices = g.UNITS, blank=False, null=False, default=g.UNITS[0][0])
+                                 choices = g.UNITS, blank=False, null=False, default=g.UNITS[0][0])
+    unit_amount = models.DecimalField(_("Product size in basic units"),
+                                      max_digits=g.DECIMAL['quantity_digits'],
+                                      decimal_places=g.DECIMAL['quantity_decimal_places'],
+                                      null=False, blank=False)
     # price - in a separate model
     tax = models.ForeignKey(Tax, null=False, blank=False)
     
@@ -189,7 +193,24 @@ class Price(SkeletonU):
     
     class Meta:
         unique_together = (('product', 'unit_price', 'datetime_updated'),)
-       
+
+### purchase prices ###
+class PurchasePrice(SkeletonU):
+    product = models.ForeignKey(Product)
+    unit_price = models.DecimalField(_("Purchase price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],
+                                     decimal_places=g.DECIMAL['currency_decimal_places'], blank=False, null=False)
+    
+    def __unicode__(self):
+        ret = self.product.name + ": " + str(self.unit_price)
+
+        if self.datetime_updated:
+            ret += " (inactive)"
+
+        return ret
+    
+    class Meta:
+        unique_together = (('product', 'unit_price', 'datetime_updated'),)
+
 ### contacts ###
 class Contact(SkeletonU):
     company = models.ForeignKey(Company)
@@ -197,6 +218,7 @@ class Contact(SkeletonU):
     company_name = models.CharField(_("Company name"), max_length=50, null=True, blank=True)
     first_name = models.CharField(_("First name"), max_length=50, null=True, blank=True)
     last_name = models.CharField(_("Last name"), max_length=50, null=True, blank=True)
+    sex = models.CharField(max_length=1, choices=g.SEXES, null=True, blank=True)
     date_of_birth = models.DateField(_("Date of birth"), null=True, blank=True)
     street_address = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
     postcode = models.CharField(_("Post code/ZIP"), max_length=12, null=True, blank=True)

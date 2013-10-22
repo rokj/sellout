@@ -56,10 +56,54 @@ function check_number(string, separator){
 function get_number(string, separator){
     // receives a string with number with decimal separator <separator> and returns BigNumber
     // bignumber: https://github.com/MikeMcl/bignumber.js/
-    return BigNumber(string.replace(separator, "."))
+    try{
+        return Big(string.replace(separator, "."));
+    }
+    catch(error){
+        return null;
+    }
 }
 
 function display_number(number, separator, decimal_places){
     // receives a BigNumber as a parameter and returns a string with user specified decimal separator
     return number.toFixed(decimal_places).replace('.', separator);
 }
+
+function tax(p_incl, p_excl, tax, separator){
+    // add or remove tax from price
+
+    // p_incl: price including tax | one of these
+    // p_excl: price excluding tax | must be null
+    // all parameters are strings
+    var t = get_number(tax, separator);
+    alert(t)    
+    if(p_incl) p = p_incl;
+    else p = p_excl;
+    
+    alert(p)
+    
+    p = get_number(p, separator);
+    if(!p){
+        alert(gettext("Check price format"));
+        return null;
+    }
+    
+    if(p_incl){ // subtract tax from price
+        return p.div(Big(1).plus(t.div(100)));
+    }
+    else{ // add tax to price
+        return p.times(Big(1).plus(t.div(100)));
+    }
+}
+
+function total_product_price(tax_first, base, tax, discounts){
+    // returns the total price, including tax and discounts
+    
+    // tax_first: true if tax is to be calculated first, else false
+    // base: base price, excluding tax, string
+    // tax: percentage, string
+    // discounts: list of discount amounts and types in correct order (!)
+    
+    return "OK";
+}
+

@@ -53,6 +53,11 @@ div.product-button div.shade{
     z-index: 3;
 }
 
+div.shade.out-of-stock{
+    opacity:0.95;
+    color:#cccccc;
+}
+
 p.product-button-name{
     font-size:10pt;
     margin:0px;

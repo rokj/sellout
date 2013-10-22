@@ -37,6 +37,7 @@ defaults = {
     'pos_interface_bill_width':370, # width of the bill area in terminal (in pixels)
     # billing and calculation defaults
     'pos_discount_calculation':"Tax first", # DISCOUNT_CALCULATION in globals
+    'pos_decimal_places':2, # default decimal places for display (for calculation, the number is twice of this)
     # fallback defaults
     'pos_default_tax':'0.0',
 }

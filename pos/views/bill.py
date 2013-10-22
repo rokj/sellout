@@ -5,9 +5,9 @@ from django.utils.translation import ugettext as _
 
 from pos.models import Company, Bill, BillItem, Price, Product
 from pos.views.manage import get_all_categories_structured
+from pos.views.manage.product import get_product_discounts
 from pos.views.util import has_permission, no_permission_view, JSON_response, JSON_ok, JSON_parse, JSON_error, \
                            format_number, parse_decimal, format_date, format_time
-from pos.views.manage.discount import get_discounts
 from config.functions import get_value, set_value
 import common.globals as g
 
@@ -172,6 +172,13 @@ def add_item_to_bill(request, company):
         if r['number'] <= Decimal('0'):
             return JSON_error(_("Cannot add an item with zero or negative quantity"))
     quantity = r['number']
+    
+    # check if there's enough items left in stock (must be at least zero =D)
+    print product.stock
+    print quantity
+    if product.stock < quantity:
+        print 'wtf'
+        return JSON_error(_("Cannot sell more items than there are in stock"))
             
     # calculate and set all stuff for this new item:
     # bill (already checked)
@@ -183,7 +190,7 @@ def add_item_to_bill(request, company):
     
     # tax:
     tax = product.tax.amount/Decimal('100') # percent!
-    discounts = get_discounts(product)
+    discounts = get_product_discounts(product)
     def abs_discounts_val(p, ds):
         """ from price p subtract all discounts in list d and return result """
         dabs = Decimal('0')
