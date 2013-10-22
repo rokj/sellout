@@ -39,6 +39,8 @@ def JSON_units(request, company):
     # also, no permission checking is required
     return JSON_response(g.UNITS) # G units!
 
+
+
 def get_product_discounts(product):
     """ returns discount objects, ordered by seq_no in intermediate table """
     product_discounts = ProductDiscount.objects.filter(product=product).order_by('seq_no')
@@ -80,6 +82,7 @@ def update_product_discounts(request, product, discount_ids):
         if modify:
             m2m.seq_no = i
             m2m.save()
+        
         i += 1
     
 @login_required
