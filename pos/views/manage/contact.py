@@ -73,12 +73,13 @@ def validate_contact(user, company, data):
     # postcode
     # city
     # country
+    # state
     # email*
     # phone
     # vat
 
     def err(msg): # the value that is returned if anything goes wrong
-        return {'success':False, 'data':None, 'message':msg}
+        return {'status':False, 'data':None, 'message':msg}
 
     # return:
     # status: True if validation passed, else False
@@ -116,11 +117,10 @@ def validate_contact(user, company, data):
             else:
                 data['date_of_birth'] = r['date']
         else:
-            del data['date_of_birth']
+            data['date_of_birth'] = None
         
     # check credentials for company
     else:
-        print data
         if not data.get('company_name'):
             return err(_("No company name"))
             
@@ -128,7 +128,7 @@ def validate_contact(user, company, data):
             return err(_("Company name too long"))
         
         # one shalt not save u'' into date field.
-        del data['date_of_birth']
+        data['date_of_birth'] = None
             
     # common fields:
     # email*
@@ -164,7 +164,7 @@ def validate_contact(user, company, data):
     # street_address
     if not check_length(data.get('street_address'), max_field_length(Contact, 'street_address')):
         return err(_("Street address too long"))
-        
+    
     # postcode
     if not check_length(data.get('postcode'), max_field_length(Contact, 'postcode')):
         return err(_("Post code too long"))
@@ -184,9 +184,9 @@ def validate_contact(user, company, data):
     # vat
     if not check_length(data.get('vat'), max_field_length(Contact, 'vat')):
         return err(_("VAT number too long"))
-
+    
     # everything OK
-    return {'success':True, 'data':data, 'message':None}
+    return {'status':True, 'data':data, 'message':None}
 
 def contact_to_dict(user, c, send_to="python"):
     # returns all relevant contact's data
@@ -380,7 +380,6 @@ def m_add_contact(request, company):
         return JSON_error(valid['message'])
     data = valid['data']
     
-    print ("bla")
     
     try:
         country = Country.objects.get(two_letter_code=data['country'])
@@ -394,7 +393,7 @@ def m_add_contact(request, company):
         first_name = data['first_name'],
         last_name = data['last_name'],
         sex = data['sex'],
-        #date_of_birth = data['date_of_birth'],
+        date_of_birth = data['date_of_birth'],
         street_address = data['street_address'],
         postcode = data['postcode'],
         city = data['city'],
@@ -492,11 +491,14 @@ def m_edit_contact(request, company, contact_id):
         return JSON_error(_("Contact doest not exist"))
     
     valid = validate_contact(request.user, c, data)
+    print valid
     if not valid['status']:
         return JSON_error(valid['messege'])
-    data = valid[data]
-
-    contact.company = data['company_name']
+    
+    data = valid['data']
+    c = get_object_or_404(Company, url_name=company)
+    
+    contact.company = c
     contact.type = data['type']
     contact.company_name = data['company_name']
     contact.first_name = data['first_name']

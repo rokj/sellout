@@ -47,8 +47,7 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/contacts/?$', manage.contact.mobile_list_contacts, name='list_contacts'),
     url(r_company + r'/manage/json/contact/add/?$', manage.contact.mobile_add_contact, name='add_contact'),
     url(r_company + r'/manage/json/contact/get/(?P<contact_id>\d+)/?$', manage.contact.mobile_get_contact, name='get_contact'),
-
-    url(r_company + _('/manage/contact/edit') + '/(?P<contact_id>\d+)/?$', manage.contact.edit_contact, name='edit_contact'),
+    url(r_company + _('/manage/json/contact/edit') + '/(?P<contact_id>\d+)/?$', manage.contact.mobile_edit_contact, name='edit_contact'),
     url(r_company + _('/manage/contact/delete') + '/(?P<contact_id>\d+)/?$', manage.contact.delete_contact, name='delete_contact'),
     
     # taxes
