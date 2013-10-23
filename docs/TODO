@@ -1,5 +1,6 @@
 - ! - check if there are taxes and categories entered (?) before adding products
 - ! - pagination (offset) of returned products ("More" button)
+- ! - 'stock' for unit_type = hour: some special logic?
 - ! - wrap *.save() in try/except
 - ! - tablet support
 - <input> text field lengths in templates (from max_field_length) on all JSON 'forms'
@@ -14,6 +15,7 @@
 - append discount to all products in a category
 - paypal, bitcoin, ...
 - check 'var' (local) and undeclared variables (global) in products.html
+- standarise error messages: 'check price format', wrong contact type, ...
 
 - products with no categories: 'no category' entry in listboxes (?)
 - bug: category select in 'advanced product search'

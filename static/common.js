@@ -79,10 +79,10 @@ function do_tax(p_incl, p_excl, tax){
     else p = p_excl;
     
     if(p_incl){ // subtract tax from price
-        return p.div(Big(1).plus(t.div(Big(100))));
+        return p.div(Big(1).plus(tax.div(Big(100))));
     }
     else{ // add tax to price
-        return p.times(Big(1).plus(t.div(Big(100))));
+        return p.times(Big(1).plus(tax.div(Big(100))));
     }
 }
 
@@ -99,15 +99,18 @@ function total_price(tax_first, base_price, tax, discounts, quantity, separator)
     function discounts_total(p, d){ // price, discounts[]
         var discount = Big(0);
         var final = p;
+        var this_discount;
         
         for(var i = 0; i < d.length; i++){
             if(d[i].type == 'Absolute'){
-                discount = discount.plus(get_number(d[i].amount, separator));
-                final = final.minus(discount);
+                this_discount = get_number(d[i].amount, separator);
+                final = final.minus(this_discount);
+                discount = discount.plus(this_discount);
             }
             else{
-                discount = discount.plus(final.times(get_number(d[i].amount, separator).div(Big(100))));
-                final = final.minus(discount)
+                this_discount = final.times(get_number(d[i].amount, separator).div(Big(100)));
+                discount = discount.plus(this_discount);
+                final = final.minus(this_discount)
             }
         }
         return {discount:discount, final:final};
@@ -121,7 +124,7 @@ function total_price(tax_first, base_price, tax, discounts, quantity, separator)
         r.base = base_price;
         
         // price including tax
-        r.tax_price = do_tax(null, base_price, t);
+        r.tax_price = do_tax(null, base_price, tax);
         if(!r.tax_price) return null;
         
         // absolute tax value
@@ -137,7 +140,7 @@ function total_price(tax_first, base_price, tax, discounts, quantity, separator)
         r.total = t.final;
         
         // total without tax
-        r.
+        r.total_tax_exc = r.total.minus(r.tax);
     }
     else{
         // subtract discounts from base
@@ -151,7 +154,7 @@ function total_price(tax_first, base_price, tax, discounts, quantity, separator)
         if(!r.discount_price) return null;
         
         // add tax
-        r.tax_price = do_tax(null, r.discount_price, t);
+        r.tax_price = do_tax(null, r.discount_price, tax);
         if(!r.tax_price) return null;
         
         // get absolute tax value
@@ -159,14 +162,17 @@ function total_price(tax_first, base_price, tax, discounts, quantity, separator)
         if(!r.tax_price) return null;
         
         r.total = r.tax_price;
+        
+        // total without tax
+        r.total_tax_exc = r.discount_price;
     }
     
     // multiply everything by quantity
     r.base = r.base.times(quantity) // without tax and discounts
-    r.tax = r.tax.times(quantity)  // tax, absolute
-    r.tax_price = r.tax_price.times(quantity) // with tax only
+    r.tax = r.tax.times(quantity)   // tax, absolute
     r.discount = r.discount.times(quantity) // discounts, absolute
-    r.discount_price = r.discount_price.times(quantity) // price with discounts only
+    r.total_tax_exc = r.total_tax_exc.times(quantity) // total without tax
+    r.total = r.total.times(quantity) // total total total
     
     return r;
 }

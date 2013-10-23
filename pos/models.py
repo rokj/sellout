@@ -111,14 +111,14 @@ class Tax(SkeletonU):
         return self.company.name + ": " + self.name
 
 ### product ###
-# so far, one image per product is enough (pos != store)
+# for now, one image per product is enough (web pos != web store)
 #class ProductImage(SkeletonU):
 #    description = models.TextField(_('Image description'), blank=True, null=True)
 #    image = models.ImageField(upload_to=get_image_path(g.DIRS['product_image_dir'], "pos_productimage"), null=False)
 #    original_filename = models.CharField(_('Original filename'), max_length=255, blank=True, null=True)
 
 class ProductAbstract(SkeletonU):
-    """ used for product and bill item """
+    """ all these fields will be copied to BillItem """
     code = models.CharField(_("Product code"), max_length=30, blank=False, null=False)
     shortcut = models.CharField(_("Store's internal product number"), max_length=5, blank=False, null=True)
     name = models.CharField(_("Product name"), max_length=50, blank=False, null=False)
@@ -130,24 +130,24 @@ class ProductAbstract(SkeletonU):
                                       max_digits=g.DECIMAL['quantity_digits'],
                                       decimal_places=g.DECIMAL['quantity_decimal_places'],
                                       null=False, blank=False)
+    stock = models.DecimalField(_("Number of items left in stock"),
+                                max_digits=g.DECIMAL['quantity_digits'],
+                                decimal_places=g.DECIMAL['quantity_decimal_places'],
+                                null=False, blank=False)
     # price - in a separate model
-    tax = models.ForeignKey(Tax, null=False, blank=False)
     
     class Meta:
         abstract = True
 
 class Product(ProductAbstract):
-    # foreign keys, changed data in Company/Discount/... will be reflected in Product and BillItem
+    """ these fields will not be copied to BillItem """
     company = models.ForeignKey(Company, null=False, blank=False)
     discounts = models.ManyToManyField(Discount, null=True, blank=True, through='ProductDiscount')
     category = models.ForeignKey(Category, null=True, blank=True)
-    stock = models.DecimalField(_("Number of items left in stock"),
-        max_digits=g.DECIMAL['quantity_digits'],
-        decimal_places=g.DECIMAL['quantity_decimal_places'],
-        null=False, blank=False)
     image = thumbnail.ImageField(_("Icon"),
          upload_to=get_image_path(g.DIRS['product_icon_dir'], "pos_product"),
          null=True, blank=True)
+    tax = models.ForeignKey(Tax, null=False, blank=False)
     # images = models.ManyToManyField(ProductImage, null=True, blank=True) # one image per product is enough
     
     def __unicode__(self):

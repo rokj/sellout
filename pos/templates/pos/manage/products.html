@@ -8,6 +8,14 @@ img.preview-product{
     max-width:{{ image_dimensions.0 }}px;
     max-height:{{ image_dimensions.1 }}px;
 }
+
+/* TODO: move to products.css */
+.negative-profit{
+    color:white;
+    font-weight:bold;
+    background-color:red;
+    padding:2px;
+}
 </style>
 
 {% comment %}
@@ -570,7 +578,7 @@ $(document).ready(function(){
         $("#edit_product_code", edit_obj).val(product.code);
         
         // update total price when tax, price or discounts change
-        $("#edit_product_tax, #edit_product_price, input.product-price-type", edit_obj).change(get_total_price);
+        $("#edit_product_tax, #edit_product_price, input.product-price-type, #edit_product_purchase_price", edit_obj).change(get_total_price);
         
         // show the edit dialog
         edit_obj.dialog({
@@ -614,34 +622,49 @@ $(document).ready(function(){
     
     function get_total_price(){
         // tax
-        t = get_number(get_tax($("#edit_product_tax", edit_obj).val()).amount, "{{ separator }}");
+        t = get_number(get_tax($("#edit_product_tax").val()).amount, "{{ separator }}");
         if(!t) return; // don't change anything if something is wrong (or not yet entered)
             
         // price
-        price = get_number($("#edit_product_price", edit_obj).val(), "{{ separator }}");
+        price = get_number($("#edit_product_price").val(), "{{ separator }}");
         if(!price) return;
             
         // if price is entered including tax, remove tax from price first and add it later
-        if($("input.product-price-type:checked", edit_obj).val() == 'incl'){
+        if($("input.product-price-type:checked").val() == 'incl'){
             // remove tax from base price in #edit_product_tax
             price = do_tax(price, null, t, "{{ separator }}");
         }
         if(!price) return;
             
         // gather all discounts
-        discounts = get_product_discounts($("ul#edit_discounts", edit_obj));
+        discounts = get_product_discounts($("ul#edit_discounts"));
             
         // total_price(tax_first, base, tax, discounts, separator){
         var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), "{{separator}}");
 
-        $("td#total_price", edit_obj).text(display_number(result.total, "{{separator}}", {{decimal_places}}));
+        $("td#total_price").text(display_number(result.total, "{{separator}}", {{decimal_places}}));
         
         // price without tax
-        $("td#price_without_tax", edit_obj).text(display_number(result.
+        $("td#price_without_tax").text(display_number(result.total_tax_exc, "{{separator}}", {{decimal_places}}));
                 
         // calculate profit and if it's lower than zero, use a different style
-        
-        
+        // get the purchase price, if entered
+        var purchase_price = get_number($("input#edit_product_purchase_price").val(), "{{separator}}");
+        var profit_obj = $("td#profit");
+        if(purchase_price){
+            var profit = result.total_tax_exc.minus(purchase_price);;
+            profit_obj.text(display_number(profit, "{{separator}}", {{decimal_places}}));
+            
+            if(profit.cmp(Big(0)) < 0){ // use alternate style
+                profit_obj.addClass("negative-profit");
+            }
+            else{
+                profit_obj.removeClass("negative-profit");
+            }
+        }
+        else{
+            profit_obj.text("");
+        }
     }
     
     function save_product(parent){
@@ -687,10 +710,28 @@ $(document).ready(function(){
         data['shortcut'] = $("#edit_product_shortcut", dlg_obj).val();
         data['code'] = $("#edit_product_code", dlg_obj).val();
         // price: remove tax if price is set including tax
-        if($("input.product-price-type:checked", dlg_obj).val() == 'incl') // remove tax from price
-            data['price'] = $("#edit_product_price", dlg_obj).val(); // TODO: remove tax
-        else // just save the existing price
+        if($("input.product-price-type:checked", dlg_obj).val() == 'incl'){ // remove tax from price
+            var pwith = get_number($("#edit_product_price", dlg_obj).val(), "{{separator}}");
+            if(!pwith){
+                alert("{% trans 'Check price format' %}");
+                return;
+            }
+            var tax = get_number(get_tax($("#edit_product_tax", dlg_obj).val()).amount, "{{separator}}");
+            if(!tax){
+                alert("{% trans 'Check tax' %}"); // how could this possibly happen at all
+                return;
+            }
+            var pwithout = do_tax(pwith, null, tax);
+            if(!pwithout){
+                return; // ?
+            }
+            data['price'] =  display_number(pwithout, "{{separator}}", {{decimal_places}});
+        }
+        else{ // just save the existing price
             data['price'] = $("#edit_product_price", dlg_obj).val();
+        }
+        // purchase price
+        data['purchase_price'] = $("#edit_product_purchase_price", dlg_obj).val();
         
         if(data['id'] == "-1"){
             // it's a new product

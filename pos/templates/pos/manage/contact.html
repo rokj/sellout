@@ -7,15 +7,22 @@
 {% block head %}
 
 <script type="text/javascript">
-individual_fields = ["first_name", "last_name", "date_of_birth"];    
+individual_fields = ["first_name", "last_name", "sex", "date_of_birth"];    
 company_fields = ["company_name", "vat"];
 
 $(document).ready(function(){
     function render_fields(fields, show){
         for(var i = 0; i < fields.length; i++){
             obj = $("#id_" + fields[i] + "_container");
-            if(show) obj.show();
-            else obj.hide();
+            
+            if(show){
+                obj.show();
+            }
+            else{
+                obj.hide();
+                // empty objects to prevent saving both company AND individual data to the same contact
+                $("input, select", obj).val("");
+            }
         }
     }
 

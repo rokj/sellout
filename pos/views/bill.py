@@ -30,7 +30,7 @@ def bill_item_to_dict(user, item):
     i['private_notes'] = item.private_notes,
     i['unit_type'] = item.unit_type,
     i['unit_amount'] = item.unit_amount,
-    i['tax'] = format_number(user, item.tax.amount)
+    i['stock'] = format_number(user, item.stock)
     # values from bill item
     i['bill_id'] = item.bill.id
     i['quantity'] = format_number(user, item.quantity)
@@ -225,11 +225,6 @@ def add_item_to_bill(request, company):
     # what's in 'price' var is not relevant and should not be used
     del price
     
-    print "base " + str(base_price)
-    print "discount " + str(discount_absolute)
-    print "tax " + str(tax_absolute)
-    print "total " + str(total)
-
     # notes, if any    
     bill_notes = data.get('notes')
 
@@ -246,7 +241,7 @@ def add_item_to_bill(request, company):
         private_notes = product.private_notes,
         unit_type = product.get_unit_type_display(), # ! display, not the 'code'
         unit_amount = product.unit_amount,
-        tax = product.tax,
+        stock = product.stock,
         # billItem's fields        
         bill = bill,
         product_id = product.id,

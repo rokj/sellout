@@ -48,7 +48,7 @@ def get_product_discounts(product):
     m2mids = [x.discount.id for x in product_discounts]
     
     discounts = []
-    for i in m2mids: # this is the only way to NOT sort the queryset by 'whatever, not but seq_no'
+    for i in m2mids: # this is obviously the only way to NOT sort the queryset by 'whatever, not by seq_no'
         discounts.append(Discount.objects.get(id=i))
     
     return discounts
@@ -56,12 +56,19 @@ def get_product_discounts(product):
 def update_product_discounts(request, product, discount_ids):
     """ smartly handles ProductDiscount m2m fields with as little repetition/deletion as possible
         discount_ids: list of discount ids (integers) """
+    
+    current_discounts = get_product_discounts(product)
+    current_discounts_ids = [x.id for x in current_discounts]
+    
     # first remove discounts that are not in discount_ids
-    get_product_discounts(product).exclude(discount__id__in=discount_ids).delete()
     # then add missing discounts with a valid sequence
     i = 1
     modify = False
     for did in discount_ids:
+        if did not in current_discounts_ids:
+            Discount.objects.get(id=did).delete()
+            continue
+    
         # see if this discount exists at all
         try:
             discount = Discount.objects.get(id=int(did))
@@ -193,8 +200,6 @@ def product_to_dict(user, product):
     # category?
     if product.category:
         ret['category'] = product.category.name
-    
-    if product.category:
         ret['category_id'] = product.category.id
     
     if product.code:
@@ -503,7 +508,16 @@ def validate_product(user, company, data):
         return r(False, _("Check price notation"))
     data['price'] = ret['number']
     
-        
+    # purchase price
+    if len(data['purchase_price']) > g.DECIMAL['currency_digits']+1:
+        return r(False, _("Purchase price too long"))
+    
+    ret = parse_decimal(user, data['purchase_price'], g.DECIMAL['currency_digits'])
+    if not ret['success']:
+        return r(False, _("Check purchase price notation"))
+    data['purchase_price'] = ret['number']
+    
+    
     # unit type (probably doesn't need checking
     if not data['unit_type'] in dict(g.UNITS):
         return r(False, _("Invalid unit type"))
@@ -586,6 +600,9 @@ def validate_product(user, company, data):
         return r(False, _("Check stock notation"))
     else:
         data['stock'] = ret['number']
+        # it cannot be negative
+        if data['stock'] < decimal.Decimal('0'):
+            return r(False, _("Stock cannot be negative"))
         
     return {'status':True, 'data':data} 
 

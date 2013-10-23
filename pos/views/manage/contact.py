@@ -541,21 +541,33 @@ def edit_contact(request, company, contact_id):
         
     if request.method == 'POST':
         # submit data
-        form = ContactForm(request.POST, instance=contact)
+        form = ContactForm(request.POST)
+        form.user = request.user
+        form.company = c
 
         if form.is_valid():
-            # created_by and company_id
-            contact = form.save(False)
-            if 'created_by' not in form.cleaned_data:
-                contact.created_by = request.user
-            if 'company_id' not in form.cleaned_data:
-                contact.company_id = c.id
-        
-            form.save()
+            contact.type = form.cleaned_data.get('type')
+            contact.company_name = form.cleaned_data.get('company_name')
+            contact.first_name = form.cleaned_data.get('first_name')
+            contact.last_name = form.cleaned_data.get('last_name')
+            contact.sex = form.cleaned_data.get('sex')
+            contact.date_of_birth = form.cleaned_data.get('date_of_birth')
+            contact.street_address = form.cleaned_data.get('street_address')
+            contact.postcode = form.cleaned_data.get('postcode')
+            contact.city = form.cleaned_data.get('city')
+            contact.state = form.cleaned_data.get('state')
+            contact.country = form.cleaned_data.get('country')
+            contact.email = form.cleaned_data.get('email')
+            contact.phone = form.cleaned_data.get('phone')
+            contact.vat = form.cleaned_data.get('vat')
+            contact.save()
             
             return redirect('pos:list_contacts', company=c.url_name)
     else:
-        form = ContactForm(instance=contact)
+        initial = contact_to_dict(request.user, contact)
+        form = ContactForm(initial=initial)
+        form.user = request.user
+        form.company = c
 
     context['form'] = form
     

@@ -25,7 +25,7 @@ def terminal(request, company):
         'company':c,
         'title':c.name,
         'site_title':g.MISC['site_title'],
-        # some static properties
+        # some static properties (for template)
         'currency':get_value(request.user, 'pos_currency'),
     }
     return render(request, 'pos/terminal.html', context)
@@ -37,12 +37,18 @@ def terminal_init(request, company):
         return JSON_error(_("Company does not exist"))
 
     """ return all terminal settings and other static data in JSON format """
+    if get_value(request.user, 'pos_discount_calculation') == 'Tax first':
+        tax_first = True
+    else:
+        tax_first = False
+    
     data = {
         # user's data
         'categories':get_all_categories_structured(c, data=[], level=0),
         'currency':get_value(request.user, 'pos_currency'),
         'separator':get_value(request.user, 'pos_decimal_separator'),
         'decimal_places':int(get_value(request.user, 'pos_decimal_places')),
+        'tax_first':tax_first,
         # interface parameters
         'interface':get_value(request.user, 'pos_interface'),
         'product_button_size':g.PRODUCT_BUTTON_DIMENSIONS[get_value(request.user, 'pos_interface_product_button_size')],

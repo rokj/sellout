@@ -60,11 +60,11 @@ function add_item(product){
         // see if there's already an item in bill for this product
         existing_item = get_bill_item(product.id);
         if(existing_item){
-            // there is, add 1 to existing item's quantity
+            // there is, add <unit_amount> to existing item's quantity
             qty_obj = $("input.item-qty", existing_item);
             qty = qty_obj.val();
             if(check_number(qty, window.data.separator)){
-                qty = get_number(qty, window.data.separator).plus(Big(1));
+                qty = get_number(qty, window.data.separator).plus(get_number(product.unit_amount, window.data.separator));
                 qty_obj.val(display_number(qty, window.data.separator, window.data.decimal_places));
             }
             // window.bill.last_item stays the same
@@ -122,26 +122,30 @@ function update_item(product, item, replace_obj, exploded){
     // copy it to window.items.bill_items and replace the data with useful stuff
     var tmp_obj, btn_obj;
     var new_item = window.items.bill_header.clone();
+    var from_server;
 
     if(!item){
         // no stuff from server has been received *yet*
         // create an empty 'item'
         item = {
             bill_id:window.bill.bill.id, // the current bill
+            product_id:product.id, 
             name:product.name,
             code:product.code,
-            quantity:unit_amount,
+            quantity:get_number(product.unit_amount, window.data.separator),
             unit_type:product.unit_type_display,
-            unit_amount:get_number(product.unit_amount, window.data.separator, window.data.decimal_places),
-            base_price:product.price,
-            tax_absolute:product.tax,
-            discount_absolute:"***",
-            product_id:product.id
+            unit_amount:get_number(product.unit_amount, window.data.separator),
+            base_price:get_number(product.price, window.data.separator),
+            tax_percent:get_number(product.tax, window.data.separator),
+            tax_absolute:null,
+            stock:get_number(product.stock, window.data.separator),
+            discount_absolute:null,
         }
+        
+        from_server = false; // the data from the server is yet to be 
     }
 
     new_item.removeAttr("id"); // no duplicate ids in document
-    var stock = new_item.data().stock;
 
     // create a new item
     // product name
@@ -156,74 +160,74 @@ function update_item(product, item, replace_obj, exploded){
     );
     
     // add/remove quantity
-    function change_qty(q, add, stock){ // if 'add' is false subtract
-        if(check_number(q)){
-            if(!add){
-                // don't set a value of 0
-                n = get_number(q, window.data.separator).minus(Big(1));
-                
-                if(n.cmp(Big(0)) <= 0){
-                    return q;
-                }
-            }
-            else{
-                // when adding, check stock - do not add more items than there are in stock
-                n = get_number(q, window.data.separator).plus(Big(1));
-                stock = get_number(stock, window.data.separator);
-                if(n.cmp(stock) > 0){
-                    return q; // do not add anything
-                }
-            }
-            
-            return display_number(n, window.data.separator, window.data.decimal_places);
+    function change_qty(add, obj){ // if 'add' is false subtract
+        if(!add){
+            // don't set a value of 0
+            n = item.quantity.minus(item.unit_amount);
+            if(n.cmp(Big(0)) > 0) item.quantity = n;
         }
         else{
-            alert(gettext("Check quantity format"));
-            return display_number(Big(1), window.data.separator, window.data.decimal_places);
+            // when adding, check stock - do not add more items than there are in stock
+            // add in increments of unit_amount
+            n = item.quantity.plus(item.unit_amount);
+            if(n.cmp(item.stock) <= 0) item.quantity = n;
         }
+        
+        // update the looks
+        obj.val(display_number(item.quantity, window.data.separator, window.data.decimal_places));
+        update_item_prices(item, new_item);
     }
     
     // quantity: an edit box
     tmp_obj = $("td.bill-item-qty-container p.bill-title", new_item);
     tmp_obj.empty();
-    tmp_obj.append($("<input>", {"class":"item-qty", type:"text"}).val(item.quantity));
+    tmp_obj.append($("<input>", {"class":"item-qty", type:"text"}).val(item.quantity)
+        .change(function(){
+            // set the new quantity, check it and update if ok
+            new_qty = get_number($(this).val(), window.data.separator);
+            if(!new_qty){
+                alert(gettext("Wrong quantity format"));
+                new_qty = Big(1);
+            }
+            // check if there's enough of it in stock
+            if(new_qty.cmp(item.stock) > 0){
+                alert(gettext("There's not enough items in stock"));
+                new_qty = item.stock;
+            }
+            // check if it's not negative or 0
+            if(new_qty.cmp(Big(0)) <= 0){
+                alert(gettext("Quantity cannot be zero or less"));
+                new_qty = Big(1);
+            }
+            // set the new quantity and update everything
+            item.quantity = new_qty;
+            $(this).val(display_number(item.quantity, window.data.separator, window.data.decimal_places));
+            update_item_prices(item, new_item);
+        })
+    );
+    
     // 'plus' button
     btn_obj = $("<input>", {type:"button", "class":"qty-button", value:"+"});
-    btn_obj.click(function(){
-        var obj = $("input.item-qty", $(this).parent());
-        obj.val(change_qty(obj.val(), true, stock));
-        
-    });
+    btn_obj.click(function(){ change_qty(true, $("input.item-qty", $(this).parent())); });
     tmp_obj.append(btn_obj);
+    
     // 'minus' button
     btn_obj = $("<input>", {type:"button", "class":"qty-button", value:"-"});
-    btn_obj.click(function(){
-        var obj = $("input.item-qty", $(this).parent());
-        obj.val(change_qty(obj.val(), false, stock));
-        
-    });
+    btn_obj.click(function(){ change_qty(false, $("input.item-qty", $(this).parent())); });
     tmp_obj.append(btn_obj);
-    // unit type        
-    $("td.bill-item-qty-container p.bill-subtitle", new_item).empty().append("[" + item.unit_type + "]");
     
-    // price
-    $("td.bill-item-price-container p.bill-title", new_item).text(item.base_price);
-    $("td.bill-item-price-container p.bill-subtitle", new_item).remove();
-    
-    // tax
-    $("td.bill-item-tax-container p.bill-title", new_item).text(item.tax_percent); // percent
-    $("td.bill-item-tax-container p.bill-subtitle", new_item).text(item.tax_absolute); // absolute value
+    // set 'fixed' fields that cannot be changed
+    // unit amount and type
+    $("td.bill-item-qty-container p.bill-subtitle", new_item).empty().append(item.unit_type);
+    // price will be set later
+    // tax: percent only
+    $("td.bill-item-tax-container p.bill-title", new_item).empty().append(display_number(item.tax_percent, window.data.separator, window.data.decimal_places));
     
     // discounts: list all discounts by type
     $("td.bill-item-discount-container p.bill-title", new_item).text(item.discount_absolute);
     // the 'more' button TODO
     
-    
-    // single total
-    $("td.bill-item-single-total-container p.bill-title", new_item).text(item.single_total);
-    
-    // total
-    $("td.bill-item-total-container p.bill-title", new_item).text(item.total);
+    // other data (that will change) will be set in update_item_prices()    
     
     // add data that we'll need later:
     // product id (to update quantity when adding new product )
@@ -257,7 +261,25 @@ function update_item(product, item, replace_obj, exploded){
         replace_obj.replaceWith(new_item);
     }
     
+    // set prices etc.
+    update_item_prices(item, new_item);
     
-    return new_item;
+    return new_item; // chainability
 }
 
+function update_item_prices(item, obj){
+    // item - 'json'
+    // obj - jquery object, bill item
+    r = total_price(window.data.tax_first, item.base_price, item.tax_percent, [], item.quantity, window.data.separator);
+
+    // base price
+    $("td.bill-item-price-container p.bill-title", obj).text(display_number(r.base, window.data.separator, window.data.decimal_places));
+    
+    // tax (only absolute value)
+    $("td.bill-item-tax-container p.bill-subtitle", obj).text(display_number(r.tax, window.data.separator, window.data.decimal_places));
+    
+    // discounts
+    
+    // total
+    $("td.bill-item-total-container p.bill-title", obj).text(display_number(r.total, window.data.separator, window.data.decimal_places));
+}
