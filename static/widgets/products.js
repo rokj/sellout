@@ -130,7 +130,7 @@ function product_button(product){
 
     div.data(product); // everything about the product
 
-    if(get_number(product.stock, window.data.separator).comparedTo(BigNumber(0)) <= 0){
+    if(get_number(product.stock, window.data.separator).cmp(Big(0)) <= 0){
         info_div.addClass("out-of-stock");
         // this product cannot be clicked
     }

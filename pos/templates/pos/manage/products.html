@@ -632,13 +632,16 @@ $(document).ready(function(){
         discounts = get_product_discounts($("ul#edit_discounts", edit_obj));
             
         // total_price(tax_first, base, tax, discounts, separator){
-        $("span#total_price", edit_obj).text(
-            display_number(
-                total_price({{tax_first|lower}}, price, t, discounts, "{{separator}}"),
-                "{{separator}}",
-                {{decimal_places}}
-            )
-        );
+        var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), "{{separator}}");
+
+        $("td#total_price", edit_obj).text(display_number(result.total, "{{separator}}", {{decimal_places}}));
+        
+        // price without tax
+        $("td#price_without_tax", edit_obj).text(display_number(result.
+                
+        // calculate profit and if it's lower than zero, use a different style
+        
+        
     }
     
     function save_product(parent){
@@ -988,8 +991,21 @@ $(document).ready(function(){
             <td><p><label for="edit_product_code">{% trans 'Product code' %}</label><input type="text" id="edit_product_code" maxlength="{{ field_lengths.code }}" /></p></td>
             
             <td>
-                {% comment %} total price {% endcomment %}
-                {% trans 'Total price' %}: <span id="total_price">&nbsp;</span>
+                {% comment %} total price and profit {% endcomment %}
+                <table>
+                    <tr>
+                        <td>{% trans 'Total price' %}</td>
+                        <td id="total_price">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>{% trans 'Price without tax' %}</td>
+                        <td id="price_without_tax">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>{% trans 'Profit' %}</td>
+                        <td id="profit">&nbsp;</td>
+                    </tr>
+                </table>
             </td>
         </tr>
         <tr>

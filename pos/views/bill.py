@@ -29,6 +29,7 @@ def bill_item_to_dict(user, item):
     i['description'] = item.description,
     i['private_notes'] = item.private_notes,
     i['unit_type'] = item.unit_type,
+    i['unit_amount'] = item.unit_amount,
     i['tax'] = format_number(user, item.tax.amount)
     # values from bill item
     i['bill_id'] = item.bill.id
@@ -243,7 +244,8 @@ def add_item_to_bill(request, company):
         name = product.name,
         description = product.description,
         private_notes = product.private_notes,
-        unit_type = product.get_unit_type_display(), # !
+        unit_type = product.get_unit_type_display(), # ! display, not the 'code'
+        unit_amount = product.unit_amount,
         tax = product.tax,
         # billItem's fields        
         bill = bill,

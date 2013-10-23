@@ -64,7 +64,7 @@ function add_item(product){
             qty_obj = $("input.item-qty", existing_item);
             qty = qty_obj.val();
             if(check_number(qty, window.data.separator)){
-                qty = get_number(qty, window.data.separator).plus(BigNumber(1));
+                qty = get_number(qty, window.data.separator).plus(Big(1));
                 qty_obj.val(display_number(qty, window.data.separator, window.data.decimal_places));
             }
             // window.bill.last_item stays the same
@@ -130,8 +130,9 @@ function update_item(product, item, replace_obj, exploded){
             bill_id:window.bill.bill.id, // the current bill
             name:product.name,
             code:product.code,
-            quantity:display_number(BigNumber(1), window.data.separator, window.data.decimal_places),
+            quantity:unit_amount,
             unit_type:product.unit_type_display,
+            unit_amount:get_number(product.unit_amount, window.data.separator, window.data.decimal_places),
             base_price:product.price,
             tax_absolute:product.tax,
             discount_absolute:"***",
@@ -159,17 +160,17 @@ function update_item(product, item, replace_obj, exploded){
         if(check_number(q)){
             if(!add){
                 // don't set a value of 0
-                n = get_number(q).minus(BigNumber(1));
+                n = get_number(q, window.data.separator).minus(Big(1));
                 
-                if(n.comparedTo(BigNumber(0)) <= 0){
+                if(n.cmp(Big(0)) <= 0){
                     return q;
                 }
             }
             else{
                 // when adding, check stock - do not add more items than there are in stock
-                n = get_number(q).plus(BigNumber(1));
-                stock = get_number(stock);
-                if(n.comparedTo(stock) > 0){
+                n = get_number(q, window.data.separator).plus(Big(1));
+                stock = get_number(stock, window.data.separator);
+                if(n.cmp(stock) > 0){
                     return q; // do not add anything
                 }
             }
@@ -178,7 +179,7 @@ function update_item(product, item, replace_obj, exploded){
         }
         else{
             alert(gettext("Check quantity format"));
-            return display_number(BigNumber(1), window.data.separator, window.data.decimal_places);
+            return display_number(Big(1), window.data.separator, window.data.decimal_places);
         }
     }
     

@@ -86,45 +86,88 @@ function do_tax(p_incl, p_excl, tax){
     }
 }
 
-function total_price(tax_first, base, tax, discounts, separator){
+function total_price(tax_first, base_price, tax, discounts, quantity, separator){
     // calculates total price
     // parameters:
     // tax_first: if true, first tax is added and then discounts, else v.v.
     // base: base price, Big()
     // tax: tax in percent, Big()
     // discounts: list of discounts (from py's discount_to_dict())
-    // returns Big() calculated price
+    
     // if anything fails, returns null
-    function subtract_discounts(p, d){ // price, discounts[]
+    // if all is OK, returns {base, discount, tax, total}, all Big()
+    function discounts_total(p, d){ // price, discounts[]
+        var discount = Big(0);
+        var final = p;
+        
         for(var i = 0; i < d.length; i++){
             if(d[i].type == 'Absolute'){
-                p = p.minus(get_number(d[i].amount, separator));
+                discount = discount.plus(get_number(d[i].amount, separator));
+                final = final.minus(discount);
             }
             else{
-                p = p.div(Big(1).plus(get_number(d[i].amount, separator).div(Big(100))));
+                discount = discount.plus(final.times(get_number(d[i].amount, separator).div(Big(100))));
+                final = final.minus(discount)
             }
         }
-        return p;
+        return {discount:discount, final:final};
     }
+    
+    var r = {};
+    var t;
     
     if(tax_first){
-        // add tax
-        price = do_tax(null, price, t);
+        // base price
+        r.base = base_price;
         
-        if(!price)return;
-        // subtract discounts
-        price = subtract_discounts(price, discounts);
-        if(!price) return null;
+        // price including tax
+        r.tax_price = do_tax(null, base_price, t);
+        if(!r.tax_price) return null;
+        
+        // absolute tax value
+        r.tax = r.tax_price.minus(base_price);
+        if(!r.tax) return null;
+        
+        // absolute discounts value
+        t = discounts_total(r.tax_price, discounts);
+        r.discount = t.discount
+        if(!r.discount) return null;
+        
+        // total, with tax and discounts
+        r.total = t.final;
+        
+        // total without tax
+        r.
     }
     else{
-        // subtract discounts
-        price = subtract_discounts(price, discounts);
-        if(!price) return;
+        // subtract discounts from base
+        t = subtract_discounts(base_price, discounts);
+        
+        r.discount = t.discount;
+        if(!r.discount) return null;
+        
+        // price including discounts
+        r.discount_price = t.final;
+        if(!r.discount_price) return null;
+        
         // add tax
-        price = tax(null, price, t);
-        if(!price) return;
+        r.tax_price = do_tax(null, r.discount_price, t);
+        if(!r.tax_price) return null;
+        
+        // get absolute tax value
+        r.tax = r.tax_price.minus(r.discount_price);
+        if(!r.tax_price) return null;
+        
+        r.total = r.tax_price;
     }
     
-    return price;
+    // multiply everything by quantity
+    r.base = r.base.times(quantity) // without tax and discounts
+    r.tax = r.tax.times(quantity)  // tax, absolute
+    r.tax_price = r.tax_price.times(quantity) // with tax only
+    r.discount = r.discount.times(quantity) // discounts, absolute
+    r.discount_price = r.discount_price.times(quantity) // price with discounts only
+    
+    return r;
 }
 
