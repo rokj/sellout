@@ -23,13 +23,13 @@ def bill_item_to_dict(user, item):
     
     # values from product
     i['product_id'] = item.product_id
-    i['code'] = item.code,
-    i['shortcut'] = item.shortcut,
-    i['name'] = item.name,
-    i['description'] = item.description,
-    i['private_notes'] = item.private_notes,
-    i['unit_type'] = item.unit_type,
-    i['unit_amount'] = item.unit_amount,
+    i['code'] = item.code
+    i['shortcut'] = item.shortcut
+    i['name'] = item.name
+    i['description'] = item.description
+    i['private_notes'] = item.private_notes
+    i['unit_type'] = item.unit_type
+    i['unit_amount'] = format_number(user, item.unit_amount)
     i['stock'] = format_number(user, item.stock)
     # values from bill item
     i['bill_id'] = item.bill.id

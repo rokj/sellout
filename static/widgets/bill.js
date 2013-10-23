@@ -4,6 +4,37 @@ function get_bill(){
     get_data(window.data.get_bill_url, render_bill);
 }
 
+function product_to_item(product){
+    // create a bill item from product
+    item = {
+        bill_id:window.bill.bill.id, // the current bill
+        product_id:product.id, 
+        name:product.name,
+        code:product.code,
+        quantity:product.unit_amount,
+        unit_type:product.unit_type_display,
+        unit_amount:product.unit_amount,
+        base_price:product.price,
+        tax_percent:product.tax,
+        tax_absolute:null,
+        stock:product.stock,
+        discount_absolute:null
+    }
+    
+    return convert_item(item);
+}
+
+function convert_item(item){
+    // convert bill item's stringed numbers to Big
+    item.unit_amount = get_number(item.unit_amount, window.data.separator)
+    item.stock = get_number(item.stock, window.data.separator)
+    item.quantity = get_number(item.quantity, window.data.separator)
+    item.base_price = get_number(item.base_price, window.data.separator)
+    item.tax_percent = get_number(item.tax_percent, window.data.separator)
+    item.total = get_number(item.total, window.data.separator)
+    return item;
+}
+
 function get_item_data(item_obj){
     // retrieve everything needed to add an item to bill or update it,
     // that is:
@@ -41,8 +72,10 @@ function render_bill(bill){
         alert(gettext("This is an unfinished bill from the last session, please check the last item"));
         
         // put each of the items in this loaded bill to #bill_items
-        var i;
+        var i, item;
         for(i = 0; i < bill.items.length; i++){
+            item = convert_item(bill.items[i]);
+        
             // save the last item
             window.bill.last_item = update_item(null, bill.items[i], null, null);
         }
@@ -56,12 +89,13 @@ function add_item(product){
         window.bill.last_item = update_item(product, null, null, false);
     }
     else{
+    
         // this is not the first item
         // see if there's already an item in bill for this product
-        existing_item = get_bill_item(product.id);
-        if(existing_item){
+        existing_item_obj = get_bill_item(product.id);
+        if(existing_item_obj){
             // there is, add <unit_amount> to existing item's quantity
-            qty_obj = $("input.item-qty", existing_item);
+            qty_obj = $("input.item-qty", existing_item_obj);
             qty = qty_obj.val();
             if(check_number(qty, window.data.separator)){
                 qty = get_number(qty, window.data.separator).plus(get_number(product.unit_amount, window.data.separator));
@@ -75,7 +109,7 @@ function add_item(product){
             item_data = get_item_data(window.bill.last_item);
             if(item_data){ // something might be entered wrongly
                 send_data(window.data.add_bill_item, item_data, window.data.csrf_token, function(recv_data){
-                    update_item(null, recv_data, window.bill.last_item, false);
+                    update_item(null, convert_item(recv_data), window.bill.last_item, false);
                 });
             }
             // a new item
@@ -122,27 +156,11 @@ function update_item(product, item, replace_obj, exploded){
     // copy it to window.items.bill_items and replace the data with useful stuff
     var tmp_obj, btn_obj;
     var new_item = window.items.bill_header.clone();
-    var from_server;
 
     if(!item){
         // no stuff from server has been received *yet*
-        // create an empty 'item'
-        item = {
-            bill_id:window.bill.bill.id, // the current bill
-            product_id:product.id, 
-            name:product.name,
-            code:product.code,
-            quantity:get_number(product.unit_amount, window.data.separator),
-            unit_type:product.unit_type_display,
-            unit_amount:get_number(product.unit_amount, window.data.separator),
-            base_price:get_number(product.price, window.data.separator),
-            tax_percent:get_number(product.tax, window.data.separator),
-            tax_absolute:null,
-            stock:get_number(product.stock, window.data.separator),
-            discount_absolute:null,
-        }
-        
-        from_server = false; // the data from the server is yet to be 
+        // create an empty 'item' - a copy of BillItem
+        item = convert_item(product_to_item(product));
     }
 
     new_item.removeAttr("id"); // no duplicate ids in document

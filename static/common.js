@@ -66,7 +66,8 @@ function get_number(string, separator){
 
 function display_number(number, separator, decimal_places){
     // receives a BigNumber as a parameter and returns a string with user specified decimal separator
-    return number.toFixed(decimal_places).replace('.', separator);
+    if(number) return number.toFixed(decimal_places).replace('.', separator);
+    else return '';
 }
 
 function do_tax(p_incl, p_excl, tax){

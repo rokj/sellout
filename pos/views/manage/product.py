@@ -217,6 +217,8 @@ def product_to_dict(user, product):
         ret['unit_type_display'] = product.get_unit_type_display()
     if product.unit_amount:
         ret['unit_amount'] = format_number(user, product.unit_amount)
+    if product.stock:
+        ret['stock'] = format_number(user, product.stock)
 
     # urls
     ret['get_url'] = reverse('pos:get_product', args=[product.company.url_name, product.id])
