@@ -52,7 +52,7 @@ class ContactForm(forms.Form):
     
     def clean(self):
         r = validate_contact(self.user, self.company, self.cleaned_data)
-        if not r['success']:
+        if not r['status']:
             raise forms.ValidationError(r['message'])
         else:
             return r['data']
@@ -228,6 +228,7 @@ def contact_to_dict(user, c, send_to="python"):
         ret['state'] = c.state
     if c.country:
         ret['country'] = c.country.name
+        ret['country_code'] = c.country.two_letter_code
     if c.email:
         ret['email'] = c.email
     if c.phone:
@@ -367,19 +368,20 @@ def m_add_contact(request, company):
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
+    
     # sellers can add product
-    if not has_permission(request.user, c, 'contact', 'edit'):
+    if not has_permission(request.user, c, 'product', 'edit'):
         return JSON_error(_("You have no permission to add products"))
 
     data = JSON_parse(request.POST['data'])
     
     # validate data
     valid = validate_contact(request.user, c, data)
-    
     if not valid['status']:
         return JSON_error(valid['message'])
     data = valid['data']
     
+
     contact = Contact(
         company = c,
         created_by = request.user,
@@ -494,12 +496,11 @@ def m_edit_contact(request, company, contact_id):
     
     contact.company = c
     contact.type = data['type']
+    contact.company_name = data['company_name']
     contact.first_name = data['first_name']
     contact.last_name = data['last_name']
-    contact.date_of_birth = data['date_of_birth']
     contact.sex = data['sex']
-    contact.company_name = data['company_name'] 
-    contact.vat = data['vat']
+    contact.date_of_birth = data['date_of_birth']
     contact.street_address = data['street_address']
     contact.postcode = data['postcode']
     contact.city = data['city']
@@ -507,6 +508,7 @@ def m_edit_contact(request, company, contact_id):
     contact.country = data['country']
     contact.email = data['email']
     contact.phone = data['phone']
+    contact.vat = data['vat']
     
     contact.save()
     
