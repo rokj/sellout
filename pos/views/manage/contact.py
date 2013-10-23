@@ -367,25 +367,19 @@ def m_add_contact(request, company):
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
-    
     # sellers can add product
-    if not has_permission(request.user, c, 'product', 'edit'):
+    if not has_permission(request.user, c, 'contact', 'edit'):
         return JSON_error(_("You have no permission to add products"))
 
     data = JSON_parse(request.POST['data'])
     
     # validate data
     valid = validate_contact(request.user, c, data)
+    
     if not valid['status']:
         return JSON_error(valid['message'])
     data = valid['data']
     
-    
-    try:
-        country = Country.objects.get(two_letter_code=data['country'])
-    except Country.DoesNotExist:
-        return JSON_error(_("Country does not exist"))
-        
     contact = Contact(
         company = c,
         created_by = request.user,
@@ -398,7 +392,7 @@ def m_add_contact(request, company):
         postcode = data['postcode'],
         city = data['city'],
         state = data['state'],
-        country = country,
+        country = data['country'],
         email = data['email'],
         phone = data['phone'],
         #vat = data['vat']
@@ -500,11 +494,12 @@ def m_edit_contact(request, company, contact_id):
     
     contact.company = c
     contact.type = data['type']
-    contact.company_name = data['company_name']
     contact.first_name = data['first_name']
     contact.last_name = data['last_name']
-    contact.sex = data['sex']
     contact.date_of_birth = data['date_of_birth']
+    contact.sex = data['sex']
+    contact.company_name = data['company_name'] 
+    contact.vat = data['vat']
     contact.street_address = data['street_address']
     contact.postcode = data['postcode']
     contact.city = data['city']
@@ -512,7 +507,6 @@ def m_edit_contact(request, company, contact_id):
     contact.country = data['country']
     contact.email = data['email']
     contact.phone = data['phone']
-    contact.vat = data['vat']
     
     contact.save()
     
