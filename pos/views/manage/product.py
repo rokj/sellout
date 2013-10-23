@@ -211,7 +211,7 @@ def product_to_dict(user, product):
         ret['unit_type'] = product.unit_type
         ret['unit_type_display'] = product.get_unit_type_display()
     if product.unit_amount:
-        ret['unit_amount'] = product.unit_amount
+        ret['unit_amount'] = format_number(user, product.unit_amount)
 
     # urls
     ret['get_url'] = reverse('pos:get_product', args=[product.company.url_name, product.id])
@@ -631,6 +631,7 @@ def create_product(request, company):
         category = category,
         name = data['name'],
         unit_type = data['unit_type'],
+        unit_amount = data['unit_amount'],  
         code = data['code'],
         shortcut = data['shortcut'],
         description = data['description'],

@@ -10,7 +10,7 @@ extensions = [ # files that we are interested in (without dots at the beginning)
 
 ignore = [ # ignore files which names start with any of these:
     './static/jquery',
-    './static/bignumber',
+    './static/big',
     './static/keyboard/',
     './static/fuckyeah/',
     './admin',

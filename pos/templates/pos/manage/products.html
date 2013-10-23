@@ -246,8 +246,8 @@ $(document).ready(function(){
         var discount = product.discounts[i];
         
         li_obj = $("<li>", {title:""});
-        li_obj.data({id:discount.id}); // store id in data() for later retrieval
-        
+        li_obj.data(discount); // store id in data() for later retrieval
+
         discount_tooltip(discount, li_obj);
         
         // delete button
@@ -291,7 +291,6 @@ $(document).ready(function(){
         for(i = 0; i < all_discounts.length; i++){
             // ignore discounts that are already in product
             if(find_discount_by_id(product.discounts, all_discounts[i].id) != null){
-                
                 continue;
             }
             
@@ -321,9 +320,11 @@ $(document).ready(function(){
         }
         
         // make the list sortable, but exclude the last item
-        if(added > 0) ul_obj.sortable({items:"li:not(:last)"});
+        if(added > 0) ul_obj.sortable({items:"li:not(:last)", stop:get_total_price}); // also update price when sorting stops
         else ul_obj.sortable({items:"li"});
-        
+
+        // update total price
+        get_total_price();        
     }
     
     function upload_image_status(status, save_obj, del_obj, upl_obj, img_obj){
@@ -420,6 +421,9 @@ $(document).ready(function(){
         sel_obj.val(product.unit_amount);
         sel_obj.change(update_unit_types); // when changed...
         
+        // update with default
+        update_unit_types();
+        
         // listbox with taxes
         sel_obj = $("#edit_product_tax", edit_obj).empty();
 
@@ -483,7 +487,7 @@ $(document).ready(function(){
             obj = upl_obj.get(0);
 
             // filetype filter
-            rFilter = /^image\/(?:{{ image_upload_formats|escapejs }})$/i; {% comment %}  {% endcomment %}
+            rFilter = /^image\/(?:{{ image_upload_formats|escapejs }})$/i; {% comment %} file formats from globals {% endcomment %}
 
             f = f = obj.files[0]
             if(obj.files && f){ // check for browser compatibility
@@ -566,25 +570,7 @@ $(document).ready(function(){
         $("#edit_product_code", edit_obj).val(product.code);
         
         // update total price when tax, price or discounts change
-        $("#edit_product_tax, #edit_product_price, input.product-price-type, ul#edit_discounts", edit_obj).change(function(){
-            // get data from edits and calculate the final price
-            t = get_tax($("#edit_product_tax", edit_obj).val()).amount;
-            
-            price = $("#edit_product_price", edit_obj).val();
-            if(!check_number(price, "{{separator}}")){
-                alert("{% trans 'Check product price format' %}");
-                return;
-            }
-            
-            if($("input.product-price-type", edit_obj).val() == 'incl'){
-                // remove tax from base price in #edit_product_tax
-                price = tax(price, null, t, "{{ separator }}").toFixed({{decimal_places}});
-            }
-            
-            // gather all discounts
-            discounts = [];
-            
-        });
+        $("#edit_product_tax, #edit_product_price, input.product-price-type", edit_obj).change(get_total_price);
         
         // show the edit dialog
         edit_obj.dialog({
@@ -604,15 +590,55 @@ $(document).ready(function(){
         // get product's data from the server and put
         // it where it was before (product.parent)
         get_data(parent.data().product.get_url, function(data){
-            // add some fields to product that are not returned from the server
-            data.p_incl = tax(null, data.price, data.tax);
-            
             parent.data({product:data});
             render_product(parent);
         });
         
         // close the dialog
         $("#edit_dialog").dialog("destroy");
+    }
+    
+    function get_product_discounts(ul_obj){
+        // discounts: get all <li> items and put them into an array
+        var discounts = [];
+        
+        ul_obj.children().each(function(){
+            id = $(this).data().id;
+            if(id){
+                discounts.push($(this).data()); // the last entry is the listbox and button, don't add that
+            }
+        });        
+        
+        return discounts;
+    }
+    
+    function get_total_price(){
+        // tax
+        t = get_number(get_tax($("#edit_product_tax", edit_obj).val()).amount, "{{ separator }}");
+        if(!t) return; // don't change anything if something is wrong (or not yet entered)
+            
+        // price
+        price = get_number($("#edit_product_price", edit_obj).val(), "{{ separator }}");
+        if(!price) return;
+            
+        // if price is entered including tax, remove tax from price first and add it later
+        if($("input.product-price-type:checked", edit_obj).val() == 'incl'){
+            // remove tax from base price in #edit_product_tax
+            price = do_tax(price, null, t, "{{ separator }}");
+        }
+        if(!price) return;
+            
+        // gather all discounts
+        discounts = get_product_discounts($("ul#edit_discounts", edit_obj));
+            
+        // total_price(tax_first, base, tax, discounts, separator){
+        $("span#total_price", edit_obj).text(
+            display_number(
+                total_price({{tax_first|lower}}, price, t, discounts, "{{separator}}"),
+                "{{separator}}",
+                {{decimal_places}}
+            )
+        );
     }
     
     function save_product(parent){
@@ -638,7 +664,7 @@ $(document).ready(function(){
         data['id'] = product.id;
         data['name'] = $("#edit_product_name", dlg_obj).val();
         data['unit_type'] = $("#edit_product_unit_type :selected", dlg_obj).val();
-        data['unit_amount'] = $("#edit_unit_amount", dlg_obj).val();
+        data['unit_amount'] = $("#edit_product_unit_amount", dlg_obj).val();
         // image: if changed, encode uploaded image to base64
         data['change_image'] = product.change_image;
         if(product.change_image) data['image'] = product.image_data
@@ -647,15 +673,11 @@ $(document).ready(function(){
         last_chosen_category = data['category']; // remember the last used
         data['tax_id'] = $("#edit_product_tax", dlg_obj).val();
         data['description'] = $("#edit_product_description", dlg_obj).val();
-        // discounts: get all <li> items and put them into an array
-        var discounts = [];
-        var i = 0;
-        $("ul#edit_discounts li", dlg_obj).each(function(){
-            id = $(this).data().id;
-            if(id){
-                discounts.push(id); // the last entry is the listbox and button, don't add that
-            }
-        });
+        // discounts: strip off everything but ids
+        var discounts = get_product_discounts($("ul#edit_discounts", dlg_obj));
+        for(var i = 0; i < discounts.length; i++){
+            discounts[i] = discounts[i].id;
+        }
         data['discounts'] = discounts;
         data['private_notes'] = $("#edit_product_private_notes", dlg_obj).val();
         data['stock'] = $("#edit_product_stock", dlg_obj).val();
@@ -663,7 +685,7 @@ $(document).ready(function(){
         data['code'] = $("#edit_product_code", dlg_obj).val();
         // price: remove tax if price is set including tax
         if($("input.product-price-type:checked", dlg_obj).val() == 'incl') // remove tax from price
-            data['price'] = tax($("#edit_product_price", dlg_obj).val(), null, get_tax(data['tax_id']).amount);
+            data['price'] = $("#edit_product_price", dlg_obj).val(); // TODO: remove tax
         else // just save the existing price
             data['price'] = $("#edit_product_price", dlg_obj).val();
         
@@ -710,7 +732,7 @@ $(document).ready(function(){
     
     function update_unit_types(){
         // when the unit types edit changes, update all static labels with the changed units
-        var unit = $("#edit_product_unit_amount").val() + 
+        var unit = $("#edit_product_unit_amount").val() + " " + 
             $("#edit_product_unit_type").val();
         
         $("span.unit-amount-readonly").each(function(){
@@ -848,8 +870,7 @@ $(document).ready(function(){
             product = {
                 "id":-1,// new product's id = -1 until the server assigns an id
                 "discounts":[], // no discounts so far
-                // #####
-                //"tax":{{default_tax|escapejs}} // tax from config
+                "unit_amount":1
             };
             // save it to a dummy div
             parent = $("#new_product_dummy");
@@ -924,12 +945,12 @@ $(document).ready(function(){
                 <select id="edit_product_category" name="edit_product_category"></select></p></td>
             {% comment %} unit type: [scale] x [unit type] {% endcomment %}
             <td><p>{% trans 'Unit' %}<br />
-                <input type="text" id="edit_product_unit_amount" name="edit_product_unit_amount" value="1" /> {% comment %} default value = 1 {% endcomment %}
-                × <select id="edit_product_unit_type"></select>
+                <input type="text" id="edit_product_unit_amount" name="edit_product_unit_amount" /> {% comment %} default value = 1 {% endcomment %}
+                <select id="edit_product_unit_type"></select>
                 </p>
             
-            <p><label for="edit_product_stock">{% trans 'Units in stock' %}</label>
-                <input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}" /></p></td>
+            <p><label for="edit_product_stock">{% trans 'Stock' %}: </label>
+                <input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}" /> × <span class="unit-amount-readonly">?</span></p></td>
                 
         </tr>
         <tr>
@@ -942,6 +963,7 @@ $(document).ready(function(){
                     {% trans 'per' %} <span class="unit-amount-readonly">?</span>
                 </p>
                 <p>
+                    <label for="edit_product_price">{% trans 'Sell price' %}: </label>
                     {{ currency }} <input type="text" id="edit_product_price" maxlength="{{ field_lengths.price }}"/>
                     {% trans 'per' %} <span class="unit-amount-readonly">?</span>
                     <input type="radio" name="price_type" class="product-price-type" value="incl" />{% trans 'Incl. tax' %}

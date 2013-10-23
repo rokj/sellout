@@ -75,6 +75,7 @@ CONTACT_TYPES = (
 SEXES = (
     ("M", _("Male")),
     ("F", _("Female")),
+    ("U", _("Undisclosed")),
 )
 
 # bills
