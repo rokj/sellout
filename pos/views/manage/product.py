@@ -143,16 +143,18 @@ def products(request, company):
 def product_to_dict(user, product):
     # returns all relevant product's data:
     # id
+    # product name
     # price (sale price, excluding tax) - numeric value
     # purchase price - numeric value
     # unit type
+    # unit type display
     # discounts - dictionary or all discounts for this product 
     #    (see discounts.discount_to_dict for details)
     # image
     # category - name
     # category - id
     # code
-    # shop code
+    # shortcut
     # description
     # private notes
     # tax
@@ -511,13 +513,14 @@ def validate_product(user, company, data):
     data['price'] = ret['number']
     
     # purchase price
-    if len(data['purchase_price']) > g.DECIMAL['currency_digits']+1:
-        return r(False, _("Purchase price too long"))
+    if 'purchase_price' in data:
+        if len(data['purchase_price']) > g.DECIMAL['currency_digits']+1:
+            return r(False, _("Purchase price too long"))
     
-    ret = parse_decimal(user, data['purchase_price'], g.DECIMAL['currency_digits'])
-    if not ret['success']:
-        return r(False, _("Check purchase price notation"))
-    data['purchase_price'] = ret['number']
+        ret = parse_decimal(user, data['purchase_price'], g.DECIMAL['currency_digits'])
+        if not ret['success']:
+            return r(False, _("Check purchase price notation"))
+        data['purchase_price'] = ret['number']
     
     
     # unit type (probably doesn't need checking
@@ -588,7 +591,9 @@ def validate_product(user, company, data):
         tax = Tax.objects.get(id=int(data['tax_id']))
     except:
         return r(False, _("Invalid tax rate"))
-
+    
+    
+    
     del data['tax_id']
     data['tax'] = tax
     
@@ -639,7 +644,7 @@ def create_product(request, company):
     
     
     try:
-        category = Category.objects.get(id=data['category'])
+        category = Category.objects.get(id=data['category_id'])
     except Category.DoesNotExist:
         return JSON_error(_("Category does not exist"))
     
