@@ -639,6 +639,7 @@ def create_product(request, company):
     # validate data
     valid = validate_product(request.user, c, data)
     if not valid['status']:
+        print valid['message']
         return JSON_error(valid['message'])
     data = valid['data']
     
