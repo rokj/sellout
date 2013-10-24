@@ -47,6 +47,8 @@ def list_time_formats():
 class ConfigForm(forms.Form):
     button_sizes = [(key,key) for key,value in g.PRODUCT_BUTTON_DIMENSIONS.iteritems()]
     decimal_places_choices = (
+        ('0', 0),
+        ('1', 1),
         ('2', 2),
         ('3', 3),
         ('4', 4),

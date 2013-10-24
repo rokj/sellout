@@ -42,7 +42,9 @@ $(document).ready(function() {
     window.data.csrf_token = "{{csrf_token}}";
     // urls
     window.data.get_bill_url = "{% url 'pos:get_active_bill' company.url_name %}";
-    window.data.add_bill_item = "{% url 'pos:add_item_to_bill' company.url_name %}";
+    window.data.add_bill_item = "{% url 'pos:add_bill_item' company.url_name %}";
+    window.data.edit_bill_item = "{% url 'pos:edit_bill_item' company.url_name %}";
+    window.data.remove_bill_item = "{% url 'pos:remove_bill_item' company.url_name %}";
     // ui settings
     window.data.t = 100; // duration of show/hide events
     window.data.t_easing = 200; // duration of easing functions (drag start/stop)
@@ -57,7 +59,7 @@ $(document).ready(function() {
         search_field:$("input#search_products_filter"),
         products_list:$("div#products"),
         bill_header:$("#bill_header"),
-        bill_items:$("#bill_items")
+        bill_items:$("#bill_items") // tbody
     }
 
     window.bill = { // all about the current bill
