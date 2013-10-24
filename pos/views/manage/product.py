@@ -503,6 +503,17 @@ def validate_product(user, company, data):
                     " (" + _("code") + ": " + p[0].code + ")")
     data['name'] = data['name'].strip()
     
+    # category: must be present and must exist
+    if not data['category_id']:
+        return r(False, _("No category assigned"))
+    else:
+        try:
+            data['category_id'] = int(data['category_id'])
+            data['category'] = Category.objects.get(id=data['category_id'], company=company)
+        except Category.DoesNotExist:
+            return r(False, _("Selected category does not exist"))
+    
+    
     # price
     if len(data['price']) > g.DECIMAL['currency_digits']+1:
         return r(False, _("Price too long"))
@@ -517,10 +528,11 @@ def validate_product(user, company, data):
         if len(data['purchase_price']) > g.DECIMAL['currency_digits']+1:
             return r(False, _("Purchase price too long"))
     
-        ret = parse_decimal(user, data['purchase_price'], g.DECIMAL['currency_digits'])
-        if not ret['success']:
-            return r(False, _("Check purchase price notation"))
-        data['purchase_price'] = ret['number']
+        if len(data['purchase_price']) > 1: # purchase price is not mandatory, so don't whine if it's not entered
+            ret = parse_decimal(user, data['purchase_price'], g.DECIMAL['currency_digits'])
+            if not ret['success']:
+                return r(False, _("Check purchase price notation"))
+            data['purchase_price'] = ret['number']
     
     
     # unit type (probably doesn't need checking
@@ -643,16 +655,11 @@ def create_product(request, company):
     data = valid['data']
     
     
-    try:
-        category = Category.objects.get(id=data['category_id'])
-    except Category.DoesNotExist:
-        return JSON_error(_("Category does not exist"))
-    
     # save product:
     product = Product(
         company = c,
         created_by = request.user,
-        category = category,
+        category = data['category'],
         name = data['name'],
         unit_type = data['unit_type'],
         unit_amount = data['unit_amount'],  
@@ -747,11 +754,8 @@ def edit_product(request, company, product_id):
             product.image.delete()
     
     # category
-    try:
-        category = Category.objects.get(id=data['category'])
-        product.category = category
-    except Category.DoesNotExist:
-        pass # do not change product's category
+    if data['category']:
+        product.category = data['category']
 
     # price has to be updated separately
     product.price = update_price(Price, product, request.user, data['price'])
