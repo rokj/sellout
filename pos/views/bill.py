@@ -41,7 +41,7 @@ def bill_item_to_dict(user, item):
     i['single_total'] = format_number(user, item.single_total)
     i['total'] = format_number(user, item.total)
     i['bill_notes'] = item.bill_notes
-    
+
     return i
 
 def bill_to_dict(user, bill):
@@ -127,7 +127,7 @@ def get_active_bill(request, company):
     return JSON_response(bill_to_dict(request.user, bill))
 
 @login_required
-def add_item_to_bill(request, company):
+def add_bill_item(request, company):
     """ add an item to bill:
          - received data: {'bill':bill_id, 'product_id':<id>, 'qty':<qty>, 'notes':<notes>}
          - calculate all item's fields (tax, discount, total, ...)
@@ -151,7 +151,6 @@ def add_item_to_bill(request, company):
     
     # get bill
     if not data.get('bill_id'):
-        print data
         return JSON_error(_("No bill specified"))
         
     try:
@@ -175,8 +174,6 @@ def add_item_to_bill(request, company):
     quantity = r['number']
     
     # check if there's enough items left in stock (must be at least zero =D)
-    print product.stock
-    print quantity
     if product.stock < quantity:
         print 'wtf'
         return JSON_error(_("Cannot sell more items than there are in stock"))
@@ -259,3 +256,32 @@ def add_item_to_bill(request, company):
     # return the item in JSON
     return JSON_response(bill_item_to_dict(request.user, item))
     
+@login_required
+def edit_bill_item(request, company):
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    return JSON_response({});        
+
+@ login_required
+def remove_bill_item(request, company):
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # data contains only id:<item_id>
+    try:
+        data = JSON_parse(request.POST.get('data'))
+    except:
+        return JSON_error(_("No data in POST"))
+        
+    # get item and remove it
+    try:
+        item = BillItem.objects.get(id=int(data.get('id')))
+        item.delete()
+        return JSON_ok()
+    except:
+        return JSON_error(_("Could not delete the item"))

@@ -628,6 +628,10 @@ $(document).ready(function(){
         // price
         price = get_number($("#edit_product_price").val(), "{{ separator }}");
         if(!price) return;
+        
+        // unit amount
+        unit_amount = get_number($("#edit_product_unit_amount").val(), "{{ separator }}");
+        if(!price) return;
             
         // if price is entered including tax, remove tax from price first and add it later
         if($("input.product-price-type:checked").val() == 'incl'){
@@ -635,11 +639,11 @@ $(document).ready(function(){
             price = do_tax(price, null, t, "{{ separator }}");
         }
         if(!price) return;
-            
+        
         // gather all discounts
         discounts = get_product_discounts($("ul#edit_discounts"));
             
-        // total_price(tax_first, base, tax, discounts, separator){
+        // total_price(tax_first, base, tax, discounts, separator)
         var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), "{{separator}}");
 
         $("td#total_price").text(display_number(result.total, "{{separator}}", {{decimal_places}}));
@@ -652,7 +656,10 @@ $(document).ready(function(){
         var purchase_price = get_number($("input#edit_product_purchase_price").val(), "{{separator}}");
         var profit_obj = $("td#profit");
         if(purchase_price){
-            var profit = result.total_tax_exc.minus(purchase_price);;
+            // multiply purchase price by unit_amount first
+            purchase_price = purchase_price.times(unit_amount);
+            
+            var profit = result.total_tax_exc.minus(purchase_price);
             profit_obj.text(display_number(profit, "{{separator}}", {{decimal_places}}));
             
             if(profit.cmp(Big(0)) < 0){ // use alternate style
@@ -695,7 +702,7 @@ $(document).ready(function(){
         data['change_image'] = product.change_image;
         if(product.change_image) data['image'] = product.image_data
         
-        data['category'] = $("#edit_product_category", dlg_obj).val();
+        data['category_id'] = $("#edit_product_category", dlg_obj).val();
         last_chosen_category = data['category']; // remember the last used
         data['tax_id'] = $("#edit_product_tax", dlg_obj).val();
         data['description'] = $("#edit_product_description", dlg_obj).val();
@@ -776,10 +783,14 @@ $(document).ready(function(){
     
     function update_unit_types(){
         // when the unit types edit changes, update all static labels with the changed units
-        var unit = $("#edit_product_unit_amount").val() + " " + 
+        var unit_amount = $("#edit_product_unit_amount").val() + " " + 
             $("#edit_product_unit_type").val();
+        var unit = $("#edit_product_unit_type").val();
         
         $("span.unit-amount-readonly").each(function(){
+            $(this).text(unit_amount);
+        });
+        $("span.unit-readonly").each(function(){
             $(this).text(unit);
         });
     }
@@ -994,7 +1005,7 @@ $(document).ready(function(){
                 </p>
             
             <p><label for="edit_product_stock">{% trans 'Stock' %}: </label>
-                <input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}" /> × <span class="unit-amount-readonly">?</span></p></td>
+                <input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}" /> <span class="unit-readonly">?</span></p></td>
                 
         </tr>
         <tr>
@@ -1004,7 +1015,7 @@ $(document).ready(function(){
             <td>{% comment %} price per unit - can be entered in two ways: including or excluding tax {% endcomment %}
                 <p><label for="edit_product_purchase_price">{% trans 'Purchase price' %}: </label>
                     {{ currency }} <input type="text" id="edit_product_purchase_price" maxlength="{{ field_lengths.purchase_price}}" />
-                    {% trans 'per' %} <span class="unit-amount-readonly">?</span>
+                    {% trans 'per' %} <span class="unit-readonly">?</span>
                 </p>
                 <p>
                     <label for="edit_product_price">{% trans 'Sell price' %}: </label>

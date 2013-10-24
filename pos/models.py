@@ -10,6 +10,7 @@ from common.functions import get_image_path
 from config.models import Cleanup, Country
 import common.globals as g
 
+import decimal
 import json
 
 ### company ###
@@ -129,7 +130,7 @@ class ProductAbstract(SkeletonU):
     unit_amount = models.DecimalField(_("Product size in basic units"),
                                       max_digits=g.DECIMAL['quantity_digits'],
                                       decimal_places=g.DECIMAL['quantity_decimal_places'],
-                                      null=False, blank=False)
+                                      null=False, blank=False, default=decimal.Decimal('1'))
     stock = models.DecimalField(_("Number of items left in stock"),
                                 max_digits=g.DECIMAL['quantity_digits'],
                                 decimal_places=g.DECIMAL['quantity_decimal_places'],
