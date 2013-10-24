@@ -1,29 +1,15 @@
-KEY BINDINGS
- - left, right: select neighbor items
- - up:
-   - focus on category selector: go to parent category
-   - focus on product selector: select product above (or jump to bottom)
- - down:
-   - focus on category selector: 
-     - select the first child of current category, or (if category has no more children)
-     - list the products and 
-   - focus on product selector: select product below (or jump to top)
-   
-BILL CREATION & ITEMS:
- - on terminal open: check if there's an active bill that has not been saved
-   - if there's no bill:
-       - create a new bill with no items and save it to db
-       - mark it as 'new' (dictionary['new'] = True) so that JS knows that
-   - if there is a bill:
-       - send it along with all items on it to client
-       - on client, alert the user that it's an old, unsaved bill in which
-         the last item may not be present or its data may be wrong
- - searching for product:
-   - with category selection:
-     - locate category
-     - show products from that category
-   - with search:
-     - type in and show search matches on click of 'search' button or after <n> seconds
- - on click of product button:
-   - add a new item to bill
-   - calculate tax, discount, single total and total
+PRICE - UNIT_AMOUNT - PURCHASE PRICE:
+unit_amount: amount of 'goods' in '1 quantity' of product
+
+In product management:
+    price:          product selling price per unit_amount
+    purchase price: purchase price per *1* unit
+    
+    total price calculation:
+        set price 
+        remove tax (if price is set including tax)
+        
+        add discounts and tax in order specified in config
+        
+        
+In bill:
