@@ -153,5 +153,5 @@ function select_product(){
     
     // on click: add this item to bill (or increase quantity of existing item by 1)
     // $(this).data() is the product itself
-    add_item($(this).data());
+    window.bill.add_product($(this).data());
 }

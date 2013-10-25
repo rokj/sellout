@@ -759,6 +759,9 @@ def edit_product(request, company, product_id):
 
     # price has to be updated separately
     product.price = update_price(Price, product, request.user, data['price'])
+    if data.get('purchase_price'):
+        product.price = update_price(PurchasePrice, product, request.user, data['purchase_price'])
+
     product.updated_by = request.user
     product.save()
 
