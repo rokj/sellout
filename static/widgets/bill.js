@@ -151,6 +151,7 @@ function update_item(item, replace_obj, exploded){
 
     new_item.attr("id", "item-"+item.id.toString()); // no duplicate ids in document
     new_item.data(item);
+    new_item.change(function(){alert("wtf")});
     
     // create a new item
     // product name
@@ -221,12 +222,12 @@ function update_item(item, replace_obj, exploded){
     btn_obj.click(function(){ change_qty(false, $("input.item-qty", $(this).parent())); });
     tmp_obj.append(btn_obj);
     
-    // set 'fixed' fields that cannot be changed
-    // unit amount and type
-    $("td.bill-item-qty-container p.bill-subtitle", new_item).empty().append(item.unit_type);
-    // price will be set later
+    // set 'fixed' fields that cannot be changed and/or remove text from 'template' row
+    // price: remove the 'currency' sign
+    $("td.bill-item-price-container p.bill-subtitle", new_item).empty();
+    
     // tax: percent only
-    $("td.bill-item-tax-container p.bill-title", new_item).empty().append(display_number(item.tax_percent, window.data.separator, window.data.decimal_places));
+    $("td.bill-item-tax-container p.bill-subtitle", new_item).empty().append(display_number(item.tax_percent, window.data.separator, window.data.decimal_places));
     
     // discounts: list all discounts by type TODO
     $("td.bill-item-discount-container p.bill-title", new_item).text(item.discount_absolute);
@@ -303,7 +304,7 @@ function update_item_prices(item, obj){
     $("td.bill-item-price-container p.bill-title", obj).text(display_number(r.base, window.data.separator, window.data.decimal_places));
     
     // tax (only absolute value)
-    $("td.bill-item-tax-container p.bill-subtitle", obj).text(display_number(r.tax, window.data.separator, window.data.decimal_places));
+    $("td.bill-item-tax-container p.bill-title", obj).text(display_number(r.tax, window.data.separator, window.data.decimal_places));
     
     // discounts
     
