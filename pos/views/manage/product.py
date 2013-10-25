@@ -651,10 +651,8 @@ def create_product(request, company):
     # validate data
     valid = validate_product(request.user, c, data)
     if not valid['status']:
-        print valid['message']
         return JSON_error(valid['message'])
     data = valid['data']
-    
     
     # save product:
     product = Product(
@@ -677,15 +675,16 @@ def create_product(request, company):
     update_product_discounts(request, product, data['discounts'])
     
     # prices have to be updated separately
-    price = update_price(PurchasePrice, product, request.user, data['price']) # purchase price
+    price = update_price(Price, product, request.user, data['price']) # purchase price
     if not price:
         product.delete()
         return JSON_error(_("Error while setting purchase price"))
-    
-    price = update_price(Price, product, request.user, data['purchase_price'])
-    if not price:
-        product.delete()
-        return JSON_error(_("Error while setting sell price"))
+
+    if data.get('purchase_price'):
+        price = update_price(PurchasePrice, product, request.user, data['purchase_price'])
+        if not price:
+            product.delete()
+            return JSON_error(_("Error while setting sell price"))
     
     # add image, if it's there
     if data['change_image']:
