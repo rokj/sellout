@@ -33,7 +33,7 @@ javascript:
          > edit button: show_product_edit_dialog(), delete button > delete_product()
     4. editing product:
         - show_product_edit_dialog() > clear edit_dialog div and add all product's data to edit boxes etc.
-        - adding/deleting discounts > add_discount(): adds a list item to discounts' ul >
+        - adding/deleting discounts > add_discount(): adds a list Item to discounts' ul >
          > refresh() discounts: clears ul and re-adds all selected products > discounts that are available to add are in all_discounts
         - save: save_product(): if it's a new product, id = -1, send to server > update_products();
            if it's an existing product, send to server > redraw the existing product in its parent div > render_product()
@@ -248,7 +248,7 @@ $(document).ready(function(){
     }
     
     function add_discount(ul_obj, product, id){ // i - index in product.discounts
-        // add a list item and a delete button to product edit dialog
+        // add a list Item and a delete button to product edit dialog
         // add a discount from all_discounts to product
         var i = find_discount_by_id(product.discounts, id)
         var discount = product.discounts[i];
@@ -261,7 +261,7 @@ $(document).ready(function(){
         // delete button
         btn_obj = $("<input>", {type:"button", value:"x", "class":"delete-discount"});
         btn_obj.click(function(){
-            // delete this list item
+            // delete this list Item
             $(this).parent().remove();
             // delete this id from product.discounts
             product.discounts.splice(i, 1);
@@ -285,12 +285,12 @@ $(document).ready(function(){
             add_discount(ul_obj, product, product.discounts[i].id);
         }
         
-        // add another item, this time with all available discounts
+        // add another Item, this time with all available discounts
         // in a listbox and an 'add' button
         li_obj = $("<li>");
         sel_obj = $("<select>", {id:"edit_discount_list"});
         li_obj.append(sel_obj);
-        li_obj.data({id:false}); // don't store or send this item
+        li_obj.data({id:false}); // don't store or send this Item
         ul_obj.append(li_obj);
         
         // add discounts NOT in product to add listbox
@@ -311,7 +311,7 @@ $(document).ready(function(){
         }
         // only add the listbox if there's anything to add
         if(added > 0){
-            // unselect the first item in listbox to avoid confusion
+            // unselect the first Item in listbox to avoid confusion
             sel_obj.prop("selectedIndex", -1);
             
             sel_obj.unbind().change(function(){ // no add buttons
@@ -327,7 +327,7 @@ $(document).ready(function(){
             li_obj.remove();
         }
         
-        // make the list sortable, but exclude the last item
+        // make the list sortable, but exclude the last Item
         if(added > 0) ul_obj.sortable({items:"li:not(:last)", stop:get_total_price}); // also update price when sorting stops
         else ul_obj.sortable({items:"li"});
 

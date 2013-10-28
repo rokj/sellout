@@ -5403,13 +5403,13 @@ jQuery.extend({
 
 		function buildParams( prefix, obj ) {
 			if ( jQuery.isArray(obj) ) {
-				// Serialize array item.
+				// Serialize array Item.
 				jQuery.each( obj, function( i, v ) {
 					if ( traditional || /\[\]$/.test( prefix ) ) {
-						// Treat each array item as a scalar.
+						// Treat each array Item as a scalar.
 						add( prefix, v );
 					} else {
-						// If array item is non-scalar (array or object), encode its
+						// If array Item is non-scalar (array or object), encode its
 						// numeric index to resolve deserialization ambiguity issues.
 						// Note that rack (as of 1.0.0) can't currently deserialize
 						// nested arrays properly, and attempting to do so may cause
@@ -5421,13 +5421,13 @@ jQuery.extend({
 				});
 					
 			} else if ( !traditional && obj != null && typeof obj === "object" ) {
-				// Serialize object item.
+				// Serialize object Item.
 				jQuery.each( obj, function( k, v ) {
 					buildParams( prefix + "[" + k + "]", v );
 				});
 					
 			} else {
-				// Serialize scalar item.
+				// Serialize scalar Item.
 				add( prefix, obj );
 			}
 		}
@@ -5831,7 +5831,7 @@ jQuery.fx.prototype = {
 					jQuery(this.elem).hide();
 				}
 
-				// Reset the properties, if the item has been hidden or shown
+				// Reset the properties, if the Item has been hidden or shown
 				if ( this.options.hide || this.options.show ) {
 					for ( var p in this.options.curAnim ) {
 						jQuery.style(this.elem, p, this.options.orig[p]);

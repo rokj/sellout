@@ -5850,7 +5850,7 @@ jQuery.fn.extend({
 						// Make sure that we do not leak memory by inadvertently discarding
 						// the original fragment (which might have attached data) instead of
 						// using it; in addition, use the original fragment object for the last
-						// item instead of first because it can end up being emptied incorrectly
+						// Item instead of first because it can end up being emptied incorrectly
 						// in certain situations (Bug #8070).
 						// Fragments from the fragment cache must always be cloned and never used
 						// in place.
@@ -7477,14 +7477,14 @@ jQuery.extend({
 
 function buildParams( prefix, obj, traditional, add ) {
 	if ( jQuery.isArray( obj ) ) {
-		// Serialize array item.
+		// Serialize array Item.
 		jQuery.each( obj, function( i, v ) {
 			if ( traditional || rbracket.test( prefix ) ) {
-				// Treat each array item as a scalar.
+				// Treat each array Item as a scalar.
 				add( prefix, v );
 
 			} else {
-				// If array item is non-scalar (array or object), encode its
+				// If array Item is non-scalar (array or object), encode its
 				// numeric index to resolve deserialization ambiguity issues.
 				// Note that rack (as of 1.0.0) can't currently deserialize
 				// nested arrays properly, and attempting to do so may cause
@@ -7496,13 +7496,13 @@ function buildParams( prefix, obj, traditional, add ) {
 		});
 
 	} else if ( !traditional && obj != null && typeof obj === "object" ) {
-		// Serialize object item.
+		// Serialize object Item.
 		for ( var name in obj ) {
 			buildParams( prefix + "[" + name + "]", obj[ name ], traditional, add );
 		}
 
 	} else {
-		// Serialize scalar item.
+		// Serialize scalar Item.
 		add( prefix, obj );
 	}
 }
@@ -8532,7 +8532,7 @@ jQuery.fx.prototype = {
 					jQuery(elem).hide();
 				}
 
-				// Reset the properties, if the item has been hidden or shown
+				// Reset the properties, if the Item has been hidden or shown
 				if ( options.hide || options.show ) {
 					for ( var p in options.animatedProperties ) {
 						jQuery.style( elem, p, options.orig[p] );

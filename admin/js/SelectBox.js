@@ -53,7 +53,7 @@ var SelectBox = {
         SelectBox.cache[id].push({value: option.value, text: option.text, displayed: 1});
     },
     cache_contains: function(id, value) {
-        // Check if an item is contained in the cache
+        // Check if an Item is contained in the cache
         var node;
         for (var i = 0; (node = SelectBox.cache[id][i]); i++) {
             if (node.value == value) {

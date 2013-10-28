@@ -54,7 +54,6 @@ function size_layout(){
         size_layout();
     }
 
-    
     save_settings();
 }
 

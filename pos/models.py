@@ -153,7 +153,74 @@ class Product(ProductAbstract):
     
     def __unicode__(self):
         return self.company.name + ":" + self.name
-    
+
+    ### prices: get and set methods
+    def get_price(self):
+        """ get product's current base price """
+        try:
+            return Price.objects.filter(product=self).order_by('-datetime_updated')[0].unit_price
+        except:
+            return None
+
+
+    def get_purchase_price(self):
+        """ get product's current purchase price """
+        try:
+            return PurchasePrice.objects.filter(product=self).order_by('-datetime_updated')[0].unit_price
+        except:
+            return None
+
+    def update_price(self, model, user, new_unit_price):
+        """ set a new price for product:
+             - if there's no price, just create new
+             - if there is a price, update its datetime_updated to now() and create new
+               (only if value is different)
+             - return current price
+
+             - can be used both for model=Price and model=PurchasePrice
+        """
+        try:
+            old_price = model.objects.get(product=self, datetime_updated=None)
+        except model.DoesNotExist:
+            old_price = None
+
+        if old_price:
+            if old_price.unit_price == new_unit_price:
+                # nothing has changed, so do nothing
+                return old_price
+
+            # update the old price (datetime_updated will be set)
+            try:
+                old_price.save()
+            except:
+                return None
+
+        # create new
+        new_price = model(created_by=user,
+                          product=self,
+                          unit_price=new_unit_price)
+        try:
+            new_price.save()
+        except:
+            return None
+
+        return new_price
+
+    ### discounts: get and set methods
+    def get_discounts(self):
+        """ returns discount objects, ordered by seq_no in intermediate table """
+        product_discounts = ProductDiscount.objects.filter(product=self).order_by('seq_no')
+
+        m2mids = [x.discount.id for x in product_discounts]
+
+        discounts = []
+        for i in m2mids: # this is obviously the only way to NOT sort the queryset by 'whatever, not by seq_no'
+            discounts.append(Discount.objects.get(id=i))
+
+        print self
+        print discounts
+        return discounts
+
     class Meta:
         abstract = False
 

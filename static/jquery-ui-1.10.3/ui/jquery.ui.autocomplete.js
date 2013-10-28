@@ -256,9 +256,9 @@ $.widget( "ui.autocomplete", {
 						this._value( item.value );
 					}
 				} else {
-					// Normally the input is populated with the item's value as the
+					// Normally the input is populated with the Item's value as the
 					// menu is navigated, causing screen readers to notice a change and
-					// announce the item. Since the focus event was canceled, this doesn't
+					// announce the Item. Since the focus event was canceled, this doesn't
 					// happen, so we update the live region so that screen readers can
 					// still notice the change and announce it.
 					this.liveRegion.text( item.value );
@@ -470,7 +470,7 @@ $.widget( "ui.autocomplete", {
 	},
 
 	_normalize: function( items ) {
-		// assume all items have the right format when the first item is complete
+		// assume all items have the right format when the first Item is complete
 		if ( items.length && items[0].label && items[0].value ) {
 			return items;
 		}

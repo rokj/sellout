@@ -206,7 +206,7 @@ test("#4752: link event firing on sortable with connect list", function () {
 	ok(!hasFired("change"), "Click only, change event should not have fired");
 	ok(hasFired("click"), "Click event should have fired");
 
-	// Drag an item within the first list
+	// Drag an Item within the first list
 	fired = {};
 	$("#sortable li:eq(0)").simulate("drag", { dx: 0, dy: 40 });
 	ok(hasFired("change"), "40px drag, change event should have fired");
@@ -214,7 +214,7 @@ test("#4752: link event firing on sortable with connect list", function () {
 	ok(!hasFired("remove"), "Remove event should not have fired");
 	ok(!hasFired("click"), "Click event should not have fired");
 
-	// Drag an item from the first list to the second, connected list
+	// Drag an Item from the first list to the second, connected list
 	fired = {};
 	$("#sortable li:eq(0)").simulate("drag", { dx: 0, dy: 150 });
 	ok(hasFired("change"), "150px drag, change event should have fired");

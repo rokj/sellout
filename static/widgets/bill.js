@@ -1,12 +1,12 @@
 /* bill 'class' */
-bill = function(bill_data){
-    // append items to bill
+Bill = function(bill_data){
+    // append items to Bill
     var items = [];
     var i, ti;
     for(i = 0; i < bill_data.items.length; i++){
-        ti = new item(parse_item(bill_data.items[i]), true, false);
+        ti = new Item(parse_item(bill_data.items[i]), true, false); // Item data, saved, not exploded
         // convert strings in data to Big() numbers
-        items.push(ti); // parent, item data, saved, not exploded
+        items.push(ti);
     }
     this.items = items;
 
@@ -17,9 +17,9 @@ bill = function(bill_data){
     // TODO: start timer interval that will save unsaved items to server every <n> seconds
 }
 
-// bill class methods
-bill.prototype.get_product = function(product_id){
-    // return an 'unexploded' item object for product 'product_id'
+// Bill class methods
+Bill.prototype.get_product = function(product_id){
+    // return an 'unexploded' Item object for product 'product_id'
     var i;
     for(i = 0; i < this.items.length; i++){
         if (this.items[i].data.product_id == product_id) {
@@ -30,12 +30,12 @@ bill.prototype.get_product = function(product_id){
     return null;
 }
 
-bill.prototype.get_item = function(item_id){
-    // return an 'item' object with specified id
+Bill.prototype.get_item = function(item_id){
+    // return an 'Item' object with specified id
     var i;
     for(i = 0; i < this.items.length; i++){
-        if(this.items[i].data.id == item_id){
-            // return array index and item so it can be removed from array
+        if(this.items[i].data.item_id == item_id){
+            // return array index and Item so it can be removed from array
             return {index:i, item:this.items[i]}; // index will be useful (for deleting)
         }
     }
@@ -43,51 +43,58 @@ bill.prototype.get_item = function(item_id){
     return null;
 }
 
-bill.prototype.add_product = function(product){
-    // add product to bill:
-    // see if this product is already in bill;
+Bill.prototype.add_product = function(product){
+    // add product to Bill:
+    // see if this product is already in Bill;
     // if it is, just add '1' to quantity;
-    // if it's not, add a new item
+    // if it's not, add a new Item
 
-    var iexist = this.get_product(product.id); // existing 'item' object in bill
+    var iexist = this.get_product(product.id); // existing 'Item' object in Bill
 
     if(iexist){
-        // there is, add <unit_amount> to existing item's quantity
+        // there is, add 1 to existing Item's quantity
         iexist.add_quantity(true);
     }
     else{
-        // no, there's no item for this product in bill, update the last edited and add a new one
-        // send the last edited item to the server: it will be updated when the server answers
-        var new_item = new item(parse_item(product_to_item(product)), false, false);
+        // no, there's no Item for this product in Bill, update the last edited and add a new one
+        // send the last edited Item to the server: it will be updated when the server answers
+        var new_item = new Item(parse_item(product_to_item(product)), false, false);
         this.items.push(new_item);
     }
-}
+};
 
-bill.prototype.save_changes = function(){
-    // search bill items and if there are any unsaved ones, update them
+Bill.prototype.save_changes = function(){
+    // search Bill items and if there are any unsaved ones, update them
     var i, ti;
     for(i = 0; i < this.items.length; i++){
         if(!this.items[i].saved){
-            // this item hasn't been saved yet, send it to server
-            ti = item_to_string(this.items[i]);
+            // this Item hasn't been saved yet, send it to server
+            ti = item_to_string(this.items[i].data);
+            alert(JSON.stringify(ti))
             send_data(window.data.edit_bill_item, ti, window.data.csrf_token, function(recv_data){
-                // recv_data contains item's re-calculated fields. update it
-                var item_to_update = parse_item(recv_data);
-                var r = window.bill.get_item(item_to_update.id);
-                if(r){
-                    r.item.saved = true;
-                    r.item.update();
+                if(recv_data.status != 'ok'){
+                    alert(recv_data.message);
+                }
+                else{
+                    // recv_data contains Item's re-calculated fields. update it
+                    var item_to_update = parse_item(recv_data);
+                    var r = window.bill.get_item(item_to_update.item_id);
+                    if(r){
+                        r.item.data = item_to_update; // copy new data to the 'old' Item
+                        r.item.saved = true; // do not send it again until updated
+                        r.item.update(); // update to reflect data from the server
+                    }
                 }
             });
         }
     }
-}
+};
 
-/* item 'class' */
-var item = function(data, saved, exploded){
-    // item properties:
-    // saved - this item has been sent to server already
-    // exploded: do not add quantity to this item when adding the same product to bill
+/* Item 'class' */
+Item = function (data, saved, exploded) {
+    // Item properties:
+    // saved - this Item has been sent to server already
+    // exploded: do not add quantity to this Item when adding the same product to Bill
     this.saved = saved;
     this.exploded = exploded;
 
@@ -95,17 +102,21 @@ var item = function(data, saved, exploded){
     this.data = data;
 
     this.obj = this.update(); // save jquery object for updating and stuff
-}
 
-item.prototype.update = function(){
-    // create or update an item in the bill
-    // product: dictionary (Product) (only if item is null - for adding new items without querying the server,
-    //                                later the same item will be updated with data from the server)
-    // item: dictionary (BillItem)
-    // replace_obj: if null, create a new item, else replace it with the new item
-    // exploded:  if true, a data-attribute will be added to prevent updating quantity of this item when adding the same product
+    // after adding a new Item, send the old ones to the server
+    if (!saved) window.bill.save_changes();
+};
 
-    // get the bill header, copy it and change the data to product.whatever
+// Item class methods
+Item.prototype.update = function(){
+    // create or update an Item in the Bill
+    // product: dictionary (Product) (only if Item is null - for adding new items without querying the server,
+    //                                later the same Item will be updated with data from the server)
+    // Item: dictionary (BillItem)
+    // replace_obj: if null, create a new Item, else replace it with the new Item
+    // exploded:  if true, a data-attribute will be added to prevent updating quantity of this Item when adding the same product
+
+    // get the Bill header, copy it and change the data to product.whatever
     // window.items.bill_header contains a <tr> 'template' for items
     // copy it to window.items.bill_items and replace the data with useful stuff
 
@@ -115,19 +126,19 @@ item.prototype.update = function(){
 
     new_item.removeAttr("id"); // no duplicate ids in document
 
-    // create a new item
+    // create a new Item
     // product name
     $("td.bill-item-name-container p.bill-title", new_item).text(item.name);
     // unit type and amount
     $("td.bill-item-name-container p.bill-subtitle", new_item).text(item.unit_amount + " " + item.unit_type);
 
     // code and notes > to info box TODO
-    /*tmp_obj = $("td.bill-item-name-container p.bill-subtitle", new_item);
-    tmp_obj.text(item.code);
+    /*tmp_obj = $("td.Bill-Item-name-container p.Bill-subtitle", new_item);
+    tmp_obj.text(Item.code);
     tmp_obj.append("<br />");
     // notes
     tmp_obj.append(
-        $("<input>", {type:"text", "class":"item-notes"})
+        $("<input>", {type:"text", "class":"Item-notes"})
     );*/
 
     // quantity: an edit box
@@ -168,13 +179,8 @@ item.prototype.update = function(){
     // add data that we'll need later:
     // product id (to update quantity when adding new product )
     new_item.attr('data-product-id', item.product_id);
-    // item id
-    new_item.attr('data-item-id', item.id);
-    // exploded (to NOT update quantity when adding a new product)
-    if(item.exploded){
-        // do not add quantity to this item
-        new_item.attr('data-exploded', 'true');
-    }
+    // Item id
+    new_item.attr('data-item-id', item.item_id);
 
     // remove button
     tmp_obj = $("td.bill-item-edit", new_item);
@@ -190,54 +196,56 @@ item.prototype.update = function(){
 
     // 'explode' button
     if(!item.exploded){
-        btn_obj = $("<button>").append("폭"); // 'explode' button
+        btn_obj = $("<button>").append("폭");
         tmp_obj.append(btn_obj);
     }
 
-    // create a new item or replace an existing one
+    // create a new Item or replace an existing one
     if(!item.obj){
         // nothing to replace, append new
         window.items.bill_items.append(new_item);
     }
     else{
-        // replace
-        replace_obj.replaceWith(new_item);
+        // replace an 'old' item
+        item.obj.replaceWith(new_item);
     }
 
-    // set prices etc.
     this.obj = new_item;
+
+    // update numbers
     this.update_prices();
 
     return new_item;
 }
 
-item.prototype.delete = function(){
-    // delete item from bill and send a notification to server;
-    // if this item has id = -1, there's no need to delete it from the server because it hasn't been sent yet,
-    // just delete it from the document
-    if(this.data.id == -1) this.obj.remove();
-    else{
-        // if it has an id, send a delete request to server and delete it when response is received
-        send_data(window.data.remove_bill_item, {id:this.data.id}, window.data.csrf_token, function(response){
-            if(response.status != 'ok') alert(gettext("Could not delete the item from the bill"));
-            else{
-                // find the item by id that's in data and remove it from bill
-                var id = parseInt(response.id); // server sends id of deleted item
-                var r = window.bill.get_item(id);
-                if(r){
-                    // delete from DOM and from bill
-                    r.item.obj.remove();
-                    delete bill.items[r.index];
+Item.prototype.delete = function(){
+    if(confirm(gettext("Delete this bill Item") + ": " + this.data.name + "?")){
+        // delete Item from Bill and send a notification to server;
+        // if this Item has id = -1, there's no need to delete it from the server because it hasn't been sent yet,
+        // just delete it from the document
+        if(this.data.item_id == -1) this.obj.remove();
+        else{
+            // if it has an id, send a delete request to server and delete it when response is received
+            send_data(window.data.remove_bill_item, {id:this.data.item_id}, window.data.csrf_token, function(response){
+                if(response.status != 'ok') alert(gettext("Could not delete the item from the bill"));
+                else{
+                    // find the Item by id that's in data and remove it from Bill
+                    var id = parseInt(response.item_id); // server sends id of deleted Item
+                    var r = window.bill.get_item(id);
+                    if(r){
+                        // delete from DOM and from Bill
+                        r.item.obj.remove();
+                        remove_from_array(window.bill.items, r.index);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 }
 
-item.prototype.add_quantity = function(add){
+Item.prototype.add_quantity = function(add){
     // add or remove '1' to/from quantity (if add==true >add, etc.)
     var n;
-
     if(!add){ // don't set a value of 0 or less
         n = this.data.quantity.minus(Big(1));
         if(n.cmp(Big(0)) > 0) this.data.quantity = n;
@@ -251,7 +259,7 @@ item.prototype.add_quantity = function(add){
     this.set_quantity(this.data.quantity);
 }
 
-item.prototype.set_quantity = function(quantity){
+Item.prototype.set_quantity = function(quantity){
     // set the new quantity, check it and update if ok
     var new_qty = null;
     if(!quantity){
@@ -259,12 +267,12 @@ item.prototype.set_quantity = function(quantity){
         new_qty = Big(1);
     }
     // check if there's enough of it in stock
-    if(quantity.cmp(this.data.stock) > 0){
+    else if(quantity.cmp(this.data.stock) > 0){
         alert(gettext("There's not enough items in stock"));
         new_qty = this.data.stock;
     }
     // check if it's not negative or 0
-    if(quantity.cmp(Big(0)) <= 0){
+    else if(quantity.cmp(Big(0)) <= 0){
         alert(gettext("Quantity cannot be zero or less"));
         new_qty = Big(1);
     }
@@ -275,41 +283,53 @@ item.prototype.set_quantity = function(quantity){
 
     this.update_prices();
 
-    // mark this item as 'not saved' so that it will be updated when another item is edited
+    // mark this Item as 'not saved' so that it will be updated when another Item is edited
     this.saved = false;
 }
 
-item.prototype.update_prices = function(){
-    var r = total_price(window.data.tax_first,
-        this.data.base_price,
-        this.data.tax_percent,
-        [],
-        this.data.quantity,
-        this.data.unit_amount,
-        window.data.separator
-    );
+Item.prototype.update_prices = function(){
+    // update price only if item is not saved - if it is,
+    // it has just arrived from the server and has its numbers well defined
+    if(!this.saved){
+        var r = total_price(window.data.tax_first,
+            this.data.base_price,
+            this.data.tax_percent,
+            [],
+            this.data.quantity,
+            this.data.unit_amount,
+            window.data.separator);
 
+        // save calculated numbers
+        this.base_price = r.base_price;
+        this.tax_absolute = r.tax;
+
+        // discounts
+
+        // total
+        this.total = r.total;
+
+    }
     // quantity
     $("input.item-qty", this.obj).val(display_number(this.data.quantity, window.data.separator, window.data.decimal_places));
 
     // base price
-    $("td.bill-item-price-container p.bill-title", this.obj).text(display_number(r.base, window.data.separator, window.data.decimal_places));
+    $("td.bill-item-price-container p.bill-title", this.obj).text(display_number(this.data.base_price, window.data.separator, window.data.decimal_places));
 
     // tax (only absolute value)
-    $("td.bill-item-tax-container p.bill-title", this.obj).text(display_number(r.tax, window.data.separator, window.data.decimal_places));
+    $("td.bill-item-tax-container p.bill-title", this.obj).text(display_number(this.data.tax_absolute, window.data.separator, window.data.decimal_places));
 
     // discounts
 
     // total
-    $("td.bill-item-total-container p.bill-title", this.obj).text(display_number(r.total, window.data.separator, window.data.decimal_places));
+    $("td.bill-item-total-container p.bill-title", this.obj).text(display_number(this.data.total, window.data.separator, window.data.decimal_places));
 }
 
 /* other functions */
 function product_to_item(product){
-    // create a bill item from product
+    // create a Bill Item from product
     return {
-        id:-1, // a 'fresh' item has this id
-        bill_id:window.bill.data.id, // the current bill
+        item_id:-1, // a 'fresh' Item has this id
+        bill_id:window.bill.data.bill_id, // the current Bill
         product_id:product.id,
         name:product.name,
         code:product.code,
@@ -325,26 +345,30 @@ function product_to_item(product){
 }
 
 function parse_item(item){
-    // convert bill item's stringed numbers to Big (or integers)
-    item.id = parseInt(item.id);
+    // convert Bill Item's stringed numbers to Big (or integers)
+    item.item_id = parseInt(item.item_id);
     item.unit_amount = get_number(item.unit_amount, window.data.separator);
     item.stock = get_number(item.stock, window.data.separator);
     item.quantity = get_number(item.quantity, window.data.separator);
     item.base_price = get_number(item.base_price, window.data.separator);
     item.tax_percent = get_number(item.tax_percent, window.data.separator);
+    item.tax_absolute = get_number(item.tax_absolute, window.data.separator);
     item.total = get_number(item.total, window.data.separator);
     
     return item;
 }
 
 function item_to_string(item){
-    // convert bill item's Big numbers to strings
-    item.unit_amount = display_number(item.unit_amount, window.data.separator, window.data.decimal_places)
-    item.stock = display_number(item.stock, window.data.separator, window.data.decimal_places)
-    item.quantity = display_number(item.quantity, window.data.separator, window.data.decimal_places)
-    item.base_price = display_number(item.base_price, window.data.separator, window.data.decimal_places)
-    item.tax_percent = display_number(item.tax_percent, window.data.separator, window.data.decimal_places)
-    item.total = display_number(item.total, window.data.separator, window.data.decimal_places)
-    
-    return item;
+    // convert Bill Item's Big numbers to strings
+    return {
+        item_id:item.item_id.toString(),
+        bill_id:item.bill_id.toString(),
+        product_id:item.product_id,
+        unit_amount:display_number(item.unit_amount, window.data.separator, window.data.decimal_places),
+        stock:display_number(item.stock, window.data.separator, window.data.decimal_places),
+        quantity:display_number(item.quantity, window.data.separator, window.data.decimal_places),
+        base_price:display_number(item.base_price, window.data.separator, window.data.decimal_places),
+        tax_percent:display_number(item.tax_percent, window.data.separator, window.data.decimal_places),
+        total:display_number(item.total, window.data.separator, window.data.decimal_places)
+    }
 }

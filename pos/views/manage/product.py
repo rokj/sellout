@@ -40,26 +40,13 @@ def JSON_units(request, company):
     return JSON_response(g.UNITS) # G units!
 
 
-
-def get_product_discounts(product):
-    """ returns discount objects, ordered by seq_no in intermediate table """
-    product_discounts = ProductDiscount.objects.filter(product=product).order_by('seq_no')
-
-    m2mids = [x.discount.id for x in product_discounts]
-    
-    discounts = []
-    for i in m2mids: # this is obviously the only way to NOT sort the queryset by 'whatever, not by seq_no'
-        discounts.append(Discount.objects.get(id=i))
-    
-    return discounts
-    
 def update_product_discounts(request, product, discount_ids):
     """ smartly handles ProductDiscount m2m fields with as little repetition/deletion as possible
         discount_ids: list of discount ids (integers) """
-    
-    current_discounts = get_product_discounts(product)
+
+    current_discounts = product.get_discounts()
     current_discounts_ids = [x.id for x in current_discounts]
-    
+
     # first remove discounts that are not in discount_ids
     # then add missing discounts with a valid sequence
     i = 1
@@ -68,7 +55,7 @@ def update_product_discounts(request, product, discount_ids):
         if did not in current_discounts_ids:
             Discount.objects.get(id=did).delete()
             continue
-    
+
         # see if this discount exists at all
         try:
             discount = Discount.objects.get(id=int(did))
@@ -85,13 +72,13 @@ def update_product_discounts(request, product, discount_ids):
             m2m.save()
             # modification is not required
             modify = False
-            
+
         if modify:
             m2m.seq_no = i
             m2m.save()
-        
+
         i += 1
-    
+
 @login_required
 def products(request, company):
     c = get_object_or_404(Company, url_name = company)
@@ -140,146 +127,6 @@ def products(request, company):
     }
     return render(request, 'pos/manage/products.html', context)
 
-def product_to_dict(user, product):
-    # returns all relevant product's data:
-    # id
-    # product name
-    # price (sale price, excluding tax) - numeric value
-    # purchase price - numeric value
-    # unit type
-    # unit type display
-    # discounts - dictionary or all discounts for this product 
-    #    (see discounts.discount_to_dict for details)
-    # image
-    # category - name
-    # category - id
-    # code
-    # shortcut
-    # description
-    # private notes
-    # tax
-    # tax - id
-    # stock
-    # edit url
-    ret = {}
-    
-    ret['id'] = product.id
-
-    # purchase price
-    purchase_price = get_price(PurchasePrice, product)
-    if not purchase_price:
-        ret['purchase_price'] = ''
-    else:    
-        ret['purchase_price'] = format_number(user, purchase_price)
-
-    # sale price
-    price = get_price(Price, product)
-    if not price:
-        ret['price'] = ''
-    else:    
-        ret['price'] = format_number(user, price)
-    
-    # all discounts in a list
-    discounts = []
-    all_discounts = get_product_discounts(product)
-    for d in all_discounts:
-        discounts.append(discount_to_dict(user, d))
-    ret['discounts'] = discounts
-    
-    if product.image: # check if product's image exists
-        # get the thumbnail
-        try:
-            ret['image'] = get_thumbnail(product.image, image_dimensions('product')[2]).url
-        except:
-            pass
-    
-    # tax: it's a not-null foreign key
-    ret['tax_id'] = product.tax.id
-    ret['tax'] = format_number(user, product.tax.amount)
-    # stock: it cannot be 'undefined'
-    ret['stock'] = format_number(user, product.stock)
-            
-    # category?
-    if product.category:
-        ret['category'] = product.category.name
-        ret['category_id'] = product.category.id
-    
-    if product.code:
-        ret['code'] = product.code
-    if product.shortcut:
-        ret['shortcut'] = product.shortcut
-    if product.name:
-        ret['name'] = product.name
-    if product.description:
-        ret['description'] = product.description
-    if product.private_notes:
-        ret['private_notes'] = product.private_notes
-    if product.unit_type:
-        ret['unit_type'] = product.unit_type
-        ret['unit_type_display'] = product.get_unit_type_display()
-    if product.unit_amount:
-        ret['unit_amount'] = format_number(user, product.unit_amount)
-    if product.stock:
-        ret['stock'] = format_number(user, product.stock)
-
-    # urls
-    ret['get_url'] = reverse('pos:get_product', args=[product.company.url_name, product.id])
-    ret['edit_url'] = reverse('pos:edit_product', args=[product.company.url_name, product.id])
-    ret['delete_url'] = reverse('pos:delete_product', args=[product.company.url_name, product.id]) 
-    
-    return ret
-
-def get_price(model, product):
-    """ returns the purchase/sell price (depending on <model>)
-        for the product, as decimal """
-    try:
-        return model.objects.filter(product=product).order_by('-datetime_updated')[0].unit_price
-    except:
-        return None
-
-def get_sell_price(user, product):
-    """ calculates the selling price of the current product, including taxes and all discounts
-        returns dictionary:
-        {'base':..., 'discount':..., 'tax':..., 'total':... }
-    """
-    
-    pass
-
-def update_price(model, product, user, new_unit_price):
-    """ set a new price for product:
-         - if there's no price, just create new
-         - if there is a price, update its datetime_updated to now() and create new
-           (only if value is different)
-         - return current price
-         
-         - can be used both for Price and PurchasePrice
-    """
-    try:
-        old_price = model.objects.get(product=product, datetime_updated=None)
-    except model.DoesNotExist:
-        old_price = None
-
-    if old_price:
-        if old_price.unit_price == new_unit_price:
-            # nothing has changed, so do nothing
-            return old_price
-    
-        # update the old price (datetime_updated will be set)
-        try:
-            old_price.save()
-        except:
-            return None
-            
-    # create new
-    new_price = model(created_by = user,
-                      product = product,
-                      unit_price = new_unit_price)
-    try:
-        new_price.save()
-    except:
-        return None
-    
-    return new_price
 
 @login_required
 def web_get_product(request, company, product_id):
@@ -675,13 +522,13 @@ def create_product(request, company):
     update_product_discounts(request, product, data['discounts'])
     
     # prices have to be updated separately
-    price = update_price(Price, product, request.user, data['price']) # purchase price
+    price = product.update_price(Price, request.user, data['price']) # purchase price
     if not price:
         product.delete()
         return JSON_error(_("Error while setting purchase price"))
 
     if data.get('purchase_price'):
-        price = update_price(PurchasePrice, product, request.user, data['purchase_price'])
+        price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
         if not price:
             product.delete()
             return JSON_error(_("Error while setting sell price"))
@@ -758,9 +605,9 @@ def edit_product(request, company, product_id):
         product.category = data['category']
 
     # price has to be updated separately
-    product.price = update_price(Price, product, request.user, data['price'])
+    product.price = product.update_price(Price, request.user, data['price'])
     if data.get('purchase_price'):
-        product.price = update_price(PurchasePrice, product, request.user, data['purchase_price'])
+        product.price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
 
     product.updated_by = request.user
     product.save()

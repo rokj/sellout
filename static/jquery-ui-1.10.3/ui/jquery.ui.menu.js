@@ -85,8 +85,8 @@ $.widget( "ui.menu", {
 						// Redirect focus to the menu
 						this.element.trigger( "focus", [ true ] );
 
-						// If the active item is on the top level, let it stay active.
-						// Otherwise, blur the active item since it is no longer visible.
+						// If the active Item is on the top level, let it stay active.
+						// Otherwise, blur the active Item since it is no longer visible.
 						if ( this.active && this.active.parents( ".ui-menu" ).length === 1 ) {
 							clearTimeout( this.timer );
 						}
@@ -95,7 +95,7 @@ $.widget( "ui.menu", {
 			},
 			"mouseenter .ui-menu-item": function( event ) {
 				var target = $( event.currentTarget );
-				// Remove ui-state-active class from siblings of the newly focused menu item
+				// Remove ui-state-active class from siblings of the newly focused menu Item
 				// to avoid a jump caused by adjacent elements both having a class with a border
 				target.siblings().children( ".ui-state-active" ).removeClass( "ui-state-active" );
 				this.focus( event, target );
@@ -103,8 +103,8 @@ $.widget( "ui.menu", {
 			mouseleave: "collapseAll",
 			"mouseleave .ui-menu": "collapseAll",
 			focus: function( event, keepActiveItem ) {
-				// If there's already an active item, keep it active
-				// If not, activate the first item
+				// If there's already an active Item, keep it active
+				// If not, activate the first Item
 				var item = this.active || this.element.children( ".ui-menu-item" ).eq( 0 );
 
 				if ( !keepActiveItem ) {
@@ -239,7 +239,7 @@ $.widget( "ui.menu", {
 				match;
 
 			// If no matches on the current filter, reset to the last character pressed
-			// to move down the menu to the first item that starts with that character
+			// to move down the menu to the first Item that starts with that character
 			if ( !match.length ) {
 				character = String.fromCharCode( event.keyCode );
 				regex = new RegExp( "^" + escape( character ), "i" );
@@ -328,10 +328,10 @@ $.widget( "ui.menu", {
 			}
 		});
 
-		// Add aria-disabled attribute to any disabled menu item
+		// Add aria-disabled attribute to any disabled menu Item
 		menus.children( ".ui-state-disabled" ).attr( "aria-disabled", "true" );
 
-		// If the active item has been removed, blur the menu
+		// If the active Item has been removed, blur the menu
 		if ( this.active && !$.contains( this.element[ 0 ], this.active[ 0 ] ) ) {
 			this.blur();
 		}
@@ -367,7 +367,7 @@ $.widget( "ui.menu", {
 			this.element.attr( "aria-activedescendant", focused.attr( "id" ) );
 		}
 
-		// Highlight active parent menu item, if any
+		// Highlight active parent menu Item, if any
 		this.active
 			.parent()
 			.closest( ".ui-menu-item" )
@@ -607,7 +607,7 @@ $.widget( "ui.menu", {
 	},
 
 	select: function( event ) {
-		// TODO: It should never be possible to not have an active item at this
+		// TODO: It should never be possible to not have an active Item at this
 		// point, but the tests don't trigger mouseenter before click.
 		this.active = this.active || $( event.target ).closest( ".ui-menu-item" );
 		var ui = { item: this.active };

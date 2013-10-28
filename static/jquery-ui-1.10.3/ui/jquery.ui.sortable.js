@@ -129,7 +129,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 		//We have to refresh the items data once first
 		this._refreshItems(event);
 
-		//Find out if the clicked node (or one of its parents) is a actual item in this.items
+		//Find out if the clicked node (or one of its parents) is a actual Item in this.items
 		$(event.target).parents().each(function() {
 			if($.data(this, that.widgetName + "-item") === that) {
 				currentItem = $(this);
@@ -368,7 +368,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 
 			// Only put the placeholder inside the current Container, skip all
 			// items form other containers. This works because when moving
-			// an item from one container to another the
+			// an Item from one container to another the
 			// currentContainer is switched before the placeholder is moved.
 			//
 			// Without this moving items in "sub-sortables" can cause the placeholder to jitter
@@ -379,7 +379,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 
 			// cannot intersect with itself
 			// no useless actions that have been done before
-			// no action if the item moved is the parent of the item checked
+			// no action if the Item moved is the parent of the Item checked
 			if (itemElement !== this.currentItem[0] &&
 				this.placeholder[intersection === 1 ? "next" : "prev"]()[0] !== itemElement &&
 				!$.contains(this.placeholder[0], itemElement) &&
@@ -710,7 +710,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 
 	refreshPositions: function(fast) {
 
-		//This has to be redone because due to the item being moved out/into the offsetParent, the offsetParent's position will change
+		//This has to be redone because due to the Item being moved out/into the offsetParent, the offsetParent's position will change
 		if(this.offsetParent && this.helper) {
 			this.offset.parent = this._getParentOffset();
 		}
@@ -791,7 +791,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 						return;
 					}
 
-					//If the element doesn't have a actual height by itself (without styles coming from a stylesheet), it receives the inline height from the dragged item
+					//If the element doesn't have a actual height by itself (without styles coming from a stylesheet), it receives the inline height from the dragged Item
 					if(!p.height()) { p.height(that.currentItem.innerHeight() - parseInt(that.currentItem.css("paddingTop")||0, 10) - parseInt(that.currentItem.css("paddingBottom")||0, 10)); }
 					if(!p.width()) { p.width(that.currentItem.innerWidth() - parseInt(that.currentItem.css("paddingLeft")||0, 10) - parseInt(that.currentItem.css("paddingRight")||0, 10)); }
 				}
@@ -801,7 +801,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 		//Create the placeholder
 		that.placeholder = $(o.placeholder.element.call(that.element, that.currentItem));
 
-		//Append it after the actual current item
+		//Append it after the actual current Item
 		that.currentItem.after(that.placeholder);
 
 		//Update the size of the placeholder (TODO: Logic to fuzzy, see line 316/317)
@@ -814,10 +814,10 @@ $.widget("ui.sortable", $.ui.mouse, {
 			innermostContainer = null,
 			innermostIndex = null;
 
-		// get innermost container that intersects with item
+		// get innermost container that intersects with Item
 		for (i = this.containers.length - 1; i >= 0; i--) {
 
-			// never consider a container that's located within the item itself
+			// never consider a container that's located within the Item itself
 			if($.contains(this.currentItem[0], this.containers[i].element[0])) {
 				continue;
 			}
@@ -847,7 +847,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 			return;
 		}
 
-		// move the item into the container if it's not there already
+		// move the Item into the container if it's not there already
 		if(this.containers.length === 1) {
 			if (!this.containers[innermostIndex].containerCache.over) {
 				this.containers[innermostIndex]._trigger("over", event, this._uiHash(this));
@@ -855,7 +855,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 			}
 		} else {
 
-			//When entering a new container, we will find the item with the least distance and append our item near it
+			//When entering a new container, we will find the Item with the least distance and append our Item near it
 			dist = 10000;
 			itemWithLeastDistance = null;
 			floating = innermostContainer.floating || isFloating(this.currentItem);
@@ -1165,7 +1165,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 			delayedTriggers = [];
 
 		// We first have to update the dom position of the actual currentItem
-		// Note: don't do it if the current item is already removed (by a user), or it gets reappended (see #4088)
+		// Note: don't do it if the current Item is already removed (by a user), or it gets reappended (see #4088)
 		if(!this._noFinalSort && this.currentItem.parent().length) {
 			this.placeholder.before(this.currentItem);
 		}

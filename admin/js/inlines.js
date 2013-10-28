@@ -68,7 +68,7 @@
           row.children(":last").append('<div><a class="' + options.deleteCssClass +'" href="javascript:void(0)">' + options.deleteText + "</a></div>");
         } else if (row.is("ul") || row.is("ol")) {
           // If they're laid out as an ordered/unordered list,
-          // insert an <li> after the last list item:
+          // insert an <li> after the last list Item:
           row.append('<li><a class="' + options.deleteCssClass +'" href="javascript:void(0)">' + options.deleteText + "</a></li>");
         } else {
           // Otherwise, just insert the remove button as the

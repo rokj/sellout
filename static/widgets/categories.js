@@ -243,7 +243,7 @@ function handle_keypress(e) {
     var code = (e.keyCode ? e.keyCode : e.which);
 
     if (!window.items.focused) {
-        window.items.focused = $(".category-button", window.items.children_div).filter(":last"); // assign the first item (only in the beginning)
+        window.items.focused = $(".category-button", window.items.children_div).filter(":last"); // assign the first Item (only in the beginning)
         // if nothing is selected, any key must select something, so override 'code'
         code = 39;
     }
@@ -253,11 +253,11 @@ function handle_keypress(e) {
     // left: 37 up: 38 right: 39 down: 40
     switch(code){
     case 37: // left
-        // get the previous item
+        // get the previous Item
         window.items.focused.removeClass("category-button-focused");
     
         item = window.items.focused.prev();
-        if (item.length < 1) { // there's no next item, select the last one
+        if (item.length < 1) { // there's no next Item, select the last one
             item = window.items.focused.parent().children().filter(":last");
         }
         item.addClass("category-button-focused");
@@ -274,7 +274,7 @@ function handle_keypress(e) {
             // show products
             get_category_products(window.items.focused.data().id);
 
-            // click the item before the last parent
+            // click the Item before the last parent
             item = window.items.parents_div.children().filter(":last").prev();
             item.click();
         }
@@ -283,11 +283,11 @@ function handle_keypress(e) {
         window.items.focused.addClass("category-button-focused");
         break;
     case 39: // right
-        // get the next item
+        // get the next Item
         window.items.focused.removeClass("category-button-focused");
     
         item = window.items.focused.next();
-        if (item.length < 1) { // there's no next item, select the last one
+        if (item.length < 1) { // there's no next Item, select the last one
             item = window.items.focused.parent().children().filter(":first");
         }
         item.addClass("category-button-focused");

@@ -1,25 +1,21 @@
-from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 
 from pos.models import Company, Bill, BillItem, Price, Product
-from pos.views.manage import get_all_categories_structured
-from pos.views.manage.product import get_product_discounts
-from pos.views.util import has_permission, no_permission_view, JSON_response, JSON_ok, JSON_parse, JSON_error, \
+from pos.views.util import has_permission, JSON_response, JSON_ok, JSON_parse, JSON_error, \
                            format_number, parse_decimal, format_date, format_time
-from config.functions import get_value, set_value
+from config.functions import get_value
 import common.globals as g
 
-import json
 from pytz import timezone
 from datetime import datetime as dtm
 from decimal import Decimal
 
-def bill_item_to_dict(user, item):
+
+def bill_item_to_dict(user, item, status=None):
     i = {}
     
-    i['id'] = item.id
+    i['item_id'] = item.id
     
     # values from product
     i['product_id'] = item.product_id
@@ -31,7 +27,7 @@ def bill_item_to_dict(user, item):
     i['unit_type'] = item.unit_type
     i['unit_amount'] = format_number(user, item.unit_amount)
     i['stock'] = format_number(user, item.stock)
-    # values from bill item
+    # values from bill Item
     i['bill_id'] = item.bill.id
     i['quantity'] = format_number(user, item.quantity)
     i['base_price'] = format_number(user, item.base_price)
@@ -42,9 +38,12 @@ def bill_item_to_dict(user, item):
     i['total'] = format_number(user, item.total)
     i['bill_notes'] = item.bill_notes
 
+    if status:  # to notify javascript
+        i['status'] = status
+
     return i
 
-def bill_to_dict(user, bill):
+def bill_to_dict(user, bill, status=None):
     # fields in bill:
     # company
     # type
@@ -56,7 +55,7 @@ def bill_to_dict(user, bill):
     # timestamp
     # status > choices in g.BILL_STATUS
     b = {}
-    b['id'] = bill.id
+    b['bill_id'] = bill.id
     b['till'] = bill.till
     b['type'] = bill.type
     b['recipient_contact'] = bill.recipient_contact
@@ -76,6 +75,9 @@ def bill_to_dict(user, bill):
         i.append(bill_item_to_dict(user, item))
         
     b['items'] = i
+
+    if status:
+        b['status'] = status
     
     return b
 
@@ -92,12 +94,82 @@ def new_bill(user, company):
     )
     b.save()
     
-    bdict = bill_to_dict(user, b)
+    bdict = bill_to_dict(user, b, status='ok')
     
     # this is a new bill, the terminal ought to know this
-    bdict['new'] = True # (this item will be deleted (ignored) on next save)
+    bdict['new'] = True  # (this Item will be deleted (ignored) on next save)
 
     return bdict
+
+
+def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts):
+    """ calculates prices and stuff and return the data
+        passing parameters instead of Item object because Item may not exist yet
+    """
+    def get_discount(p):
+        """
+            accumulates discounts on price p and returns final price and discounts
+        """
+
+        discount = Decimal('0') # cumulative discounts
+        final = p # the final price
+
+        for di in discounts:
+            if di.type == 'Absolute':
+                final = final - di.amount
+                discount = discount + di.amount
+            else:
+                this_discount = final*(di.amount/100)
+                discount += this_discount
+                final -= this_discount
+
+        return {'discount': discount, 'final': final}
+
+    r = {}  # return values
+
+    if get_value(user, 'pos_discount_calculation') == 'Tax first':
+        # price without tax and discounts
+        r['base'] = base_price
+        # price including tax
+        r['tax_price'] = base_price*(tax_percent/100)
+        # absolute tax value
+        r['tax_absolute'] = r['tax_price'] - r['base_price']
+        # absolute discounts value
+        dd = get_discount(r['tax_price'])
+        r['discount_absolute'] = dd['discount']
+        # total, including tax and discounts
+        r['total'] = dd['final']
+        # total excluding tax
+        r['total_tax_exc'] = r['total'] - r['tax_absolute']
+    else:
+        # base price
+        r['base'] = base_price
+        # subtract discounts from base
+        dd = get_discount(r['tax_price'])
+        r['discount'] = dd['discount']
+        # price including discounts
+        r['discount_price'] = dd['final']
+        # add tax
+        r['tax_price'] = r['discount_price']*(Decimal('1') + (tax_percent/100))
+        # get absolute tax value
+        r['tax'] = r['tax_price'] - r['discount_price']
+        # total
+        r['total'] = r['tax_price']
+        # total without tax
+        r['total_tax_exc'] = r['discount_price']
+
+    # multiply everything by quantity and unit amount
+    t = quantity * unit_amount
+    r['base'] = r['base']*t  # without tax and discounts
+    r['tax'] = r['tax']*t  # tax, absolute
+    r['discount'] = r['discount']*t  # discounts, absolute
+    r['total_tax_exc'] = r['total_tax_exc']*t  # total without tax
+    # save single total
+    r['single_total'] = r['total']
+    r['total'] = r['total']*t  # total total total
+
+    return r
+
 
 #########
 # views #
@@ -124,7 +196,7 @@ def get_active_bill(request, company):
         return JSON_error(_("Multiple active bills found"))
         
     # serialize the fetched bill and return it
-    return JSON_response(bill_to_dict(request.user, bill))
+    return JSON_response(bill_to_dict(request.user, bill, status='ok'))
 
 @login_required
 def edit_bill_item(request, company):
@@ -135,10 +207,10 @@ def edit_bill_item(request, company):
          - return item_to_dict
     """
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
-        
+
     # permissions
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JSON_error(_("You have no permission to edit bills"))
@@ -174,54 +246,14 @@ def edit_bill_item(request, company):
     quantity = r['number']
     
     # check if there's enough items left in stock (must be at least zero =D)
-    if product.stock < quantity:
+    if product.stock < quantity*product.unit_amount:
         print 'wtf'
         return JSON_error(_("Cannot sell more items than there are in stock"))
             
     # calculate and set all stuff for this new item:
-    # bill (already checked)
-    # quantity (already_checked)
-    try:
-        base_price = Price.objects.filter(product=product).order_by('-datetime_updated')[0].unit_price
-    except Price.DoesNotExist:
-        return JSON_error(_("Price for this product is not defined"))
-    
-    # tax:
-    tax = product.tax.amount/Decimal('100') # percent!
-    discounts = get_product_discounts(product)
-    def abs_discounts_val(p, ds):
-        """ from price p subtract all discounts in list d and return result """
-        dabs = Decimal('0')
-        for d in ds:
-            d = d.discount
-            # if discount is absolute, just subtract the price from p
-            if d.type == "Absolute":
-                dabs = dabs + d.amount
-            else:
-                dabs = dabs + p*d.amount/Decimal('100') # percent!
-                
-        return dabs
-        
-    # calculate discounts and tax: equation depends on configuration (first tax or first discounts)
-    # for quantity = 1, then multiply
-    if get_value(request.user, 'pos_discount_calculation') == "Tax first":
-        # first add tax to base price, then subtract discounts
-        tax_absolute = base_price * tax   # absolute tax value
-        price = base_price + tax_absolute # price with tax
-        discount_absolute = abs_discounts_val(price, discounts) # absolute discount value
-        single_total = price - discount_absolute # price with discounts subtracted
-    else:
-        # first subtract discounts from base price, then add tax
-        discount_absolute = abs_discounts_val(price, discounts)
-        price = base_price - discount_absolute
-        tax_absolute = price*tax
-        single_total = price + tax_absolute
-    
-    total = single_total * quantity    
-    
-    # what's in 'price' var is not relevant and should not be used
-    del price
-    
+    discounts = product.get_discounts()
+    prices = item_prices(request.user, product.get_price(), product.tax.amount, product.quantity, product.unit_amount, discounts)
+
     # notes, if any    
     bill_notes = data.get('notes')
 
@@ -243,27 +275,18 @@ def edit_bill_item(request, company):
         bill = bill,
         product_id = product.id,
         quantity = quantity,
-        base_price = base_price,
+        base_price = prices['base'],
         tax_percent = product.tax.amount,
-        tax_absolute = tax_absolute,
-        discount_absolute = discount_absolute,
-        single_total = single_total,
-        total = total,
+        tax_absolute = prices['tax_absolute'],
+        discount_absolute = prices['discount_absolute'],
+        single_total = prices['single_total'],
+        total = prices['total'],
         bill_notes = bill_notes
     )
     item.save()
-    
-    # return the item in JSON
-    return JSON_response(bill_item_to_dict(request.user, item))
-    
-@login_required
-def edit_bill_item(request, company):
-    try:
-        c = Company.objects.get(url_name = company)
-    except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
 
-    return JSON_response({});        
+    # return the item in JSON
+    return JSON_response(bill_item_to_dict(request.user, item, status='ok'))
 
 @ login_required
 def remove_bill_item(request, company):
@@ -280,9 +303,8 @@ def remove_bill_item(request, company):
         
     # get item and remove it
     try:
-
         item = BillItem.objects.get(id=int(data.get('id')))
-        # save item id for later
+        # save Item id for later
         id = item.id
         item.delete()
         return JSON_response({'status':'ok', 'id':id})

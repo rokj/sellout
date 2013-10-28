@@ -1593,7 +1593,7 @@ $.ui.plugin.add("draggable", "connectToSortable", {
 
 				this.instance.options.helper = this.instance.options._helper;
 
-				//If the helper has been the original item, restore properties in the sortable
+				//If the helper has been the original Item, restore properties in the sortable
 				if(inst.options.helper === "original") {
 					this.instance.currentItem.css({ top: "auto", left: "auto" });
 				}
@@ -1643,7 +1643,7 @@ $.ui.plugin.add("draggable", "connectToSortable", {
 
 					this.instance.isOver = 1;
 					//Now we fake the start of dragging for the sortable instance,
-					//by cloning the list group item, appending it to the sortable and using it as inst.currentItem
+					//by cloning the list group Item, appending it to the sortable and using it as inst.currentItem
 					//We can then fire the start event of the sortable with our passed browser event, and our own helper (so it doesn't create a new one)
 					this.instance.currentItem = $(that).clone().removeAttr("id").appendTo(this.instance.element).data("ui-sortable-item", true);
 					this.instance.options._helper = this.instance.options.helper; //Store helper option to later restore it
@@ -2163,7 +2163,7 @@ $.ui.ddmanager = {
 				continue;
 			}
 
-			// Filter out elements in the current dragged item
+			// Filter out elements in the current dragged Item
 			for (j=0; j < list.length; j++) {
 				if(list[j] === m[i].element[0]) {
 					m[i].proportions.height = 0;
@@ -3616,7 +3616,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 		//We have to refresh the items data once first
 		this._refreshItems(event);
 
-		//Find out if the clicked node (or one of its parents) is a actual item in this.items
+		//Find out if the clicked node (or one of its parents) is a actual Item in this.items
 		$(event.target).parents().each(function() {
 			if($.data(this, that.widgetName + "-item") === that) {
 				currentItem = $(this);
@@ -3855,7 +3855,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 
 			// Only put the placeholder inside the current Container, skip all
 			// items form other containers. This works because when moving
-			// an item from one container to another the
+			// an Item from one container to another the
 			// currentContainer is switched before the placeholder is moved.
 			//
 			// Without this moving items in "sub-sortables" can cause the placeholder to jitter
@@ -3866,7 +3866,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 
 			// cannot intersect with itself
 			// no useless actions that have been done before
-			// no action if the item moved is the parent of the item checked
+			// no action if the Item moved is the parent of the Item checked
 			if (itemElement !== this.currentItem[0] &&
 				this.placeholder[intersection === 1 ? "next" : "prev"]()[0] !== itemElement &&
 				!$.contains(this.placeholder[0], itemElement) &&
@@ -4197,7 +4197,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 
 	refreshPositions: function(fast) {
 
-		//This has to be redone because due to the item being moved out/into the offsetParent, the offsetParent's position will change
+		//This has to be redone because due to the Item being moved out/into the offsetParent, the offsetParent's position will change
 		if(this.offsetParent && this.helper) {
 			this.offset.parent = this._getParentOffset();
 		}
@@ -4278,7 +4278,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 						return;
 					}
 
-					//If the element doesn't have a actual height by itself (without styles coming from a stylesheet), it receives the inline height from the dragged item
+					//If the element doesn't have a actual height by itself (without styles coming from a stylesheet), it receives the inline height from the dragged Item
 					if(!p.height()) { p.height(that.currentItem.innerHeight() - parseInt(that.currentItem.css("paddingTop")||0, 10) - parseInt(that.currentItem.css("paddingBottom")||0, 10)); }
 					if(!p.width()) { p.width(that.currentItem.innerWidth() - parseInt(that.currentItem.css("paddingLeft")||0, 10) - parseInt(that.currentItem.css("paddingRight")||0, 10)); }
 				}
@@ -4288,7 +4288,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 		//Create the placeholder
 		that.placeholder = $(o.placeholder.element.call(that.element, that.currentItem));
 
-		//Append it after the actual current item
+		//Append it after the actual current Item
 		that.currentItem.after(that.placeholder);
 
 		//Update the size of the placeholder (TODO: Logic to fuzzy, see line 316/317)
@@ -4301,10 +4301,10 @@ $.widget("ui.sortable", $.ui.mouse, {
 			innermostContainer = null,
 			innermostIndex = null;
 
-		// get innermost container that intersects with item
+		// get innermost container that intersects with Item
 		for (i = this.containers.length - 1; i >= 0; i--) {
 
-			// never consider a container that's located within the item itself
+			// never consider a container that's located within the Item itself
 			if($.contains(this.currentItem[0], this.containers[i].element[0])) {
 				continue;
 			}
@@ -4334,7 +4334,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 			return;
 		}
 
-		// move the item into the container if it's not there already
+		// move the Item into the container if it's not there already
 		if(this.containers.length === 1) {
 			if (!this.containers[innermostIndex].containerCache.over) {
 				this.containers[innermostIndex]._trigger("over", event, this._uiHash(this));
@@ -4342,7 +4342,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 			}
 		} else {
 
-			//When entering a new container, we will find the item with the least distance and append our item near it
+			//When entering a new container, we will find the Item with the least distance and append our Item near it
 			dist = 10000;
 			itemWithLeastDistance = null;
 			floating = innermostContainer.floating || isFloating(this.currentItem);
@@ -4652,7 +4652,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 			delayedTriggers = [];
 
 		// We first have to update the dom position of the actual currentItem
-		// Note: don't do it if the current item is already removed (by a user), or it gets reappended (see #4088)
+		// Note: don't do it if the current Item is already removed (by a user), or it gets reappended (see #4088)
 		if(!this._noFinalSort && this.currentItem.parent().length) {
 			this.placeholder.before(this.currentItem);
 		}
@@ -6852,9 +6852,9 @@ $.widget( "ui.autocomplete", {
 						this._value( item.value );
 					}
 				} else {
-					// Normally the input is populated with the item's value as the
+					// Normally the input is populated with the Item's value as the
 					// menu is navigated, causing screen readers to notice a change and
-					// announce the item. Since the focus event was canceled, this doesn't
+					// announce the Item. Since the focus event was canceled, this doesn't
 					// happen, so we update the live region so that screen readers can
 					// still notice the change and announce it.
 					this.liveRegion.text( item.value );
@@ -7066,7 +7066,7 @@ $.widget( "ui.autocomplete", {
 	},
 
 	_normalize: function( items ) {
-		// assume all items have the right format when the first item is complete
+		// assume all items have the right format when the first Item is complete
 		if ( items.length && items[0].label && items[0].value ) {
 			return items;
 		}
@@ -11489,8 +11489,8 @@ $.widget( "ui.menu", {
 						// Redirect focus to the menu
 						this.element.trigger( "focus", [ true ] );
 
-						// If the active item is on the top level, let it stay active.
-						// Otherwise, blur the active item since it is no longer visible.
+						// If the active Item is on the top level, let it stay active.
+						// Otherwise, blur the active Item since it is no longer visible.
 						if ( this.active && this.active.parents( ".ui-menu" ).length === 1 ) {
 							clearTimeout( this.timer );
 						}
@@ -11499,7 +11499,7 @@ $.widget( "ui.menu", {
 			},
 			"mouseenter .ui-menu-item": function( event ) {
 				var target = $( event.currentTarget );
-				// Remove ui-state-active class from siblings of the newly focused menu item
+				// Remove ui-state-active class from siblings of the newly focused menu Item
 				// to avoid a jump caused by adjacent elements both having a class with a border
 				target.siblings().children( ".ui-state-active" ).removeClass( "ui-state-active" );
 				this.focus( event, target );
@@ -11507,8 +11507,8 @@ $.widget( "ui.menu", {
 			mouseleave: "collapseAll",
 			"mouseleave .ui-menu": "collapseAll",
 			focus: function( event, keepActiveItem ) {
-				// If there's already an active item, keep it active
-				// If not, activate the first item
+				// If there's already an active Item, keep it active
+				// If not, activate the first Item
 				var item = this.active || this.element.children( ".ui-menu-item" ).eq( 0 );
 
 				if ( !keepActiveItem ) {
@@ -11643,7 +11643,7 @@ $.widget( "ui.menu", {
 				match;
 
 			// If no matches on the current filter, reset to the last character pressed
-			// to move down the menu to the first item that starts with that character
+			// to move down the menu to the first Item that starts with that character
 			if ( !match.length ) {
 				character = String.fromCharCode( event.keyCode );
 				regex = new RegExp( "^" + escape( character ), "i" );
@@ -11732,10 +11732,10 @@ $.widget( "ui.menu", {
 			}
 		});
 
-		// Add aria-disabled attribute to any disabled menu item
+		// Add aria-disabled attribute to any disabled menu Item
 		menus.children( ".ui-state-disabled" ).attr( "aria-disabled", "true" );
 
-		// If the active item has been removed, blur the menu
+		// If the active Item has been removed, blur the menu
 		if ( this.active && !$.contains( this.element[ 0 ], this.active[ 0 ] ) ) {
 			this.blur();
 		}
@@ -11771,7 +11771,7 @@ $.widget( "ui.menu", {
 			this.element.attr( "aria-activedescendant", focused.attr( "id" ) );
 		}
 
-		// Highlight active parent menu item, if any
+		// Highlight active parent menu Item, if any
 		this.active
 			.parent()
 			.closest( ".ui-menu-item" )
@@ -12011,7 +12011,7 @@ $.widget( "ui.menu", {
 	},
 
 	select: function( event ) {
-		// TODO: It should never be possible to not have an active item at this
+		// TODO: It should never be possible to not have an active Item at this
 		// point, but the tests don't trigger mouseenter before click.
 		this.active = this.active || $( event.target ).closest( ".ui-menu-item" );
 		var ui = { item: this.active };
