@@ -402,13 +402,16 @@ $(document).ready(function(){
         // always show price excluding tax first
         sel_obj = $("#edit_product_price", edit_obj);
         sel_obj.val(product.price);
-        // show price excluding tax first
         $(".product-price-type", edit_obj).each(function(){
             if($(this).val() == "excl"){
-                $(this).click();
+                $(this).attr('checked', true);
+                return false;
             }
         });
-        
+        // purchase price
+        sel_obj = $("#edit_product_purchase_price");
+        sel_obj.val(product.purchase_price);
+
         // ... per unit (listbox with unit types)
         sel_obj = $("#edit_product_unit_type", edit_obj).empty();
 
@@ -631,7 +634,7 @@ $(document).ready(function(){
         
         // unit amount
         unit_amount = get_number($("#edit_product_unit_amount").val(), "{{ separator }}");
-        if(!price) return;
+        if(!unit_amount) return;
             
         // if price is entered including tax, remove tax from price first and add it later
         if($("input.product-price-type:checked").val() == 'incl'){
@@ -644,7 +647,7 @@ $(document).ready(function(){
         discounts = get_product_discounts($("ul#edit_discounts"));
             
         // total_price(tax_first, base, tax, discounts, separator)
-        var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), "{{separator}}");
+        var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), unit_amount, "{{separator}}");
 
         $("td#total_price").text(display_number(result.total, "{{separator}}", {{decimal_places}}));
         

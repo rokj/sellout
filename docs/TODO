@@ -3,6 +3,7 @@
 - ! - 'stock' for unit_type = hour: some special logic?
 - ! - wrap *.save() in try/except
 - ! - tablet support
+- unlimited stock (-1) for some unit types ('hour')
 - <input> text field lengths in templates (from max_field_length) on all JSON 'forms'
 - missing images (deleted from disk) trigger IOException
 - <[ CDATA for <javascript>

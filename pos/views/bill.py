@@ -127,7 +127,7 @@ def get_active_bill(request, company):
     return JSON_response(bill_to_dict(request.user, bill))
 
 @login_required
-def add_bill_item(request, company):
+def edit_bill_item(request, company):
     """ add an item to bill:
          - received data: {'bill':bill_id, 'product_id':<id>, 'qty':<qty>, 'notes':<notes>}
          - calculate all item's fields (tax, discount, total, ...)
@@ -280,8 +280,11 @@ def remove_bill_item(request, company):
         
     # get item and remove it
     try:
+
         item = BillItem.objects.get(id=int(data.get('id')))
+        # save item id for later
+        id = item.id
         item.delete()
-        return JSON_ok()
+        return JSON_response({'status':'ok', 'id':id})
     except:
         return JSON_error(_("Could not delete the item"))

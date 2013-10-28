@@ -6,10 +6,12 @@ In product management:
     purchase price: purchase price per *1* unit
     
     total price calculation:
-        set price 
-        remove tax (if price is set including tax)
-        
-        add discounts and tax in order specified in config
-        
-        
+        1. set price
+        2. remove tax (if price is set including tax)
+        3. add discounts and tax in order specified in config
+        4. quantity is always 1 (managing only 1 product at a time)
+
 In bill:
+    1. get product's price
+    2. add tax and discounts in order specified in config
+    3. multiply by unit amount and quantity

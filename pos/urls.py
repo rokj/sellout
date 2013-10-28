@@ -38,8 +38,7 @@ urlpatterns = patterns('',
     # url(r_company + '/bill/save/?$', pos.add_item_to_bill, name='add_item_to_bill'),
     
     # views for bill items
-    url(r_company + '/bill/item/add/?$', pos.add_bill_item, name='add_bill_item'), # adds product to bill and returns updated bill info
-    url(r_company + '/bill/item/edit/?$', pos.edit_bill_item, name='edit_bill_item'), # updates item info
+    url(r_company + '/bill/item/edit/?$', pos.edit_bill_item, name='edit_bill_item'), # adds item to bill or updates it
     url(r_company + '/bill/item/remove/?$', pos.remove_bill_item, name='remove_bill_item'), # removes item from bill
     
     
