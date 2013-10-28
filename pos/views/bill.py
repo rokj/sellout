@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 
-from pos.models import Company, Bill, BillItem, Price, Product
+from pos.models import Company, Bill, BillItem, Product
 from pos.views.util import has_permission, JSON_response, JSON_ok, JSON_parse, JSON_error, \
-                           format_number, parse_decimal, format_date, format_time
+    format_number, parse_decimal, format_date, format_time
 from config.functions import get_value
 import common.globals as g
 
@@ -133,7 +133,7 @@ def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts)
         # price including tax
         r['tax_price'] = base_price*(tax_percent/100)
         # absolute tax value
-        r['tax_absolute'] = r['tax_price'] - r['base_price']
+        r['tax_absolute'] = r['tax_price'] - r['base']
         # absolute discounts value
         dd = get_discount(r['tax_price'])
         r['discount_absolute'] = dd['discount']
@@ -152,7 +152,7 @@ def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts)
         # add tax
         r['tax_price'] = r['discount_price']*(Decimal('1') + (tax_percent/100))
         # get absolute tax value
-        r['tax'] = r['tax_price'] - r['discount_price']
+        r['tax_absolute'] = r['tax_price'] - r['discount_price']
         # total
         r['total'] = r['tax_price']
         # total without tax
@@ -161,8 +161,8 @@ def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts)
     # multiply everything by quantity and unit amount
     t = quantity * unit_amount
     r['base'] = r['base']*t  # without tax and discounts
-    r['tax'] = r['tax']*t  # tax, absolute
-    r['discount'] = r['discount']*t  # discounts, absolute
+    r['tax_absolute'] = r['tax_absolute']*t  # tax, absolute
+    r['discount_absolute'] = r['discount_absolute']*t  # discounts, absolute
     r['total_tax_exc'] = r['total_tax_exc']*t  # total without tax
     # save single total
     r['single_total'] = r['total']
@@ -252,7 +252,7 @@ def edit_bill_item(request, company):
             
     # calculate and set all stuff for this new item:
     discounts = product.get_discounts()
-    prices = item_prices(request.user, product.get_price(), product.tax.amount, product.quantity, product.unit_amount, discounts)
+    prices = item_prices(request.user, product.get_price(), product.tax.amount, quantity, product.unit_amount, discounts)
 
     # notes, if any    
     bill_notes = data.get('notes')

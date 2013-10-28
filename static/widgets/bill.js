@@ -70,7 +70,6 @@ Bill.prototype.save_changes = function(){
         if(!this.items[i].saved){
             // this Item hasn't been saved yet, send it to server
             ti = item_to_string(this.items[i].data);
-            alert(JSON.stringify(ti))
             send_data(window.data.edit_bill_item, ti, window.data.csrf_token, function(recv_data){
                 if(recv_data.status != 'ok'){
                     alert(recv_data.message);
@@ -288,7 +287,7 @@ Item.prototype.set_quantity = function(quantity){
 }
 
 Item.prototype.update_prices = function(){
-    // update price only if item is not saved - if it is,
+    // calculate prices only if item is not saved - if it is,
     // it has just arrived from the server and has its numbers well defined
     if(!this.saved){
         var r = total_price(window.data.tax_first,

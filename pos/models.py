@@ -211,15 +211,57 @@ class Product(ProductAbstract):
         """ returns discount objects, ordered by seq_no in intermediate table """
         product_discounts = ProductDiscount.objects.filter(product=self).order_by('seq_no')
 
-        m2mids = [x.discount.id for x in product_discounts]
+        # save discount id and m2m table id
+        m2mids = [(x.discount.id, x.id) for x in product_discounts]
 
         discounts = []
         for i in m2mids: # this is obviously the only way to NOT sort the queryset by 'whatever, not by seq_no'
-            discounts.append(Discount.objects.get(id=i))
+            td = Discount.objects.get(id=i[0])
+            td.m2mid = i[1]
+            discounts.append(td)
 
-        print self
-        print discounts
         return discounts
+
+    def update_discounts(self, user, discount_ids):
+        """ smartly handles ProductDiscount m2m fields with as little repetition/deletion as possible
+            discount_ids: list of discount ids (integers) that will have to be on product when this method returns """
+
+        current_discounts_list = self.get_discounts()
+
+        # remove discounts that are not in discount_ids from product,
+        for cd in current_discounts_list:
+            if cd.id not in discount_ids:
+                # this discount must be deleted from product
+                ProductDiscount.objects.get(id=cd.m2mid).delete()  # achtung, delete from m2m table, not from discounts!
+
+        # add missing discounts with a valid sequence
+        i = 1
+        modify = False
+        for d in discount_ids:
+            try:  # see if this discount exists at all
+                discount = Discount.objects.get(company=self.company, id=d)
+            except Discount.DoesNotExist:  # there's no such discount in Discount table (why???), don't do anything
+                continue
+
+            try:  # see if this discount is already on the product
+                m2m = ProductDiscount.objects.get(product=self, discount__id=d)
+                modify = True  # modify existing m2m entry
+            except ProductDiscount.DoesNotExist:  # it does not exist, add it and assign sequence number
+                m2m = ProductDiscount(
+                    created_by=user,
+                    product=self,
+                    discount=discount,
+                    seq_no=i
+                )
+                m2m.save()
+                # modification is not required
+                modify = False
+
+            if modify:
+                m2m.seq_no = i
+                m2m.save()
+
+            i += 1
 
     class Meta:
         abstract = False

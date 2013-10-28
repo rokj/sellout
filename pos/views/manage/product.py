@@ -40,44 +40,95 @@ def JSON_units(request, company):
     return JSON_response(g.UNITS) # G units!
 
 
-def update_product_discounts(request, product, discount_ids):
-    """ smartly handles ProductDiscount m2m fields with as little repetition/deletion as possible
-        discount_ids: list of discount ids (integers) """
+def product_to_dict(user, product):
+    # returns all relevant product's data:
+    # id
+    # product name
+    # price (sale price, excluding tax) - numeric value
+    # purchase price - numeric value
+    # unit type
+    # unit type display
+    # discounts - dictionary or all discounts for this product
+    #    (see discounts.discount_to_dict for details)
+    # image
+    # category - name
+    # category - id
+    # code
+    # shortcut
+    # description
+    # private notes
+    # tax
+    # tax - id
+    # stock
+    # edit url
+    ret = {}
 
-    current_discounts = product.get_discounts()
-    current_discounts_ids = [x.id for x in current_discounts]
+    ret['id'] = product.id
 
-    # first remove discounts that are not in discount_ids
-    # then add missing discounts with a valid sequence
-    i = 1
-    modify = False
-    for did in discount_ids:
-        if did not in current_discounts_ids:
-            Discount.objects.get(id=did).delete()
-            continue
+    # purchase price
+    purchase_price = product.get_purchase_price()
+    if not purchase_price:
+        ret['purchase_price'] = ''
+    else:
+        ret['purchase_price'] = format_number(user, purchase_price)
 
-        # see if this discount exists at all
+    # sale price
+    price = product.get_price()
+    if not price:
+        ret['price'] = ''
+    else:
+        ret['price'] = format_number(user, price)
+
+    # all discounts in a list
+    discounts = []
+    all_discounts = product.get_discounts()
+    for d in all_discounts:
+        discounts.append(discount_to_dict(user, d))
+    ret['discounts'] = discounts
+
+    if product.image: # check if product's image exists
+        # get the thumbnail
         try:
-            discount = Discount.objects.get(id=int(did))
-            m2m = ProductDiscount.objects.get(product=product, discount__id=did)
-            modify = True # modify existing m2m entry
-        except ProductDiscount.DoesNotExist:
-            # it does not exist, add it and assign sequence number
-            m2m = ProductDiscount(
-                created_by = request.user,
-                product = product,
-                discount = discount,
-                seq_no = i
-            )
-            m2m.save()
-            # modification is not required
-            modify = False
+            ret['image'] = get_thumbnail(product.image, image_dimensions('product')[2]).url
+        except:
+            pass
 
-        if modify:
-            m2m.seq_no = i
-            m2m.save()
+    # tax: it's a not-null foreign key
+    ret['tax_id'] = product.tax.id
+    ret['tax'] = format_number(user, product.tax.amount)
+    # stock: it cannot be 'undefined'
+    ret['stock'] = format_number(user, product.stock)
 
-        i += 1
+    # category?
+    if product.category:
+        ret['category'] = product.category.name
+        ret['category_id'] = product.category.id
+
+    if product.code:
+        ret['code'] = product.code
+    if product.shortcut:
+        ret['shortcut'] = product.shortcut
+    if product.name:
+        ret['name'] = product.name
+    if product.description:
+        ret['description'] = product.description
+    if product.private_notes:
+        ret['private_notes'] = product.private_notes
+    if product.unit_type:
+        ret['unit_type'] = product.unit_type
+        ret['unit_type_display'] = product.get_unit_type_display()
+    if product.unit_amount:
+        ret['unit_amount'] = format_number(user, product.unit_amount)
+    if product.stock:
+        ret['stock'] = format_number(user, product.stock)
+
+    # urls
+    ret['get_url'] = reverse('pos:get_product', args=[product.company.url_name, product.id])
+    ret['edit_url'] = reverse('pos:edit_product', args=[product.company.url_name, product.id])
+    ret['delete_url'] = reverse('pos:delete_product', args=[product.company.url_name, product.id])
+
+    return ret
+
 
 @login_required
 def products(request, company):
@@ -524,7 +575,7 @@ def create_product(request, company):
     product.save()
     
     # update discounts
-    update_product_discounts(request, product, data['discounts'])
+    product.update_discounts(request.user, data['discounts'])
     
     # prices have to be updated separately
     price = product.update_price(Price, request.user, data['price']) # purchase price
@@ -592,7 +643,7 @@ def edit_product(request, company, product_id):
     product.tax = data['tax']
     
     # update discounts
-    update_product_discounts(request, product, data['discounts'])
+    product.update_discounts(request.user, data['discounts'])
     
     # image
     if data['change_image'] == True:
