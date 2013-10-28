@@ -550,7 +550,9 @@ def validate_product(user, company, data):
 
     # image:
     if data['change_image'] == True:
+        print 'bla'
         if 'image' in data: # new image has been uploaded
+            print data['image']
             data['image'] = image_from_base64(data['image'])
             if not data['image']:
                 # something has gone wrong during conversion
@@ -571,6 +573,8 @@ def validate_product(user, company, data):
             return r(False, _("Code too long"))
         
         try:
+            print company
+            print data['code']
             p = Product.objects.get(company=company, code=data['code'])
             if p.id != data['id']:
                 # same ids = product is being edited, so codes can be the same
@@ -651,6 +655,7 @@ def create_product(request, company):
     # validate data
     valid = validate_product(request.user, c, data)
     if not valid['status']:
+        print valid['message']
         return JSON_error(valid['message'])
     data = valid['data']
     
