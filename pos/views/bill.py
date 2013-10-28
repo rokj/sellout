@@ -16,7 +16,7 @@ def bill_item_to_dict(user, item, status=None):
     i = {}
     
     i['item_id'] = item.id
-    
+
     # values from product
     i['product_id'] = item.product_id
     i['code'] = item.code
@@ -131,7 +131,7 @@ def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts)
         # price without tax and discounts
         r['base'] = base_price
         # price including tax
-        r['tax_price'] = base_price*(tax_percent/100)
+        r['tax_price'] = base_price*(Decimal('1') + (tax_percent/Decimal('100')))
         # absolute tax value
         r['tax_absolute'] = r['tax_price'] - r['base']
         # absolute discounts value
@@ -150,7 +150,7 @@ def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts)
         # price including discounts
         r['discount_price'] = dd['final']
         # add tax
-        r['tax_price'] = r['discount_price']*(Decimal('1') + (tax_percent/100))
+        r['tax_price'] = r['discount_price']*(Decimal('1') + (tax_percent/Decimal('100')))
         # get absolute tax value
         r['tax_absolute'] = r['tax_price'] - r['discount_price']
         # total
@@ -169,6 +169,8 @@ def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts)
     r['total'] = r['total']*t  # total total total
 
     return r
+
+def 
 
 
 #########
@@ -198,10 +200,15 @@ def get_active_bill(request, company):
     # serialize the fetched bill and return it
     return JSON_response(bill_to_dict(request.user, bill, status='ok'))
 
+
+@login_required
+def add_bill_item(request, company):
+    pass
+
 @login_required
 def edit_bill_item(request, company):
     """ add an item to bill:
-         - received data: {'bill':bill_id, 'product_id':<id>, 'qty':<qty>, 'notes':<notes>}
+         - received data: {item_id, bill_id, 'product_id':<id>, 'qty':<qty>, 'notes':<notes>}
          - calculate all item's fields (tax, discount, total, ...)
          - add to bill object
          - return item_to_dict
@@ -307,6 +314,6 @@ def remove_bill_item(request, company):
         # save Item id for later
         id = item.id
         item.delete()
-        return JSON_response({'status':'ok', 'id':id})
+        return JSON_response({'status':'ok', 'item_id':id})
     except:
         return JSON_error(_("Could not delete the item"))

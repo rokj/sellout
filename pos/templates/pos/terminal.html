@@ -77,7 +77,7 @@ $(document).ready(function() {
         // errors maybe?
         if(data.status != 'ok'){
             alert(data.message);
-            // TODO: what to do?
+            // TODO: what to do on error?
         }
         else window.bill = new Bill(data);
     });
