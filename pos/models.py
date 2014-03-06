@@ -13,6 +13,7 @@ import common.globals as g
 import decimal
 import json
 
+
 ### company ###
 class Company(SkeletonU):
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)

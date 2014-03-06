@@ -1,3 +1,14 @@
+Product = function(g){
+    var p = this;
+
+    p.g = g;
+
+    p.items = {
+        container:1
+    };
+};
+
+
 /* products draggable with easing */
 function products_draggable(obj) {
     var params = {

@@ -28,7 +28,6 @@ urlpatterns = patterns('',
     # home: POS terminal, directly
     url(r_company + '/?$', pos.terminal, name='terminal'), # by url_name
     # ajax calls for POS terminal
-    url(r_company + '/init/?$', pos.terminal_init, name='terminal_init'),
     url(r_company + '/save/?$', pos.terminal_save, name='terminal_save'),
     
     # views for bill

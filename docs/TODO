@@ -3,6 +3,7 @@
 - ! - 'stock' for unit_type = hour: some special logic?
 - ! - wrap *.save() in try/except
 - ! - tablet support
+- product search to request.GET + caching
 - unlimited stock (-1) for some unit types ('hour')
 - <input> text field lengths in templates (from max_field_length) on all JSON 'forms'
 - missing images (deleted from disk) trigger IOException
@@ -20,6 +21,10 @@
 
 - products with no categories: 'no category' entry in listboxes (?)
 - bug: category select in 'advanced product search'
+
+- bug: product management: price per <n>?
+- bug: product management: price from previously edited product stays in dialog for new product
+
 
 - DONE change underscores for HTML and CSS ids and classes to dashes (django forms use underscores ?!)
 - DONE product validation: lengths of all fields

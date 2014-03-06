@@ -1,97 +1,156 @@
-/* categories draggable with easing */
-function category_draggable(obj) {
-    var params = {
-        // Kudos:
-        // http://stackoverflow.com/questions/6602568/jquery-ui-draggable-deaccelerate-on-stop
-        helper: function () {
-            return $("<div>").css("opacity", 0);
-        },
-        drag: function (event, ui) {
-            // the position of parent obviously has to be taken into account
-            var pos = ui.helper.position().left - obj.parent().position().left;
-            $(this).stop().animate({left: pos},
-                window.data.t_easing,
-                'easeOutCirc',
-                function () {
-                    // check if this has scrolled past the last
-                    // (first) button
-                    var first_button = $(".category-button", obj).filter(":first");
-                    var last_button = $(".category-button", obj).filter(":last");
-                    var container = obj.parent();
+/* categories:
+ *  there are two divs in terminal: #parents and #children;
+ *    parent shows:
+ *      - path to the current children, shown below, or nothing if in topmost category
+ *    children shows:
+ *      - topmost categories if there's no parent selected
+ *      - after selecting parent, a button goes to #parent and all its children are shown in children
+ */
+Categories = function(g){
+    var p = this;
 
-                    if(first_button.length < 1 || last_button.length < 1) return;
+    p.g = g;
 
-                    // if the whole scroller's width is less than
-                    // container's, always slide it back to left border
-                    if (first_button.position().left + last_button.position().left + last_button.outerWidth() < container.width()) {
-                        first_button.parent().animate({left: 0}, "fast");
-                    }
-                    else {
-                        if (first_button.offset().left > container.offset().left) {
-                            first_button.parent().animate({left: 0}, "fast");
-                        }
-                        else if (last_button.offset().left + last_button.outerWidth() < container.offset().left + container.width()) {
-                            first_button.parent().animate({left: -last_button.position().left + container.width() - last_button.outerWidth()}, "fast");
-                        }
-                    }
-                });
-        },
-        axis: "x"
+    p.categories = []; // will hold Category() objects
+    p.current_category = null;
+
+    p.items = {
+        parents: $("#parents"), // parent categories
+        children: $("#children"), // children categories
+        home_button: $("#category_button_home"),
+        favorites_button: $("#category_button_favorites")
     };
 
-    obj.draggable(params);
-}
+    //
+    // methods
+    //
+    p.clear_parents = function(){ $("div.category-button", p.items.parents).hide(); };
+    p.clear_children = function(){ $("div.category-button", p.items.children).hide(); };
+    p.clear = function(){
+        p.clear_parents();
+        p.clear_children();
+    };
 
-/* category buttons */
-function create_button(cc) {
-    // stuff to add:
-    // a div
-    var btn_div = $("<div>", {
-        "class" : "category-button",
-        "data-id" : cc.id
-    });
+    p.home_button_action = function(){
+        // clear everything first
+        p.clear();
 
-    if (cc.children.length > 0)
-        btn_div.addClass("category-button-subcategories");
-    
-    // a paragraph with category name
-    var p_obj = $("<p>", {"class" : "category-name"}); // a paragraph with the name
-    p_obj.append(cc.name);
-    btn_div.append(p_obj);
-    // an image, if the category has one
-    var img_obj = $("<img>", {"class" : "category-button-icon"});
-    if (cc.image)
-        img_obj.attr("src", cc.image);
-    else
-        img_obj.attr("src", window.data.spacer); // data is a global
-                                                 // variable, set in
-                                                 // terminal.html
-    p_obj.prepend(img_obj); // add image
-    // a subcategory image (only shown if in parents div)
-    p_obj.prepend($("<img>", {src : window.data.subcategory,"class" : "subcategory"}));
+        // show only top categories in children div
+        for(var i = 0; i < p.categories.length; i++){
+            p.categories[i].children_button.show();
+        }
+    };
 
-    btn_div.data(cc);
+    //
+    // init
+    //
 
-    return btn_div;
-}
+    // draggable parents and children
+    set_draggable(p.items.parents, "div.category-button:visible", p.g.settings.t_easing);
+    set_draggable(p.items.children, "div.category-button:visible", p.g.settings.t_easing);
 
-function categories_home() {
-    var c = window.data.categories;
-    // remove stuff from parent and children div
-    window.items.parents_div.empty();
-    window.items.children_div.empty();
-    window.items.products_list.empty();
-
-    // create children
-    for (i = 0; i < c.length; i++) {
-        btn = create_button(c[i]);
-        btn.click(select_category);
-        window.items.children_div.append(btn);
+    // create all categories
+    var i, c;
+    c = p.g.data.categories;
+    for(i = 0; i < c.length; i++){
+        p.categories[i] = new CategoryButton(p, null, c[i]);
     }
 
-    // add some class to the button
-    window.items.all_cat_button.addClass("category-button-selected");
-}
+    // home button action
+    p.items.home_button.click(function(){ p.home_button_action(); });
+
+    // in the beginning, show the home button
+    p.home_button_action();
+};
+
+CategoryButton = function(list, parent, data){
+    var p = this;
+
+    p.list = list; // category list, the god of categories
+    p.parent = parent;
+    p.data = data; // this category's data
+    p.g = p.list.g;
+
+    p.has_children = (p.data.children.length > 0);
+
+    p.subcategories = []; // an object for each subcategory
+
+    p.children_button = null; // the button in the children div
+    p.parents_button = null; // the button in the parents div (this may not be there at all)
+
+    //
+    // methods
+    //
+    p.create_button = function(){
+        // stuff to add:
+        // a div
+        p.button = $("<div>", { "class": "category-button"}).hide(); // will be shown later
+
+        if (p.has_children) // show that this category has subcategories
+            p.button.addClass("category-button-subcategories");
+
+        // a paragraph with category name
+        p.button.append(p.data.name);
+
+        // category icon
+        var img_obj;
+        if (p.data.image) // create a new image from category's icon
+            img_obj = $("<img>", {src: p.data.image });
+        else // use an existing spacer from template
+            img_obj = p.g.items.spacer;
+
+        img_obj.addClass("category-button-icon");
+        p.button.prepend(img_obj); // add image
+
+        // appending: in parents div, prepend (subcategory is the last to be shown)
+        //            in children, append (sorted by name, alphabetically)
+
+        // append to children div
+        p.children_button = p.button.clone().appendTo(p.list.items.children);
+
+        // append to parents div only if it has subcategories
+        if(p.subcategories.length > 0)
+            p.parents_button = p.button.clone().prependTo(p.list.items.parents);
+    };
+
+    p.show_children = function(){
+        if(p.has_children){
+            // this category has children: show parents_button and all subcategories
+
+            // remove current children
+            p.list.clear();
+
+            // show all buttons of all subcategories
+            for(var i = 0; i < p.subcategories.length; i++){
+                p.subcategories[i].children_button.show();
+            }
+
+            // show parents
+            var c = p;
+            while(c){
+                if(c.parents_button) c.parents_button.show();
+                c = c.parent;
+            }
+        }
+
+        // TODO: show products in this category
+    };
+
+    //
+    // init
+    //
+    // create subcategories
+    var i, c = p.data.children;
+    for(i = 0; i < c.length; i++){
+        p.subcategories[i] = new CategoryButton(p.list, p, c[i]);
+    }
+
+    // button (categories must already be initialized)
+    p.create_button();
+
+    // register events
+    $().add(p.parents_button).add(p.children_button).click(function(){ p.show_children(); });
+};
 
 function scroll_into_view(btn) {
     var scroller = btn.parent();
@@ -107,48 +166,6 @@ function scroll_into_view(btn) {
     }
 }
 
-/* categories selector */
-function categories_selector(){
-    var c = window.data.categories;
-    // there are two divs in terminal: #parents and #children;
-    // parent shows:
-    // - path to the current children, shown below, or nothing if in topmost
-    // category
-    // children shows:
-    // - topmost categories if there's no parent selected
-    // - after selecting parent, a button goes to #parent and all its children
-    // are shown in children
-    // add buttons for all categories to the children div
-
-    // each button holds data() for its category
-
-    // add parent references to all children and
-    // create a dictionary of all categories by id for quick selection on product button click
-    function add_parent(cat, parent_cat) {
-        var i;
-        for(i = 0; i < cat.length; i++) {
-            if(parent_cat) cat[i].parent = parent_cat;
-            if(cat[i].children.length > 0) add_parent(cat[i].children, cat[i]);
-
-            window.data.categories_list[cat[i].id.toString()] = cat[i];
-        }
-    }
-    add_parent(c, null);
-
-    // draggable with easing function
-    category_draggable(window.items.parents_div);
-    category_draggable(window.items.children_div);
-
-    // bind events to 'favorites' and 'home' buttons
-    window.items.all_cat_button.click(categories_home);
-    
-    $("#category_button_favorites").click(function(){
-
-    });
-
-    // in the beginning, there was the first category selected
-    categories_home();
-}
 
 function select_category(e, id) { // gets called on buttons that are in parents div
     // e - jQuery event

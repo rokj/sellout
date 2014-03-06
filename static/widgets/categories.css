@@ -8,7 +8,7 @@
     selected (class category-button-selected) - when this is the currently focused button
 
 */
-div#children, div#parents{
+div#children_scroll_outer, div#parents_scroll_outer{
     height:38px;
     /* prevent text selection (interferes with dragging) */
     -webkit-touch-callout: none;
@@ -19,14 +19,14 @@ div#children, div#parents{
     user-select: none;
 }
 
-div#children_scroll_outer, div#parents_scroll_outer{ /* category scrolling: outer div*/
+div#children_scroll_inner, div#parents_scroll_inner{ /* category scrolling: outer div*/
     height:34px;
     overflow:auto;
     overflow-x:hidden;
     border:1px solid black;
 }
 
-div#children_scroll_inner, div#parents_scroll_inner{ /* scrolling: inner div */
+div#children, div#parents{ /* scrolling: inner div */
     /* container for category-button */
     height:32px;
     width:1280000px; /* this will hold 10,000 buttons */
@@ -35,53 +35,35 @@ div#children_scroll_inner, div#parents_scroll_inner{ /* scrolling: inner div */
     position:relative;
 }
 
-div .category-button{ /* category selection buttons (the scrolling ones) */
+div.category-button{ /* category selection buttons (the scrolling ones) */
     float:left;
     min-width:120px;
-    max-width:150px;
+    max-width:180px;
     padding:3px;
     margin-left:3px;
     margin-right:3px;
     cursor:pointer;
     border:1px solid black;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-div .category-button-focused{ /* only for keyboard-arrow selection */
+div.category-button-focused{ /* only for keyboard-arrow selection */
     border:1px dotted gray;
 }
 
-div .category-button-selected{ /* selected and products are shown*/
+div.category-button-selected{ /* selected and products are shown*/
     background-color:orange;
 }
 
-div .category-button-subcategories{ /* this category has more subcategories */
+div.category-button-subcategories{ /* this category has more subcategories */
     border-color:red;
 }
 
-.category-button-icon{ /* category image in selection buttons */
+img.category-button-icon{ /* category image in selection buttons */
     display:inline-block;
     vertical-align:middle;
     height:24px; /* icons are thumbnails, which are already cropped to a square */
     width:24px;
-}
-
-p.category-name{
-    width:100%;
-    margin:0px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-/* subcategories indicator */
-img.subcategory{
-    height:15px;
-}
-div#children img.subcategory{
-    visibility:hidden;
-}
-div#parents img.subcategory{
-    position:relative;
-    margin-top:auto;
-    margin-bottom:auto;
 }

@@ -170,7 +170,9 @@ def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts)
 
     return r
 
-def 
+def validate_bill_item(data):
+    """ finds bill and item in database and """
+    pass
 
 
 #########

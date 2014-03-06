@@ -21,9 +21,12 @@ div#loading{
     position:absolute;
     top:0;
     left:0;
+    bottom: 0;
+    right: 0;
+
     opacity:.9;
     background-color:white;
-    z-index:999;
+    z-index:99999; /* above everything on the page */
 }
 /* topmost bar */
 div#manage_bar{
@@ -58,9 +61,9 @@ border: 1px solid black;
     left:5px;
 }
 
-div#selection{
+div#selector{
     position:absolute;
-    left:370px;
+    left:370px; /* default values only, position will be saved */
     right:5px;
     top:35px;
     bottom:5px;

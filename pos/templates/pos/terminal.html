@@ -28,64 +28,140 @@
 
 {% comment %} 'embedded' javascript {% endcomment %}
 <script type="text/javascript">
-window.request = null; // the (possibly) pending ajax request
-
 $(document).ready(function() {
-    {% comment %} see terminal.py to see what data is loaded {% endcomment %}
-    load_data("{% url 'pos:terminal_init' company.url_name %}");
-    // add some other global data
-    window.data.categories_list = {}; // a dictionary of all categories by id
-    // stuff from template
-    window.data.spacer = "{% static 'graphics/spacer.png' %}"; // {% comment %} stuff that javascript can't see {% endcomment %}
-    window.data.loading = "{% static 'graphics/loading.gif' %}";
-    window.data.subcategory = "{% static 'graphics/subcategory.png' %}";
-    window.data.csrf_token = "{{csrf_token}}";
-    // urls
-    window.data.get_bill_url = "{% url 'pos:get_active_bill' company.url_name %}";
-    window.data.edit_bill_item = "{% url 'pos:edit_bill_item' company.url_name %}";
-    window.data.remove_bill_item = "{% url 'pos:remove_bill_item' company.url_name %}";
-    // ui settings
-    window.data.t = 100; // duration of show/hide events
-    window.data.t_easing = 200; // duration of easing functions (drag start/stop)
-    window.data.last_search = ""; // last searched query
-    window.data.search_update_interval = 1000; // checking if search query has changed
+    // global data for the terminal
+    var g = {
+        // misc
+        csrf_token: "{{csrf_token}}",
 
-    // save jquery items that will be used often
-    window.items = { // jQuery objects only (to avoid searching each time something updates)
-        focused: null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
-        parents_div: $("div#parents_scroll_inner"),
-        children_div: $("div#children_scroll_inner"),
-        all_cat_button: $("div#category_button_home"),
-        search_field: $("input#search_products_filter"),
-        products_list: $("div#products"),
-        bill_header: $("#bill_header"),
-        bill_items: $("#bill_items") // table>tbody
+        // data, retrieved from the server (later)
+        request: null, // the (possibly) pending ajax request
+        categories_list: {}, // a dictionary of all categories by id
+
+        // urls
+        urls: {
+            // searching
+            search_products: "{% url 'pos:search_products' company.url_name %}",
+            save_terminal: "{% url 'pos:terminal_save' company.url_name %}",
+
+            // bill
+            get_bill: "{% url 'pos:get_active_bill' company.url_name %}",
+
+            // items
+            edit_item: "{% url 'pos:edit_bill_item' company.url_name %}",
+            remove_item: "{% url 'pos:remove_bill_item' company.url_name %}"
+        },
+
+        // config (data comes directly from view)
+        config: {% autoescape off %}{{ config }}{% endautoescape %},
+
+        settings: {
+            // ui settings
+            t: 100, // duration of show/hide events
+            t_easing: 200, // duration of easing functions (drag start/stop)
+            last_search: "", // last searched query
+            search_update_interval: 1000 // checking if search query has changed
+        },
+
+        // other data (directly from view)
+        // includes: categories,
+        data: {% autoescape off %}{{ data }}{% endautoescape %},
+
+        // cached jquery items
+        items: {
+            // terminal items
+            splitter: $("#splitter"),
+            manage_bar: $("#manage_bar"),
+            bill: $("#bill"),
+            products: $("#products"),
+            selector: $("#selector"),
+            controls: $("#controls"),
+            loading: $("#loading"),
+
+            focused: null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
+
+            // items that are ready to be inserted
+            spacer: $("<img>", {src:"{% static 'graphics/spacer.png' %}"}),
+            loading_animation: $("<img>", {src: "{% static 'graphics/loading.gif' %}"}),
+            subcategory: $("<img>", {src:"{% static 'graphics/subcategory.png' %}"})
+        },
+
+        // javascript objects (initialized later)
+        categories: null,
+        products: null,
+        bill: null // current bill (will be loaded with ajax)
     };
 
-    /* layout (change some things programmaticaly) */
-    init_layout();
+    //
+    // layout and resizing
+    //
+    function size_layout(save){
+        var pos = g.items.splitter.offset();
+
+        // splitter
+        g.items.splitter.height($(window).height() - pos.top);
+        // selection
+        g.items.selector.css({left:pos.left});
+        // products
+        g.items.products.outerHeight(
+            g.items.controls.offset().top -
+            g.items.products.offset().top
+        ).empty(); // if the new height is less than previous, product buttons will break out of their parent
+
+        // bill: if wider than pos.left, move it back to show the whole bill
+        g.items.bill.width(pos.left);
+        if(g.items.bill.width() > pos.left){
+            g.items.splitter.offset({left: g.items.bill.width(), top: pos.top});
+            size_layout();
+            return;
+        }
+
+        // save?
+        if(save){
+            // get splitter position
+            var ld = {};
+            ld.bill_width = g.items.splitter.position().left;
+
+            send_data_blocking(g.urls.save_terminal, ld, g.csrf_token, null);
+        }
+    }
+
+    g.items.splitter // resize on splitter drag and save data
+        .draggable({ axis: "x", stop: function(){ size_layout(true); }})
+        .css({
+            height: $(window).height() - g.items.manage_bar.outerHeight(),
+            top: g.items.manage_bar.outerHeight(),
+            left: g.config.bill_width
+        });
+    g.items.bill.width(g.config.bill_width);
+
+    // resize everything now and on resize
+    size_layout(false); // no need to save on load
+    $(window).resize(function(){ size_layout(false); }); // and no need to save on window resize
 
     /* widgets */
-    categories_selector(); // categories selector (level 0 is the topmost category)
-    products_selector();
+    g.categories = new Categories(g); // categories selector (level 0 is the topmost category)
+    //g.products = new Products(g);
     
     /* handle the keyboard */
-    $(document).keypress(handle_keypress);
+    //$(document).keypress(handle_keypress);
 
     /* bill will instantiate a 'bill' 'class' that will load/start a new bill */
-    get_data(window.data.get_bill_url, function(data){
+    get_data(g.urls.get_bill, function(data){
         // errors maybe?
         if(data.status != 'ok'){
             alert(data.message);
             // TODO: what to do on error?
         }
-        else window.bill = new Bill(data);
+        else{
+            //g.bill = new Bill(g, data);
+            g.items.loading.hide();
+        }
     });
 
     /* show the terminal */
-    window.items.search_field.val(""); // ff remembers edit boxes' values, but mixes them up when refreshing
-    $("#loading").remove();
-});  
+    //window.items.search_field.val(""); // ff remembers edit boxes' values, but mixes them up when refreshing
+});
 </script>
 
 {% endblock %}
@@ -145,28 +221,32 @@ $(document).ready(function() {
     {% comment %} buttons etc. {% endcomment %}
 </div>
 
-
 {% comment %} separator: draggable div for resizing bill/controls {% endcomment %}
 <div id="splitter"></div>
 
 {% comment %} product selector and other controls {% endcomment %}
-
-<div id="selection">
+<div id="selector">
     <div id="categories">
-        <div id="parents">
+        <div id="parents_scroll_outer">
             {% comment %} fixed buttons: favorites and 'home' {% endcomment %}
-            <div class="category-button" id="category_button_favorites"><p class="category-name"><img class="category-button-icon" src="{% static 'graphics/favorites.png' %}" alt="favorites icon" />{% trans 'Favorites' %}</p></div>
-            <div class="category-button" id="category_button_home"><p class="category-name"><img class="category-button-icon" src="{% static 'graphics/home.png' %}" alt="favorites icon" />{% trans 'All' %}</p></div>
+            <div class="category-button" id="category_button_favorites">
+                <img class="category-button-icon" src="{% static 'graphics/favorites.png' %}" alt="{% trans 'Favorites' %}" />
+                {% trans 'Favorites' %}
+            </div>
+            <div class="category-button" id="category_button_home"><img class="category-button-icon" src="{% static 'graphics/home.png' %}" alt="{% trans 'Home' %}" />
+                {% trans 'All' %}
+            </div>
+
             {% comment %} scrolling: parents {% endcomment %}
-            <div id="parents_scroll_outer">
-                <div id="parents_scroll_inner"></div>
+            <div id="parents_scroll_inner">
+                <div id="parents"></div>
             </div>
         </div>
         
         {% comment %} scrolling: children {% endcomment %}
-        <div id="children">
-            <div id="children_scroll_outer">
-                <div id="children_scroll_inner"></div>
+        <div id="children_scroll_outer">
+            <div id="children_scroll_inner">
+                <div id="children"></div>
             </div>
         </div>
     </div>
@@ -177,7 +257,7 @@ $(document).ready(function() {
     </div>
     <div id="controls">
         <input type="text" id="search_products_filter" />
-        <button type="button" id="search_products_submit" onclick="get_products()"><img src="{% static 'graphics/search.png'%}" style="height:16px;"/></button>
+        <button type="button" id="search_products_submit"><img src="{% static 'graphics/search.png'%}"/></button>
     </div>
 </div>
 

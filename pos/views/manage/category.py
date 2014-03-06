@@ -10,14 +10,13 @@ from django.http import Http404
 
 from pos.models import Company, Category
 from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, resize_image, validate_image, \
-                           has_permission, no_permission_view, \
-                           image_dimensions, max_field_length, image_from_base64
+    image_dimensions, max_field_length, image_from_base64, has_permission, no_permission_view
 from common import globals as g
 
 
-from rest_framework.decorators import api_view, permission_classes,\
-    authentication_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+
 
 ########################
 ### helper functions ###
@@ -37,6 +36,7 @@ def category_breadcrumbs(category):
     name = ' > '.join(name)
     
     return name
+
 
 def category_to_dict(c):
     # get list: topmost category > sub > subsub > c
@@ -59,7 +59,6 @@ def category_to_dict(c):
     if c.image:
         r['image'] = c.image.url
     return r
-
 
 
 def validate_category(user, company, data, parent_id):
@@ -138,13 +137,11 @@ def validate_category(user, company, data, parent_id):
     
     # description, notes - anything can be entered
     data['description'] = data['description'].strip()
-    
         
     return {'status':True, 'data':data} 
 
 
-def get_all_categories(company_id, category_id=None, sort='name', data=[], level=0, json=False):
-    
+def get_all_categories(company_id, category_id=None, sort='name', data=None, level=0, json=False):
     """ return a 'flat' list of all categories (converted to dictionaries/json) """
     
     #def category_to_dict(c, level): # c = Category object # currently not needed
@@ -154,7 +151,10 @@ def get_all_categories(company_id, category_id=None, sort='name', data=[], level
     #            'image':c.image,
     #            'level':level
     #    }
-    
+
+    if data is None:
+        data = []
+
     if category_id:
         c = Category.objects.get(company__id=company_id, id=category_id)
         # add current category to list
@@ -181,8 +181,12 @@ def get_all_categories(company_id, category_id=None, sort='name', data=[], level
 
     return data
 
-def get_subcategories(category_id, sort='name', data=[]):
+
+def get_subcategories(category_id, sort='name', data=None):
     """ return a 'flat' list of all subcategories' ids """
+    if data is None:
+        data = []
+
     c = Category.objects.get(id=category_id)
     data.append(c.id)
         
@@ -193,9 +197,12 @@ def get_subcategories(category_id, sort='name', data=[]):
     
     return data
 
-def get_all_categories_structured(company, category=None, data=[], sort='name', level=0):
+
+def get_all_categories_structured(company, category=None, data=None, sort='name', level=0):
     """ return a structured list of all categories of given company """
-    
+    if data is None:
+        data = []
+
     if not category:
         # list all categories that have no parent
         category = Category.objects.filter(company=company, parent=None).order_by(sort)
@@ -208,15 +215,15 @@ def get_all_categories_structured(company, category=None, data=[], sort='name', 
         # add current category to list
         current = category_to_dict(category)
         level += 1
-        current['level'] = level;
-        current['children'] = [] # will contain subcategories
+        current['level'] = level
+        current['children'] = []  # will contain subcategories
         
         # list all categories with this parent
         children = Category.objects.filter(company=company, parent=category).order_by(sort)
         
         # add them to the list
         for c in children:
-            current['children'].append(get_all_categories_structured(company, c, level))
+            current['children'].append(get_all_categories_structured(company, c, level=level))
 
     return current
 
