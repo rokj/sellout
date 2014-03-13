@@ -12,6 +12,7 @@ Categories = function(g){
     p.g = g;
 
     p.categories = []; // will hold Category() objects
+    p.categories_by_id = {}; // will hold pairs id:{category reference} for faster searching
     p.current_category = null;
 
     p.items = {
@@ -78,6 +79,9 @@ CategoryButton = function(list, parent, data){
     p.children_button = null; // the button in the children div
     p.parents_button = null; // the button in the parents div (this may not be there at all)
 
+    // add a pair to list.categories_by_id
+    p.list.categories_by_id[p.data.id] = p.data;
+
     //
     // methods
     //
@@ -90,7 +94,7 @@ CategoryButton = function(list, parent, data){
             p.button.addClass("category-button-subcategories");
 
         // a paragraph with category name
-        p.button.append(p.data.name);
+        p.button.append($("<span>", {"class": "category-button-text"}).text(p.data.name));
 
         // category icon
         var img_obj;
@@ -136,6 +140,16 @@ CategoryButton = function(list, parent, data){
         // TODO: show products in this category
     };
 
+    p.click_action = function(){
+        // show children
+        p.show_children();
+
+        // show products from this category
+        p.g.objects.products.show_products(
+            p.g.objects.search.search_by_category(p.data.id)
+        );
+    };
+
     //
     // init
     //
@@ -149,7 +163,7 @@ CategoryButton = function(list, parent, data){
     p.create_button();
 
     // register events
-    $().add(p.parents_button).add(p.children_button).click(function(){ p.show_children(); });
+    $().add(p.parents_button).add(p.children_button).click(function(){ p.click_action(); });
 };
 
 function scroll_into_view(btn) {

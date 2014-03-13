@@ -1,18 +1,23 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load i18n %}
 
 {% block head %}
+<script type="text/javascript" src="{% static 'omnibus/omnibus.js' %}"></script>
+
+<link type="text/css" rel="stylesheet" href="{% static 'terminal.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'widgets/products.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'widgets/categories.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'widgets/bill.css' %}" />
+
+
 {% comment %} the terminal {% endcomment %}
 <script src="{% static 'terminal.js' %}"></script>
-<link type="text/css" rel="stylesheet" href="{% static 'terminal.css' %}" />
 {% comment %} widgets {% endcomment %}
 <script src="{% static 'widgets/categories.js' %}"></script> {% comment %} categories selector {% endcomment %}
-<link type="text/css" rel="stylesheet" href="{% static 'widgets/categories.css' %}" />
 <script src="{% static 'widgets/products.js' %}"></script> {% comment %} products selector {% endcomment %}
-<link type="text/css" rel="stylesheet" href="{% static 'widgets/products.css' %}" />
+<script src="{% static 'widgets/search.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 <script src="{% static 'widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
-<link type="text/css" rel="stylesheet" href="{% static 'widgets/bill.css' %}" />
 
 {% comment %} keyboard {% endcomment %}
 <link href="{% static 'keyboard/css/keyboard.css' %}" rel="stylesheet">
@@ -29,43 +34,46 @@
 {% comment %} 'embedded' javascript {% endcomment %}
 <script type="text/javascript">
 $(document).ready(function() {
-    // global data for the terminal
-    var g = {
-        // misc
-        csrf_token: "{{csrf_token}}",
+    //
+    // GLOBAL DATA AND OBJECTS -------------------------------
+    //
+    var g = { // global data for the terminal
 
-        // data, retrieved from the server (later)
-        request: null, // the (possibly) pending ajax request
-        categories_list: {}, // a dictionary of all categories by id
+        // status:
+        //  0: not connected
+        status: 0,
 
-        // urls
-        urls: {
-            // searching
-            search_products: "{% url 'pos:search_products' company.url_name %}",
-            save_terminal: "{% url 'pos:terminal_save' company.url_name %}",
-
-            // bill
-            get_bill: "{% url 'pos:get_active_bill' company.url_name %}",
-
-            // items
-            edit_item: "{% url 'pos:edit_bill_item' company.url_name %}",
-            remove_item: "{% url 'pos:remove_bill_item' company.url_name %}"
-        },
+        // websockets connection
+        ws: null, // TODO new Omnibus(WebSocket, "{{ socket_endpoint }}"),
 
         // config (data comes directly from view)
         config: {% autoescape off %}{{ config }}{% endautoescape %},
 
+        // other data (directly from view)
+        // includes: categories,
+        data: {% autoescape off %}{{ data }}{% endautoescape %},
+
+        // websocket channels
+        channels: {
+            updates: null,
+            terminal: null
+        },
+
+        // javascript objects (initialized later)
+        objects:{
+            categories: null,
+            products: null,
+            search: null,
+            bill: null // current bill (will be loaded with ajax)
+        },
+
+        // static ui settings
         settings: {
-            // ui settings
             t: 100, // duration of show/hide events
             t_easing: 200, // duration of easing functions (drag start/stop)
             last_search: "", // last searched query
             search_update_interval: 1000 // checking if search query has changed
         },
-
-        // other data (directly from view)
-        // includes: categories,
-        data: {% autoescape off %}{{ data }}{% endautoescape %},
 
         // cached jquery items
         items: {
@@ -73,10 +81,9 @@ $(document).ready(function() {
             splitter: $("#splitter"),
             manage_bar: $("#manage_bar"),
             bill: $("#bill"),
-            products: $("#products"),
-            selector: $("#selector"),
-            controls: $("#controls"),
-            loading: $("#loading"),
+            products_container: $("#products_scroll_outer"),
+            selector_container: $("#selector"),
+            controls_container: $("#controls"),
 
             focused: null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
 
@@ -84,16 +91,16 @@ $(document).ready(function() {
             spacer: $("<img>", {src:"{% static 'graphics/spacer.png' %}"}),
             loading_animation: $("<img>", {src: "{% static 'graphics/loading.gif' %}"}),
             subcategory: $("<img>", {src:"{% static 'graphics/subcategory.png' %}"})
-        },
-
-        // javascript objects (initialized later)
-        categories: null,
-        products: null,
-        bill: null // current bill (will be loaded with ajax)
+        }
     };
 
+    // widgets
+    g.objects.categories = new Categories(g); // categories selector (level 0 is the topmost category)
+    g.objects.products = new Products(g);
+    g.objects.search = new Search(g);
+
     //
-    // layout and resizing
+    // LAYOUT AND RESIZING -------------------------------------
     //
     function size_layout(save){
         var pos = g.items.splitter.offset();
@@ -101,11 +108,11 @@ $(document).ready(function() {
         // splitter
         g.items.splitter.height($(window).height() - pos.top);
         // selection
-        g.items.selector.css({left:pos.left});
+        g.items.selector_container.css({left:pos.left});
         // products
-        g.items.products.outerHeight(
-            g.items.controls.offset().top -
-            g.items.products.offset().top
+        g.items.products_container.outerHeight(
+            g.items.controls_container.offset().top -
+            g.items.products_container.offset().top
         ).empty(); // if the new height is less than previous, product buttons will break out of their parent
 
         // bill: if wider than pos.left, move it back to show the whole bill
@@ -138,29 +145,6 @@ $(document).ready(function() {
     // resize everything now and on resize
     size_layout(false); // no need to save on load
     $(window).resize(function(){ size_layout(false); }); // and no need to save on window resize
-
-    /* widgets */
-    g.categories = new Categories(g); // categories selector (level 0 is the topmost category)
-    //g.products = new Products(g);
-    
-    /* handle the keyboard */
-    //$(document).keypress(handle_keypress);
-
-    /* bill will instantiate a 'bill' 'class' that will load/start a new bill */
-    get_data(g.urls.get_bill, function(data){
-        // errors maybe?
-        if(data.status != 'ok'){
-            alert(data.message);
-            // TODO: what to do on error?
-        }
-        else{
-            //g.bill = new Bill(g, data);
-            g.items.loading.hide();
-        }
-    });
-
-    /* show the terminal */
-    //window.items.search_field.val(""); // ff remembers edit boxes' values, but mixes them up when refreshing
 });
 </script>
 
@@ -168,7 +152,6 @@ $(document).ready(function() {
 
 {% block content %}
 {% comment %} the 'loading' div {% endcomment %}
-<div id="loading">loading...</div>
 {% comment %} management, logout, ... links {% endcomment %}
 <div id="manage_bar">
     <div id="blocklogic"><a href="http://www.blocklogic.net">BlockLogic</a></div>
@@ -183,28 +166,28 @@ $(document).ready(function() {
     <div id="bill_scroll_inner">
         <table id="bill">
             <thead>
-            <tr id="bill_header">
-                <td class="bill-item-name-container">
-                    <p class="bill-title">{% trans 'Name' %}</p> {% comment %} product name and code {% endcomment %}
-                    <p class="bill-subtitle">{% trans 'Code' %}</p></td>
-                <td class="bill-item-qty-container">
-                    <p class="bill-title">{% trans 'Qty' %}</p> {% comment %} quantity and unit type {% endcomment %}
-                    <p class="bill-subtitle">{% comment %} empty at the moment {% endcomment %}</p></td>
-                <td class="bill-item-price-container">
-                    <p class="bill-title">{% trans 'Price' %}</p> {% comment %} base price {% endcomment %}
-                    <p class="bill-subtitle">[{{ currency }}]   </p></td>
-                <td class="bill-item-tax-container">
-                    <p class="bill-title">{% trans 'Tax' %}</p>{% comment %} tax, percent and absolute value {% endcomment %}
-                    <p class="bill-subtitle">[%/{{currency}}]</p></td>
-                <td class="bill-item-discount-container">
-                    <p class="bill-title">{% trans 'Discount' %}</p> {% comment %} discount, absolute value and a 'mode' button {% endcomment %}
-                    <p class="bill-subtitle">[{{ currency }}]</p></td>
-                <td class="bill-item-total-container">
-                    <p class="bill-title">{% trans 'Total' %}</p> {% comment %} total of this Item(s) {% endcomment %}
-                    <p class="bill-subtitle">[{{ currency }}]</p></td>
+                <tr id="bill_header">
+                    <td class="bill-item-name-container">
+                        <p class="bill-title">{% trans 'Name' %}</p> {% comment %} product name and code {% endcomment %}
+                        <p class="bill-subtitle">{% trans 'Code' %}</p></td>
+                    <td class="bill-item-qty-container">
+                        <p class="bill-title">{% trans 'Qty' %}</p> {% comment %} quantity and unit type {% endcomment %}
+                        <p class="bill-subtitle">{% comment %} empty at the moment {% endcomment %}</p></td>
+                    <td class="bill-item-price-container">
+                        <p class="bill-title">{% trans 'Price' %}</p> {% comment %} base price {% endcomment %}
+                        <p class="bill-subtitle">[{{ currency }}]   </p></td>
+                    <td class="bill-item-tax-container">
+                        <p class="bill-title">{% trans 'Tax' %}</p>{% comment %} tax, percent and absolute value {% endcomment %}
+                        <p class="bill-subtitle">[%/{{currency}}]</p></td>
+                    <td class="bill-item-discount-container">
+                        <p class="bill-title">{% trans 'Discount' %}</p> {% comment %} discount, absolute value and a 'mode' button {% endcomment %}
+                        <p class="bill-subtitle">[{{ currency }}]</p></td>
+                    <td class="bill-item-total-container">
+                        <p class="bill-title">{% trans 'Total' %}</p> {% comment %} total of this Item(s) {% endcomment %}
+                        <p class="bill-subtitle">[{{ currency }}]</p></td>
 
-                <td class="bill-item-edit"></td> {% comment %} edit buttons for this row {%  endcomment %}
-            </tr>
+                    <td class="bill-item-edit"></td> {% comment %} edit buttons for this row {%  endcomment %}
+                </tr>
             </thead>
 
             <tbody id="bill_items">
@@ -213,7 +196,7 @@ $(document).ready(function() {
         </table>
     </div>
 </div>
-{% comment %} bill summary and till: fixed{% endcomment %}
+{% comment %} bill summary and till: fixed {% endcomment %}
 <div id="till">
     {% comment %} bill summary: discounts total and tax total {% endcomment %}
     <div id="bill_summary"></div>

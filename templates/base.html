@@ -1,4 +1,4 @@
-{% load staticfiles %}
+{% load static %}
 <!DOCTYPE html>
 
 <head>
@@ -20,6 +20,7 @@
     {% comment %} common javascript files {% endcomment %}
     <script type="text/javascript" src="{% static 'ajax.js' %}"></script>
     <script type="text/javascript" src="{% static 'common.js' %}"></script>
+    <script type="text/javascript" src="{% static 'widgets/calculations.js' %}"></script>
     
     <title>{% block title %}{{title}} - {{site_title}}{% endblock %}</title>
     

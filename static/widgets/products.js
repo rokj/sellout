@@ -1,11 +1,91 @@
-Product = function(g){
+Products = function(g){
     var p = this;
 
     p.g = g;
 
+    p.products = []; // a list of all product objects
+    p.products_by_id = {}; // a dictionary {id:<product reference>}
+
     p.items = {
-        container:1
+        container: $("#products")
     };
+
+    //
+    // methods
+    //
+    p.show_products = function(products){
+        // products: a list of product ids (normally returned from Search())
+        console.log(products)
+
+    };
+
+    //
+    // init
+    //
+    // initialize all products
+    var i, product;
+    for(i = 0; i < p.g.data.products.length; i++){
+        product = new Product(p, p.g.data.products[i]);
+        p.products.push(product);
+        p.products_by_id[p.g.data.products[i].id] = product;
+    }
+};
+
+Product = function(list, data){
+    var p = this;
+
+    p.list = list;
+    p.g = p.list.g;
+
+    p.data = data;
+
+    p.items = {}; // will be filled on init
+
+    //
+    // methods
+    //
+
+
+    //
+    // init
+    //
+
+    // create a 'product' div
+	// show: name, code, shortcut and background image
+	// gray out if there's no products left
+    p.items.container = $("<div>", {"class":"product-button"});
+    p.items.container.css({
+		width: p.g.config.product_button_size,
+		height: p.g.config.product_button_size
+	});
+
+	if(p.data.image){
+        p.items.container.append($("<img>", {src: p.data.image, "class":"product-button-image"}));
+    }
+
+    p.items.info = $("<div>", {"class":"shade"});
+    p.items.name = $("<p>", {"class":"product-button-name"}).text(p.data.name);
+    p.items.code = $("<p>", {"class":"product-button-code"}).text(p.data.code);
+    p.items.shortcut = $("<p>", {"class":"product-button-shortcut"}).text(p.data.shortcut);
+
+    p.items.info
+        .append(p.items.name)
+	    .append(p.items.code)
+        .append(p.items.shortcut);
+
+    p.items.container.append(p.items.info);
+
+    // if the product is out of stock,, add a special class
+    if(get_number(p.data.stock, p.g.config.separator).cmp(Big(0)) <= 0){
+        p.items.info.addClass("out-of-stock");
+        // this product cannot be clicked
+    }
+    else{
+        p.items.container.click(function(){console.log("click")});
+    }
+
+    // add id to access this object via document tree, not javascript
+    p.items.container.data({id: p.data.id});
 };
 
 
@@ -113,43 +193,7 @@ function show_products(pl){
 }
 
 function product_button(product){
-	// create a 'product' div
-	// show: name, code, shortcut and background image
-	// gray out if there's no products left
-	var div = $("<div>", {"class":"product-button"});
-	div.css({
-		width:window.data.product_button_size,
-		height:window.data.product_button_size
-	});
-	if(product.image){
-        div.append($("<img>", {src:product.image, "class":"product-button-image"}));
-    }
 
-    info_div = $("<div>", {"class":"shade"});
-
-	var name = $("<p>", {"class":"product-button-name"});
-	name.append(product.name);
-	var code = $("<p>", {"class":"product-button-code"});
-	code.append(product.code);
-	var shortcut = $("<p>", {"class":"product-button-shortcut"});
-	shortcut.append(product.shortcut);
-
-    info_div.append(name);
-	info_div.append(code);
-	info_div.append(shortcut);
-    div.append(info_div);
-
-    div.data(product); // everything about the product
-
-    if(get_number(product.stock, window.data.separator).cmp(Big(0)) <= 0){
-        info_div.addClass("out-of-stock");
-        // this product cannot be clicked
-    }
-    else{
-        div.click(select_product);
-    }
-
-	return div;
 }
 
 function select_product(){

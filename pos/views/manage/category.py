@@ -1,21 +1,16 @@
-# author: nejc jurkovic
-# date: 9. 8. 2013
-#
-# Views for managing POS data: categories
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
 from django.http import Http404
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Category
 from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, resize_image, validate_image, \
     image_dimensions, max_field_length, image_from_base64, has_permission, no_permission_view
 from common import globals as g
 
-
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
 
 
 ########################
@@ -49,12 +44,12 @@ def category_to_dict(c):
     #
     #cid.reverse()
     r = {
-        'id':c.id,
-        'name':c.name,
-        'description':c.description,
+        'id': c.id,
+        'name': c.name,
+        'description': c.description,
         'parent_id:': c.parent_id,
         #'path':cid,
-        'image':"",
+        'image': "",
     }
     if c.image:
         r['image'] = c.image.url
@@ -227,6 +222,7 @@ def get_all_categories_structured(company, category=None, data=None, sort='name'
 
     return current
 
+
 #############
 ### views ###
 #############
@@ -237,7 +233,7 @@ def web_JSON_categories(request, company):
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_JSON_categories(request,company):
+def mobile_JSON_categories(request, company):
     return JSON_categories(request, company)
 
 

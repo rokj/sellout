@@ -359,3 +359,13 @@ def delete_discount(request, company, discount_id):
     discount.delete()
     
     return redirect('pos:list_discounts', company=c.url_name)
+
+
+def get_all_discounts(user, company):
+    discounts = Discount.objects.filter(company=company)
+
+    r = []
+    for d in discounts:
+        r.append(discount_to_dict(user, d))
+
+    return r

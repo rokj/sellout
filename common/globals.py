@@ -102,7 +102,7 @@ DATE_FORMATS = {
     'dd.mm.yyyy':{'regex':"^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros
                   'python':"%d.%m.%Y", # the docs say zero-padded decimal, but will also parse non-padded numbers
                   'django':"j.n.Y", # show no leading zeros in template
-                  'python':"%d.%m.%Y",
+                  'android': "%d.%m.%Y",
                   'jquery':"dd.mm.yy",
                   },
     'mm/dd/yyyy':{'regex':"^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros

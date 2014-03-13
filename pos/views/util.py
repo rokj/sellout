@@ -18,22 +18,31 @@ from datetime import datetime
 # requests and responses
 def error(request, message):
     
-    context = {'message':message,
-               'back_link':request.build_absolute_uri(),
+    context = {'message': message,
+               'back_link': request.build_absolute_uri(),
                }
     return render(request, 'pos/error.html', context)
 
-def JSON_stringify(data):
-    return json.dumps(data)
+def JSON_stringify(data, for_javascript=False):
+    s = json.dumps(data)
+
+    if for_javascript:
+        # this data will be thrown directly into javascript;
+        # prevent things like </script> being written into the code
+        s = s.replace('/', '\/')
+
+        return s
+    else:
+        return s
     
 def JSON_response(data):
     return HttpResponse(JSON_stringify(data), mimetype="application/json")
 
 def JSON_error(message):
-    return JSON_response({'status':'error', 'message':message})
+    return JSON_response({'status': 'error', 'message': message})
 
 def JSON_ok():
-    return JSON_response({'status':'ok'})
+    return JSON_response({'status': 'ok'})
 
 def JSON_parse(string_data):
     try:
@@ -66,7 +75,7 @@ def validate_image(obj): # obj is actually "self"
     try:
         if image._size > g.MISC['max_upload_image_size']:
             raise ValidationError(_("Image too large, maximum file size for upload is %s MB")%(g.MISC['max_upload_image_size']/2**20))
-    except AttributeError: # case 3
+    except AttributeError:  # case 3
         pass
     
     return image

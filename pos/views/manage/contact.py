@@ -1,8 +1,3 @@
-# author: nejc jurkovic
-# date: 9. 8. 2013
-#
-# Views for managing POS data: contacts
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -22,6 +17,7 @@ from rest_framework.permissions import IsAuthenticated
 from config.models import Country
 
 import re
+
 
 ################
 ### contacts ###
@@ -595,3 +591,11 @@ def delete_contact(request, company, contact_id):
     contact.delete()
 
 
+def get_all_contacts(user, company):
+    contacts = Contact.objects.filter(company=company)
+
+    r = []
+    for c in contacts:
+        r.append(contact_to_dict(user, c))
+
+    return r

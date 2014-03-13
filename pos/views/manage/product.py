@@ -697,3 +697,13 @@ def delete_product(request, company, product_id):
     product.delete()
     
     return JSON_ok()
+
+
+def get_all_products(user, company):
+    products = Product.objects.filter(company=company)
+
+    r = []
+    for p in products:
+        r.append(product_to_dict(user, p))
+
+    return r

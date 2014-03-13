@@ -17,17 +17,7 @@ div#splitter{
 /*              */
 /* main content */
 /*              */
-div#loading{
-    position:absolute;
-    top:0;
-    left:0;
-    bottom: 0;
-    right: 0;
 
-    opacity:.9;
-    background-color:white;
-    z-index:99999; /* above everything on the page */
-}
 /* topmost bar */
 div#manage_bar{
     position:absolute;

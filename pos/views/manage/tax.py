@@ -181,3 +181,13 @@ def save_taxes(request, company):
         Tax.objects.get(id=i).delete()
         
     return JSON_ok()
+
+
+def get_all_taxes(user, company):
+    taxes = Tax.objects.filter(company=company)
+
+    r = []
+    for t in taxes:
+        r.append(tax_to_dict(user, t))
+
+    return r
