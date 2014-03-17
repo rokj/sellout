@@ -234,6 +234,7 @@ def web_JSON_categories(request, company):
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_JSON_categories(request, company):
+    print JSON_categories(request, company)
     return JSON_categories(request, company)
 
 
@@ -288,8 +289,8 @@ def web_add_category(request, company, parent_id=-1):
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_add_category(request, company, parent_id=-1):
-    return m_add_category(request, company, parent_id)
+def mobile_add_category(request, company):
+    return m_add_category(request, company, -1)
 
 
 def m_add_category(request, company, parent_id=-1):

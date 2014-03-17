@@ -25,6 +25,7 @@ from rest_framework.permissions import IsAuthenticated
 ###############
 ## products ###
 ###############
+
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_JSON_units(request, company):

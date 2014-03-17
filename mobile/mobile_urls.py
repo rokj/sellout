@@ -12,7 +12,7 @@ from pos.views.manage import discount
 from pos.views.manage import tax
 from pos.views.manage import contact
 from pos.views.manage import configuration
-
+from pos.views import temp_views
 
 from rest_framework.authtoken import views as authtoken_views
 
@@ -33,7 +33,6 @@ urlpatterns = patterns('',
     #
     #TODO
     #
-    url(r_manage + r'api-token-auth/?$', authtoken_views.obtain_auth_token),
     
     # home: POS terminal, directly
     url(r_company + '/?$', terminal.terminal, name='terminal'), # by url_name
@@ -44,8 +43,9 @@ urlpatterns = patterns('',
     url(r_company + _('/manage') + '/?$', manage.manage_home, name='manage_home'), # management home
     url(r_company + _('/manage/company') + '/?$', company.edit_company, name='edit_company'), # company
     # categories
-    url(r_company + r'/manage/json/category/add' + '/(?P<parent_id>-?\d+)/?$', category.mobile_add_category, name='add_category'), # add
+    #url(r_company + r'/manage/json/category/add/(?P<parent_id>-?\d+)/?$', category.mobile_add_category, name='add_category'), # add
     url(r_company + r'/manage/json/category/get/(?P<category_id>\d+)/?$', category.mobile_get_category, name='get_category'),
+    url(r_company + r'/manage/json/category/add/(?P<parent_id>-?\d+)/?$', category.mobile_add_category, name='add_category'),
     url(r_company + r'/manage/json/category/edit/(?P<category_id>\d+)/?$', category.mobile_edit_category, name='edit_category'), # edit
     url(r_company + r'/manage/json/category/delete/(?P<category_id>\d+)/?$', category.mobile_delete_category, name='delete_category'), # delete
     url(r_company + r'/manage/json/categories/?$', category.mobile_JSON_categories, name='JSON_categories'),
@@ -68,6 +68,7 @@ urlpatterns = patterns('',
     url(r_company + _('/manage/discount/add') + '/?$', discount.add_discount, name='add_discount'),
     url(r_company + _('/manage/discount/edit') + '/(?P<discount_id>\d+)/?$', discount.edit_discount, name='edit_discount'),
     url(r_company + _('/manage/discount/delete') + '/(?P<discount_id>\d+)/?$', discount.delete_discount, name='delete_discount'),
+
     # products
     url(r_company + _('/manage/products') + '/?$', product.products, name='products'), # static (template) page
     url(r_company + r'/manage/json/products/search/?$', product.mobile_search_products, name='search_products'), # product list (search) - json
@@ -88,6 +89,7 @@ urlpatterns = patterns('',
     #
     # TODO
     #
+
     url(r_company + r'/manage/json/units/?$', product.mobile_JSON_units, name='mobile_JSON_units'),
     
     # available discounts list
