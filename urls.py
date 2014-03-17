@@ -2,6 +2,7 @@ from django.conf.urls import patterns, include, url
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
+
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -13,7 +14,7 @@ urlpatterns = patterns('',
     (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', {'packages': ('webpos',)}),
     
     # MOBILE
-    url(r'^pos/mobile/', include('pos.mobile_urls', namespace='mobile_pos')),
+    url(r'^pos/mobile/', include('mobile.urls', namespace='mobile_pos')),
 )
 
 # TODO: remove from production

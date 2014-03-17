@@ -25,6 +25,7 @@ from rest_framework.permissions import IsAuthenticated
 ###############
 ## products ###
 ###############
+
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_JSON_units(request, company):
@@ -183,11 +184,6 @@ def products(request, company):
 def web_get_product(request, company, product_id):
     return get_product(request, company, product_id)
 
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_get_product(request, company, product_id):
-    return get_product(request, company, product_id)
-
 def get_product(request, company, product_id):
     try:
         c = Company.objects.get(url_name = company)
@@ -206,10 +202,6 @@ def get_product(request, company, product_id):
 def web_search_products(request, company):
     return search_products(request, company)
 
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_search_products(request, company):
-    return search_products(request, company)
 
 def search_products(request, company):
     try:
@@ -532,10 +524,6 @@ def web_create_product(request, company):
     return create_product(request, company)
 
 
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_create_product(request, company):
-    return create_product(request, company)
 
 def create_product(request, company):
     # create new product
@@ -601,10 +589,6 @@ def create_product(request, company):
 def web_edit_product(request, company, product_id):
     return edit_product(request, company, product_id)
 
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_edit_product(request, company, product_id):
-    return edit_product(request, company, product_id)
 
 def edit_product(request, company, product_id):
     # update existing product
@@ -674,10 +658,6 @@ def edit_product(request, company, product_id):
 def web_delete_product(request, company, prodcut_id):
     return delete_product(request, company, prodcut_id)
 
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_delete_prodcut(request, company, product_id):
-    return delete_product(request, company, product_id)
 
 def delete_product(request, company, product_id):
     try:

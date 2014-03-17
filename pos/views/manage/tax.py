@@ -77,10 +77,6 @@ def validate_tax(user, tax):
 def web_list_taxes(request, company):
     return list_taxes(request, company)
 
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_list_taxes(request, company):
-    return list_taxes(request, company)
 
 def list_taxes(request, company):
     c = get_object_or_404(Company, url_name=company)
@@ -107,11 +103,6 @@ def list_taxes(request, company):
 def web_get_taxes(request, company):
     return get_taxes(request, company)
 
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_get_taxes(request, company):
-    return get_taxes(request, company)
-    
 def get_taxes(request, company):
     try:
         c = Company.objects.get(url_name=company)
@@ -133,10 +124,6 @@ def get_taxes(request, company):
 def web_save_taxes(request, company):
     return save_taxes(request, company)
 
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_save_taxes(request, company):
-    return save_taxes(request, company)
 
 def save_taxes(request, company):
     try:

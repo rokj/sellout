@@ -230,6 +230,7 @@ def web_JSON_categories(request, company):
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_JSON_categories(request, company):
+    print JSON_categories(request, company)
     return JSON_categories(request, company)
 
 
@@ -284,8 +285,8 @@ def web_add_category(request, company, parent_id=-1):
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_add_category(request, company, parent_id=-1):
-    return m_add_category(request, company, parent_id)
+def mobile_add_category(request, company):
+    return m_add_category(request, company, -1)
 
 
 def m_add_category(request, company, parent_id=-1):
@@ -485,10 +486,6 @@ def edit_category(request, company, category_id):
 def web_delete_category(request, company, category_id):
     return delete_category(request, company, category_id)
 
-@api_view(['POST', 'GET'])
-@permission_classes((IsAuthenticated,))
-def mobile_delete_category(request, company, category_id):
-    return delete_category(request, company, category_id)
 
 def delete_category(request, company, category_id):
     c = get_object_or_404(Company, url_name=company)
@@ -510,13 +507,6 @@ def delete_category(request, company, category_id):
         pass
     
     return redirect('pos:list_categories', company=c.url_name)
-
-
-@api_view(['POST', 'GET'])
-@permission_classes((IsAuthenticated,))
-def mobile_get_category(request, company, category_id):
-    return get_category(request, company, category_id)
-
 
 
 def get_category(request, company, category_id):
