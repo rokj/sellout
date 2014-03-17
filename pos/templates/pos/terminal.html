@@ -18,6 +18,7 @@
 <script src="{% static 'widgets/products.js' %}"></script> {% comment %} products selector {% endcomment %}
 <script src="{% static 'widgets/search.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 <script src="{% static 'widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
+<script src="{% static 'widgets/sockets.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 
 {% comment %} keyboard {% endcomment %}
 <link href="{% static 'keyboard/css/keyboard.css' %}" rel="stylesheet">
@@ -38,13 +39,10 @@ $(document).ready(function() {
     // GLOBAL DATA AND OBJECTS -------------------------------
     //
     var g = { // global data for the terminal
-
-        // status:
-        //  0: not connected
-        status: 0,
+        user_socket_token: "{{ user_socket_token }}",
 
         // websockets connection
-        ws: null, // TODO new Omnibus(WebSocket, "{{ socket_endpoint }}"),
+        ws: null,
 
         // config (data comes directly from view)
         config: {% autoescape off %}{{ config }}{% endautoescape %},
@@ -52,12 +50,6 @@ $(document).ready(function() {
         // other data (directly from view)
         // includes: categories,
         data: {% autoescape off %}{{ data }}{% endautoescape %},
-
-        // websocket channels
-        channels: {
-            updates: null,
-            terminal: null
-        },
 
         // javascript objects (initialized later)
         objects:{
@@ -81,7 +73,7 @@ $(document).ready(function() {
             splitter: $("#splitter"),
             manage_bar: $("#manage_bar"),
             bill: $("#bill"),
-            products_container: $("#products_scroll_outer"),
+            products_container: $("#products"),
             selector_container: $("#selector"),
             controls_container: $("#controls"),
 
@@ -98,6 +90,11 @@ $(document).ready(function() {
     g.objects.categories = new Categories(g); // categories selector (level 0 is the topmost category)
     g.objects.products = new Products(g);
     g.objects.search = new Search(g);
+    g.objects.bill = new Bill(g);
+
+    // websocket connection & channels (channels will be opened in SocketConnection)
+    g.ws = new SocketConnection(g, "{{ socket_endpoint }}", {{ company.id }}, {{ user.id }});
+
 
     //
     // LAYOUT AND RESIZING -------------------------------------

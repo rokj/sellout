@@ -1,0 +1,50 @@
+CHANNELS:
+    updates:
+        server sends notifications about changes in management
+        (products, categories, configuration, ...)
+        to all opened terminals of a company
+
+        name: updates-<company-id>, common to all terminals of the same company
+
+    terminal:
+        all communication between POS terminal and server, including
+        bill and item data, changed settings (terminal only), etc.
+
+        name: terminal-<user-id>, only one per user
+
+
+
+MESSAGES:
+In format: <direction>:<message-name>, {payload}
+Direction:
+    sc: server > client
+    cs: client > server
+
+    updates:
+        Server > Client
+
+        Client > Server
+
+    terminal:
+        Server > Client:
+            sc:set-active-bill, {bill data}:
+
+
+        Client > Server:
+            cs:get-active-bill <no data>:
+                request to send active bill
+
+
+INIT SEQUENCE:
+    1. static html template with 'embedded' json data
+    2. all javascript objects (Category, Product, Search, Bill)
+    3. get active bill, if any
+    4. show the terminal
+    5. 'normal usage'
+
+
+'NORMAL USAGE':
+    1. find product (search, categories) and select it
+    2. send message to server (cs:add-bill-item)
+    3. server adds item to bill and returns message (sc:add-bill-item)
+    4. the TerminalChannel JS object orders Bill object to add an item

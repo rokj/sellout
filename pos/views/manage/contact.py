@@ -53,10 +53,12 @@ class ContactForm(forms.Form):
         else:
             return r['data']
 
+
 class ContactFilterForm(forms.Form):
     type = forms.ChoiceField(required=True,
                              choices=g.CONTACT_TYPES)
     name = forms.CharField(required=False)
+
 
 def validate_contact(user, company, data):
     # data format (*-required data):
@@ -184,6 +186,7 @@ def validate_contact(user, company, data):
     # everything OK
     return {'status':True, 'data':data, 'message':None}
 
+
 def contact_to_dict(user, c, send_to="python"):
     # returns all relevant contact's data
     # id
@@ -231,7 +234,6 @@ def contact_to_dict(user, c, send_to="python"):
         ret['phone'] = c.phone
     if c.vat:
         ret['vat'] = c.vat
-    
 
     return ret
 
@@ -240,10 +242,12 @@ def contact_to_dict(user, c, send_to="python"):
 def web_list_contacts(request, company):
     return list_contacts(request, company)
 
+
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_list_contacts(request, company):
     return m_list_contacts(request, company)
+
 
 def m_list_contacts(request, company):
     try:
@@ -274,6 +278,7 @@ def m_list_contacts(request, company):
     for c in contacts:
         cs.append(contact_to_dict(request.user, c, "android"))
     return JSON_response(cs)
+
 
 def list_contacts(request, company):
     c = get_object_or_404(Company, url_name=company)
@@ -325,14 +330,17 @@ def list_contacts(request, company):
 
     return render(request, 'pos/manage/contacts.html', context)
 
+
 @login_required
 def web_get_contact(request, company, contact_id):
     return get_contact(request, company, contact_id)
+
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_get_contact(request, company, contact_id):
     return get_contact(request, company, contact_id)
+
 
 def get_contact(request, company, contact_id):
     try:
@@ -358,6 +366,7 @@ def web_add_contact(request, company):
 @permission_classes((IsAuthenticated,))
 def mobile_add_contact(request, company):
     return m_add_contact(request, company)
+
 
 def m_add_contact(request, company):
     try:
@@ -455,14 +464,17 @@ def add_contact(request, company):
     
     return render(request, 'pos/manage/contact.html', context)
 
+
 @login_required
 def web_edit_contact(request, company, contact_id):
     return edit_contact(request, company, contact_id)
+
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_edit_contact(request, company, contact_id):
     return m_edit_contact(request, company, contact_id)
+
 
 def m_edit_contact(request, company, contact_id):
     # update existing contact
@@ -509,7 +521,6 @@ def m_edit_contact(request, company, contact_id):
     contact.save()
     
     return JSON_ok()
-    
     
 
 def edit_contact(request, company, contact_id):
@@ -569,12 +580,15 @@ def edit_contact(request, company, contact_id):
     
     return render(request, 'pos/manage/contact.html', context)
 
+
 @login_required
 def web_delete_contact(request, company, contact_id):
     return delete_contact(request, company, contact_id)
 
+
 def mobile_delete_contact(request, company, contact_id):
     return
+
 
 def delete_contact(request, company, contact_id):
     c = get_object_or_404(Company, url_name=company)

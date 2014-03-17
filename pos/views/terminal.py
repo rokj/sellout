@@ -8,6 +8,7 @@ from pos.views.manage.contact import get_all_contacts
 from pos.views.manage.discount import get_all_discounts
 from pos.views.manage.product import get_all_products
 from pos.views.manage.tax import get_all_taxes
+from pos.views.sockets import user_socket_token
 
 from pos.views.util import has_permission, no_permission_view, JSON_ok, JSON_parse, JSON_stringify
 from config.functions import get_value, set_value
@@ -51,6 +52,8 @@ def terminal(request, company):
         'contacts': get_all_contacts(request.user, c),
         'taxes':  get_all_taxes(request.user, c),
         'unit_types': g.UNITS,
+
+        'active_bill': None
     }
 
     context = {
@@ -59,6 +62,7 @@ def terminal(request, company):
         'title': c.name,
         'site_title': g.MISC['site_title'],
         'socket_endpoint': settings.SOCKET_ENDPOINT,
+        'user_socket_token': user_socket_token(request.user.id),
 
         # user config
         'config': JSON_stringify(config, True),
