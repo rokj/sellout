@@ -15,6 +15,8 @@ from pos.views.manage import discount
 from pos.views.manage import tax
 from pos.views.manage import configuration
 
+from pos.views import bill
+
 ### common URL prefixes: ###
 # company's site: /pos/blocklogic
 # readable pattern: (?P<company>[\w-]{1,30})
@@ -23,20 +25,33 @@ r_company = r'^(?P<company>[\w-]{1,' + str(g.MISC['company_url_length']) + '})'
 r_manage = g.MISC['management_url'] + '/'
 
 urlpatterns = patterns('',
-    # system pages
+    #
+    # SYSTEM PAGES:
+    #
     url(r_manage + _('register-company') + '$', company.register_company, name='register_company'),
     url(r_manage + r'url-name-suggestions$', company.url_name_suggestions, name='url_name_suggestions'),
     
     #token registration for api devices
+    url(r_manage + r'api-token-auth/?$', authtoken_views.obtain_auth_token),  # TODO
+
     #
-    #TODO
+    # TERMINAL:
     #
-    url(r_manage + r'api-token-auth/?$', authtoken_views.obtain_auth_token),
-    
     # home: POS terminal, directly
     url(r_company + '/?$', terminal.terminal, name='terminal'),  # by url_name
+    # save terminal settings (will width and such)
+    url(r_company + '/save/?$', terminal.save, name='save_terminal'),
 
-    # management urls: company
+    # views for bill
+    url(r_company + '/bill/get-active/?$', bill.get_active_bill, name='get_active_bill'),
+    url(r_company + '/bill/item/edit/?$', bill.edit_item, name='edit_bill_item'), # adds Item to bill or updates it
+    #url(r_company + '/bill/item/remove/?$', bill.remove_item, name='remove_bill_item'), # removes Item from bill
+
+
+    #
+    # MANAGEMENT:
+    #
+    # company
     url(r_company + _('/manage') + '/?$', manage.manage_home, name='manage_home'),  # management home
     url(r_company + _('/manage/company') + '/?$', company.edit_company, name='edit_company'),  # company
     # categories

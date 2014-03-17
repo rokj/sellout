@@ -8,7 +8,6 @@ from pos.views.manage.contact import get_all_contacts
 from pos.views.manage.discount import get_all_discounts
 from pos.views.manage.product import get_all_products
 from pos.views.manage.tax import get_all_taxes
-from pos.views.sockets import user_socket_token
 
 from pos.views.util import has_permission, no_permission_view, JSON_ok, JSON_parse, JSON_stringify
 from config.functions import get_value, set_value
@@ -61,8 +60,6 @@ def terminal(request, company):
         'company': c,
         'title': c.name,
         'site_title': g.MISC['site_title'],
-        'socket_endpoint': settings.SOCKET_ENDPOINT,
-        'user_socket_token': user_socket_token(request.user.id),
 
         # user config
         'config': JSON_stringify(config, True),
@@ -70,3 +67,15 @@ def terminal(request, company):
 
     }
     return render(request, 'pos/terminal.html', context)
+
+
+@login_required
+def save(request, company):
+    """ save stuff when the terminal page closes/unloads """
+    data = JSON_parse(request.POST.get('data'))
+
+    if data.get('bill_width'):
+        set_value(request.user, 'pos_interface_bill_width', int(data['bill_width']))
+
+    # save stuff from data to config
+    return JSON_ok()

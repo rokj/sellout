@@ -212,7 +212,7 @@ def add_bill_item(request, company):
 
 
 @login_required
-def edit_bill_item(request, company):
+def edit_item(request, company):
     """ add an item to bill:
          - received data: {item_id, bill_id, 'product_id':<id>, 'qty':<qty>, 'notes':<notes>}
          - calculate all item's fields (tax, discount, total, ...)
@@ -303,7 +303,7 @@ def edit_bill_item(request, company):
 
 
 @ login_required
-def remove_bill_item(request, company):
+def remove_item(request, company):
     try:
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:

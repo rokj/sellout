@@ -3,22 +3,19 @@
 {% load i18n %}
 
 {% block head %}
-<script type="text/javascript" src="{% static 'omnibus/omnibus.js' %}"></script>
 
 <link type="text/css" rel="stylesheet" href="{% static 'terminal.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'widgets/products.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'widgets/categories.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'widgets/bill.css' %}" />
 
-
 {% comment %} the terminal {% endcomment %}
-<script src="{% static 'terminal.js' %}"></script>
+<script src="{% static 'widgets/terminal.js' %}"></script>
 {% comment %} widgets {% endcomment %}
 <script src="{% static 'widgets/categories.js' %}"></script> {% comment %} categories selector {% endcomment %}
 <script src="{% static 'widgets/products.js' %}"></script> {% comment %} products selector {% endcomment %}
 <script src="{% static 'widgets/search.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 <script src="{% static 'widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
-<script src="{% static 'widgets/sockets.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 
 {% comment %} keyboard {% endcomment %}
 <link href="{% static 'keyboard/css/keyboard.css' %}" rel="stylesheet">
@@ -35,14 +32,17 @@
 {% comment %} 'embedded' javascript {% endcomment %}
 <script type="text/javascript">
 $(document).ready(function() {
-    //
-    // GLOBAL DATA AND OBJECTS -------------------------------
-    //
+    // global data and objects
     var g = { // global data for the terminal
-        user_socket_token: "{{ user_socket_token }}",
+        csrf_token: "{{ csrf_token }}",
+        urls: {
+              // terminal & stuff
+              save_terminal_settings: "{% url 'pos:save_terminal' company.id  %}",
 
-        // websockets connection
-        ws: null,
+              // bill and items
+              get_active_bill: "{% url 'pos:get_active_bill' company.id %}"
+
+        },
 
         // config (data comes directly from view)
         config: {% autoescape off %}{{ config }}{% endautoescape %},
@@ -53,6 +53,7 @@ $(document).ready(function() {
 
         // javascript objects (initialized later)
         objects:{
+            terminal: null, // everything related to terminal, windows, controls etc
             categories: null,
             products: null,
             search: null,
@@ -69,14 +70,6 @@ $(document).ready(function() {
 
         // cached jquery items
         items: {
-            // terminal items
-            splitter: $("#splitter"),
-            manage_bar: $("#manage_bar"),
-            bill: $("#bill"),
-            products_container: $("#products"),
-            selector_container: $("#selector"),
-            controls_container: $("#controls"),
-
             focused: null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
 
             // items that are ready to be inserted
@@ -86,62 +79,14 @@ $(document).ready(function() {
         }
     };
 
-    // widgets
+    // object initialization
+    g.objects.terminal = new Terminal(g);
     g.objects.categories = new Categories(g); // categories selector (level 0 is the topmost category)
     g.objects.products = new Products(g);
     g.objects.search = new Search(g);
     g.objects.bill = new Bill(g);
 
-    // websocket connection & channels (channels will be opened in SocketConnection)
-    g.ws = new SocketConnection(g, "{{ socket_endpoint }}", {{ company.id }}, {{ user.id }});
 
-
-    //
-    // LAYOUT AND RESIZING -------------------------------------
-    //
-    function size_layout(save){
-        var pos = g.items.splitter.offset();
-
-        // splitter
-        g.items.splitter.height($(window).height() - pos.top);
-        // selection
-        g.items.selector_container.css({left:pos.left});
-        // products
-        g.items.products_container.outerHeight(
-            g.items.controls_container.offset().top -
-            g.items.products_container.offset().top
-        ).empty(); // if the new height is less than previous, product buttons will break out of their parent
-
-        // bill: if wider than pos.left, move it back to show the whole bill
-        g.items.bill.width(pos.left);
-        if(g.items.bill.width() > pos.left){
-            g.items.splitter.offset({left: g.items.bill.width(), top: pos.top});
-            size_layout();
-            return;
-        }
-
-        // save?
-        if(save){
-            // get splitter position
-            var ld = {};
-            ld.bill_width = g.items.splitter.position().left;
-
-            send_data_blocking(g.urls.save_terminal, ld, g.csrf_token, null);
-        }
-    }
-
-    g.items.splitter // resize on splitter drag and save data
-        .draggable({ axis: "x", stop: function(){ size_layout(true); }})
-        .css({
-            height: $(window).height() - g.items.manage_bar.outerHeight(),
-            top: g.items.manage_bar.outerHeight(),
-            left: g.config.bill_width
-        });
-    g.items.bill.width(g.config.bill_width);
-
-    // resize everything now and on resize
-    size_layout(false); // no need to save on load
-    $(window).resize(function(){ size_layout(false); }); // and no need to save on window resize
 });
 </script>
 
