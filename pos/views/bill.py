@@ -43,6 +43,7 @@ def bill_item_to_dict(user, item, status=None):
 
     return i
 
+
 def bill_to_dict(user, bill, status=None):
     # fields in bill:
     # company
@@ -81,16 +82,17 @@ def bill_to_dict(user, bill, status=None):
     
     return b
 
+
 def new_bill(user, company):
     # creates an 'empty' bill in database
     # with active status
     b = Bill(
-        company = company,
-        user = user, # this can change
-        created_by = user, # this will never change
-        type = "Normal",
-        timestamp = dtm.now().replace(tzinfo=timezone(get_value(user, 'pos_timezone'))),
-        status = "Active"
+        company=company,
+        user=user,  # this can change
+        created_by=user,  # this will never change
+        type="Normal",
+        timestamp=dtm.now().replace(tzinfo=timezone(get_value(user, 'pos_timezone'))),
+        status="Active"
     )
     b.save()
     
@@ -170,13 +172,14 @@ def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts)
 
     return r
 
+
 def validate_bill_item(data):
-    """ finds bill and item in database and """
+    """ TODO: finds bill and item in database and """
     pass
 
 
 #########
-# views #
+# views # TODO: remove
 #########
 @login_required
 def get_active_bill(request, company):
@@ -206,6 +209,7 @@ def get_active_bill(request, company):
 @login_required
 def add_bill_item(request, company):
     pass
+
 
 @login_required
 def edit_bill_item(request, company):
@@ -296,6 +300,7 @@ def edit_bill_item(request, company):
 
     # return the item in JSON
     return JSON_response(bill_item_to_dict(request.user, item, status='ok'))
+
 
 @ login_required
 def remove_bill_item(request, company):

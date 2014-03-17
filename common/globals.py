@@ -79,7 +79,7 @@ SEXES = (
 )
 
 # bills
-BILL_TYPES = ( 
+BILL_TYPES = (
     ("Normal",_("Normal")),
     # TODO add type for company
 )
@@ -182,7 +182,7 @@ PERMISSION_GROUPS = ( # retrieve readable format with get_permission_display()
     ('cashier', _("Cashier")), # can write and edit bills
     ('seller',  _("Seller")),  # can add and edit products
     ('manager', _("Manager")), # can add and edit discounts, contacts, categories, ...
-    ('admin',   _("Admin")),   # can do anything 
+    ('admin',   _("Admin")),   # can do anything
 )
 
 PERMISSIONS = { # 'chapters' that each group can view or manage
@@ -224,10 +224,12 @@ PERMISSIONS = { # 'chapters' that each group can view or manage
 INTERFACES = [
     'touch', # also for mouse (first entry is default)
     'keyboard',
+
+
 ]
 
 PRODUCT_BUTTON_DIMENSIONS = {
-    'small':90, # all squares
-    'medium':125,
-    'large':160 # check IMAGE_DIMENSIONS['product']
+    'small': 90,  # all squares
+    'medium': 125,
+    'large': 160  # check IMAGE_DIMENSIONS['product']
 }

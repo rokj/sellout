@@ -13,10 +13,63 @@ Products = function(g){
     //
     // methods
     //
-    p.show_products = function(products){
-        // products: a list of product ids (normally returned from Search())
-        console.log(products)
+    p.sort_products = function(products, sort_by){
+        products.sort(function(p1, p2){
+            switch(sort_by){
+                case 'name':
+                default: // sort by name by default
+                    return p.products_by_id[p1].data.name
+                        .localeCompare(p.products_by_id[p2].data.name);
+                    break;
+            }
+        });
 
+        return products;
+    };
+
+    p.show_products = function(ids){
+        // products: a list of product ids (normally returned from Search())
+        p.items.container.empty();
+
+	    if(ids.length == 0) return;
+        if(p.products.length == 0) return;
+
+        p.sort_products(ids, null);
+
+	    // put products in the div:
+	    // list them in columns, first down then right to next column
+	    var i, j, // loop indexes: i - current product index, j - index in current column
+    		n, // number of products in one column
+    		div_height, // height of #products div
+    		p_size, // size [width, height] of a product button
+    		tmp_div; // a 'column' div
+
+	    div_height = p.items.container.height();
+	    p_size = get_size(p.products[0].items.container); // there's at least one product in the list
+
+        n = Math.floor(div_height/p_size[1]);
+        for(i = 0; i < ids.length;){
+            // create a temp 'column' div
+            tmp_div = $("<div>", {"class": "products-column"});
+            for(j = 0; j < n; j++){
+                // add buttons to that div
+                tmp_div.append(
+                    p.products_by_id[ids[i]].items.container.clone().show()
+                );
+
+                i++;
+                if(i == ids.length) break;
+            }
+            p.items.container.append(tmp_div);
+        }
+
+        // space product buttons evenly:
+        i = Math.floor((div_height - n*p_size[1])/(n+1));
+        $("div.product-button", p.items.container)
+            .css("margin-top", i.toString() + "px")
+            .css("margin-bottom", i.toString() + "px")
+            .css("margin-left", Math.floor((i/2).toString()) + "px")
+            .css("margin-right", Math.floor((i/2).toString()) + "px");
     };
 
     //
@@ -29,6 +82,9 @@ Products = function(g){
         p.products.push(product);
         p.products_by_id[p.g.data.products[i].id] = product;
     }
+
+    // make the div draggable
+    set_draggable(p.items.container, "div.products-column", p.g.settings.t_easing);
 };
 
 Product = function(list, data){
@@ -44,6 +100,9 @@ Product = function(list, data){
     //
     // methods
     //
+    p.add_to_bill = function(){
+        p.g.objects.bill.add_product(p);
+    };
 
 
     //
@@ -88,122 +147,7 @@ Product = function(list, data){
     p.items.container.data({id: p.data.id});
 };
 
-
-/* products draggable with easing */
-function products_draggable(obj) {
-    var params = {
-        // Kudos:
-        // http://stackoverflow.com/questions/6602568/jquery-ui-draggable-deaccelerate-on-stop
-        helper: function () {
-            return $("<div>").css("opacity", 0);
-        },
-        drag: function (event, ui) {
-            var pos = ui.helper.position().left - obj.parent().position().left;
-            $(this).stop().animate({left: pos},
-                window.data.t_easing,
-                'easeOutCirc',
-                function() {
-	                // see categories.js for more info
-	                var first_button = $("div.products-column", obj).filter(":first");
-	                var last_button = $("div.products-column", obj).filter(":last");
-	                var container = obj.parent();
-
-                    if(first_button.length < 1 || last_button.length < 1) return;
-
-
-	                if (first_button.position().left + last_button.position().left + last_button.outerWidth() < container .width()) {
-	                    first_button.parent().animate({left:0}, "fast");
-	                }
-	                else{
-	                    if(first_button.offset().left > container.offset().left){
-	                    	first_button.parent().animate({left:0}, "fast");
-	                    }
-	                    else if(last_button.offset().left+ last_button.outerWidth() < container.offset().left + container.width()) {
-	                    	first_button.parent().animate({left:-last_button.position().left + container.width() - last_button.outerWidth()}, "fast");
-	                    }
-	                }
-	            });
-
-        },
-        axis: "x"
-    };
-
-    obj.draggable(params);
-}
-
-function products_selector(){
-	products_draggable(window.items.products_list); // make the results div draggable
-	
-	// check if products search box has changed on fixed interval
-	var s_int = self.setInterval(function(){
-		var  s = window.items.search_field.val();
-		if(s != window.data.last_search){
-			if(s.replace(" ", "") != '') get_products();
-			window.data.last_search = s;
-		}
-	}, window.data.search_update_interval);
-	window.items.search_field.val()
-}
-
-function get_products(category_id){
-    // send JSON: {general_filter:#search_products_filter.val()} to data['search_url']
-    var criteria = {general_filter:window.items.search_field.val()};
-
-	send_data(window.data.search_products_url, criteria, window.data.csrf_token, show_products);
-}
-
-function show_products(pl){
-	
-	window.items.products_list.empty();
-	if(pl.length == 0){
-		return;
-	}
-	
-	// put products in the div:
-	// list them in columns, first down then right to next column
-	var i, j, // loop indexes: i - current product index, j - index in current column
-		n, // number of products in one column
-		div_height, // height of #products div
-		p_size, // size [width, height] of a product button
-		tmp_div; // a 'column' div
-		
-	div_height = window.items.products_list.height();
-	p_size = get_size(product_button(pl[0])); // there's at least one product in the list 
-	
-	n = Math.floor(div_height/p_size[1]);
-	i = 0;
-	for(i = 0; i < pl.length;){
-		// create a temp 'column' div
-		tmp_div = $("<div>", {"class":"products-column"});
-		for(j = 0; j < n; j++){
-			// add buttons to that div
-			tmp_div.append(product_button(pl[i++]));
-            if(i == pl.length) break;
-		}
-		window.items.products_list.append(tmp_div);
-	}
-	
-	// space product buttons evenly:
-	i = Math.floor((div_height - n*p_size[1])/(n+1));
-	$("div .product-button")
-		.css("margin-top", i.toString() + "px")
-		.css("margin-bottom", i.toString() + "px")
-		.css("margin-left", Math.floor((i/2).toString()) + "px")
-		.css("margin-right", Math.floor((i/2).toString()) + "px");
-}
-
-function product_button(product){
-
-}
-
 function select_product(){
-    // $(this) is the product div
-    // 'unstyle' any currently selected product
-    // change style
-    // show the product's category
-    $(".product-button-focused").removeClass("product-button-focused");
-    $(this).addClass("product-button-focused");
-
     select_category(null, $(this).data().category_id)
     
     // on click: add this Item to Bill (or increase quantity of existing Item by 1)

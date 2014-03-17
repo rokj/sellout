@@ -12,7 +12,6 @@ from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, resiz
 from common import globals as g
 
 
-
 ########################
 ### helper functions ###
 ########################
@@ -34,25 +33,22 @@ def category_breadcrumbs(category):
 
 
 def category_to_dict(c):
-    # get list: topmost category > sub > subsub > c
-    # NOT NEEDED
-    #cid = [c.id]
-    #cc = c;
-    #while cc.parent:
-    #    cc = cc.parent;
-    #    cid.append(cc.id)
-    #
-    #cid.reverse()
+    if c.parent:
+        parent_id = c.parent.id
+    else:
+        parent_id = None
+
     r = {
         'id': c.id,
         'name': c.name,
         'description': c.description,
-        'parent_id:': c.parent_id,
-        #'path':cid,
+        'parent_id': parent_id,
         'image': "",
     }
+
     if c.image:
         r['image'] = c.image.url
+
     return r
 
 
@@ -158,7 +154,7 @@ def get_all_categories(company_id, category_id=None, sort='name', data=None, lev
         # if json == true, add to dictionary rather than queryset
         if json:
             entry = category_to_dict(c) 
-            entry['level'] = c.level # some additional data
+            entry['level'] = c.level  # some additional data
             entry['breadcrumbs'] = category_breadcrumbs(c)
             data.append(entry)
         else:

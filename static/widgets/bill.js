@@ -1,33 +1,21 @@
 /* bill 'class' */
-Bill = function(g, bill_data){
+Bill = function(g){
     var p = this;
 
     p.g = g;
-    var items = [];
-    var i, ti;
+
+    p.items = [];
 
     //
     // methods
     //
-    p.get_product = function(product_id){
-        // return an 'unexploded' Item object for product 'product_id'
-        var i;
-        for(i = 0; i < p.items.length; i++){
-            if (p.items[i].data.product_id == product_id) {
-                if(p.items[i].exploded == false) return p.items[i];
-            }
-        }
-        // nothing was found
-        return null;
-    };
-
     p.get_item = function(item_id){
         // return an 'Item' object with specified id
         var i;
         for(i = 0; i < p.items.length; i++){
             if(p.items[i].data.item_id == item_id){
                 // return array index and Item so it can be removed from array
-                return {index:i, item:p.items[i]}; // index will be useful (for deleting)
+                return {index:i, item:p.items[i]};
             }
         }
         // nothing was found
@@ -35,58 +23,17 @@ Bill = function(g, bill_data){
     };
 
     p.add_product = function(product){
-        // add product to Bill:
-        // see if this product is already in Bill;
-        // if it is, just add '1' to quantity;
-        // if it's not, add a new Item
+        // see if this product is already
 
-        var iexist = p.get_product(product.id); // existing 'Item' object in Bill
-
-        if(iexist){
-            // there is, add 1 to existing Item's quantity
-            iexist.add_quantity(true);
-        }
-        else{
-            // no, there's no Item for this product in Bill, update the last edited and add a new one
-            // send the last edited Item to the server: it will be updated when the server answers
-            var new_item = new Item(product_to_item_data(product), false, false);
-            p.items.push(new_item);
-        }
+        // send an 'add' request to the server
     };
-
-    p.save_changes = function(){
-        // search Bill items and if there are any unsaved ones, update them
-        var i, ti;
-        for(i = 0; i < p.items.length; i++){
-            if(!p.items[i].saved){
-                // this Item hasn't been saved yet, send it to server
-                ti = item_data_to_string(p.items[i].data);
-                send_data(window.data.edit_bill_item, ti, window.data.csrf_token, function(recv_data){
-                    if(recv_data.status != 'ok'){
-                        alert(recv_data.message);
-                    }
-                    else{
-                        // recv_data contains Item's re-calculated fields. update it
-                        var item_to_update = parse_item_data(recv_data);
-                        var r = window.bill.get_item(item_to_update.item_id);
-                        if(r){
-                            r.item.data = item_to_update; // copy new data to the 'old' Item
-                            r.item.saved = true; // do not send it again until updated
-                            r.item.update(); // update to reflect data from the server
-                        }
-                    }
-                });
-            }
-        }
-    };
-
 
     //
     // init
     //
 
     // append items to Bill
-    for(i = 0; i < bill_data.items.length; i++){
+    /*for(i = 0; i < bill_data.items.length; i++){
         ti = new Item(parse_item_data(bill_data.items[i]), true, false); // Item data, saved, not exploded
         // convert strings in data to Big() numbers
         items.push(ti);
@@ -102,7 +49,7 @@ Bill = function(g, bill_data){
     p.last_item_id = -1;
 
 
-
+    */
 };
 
 /* Item 'class' */

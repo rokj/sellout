@@ -53,10 +53,12 @@ class ContactForm(forms.Form):
         else:
             return r['data']
 
+
 class ContactFilterForm(forms.Form):
     type = forms.ChoiceField(required=True,
                              choices=g.CONTACT_TYPES)
     name = forms.CharField(required=False)
+
 
 def validate_contact(user, company, data):
     # data format (*-required data):
@@ -184,6 +186,7 @@ def validate_contact(user, company, data):
     # everything OK
     return {'status':True, 'data':data, 'message':None}
 
+
 def contact_to_dict(user, c, send_to="python"):
     # returns all relevant contact's data
     # id
@@ -231,7 +234,6 @@ def contact_to_dict(user, c, send_to="python"):
         ret['phone'] = c.phone
     if c.vat:
         ret['vat'] = c.vat
-    
 
     return ret
 
@@ -290,6 +292,7 @@ def list_contacts(request, company):
     }
 
     return render(request, 'pos/manage/contacts.html', context)
+
 
 @login_required
 def web_get_contact(request, company, contact_id):
@@ -372,6 +375,7 @@ def add_contact(request, company):
     
     return render(request, 'pos/manage/contact.html', context)
 
+
 @login_required
 def web_edit_contact(request, company, contact_id):
     return edit_contact(request, company, contact_id)
@@ -433,6 +437,7 @@ def edit_contact(request, company, contact_id):
     context['form'] = form
     
     return render(request, 'pos/manage/contact.html', context)
+
 
 @login_required
 def web_delete_contact(request, company, contact_id):
