@@ -490,10 +490,6 @@ def edit_category(request, company, category_id):
 def web_delete_category(request, company, category_id):
     return delete_category(request, company, category_id)
 
-@api_view(['POST', 'GET'])
-@permission_classes((IsAuthenticated,))
-def mobile_delete_category(request, company, category_id):
-    return delete_category(request, company, category_id)
 
 def delete_category(request, company, category_id):
     c = get_object_or_404(Company, url_name=company)
@@ -515,13 +511,6 @@ def delete_category(request, company, category_id):
         pass
     
     return redirect('pos:list_categories', company=c.url_name)
-
-
-@api_view(['POST', 'GET'])
-@permission_classes((IsAuthenticated,))
-def mobile_get_category(request, company, category_id):
-    return get_category(request, company, category_id)
-
 
 
 def get_category(request, company, category_id):

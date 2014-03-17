@@ -4,16 +4,15 @@ from django.utils.translation import ugettext as _
 from common import globals as g
 
 from pos.views import terminal
-from pos.views.manage import manage
-from pos.views.manage import company
-from pos.views.manage import category
-from pos.views.manage import product
-from pos.views.manage import discount
-from pos.views.manage import tax
-from pos.views.manage import contact
-from pos.views.manage import configuration
-from pos.views import temp_views
-
+from mobile.views import login
+from mobile.views.manage import manage
+from mobile.views.manage import company
+from mobile.views.manage import category
+from mobile.views.manage import product
+from mobile.views.manage import discount
+from mobile.views.manage import tax
+from mobile.views.manage import contact
+from mobile.views.manage import configuration
 from rest_framework.authtoken import views as authtoken_views
 
 
@@ -25,23 +24,15 @@ r_company = r'^(?P<company>[\w-]{1,' + str(g.MISC['company_url_length']) + '})'
 r_manage = g.MISC['management_url'] + '/'
 
 urlpatterns = patterns('',
-    # system pages
-    url(r_manage + _('register-company') + '$', company.register_company, name='register_company'),
-    url(r_manage + r'url-name-suggestions$', company.url_name_suggestions, name='url_name_suggestions'),
-    
-    #token registration for api devices
-    #
-    #TODO
-    #
-    
-    # home: POS terminal, directly
-    url(r_company + '/?$', terminal.terminal, name='terminal'), # by url_name
-    # ajax calls for POS terminal
-    
-    
+
+    # LOGIN
+    url(r'^mobile-login/(?P<backend>[\w-]+)$', login.obtain_auth_token),
+
+
     # management urls: company
     url(r_company + _('/manage') + '/?$', manage.manage_home, name='manage_home'), # management home
     url(r_company + _('/manage/company') + '/?$', company.edit_company, name='edit_company'), # company
+
     # categories
     #url(r_company + r'/manage/json/category/add/(?P<parent_id>-?\d+)/?$', category.mobile_add_category, name='add_category'), # add
     url(r_company + r'/manage/json/category/get/(?P<category_id>\d+)/?$', category.mobile_get_category, name='get_category'),
