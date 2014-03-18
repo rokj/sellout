@@ -37,10 +37,10 @@ $(document).ready(function() {
         csrf_token: "{{ csrf_token }}",
         urls: {
               // terminal & stuff
-              save_terminal_settings: "{% url 'pos:save_terminal' company.id  %}",
+              save_terminal_settings: "{% url 'pos:save_terminal' company.url_name  %}"
 
               // bill and items
-              get_active_bill: "{% url 'pos:get_active_bill' company.id %}"
+
 
         },
 
@@ -120,7 +120,7 @@ $(document).ready(function() {
                         <p class="bill-subtitle">[{{ currency }}]   </p></td>
                     <td class="bill-item-tax-container">
                         <p class="bill-title">{% trans 'Tax' %}</p>{% comment %} tax, percent and absolute value {% endcomment %}
-                        <p class="bill-subtitle">[%/{{currency}}]</p></td>
+                        <p class="bill-subtitle">[%/{{ currency }}]</p></td>
                     <td class="bill-item-discount-container">
                         <p class="bill-title">{% trans 'Discount' %}</p> {% comment %} discount, absolute value and a 'mode' button {% endcomment %}
                         <p class="bill-subtitle">[{{ currency }}]</p></td>
@@ -134,6 +134,35 @@ $(document).ready(function() {
 
             <tbody id="bill_items">
                 {% comment %} bill items come here {% endcomment %}
+                <tr id="bill_item_template">
+                    <td class="item-name"> {# name and code #}
+                        <div class="value item name"></div>
+                        <div class="subvalue item code"></div>
+                    </td>
+                    <td class="item-qty"> {# quantity #}
+                        <input type="button" class="qty-plus" value="+" />
+                        <input type="text" class="qty" />
+                        <input type="button" class="qty-minus" value="-" />
+                    </td>
+                    <td class="item-price"> {# price #}
+                        <div class="value item price"></div>
+                    </td>
+                    <td class="item-tax"> {# tax #}
+                        <div class="value item tax"></div>
+                        <div class="subvalue item tax"></div>
+                    </td>
+                    <td class="item-discount"> {# discount #}
+                        <div class="value item discount"></div>
+                        <input type="button" class="discount-more" value="..." />
+                    </td>
+                    <td class="item-total"> {# total #}
+                        <div class="value item total"></div> {% comment %} total of this Item(s) {% endcomment %}
+                    </td>
+                    <td class="item-edit"> {# edit buttons #}
+                        <input type="button" class="explode" value="e" />
+                        <input type="button" class="delete" value="x" />
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>

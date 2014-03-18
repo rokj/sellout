@@ -100,3 +100,49 @@ function set_draggable(obj, items_selector, easing_time){
 
     obj.draggable(params);
 }
+
+function error_message(title, message){
+    // create a div for error dialog
+    var dlg_obj = $("<div>");
+    var msg_obj = $("<p>", {"class": "error-message"});
+
+    if(!title) title = gettext("Error");
+
+    msg_obj.text(message);
+
+    dlg_obj.append(msg_obj);
+
+    dlg_obj.dialog({
+        modal: true,
+        width: 350,
+        title: title,
+        buttons:[ {text: gettext("OK"), click: function(){ $(this).dialog("close"); }} ]
+    });
+}
+
+function confirmation_dialog(title, text, yes_action, no_action){
+    // returns "true" if the user clicked 'yes' or false otherwise
+    var dlg = $("<div>");
+
+        dlg.text(text);
+
+        dlg.dialog({
+            modal: true,
+            width: 430,
+            draggable: false,
+            title: title,
+            buttons: [
+                { text: gettext("Yes"), click: function(){
+                    if(yes_action) yes_action.call();
+
+                    dlg.dialog("destroy");
+                }},
+                { text: gettext("No"), click: function(){
+                    if(no_action) no_action.call();
+
+                    dlg.dialog("destroy");
+                }} ]
+        });
+
+    return dlg;
+}

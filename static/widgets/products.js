@@ -10,6 +10,8 @@ Products = function(g){
         container: $("#products")
     };
 
+    p.shown_products = null; // will show ids that show_products has shown
+
     //
     // methods
     //
@@ -27,9 +29,16 @@ Products = function(g){
         return products;
     };
 
+    p.empty = function(){
+        // detach current products (do not remove, it will unbind events as well)
+        $(".product-button", p.items.container).detach();
+    };
+
     p.show_products = function(ids){
         // products: a list of product ids (normally returned from Search())
-        p.items.container.empty();
+
+
+        p.empty();
 
 	    if(ids.length == 0) return;
         if(p.products.length == 0) return;
@@ -48,13 +57,18 @@ Products = function(g){
 	    p_size = get_size(p.products[0].items.container); // there's at least one product in the list
 
         n = Math.floor(div_height/p_size[1]);
+        if(n == 0){
+            console.warn("Products div too narrow");
+            return;
+        }
+
         for(i = 0; i < ids.length;){
             // create a temp 'column' div
             tmp_div = $("<div>", {"class": "products-column"});
             for(j = 0; j < n; j++){
                 // add buttons to that div
                 tmp_div.append(
-                    p.products_by_id[ids[i]].items.container.clone().show()
+                    p.products_by_id[ids[i]].items.container.show()
                 );
 
                 i++;
@@ -70,6 +84,21 @@ Products = function(g){
             .css("margin-bottom", i.toString() + "px")
             .css("margin-left", Math.floor((i/2).toString()) + "px")
             .css("margin-right", Math.floor((i/2).toString()) + "px");
+
+        // save currently shown products in case of refresh etc.
+        p.shown_products = ids;
+    };
+
+    p.refresh = function(){
+        if(p.shown_products){
+            // there are products to show, just re-show them
+            p.show_products(p.shown_products);
+        }
+        else{
+            // there are no products to show, empty the container
+            p.empty();
+        }
+
     };
 
     //
@@ -101,7 +130,7 @@ Product = function(list, data){
     // methods
     //
     p.add_to_bill = function(){
-        p.g.objects.bill.add_product(p);
+        if(p.g.objects.bill) p.g.objects.bill.add_product(p);
     };
 
 
@@ -140,17 +169,9 @@ Product = function(list, data){
         // this product cannot be clicked
     }
     else{
-        p.items.container.click(function(){console.log("click")});
+        p.items.container.click(function(){ p.add_to_bill(); });
     }
 
     // add id to access this object via document tree, not javascript
     p.items.container.data({id: p.data.id});
 };
-
-function select_product(){
-    select_category(null, $(this).data().category_id)
-    
-    // on click: add this Item to Bill (or increase quantity of existing Item by 1)
-    // $(this).data() is the product itself
-    window.bill.add_product($(this).data());
-}

@@ -26,7 +26,9 @@ Terminal = function(g){
         p.items.products_container.outerHeight(
             p.items.controls_container.offset().top -
             p.items.products_container.offset().top
-        ).empty(); // if the new height is less than previous, product buttons will break out of their parent
+        );
+
+        if(p.g.objects.products) p.g.objects.products.refresh();
 
         // bill: if wider than pos.left, move it back to show the whole bill
         p.items.bill.width(pos.left);

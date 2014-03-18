@@ -51,8 +51,6 @@ def terminal(request, company):
         'contacts': get_all_contacts(request.user, c),
         'taxes':  get_all_taxes(request.user, c),
         'unit_types': g.UNITS,
-
-        'active_bill': None
     }
 
     context = {
@@ -61,10 +59,12 @@ def terminal(request, company):
         'title': c.name,
         'site_title': g.MISC['site_title'],
 
+        # template etc.
+        'currency': get_value(request.user, 'pos_currency'),
+
         # user config
         'config': JSON_stringify(config, True),
         'data': JSON_stringify(data, True),
-
     }
     return render(request, 'pos/terminal.html', context)
 

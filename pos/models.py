@@ -378,7 +378,7 @@ def delete_permission_cache(**kwargs):
 class Bill(SkeletonU):
     company = models.ForeignKey(Company, null=False, blank=False) # also an issuer of the bill
     user = models.ForeignKey(User, null=False)
-    till = models.CharField(_("Cash register id"), max_length = 50, null=True) # is null only when saving a fresh bill
+    till = models.CharField(_("Cash register id"), max_length=50, null=True)  # is null only when saving a fresh bill
     
     type = models.CharField(_("Bill type"), max_length=20, choices=g.BILL_TYPES, null=False, blank=False, default=g.BILL_TYPES[0][0])
     recipient_contact = models.ForeignKey(Contact, null=True, blank=True, related_name='bill_recipient_company')

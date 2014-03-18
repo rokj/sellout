@@ -1,3 +1,11 @@
+#
+# Bill
+#   ajax views:
+#     get_active_bill: finds an unfinished bill and returns it (returns a new bill if none was found)
+#     add_item: adds an item to bill
+#     edit_item: edits an existing item
+#     delete_item
+#
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 
@@ -12,7 +20,7 @@ from datetime import datetime as dtm
 from decimal import Decimal
 
 
-def bill_item_to_dict(user, item, status=None):
+def bill_item_to_dict(user, item):
     i = {}
     
     i['item_id'] = item.id
@@ -38,13 +46,10 @@ def bill_item_to_dict(user, item, status=None):
     i['total'] = format_number(user, item.total)
     i['bill_notes'] = item.bill_notes
 
-    if status:  # to notify javascript
-        i['status'] = status
-
     return i
 
 
-def bill_to_dict(user, bill, status=None):
+def bill_to_dict(user, bill):
     # fields in bill:
     # company
     # type
@@ -77,9 +82,6 @@ def bill_to_dict(user, bill, status=None):
         
     b['items'] = i
 
-    if status:
-        b['status'] = status
-    
     return b
 
 
@@ -95,13 +97,8 @@ def new_bill(user, company):
         status="Active"
     )
     b.save()
-    
-    bdict = bill_to_dict(user, b, status='ok')
-    
-    # this is a new bill, the terminal ought to know this
-    bdict['new'] = True  # (this Item will be deleted (ignored) on next save)
 
-    return bdict
+    return bill_to_dict(user, b)
 
 
 def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts):
@@ -179,7 +176,7 @@ def validate_bill_item(data):
 
 
 #########
-# views # TODO: remove
+# views #
 #########
 @login_required
 def get_active_bill(request, company):
@@ -203,12 +200,46 @@ def get_active_bill(request, company):
         return JSON_error(_("Multiple active bills found"))
         
     # serialize the fetched bill and return it
-    return JSON_response(bill_to_dict(request.user, bill, status='ok'))
+    bill = bill_to_dict(request.user, bill)
+    return JSON_response({'status': 'ok', 'bill': bill})
 
 
 @login_required
-def add_bill_item(request, company):
-    pass
+def add_item(request, company):
+    """ add an item to bill;
+        received data: product id, bill id
+        returned data: item_to_dict (of the newly created item)
+    """
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # check permissions
+    if not has_permission(request.user, c, 'bill', 'edit'):
+        return JSON_error(_("You have no permission to edit bills"))
+
+    # get data
+    d = JSON_parse(request.POST.get('data'))
+    if not d:
+        return JSON_error(_("No data sent"))
+
+    # get bill
+    try:
+        product_id = int(d.get('product_id'))
+        bill_id = int(d.get('bill_id'))
+    except (ValueError, TypeError):  # ValueError is for 'a' and TypeError for None (for example)
+        return JSON_error(_("Invalid ids in request"))
+
+    try:
+        bill = Bill.objects.get(id=d.get('id'), company=c)
+        product = Product.objects.get(id=d.get, company=c)
+    except (Bill.DoesNotExist, Product.DoesNotExist):
+        return JSON_error(_("Bill or product does not exist"))
+
+
+
+
 
 
 @login_required
@@ -274,32 +305,32 @@ def edit_item(request, company):
 
     # create a bill item and save it to database, then return JSON with its data
     item = BillItem(
-        created_by = request.user,
+        created_by=request.user,
         # copy ProductAbstract's values:
-        code = product.code,
-        shortcut = product.shortcut,
-        name = product.name,
-        description = product.description,
-        private_notes = product.private_notes,
-        unit_type = product.get_unit_type_display(), # ! display, not the 'code'
-        unit_amount = product.unit_amount,
-        stock = product.stock,
-        # billItem's fields        
-        bill = bill,
-        product_id = product.id,
-        quantity = quantity,
-        base_price = prices['base'],
-        tax_percent = product.tax.amount,
-        tax_absolute = prices['tax_absolute'],
-        discount_absolute = prices['discount_absolute'],
-        single_total = prices['single_total'],
-        total = prices['total'],
-        bill_notes = bill_notes
+        code=product.code,
+        shortcut=product.shortcut,
+        name=product.name,
+        description=product.description,
+        private_notes=product.private_notes,
+        unit_type=product.get_unit_type_display(),  # ! display, not the 'code'
+        unit_amount=product.unit_amount,
+        stock=product.stock,
+        # billItem's fields
+        bill=bill,
+        product_id=product.id,
+        quantity=quantity,
+        base_price=prices['base'],
+        tax_percent=product.tax.amount,
+        tax_absolute=prices['tax_absolute'],
+        discount_absolute=prices['discount_absolute'],
+        single_total=prices['single_total'],
+        total=prices['total'],
+        bill_notes=bill_notes
     )
     item.save()
 
     # return the item in JSON
-    return JSON_response(bill_item_to_dict(request.user, item, status='ok'))
+    return JSON_response({'item': bill_item_to_dict(request.user, item), 'status': 'ok'})
 
 
 @ login_required

@@ -20,13 +20,12 @@ div .products-column{
 }
 
 div.product-button{
-    position:relative; /* this is required for product image to work correctly (to position another div aboce it) */
+    position:relative; /* this is required for product image to work correctly (to position another div above it) */
     border:1px solid black;
     /* do not set margin: it will be set by javascript every time products are rendered for even spacing */
-    background-position:center;
-    background-repeat:no-repeat;
+    background: no-repeat center;
 
-    z-index:1;
+    cursor: pointer;
 }
 
 div.product-button-focused{
@@ -35,8 +34,8 @@ div.product-button-focused{
 
 img.product-button-image{
     position:absolute; /* positioned above product-button */
-    top:0px;
-    left:0px;
+    top:0;
+    left:0;
     max-width:100%;
     max-height:100%;
     z-index:2;
@@ -44,12 +43,12 @@ img.product-button-image{
 
 div.product-button div.shade{
     position:absolute; /* positioned above product-button-image */
-    top:0px;
-    left:0px;
-    bottom:0px;
-    right:0px;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
     background-color: white;
-    opacity:0.8;
+    opacity: 0.8;
     z-index: 3;
 }
 
@@ -60,8 +59,8 @@ div.shade.out-of-stock{
 
 p.product-button-name{
     font-size:10pt;
-    margin:0px;
-    padding:0px;
+    margin: 0;
+    padding: 0;
     font-weight:bolder;
     text-align: center;
 }

@@ -34,7 +34,7 @@ td.bill-item-total-container{
 }
 
 p.bill-title{
-    margin-top:0px;
+    margin-top:0;
     margin-bottom:3px;
 }
 
@@ -42,10 +42,10 @@ p.bill-subtitle{
     font-size:12px;
     font-family:"Courier New", "Courier", monospace;
     margin-top:5px;
-    margin-bottom:0px;
+    margin-bottom:0;
 }
 
-input.item-qty{
+td.item-qty input.qty{
     width:30px;
 }
 

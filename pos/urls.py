@@ -44,7 +44,8 @@ urlpatterns = patterns('',
 
     # views for bill
     url(r_company + '/bill/get-active/?$', bill.get_active_bill, name='get_active_bill'),
-    url(r_company + '/bill/item/edit/?$', bill.edit_item, name='edit_bill_item'), # adds Item to bill or updates it
+    url(r_company + '/bill/item/add/?$', bill.add_item, name='add_bill_item'), # adds an item to bill
+    url(r_company + '/bill/item/edit/?$', bill.edit_item, name='edit_bill_item'),
     #url(r_company + '/bill/item/remove/?$', bill.remove_item, name='remove_bill_item'), # removes Item from bill
 
 
