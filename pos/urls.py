@@ -35,28 +35,13 @@ urlpatterns = patterns('',
     url(r_manage + r'api-token-auth/?$', authtoken_views.obtain_auth_token),  # TODO
 
     #
-    # TERMINAL:
-    #
-    # home: POS terminal, directly
-    url(r_company + '/?$', terminal.terminal, name='terminal'),  # by url_name
-    # save terminal settings (will width and such)
-    url(r_company + '/save/?$', terminal.save, name='save_terminal'),
-
-    # views for bill
-    url(r_company + '/bill/get-active/?$', bill.get_active_bill, name='get_active_bill'),
-    url(r_company + '/bill/item/add/?$', bill.add_item, name='add_bill_item'), # adds an item to bill
-    url(r_company + '/bill/item/edit/?$', bill.edit_item, name='edit_bill_item'),
-    #url(r_company + '/bill/item/remove/?$', bill.remove_item, name='remove_bill_item'), # removes Item from bill
-
-
-    #
     # MANAGEMENT:
     #
     # company
     url(r_company + _('/manage') + '/?$', manage.manage_home, name='manage_home'),  # management home
     url(r_company + _('/manage/company') + '/?$', company.edit_company, name='edit_company'),  # company
     # categories
-    url(r_company + _('/manage/categories') + '/?$', category.list_categories, name='list_categories'), # list of categories
+    url(r_company + _('/manage/categories') + '/?$', category.list_categories, name='list_categories'),  # list of categories
     url(r_company + _('/manage/category/add') + '/(?P<parent_id>-?\d+)/?$', category.web_add_category, name='add_category'), # add
     url(r_company + _('/manage/category/edit') + '/(?P<category_id>\d+)/?$', category.web_edit_category, name='edit_category'), # edit
     url(r_company + _('/manage/category/delete') + '/(?P<category_id>\d+)/?$', category.web_delete_category, name='delete_category'), # delete
@@ -86,7 +71,7 @@ urlpatterns = patterns('',
     # users
     #url(r_company + _('/manage/users') + '/?$', manage.users.edit_company, name='edit_users'), # company
     # config (company parameter is needed only for url; configuration is per user, regardless of company
-    url(r_company + _('/manage/configuration') + '/?$', configuration.edit_config, name='edit_config'), # company
+    url(r_company + _('/manage/configuration') + '/?$', configuration.edit_config, name='edit_config'),  # company
 
 
     # misc (ajax): urls not translated
@@ -99,4 +84,18 @@ urlpatterns = patterns('',
 
     # available discounts list
     url(r_company + r'/manage/json/discounts/?$', discount.JSON_discounts, name='JSON_discounts'),
+
+    #
+    # TERMINAL:
+    #
+    # save terminal settings (will width and such)
+    url(r_company + '/save/?$', terminal.save, name='save_terminal'),
+
+    # views for bill
+    url(r_company + '/bill/save/?$', bill.create_bill, name='create_bill'),  # adds an item to bill
+    #url(r_company + '/bill/get-active/?$', bill.get_active_bill, name='get_active_bill'),
+    #url(r_company + '/bill/item/remove/?$', bill.remove_item, name='remove_bill_item'), # removes Item from bill
+
+    # and finally: home: POS terminal, directly
+    url(r_company + '/$', terminal.terminal, name='terminal'),  # by url_name
 )

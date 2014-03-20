@@ -31,17 +31,16 @@
 
 {% comment %} 'embedded' javascript {% endcomment %}
 <script type="text/javascript">
-$(document).ready(function() {
+$(document).ready(function(){
     // global data and objects
     var g = { // global data for the terminal
         csrf_token: "{{ csrf_token }}",
         urls: {
               // terminal & stuff
-              save_terminal_settings: "{% url 'pos:save_terminal' company.url_name  %}"
+              save_terminal_settings: "{% url 'pos:save_terminal' company.url_name  %}",
 
               // bill and items
-
-
+              create_bill: "{% url 'pos:create_bill' company.url_name %}"
         },
 
         // config (data comes directly from view)
@@ -104,75 +103,83 @@ $(document).ready(function() {
 
 {% comment %} the bill (scrolling) {% endcomment %}
 {% comment %} bill header has the same layout as items and will be copied when adding new (items) {% endcomment %}
+<div id="bill_header" class="bill-item header">
+    <div class="item-val name header">
+        <p class="bill-title">{% trans 'Name' %}</p> {% comment %} product name and code {% endcomment %}
+        <p class="bill-subtitle">{% trans 'Code' %}</p></div>
+    <div class="item-val quantity header">
+        <p class="bill-title">{% trans 'Qty' %}</p> {% comment %} quantity and unit type {% endcomment %}
+        <p class="bill-subtitle">{% comment %} empty at the moment {% endcomment %}</p></div>
+    <div class="item-val price header">
+        <p class="bill-title">{% trans 'Price' %}</p> {% comment %} base price {% endcomment %}
+        <p class="bill-subtitle">[{{ currency }}]   </p></div>
+    <div class="item-val tax header">
+        <p class="bill-title">{% trans 'Tax' %}</p>{% comment %} tax, percent and absolute value {% endcomment %}
+        <p class="bill-subtitle">[%/{{ currency }}]</p></div>
+    <div class="item-val discount header">
+        <p class="bill-title">{% trans 'Discount' %}</p> {% comment %} discount, absolute value and a 'mode' button {% endcomment %}
+        <p class="bill-subtitle">[{{ currency }}]</p></div>
+    <div class="item-val total header">
+        <p class="bill-title">{% trans 'Total' %}</p> {% comment %} total of this Item(s) {% endcomment %}
+        <p class="bill-subtitle">[{{ currency }}]</p></div>
+
+    <div class="item-val edit header">
+        {% comment %} edit buttons for this row {%  endcomment %}
+    </div>
+</div>
 <div id="bill_scroll_outer">
     <div id="bill_scroll_inner">
-        <table id="bill">
-            <thead>
-                <tr id="bill_header">
-                    <td class="bill-item-name-container">
-                        <p class="bill-title">{% trans 'Name' %}</p> {% comment %} product name and code {% endcomment %}
-                        <p class="bill-subtitle">{% trans 'Code' %}</p></td>
-                    <td class="bill-item-qty-container">
-                        <p class="bill-title">{% trans 'Qty' %}</p> {% comment %} quantity and unit type {% endcomment %}
-                        <p class="bill-subtitle">{% comment %} empty at the moment {% endcomment %}</p></td>
-                    <td class="bill-item-price-container">
-                        <p class="bill-title">{% trans 'Price' %}</p> {% comment %} base price {% endcomment %}
-                        <p class="bill-subtitle">[{{ currency }}]   </p></td>
-                    <td class="bill-item-tax-container">
-                        <p class="bill-title">{% trans 'Tax' %}</p>{% comment %} tax, percent and absolute value {% endcomment %}
-                        <p class="bill-subtitle">[%/{{ currency }}]</p></td>
-                    <td class="bill-item-discount-container">
-                        <p class="bill-title">{% trans 'Discount' %}</p> {% comment %} discount, absolute value and a 'mode' button {% endcomment %}
-                        <p class="bill-subtitle">[{{ currency }}]</p></td>
-                    <td class="bill-item-total-container">
-                        <p class="bill-title">{% trans 'Total' %}</p> {% comment %} total of this Item(s) {% endcomment %}
-                        <p class="bill-subtitle">[{{ currency }}]</p></td>
-
-                    <td class="bill-item-edit"></td> {% comment %} edit buttons for this row {%  endcomment %}
-                </tr>
-            </thead>
-
-            <tbody id="bill_items">
-                {% comment %} bill items come here {% endcomment %}
-                <tr id="bill_item_template">
-                    <td class="item-name"> {# name and code #}
-                        <div class="value item name"></div>
-                        <div class="subvalue item code"></div>
-                    </td>
-                    <td class="item-qty"> {# quantity #}
-                        <input type="button" class="qty-plus" value="+" />
-                        <input type="text" class="qty" />
-                        <input type="button" class="qty-minus" value="-" />
-                    </td>
-                    <td class="item-price"> {# price #}
-                        <div class="value item price"></div>
-                    </td>
-                    <td class="item-tax"> {# tax #}
-                        <div class="value item tax"></div>
-                        <div class="subvalue item tax"></div>
-                    </td>
-                    <td class="item-discount"> {# discount #}
-                        <div class="value item discount"></div>
-                        <input type="button" class="discount-more" value="..." />
-                    </td>
-                    <td class="item-total"> {# total #}
-                        <div class="value item total"></div> {% comment %} total of this Item(s) {% endcomment %}
-                    </td>
-                    <td class="item-edit"> {# edit buttons #}
-                        <input type="button" class="explode" value="e" />
-                        <input type="button" class="delete" value="x" />
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div id="bill">
+            <div class="bill-item" id="bill_item_template">
+                <div class="item-val name"> {# name and code #}
+                    <div class="value item name"></div>
+                    <div class="subvalue item code"></div>
+                </div>
+                <div class="item-val quantity"> {# quantity #}
+                    <input type="button" class="qty-plus" value="+" />
+                    <input type="text" class="qty" />
+                    <input type="button" class="qty-minus" value="-" />
+                </div>
+                <div class="item-val price"> {# price #}
+                    <div class="value item price"></div>
+                </div>
+                <div class="item-val tax"> {# tax #}
+                    <div class="value item tax"></div>
+                    <div class="subvalue item tax"></div>
+                </div>
+                <div class="item-val discount"> {# discount #}
+                    <div class="value item discount"></div>
+                    <input type="button" class="discount-more" value="..." />
+                </div>
+                <div class="item-val total"> {# total #}
+                    <div class="value item total"></div> {% comment %} total of this Item(s) {% endcomment %}
+                </div>
+                <div class="item-val edit"> {# edit buttons #}
+                    <input type="button" class="explode" value="e" />
+                    <input type="button" class="delete" value="x" />
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% comment %} bill summary and till: fixed {% endcomment %}
 <div id="till">
     {% comment %} bill summary: discounts total and tax total {% endcomment %}
-    <div id="bill_summary"></div>
+    <div id="bill_summary">
+        <div class="total">
+            {% trans "Fakin total" %}:
+            <p class="total">{# placeholder, this is #}</p>
+        </div>
+    </div>
 
     {% comment %} buttons etc. {% endcomment %}
+    <div id="bill_actions">
+        <button class="finish-the-fukin-bill">
+            <span style="font-size: 30px; font-weight: bold; width: 100%;">
+                FINISH THE FUKIN BILL
+            </span>
+        </button>
+    </div>
 </div>
 
 {% comment %} separator: draggable div for resizing bill/controls {% endcomment %}

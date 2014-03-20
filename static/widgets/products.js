@@ -32,6 +32,8 @@ Products = function(g){
     p.empty = function(){
         // detach current products (do not remove, it will unbind events as well)
         $(".product-button", p.items.container).detach();
+        // empty product columns
+        $(".product-column", p.items.container).remove();
     };
 
     p.show_products = function(ids){
@@ -130,7 +132,7 @@ Product = function(list, data){
     // methods
     //
     p.add_to_bill = function(){
-        if(p.g.objects.bill) p.g.objects.bill.add_product(p);
+        if(p.g.objects.bill) p.g.objects.bill.add_product(p, true);
     };
 
 
@@ -169,7 +171,9 @@ Product = function(list, data){
         // this product cannot be clicked
     }
     else{
-        p.items.container.click(function(){ p.add_to_bill(); });
+        p.items.container.click(function(){
+            p.add_to_bill();
+        });
     }
 
     // add id to access this object via document tree, not javascript

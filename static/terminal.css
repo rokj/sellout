@@ -5,8 +5,8 @@
 }*/
 
 /* splitter */
-div#splitter{
-    position:absolute;
+#splitter{
+    position:fixed;
     width:6px;
     background-color:black;
     opacity:0.6;
@@ -20,10 +20,7 @@ div#splitter{
 
 /* topmost bar */
 div#manage_bar{
-    position:absolute;
-    top:5px;
-    left:5px;
-    right:5px;
+    position:fixed;
     height:25px;
 }
 
@@ -42,37 +39,13 @@ div#manage_bar .management-bar-button{
     float:right;
 }
 
-table#bill{
-border: 1px solid black;
-    width:360px;
-    position:absolute;
-    top:35px;
-    bottom:5px;
-    left:5px;
-}
-
 div#selector{
-    position:absolute;
-    left:370px; /* default values only, position will be saved */
-    right:5px;
+    position:fixed;
     top:35px;
-    bottom:5px;
-}
-
-div#products{
-    /* height is set in javascript */
 }
 
 div#controls{
-    position:absolute;
-    bottom:5px;
+    position:fixed;
     height:200px;
     border:1px solid black;
-}
-
-/*      */
-/* misc */
-/*      */
-img.loading{
-    
 }

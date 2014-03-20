@@ -33,9 +33,9 @@ class Skeleton(models.Model):
             self.datetime_updated = now()
         return super(Skeleton, self).save(*args, **kwargs)
 
-    def delete(self):
+    def delete(self, *args, **kwargs):
         # just set datetime_deleted to now()
-        self.datetime_deleted=now()#.replace(tzinfo=timezone('utc'))
+        self.datetime_deleted = now()#.replace(tzinfo=timezone('utc'))
         self.save()
     
     objects = SkeletonManager()

@@ -45,20 +45,40 @@ Search = function(g){
     };
 
     p.search_by_text = function(text){
+        if(text.length == 0) return []; // nothing to search for, nothing to show (really?)
+
+        // keep everything lowercase
+        text = text.toLowerCase();
+
         if(text in p.results_by_text){
             return p.results_by_text[text];
         }
         else{
-            // TODO
+            var r = [];
+            var q = p.g.data.products;
+
             // do a linear search through all products
             // and search the following fields:
             // name
             // description
             // code
             // shortcut
+            // category name
             // ... and return anything that matches
+            for(var i = 0; i < q.length; i++){
+                if((q[i].name.toLowerCase().indexOf(text) > -1) ||
+                   (q[i].description.toLowerCase().indexOf(text) > -1) ||
+                   (q[i].code.toLowerCase().indexOf(text) > -1) ||
+                   (q[i].shortcut.toLowerCase().indexOf(text) > -1) ||
+                   (q[i].category.toLowerCase().indexOf(text) > -1)){
 
-            return null;
+                    r.push(q[i].id);
+                }
+            }
+
+            // save results for later
+            p.results_by_text[text] = r;
+            return r;
         }
     };
 
@@ -160,7 +180,14 @@ Search = function(g){
 
     // events
     p.items.submit.click(function(){
-
+        p.g.objects.products.show_products(
+            p.search_by_text(p.items.field.val())
+        );
+    });
+    p.items.field.change(function(){
+        p.g.objects.products.show_products(
+            p.search_by_text($(this).val())
+        );
     });
 
 };

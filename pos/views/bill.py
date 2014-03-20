@@ -179,6 +179,109 @@ def validate_bill_item(data):
 # views #
 #########
 @login_required
+def create_bill(request, company):
+    """ there's bill and items in request.POST['data'], create a new bill, and check all items and all """
+
+    # get company
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # check permissions
+    if not has_permission(request.user, c, 'bill', 'edit'):
+        return JSON_error(_("You have no permission to create bills"))
+
+    # get data
+    d = JSON_parse(request.POST.get('data'))
+    if not d:
+        return JSON_error(_("No data received"))
+
+    # check bill properties
+    # TODO: ... (nothing to check?)
+
+    # check items
+    # TODO: ... (nothing to check?)
+
+    # create a new bill
+    bill = Bill(
+        company=c,
+        user=request.user,  # this can change
+        created_by=request.user,  # this will never change
+        type="Normal",
+        timestamp=dtm.now().replace(tzinfo=timezone(get_value(request.user, 'pos_timezone'))),
+        status="Active"
+    )
+    #try:
+    bill.save()
+    #except:
+    #    return JSON_error(_("Error while saving new bill"))
+
+    # create new items
+    for i in d.get('items'):
+    # get product
+        try:
+            product = Product.objects.get(company=c, id=int(i.get('product_id')))
+        except Product.DoesNotExist:
+            return JSON_error(_("Product with this id does not exist"))
+
+        # parse quantity
+        r = parse_decimal(request.user, i.get('quantity'), g.DECIMAL['quantity_digits'])
+        if not r['success']:
+            return JSON_error(_("Invalid quantity value"))
+        else:
+            if r['number'] <= Decimal('0'):
+                return JSON_error(_("Cannot add an item with zero or negative quantity"))
+        quantity = r['number']
+
+        # check if there's enough items left in stock (must be at least zero =D)
+        if product.stock < quantity * product.unit_amount:
+            print 'wtf'
+            return JSON_error(_("Cannot sell more items than there are in stock"))
+
+        # calculate and set all stuff for this new item:
+        discounts = product.get_discounts()
+        prices = item_prices(request.user, product.get_price(), product.tax.amount, quantity, product.unit_amount,
+                             discounts)
+
+        # notes, if any
+        bill_notes = i.get('notes')
+
+        # TODO: subtract quantity from stock (if there's enough left)
+
+        # create a bill item and save it to database, then return JSON with its data
+        item = BillItem(
+            created_by=request.user,
+            # copy ProductAbstract's values:
+            code=product.code,
+            shortcut=product.shortcut,
+            name=product.name,
+            description=product.description,
+            private_notes=product.private_notes,
+            unit_type=product.get_unit_type_display(), # ! display, not the 'code'
+            unit_amount=product.unit_amount,
+            stock=product.stock,
+            # billItem's fields
+            bill=bill,
+            product_id=product.id,
+            quantity=quantity,
+            base_price=prices['base'],
+            tax_percent=product.tax.amount,
+            tax_absolute=prices['tax_absolute'],
+            discount_absolute=prices['discount_absolute'],
+            single_total=prices['single_total'],
+            total=prices['total'],
+            bill_notes=bill_notes
+        )
+        try:
+            item.save()
+        except:
+            return JSON_error(_("Could not save one of items"))  # TODO: a bit more specific, please
+
+    return JSON_ok()
+
+
+@login_required
 def get_active_bill(request, company):
     """ returns the last edited (active) bill if any, or an empty one """
     try:
@@ -202,44 +305,6 @@ def get_active_bill(request, company):
     # serialize the fetched bill and return it
     bill = bill_to_dict(request.user, bill)
     return JSON_response({'status': 'ok', 'bill': bill})
-
-
-@login_required
-def add_item(request, company):
-    """ add an item to bill;
-        received data: product id, bill id
-        returned data: item_to_dict (of the newly created item)
-    """
-    try:
-        c = Company.objects.get(url_name=company)
-    except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
-
-    # check permissions
-    if not has_permission(request.user, c, 'bill', 'edit'):
-        return JSON_error(_("You have no permission to edit bills"))
-
-    # get data
-    d = JSON_parse(request.POST.get('data'))
-    if not d:
-        return JSON_error(_("No data sent"))
-
-    # get bill
-    try:
-        product_id = int(d.get('product_id'))
-        bill_id = int(d.get('bill_id'))
-    except (ValueError, TypeError):  # ValueError is for 'a' and TypeError for None (for example)
-        return JSON_error(_("Invalid ids in request"))
-
-    try:
-        bill = Bill.objects.get(id=d.get('id'), company=c)
-        product = Product.objects.get(id=d.get, company=c)
-    except (Bill.DoesNotExist, Product.DoesNotExist):
-        return JSON_error(_("Bill or product does not exist"))
-
-
-
-
 
 
 @login_required

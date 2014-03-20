@@ -1,33 +1,25 @@
 // sending 
 function send_data(url, data, token, handleFun){
-	if(window.request){
-		window.request.abort();
-		window.request = null;
-	}
-	
     var sd = {data:JSON.stringify(data), csrfmiddlewaretoken:token};
-    window.request = $.post(url,
+    $.post(
+        url,
         sd,
         function(retData){
-        	handleFun(retData);
-  		},	
-  		"json");
-	
-	return false;
+            if(handleFun) handleFun(retData);
+  		},
+  		"json"
+    );
 }
 
 // receiving
 function get_data(url, handleFun){
-	if(window.request){
-		window.request.abort();
-		window.request = null;
-	}
-	window.request = $.ajax({
-		type:"GET",
+	$.ajax({
+		type: "GET",
 		dataType: "json",
-		url:url,
-		async:false,
-		success:function(data){handleFun(data);}
+		url: url,
+		async: false,
+		success: function(data){
+            if(handleFun) handleFun(data);
+        }
 	});
-	return false;
 }

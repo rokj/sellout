@@ -84,11 +84,11 @@ BILL_TYPES = (
     # TODO add type for company
 )
 
-BILL_STATUS = (
+BILL_STATUS = (  # TODO: check & handle this
+    ("Invoice", _("Invoice")), # racun
     ("Active", _("Active")), # the bill that's currently open in POS (only one can exist!)
     ("Offer", _("Offer")), # ponudba # TODO preveriti izrazoslovje
     ("Quote", _("Quote")), # predracun
-    ("Invoice", _("Invoice")), # racun
     ("Canceled", _("Canceled")),
 )
 
@@ -99,61 +99,61 @@ BILL_STATUS = (
 #  - django templates
 #  - jquery format string (for datepicker etc.)
 DATE_FORMATS = {
-    'dd.mm.yyyy':{'regex':"^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros
-                  'python':"%d.%m.%Y", # the docs say zero-padded decimal, but will also parse non-padded numbers
-                  'django':"j.n.Y", # show no leading zeros in template
-                  'android': "%d.%m.%Y",
-                  'jquery':"dd.mm.yy",
+    'dd.mm.yyyy': {'regex': "^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros
+                   'python': "%d.%m.%Y", # the docs say zero-padded decimal, but will also parse non-padded numbers
+                   'django': "j.n.Y", # show no leading zeros in template
+                   'android': "%d.%m.%Y",
+                   'jquery': "dd.mm.yy",
+                   },
+    'mm/dd/yyyy': {'regex': "^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros
+                   'python': "%m/%d/%Y",
+                   'django': "n/j/Y",
+                   'android': "%m/%d/%Y",
+                   'jquery': "mm/dd/yy",
                   },
-    'mm/dd/yyyy':{'regex':"^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros
-                  'python':"%m/%d/%Y",
-                  'django':"n/j/Y",
-                  'android':"%m/%d/%Y",
-                  'jquery':"mm/dd/yy",
-                  },
-    'yyyy-mm-dd':{'regex':"^\d{4}\.\d{2}\.\d{2}$", # strictly with leading zeros
-                  'python':"%Y-%m-%d",
-                  'django':"Y-m-d",
-                  'android':"%Y-%m-%d",
-                  'jquery':"yy-mm-dd",
-                  },
+    'yyyy-mm-dd': {'regex': "^\d{4}\.\d{2}\.\d{2}$", # strictly with leading zeros
+                   'python': "%Y-%m-%d",
+                   'django': "Y-m-d",
+                   'android': "%Y-%m-%d",
+                   'jquery': "yy-mm-dd",
+                   },
 }
 
 TIME_FORMATS = {
-    '23:59':{ # 24-hour clock
-            'regex':"^[0-2][0-4]:[0-5][0-9]$",
-            'python':"%H:%M",
-            'django':"H:i",
-            'android':"hh:mm",
-            'js':"HH:mm", # jquery has nothing to do with time, so it will have to be formatted using javascript
+    '23:59': {  # 24-hour clock
+             'regex': "^[0-2][0-4]:[0-5][0-9]$",
+             'python': "%H:%M",
+             'django': "H:i",
+             'android': "hh:mm",
+             'js': "HH:mm", # jquery has nothing to do with time, so it will have to be formatted using javascript
             },
-    '23:59:59':{ # 24-hour clock with seconds
-            'regex':"^[0-2][0-4]:[0-5][0-9]:[0-5][0-9]$",
-            'python':"%H:%M:%S",
-            'django':"H:i:s",
-            'android':"hh:mm:ss",
-            'js':"HH:mm:ss",
+    '23:59:59': {  # 24-hour clock with seconds
+            'regex': "^[0-2][0-4]:[0-5][0-9]:[0-5][0-9]$",
+            'python': "%H:%M:%S",
+            'django': "H:i:s",
+            'android': "hh:mm:ss",
+            'js': "HH:mm:ss",
             },
-    '12:59 AM/PM':{ # 12-hour clock with AM/PM
-            'regex':"^[0-2][0-4]:[0-5][0-9] (AM|PM)$",
-            'python':"%I:%M %p",
-            'django':"",
-            'android':"",
-            'js':"hh:mm <AMPM>", # <AMPM> will have to be replaced in javascript (python?)
+    '12:59 AM/PM': {  # 12-hour clock with AM/PM
+            'regex': "^[0-2][0-4]:[0-5][0-9] (AM|PM)$",
+            'python': "%I:%M %p",
+            'django': "",
+            'android': "",
+            'js': "hh:mm <AMPM>",  # <AMPM> will have to be replaced in javascript (python?)
             },
-    '12:59:59 AM/PM':{ # 12-hour clock with AM/PM
-            'regex':"^[0-2][0-4]:[0-5][0-9]:[0-5][0-9] (AM|PM)$",
-            'python':"%r",
-            'django':"",
-            'android':"",
-            'js':"hh:mm:ss <AMPM>", # <AMPM> will have to be replaced in javascript (python?)
+    '12:59:59 AM/PM': {  # 12-hour clock with AM/PM
+             'regex': "^[0-2][0-4]:[0-5][0-9]:[0-5][0-9] (AM|PM)$",
+             'python': "%r",
+             'django': "",
+             'android': "",
+             'js': "hh:mm:ss <AMPM>", # <AMPM> will have to be replaced in javascript (python?)
             },
 }
 
 
 
 DATE = {
-    'max_date_length':10,
+    'max_date_length': 10,
 }
 
 

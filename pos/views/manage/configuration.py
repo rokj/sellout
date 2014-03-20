@@ -45,7 +45,7 @@ def list_time_formats():
 ### forms and views ###
 #######################
 class ConfigForm(forms.Form):
-    button_sizes = [(key,key) for key,value in g.PRODUCT_BUTTON_DIMENSIONS.iteritems()]
+    button_sizes = [(key, key) for key, value in g.PRODUCT_BUTTON_DIMENSIONS.iteritems()]
     decimal_places_choices = (
         ('0', 0),
         ('1', 1),
@@ -80,17 +80,17 @@ def edit_config(request, company):
     # this may be a little wasteful on resources, but config is only edited once in a lifetime or so
     # get_value is needed because dict['key'] will fail if new keys are added but not yet saved
     initial = {
-        'date_format':get_value(request.user, 'pos_date_format'),
-        'time_format':get_value(request.user, 'pos_time_format'),
-        'timezone':get_value(request.user, 'pos_timezone'),
-        'currency':get_value(request.user, 'pos_currency'),
-        'contacts_per_page':get_value(request.user, 'pos_contacts_per_page'),
-        'discounts_per_page':get_value(request.user, 'pos_discounts_per_page'),
-        'default_tax':get_value(request.user, 'pos_default_tax'),
-        'decimal_separator':get_value(request.user, 'pos_decimal_separator'),
-        'interface_product_button_size':get_value(request.user, 'pos_interface_product_button_size'),
-        'discount_calculation':get_value(request.user, 'pos_discount_calculation'),
-        'decimal_places':get_value(request.user, 'pos_decimal_places'),
+        'date_format': get_value(request.user, 'pos_date_format'),
+        'time_format': get_value(request.user, 'pos_time_format'),
+        'timezone': get_value(request.user, 'pos_timezone'),
+        'currency': get_value(request.user, 'pos_currency'),
+        'contacts_per_page': get_value(request.user, 'pos_contacts_per_page'),
+        'discounts_per_page': get_value(request.user, 'pos_discounts_per_page'),
+        'default_tax': get_value(request.user, 'pos_default_tax'),
+        'decimal_separator': get_value(request.user, 'pos_decimal_separator'),
+        'interface_product_button_size': get_value(request.user, 'pos_interface_product_button_size'),
+        'discount_calculation': get_value(request.user, 'pos_discount_calculation'),
+        'decimal_places': get_value(request.user, 'pos_decimal_places'),
     }
     
     if request.method == 'POST':
@@ -99,13 +99,13 @@ def edit_config(request, company):
             for key in initial:
                 set_value(request.user, "pos_" + key, unicode(form.cleaned_data[key]))
     else:
-        form = ConfigForm(initial=initial) # An unbound form
+        form = ConfigForm(initial=initial)  # An unbound form
 
     context = {
-        'company':c,
-        'form':form,
-        'title':_("System configuration"),
-        'site_title':g.MISC['site_title'],
+        'company': c,
+        'form': form,
+        'title': _("System configuration"),
+        'site_title': g.MISC['site_title'],
     }
 
     return render(request, 'pos/manage/config.html', context)

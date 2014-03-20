@@ -14,8 +14,15 @@ Bill = function(g){
     p.serial = 0; // a number that will be assigned to every item
                    // (like an unique id - has nothing to do with id on server)
 
-    p.bill_container = $("#bill"); // <table> object
-    p.items_container = $("#bill_items"); // <tbody> with items
+    p.bill_container = $("#bill");
+
+    // summary numbers
+    p.summary = $("#bill_summary");
+    p.summary_total = $("p.total", p.summary);
+
+    // the 'finish' button
+    p.actions = $("#bill_actions");
+    p.finish_button = $(".finish-the-fukin-bill", p.actions);
 
     // save item template for items and remove it from the document
     p.item_template = $("#bill_item_template").detach().removeAttr("id");
@@ -23,8 +30,6 @@ Bill = function(g){
     //
     // methods
     //
-    // bill manipulation
-
     // item manipulation
     p.get_item = function(serial){
         // do a linear search for an item with given id
@@ -49,19 +54,26 @@ Bill = function(g){
         return null;
     };
 
-    p.add_product = function(product){
+    p.add_product = function(product, to_existing){
         // see if this product is already in the bill;
-        var item_index = p.get_product(product.data.id);
 
-        if(item_index){
-            // if it is, just update quantity
-            //p.items[item_index].something_something()
+        if(to_existing == false){
+            p.items.push(new Item(p, product));
         }
         else{
-            // if not, add a new item
-            var item = new Item(p, product);
+            var item_index = p.get_product(product.data.id);
+
+            if(item_index == null){
+                // if not, add a new item
+                p.items.push(new Item(p, product));
+            }
+            else{
+                // if it is, just update quantity
+                p.items[item_index].add_quantity(true);
+            }
         }
 
+        p.update_summary();
     };
 
     p.remove_item = function(item){
@@ -72,29 +84,110 @@ Bill = function(g){
         remove_from_array(p.items, i);
 
         item = null;
+
+        p.update_summary();
+    };
+
+    p.update_summary = function(){
+        // traverse items and sum totals
+        var total = Big(0);
+
+        for(var i = 0; i < p.items.length; i++){
+            total = total.plus(p.items[i].data.total);
+        }
+
+        p.summary_total.text(display_number(total, p.g.config.separator, p.g.config.decimal_places));
+    };
+
+    // bill manipulation
+    p.finish = function(){
+        // put this bill, including all items in a neat json
+        // and send it to server
+
+        if(p.items.length == 0){
+            error_message(
+                gettext("Cannot create bill"),
+                gettext("There are no items on it")
+            );
+            return;
+        }
+
+        var i;
+        var r = {
+            items: []
+        };
+
+        // get all items
+        for(i = 0; i < p.items.length; i++){
+            r.items.push(p.items[i].format());
+        }
+
+        // send to server
+        send_data(p.g.urls.create_bill, r, p.g.csrf_token, function(recv_data){
+            if(recv_data.status != 'ok'){
+                error_message(
+                    gettext("Error while saving bill"),
+                    recv_data.message);
+
+                // TODO: further actions (?!)
+            }
+            else{
+                // TODO: empty this bill and create a new one
+            }
+        });
+
+        // TODO: what then?
     };
 
     //
     // init
     //
-    // start a new bill
+    // draggable: the same as set_draggable(), but vertical
+    p.bill_container.draggable({
+        helper: function () {
+            return $("<div>").css("opacity", 0);
+        },
+        drag: function (event, ui) {
+            // the position of parent obviously has to be taken into account
+            var pos = ui.helper.position().top - p.bill_container.parent().position().top;
+            $(this).stop().animate({top: pos},
+                p.g.settings.t_easing,
+                'easeOutCirc',
+                function () {
+                    // check if this has scrolled past the last
+                    // (first) button
+                    var all_buttons = $("div.bill-item", p.bill_container);
+                    var first_button = all_buttons.filter(":first");
+                    var last_button = all_buttons.filter(":last");
+                    var container = p.bill_container.parent().parent();
+
+                    if(first_button.length < 1 || last_button.length < 1) return;
+
+                    // if the whole scroller's height is less than
+                    // container's, always slide it back to top border
+
+                    if (first_button.position().top + last_button.position().top + last_button.outerHeight() < container.height()){
+                        p.bill_container.animate({top: 0}, "fast");
+                    }
+                    else {
+                        if (first_button.offset().top > container.offset().top) {
+                            p.bill_container.animate({top: 0}, "fast");
+                        }
+                        else if (last_button.offset().top + last_button.height() < container.offset().top + container.height()) {
+                            p.bill_container.animate({
+                                top: -last_button.position().top + container.height() - last_button.height()}, "fast");
+                        }
+                    }
+                });
+        },
+        axis: "y"
+    });
 
 
-    // append items to Bill
-    /*for(i = 0; i < bill_data.items.length; i++){
-        ti = new Item(parse_item_data(bill_data.items[i]), true, false); // Item data, saved, not exploded
-        // convert strings in data to Big() numbers
-        items.push(ti);
-    }
-    p.items = items;
-
-    // also save other information (but not items)
-    delete bill_data.items;
-    p.data = bill_data;
-
-    p.last_item_id = -1;
-    */
-
+    // bindings
+    p.finish_button.click(function(){
+        p.finish();
+    });
 };
 
 /* Item 'class' */
@@ -110,7 +203,7 @@ Item = function(bill, product) {
     p.data = null; // the actual item data that will be sent to server (initialized later)
     p.serial = ++p.bill.serial;
 
-    p.item_row = p.bill.item_template.clone().appendTo(p.bill.items_container);
+    p.item_row = p.bill.item_template.clone().appendTo(p.bill.bill_container);
     p.items = {
         name: $("div.item.name", p.item_row),
         code: $("div.item.code", p.item_row),
@@ -176,6 +269,9 @@ Item = function(bill, product) {
 
         // total
         p.items.total.text(display_number(p.data.total, p.g.config.separator, p.g.config.decimal_places));
+
+        // also update bill
+        p.bill.update_summary();
     };
 
     p.add_quantity = function(add){
@@ -234,7 +330,7 @@ Item = function(bill, product) {
         p.update();
     };
 
-    p.format_item = function(){
+    p.format = function(){
         // used for sending to server
         return {
             product_id: p.data.product_id,
@@ -248,7 +344,11 @@ Item = function(bill, product) {
     };
 
     p.explode = function(){
-        console.log("explode")
+        // if this item has quantity > 1, subtract 1 from this and create a new one in the bill
+        if(p.data.quantity.cmp(Big(1)) > 0){
+            p.bill.add_product(p.product, false);
+            p.add_quantity(false);
+        }
     };
 
     //
@@ -266,7 +366,8 @@ Item = function(bill, product) {
         tax_percent: get_number(p.product.data.tax, p.g.config.separator),
         tax_absolute: null, // will be calculated later
         stock: get_number(p.product.data.stock, p.g.config.separator),
-        discount_absolute:null // calculated later
+        discount_absolute:null, // calculated later
+        total_price: null // calculated later
     };
 
     // then update it
