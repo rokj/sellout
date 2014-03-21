@@ -36,21 +36,11 @@ def mobile_list_contacts(request, company):
     contacts = Contact.objects.filter(company__id=c.id)
 
     criteria = JSON_parse(request.POST['data'])
-
-    if criteria.get('type') == 'Individual':
-        contacts = contacts.filter(type='Individual')
-        if 'name' in criteria:
-            first_names = contacts.filter(first_name__icontains=criteria.get('name'))
-            last_names = contacts.filter(last_name__icontains=criteria.get('name'))
-            contacts = (first_names | last_names).distinct()
-    elif criteria.get('type') == 'Company':
-      contacts = contacts.filter(type='Company')
-      if 'name' in criteria:
-          contacts = contacts.filter(company_name__icontains=criteria.get('name'))
-
     cs = []
     for c in contacts:
         cs.append(contact_to_dict(request.user, c, "android"))
+
+    print JSON_response(cs)
     return JSON_response(cs)
 
 
@@ -81,26 +71,34 @@ def mobile_add_contact(request, company):
         return JSON_error(valid['message'])
     data = valid['data']
 
+    if 'type' in data:
+        type = data['type']
+    else:
+        type = None
+
+
 
     contact = Contact(
         company = c,
         created_by = request.user,
-        type = data['type'],
-        first_name = data['first_name'],
-        last_name = data['last_name'],
-        sex = data['sex'],
-        date_of_birth = data['date_of_birth'],
-        street_address = data['street_address'],
-        postcode = data['postcode'],
-        city = data['city'],
-        state = data['state'],
-        country = data['country'],
-        email = data['email'],
-        phone = data['phone'],
+        type = type,
+        company_name = data['company_name'] if 'company_name' in data else None,
+        first_name = data['first_name'] if 'first_name' in data else None,
+        last_name = data['last_name'] if 'last_name' in data else None,
+        sex = data['sex'] if 'sex' in data else None,
+        date_of_birth = data['date_of_birth'] if 'date_of_birth' in data else None,
+        street_address = data['street_address'] if 'street_address' in data else None,
+        postcode = data['postcode'] if 'postcode' in data else None,
+        city = data['city'] if 'city' in data else None,
+        state = data['state'] if 'state' in data else None,
+        country = data['country'] if 'country' in data else None,
+        email = data['email'] if 'email' in data else None,
+        phone = data['phone'] if 'phone' in data else None,
         #vat = data['vat']
     )
     contact.save()
-    return JSON_ok()
+
+    return JSON_ok(extra=contact_to_dict(request.user, contact, send_to="android"))
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))

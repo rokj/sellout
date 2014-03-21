@@ -344,7 +344,7 @@ class Contact(SkeletonU):
         if type == "Individual":
             return "Individual: " + self.first_name + " " + self.last_name
         else:
-            return "Company: " + self.company_name
+            return "Company: " + str(self.company_name)
  
 # not in use at the moment   
 #class ContactAttribute(SkeletonU):
