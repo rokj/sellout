@@ -4,6 +4,7 @@ from common.models import SkeletonU
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 
+
 class Config(SkeletonU):
     user = models.ForeignKey(User)
     
@@ -12,7 +13,8 @@ class Config(SkeletonU):
     
     def __unicode__(self):
         return str(self.user.id) + ":" + self.app
-    
+
+
 class Country(models.Model):
     two_letter_code = models.CharField(max_length=2, null=False, primary_key=True)
     name = models.CharField(max_length=64, null=False)
@@ -23,7 +25,8 @@ class Country(models.Model):
     
     class Meta:
         verbose_name_plural = _("Countries")
-    
+
+
 def fill_countries(): # will only be used once, after install
     from countries import country_list 
     for c in country_list:
@@ -32,6 +35,7 @@ def fill_countries(): # will only be used once, after install
                           two_letter_code=c[1],
                           three_letter_code=c[2])
         country.save()
+
 
 # cleanup: a helper class for files that need to be removed after change in database was made
 # file names are stored on any model's pre_save signal

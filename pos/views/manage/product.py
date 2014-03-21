@@ -104,24 +104,19 @@ def product_to_dict(user, product):
     if product.category:
         ret['category'] = product.category.name
         ret['category_id'] = product.category.id
+    else:
+        ret['category'] = None
+        ret['category_id'] = None
 
-    if product.code:
-        ret['code'] = product.code
-    if product.shortcut:
-        ret['shortcut'] = product.shortcut
-    if product.name:
-        ret['name'] = product.name
-    if product.description:
-        ret['description'] = product.description
-    if product.private_notes:
-        ret['private_notes'] = product.private_notes
-    if product.unit_type:
-        ret['unit_type'] = product.unit_type
-        ret['unit_type_display'] = product.get_unit_type_display()
-    if product.unit_amount:
-        ret['unit_amount'] = format_number(user, product.unit_amount)
-    if product.stock:
-        ret['stock'] = format_number(user, product.stock)
+    ret['code'] = product.code
+    ret['shortcut'] = product.shortcut
+    ret['name'] = product.name
+    ret['description'] = product.description
+    ret['private_notes'] = product.private_notes
+    ret['unit_type'] = product.unit_type
+    ret['unit_type_display'] = product.get_unit_type_display()
+    ret['unit_amount'] = format_number(user, product.unit_amount)
+    ret['stock'] = format_number(user, product.stock)
 
     # urls
     ret['get_url'] = reverse('pos:get_product', args=[product.company.url_name, product.id])
@@ -133,7 +128,7 @@ def product_to_dict(user, product):
 
 @login_required
 def products(request, company):
-    c = get_object_or_404(Company, url_name = company)
+    c = get_object_or_404(Company, url_name=company)
     
     # needs to be at least guest to view products
     if not has_permission(request.user, c, 'product', 'list'):

@@ -15,6 +15,7 @@ import re
 from decimal import Decimal
 from datetime import datetime
 
+
 # requests and responses
 def error(request, message):
     
@@ -22,6 +23,7 @@ def error(request, message):
                'back_link': request.build_absolute_uri(),
                }
     return render(request, 'pos/error.html', context)
+
 
 def JSON_stringify(data, for_javascript=False):
     s = json.dumps(data)
@@ -34,9 +36,11 @@ def JSON_stringify(data, for_javascript=False):
         return s
     else:
         return s
-    
+
+
 def JSON_response(data):
     return HttpResponse(JSON_stringify(data), mimetype="application/json")
+
 
 def JSON_error(message):
     return JSON_response({'status': 'error', 'message': message})
@@ -53,10 +57,12 @@ def JSON_parse(string_data):
         return json.loads(string_data)
     except:
         return None
-        
+
+
 # misc
 def max_field_length(model, field_name):
     return model._meta.get_field(field_name).max_length
+
 
 # image and file handling
 def resize_image(path, dimensions):
@@ -68,6 +74,7 @@ def resize_image(path, dimensions):
     # also resize to un-animate any animated GIFs
     image.thumbnail(dimensions, Image.ANTIALIAS)
     image.save(path, g.MISC['image_format'])
+
 
 def validate_image(obj): # obj is actually "self"
     image = obj.cleaned_data.get('image', False)
@@ -84,6 +91,7 @@ def validate_image(obj): # obj is actually "self"
     
     return image
 
+
 def image_dimensions(size):
     """ accepts string - key in g.IMAGE_DIMENSIONS and returns
         a list: [width, height, sorl_string]
@@ -95,6 +103,7 @@ def image_dimensions(size):
     dim = g.IMAGE_DIMENSIONS[size]
     
     return [dim[0], dim[1], str(dim[0]) + "x" + str(dim[1])]
+
 
 def image_from_base64(data):
     """ receives base64 data and returns a file for saving to ImageField """
@@ -113,6 +122,7 @@ def image_from_base64(data):
 
     return ContentFile(image_data, "fakename." + filetype) # name will be replaced when saving to ImageField
 
+
 # numbers
 def format_number(user, n, high_precision=False):
     """ returns formatted decimal number n;
@@ -125,12 +135,13 @@ def format_number(user, n, high_precision=False):
         return '0'
     
     if high_precision:
-        s = str(n.quantize(Decimal('1.'+'0'*p*2)))
+        s = str(n.quantize(Decimal('1.'+'0'*8)))  # for calculation, use more decimal places
     else:
         s = str(n.quantize(Decimal('1.'+'0'*p)))
     
     return s.replace('.', sep)
-        
+
+
 def format_date(user, date, send_to='python'):
     """ formats date for display according to user's settings """
     if not date:
@@ -138,12 +149,14 @@ def format_date(user, date, send_to='python'):
     else:
         return date.strftime(get_date_format(user, send_to))
 
+
 def format_time(user, date):
     """ formats time for display according to user's settings """
     if not date:
         return ''
     else:
         return date.strftime(get_time_format(user, 'python'))
+
 
 def parse_decimal(user, string, max_digits=None):
     """ replace user's decimal separator with dot and parse
@@ -170,6 +183,7 @@ def parse_decimal(user, string, max_digits=None):
     except:
         return {'success':False, 'number':None}
 
+
 def parse_date(user, string):
     """ parses date in string according to user selected preferences
         return dictionary with result status and parsed datetime:
@@ -183,9 +197,11 @@ def parse_date(user, string):
    
     return {'success':True, 'date':d}
 
+
 # permissions: cached
 def permission_cache_key(user, company):
         return "permission_" + str(user.id) + "_" + str(company.id)
+
 
 def has_permission(user, company, model, task):
     """ returns True if the user has the required permissions
@@ -213,6 +229,7 @@ def has_permission(user, company, model, task):
         return True
     else:
         return False
+
 
 def no_permission_view(request, company, action):
     """ the view that is called if user attempts to do shady business without permission """

@@ -15,6 +15,8 @@ from pos.views.manage import discount
 from pos.views.manage import tax
 from pos.views.manage import configuration
 
+from pos.views import bill
+
 ### common URL prefixes: ###
 # company's site: /pos/blocklogic
 # readable pattern: (?P<company>[\w-]{1,30})
@@ -23,24 +25,23 @@ r_company = r'^(?P<company>[\w-]{1,' + str(g.MISC['company_url_length']) + '})'
 r_manage = g.MISC['management_url'] + '/'
 
 urlpatterns = patterns('',
-    # system pages
+    #
+    # SYSTEM PAGES:
+    #
     url(r_manage + _('register-company') + '$', company.register_company, name='register_company'),
     url(r_manage + r'url-name-suggestions$', company.url_name_suggestions, name='url_name_suggestions'),
     
     #token registration for api devices
-    #
-    #TODO
-    #
-    url(r_manage + r'api-token-auth/?$', authtoken_views.obtain_auth_token),
-    
-    # home: POS terminal, directly
-    url(r_company + '/?$', terminal.terminal, name='terminal'),  # by url_name
+    url(r_manage + r'api-token-auth/?$', authtoken_views.obtain_auth_token),  # TODO
 
-    # management urls: company
+    #
+    # MANAGEMENT:
+    #
+    # company
     url(r_company + _('/manage') + '/?$', manage.manage_home, name='manage_home'),  # management home
     url(r_company + _('/manage/company') + '/?$', company.edit_company, name='edit_company'),  # company
     # categories
-    url(r_company + _('/manage/categories') + '/?$', category.list_categories, name='list_categories'), # list of categories
+    url(r_company + _('/manage/categories') + '/?$', category.list_categories, name='list_categories'),  # list of categories
     url(r_company + _('/manage/category/add') + '/(?P<parent_id>-?\d+)/?$', category.web_add_category, name='add_category'), # add
     url(r_company + _('/manage/category/edit') + '/(?P<category_id>\d+)/?$', category.web_edit_category, name='edit_category'), # edit
     url(r_company + _('/manage/category/delete') + '/(?P<category_id>\d+)/?$', category.web_delete_category, name='delete_category'), # delete
@@ -70,7 +71,7 @@ urlpatterns = patterns('',
     # users
     #url(r_company + _('/manage/users') + '/?$', manage.users.edit_company, name='edit_users'), # company
     # config (company parameter is needed only for url; configuration is per user, regardless of company
-    url(r_company + _('/manage/configuration') + '/?$', configuration.edit_config, name='edit_config'), # company
+    url(r_company + _('/manage/configuration') + '/?$', configuration.edit_config, name='edit_config'),  # company
 
 
     # misc (ajax): urls not translated
@@ -83,4 +84,18 @@ urlpatterns = patterns('',
 
     # available discounts list
     url(r_company + r'/manage/json/discounts/?$', discount.JSON_discounts, name='JSON_discounts'),
+
+    #
+    # TERMINAL:
+    #
+    # save terminal settings (will width and such)
+    url(r_company + '/save/?$', terminal.save, name='save_terminal'),
+
+    # views for bill
+    url(r_company + '/bill/save/?$', bill.create_bill, name='create_bill'),  # adds an item to bill
+    #url(r_company + '/bill/get-active/?$', bill.get_active_bill, name='get_active_bill'),
+    #url(r_company + '/bill/item/remove/?$', bill.remove_item, name='remove_bill_item'), # removes Item from bill
+
+    # and finally: home: POS terminal, directly
+    url(r_company + '/$', terminal.terminal, name='terminal'),  # by url_name
 )

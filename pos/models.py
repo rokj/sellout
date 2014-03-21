@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext as _
-from django.db.models.signals import pre_save, pre_delete
+from django.db.models.signals import pre_save, pre_delete, post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from sorl import thumbnail
@@ -48,7 +48,8 @@ class Company(SkeletonU):
 #    
 #    def __unicode__(self):
 #        return self.company.name + ": " + self.attribute_name + " = " + self.attribute_value
-    
+
+
 ### category ###
 class Category(SkeletonU):
     company = models.ForeignKey(Company, null=False, blank=False)
@@ -79,6 +80,7 @@ class Category(SkeletonU):
 #    def __unicode(self):
 #        return self.category.name + ": " + self.attribute_name + " = " + self.attribute_value
 
+
 ### discounts ### 
 class Discount(SkeletonU):
     company = models.ForeignKey(Company)
@@ -97,6 +99,7 @@ class Discount(SkeletonU):
     
     def __unicode__(self):
         return self.code + " " + self.description
+
 
 ### tax rates ###
 class Tax(SkeletonU):
@@ -119,6 +122,7 @@ class Tax(SkeletonU):
 #    image = models.ImageField(upload_to=get_image_path(g.DIRS['product_image_dir'], "pos_productimage"), null=False)
 #    original_filename = models.CharField(_('Original filename'), max_length=255, blank=True, null=True)
 
+
 class ProductAbstract(SkeletonU):
     """ all these fields will be copied to BillItem """
     code = models.CharField(_("Product code"), max_length=30, blank=False, null=False)
@@ -140,6 +144,7 @@ class ProductAbstract(SkeletonU):
     
     class Meta:
         abstract = True
+
 
 class Product(ProductAbstract):
     """ these fields will not be copied to BillItem """
@@ -273,6 +278,7 @@ class Product(ProductAbstract):
 #    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
 #    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
 
+
 class ProductDiscount(SkeletonU):
     """ custom many-to-many field for products' discounts: order is important so it must be saved """
     product = models.ForeignKey(Product)
@@ -305,6 +311,7 @@ class Price(SkeletonU):
     class Meta:
         unique_together = (('product', 'unit_price', 'datetime_updated'),)
 
+
 ### purchase prices ###
 class PurchasePrice(SkeletonU):
     product = models.ForeignKey(Product)
@@ -321,6 +328,7 @@ class PurchasePrice(SkeletonU):
     
     class Meta:
         unique_together = (('product', 'unit_price', 'datetime_updated'),)
+
 
 ### contacts ###
 class Contact(SkeletonU):
@@ -355,6 +363,7 @@ class Contact(SkeletonU):
 #    def __unicode__(self):
 #        return str(self.contact) + ": " + self.attribute_name + " = " + self.attribute_value
 
+
 ### permissions
 class Permission(SkeletonU):
     user = models.ForeignKey(User)
@@ -363,7 +372,8 @@ class Permission(SkeletonU):
     
     def __unicode__(self):
         return self.user.email + " | " + self.company.name + ": " + self.get_permission_display()
-        
+
+
 @receiver(pre_save, sender=Permission)
 @receiver(pre_delete, sender=Permission)
 def delete_permission_cache(**kwargs):
@@ -373,28 +383,34 @@ def delete_permission_cache(**kwargs):
     
     ckey = permission_cache_key(kwargs['instance'].user, kwargs['instance'].company)
     cache.delete(ckey)
-    
+
+
 ### bills ###
 class Bill(SkeletonU):
-    company = models.ForeignKey(Company, null=False, blank=False) # also an issuer of the bill
+    company = models.ForeignKey(Company, null=False, blank=False)  # also an issuer of the bill
     user = models.ForeignKey(User, null=False)
-    till = models.CharField(_("Cash register id"), max_length = 50, null=True) # is null only when saving a fresh bill
-    
+    till = models.CharField(_("Cash register id"), max_length=50, null=True)  # TODO: what's this?
+    serial = models.IntegerField(_("Bill number, unique over all company's bills"), null=True)  # will be updated in post_save signal
+
     type = models.CharField(_("Bill type"), max_length=20, choices=g.BILL_TYPES, null=False, blank=False, default=g.BILL_TYPES[0][0])
     recipient_contact = models.ForeignKey(Contact, null=True, blank=True, related_name='bill_recipient_company')
     note = models.CharField(_("Notes"), max_length=1000, null=True, blank=True)
     sub_total = models.DecimalField(_("Sub total"),
-                                    max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
+                                    max_digits=g.DECIMAL['currency_digits'],
+                                    decimal_places=g.DECIMAL['currency_decimal_places'],
                                     null=True, blank=True)
     discount = models.DecimalField(_("Discount on the whole bill, in percentage"), 
-                                   max_digits = g.DECIMAL['percentage_decimal_places']+3, decimal_places=g.DECIMAL['percentage_decimal_places'],
+                                   max_digits=g.DECIMAL['percentage_decimal_places']+3,
+                                   decimal_places=g.DECIMAL['percentage_decimal_places'],
                                    null=True, blank=True)
     tax = models.DecimalField(_("Tax amount, absolute value, derived from products"), 
-                                   max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                                   null=True, blank=True)
+                              max_digits=g.DECIMAL['currency_digits'],
+                              decimal_places=g.DECIMAL['currency_decimal_places'],
+                              null=True, blank=True)
     total = models.DecimalField(_("Total amount to be paid"), 
-                         max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                         null=True, blank=True)
+                                max_digits=g.DECIMAL['currency_digits'],
+                                decimal_places=g.DECIMAL['currency_decimal_places'],
+                                null=True, blank=True)
                          
     timestamp = models.DateTimeField(_("Date and time of bill creation"), null=False)
     due_date = models.DateTimeField(_("Due date"), null=True)
@@ -406,6 +422,26 @@ class Bill(SkeletonU):
     #def save(self):
     #    super(Bill, self).save()
     #    copy_bill_to_history(self.id) # always put a copy in history
+
+
+# post-save signal: set bill's serial number
+@receiver(post_save, sender=Bill)
+def set_serial(instance, created, **kwargs):
+    if not created:  # only set the serial number once
+        return
+
+    if not instance.company:
+        return
+
+    last_bill = Bill.objects.filter(company=instance.company).order_by('-serial')[:0]
+
+    if len(last_bill) == 0:
+        instance.serial = 1
+    else:
+        instance.serial = last_bill.serial + 1
+
+    instance.save()
+
 
 class BillItem(ProductAbstract): # include all data from Product
     bill = models.ForeignKey(Bill)
@@ -442,6 +478,7 @@ class BillItem(ProductAbstract): # include all data from Product
     #    super(BillItem, self).save()
     #    copy_bill_to_history(self.bill.id) # always put a copy in history
 
+
 ### history
 class BillHistory(SkeletonU):
     bill = models.ForeignKey(Bill)
@@ -450,13 +487,19 @@ class BillHistory(SkeletonU):
     class Meta:
         verbose_name_plural = _("Bill history")
 
-def model_to_dict(obj, ignore=[], exclude=[]):
+
+def model_to_dict(obj, ignore=None, exclude=None):
     """ converts django model object to dictionary.
         ignores data that is in ignore list.
         includes data from foreign key objects, if it's not in exclude[] list.
         ignore takes precedence over exclude. """
     if not obj:
         return ''
+
+    if ignore is None:
+        ignore = []
+    if exclude is None:
+        exclude = []
     
     data = {}
     
@@ -482,6 +525,7 @@ def model_to_dict(obj, ignore=[], exclude=[]):
             data[key] = unicode(value)
 
     return data
+
 
 def copy_bill_to_history(bill_id):
     """ serializes Bill, BillItem and all foreign-keyed tables,

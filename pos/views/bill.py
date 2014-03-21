@@ -1,3 +1,11 @@
+#
+# Bill
+#   ajax views:
+#     get_active_bill: finds an unfinished bill and returns it (returns a new bill if none was found)
+#     add_item: adds an item to bill
+#     edit_item: edits an existing item
+#     delete_item
+#
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 
@@ -12,7 +20,7 @@ from datetime import datetime as dtm
 from decimal import Decimal
 
 
-def bill_item_to_dict(user, item, status=None):
+def bill_item_to_dict(user, item):
     i = {}
     
     i['item_id'] = item.id
@@ -38,13 +46,10 @@ def bill_item_to_dict(user, item, status=None):
     i['total'] = format_number(user, item.total)
     i['bill_notes'] = item.bill_notes
 
-    if status:  # to notify javascript
-        i['status'] = status
-
     return i
 
 
-def bill_to_dict(user, bill, status=None):
+def bill_to_dict(user, bill):
     # fields in bill:
     # company
     # type
@@ -77,9 +82,6 @@ def bill_to_dict(user, bill, status=None):
         
     b['items'] = i
 
-    if status:
-        b['status'] = status
-    
     return b
 
 
@@ -95,13 +97,8 @@ def new_bill(user, company):
         status="Active"
     )
     b.save()
-    
-    bdict = bill_to_dict(user, b, status='ok')
-    
-    # this is a new bill, the terminal ought to know this
-    bdict['new'] = True  # (this Item will be deleted (ignored) on next save)
 
-    return bdict
+    return bill_to_dict(user, b)
 
 
 def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts):
@@ -179,8 +176,111 @@ def validate_bill_item(data):
 
 
 #########
-# views # TODO: remove
+# views #
 #########
+@login_required
+def create_bill(request, company):
+    """ there's bill and items in request.POST['data'], create a new bill, and check all items and all """
+
+    # get company
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # check permissions
+    if not has_permission(request.user, c, 'bill', 'edit'):
+        return JSON_error(_("You have no permission to create bills"))
+
+    # get data
+    d = JSON_parse(request.POST.get('data'))
+    if not d:
+        return JSON_error(_("No data received"))
+
+    # check bill properties
+    # TODO: ... (nothing to check?)
+
+    # check items
+    # TODO: ... (nothing to check?)
+
+    # create a new bill
+    bill = Bill(
+        company=c,
+        user=request.user,  # this can change
+        created_by=request.user,  # this will never change
+        type="Normal",
+        timestamp=dtm.now().replace(tzinfo=timezone(get_value(request.user, 'pos_timezone'))),
+        status="Active"
+    )
+    #try:
+    bill.save()
+    #except:
+    #    return JSON_error(_("Error while saving new bill"))
+
+    # create new items
+    for i in d.get('items'):
+    # get product
+        try:
+            product = Product.objects.get(company=c, id=int(i.get('product_id')))
+        except Product.DoesNotExist:
+            return JSON_error(_("Product with this id does not exist"))
+
+        # parse quantity
+        r = parse_decimal(request.user, i.get('quantity'), g.DECIMAL['quantity_digits'])
+        if not r['success']:
+            return JSON_error(_("Invalid quantity value"))
+        else:
+            if r['number'] <= Decimal('0'):
+                return JSON_error(_("Cannot add an item with zero or negative quantity"))
+        quantity = r['number']
+
+        # check if there's enough items left in stock (must be at least zero =D)
+        if product.stock < quantity * product.unit_amount:
+            print 'wtf'
+            return JSON_error(_("Cannot sell more items than there are in stock"))
+
+        # calculate and set all stuff for this new item:
+        discounts = product.get_discounts()
+        prices = item_prices(request.user, product.get_price(), product.tax.amount, quantity, product.unit_amount,
+                             discounts)
+
+        # notes, if any
+        bill_notes = i.get('notes')
+
+        # TODO: subtract quantity from stock (if there's enough left)
+
+        # create a bill item and save it to database, then return JSON with its data
+        item = BillItem(
+            created_by=request.user,
+            # copy ProductAbstract's values:
+            code=product.code,
+            shortcut=product.shortcut,
+            name=product.name,
+            description=product.description,
+            private_notes=product.private_notes,
+            unit_type=product.get_unit_type_display(), # ! display, not the 'code'
+            unit_amount=product.unit_amount,
+            stock=product.stock,
+            # billItem's fields
+            bill=bill,
+            product_id=product.id,
+            quantity=quantity,
+            base_price=prices['base'],
+            tax_percent=product.tax.amount,
+            tax_absolute=prices['tax_absolute'],
+            discount_absolute=prices['discount_absolute'],
+            single_total=prices['single_total'],
+            total=prices['total'],
+            bill_notes=bill_notes
+        )
+        try:
+            item.save()
+        except:
+            return JSON_error(_("Could not save one of items"))  # TODO: a bit more specific, please
+
+    return JSON_ok()
+
+
 @login_required
 def get_active_bill(request, company):
     """ returns the last edited (active) bill if any, or an empty one """
@@ -203,16 +303,12 @@ def get_active_bill(request, company):
         return JSON_error(_("Multiple active bills found"))
         
     # serialize the fetched bill and return it
-    return JSON_response(bill_to_dict(request.user, bill, status='ok'))
+    bill = bill_to_dict(request.user, bill)
+    return JSON_response({'status': 'ok', 'bill': bill})
 
 
 @login_required
-def add_bill_item(request, company):
-    pass
-
-
-@login_required
-def edit_bill_item(request, company):
+def edit_item(request, company):
     """ add an item to bill:
          - received data: {item_id, bill_id, 'product_id':<id>, 'qty':<qty>, 'notes':<notes>}
          - calculate all item's fields (tax, discount, total, ...)
@@ -274,36 +370,36 @@ def edit_bill_item(request, company):
 
     # create a bill item and save it to database, then return JSON with its data
     item = BillItem(
-        created_by = request.user,
+        created_by=request.user,
         # copy ProductAbstract's values:
-        code = product.code,
-        shortcut = product.shortcut,
-        name = product.name,
-        description = product.description,
-        private_notes = product.private_notes,
-        unit_type = product.get_unit_type_display(), # ! display, not the 'code'
-        unit_amount = product.unit_amount,
-        stock = product.stock,
-        # billItem's fields        
-        bill = bill,
-        product_id = product.id,
-        quantity = quantity,
-        base_price = prices['base'],
-        tax_percent = product.tax.amount,
-        tax_absolute = prices['tax_absolute'],
-        discount_absolute = prices['discount_absolute'],
-        single_total = prices['single_total'],
-        total = prices['total'],
-        bill_notes = bill_notes
+        code=product.code,
+        shortcut=product.shortcut,
+        name=product.name,
+        description=product.description,
+        private_notes=product.private_notes,
+        unit_type=product.get_unit_type_display(),  # ! display, not the 'code'
+        unit_amount=product.unit_amount,
+        stock=product.stock,
+        # billItem's fields
+        bill=bill,
+        product_id=product.id,
+        quantity=quantity,
+        base_price=prices['base'],
+        tax_percent=product.tax.amount,
+        tax_absolute=prices['tax_absolute'],
+        discount_absolute=prices['discount_absolute'],
+        single_total=prices['single_total'],
+        total=prices['total'],
+        bill_notes=bill_notes
     )
     item.save()
 
     # return the item in JSON
-    return JSON_response(bill_item_to_dict(request.user, item, status='ok'))
+    return JSON_response({'item': bill_item_to_dict(request.user, item), 'status': 'ok'})
 
 
 @ login_required
-def remove_bill_item(request, company):
+def remove_item(request, company):
     try:
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:

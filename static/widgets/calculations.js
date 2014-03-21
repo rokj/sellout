@@ -44,7 +44,7 @@ function do_tax(p_incl, p_excl, tax){
     }
 }
 
-function total_price(tax_first, base_price, tax, discounts, quantity, unit_amount, separator){
+function total_price(tax_first, base_price, tax, discounts, quantity, unit_amount){
     // calculates total price
     // parameters:
     // tax_first: if true, first tax is added and then discounts, else v.v.
@@ -61,12 +61,12 @@ function total_price(tax_first, base_price, tax, discounts, quantity, unit_amoun
 
         for(var i = 0; i < d.length; i++){
             if(d[i].type == 'Absolute'){
-                this_discount = get_number(d[i].amount, separator);
+                this_discount = d[i].amount;
                 final = final.minus(this_discount);
                 discount = discount.plus(this_discount);
             }
             else{
-                this_discount = final.times(get_number(d[i].amount, separator).div(Big(100)));
+                this_discount = final.times(d[i].amount).div(Big(100));
                 discount = discount.plus(this_discount);
                 final = final.minus(this_discount)
             }

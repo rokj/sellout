@@ -1,40 +1,46 @@
 /*      */
 /* Bill */
 /*      */
-table#bill{
-    overflow:hidden;
+#bill_scroll_outer{
+    position: fixed;
+    min-width: 300px; /* must be defined for js (separator dragging) */
+
+    /* prevent text selection (interferes with dragging) */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-tr#bill_header{
-    border-bottom:3px solid black;
-    background-color:#dddddd;
+#bill_scroll_inner{
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
 }
 
-td.bill-item-name{
+#bill{
+    /* container for category-button */
+    width: 100%;
+    height: 900000px;
+    float:left;
+    position:relative;
+    border: 1px solid black;
 }
 
-td.bill-item-qty-container{
-    width:70px;
+#bill_header{
+    position: fixed;
+    border-bottom: 3px solid black;
+    background-color: #dddddd;
 }
 
-td.bill-item-price-container{
-    width:70px;
-}
-
-td.bill-item-tax-container{
-    width:70px;
-}
-
-td.bill-item-discount-container{
-    width:80px;
-}
-
-td.bill-item-total-container{
-    width:80px;
+div.item-val{
+    display: table-cell;
 }
 
 p.bill-title{
-    margin-top:0px;
+    margin-top:0;
     margin-bottom:3px;
 }
 
@@ -42,15 +48,21 @@ p.bill-subtitle{
     font-size:12px;
     font-family:"Courier New", "Courier", monospace;
     margin-top:5px;
-    margin-bottom:0px;
+    margin-bottom:0;
 }
 
-input.item-qty{
-    width:30px;
+div.item-val input.qty{
+    width: 30px;
 }
 
-input.item-notes{
-    width:50px;
-    font-size:10px;
+/* bill summary */
+#bill_summary div.total{
+    height: 50px;
 }
-    
+
+/*      */
+/* till */
+/*      */
+#till{
+    position: fixed;
+}
