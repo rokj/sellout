@@ -74,27 +74,25 @@ def mobile_add_contact(request, company):
     if 'type' in data:
         type = data['type']
     else:
-        type = None
-
-
+        return JSON_error("type cannot be None Stupid")
 
     contact = Contact(
-        company = c,
-        created_by = request.user,
-        type = type,
-        company_name = data['company_name'] if 'company_name' in data else None,
-        first_name = data['first_name'] if 'first_name' in data else None,
-        last_name = data['last_name'] if 'last_name' in data else None,
-        sex = data['sex'] if 'sex' in data else None,
-        date_of_birth = data['date_of_birth'] if 'date_of_birth' in data else None,
-        street_address = data['street_address'] if 'street_address' in data else None,
-        postcode = data['postcode'] if 'postcode' in data else None,
-        city = data['city'] if 'city' in data else None,
-        state = data['state'] if 'state' in data else None,
-        country = data['country'] if 'country' in data else None,
-        email = data['email'] if 'email' in data else None,
-        phone = data['phone'] if 'phone' in data else None,
-        #vat = data['vat']
+        company=c,
+        created_by=request.user,
+        type=type,
+        company_name=data.get('company_name'),
+        first_name=data.get('first_name'),
+        last_name=data.get('last_name'),
+        sex=data.get('sex'),
+        date_of_birth=data.get('date_of_birth'),
+        street_address=data.get('street_address'),
+        postcode=data.get('postcode'),
+        city=data.get('city'),
+        state=data.get('state'),
+        country=data.get('country'),
+        email=data.get('email'),
+        phone=data.get('phone'),
+        # vat = data['vat']
     )
     contact.save()
 
@@ -102,47 +100,49 @@ def mobile_add_contact(request, company):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_edit_contact(request, company, contact_id):
-    # update existing contact
+def mobile_edit_contact(request, company):
+
     try:
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
 
+    #contact_id = request.POST.get('contact_id')
+    #print contact_id
     # sellers can edit product
     if not has_permission(request.user, c, 'product', 'edit'):
         return JSON_error(_("You have no permission to edit products"))
 
     data = JSON_parse(request.POST['data'])
+    contact_id = data.get('id')
 
     try:
         contact = Contact.objects.get(id=contact_id)
-    except:
+    except Contact.DoesNotExist:
         return JSON_error(_("Contact doest not exist"))
 
     valid = validate_contact(request.user, c, data)
-    print valid
     if not valid['status']:
         return JSON_error(valid['messege'])
 
     data = valid['data']
-    c = get_object_or_404(Company, url_name=company)
 
     contact.company = c
-    contact.type = data['type']
-    contact.company_name = data['company_name']
-    contact.first_name = data['first_name']
-    contact.last_name = data['last_name']
-    contact.sex = data['sex']
-    contact.date_of_birth = data['date_of_birth']
-    contact.street_address = data['street_address']
-    contact.postcode = data['postcode']
-    contact.city = data['city']
-    contact.state = data['state']
-    contact.country = data['country']
-    contact.email = data['email']
-    contact.phone = data['phone']
-    contact.vat = data['vat']
+    contact.created_by = request.user
+    contact.type = data.get('type')
+    contact.company_name = data.get('company_name')
+    contact.first_name = data.get('first_name')
+    contact.last_name = data.get('last_name')
+    contact.sex = data.get('sex')
+    contact.date_of_birth = data.get('date_of_birth')
+    contact.street_address = data.get('street_address')
+    contact.postcode = data.get('postcode')
+    contact.city = data.get('city')
+    contact.state = data.get('state')
+    contact.country = data.get('country')
+    contact.email = data.get('email')
+    contact.phone = data.get('phone')
+    # contact.vat = data['vat']
 
     contact.save()
 
