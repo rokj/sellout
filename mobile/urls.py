@@ -2,6 +2,7 @@ from django.conf.urls import patterns, url
 from django.utils.translation import ugettext as _
 
 from common import globals as g
+from mobile.views.views import mobile_get_cut
 
 from pos.views import terminal
 from mobile.views import login
@@ -45,7 +46,6 @@ urlpatterns = patterns('',
     url(r_company + _('/manage/contact/delete') + '/(?P<contact_id>\d+)/?$', contact.mobile_delete_contact, name='delete_contact'),
     
     # taxes
-    url(r_company + _('/manage/taxes') + '/?$', tax.mobile_list_taxes, name='list_taxes'), # template view
     url(r_company + r'/manage/json/taxes/?$', tax.mobile_get_taxes, name='get_taxes'), # get all taxes in a json list
     url(r_company + r'/manage/json/taxes/save/?$', tax.mobile_save_taxes, name='save_taxes'), # save (override existing) taxes
 
@@ -57,6 +57,8 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/products/edit/(?P<product_id>\d+)/?$', product.mobile_edit_product, name='edit_product'), # edit (save) product - json
     url(r_company + r'/manage/json/products/delete/(?P<product_id>\d+)/?$', product.delete_product, name='delete_product'), # edit (save) product - json
 
+    # CUT (Categories, units, taxes)
+    url(r_company + r'/manage/json/cut/get', mobile_get_cut, name='get_cut'), # get categories, units, taxes
     # misc (ajax): urls not translated
     
     
