@@ -7,7 +7,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Category
-from pos.views.manage.category import get_category, delete_category, get_all_categories, validate_category
+from pos.views.manage.category import get_category, delete_category, get_all_categories, validate_category, \
+    get_all_categories_structured
 from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, resize_image, validate_image, \
     image_dimensions, max_field_length, image_from_base64, has_permission, no_permission_view
 from common import globals as g
@@ -31,7 +32,7 @@ def mobile_JSON_categories(request, company):
         return JSON_error("no permission")
 
     # return all categories' data in JSON format
-    return JSON_response(get_all_categories(c.id, sort='name', data=[], json=True))
+    return JSON_response(get_all_categories_structured(c.id, sort='name', data=[]))
 
 
 
@@ -39,10 +40,10 @@ def mobile_JSON_categories(request, company):
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_add_category(request, company):
-    return add_category(request, company, -1)
+    return add_category(request, company)
 
 
-def add_category(request, company, parent_id=-1):
+def add_category(request, company):
     try:
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
@@ -55,11 +56,13 @@ def add_category(request, company, parent_id=-1):
     data = JSON_parse(request.POST['data'])
     
     # validate data
-    valid = validate_category(request.user, c, data, parent_id)
+    valid = validate_category(request.user, c, data)
     if not valid['status']:
         return JSON_error(valid['message'])
     data = valid['data']
-        
+
+    parent_id = data['parent_id']
+
     if int(parent_id) == -1:
         parent = None
     else:
@@ -85,11 +88,11 @@ def add_category(request, company, parent_id=-1):
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_edit_category(request, company, category_id):
-    return edit_category(request, company, category_id)
+def mobile_edit_category(request, company):
+    return edit_category(request, company)
 
 
-def edit_category(request, company, category_id):
+def edit_category(request, company):
     try:
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
@@ -100,6 +103,8 @@ def edit_category(request, company, category_id):
         return JSON_error(_("You have no permission to edit products"))
 
     data = JSON_parse(request.POST['data'])
+
+    category_id = data['id']
 
     # see if product exists in database
     try:

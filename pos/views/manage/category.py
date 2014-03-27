@@ -52,7 +52,7 @@ def category_to_dict(c):
     return r
 
 
-def validate_category(user, company, data, parent_id):
+def validate_category(user, company, data):
     # data format (*-validation needed):
     # id
     # name*
@@ -86,7 +86,8 @@ def validate_category(user, company, data, parent_id):
             return r(False, _("You have no permission to edit this product"))
     
     # parent
-    if int(parent_id) != -1:
+    parent_id = data['parent_id']
+    if parent_id != -1:
         # check if product belongs to this company and if he has the required permissions
         try:
             p = Category.objects.get(id=parent_id, company=company)
