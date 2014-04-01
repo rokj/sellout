@@ -55,10 +55,10 @@ def mobile_create_product(request, company):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_edit_product(request, company, product_id):
-    return edit_product(request, company, product_id)
+def mobile_edit_product(request, company):
+    return edit_product(request, company)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_delete_prodcut(request, company, product_id):
-    return delete_product(request, company, product_id)
+def mobile_delete_prodcut(request, company):
+    return delete_product(request, company)

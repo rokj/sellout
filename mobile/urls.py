@@ -35,15 +35,15 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/category/get/(?P<category_id>\d+)/?$', category.mobile_get_category, name='get_category'),
     url(r_company + r'/manage/json/category/add/?$', category.mobile_add_category, name='add_category'),
     url(r_company + r'/manage/json/category/edit/?$', category.mobile_edit_category, name='edit_category'), # edit
-    url(r_company + r'/manage/json/category/delete/(?P<category_id>\d+)/?$', category.mobile_delete_category, name='delete_category'), # delete
+    url(r_company + r'/manage/json/category/delete/?$', category.mobile_delete_category, name='delete_category'), # delete
     url(r_company + r'/manage/json/categories/?$', category.mobile_JSON_categories, name='JSON_categories'),
     
     # contacts
     url(r_company + r'/manage/json/contacts/?$', contact.mobile_list_contacts, name='list_contacts'),
     url(r_company + r'/manage/json/contact/add/?$', contact.mobile_add_contact, name='add_contact'),
     url(r_company + r'/manage/json/contact/get/(?P<contact_id>\d+)/?$', contact.mobile_get_contact, name='get_contact'),
-    url(r_company + '/manage/json/contact/edit/', contact.mobile_edit_contact, name='edit_contact'),
-    url(r_company + _('/manage/contact/delete') + '/(?P<contact_id>\d+)/?$', contact.mobile_delete_contact, name='delete_contact'),
+    url(r_company + r'/manage/json/contact/edit/', contact.mobile_edit_contact, name='edit_contact'),
+    url(r_company + r'/manage/json/contact/delete/?$', contact.mobile_delete_contact, name='delete_contact'),
     
     # taxes
     url(r_company + r'/manage/json/taxes/?$', tax.mobile_get_taxes, name='get_taxes'), # get all taxes in a json list
@@ -54,8 +54,8 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/products/search/?$', product.mobile_search_products, name='search_products'), # product list (search) - json
     url(r_company + r'/manage/json/products/add/?$', product.mobile_create_product, name='mobile_create_product'), # edit (save) product - json
     url(r_company + r'/manage/json/products/get/(?P<product_id>\d+)/?$', product.mobile_get_product, name='get_product'), # product list (search) - json
-    url(r_company + r'/manage/json/products/edit/(?P<product_id>\d+)/?$', product.mobile_edit_product, name='edit_product'), # edit (save) product - json
-    url(r_company + r'/manage/json/products/delete/(?P<product_id>\d+)/?$', product.delete_product, name='delete_product'), # edit (save) product - json
+    url(r_company + r'/manage/json/products/edit/?$', product.mobile_edit_product, name='edit_product'), # edit (save) product - json
+    url(r_company + r'/manage/json/products/delete/?$', product.mobile_delete_prodcut, name='delete_product'), # edit (save) product - json
 
     # CUT (Categories, units, taxes)
     url(r_company + r'/manage/json/cut/get', mobile_get_cut, name='get_cut'), # get categories, units, taxes

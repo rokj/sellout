@@ -146,9 +146,29 @@ def mobile_edit_contact(request, company):
 
     contact.save()
 
-    return JSON_ok()
+    return JSON_ok(extra=contact_to_dict(request.user, contact))
     
 
-def mobile_delete_contact(request, company, contact_id):
-    # TODO
-    return JSON_ok()
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_delete_contact(request, company):
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # check permissions: needs to be manager
+    if not has_permission(request.user, c, 'contact', 'edit'):
+        return no_permission_view(request, c, _("delete contacts"))
+
+    data = JSON_parse(request.POST['data'])
+    contact_id = data.get('id')
+
+    try:
+        contact = Contact.objects.get(id=contact_id)
+    except Contact.DoesNotExist:
+        return JSON_error(_("Contact does not exist"))
+
+    contact.delete()
+
+    return JSON_ok(extra=contact_to_dict(request.user, contact))

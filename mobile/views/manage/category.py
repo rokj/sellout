@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Category
 from pos.views.manage.category import get_category, delete_category, get_all_categories, validate_category, \
-    get_all_categories_structured
+    get_all_categories_structured, category_to_dict
 from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, resize_image, validate_image, \
     image_dimensions, max_field_length, image_from_base64, has_permission, no_permission_view
 from common import globals as g
@@ -32,7 +32,7 @@ def mobile_JSON_categories(request, company):
         return JSON_error("no permission")
 
     # return all categories' data in JSON format
-    return JSON_response(get_all_categories_structured(c.id, sort='name', data=[]))
+    return JSON_response(get_all_categories_structured(c, sort='name', data=[]))
 
 
 
@@ -69,22 +69,22 @@ def add_category(request, company):
         parent = Category.objects.get(id=parent_id)
     
     # save category:
-    product = Category(
+    category = Category(
         company = c,
         parent = parent,
         name = data['name'],
         description = data['description'],
         created_by = request.user,
     )
-    product.save()
+    category.save()
     
     # add image, if it's there
     if data['change_image']:
         if 'image' in data:
-            product.image = data['image']
-            product.save()
+            category.image = data['image']
+            category.save()
     
-    return JSON_ok()
+    return JSON_ok(extra=get_all_categories_structured(c, category))
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
@@ -113,7 +113,7 @@ def edit_category(request, company):
         return JSON_error(_("Product does not exist"))
     
     # validate data
-    valid = validate_category(request.user, c, data, category_id)
+    valid = validate_category(request.user, c, data)
     
     if not valid['status']:
         return JSON_error(valid['message'])
@@ -135,12 +135,37 @@ def edit_category(request, company):
         else: # delete the old image
             category.image.delete()
     category.save()
-    return JSON_ok()
+    return JSON_ok(extra=get_all_categories_structured(c, category))
 
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_delete_category(request, company, category_id):
+def mobile_delete_category(request, company):
+    c = get_object_or_404(Company, url_name=company)
+
+    # check permissions: needs to be at least manager
+    if not has_permission(request.user, c, 'category', 'edit'):
+        return no_permission_view(request, c, _("delete categories"))
+
+    # get category
+    data = JSON_parse(request.POST['data'])
+
+    category_id = data['id']
+    category = get_object_or_404(Category, id=category_id)
+    # check if category actually belongs to the given company
+    if category.company != c:
+        raise Http404 # this category does not exist for the current user
+
+    if Category.objects.filter(parent=category).count() > 0:
+        return JSON_error("Cannot delete category with subcategories")
+
+    # delete the category and return to management page
+    try:
+        category.delete()
+    except:
+        pass
+
+    return redirect('pos:list_categories', company=c.url_name)
     return delete_category(request, company, category_id)
 
 

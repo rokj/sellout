@@ -500,7 +500,10 @@ def delete_category(request, company, category_id):
     # check if category actually belongs to the given company
     if category.company != c:
         raise Http404 # this category does not exist for the current user
-    
+
+    if Category.objects.filter(parent=category).count() > 0:
+        return JSON_error("Cannot delete category with subcategories")
+
     # delete the category and return to management page
     try:
         category.delete()

@@ -339,7 +339,7 @@ def validate_product(user, company, data):
     # image
     # category - id (checked in create/edit_product)
     # code*
-    # shop code*
+    # shortcut*
     # description
     # private notes
     # tax*
@@ -542,18 +542,18 @@ def create_product(request, company):
     
     # save product:
     product = Product(
-        company = c,
-        created_by = request.user,
-        category = data['category'],
-        name = data['name'],
-        unit_type = data['unit_type'],
-        unit_amount = data['unit_amount'],  
-        code = data['code'],
-        shortcut = data['shortcut'],
-        description = data['description'],
-        private_notes = data['private_notes'],
-        stock = data['stock'],
-        tax = data['tax'],
+        company=c,
+        created_by=request.user,
+        category=data.get('category'),
+        name=data.get('name'),
+        unit_type=data.get('unit_type'),
+        unit_amount=data.get('unit_amount'),
+        code=data.get('code'),
+        shortcut=data.get('shortcut'),
+        description=data.get('description'),
+        private_notes=data.get('private_notes'),
+        stock=data.get('stock'),
+        tax=data.get('tax'),
     )
     product.save()
     
@@ -585,7 +585,7 @@ def web_edit_product(request, company, product_id):
     return edit_product(request, company, product_id)
 
 
-def edit_product(request, company, product_id):
+def edit_product(request, company):
     # update existing product
     try:
         c = Company.objects.get(url_name = company)
@@ -599,6 +599,7 @@ def edit_product(request, company, product_id):
     data = JSON_parse(request.POST['data'])
 
     # see if product exists in database
+    product_id = data['id']
     try:
         product = Product.objects.get(id=product_id)
     except:
@@ -647,14 +648,14 @@ def edit_product(request, company, product_id):
     product.updated_by = request.user
     product.save()
 
-    return JSON_ok()
+    return JSON_ok(extra=product_to_dict(request.user, product))
 
 @login_required
 def web_delete_product(request, company, prodcut_id):
     return delete_product(request, company, prodcut_id)
 
 
-def delete_product(request, company, product_id):
+def delete_product(request, company):
     try:
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
@@ -663,7 +664,10 @@ def delete_product(request, company, product_id):
     # sellers can delete products
     if not has_permission(request.user, c, 'product', 'edit'):
         return JSON_error(_("You have no permission to delete products"))
-    
+
+    data = JSON_parse(request.POST['data'])
+    product_id = data['id']
+
     try:
         product = Product.objects.get(id=product_id)
     except Product.DoesNotExist:
@@ -671,7 +675,7 @@ def delete_product(request, company, product_id):
     
     product.delete()
     
-    return JSON_ok()
+    return JSON_ok(extra=product_to_dict(request.user, product))
 
 
 def get_all_products(user, company):
