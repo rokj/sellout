@@ -760,7 +760,7 @@ $(document).ready(function(){
         else{
             // the product's been edited
             // send data to server and update the div with the retrieved 'cleaned' data
-            send_data(product.edit_url, data, "{{csrf_token}}",
+            send_data("{% url 'pos:edit_product' company.url_name %}", data, "{{csrf_token}}",
                 function(response){
                     if(response.status != 'ok') alert(response.message);
                     else get_product(parent);
@@ -771,12 +771,15 @@ $(document).ready(function(){
     
     function delete_product(parent){
         var product = parent.data().product;
+        var data = {};
+        data['id'] = product.id;
         // confirm deletion
         if(confirm("{% trans 'Delete product ' %} '" + product.name + "'?")){
             // TODO: GET or POST method? CSRF tokens? security?
-            get_data(product.delete_url, function(data){
-                if(data.status != 'ok') alert(data.message);
-                else{
+            send_data("{% url 'pos:delete_product' company.url_name %}", data, "{{ csrf_token }}",
+                function(data){
+                    if(data.status != 'ok') alert(data.message);
+                    else{
                     // remove the product's div and delete the variable
                     parent.remove();
                 }

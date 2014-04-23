@@ -40,7 +40,6 @@ def mobile_list_contacts(request, company):
     for c in contacts:
         cs.append(contact_to_dict(request.user, c, "android"))
 
-    print JSON_response(cs)
     return JSON_response(cs)
 
 

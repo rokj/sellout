@@ -7,9 +7,22 @@ from common.globals import UNITS
 from pos.models import Company, Tax
 from pos.views.manage.category import get_all_categories
 from pos.views.manage.tax import get_taxes, tax_to_dict
-from pos.views.util import JSON_error, has_permission, JSON_response
+from pos.views.util import JSON_error, has_permission, JSON_response, JSON_ok
 from django.utils.translation import ugettext as _
 
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_get_units(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    units = UNITS
+    result = {'units': units}
+    return JSON_response(result)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))

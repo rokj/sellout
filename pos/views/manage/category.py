@@ -388,57 +388,10 @@ def web_edit_category(request, company, category_id):
     return edit_category(request, company, category_id)
 
 
-@api_view(['POST', 'GET'])
-@permission_classes((IsAuthenticated,))
-def mobile_edit_category(request, company, category_id):
-    return m_edit_category(request, company, category_id)
-
-def m_edit_category(request, company, category_id):
-    try:
-        c = Company.objects.get(url_name = company)
-    except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
-    
-    # sellers can edit product
-    if not has_permission(request.user, c, 'category', 'edit'):
-        return JSON_error(_("You have no permission to edit products"))
-
-    data = JSON_parse(request.POST['data'])
-
-    # see if product exists in database
-    try:
-        category = Category.objects.get(id=category_id)
-    except:
-        return JSON_error(_("Product does not exist"))
-    
-    # validate data
-    valid = validate_category(request.user, c, data, category_id)
-    
-    if not valid['status']:
-        return JSON_error(valid['message'])
-    data = valid['data']
-    
-    # update category:
-    category.name = data['name']
-    category.description = data['description']
-    
-
-    # image
-    if data['change_image'] == True:
-        if data['image']: # new image is uploaded
-            # create a file from the base64 data and save it to product.image
-            if category.image:
-                category.image.delete()
-            # save a new image
-            category.image = data['image'] # conversion from base64 is done in validate_product
-        else: # delete the old image
-            category.image.delete()
-    category.save()
-    return JSON_ok()
-
 def edit_category(request, company, category_id):
+
     c = get_object_or_404(Company, url_name=company)
-    
+
     # get category
     category = get_object_or_404(Category, id=category_id)
     # check if category actually belongs to the given company

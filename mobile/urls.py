@@ -2,7 +2,8 @@ from django.conf.urls import patterns, url
 from django.utils.translation import ugettext as _
 
 from common import globals as g
-from mobile.views.views import mobile_get_cut
+from mobile.views.manage.tax import mobile_get_taxes
+from mobile.views.views import mobile_get_cut, mobile_get_units
 
 from pos.views import terminal
 from mobile.views import login
@@ -29,29 +30,35 @@ urlpatterns = patterns('',
     # LOGIN
     url(r'^mobile-login/(?P<backend>[\w-]+)$', login.obtain_auth_token),
 
-
-
     # categories
     url(r_company + r'/manage/json/category/get/(?P<category_id>\d+)/?$', category.mobile_get_category, name='get_category'),
     url(r_company + r'/manage/json/category/add/?$', category.mobile_add_category, name='add_category'),
     url(r_company + r'/manage/json/category/edit/?$', category.mobile_edit_category, name='edit_category'), # edit
     url(r_company + r'/manage/json/category/delete/?$', category.mobile_delete_category, name='delete_category'), # delete
-    url(r_company + r'/manage/json/categories/?$', category.mobile_JSON_categories, name='JSON_categories'),
-    
+    url(r_company + r'/manage/json/categories/?$', category.mobile_JSON_categories_strucutred, name='JSON_categories'),
+    url(r_company + r'/manage/json/categories/all/?$', category.mobile_JSON_categories, name='JSON_categories'),
+    url(r_company + r'/manage/json/category/dumps', category.mobile_JSON_dump_categories, name='dump_category'),
     # contacts
     url(r_company + r'/manage/json/contacts/?$', contact.mobile_list_contacts, name='list_contacts'),
     url(r_company + r'/manage/json/contact/add/?$', contact.mobile_add_contact, name='add_contact'),
     url(r_company + r'/manage/json/contact/get/(?P<contact_id>\d+)/?$', contact.mobile_get_contact, name='get_contact'),
     url(r_company + r'/manage/json/contact/edit/', contact.mobile_edit_contact, name='edit_contact'),
     url(r_company + r'/manage/json/contact/delete/?$', contact.mobile_delete_contact, name='delete_contact'),
-    
+
+
+    # discounts
+    url(r_company + r'/manage/json/discounts/?$', discount.mobile_get_discounts, name='get_discounts'),
+
+    # units
+    url(r_company + r'/manage/json/units/?$', mobile_get_units, name='get_units'),
+
     # taxes
     url(r_company + r'/manage/json/taxes/?$', tax.mobile_get_taxes, name='get_taxes'), # get all taxes in a json list
-    url(r_company + r'/manage/json/taxes/save/?$', tax.mobile_save_taxes, name='save_taxes'), # save (override existing) taxes
-
 
     # products
+    url(r_company + r'/manage/json/products/?$', product.mobile_get_products, name='get_products'),
     url(r_company + r'/manage/json/products/search/?$', product.mobile_search_products, name='search_products'), # product list (search) - json
+
     url(r_company + r'/manage/json/products/add/?$', product.mobile_create_product, name='mobile_create_product'), # edit (save) product - json
     url(r_company + r'/manage/json/products/get/(?P<product_id>\d+)/?$', product.mobile_get_product, name='get_product'), # product list (search) - json
     url(r_company + r'/manage/json/products/edit/?$', product.mobile_edit_product, name='edit_product'), # edit (save) product - json
@@ -59,8 +66,7 @@ urlpatterns = patterns('',
 
     # CUT (Categories, units, taxes)
     url(r_company + r'/manage/json/cut/get', mobile_get_cut, name='get_cut'), # get categories, units, taxes
-    # misc (ajax): urls not translated
-    
+
     
     # unit types list
     #

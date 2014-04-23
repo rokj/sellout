@@ -118,10 +118,6 @@ def product_to_dict(user, product):
     ret['unit_amount'] = format_number(user, product.unit_amount)
     ret['stock'] = format_number(user, product.stock)
 
-    # urls
-    ret['get_url'] = reverse('pos:get_product', args=[product.company.url_name, product.id])
-    ret['edit_url'] = reverse('pos:edit_product', args=[product.company.url_name, product.id])
-    ret['delete_url'] = reverse('pos:delete_product', args=[product.company.url_name, product.id])
 
     return ret
 
@@ -581,8 +577,8 @@ def create_product(request, company):
     return JSON_ok()
 
 @login_required
-def web_edit_product(request, company, product_id):
-    return edit_product(request, company, product_id)
+def web_edit_product(request, company):
+    return edit_product(request, company)
 
 
 def edit_product(request, company):
@@ -653,6 +649,10 @@ def edit_product(request, company):
 @login_required
 def web_delete_product(request, company, prodcut_id):
     return delete_product(request, company, prodcut_id)
+
+@login_required
+def web_delete_product(request, company):
+    return delete_product(request, company)
 
 
 def delete_product(request, company):

@@ -65,9 +65,9 @@ urlpatterns = patterns('',
     url(r_company + _('/manage/products') + '/?$', product.products, name='products'), # static (template) page
     url(r_company + r'/manage/json/products/search/?$', product.search_products, name='search_products'), # product list (search) - json
     url(r_company + r'/manage/json/products/add/?$', product.web_create_product, name='web_create_product'), # edit (save) product - json
-    url(r_company + r'/manage/json/products/get/(?P<product_id>\d+)/?$', product.web_get_product, name='get_product'), # product list (search) - json
-    url(r_company + r'/manage/json/products/edit/(?P<product_id>\d+)/?$', product.web_edit_product, name='edit_product'), # edit (save) product - json
-    url(r_company + r'/manage/json/products/delete/(?P<product_id>\d+)/?$', product.delete_product, name='delete_product'), # edit (save) product - json
+    url(r_company + r'/manage/json/products/get/?$', product.web_get_product, name='get_product'), # product list (search) - json
+    url(r_company + r'/manage/json/products/edit/?$', product.web_edit_product, name='edit_product'), # edit (save) product - json
+    url(r_company + r'/manage/json/products/delete/?$', product.web_delete_product, name='delete_product'), # edit (save) product - json
     # users
     #url(r_company + _('/manage/users') + '/?$', manage.users.edit_company, name='edit_users'), # company
     # config (company parameter is needed only for url; configuration is per user, regardless of company
