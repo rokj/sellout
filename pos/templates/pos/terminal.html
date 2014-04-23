@@ -4,10 +4,10 @@
 
 {% block head %}
 
-<link type="text/css" rel="stylesheet" href="{% static 'terminal.css' %}" />
-<link type="text/css" rel="stylesheet" href="{% static 'widgets/products.css' %}" />
-<link type="text/css" rel="stylesheet" href="{% static 'widgets/categories.css' %}" />
-<link type="text/css" rel="stylesheet" href="{% static 'widgets/bill.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'css/terminal.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'css/products.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'css/categories.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'css/bill.css' %}" />
 
 {% comment %} the terminal {% endcomment %}
 <script src="{% static 'widgets/terminal.js' %}"></script>
@@ -17,16 +17,8 @@
 <script src="{% static 'widgets/search.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 <script src="{% static 'widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 
-{% comment %} keyboard {% endcomment %}
-<link href="{% static 'keyboard/css/keyboard.css' %}" rel="stylesheet">
-<script src="{% static 'keyboard/js/jquery.keyboard.js' %}"></script>
-
 {% comment %} other {% endcomment %}
 <script src="{% static 'fuckyeah/fuckyeah.jquery.js' %}"></script>
-<!-- keyboard extensions (optional) -->
-<script src="{% static 'keyboard/js/jquery.mousewheel.js' %}"></script>
-<script src="{% static 'keyboard/js/jquery.keyboard.extension-typing.js' %}"></script>
-<script src="{% static 'keyboard/js/jquery.keyboard.extension-autocomplete.js' %}"></script>
 
 
 {% comment %} 'embedded' javascript {% endcomment %}
