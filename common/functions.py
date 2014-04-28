@@ -34,3 +34,10 @@ def get_image_path(path, table_name):
 
     return upload_callback
 
+
+def get_terminal_url(request):
+# future store url: same as this page's, excluding what's after the
+    # g.MISC['management_url'] string
+    # blocklogic.net/pos/app/register-company >> blocklogic.net/pos/company-name
+    full_url = request.build_absolute_uri()
+    return full_url[:full_url.rfind(g.MISC['management_url'] + '/')]

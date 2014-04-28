@@ -1,0 +1,29 @@
+div.split-cell{
+    float: left;
+    width: 45%;
+    margin-bottom: 20px;
+}
+
+div.split-cell.first{ padding-right: 5% }
+div.split-cell.last{ padding-left: 5%; }
+
+input[type='submit']{
+    width: 100%;
+}
+
+div.left-column form{
+    border-top: 3px solid #646464;
+    border-bottom: 3px solid #646464;
+    padding-bottom: 30px;
+}
+
+span.discount-active, span.discount-inactive{ text-transform: uppercase; }
+span.discount-active{ color: #00aa00; }
+span.discount-inactive { color: #aa0000; }
+
+div.clear-results{
+    text-align: right;
+}
+div.clear-results a{
+    color: #646464;
+}

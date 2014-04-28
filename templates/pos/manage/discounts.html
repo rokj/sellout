@@ -1,0 +1,138 @@
+{% extends "pos/manage/manage.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block section_head %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/management/discounts.css' %}" />
+<script type="text/javascript">
+$(document).ready(function(){
+	// append datepickers
+	$("#id_start_date, #id_end_date").datepicker({
+		dateFormat:"{{ date_format_jquery|escapejs }}"
+	});
+});
+</script>
+{% endblock %}
+
+{% block manage_content %}
+
+<h1>{% trans 'Discounts' %}</h1>
+
+{% comment %} filter discounts {% endcomment %}
+<div class="left-column">
+    <form method="post" action="{% url 'pos:list_discounts' company.url_name %}">
+    {% csrf_token %}
+
+    <span class="error">{{ filter_form.non_field_errors }}</span>
+
+
+    <div class="form-field">
+        <span class="error">{{ filter_form.search.errors }}</span>
+        {{ filter_form.search.label_tag }}
+        {{ filter_form.search}}
+    </div>
+
+    <div class="form-field">
+        <div class="split-cell first bottom-space">
+            <span class="error">{{ filter_form.start_date.errors }}</span>
+            {{ filter_form.start_date.label_tag }}
+            {{ filter_form.start_date }}
+        </div>
+
+        <div class="split-cell last">
+            <span class="error">{{ filter_form.end_date.errors }}</span>
+            {{ filter_form.end_date.label_tag }}
+            {{ filter_form.end_date }}
+        </div>
+    </div>
+
+    <div class="form-field clear-floats">
+        {{ filter_form.active.label_tag }}
+        <span class="error">{{ filter_form.active.errors }}</span>
+
+        <div class="split-cell first">
+            {{ filter_form.active }}
+        </div>
+        <div class="split-cell last">
+            <input type="submit" value="{% trans 'Search' %}" />
+        </div>
+    </div>
+
+    <div class="clear-floats">
+        {% comment %} only display if search results are being displayed (it's just a link back to 'discounts') {% endcomment %}
+        {% if results_display %}
+            <div class="clear-results">
+                <a href="{% url 'pos:list_discounts' company.url_name %}">
+                    {% trans 'Clear results' %}</a>
+            </div>
+        {% endif %}
+    </div>
+    </form>
+
+    {% comment %} add discount {% endcomment %}
+    <h2>{% trans 'Add' %}</h2>
+    <a class="add-discount button"
+       href="{% url 'pos:add_discount' company.url_name %}">
+        {% trans 'New discount' %}
+    </a>
+</div>
+
+<div class="content">
+    {% if discounts %}
+        {% for d in discounts %}
+            <div class="object-container">
+                <div class="title">
+                    {{ d.code }}
+
+                    <div class="controls">
+                        <a href="{% url 'pos:edit_discount' company.url_name d.id %}">{% trans 'Edit' %}</a>
+                        <a href="{% url 'pos:delete_discount' company.url_name d.id  %}">{% trans 'Delete' %}</a>
+                    </div>
+                </div>
+
+                <table class="details">
+                    <tr>
+                        <td class="details-label">{% trans 'Description' %} </td>
+                        <td>{{ d.description }} </td>
+                    </tr>
+                    <tr>
+                        <td class="details-label">{% trans 'Starts' %}</td>
+                        <td>{{ d.start_date|date:date_format_django }}</td>
+                    </tr>
+                    <tr>
+                        <td class="details-label">{% trans 'Ends' %}</td>
+                        <td>{{ d.end_date|date:date_format_django }}</td>
+                    </tr>
+                    <tr>
+                        <td class="details-label">{% trans 'Amount' %}</td>
+                        <td>{{ d.amount }}</td>
+                    </tr>
+                    <tr>
+                        <td class="details-label">{% trans 'Active' %}</td>
+                        <td>
+                            {% if d.active %}
+                                <span class="discount-active">{% trans 'Yes' %}</span>
+                            {% else %}
+                                <span class="discount-inactive">{% trans 'No' %}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% endfor %}
+
+        {% comment %} paginator pages {% endcomment %}
+        <div class="paginator">
+            {% for p in paginator.page_range %}
+                <a href="?page={{p}}" {% comment %} django templates can only compare strings{% endcomment %}
+                    {% if p|stringformat:"s" == current_page|stringformat:"s" %} class="current-page"{% endif %}>
+                    {{p}}</a>
+                {% if not forloop.last %}|{% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <span class="no-results">{% trans 'No discounts found.' %}</span>
+    {% endif %}
+</div>
+{% endblock %}
+

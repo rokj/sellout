@@ -14,7 +14,7 @@
 {% comment %} widgets {% endcomment %}
 <script src="{% static 'widgets/categories.js' %}"></script> {% comment %} categories selector {% endcomment %}
 <script src="{% static 'widgets/products.js' %}"></script> {% comment %} products selector {% endcomment %}
-<script src="{% static 'widgets/search.js' %}"></script> {% comment %} bill and its items {% endcomment %}
+<script src="{% static 'widgets/search.js' %}"></script> {% comment %} searching products/categories {% endcomment %}
 <script src="{% static 'widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 
 {% comment %} other {% endcomment %}
@@ -86,12 +86,8 @@ $(document).ready(function(){
 {% block content %}
 {% comment %} the 'loading' div {% endcomment %}
 {% comment %} management, logout, ... links {% endcomment %}
-<div id="manage_bar">
-    <div id="blocklogic"><a href="http://www.blocklogic.net">BlockLogic</a></div>
-    <div class="management-bar-button"><a href="{% url 'pos:manage_home' company.url_name %}">{% trans 'Manage' %}</a></div>
-    <div class="management-bar-button"><a href="#">{% trans 'Logout' %}</a></div>
-    <div id="messages">messages</div> {% comment %} actually in center, but with overflow:hidden {% endcomment %}
-</div>
+
+<div id="messages">messages</div> {% comment %} actually in center, but with overflow:hidden {% endcomment %}
 
 {% comment %} the bill (scrolling) {% endcomment %}
 {% comment %} bill header has the same layout as items and will be copied when adding new (items) {% endcomment %}
@@ -210,7 +206,7 @@ $(document).ready(function(){
     </div>
     <div id="controls">
         <input type="text" id="search_products_filter" />
-        <button type="button" id="search_products_submit"><img src="{% static 'graphics/search.png'%}"/></button>
+        <button type="button" id="search_products_submit"><img src="{% static 'graphics/search.png' %}"/></button>
     </div>
 </div>
 

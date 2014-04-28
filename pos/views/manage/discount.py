@@ -40,6 +40,7 @@ def is_discount_active(d):
         
     return valid
 
+
 def discount_to_dict(user, d):
     return {
         'id':d.id,
@@ -75,6 +76,7 @@ def JSON_discounts(request, company, product_id=None):
     
     # serialize
     return JSON_response(ds)
+
 
 def validate_discount(data, user):
     """ validates data for discount
@@ -137,6 +139,7 @@ def validate_discount(data, user):
     # ok
     return {'success':True, 'message':None, 'data':data}
 
+
 #############
 ### views ###
 #############
@@ -159,12 +162,13 @@ class DiscountForm(forms.Form):
         else:
             return r['data']
 
+
 class DiscountFilterForm(forms.Form):
-    description = forms.CharField(required=False)    
-    code = forms.CharField(required=False)
+    search = forms.CharField(required=False)
     start_date = forms.CharField(required=False, max_length=g.DATE['max_date_length'])
     end_date = forms.CharField(required=False, max_length=g.DATE['max_date_length'])
     active = forms.NullBooleanField(required=False)
+
 
 @login_required
 def list_discounts(request, company):
@@ -175,19 +179,18 @@ def list_discounts(request, company):
         return no_permission_view(request, c, _("view discounts"))
     
     discounts = Discount.objects.filter(company__id=c.id)
-    
+
+    results_display = False
+
     # show the filter form
     if request.method == 'POST':
         form = DiscountFilterForm(request.POST)
         
         if form.is_valid():
             # filter by whatever is in the form: description
-            if form.cleaned_data.get('description'):
-                discounts = discounts.filter(description__icontains=form.cleaned_data['description'])
-            
-            # code
-            if form.cleaned_data.get('code'):
-                discounts = discounts.filter(code__icontains=form.cleaned_data['code'])
+            if form.cleaned_data.get('search'):
+                discounts = discounts.filter(description__icontains=form.cleaned_data['search']) | \
+                            discounts.filter(code__icontains=form.cleaned_data['search'])
             
             # start_date
             if form.cleaned_data.get('start_date'):
@@ -206,11 +209,10 @@ def list_discounts(request, company):
             if form.cleaned_data.get('active') is not None:
                 discounts = discounts.filter(active=form.cleaned_data['active'])
                 
-            results_display = True # search results are being displayed
+            results_display = True  # search results are being displayed
     else:
         form = DiscountFilterForm()
-        results_display = False # no results are being displayed, so don't show the 'clear results' link in template
-        
+
     # show discounts
     paginator = Paginator(discounts, get_value(request.user, 'pos_discounts_per_page'))
 
@@ -223,15 +225,15 @@ def list_discounts(request, company):
         discounts = paginator.page(paginator.num_pages)
 
     context = {
-        'company':c,
-        'discounts':discounts,
-        'paginator':paginator,
-        'filter_form':form,
-        'title':_("Discounts"),
-        'site_title':g.MISC['site_title'],
-        'date_format_django':get_date_format(request.user, 'django'),
-        'date_format_jquery':get_date_format(request.user, 'jquery'),
-        'results_display':results_display,
+        'company': c,
+        'discounts': discounts,
+        'paginator': paginator,
+        'filter_form': form,
+        'title': _("Discounts"),
+        'site_title': g.MISC['site_title'],
+        'date_format_django': get_date_format(request.user, 'django'),
+        'date_format_jquery': get_date_format(request.user, 'jquery'),
+        'results_display': results_display,
     }
 
     return render(request, 'pos/manage/discounts.html', context) 

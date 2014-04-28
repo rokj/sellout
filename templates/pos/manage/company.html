@@ -1,0 +1,137 @@
+{% extends "pos/manage/manage.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block section_head %}
+<script type="text/javascript" src="{% static 'js/jquery.customfileinput.js' %}"></script>
+
+<link type="text/css" rel="stylesheet" href="{% static 'css/management/company.css' %}" />
+
+<style type="text/css">
+img.logo-placeholder{
+    max-width:{{logo_dimensions.0}}px;
+    max-height:{{logo_dimensions.1}}px;
+}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#id_image")
+        .customFileInput()
+        .change(function(){
+            preview_image(this, "#logo", {{logo_dimensions.0}}, {{logo_dimensions.1}});
+        });
+});
+
+</script>
+{% endblock %}
+
+{% block manage_content %}
+
+<h1>{% trans 'Company' %}</h1>
+
+<form action="{% url 'pos:edit_company' company.url_name %}" method="post" enctype="multipart/form-data">
+    <span class="error">{{ form.non_field_errors }}</span>
+    {% csrf_token %}
+
+    <div class="management-column">
+        {% if company.image %}
+            <img id="logo" src="{{ company.image.url }}" alt="company_logo">
+        {% else %}
+            <img id="logo" src="{% static 'graphics/placeholder.png' %}" alt="company_logo" class="logo-placeholder">
+        {% endif %}
+
+        <div class="form-field">
+            <span class="error">{{ form.image.errors }}</span>
+            {{ form.image.label_tag }}
+            {{ form.image }}
+        </div>
+
+        <div class="form-field">
+            <span class="error">{{ form.name.errors }}</span>
+            {{ form.name.label_tag }}
+            {{ form.name }}
+        </div>
+
+        <div class="form-field">
+            <span class="error">{{ form.url_name.errors }}</span>
+            {{ form.url_name.label_tag }}
+            {{ pos_url }}{{ form.url_name }}
+        </div>
+    </div>
+
+    <div class="management-column">
+        <div class="form-field">
+            <span class="error">{{ form.vat_no.errors }}</span>
+            {{ form.vat_no.label_tag }}
+            {{ form.vat_no }}
+        </div>
+
+        <div class="form-field">
+            <span class="error">{{ form.street.errors }}</span>
+            {{ form.street.label_tag }}
+            {{ form.street }}
+        </div>
+
+        <div class="form-field">
+            <span class="error">{{ form.postcode.errors }}</span>
+            {{ form.postcode.label_tag }}
+            {{ form.postcode }}
+        </div>
+
+        <div class="form-field">
+            <span class="error">{{ form.city.errors }}</span>
+            {{ form.city.label_tag }}
+            {{ form.city }}
+        </div>
+
+        <div class="form-field">
+            <span class="error">{{ form.state.errors }}</span>
+            {{ form.state.label_tag }}
+            {{ form.state }}
+        </div>
+
+        <div class="form-field">
+            <span class="error">{{ form.country.errors }}</span>
+            {{ form.country.label_tag }}
+            {{ form.country }}
+        </div>
+    </div>
+
+    <div class="management-column">
+        <div class="form-field">
+            <span class="error">{{ form.phone.errors }}</span>
+            {{ form.phone.label_tag }}
+            {{ form.phone }}
+        </div>
+
+        <div class="form-field">
+            <span class="error">{{ form.notes.errors }}</span>
+            {{ form.notes.label_tag }}
+            {{ form.notes }}
+        </div>
+
+        <div class="form-field">
+            <span class="error">{{ form.email.errors }}</span>
+            {{ form.email.label_tag }}
+            {{ form.email }}
+        </div>
+
+        <div class="form-field">
+            <span class="error">{{ form.website.errors }}</span>
+            {{ form.website.label_tag }}
+            {{ form.website }}
+        </div>
+
+        <div class="form-footer">
+            <div class="form-footer-column">
+                <input type="button" id="static_cancel" value="{% trans 'Cancel' %}" />
+            </div>
+            <div class="form-footer-column">
+                <input type="submit" value="{% trans 'Save' %}" />
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

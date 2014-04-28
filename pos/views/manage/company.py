@@ -13,7 +13,8 @@ from pos.views.util import JSON_response, JSON_parse, \
                            no_permission_view
 from common import globals as g
 import unidecode
-from common.functions import get_random_string
+from common.functions import get_random_string, get_terminal_url
+from common import widgets
 
 import re
 
@@ -30,7 +31,7 @@ def is_url_name_unique(url_name):
         return True
     
     # ??? any other exceptions?
-    return False
+
 
 def check_url_name(url_name):
     # a valid url name:
@@ -53,7 +54,8 @@ def check_url_name(url_name):
             return False
     except:
         return False
-    
+
+
 def unique_url_name(url_name):
     # check if url exists already and if it does, append a number
     # and return a unique url.
@@ -72,6 +74,7 @@ def unique_url_name(url_name):
         else:
             try_name = url_name[0:max_len - 1 - len(str(n))] + '-' + str(n)
             n += 1
+
 
 def url_name_suggestions(request):
     # there's a 'name' in request:
@@ -143,6 +146,7 @@ def url_name_suggestions(request):
     # pass on to the page
     return JSON_response({'suggestions':suggestions})
 
+
 ###############
 ### company ###
 ###############
@@ -169,10 +173,10 @@ class CompanyForm(forms.ModelForm):
 
     class Meta:
         model = Company
-        fields = ['name',
+        fields = ['image',
+                  'name',
                   'url_name',
                   'email',
-                  'image',
                   'street',
                   'postcode',
                   'city',
@@ -180,10 +184,12 @@ class CompanyForm(forms.ModelForm):
                   'country',
                   'phone',
                   'vat_no',
-                  'notes']
+                  'notes',
+                  'website']
         widgets = {
-            'image': forms.ClearableFileInput,
+            'image': widgets.PlainClearableFileInput,
         }
+
 
 # for json etc.
 def company_to_dict(company):
@@ -199,6 +205,7 @@ def company_to_dict(company):
     c['vat_no'] = company.vat_no
     
     return c
+
 
 # registration
 @login_required
@@ -222,19 +229,12 @@ def register_company(request):
         # show an empty form
         form = CompanyForm()
     
-    # some beautifixes:
-    # future store url: same as this page's, excluding what's after the
-    # g.MISC['management_url'] string
-    # blocklogic.net/pos/app/register-company >> blocklogic.net/pos/company-name
-    full_url = request.build_absolute_uri()
-    pos_url = full_url[:full_url.rfind(g.MISC['management_url'] + '/')]   
-    
     context = {
-       'form':form,
-       'pos_url':pos_url,
-       'logo_dimensions':g.IMAGE_DIMENSIONS['logo'],
-       'title':_("Registration"),
-       'site_title':g.MISC['site_title'],
+       'form': form,
+       'pos_url': get_terminal_url(request),
+       'logo_dimensions': g.IMAGE_DIMENSIONS['logo'],
+       'title': _("Registration"),
+       'site_title': g.MISC['site_title'],
     }
 
     return render(request, 'pos/manage/register.html', context)
@@ -251,11 +251,11 @@ def edit_company(request, company):
         return no_permission_view(request, c, _("edit company details"))
     
     context = {
-        'company':c,
-        'logo_dimensions':g.IMAGE_DIMENSIONS['logo'],
-        'title':_("Company details"),
-        'site_title':g.MISC['site_title'],
-        'logo_dimensions':g.IMAGE_DIMENSIONS['logo'],
+        'company': c,
+        'logo_dimensions': g.IMAGE_DIMENSIONS['logo'],
+        'title': _("Company details"),
+        'site_title': g.MISC['site_title'],
+        'pos_url': get_terminal_url(request),
     }
     
     if request.method == 'POST':

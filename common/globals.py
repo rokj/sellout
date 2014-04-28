@@ -150,22 +150,19 @@ TIME_FORMATS = {
             },
 }
 
-
-
 DATE = {
     'max_date_length': 10,
 }
 
-
 # misc
 MISC = {
-    'company_url_length':50,
-    'site_title':'webpos',
-    'management_url':'admin', # must not be empty!
-                              # (to differentiate between company and management sites)
-    'max_upload_image_size':2*2**20, # 2 megabytes
-    'image_format':'png', # all images will be saved in this format
-    'image_upload_formats':'jpg|jpeg|gif|png|bmp|tiff', # supported image formats (as regex "options")
+    'company_url_length': 50,
+    'site_title': 'webpos',
+    'management_url': 'admin',  # must not be empty!
+                                # (to differentiate between company and management sites)
+    'max_upload_image_size': 2*2**20,  # 2 megabytes
+    'image_format': 'png',  # all images will be saved in this format
+    'image_upload_formats': 'jpg|jpeg|gif|png|bmp|tiff',  # supported image formats (as regex "options")
 }
 
 IMAGE_DIMENSIONS = {
@@ -178,11 +175,11 @@ IMAGE_DIMENSIONS = {
 
 # premissions
 PERMISSION_GROUPS = ( # retrieve readable format with get_permission_display()
-    ('guest',   _("Guest")),   # can only view stuff
-    ('cashier', _("Cashier")), # can write and edit bills
-    ('seller',  _("Seller")),  # can add and edit products
-    ('manager', _("Manager")), # can add and edit discounts, contacts, categories, ...
-    ('admin',   _("Admin")),   # can do anything
+    ('guest',   _("Guest")),    # can only view stuff
+    ('cashier', _("Cashier")),  # can write and edit bills
+    ('seller',  _("Seller")),   # can add and edit products
+    ('manager', _("Manager")),  # can add and edit discounts, contacts, categories, ...
+    ('admin',   _("Admin")),    # can do anything
 )
 
 PERMISSIONS = { # 'chapters' that each group can view or manage

@@ -1,22 +1,17 @@
-{% extends "pos/manage/manage.html" %}
-{% load staticfiles %}
+{% extends 'pos/manage/manage.html' %}
+{% load static %}
 {% load i18n %}
 
-{% block head %}
+{% block section_head %}
+
 <style type="text/css">
-img.preview-product{
+img.preview-product{ /* some data directly from view */
     max-width:{{ image_dimensions.0 }}px;
     max-height:{{ image_dimensions.1 }}px;
 }
-
-/* TODO: move to products.css */
-.negative-profit{
-    color:white;
-    font-weight:bold;
-    background-color:red;
-    padding:2px;
-}
 </style>
+
+<link type="text/css" rel="stylesheet" href="{% static 'css/management/products.css' %}" />
 
 {% comment %}
 javascript:
@@ -68,7 +63,7 @@ $(document).ready(function(){
         // update products when search criteria has changed (gets called on timeout or on click)
         // assemble a JSON object with all search criteria and pass it to the view
         var search_criteria = {
-            general_filter:$("#general_filter").val(),
+            general_filter:$("#general_filter").val()
         };
         
         if(adv_chk_obj.prop("checked") == true){

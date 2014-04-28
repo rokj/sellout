@@ -40,25 +40,31 @@ Terminal = function(g){
         var manage_height = p.items.manage_bar.height();
         p.items.manage_bar.width(window_width); // width is 100%
 
-        // splitter
-        p.items.splitter.offset({ top: manage_height, left: p.g.config.bill_width });
+        // splitter: if it is pushed away further than the width of window, reset it
+        var sp = p.g.config.bill_width;
+        if(sp > $(window).width()){
+            // a reasonable default
+            sp = $(window).width() / 4;
+        }
+
+        p.items.splitter.offset({ top: manage_height, left: sp });
         p.items.splitter.height(window_height - manage_height);
-        var splitter_left = p.g.config.bill_width + p.items.splitter.width();
+        var splitter_left = sp + p.items.splitter.width();
 
         // till
         var till_height = p.items.till.height();
         p.items.till.offset({left: 0, top: window_height - till_height});
-        p.items.till.width(p.g.config.bill_width);
+        p.items.till.width(sp);
 
         // bill header
         var header_height = p.items.bill_header.height();
         p.items.bill_header.offset({top: manage_height, left: 0});
-        p.items.bill_header.width(p.g.config.bill_width);
+        p.items.bill_header.width(sp);
 
         // bill
         p.items.bill.offset({ top: manage_height + header_height, left: 0 });
         p.items.bill.height(window_height - manage_height - till_height - header_height);
-        p.items.bill.width(p.g.config.bill_width);
+        p.items.bill.width(sp);
 
         // controls
         var controls_height = p.items.controls.height();
@@ -86,7 +92,7 @@ Terminal = function(g){
             // get splitter position
             send_data(
                 p.g.urls.save_terminal_settings,
-                { bill_width: p.g.config.bill_width },
+                { bill_width: sp },
                 p.g.csrf_token, null
             );
         }

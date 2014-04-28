@@ -1,19 +1,16 @@
 {% extends "pos/manage/manage.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load i18n %}
 
-{% block head %}
-
+{% block section_head %}
 <script type="text/javascript">
-$(document).ready(function(){
-	// append datepicker to form ids:
-	$("#id_start_date, #id_end_date").datepicker({
-		dateFormat:"{{ date_format_jquery|escapejs }}"
-	});
-});
-
+    $(document).ready(function(){
+        // append datepicker to form ids:
+        $("#id_start_date, #id_end_date").datepicker({
+            dateFormat:"{{ date_format_jquery|escapejs }}"
+        });
+    });
 </script>
-
 {% endblock %}
 
 {% block manage_content %}

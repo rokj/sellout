@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load i18n %}
 
 {% block head %}
@@ -9,7 +9,7 @@ function show_suggestions(data){
     div_obj.empty();
     
     for(var i = 0; i < data.suggestions.length; i++){
-        s = data.suggestions[i]
+        s = data.suggestions[i];
         
         entry = $("<p>", {"class":"suggestion-list-item"});
         entry.text(s);

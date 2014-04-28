@@ -1,9 +1,9 @@
 {% extends "pos/manage/manage.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load thumbnail %}
 {% load i18n %}
 
-{% block head %}
+{% block section_head %}
 <style type="text/css">
 img.category-placeholder{
     width:{{image_dimensions.0}}px;
@@ -13,8 +13,9 @@ img.category-placeholder{
 {% endblock %}
 
 {% block manage_content %}
+    <h1>{% trans 'Categories' %}</h1>
 
-<a href="{% url 'pos:add_category' company.url_name -1 %}">Add category</a><br />
+    <a href="{% url 'pos:add_category' company.url_name -1 %}">Add category</a><br />
 
 {% for c in categories %}
     {{c.level}}

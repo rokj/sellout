@@ -1,0 +1,193 @@
+#management_menu{
+    display: block;
+    background-color: #000000;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#management_menu li{
+    padding: 0;
+}
+
+.menu-hidden{
+    /* simpleMenus should not be hidden with display: none, but
+       height: 0 to keep the necessary horizontal space occupied */
+    height: 0;
+}
+
+#management_content{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: -1; /* keep it below the statusbar */
+
+    margin-top: 3em;
+}
+
+h1{
+    text-transform: uppercase;
+}
+
+/* controls and widgets and stuff */
+label{
+    text-transform: uppercase;
+    font-size: 10px;
+    color: #999999;
+}
+
+input[type='text'], textarea {
+    border-radius: 0;
+    border-width: 1px;
+}
+
+input[type='submit'], input[type='button']{
+    color: #ffffff;
+    border: none;
+    height: 2.5em;
+}
+
+input[type='submit']{ background-color: #00aa00; }
+input#static_cancel{ background-color: #aa0000; }
+
+select{
+    border: none;
+    background-color: #646464;
+    color: #ffffff;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+div.custom-file-input{
+    display: inline;
+}
+
+div.custom-file-input input{
+    border: none;
+    height: 2.5em;
+    background-color: #000000;
+    color: #ffffff;
+}
+
+div.form-field-container{
+    display: inline;
+}
+
+form span.error{
+    color: #ff0000;
+}
+
+div.management-column{
+    width: 30%;
+    float: left;
+    max-width: 350px;
+    margin-left: 20px;
+    margin-right: 40px;
+}
+
+div.form-field label{
+    display: block;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+#image-clear_id + label{
+    /* stupid clear boxes require special attention */
+    display: inline;
+    vertical-align: middle;
+}
+#image-clear_id{
+    vertical-align: middle;
+}
+
+div.form-field input[type='text'], div.form-field select, div.form-field textarea{
+    width: 100%;
+}
+
+div.clear-columns{
+    clear: both;
+}
+
+div.form-footer{
+    margin-top: 30px;
+}
+
+div.form-footer-column{
+    float: left;
+    width: 50%;
+    text-align: center;
+}
+
+div.left-column{
+    float: left;
+    width: 300px;
+    position: fixed;
+    margin-left: 30px;
+}
+
+div.left-column + div.content{
+    margin-left: 360px; /* the same as .left-column width plus some border */
+}
+
+/* details about product, discount, ... in a table */
+div.object-container{
+    position: relative;
+    padding-top: 2em; /* the height of object-container.title */
+    
+    background-color: #f7f7f7;
+    max-width: 500px;
+    margin: 10px;
+}
+
+div.object-container div.title{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2em;
+    line-height: 2em;
+
+    color: #ffffff;
+    background-color: #646464;
+}
+
+div.object-container div.title div.controls{
+    float: right;
+}
+
+td.details-label{
+    color: #646464;
+    padding-right: 30px;
+}
+
+div.paginator{
+    max-width: 500px;
+    text-align: center;
+}
+div.paginator a{
+    text-decoration: none;
+    font-weight: bold;
+}
+div.paginator a.current-page{ font-size: 120%; }
+
+/* search/filter results */
+span.no-results{
+    color: #969696;
+    font-style: italic;
+}
+
+/* buttons that are actually links */
+a.button{
+    height: 2.5em;
+    line-height: 2.5em;
+    display: inline-block;
+    color: #ffffff;
+    text-decoration: none;
+    text-transform: uppercase;
+    padding-left: 10px;
+    padding-right: 10px;
+    cursor: default;
+    background-color: #0000dd;
+}

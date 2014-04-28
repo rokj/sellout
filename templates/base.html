@@ -1,34 +1,57 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 
 <head>
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
     {% comment %} CSS {% endcomment %}
     <link rel="stylesheet" href="{% static 'jquery-ui-1.10.3/themes/base/jquery-ui.css' %}">
-    
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
     {% comment %} jQuery {% endcomment %}
     <script type="text/javascript" src="{% static 'jquery-ui-1.10.3/jquery-1.9.1.js' %}"></script>
     <script type="text/javascript" src="{% static 'jquery-ui-1.10.3/ui/jquery-ui.js' %}"></script>
     
     {% comment %} bignumber (for all number manipulation) {% endcomment %}
-    <script src="{% static 'big.js' %}"></script>
+    <script src="{% static 'js/big.js' %}"></script>
     
     {% comment %} translation {% endcomment %}
     <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
 
-    
     {% comment %} common javascript files {% endcomment %}
-    <script type="text/javascript" src="{% static 'ajax.js' %}"></script>
-    <script type="text/javascript" src="{% static 'common.js' %}"></script>
-    <script type="text/javascript" src="{% static 'widgets/calculations.js' %}"></script>
-    
+    <script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/common.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/widgets/calculations.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.simplemenu.js' %}"></script>
+
     <title>{% block title %}{{title}} - {{site_title}}{% endblock %}</title>
     
-    {% block head %}{% endblock %}
+    {% block head %}asdf{% endblock %}
 </head>
-    {% block body_tag %}<body>{% endblock %}{% comment %} in case something needs to be assigned to body tag (styles, etc.){% endcomment %}
+{% block body_tag %}<body>{% endblock %}{% comment %} in case something needs to be assigned to body tag (styles, etc.){% endcomment %}
+    {% block status_bar %}
+        <div id="status_bar">
+            <div id="logo">
+                POSSY
+            </div>
+
+            <div id="user_menu_button" class="statusbar-button">
+                {{ request.user }} <a href="#">{% trans 'Logout' %}</a>
+            </div>
+
+            <div id="management_button" class="statusbar-button">
+                {% block management_menu %}
+                    {# will be replaced by manage menu in management #}
+                    <a href="{% url 'pos:manage_home' company.url_name %}">{% trans 'Management' %}</a>
+                {% endblock %}
+            </div>
+
+            <div id="terminal_button" class="statusbar-button">
+                <a href="{% url 'pos:terminal' company.url_name %}">{% trans 'Terminal' %}</a>
+            </div>
+
+        </div>
+    {% endblock %}
 
     {% block content %}{% endblock %}
-    
-<!-- footer -->
 </body>
