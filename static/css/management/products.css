@@ -1,6 +1,47 @@
+#filter_form input[type='text']{
+    width: calc(100% - 5px); /* the padding, defined in managebase.css */
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+#filter-form label{
+    display: block;
+}
+
+#filter_form input[type='button']{
+    width: 100%;
+}
+
+#advanced_search_toggle{
+    vertical-align: middle;
+}
+
+/* the 'advanced' "button" */
+#advanced_search_toggle{ display: none; }
+#advanced_search_toggle + label{
+    font-size: inherit;
+    width: 100%;
+    line-height: 2.5em;
+    text-align: center;
+    background-color: #000000;
+    color: #646464;
+    display: block;
+    font-weight: normal;
+}
+
+#advanced_search_toggle:checked + label{
+    color: #ffffff;
+    font-weight: bold;
+}
+
 .negative-profit{
     color:white;
     font-weight:bold;
     background-color:red;
     padding:2px;
 }
+
+#filter_form_controls{
+    margin-top: 15px;
+}
+

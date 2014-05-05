@@ -31,7 +31,7 @@ $(document).ready(function(){
 <h1>{% trans 'Company' %}</h1>
 
 <form action="{% url 'pos:edit_company' company.url_name %}" method="post" enctype="multipart/form-data">
-    <span class="error">{{ form.non_field_errors }}</span>
+    <div class="error">{{ form.non_field_errors }}</div>
     {% csrf_token %}
 
     <div class="management-column">
@@ -42,19 +42,19 @@ $(document).ready(function(){
         {% endif %}
 
         <div class="form-field">
-            <span class="error">{{ form.image.errors }}</span>
+            <div class="error">{{ form.image.errors }}</div>
             {{ form.image.label_tag }}
-            {{ form.image }}
+            <div> {{ form.image }} </div>
         </div>
 
         <div class="form-field">
-            <span class="error">{{ form.name.errors }}</span>
+            <div class="error">{{ form.name.errors }}</div>
             {{ form.name.label_tag }}
             {{ form.name }}
         </div>
 
         <div class="form-field">
-            <span class="error">{{ form.url_name.errors }}</span>
+            <div class="error">{{ form.url_name.errors }}</div>
             {{ form.url_name.label_tag }}
             {{ pos_url }}{{ form.url_name }}
         </div>
@@ -62,37 +62,37 @@ $(document).ready(function(){
 
     <div class="management-column">
         <div class="form-field">
-            <span class="error">{{ form.vat_no.errors }}</span>
+            <div class="error">{{ form.vat_no.errors }}</div>
             {{ form.vat_no.label_tag }}
             {{ form.vat_no }}
         </div>
 
         <div class="form-field">
-            <span class="error">{{ form.street.errors }}</span>
+            <div class="error">{{ form.street.errors }}</div>
             {{ form.street.label_tag }}
             {{ form.street }}
         </div>
 
         <div class="form-field">
-            <span class="error">{{ form.postcode.errors }}</span>
+            <div class="error">{{ form.postcode.errors }}</div>
             {{ form.postcode.label_tag }}
             {{ form.postcode }}
         </div>
 
         <div class="form-field">
-            <span class="error">{{ form.city.errors }}</span>
+            <div class="error">{{ form.city.errors }}</div>
             {{ form.city.label_tag }}
             {{ form.city }}
         </div>
 
         <div class="form-field">
-            <span class="error">{{ form.state.errors }}</span>
+            <div class="error">{{ form.state.errors }}</div>
             {{ form.state.label_tag }}
             {{ form.state }}
         </div>
 
         <div class="form-field">
-            <span class="error">{{ form.country.errors }}</span>
+            <div class="error">{{ form.country.errors }}</div>
             {{ form.country.label_tag }}
             {{ form.country }}
         </div>
@@ -100,25 +100,25 @@ $(document).ready(function(){
 
     <div class="management-column">
         <div class="form-field">
-            <span class="error">{{ form.phone.errors }}</span>
+            <div class="error">{{ form.phone.errors }}</div>
             {{ form.phone.label_tag }}
             {{ form.phone }}
         </div>
 
         <div class="form-field">
-            <span class="error">{{ form.notes.errors }}</span>
+            <div class="error">{{ form.notes.errors }}</div>
             {{ form.notes.label_tag }}
             {{ form.notes }}
         </div>
 
         <div class="form-field">
-            <span class="error">{{ form.email.errors }}</span>
+            <div class="error">{{ form.email.errors }}</div>
             {{ form.email.label_tag }}
             {{ form.email }}
         </div>
 
         <div class="form-field">
-            <span class="error">{{ form.website.errors }}</span>
+            <div class="error">{{ form.website.errors }}</div>
             {{ form.website.label_tag }}
             {{ form.website }}
         </div>

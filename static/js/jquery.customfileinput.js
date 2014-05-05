@@ -13,15 +13,18 @@
                 "class": 'custom-file-input',
                 value: gettext("Browse") + "..."
             });
-            container.append(browse_button);
+            container.prepend(browse_button);
 
             // append the container to current button's parent
-            parent.append(container);
+            parent.prepend(container);
 
             // make the original input transparent and float it above the parent
             $(this).css("opacity", 0);
             $(this).css("position", "absolute");
             $(this).css("z-index", "2");
+
+            // move it over the browse button
+            $(this).css("left", "0");
 
             // make the whole thing as wide as the button
             $(this).width(browse_button.outerWidth());

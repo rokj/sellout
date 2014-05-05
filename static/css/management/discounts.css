@@ -1,20 +1,5 @@
-div.split-cell{
-    float: left;
-    width: 45%;
-    margin-bottom: 20px;
-}
-
-div.split-cell.first{ padding-right: 5% }
-div.split-cell.last{ padding-left: 5%; }
-
 input[type='submit']{
     width: 100%;
-}
-
-div.left-column form{
-    border-top: 3px solid #646464;
-    border-bottom: 3px solid #646464;
-    padding-bottom: 30px;
 }
 
 span.discount-active, span.discount-inactive{ text-transform: uppercase; }
@@ -26,4 +11,42 @@ div.clear-results{
 }
 div.clear-results a{
     color: #646464;
+}
+
+#id_description{
+    height: 80px;
+}
+
+div.discount-active-checkbox{
+    height: 100%;
+}
+
+div.object-container{
+    position: relative;
+    padding-top: 2em; /* the height of object-container.title */
+
+    background-color: #f7f7f7;
+    max-width: 500px;
+    margin: 10px;
+}
+
+div.object-container div.title{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2em;
+    line-height: 2em;
+
+    color: #ffffff;
+    background-color: #646464;
+}
+
+div.object-container div.title div.controls{
+    float: right;
+}
+
+td.details-label{
+    color: #646464;
+    padding-right: 30px;
 }

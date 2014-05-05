@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, get_language
 from django import forms
 from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -28,7 +28,7 @@ class ContactForm(forms.Form):
     # countries list for ChoiceField
     countries = [(c.two_letter_code, c.name) for c in Country.objects.all()]
 
-    type = forms.ChoiceField(choices=g.CONTACT_TYPES)
+    type = forms.ChoiceField(required=True, choices=g.CONTACT_TYPES)  # thid field will be hidden in the form
     # none of the fields are required (the form doesn't know for the company/individual whatchamacallit -
     # stuff will be checked in validate_contact)
     company_name = forms.CharField(required=False, max_length=max_field_length(Contact, 'company_name'))
@@ -76,8 +76,8 @@ def validate_contact(user, company, data):
     # phone
     # vat
 
-    def err(msg): # the value that is returned if anything goes wrong
-        return {'status':False, 'data':None, 'message':msg}
+    def err(msg):  # the value that is returned if anything goes wrong
+        return {'status': False, 'data': None, 'message': msg}
 
     # return:
     # status: True if validation passed, else False
@@ -249,46 +249,55 @@ def list_contacts(request, company):
     # check permissions: needs to be guest
     if not has_permission(request.user, c, 'contact', 'list'):
         return no_permission_view(request, c, _("view contacts"))
-    
-    contacts = Contact.objects.filter(company__id=c.id)
-    
+
+    #
+    l = request.GET.get('letter')
+
     # show the filter form
     if request.method == 'POST':
+        contacts = Contact.objects.all()
         form = ContactFilterForm(request.POST)
+
         if form.is_valid():
             # filter by whatever is in the form
             if form.cleaned_data['type'] == 'Individual':
                 contacts = contacts.filter(type='Individual')
-                if 'name' in form.cleaned_data: # search by first and last name 
+                if 'name' in form.cleaned_data:  # search by first and last name
                     first_names = contacts.filter(first_name__icontains=form.cleaned_data['name'])
                     last_names = contacts.filter(last_name__icontains=form.cleaned_data['name'])
                     contacts = (first_names | last_names).distinct()
             else:
                 contacts = contacts.filter(type='Company')
-                if 'name' in form.cleaned_data: # search by company name
+                if 'name' in form.cleaned_data:  # search by company name
                     contacts = contacts.filter(company_name__icontains=form.cleaned_data['name'])
     else:
         form = ContactFilterForm()
+
+        if l:
+            if l == '*':
+                # get all contacts that don't begin with any letter of the alphabet
+                print r'^[^' + g.ALPHABETS[get_language()] + '].*'
+                contacts = Contact.objects.filter(company=c,
+                                                  company_name__iregex=r'^[^' + g.ALPHABETS[get_language()] + '].*') | \
+                           Contact.objects.filter(company=c,
+                                                  first_name__iregex=r'^[^' + g.ALPHABETS[get_language()] + '].*')
+                print contacts
+            else:
+                # get contacts beginning with the selected letter
+                contacts = Contact.objects.filter(company=c, company_name__istartswith=l) | \
+                           Contact.objects.filter(company=c, first_name__istartswith=l)
+        else:
+            contacts = Contact.objects.none()
         
-    # show contacts
-    paginator = Paginator(contacts, get_value(request.user, 'pos_contacts_per_page'))
-
-    page = request.GET.get('page')
-    try:
-        contacts = paginator.page(page)
-    except PageNotAnInteger:
-        contacts = paginator.page(1)
-    except EmptyPage:
-        contacts = paginator.page(paginator.num_pages)
-
     context = {
-        'company':c,
-        'contacts':contacts,
-        'paginator':paginator,
-        'filter_form':form,
-        'title':_("Contacts"),
-        'site_title':g.MISC['site_title'],
-        'date_format_django':get_date_format(request.user, 'django'),
+        'company': c,
+        'letter': l,
+        'contacts': contacts,
+        'filter_form': form,
+        'title': _("Contacts"),
+        'site_title': g.MISC['site_title'],
+        'date_format_django': get_date_format(request.user, 'django'),
+        'alphabet': g.ALPHABETS[get_language()],
     }
 
     return render(request, 'pos/manage/contacts.html', context)
@@ -301,7 +310,7 @@ def web_get_contact(request, company, contact_id):
 
 def get_contact(request, company, contact_id):
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company doest not exist"))
     
@@ -326,13 +335,18 @@ def add_contact(request, company):
     # check permissions: needs to be manager
     if not has_permission(request.user, c, 'contact', 'edit'):
         return no_permission_view(request, c, _("add contacts"))
-    
+
+    t = request.GET.get('type')
+    if not t:
+        t = 'Individual'  # the default
+
     context = {
-        'add':True,
-        'company':c,
-        'title':_("Add contact"),
-        'site_title':g.MISC['site_title'],
-        'date_format_jquery':get_date_format(request.user, 'jquery')
+        'add': True,
+        'type': t,
+        'company': c,
+        'title': _("Add contact"),
+        'site_title': g.MISC['site_title'],
+        'date_format_jquery': get_date_format(request.user, 'jquery')
     }
 
     if request.method == 'POST':
@@ -344,30 +358,29 @@ def add_contact(request, company):
         if form.is_valid():
             # create a new Contact
             contact = Contact(
-                type = form.cleaned_data.get('type'),
-                company_name = form.cleaned_data.get('company_name'),
-                first_name = form.cleaned_data.get('first_name'),
-                last_name = form.cleaned_data.get('last_name'), 
-                sex = form.cleaned_data.get('sex'),
-                street_address = form.cleaned_data.get('street_address'),
-                postcode = form.cleaned_data.get('postcode'),
-                city = form.cleaned_data.get('city'),
-                state = form.cleaned_data.get('state'),
-                country = form.cleaned_data.get('country'),
-                email = form.cleaned_data.get('email'),
-                phone = form.cleaned_data.get('phone'),
-                vat = form.cleaned_data.get('vat'),
-                date_of_birth = form.cleaned_data.get('date_of_birth'),
+                type=form.cleaned_data.get('type'),
+                company_name=form.cleaned_data.get('company_name'),
+                first_name=form.cleaned_data.get('first_name'),
+                last_name=form.cleaned_data.get('last_name'),
+                sex=form.cleaned_data.get('sex'),
+                street_address=form.cleaned_data.get('street_address'),
+                postcode=form.cleaned_data.get('postcode'),
+                city=form.cleaned_data.get('city'),
+                state=form.cleaned_data.get('state'),
+                country=form.cleaned_data.get('country'),
+                email=form.cleaned_data.get('email'),
+                phone=form.cleaned_data.get('phone'),
+                vat=form.cleaned_data.get('vat'),
+                date_of_birth=form.cleaned_data.get('date_of_birth'),
                 
-                created_by = request.user,
-                company = c
-
+                created_by=request.user,
+                company=c
             )
             contact.save()
 
             return redirect('pos:list_contacts', company=c.url_name)
     else:
-        form = ContactForm()
+        form = ContactForm(initial={'type': t})
         form.user = request.user
         form.company = c
 

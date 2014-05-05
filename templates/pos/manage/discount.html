@@ -3,6 +3,7 @@
 {% load i18n %}
 
 {% block section_head %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/management/discounts.css' %}" />
 <script type="text/javascript">
     $(document).ready(function(){
         // append datepicker to form ids:
@@ -15,23 +16,73 @@
 
 {% block manage_content %}
 {% if add %}
+    <h1>{% trans 'Add discount' %}</h1>
     <form action="{% url 'pos:add_discount' company.url_name %}" method="post">
 {% else %}
+    <h1>{% trans 'Edit discount' %}</h1>
     <form action="{% url 'pos:edit_discount' company.url_name discount_id %}" method="post">
 {% endif %}
+    <div class="edit-container">
     {% csrf_token %}
-    {{ form.non_field_errors }}
-    {% for field in form %}
-        <div class="form-field-container" id="{{field.auto_id}}_container">
-        {% if field.errors %}
-            <div class="form-field-error">{{ field.errors }}</div>
-        {% endif %}
-        <div class="field-label-tag">{{ field.label_tag }}</div>
-        <div class="form-field">{{ field }}</div>
+        <div class="error">{{ form.non_field_errors }}</div>
+
+        <div class="form-field">
+            <div class="error">{{ form.code.errors }}</div>
+            {{ form.code.label_tag }}
+            {{ form.code }}
         </div>
-    {% endfor %}
-    <p><input type="submit" value="{% trans 'Save' %}" />
-<a href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Cancel' %}</a></p>
+
+        <div class="form-field">
+            <div class="error">{{ form.description.errors }}</div>
+            {{ form.description.label_tag }}
+            {{ form.description }}
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.type.errors }}</div>
+            <div class="error">{{ form.amount.errors }}</div>
+
+            <div class="split-cell first">
+                {{ form.type.label_tag }}
+                {{ form.type }}
+            </div>
+            <div class="split-cell last">
+                {{ form.amount.label_tag }}
+                {{ form.amount }}
+            </div>
+        </div>
+
+        <div class="form-field clear-floats">
+            <div class="error">{{ form.start_date.errors }}</div>
+            <div class="error">{{ form.end_date.errors }}</div>
+
+            <div class="split-cell first">
+                {{ form.start_date.label_tag }}
+                {{ form.start_date }}
+            </div>
+            <div class="split-cell last">
+                {{ form.end_date.label_tag }}
+                {{ form.end_date }}
+            </div>
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.active.errors }}</div>
+            <div class="split-cell first"> {{ form.active.label_tag }}</div>
+            <div class="split-cell last discount-active-checkbox">{{ form.active }}</div>
+            <div class="clear-floats"></div>
+        </div>
+
+        <div class="split-cell first clear-floats">
+            <a class="button cancel"
+               href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Cancel' %}</a>
+        </div>
+        <div class="split-cell last">
+            <input type="submit" value="{% trans 'Save' %}" />
+        </div>
+
+        <div class="clear-floats"></div>
+    </div>
 </form>
 
 {% endblock %}

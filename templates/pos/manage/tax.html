@@ -1,9 +1,9 @@
 {% extends "pos/manage/manage.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load i18n %}
 
-{% block head %}
-
+{% block section_head %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/management/taxes.css' %}" />
 <script type="text/javascript">
 $(document).ready(function(){
     var taxes = [];
@@ -38,11 +38,11 @@ $(document).ready(function(){
             }
             var td_obj = $("<td>");
             td_obj.append(
-                $("<button>", {id:"add-tax"})
+                $("<button>", {id:"add_tax"})
                     .click(function(){
                         // create an empty tax and insert it above $this button
                         // $this.parent(=td).parent(=tr).parent(=table)
-                        tax_entry({name:'', amount:'', default:false, id:-1}).
+                        tax_entry({name:'', amount:'', "default":false, id:-1}).
                             insertBefore($(this).parent().parent());
                     })
                     .append("+"));
@@ -115,7 +115,7 @@ $(document).ready(function(){
                 'name':name,
                 'amount':amount,
                 'default':def,
-                'id':$(this).data().id,
+                'id':$(this).data().id
             });
         });
         
@@ -136,23 +136,31 @@ $(document).ready(function(){
 {% endblock %}
 
 {% block manage_content %}
-<table>
-    <thead>
-        <tr>
-            <td>{% trans 'Default' %}</td>
-            <td>{% trans 'Name (optional)' %}</td>
-            <td>{% trans 'Amount' %} (%)</td>
-            <td></td>{% comment %} new and delete buttons {% endcomment %}
-        </tr>
-    </thead>
-    
-    <tbody id="taxes">
+    <h1>{% trans 'Taxes' %}</h1>
 
-    </tbody>
-</table>
+    <table id="tax_list">
+        <thead>
+            <tr>
+                <td>{% trans 'Default' %}</td>
+                <td>{% trans 'Name (optional)' %}</td>
+                <td>{% trans 'Amount' %} (%)</td>
+                <td></td>{% comment %} new and delete buttons {% endcomment %}
+            </tr>
+        </thead>
 
-<input type="button" id="save_taxes" value="{% trans 'Save' %}" />
-<input type="button" id="cancel" value="{% trans 'Cancel' %}" />
+        <tbody id="taxes">
+
+        </tbody>
+    </table>
+
+    <div id="tax_footer">
+        <div class="button-container">
+            <input type="button" id="cancel" value="{% trans 'Cancel' %}" class="cancel" />
+        </div>
+        <div class="button-container">
+            <input type="button" id="save_taxes" value="{% trans 'Save' %}" class="ok"/>
+        </div>
+    </div>
 
 {% endblock %}
 

@@ -20,27 +20,27 @@ $(document).ready(function(){
 
 {% comment %} filter discounts {% endcomment %}
 <div class="left-column">
+    <h2>{% trans 'Search' context 'form title' %}</h2>
     <form method="post" action="{% url 'pos:list_discounts' company.url_name %}">
     {% csrf_token %}
 
-    <span class="error">{{ filter_form.non_field_errors }}</span>
-
+    <div class="error">{{ filter_form.non_field_errors }}</div>
 
     <div class="form-field">
-        <span class="error">{{ filter_form.search.errors }}</span>
+        <div class="error">{{ filter_form.search.errors }}</div>
         {{ filter_form.search.label_tag }}
         {{ filter_form.search}}
     </div>
 
     <div class="form-field">
         <div class="split-cell first bottom-space">
-            <span class="error">{{ filter_form.start_date.errors }}</span>
+            <div class="error">{{ filter_form.start_date.errors }}</div>
             {{ filter_form.start_date.label_tag }}
             {{ filter_form.start_date }}
         </div>
 
         <div class="split-cell last">
-            <span class="error">{{ filter_form.end_date.errors }}</span>
+            <div class="error">{{ filter_form.end_date.errors }}</div>
             {{ filter_form.end_date.label_tag }}
             {{ filter_form.end_date }}
         </div>
@@ -48,13 +48,13 @@ $(document).ready(function(){
 
     <div class="form-field clear-floats">
         {{ filter_form.active.label_tag }}
-        <span class="error">{{ filter_form.active.errors }}</span>
+        <div class="error">{{ filter_form.active.errors }}</div>
 
         <div class="split-cell first">
             {{ filter_form.active }}
         </div>
         <div class="split-cell last">
-            <input type="submit" value="{% trans 'Search' %}" />
+            <input type="submit" value="{% trans 'Search' context 'submit button label' %}" />
         </div>
     </div>
 
@@ -71,10 +71,13 @@ $(document).ready(function(){
 
     {% comment %} add discount {% endcomment %}
     <h2>{% trans 'Add' %}</h2>
-    <a class="add-discount button"
-       href="{% url 'pos:add_discount' company.url_name %}">
-        {% trans 'New discount' %}
-    </a>
+    <div class="add-button-container">
+        <a class="add-discount button do"
+           href="{% url 'pos:add_discount' company.url_name %}">
+            {% trans 'New discount' %}
+        </a>
+    </div>
+
 </div>
 
 <div class="content">
@@ -105,7 +108,10 @@ $(document).ready(function(){
                     </tr>
                     <tr>
                         <td class="details-label">{% trans 'Amount' %}</td>
-                        <td>{{ d.amount }}</td>
+                        <td>
+                            {{ d.amount }}
+                            {% if d.type == "Absolute" %}{{ currency }}{% else %}%{% endif %}
+                        </td>
                     </tr>
                     <tr>
                         <td class="details-label">{% trans 'Active' %}</td>

@@ -164,7 +164,7 @@ class DiscountForm(forms.Form):
 
 
 class DiscountFilterForm(forms.Form):
-    search = forms.CharField(required=False)
+    search = forms.CharField(label=_("Search text"), required=False)
     start_date = forms.CharField(required=False, max_length=g.DATE['max_date_length'])
     end_date = forms.CharField(required=False, max_length=g.DATE['max_date_length'])
     active = forms.NullBooleanField(required=False)
@@ -234,6 +234,7 @@ def list_discounts(request, company):
         'date_format_django': get_date_format(request.user, 'django'),
         'date_format_jquery': get_date_format(request.user, 'jquery'),
         'results_display': results_display,
+        'currency': get_value(request.user, 'pos_currency'),
     }
 
     return render(request, 'pos/manage/discounts.html', context) 

@@ -1,59 +1,160 @@
 {% extends "pos/manage/manage.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load i18n %}
 
+{% block section_head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/contacts.css' %}"/>
+
+{% endblock %}
 
 {% block manage_content %}
+    <h1>{% trans 'Contacts' %}</h1>
 
-{% comment %} filter contacts {% endcomment %}
-<form method="post" action="{% url 'pos:list_contacts' company.url_name %}">
-{{ filter_form.as_p }}
-{% csrf_token %}
-<input type="submit" value="submit" />
-</form>
+    <div class="left-column">
+        {% comment %} filter contacts {% endcomment %}
+        <h2>{% trans 'Search' context 'form title' %}</h2>
+        <form method="post" action="{% url 'pos:list_contacts' company.url_name %}">
+            {% csrf_token %}
+            <div class="error">{{ filter_form.non_field_errors }}</div>
 
-{% comment %} add contact {% endcomment %}
-<p><a href="{% url 'pos:add_contact' company.url_name %}">{% trans 'Add' %}</a></p>
+            <div class="form-field">
+                <div class="error">{{ filter_form.name.errors }}</div>
+                {{ filter_form.name.label_tag }}
+                {{ filter_form.name }}
+            </div>
 
-{% for c in contacts %}
-    {% comment %} two different layouts, for company and individual {% endcomment %}
-    <div class="{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}">
-    {% ifequal c.type 'Individual' %}
-        <p>{% trans 'Individual' %}</p>
-        <p>{{ c.first_name }} {{ c.last_name }}</p>
-        <p>{{ c.street_address }} {% if c.street_address and c.postcode %},{% endif %} {{ c.postcode }} {{ c.city }}
-        {% if c.street_address and c.postcode %}<br />{% endif %} {{ c.country }}</p>
-        <p>{% trans 'E-mail' %}: <a href="mailto:{{ c.email }}">{{ c.email }}</a></p>
-        <p>{% trans 'Phone' %}: {{ c.phone }}</p>
-        <p>{% trans 'Birth date' %}: {{ c.date_of_birth|date:date_format_django }}</p>
-    {% else %}
-        <p>{% trans 'Company' %}</p>
-        <p>{{ c.company_name }}</p>
-        <p>{{ c.street_address }}, {{ c.postcode }} {{ c.city }} <br /> {{ c.country }}</p>
-        <p>{% trans 'E-mail' %}: <a href="mailto:{{ c.email }}">{{ c.email }}</a></p>
-        <p>{% trans 'Phone' %}: {{ c.phone }}</p>
-        <p>{% trans 'VAT No.' %}: {{ c.vat }}</p>
-    {% endifequal%}
+            <div class="form-field clear-floats">
+                {{ filter_form.type.label_tag }}
+                <div class="error">{{ filter_form.type.errors }}</div>
+
+                <div class="split-cell first">
+                    {{ filter_form.type }}
+                </div>
+                <div class="split-cell last">
+                    <input type="submit" value="{% trans 'Search' context 'submit button label' %}"/>
+                </div>
+            </div>
+
+            <div class="clear-floats"></div>
+        </form>
+
+        {% comment %} add contact {% endcomment %}
+        <h2>{% trans 'Add' %}</h2>
+        <div class="split-cell first">
+            <a class="button type-company"
+               href="{% url 'pos:add_contact' company.url_name %}?type=Company">{% trans 'company' %}</a>
+        </div>
+        <div class="split-cell first">
+            <a class="button type-individual"
+               href="{% url 'pos:add_contact' company.url_name %}?type=Individual">{% trans 'individual' %}</a>
+        </div>
     </div>
-    
-    {% comment %} edit this contact {% endcomment %}
-    
-    <a href="{% url 'pos:edit_contact' company.url_name c.id %}">{% trans 'Edit' %}</a>
-    
-    {% comment %} delete this contact {% endcomment %}
-    <a href="{% url 'pos:delete_contact' company.url_name c.id  %}">{% trans 'Delete' %}</a>
-{% endfor %}
+    <div class="content">
+        <div id="contacts">
+            <table id="contacts_index">
+                <tr>
+                    <td{% if letter == '#' %} class="current-letter"{% endif %}>
+                        {# letters that are not in the alphabet #}
+                        <a href="{% url 'pos:list_contacts' company.url_name %}?letter=*">#</a>
+                    </td>
+                    {# all letters of the alphabet #}
+                    {% for l in alphabet %}
+                        <td{% if letter == 'l' %} class="current-letter"{% endif %}>
+                            <a href="{% url 'pos:list_contacts' company.url_name %}?letter={{ l }}">{{ l }}</a>
+                        </td>
+                    {% endfor %}
+                </tr>
+            </table>
 
-{% comment %} paginator pages {% endcomment %}
-<div class="paginator">
-    {% for p in paginator.page_range %}
-        <a href="?page={{p}}" {% comment %} django templates can only compare strings{% endcomment %}
-            {% if p|stringformat:"s" == current_page|stringformat:"s" %} class="current_page"{% endif %}>
-            &nbsp;{{p}}&nbsp;</a>
-        {% if not forloop.last %}|{% endif %}
-    {% endfor %}
-</div>
+            <div class="results">
+                <h2>{% if letter %}
+                    {{ letter|upper }}
+                {% else %}
+                    {% trans 'Search results' %}
+                {% endif %}</h2>
+            </div>
 
-
+            <div class="contact-container">
+            {% if c.count == 0 %}
+                {% trans 'No results found' %}
+            {% else %}
+                {% for c in contacts %}
+                    {% comment %} two different layouts, for company and individual {% endcomment %}
+                    {% ifequal c.type 'Individual' %}
+                        <table class="details type-individual">
+                            <tr>
+                                <td>{{ c.first_name }} {{ c.last_name }}</td>
+                                <td>I {# that's an image #} </td>
+                                <td>
+                                    {% trans 'Individual' context 'contact type' %}
+                                    <div class="controls">
+                                        {% comment %} edit this contact {% endcomment %}
+                                        <a href="{% url 'pos:edit_contact' company.url_name c.id %}">
+                                            {% trans 'Edit' %}{# TODO: icon #}
+                                        </a>
+                                        {% comment %} delete this contact {% endcomment %}
+                                        <a href="{% url 'pos:delete_contact' company.url_name c.id %}">
+                                            {% trans 'Delete' %} {# TODO: icon #}
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{ c.street_address }}</td>
+                                <td>T</td>
+                                <td>{{ c.phone }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ c.postcode }} {{ c.city }}</td>
+                                <td>E</td>
+                                <td><a href="mailto:{{ c.email }}">{{ c.email }}</a></td>
+                            </tr>
+                            <tr>
+                                <td>{{ c.country }}</td>
+                                <td>*</td>
+                                <td>{{ c.date_of_birth|date:date_format_django }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    {% else %}
+                    <table class="details type-individual">
+                        <tr>
+                            <td>{{ c.company_name }}</td>
+                            <td>I {# that's an image #} </td>
+                            <td>
+                                {% trans 'Company' context 'contact type' %}
+                                <div class="controls">
+                                    {% comment %} edit this contact {% endcomment %}
+                                    <a href="{% url 'pos:edit_contact' company.url_name c.id %}">
+                                        {% trans 'Edit' %}{# TODO: icon #}
+                                    </a>
+                                    {% comment %} delete this contact {% endcomment %}
+                                    <a href="{% url 'pos:delete_contact' company.url_name c.id %}">
+                                        {% trans 'Delete' %} {# TODO: icon #}
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ c.street_address }}</td>
+                            <td>T</td>
+                            <td>{{ c.phone }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ c.postcode }} {{ c.city }}</td>
+                            <td>E</td>
+                            <td><a href="mailto:{{ c.email }}">{{ c.email }}</a></td>
+                        </tr>
+                        <tr>
+                            <td>{{ c.country }}</td>
+                            <td>VAT</td>
+                            <td>{{ c.vat }}</td>
+                        </tr>
+                    </table>
+                    {% endifequal %}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}
 

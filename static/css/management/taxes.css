@@ -1,0 +1,59 @@
+/* table header */
+table#tax_list thead tr td{
+    font-size: 10px;
+    color: #646464;
+    text-transform: uppercase;
+}
+
+table#tax_list input[type='text']{ width: 100% }
+table#tax_list td{ padding-right: 10px;}
+
+/* style table columns */
+/* first: default tax */
+table#tax_list tr td:nth-child(1){
+    text-align: center;
+    vertical-align: middle;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* second: name */
+table#tax_list tr td:nth-child(2){
+    max-width: 200px;
+}
+
+/* third: amount */
+table#tax_list tr td:nth-child(3){
+    max-width: 100px;
+}
+
+/* fourth: edit/delete buttons */
+table#tax_list tr td:nth-child(4){
+    width: 80px;
+}
+
+div.button-container{
+    width: 120px;
+    float: left;
+    margin-right: 20px;
+}
+
+div.button-container input{ width: 100%; }
+
+button.delete-tax, button#add_tax{
+    background: none;
+    border: none;
+    font-weight: bold;
+    height: 100%;
+}
+
+button.delete-tax{
+    color: #aa0000;
+}
+button#add_tax{
+    color: #0000aa;
+}
+
+#tax_footer{
+    margin-top: 20px;
+}

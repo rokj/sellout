@@ -1,81 +1,147 @@
 {% extends "pos/manage/manage.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load i18n %}
 
 {% comment %} add/edit contact form {% endcomment %}
 
-{% block head %}
-
-<script type="text/javascript">
-individual_fields = ["first_name", "last_name", "sex", "date_of_birth"];    
-company_fields = ["company_name", "vat"];
-
-$(document).ready(function(){
-    function render_fields(fields, show){
-        for(var i = 0; i < fields.length; i++){
-            obj = $("#id_" + fields[i] + "_container");
-            
-            if(show){
-                obj.show();
-            }
-            else{
-                obj.hide();
-                // empty objects to prevent saving both company AND individual data to the same contact
-                $("input, select", obj).val("");
-            }
-        }
-    }
-
-    // use datepicker on all date inputs
-    $("#id_date_of_birth").datepicker({
-    	dateFormat:"{{ date_format_jquery|escapejs }}"
-    });
-    
-    $("#id_type").change(function(){
-        // when the contact type listbox changes, hide and show relevant inputs
-        if($("#id_type").val() == "Individual") individual = true;
-        else individual = false;
-        
-        if(individual){
-            // show only field for individual contact type
-            render_fields(individual_fields, true);
-            render_fields(company_fields, false);
-        }
-        else{
-            // show only fields for company type
-            render_fields(individual_fields, false);
-            render_fields(company_fields, true);
-        }
-    });
-    
-    // force the correct fields from start
-    $("#id_type").change();
-});
-
-</script>
-
+{% block section_head %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/management/contacts.css' %}"/>
 {% endblock %}
 
 {% block manage_content %}
-{% if add %}
-    <form action="{% url 'pos:add_contact' company.url_name %}" method="post">
-{% else %}
-    <form action="{% url 'pos:edit_contact' company.url_name contact_id %}" method="post">
-{% endif %}
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    {% for field in form %}
-        <div class="form-field-container" id="{{field.auto_id}}_container">
-        {% if field.errors %}
-            <div class="form-field-error">{{ field.errors }}</div>
+    <h1>{% trans 'Add contact' context 'page title' %}</h1>
+    <div class="edit-container">
+        {% if type == 'Individual' %}
+            I {# TODO: icon #}
+            {% trans 'Individual' %}
+        {% else %}
+            C {# TODO: icon #}
+            {% trans 'Company' %}
         {% endif %}
-        <div class="field-label-tag">{{ field.label_tag }}</div>
-        <div class="form-field">{{ field }}</div>
-        </div>
-    {% endfor %}
-    <p><input type="submit" value="{% trans 'Save' %}" />
-<a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Cancel' %}</a></p>
-</form>
 
+        {% if add %}
+            <form action="{% url 'pos:add_contact' company.url_name %}" method="post">
+        {% else %}
+            <form action="{% url 'pos:edit_contact' company.url_name contact_id %}" method="post"> {% endif %}
+
+            {% csrf_token %}
+            <div class="hidden"> {{ form.type }} </div> {# a hidden type field #}
+
+            {{ form.non_field_errors }}
+
+            {% if type == 'Individual' %}
+                <div class="form-field">
+                    <div class="error">{{ form.first_name.errors }}</div>
+                    {{ form.first_name.label_tag }}
+                    {{ form.first_name }}
+                </div>
+
+                <div class="form-field">
+                    <div class="error">{{ form.last_name.errors }}</div>
+                    {{ form.last_name.label_tag }}
+                    {{ form.last_name }}
+                </div>
+
+                <div class="form-field">
+                    <div class="error">{{ form.sex.errors }}</div>
+                    {{ form.sex.label_tag }}
+                    {{ form.sex }}
+                </div>
+
+                <div class="form-field">
+                    <div class="error">{{ form.street_address.errors }}</div>
+                    {{ form.street_address.label_tag }}
+                    {{ form.street_address }}
+                </div>
+
+                <div class="form-field">
+                    <div class="error">{{ form.postcode.errors }}</div>
+                    {{ form.postcode.label_tag }}
+                    {{ form.postcode }}
+                </div>
+
+
+
+                <div class="form-field">
+                    <div class="error">{{ form.phone.errors }}</div>
+                    {{ form.phone.label_tag }}
+                    {{ form.phone }}
+                </div>
+
+                <div class="form-field">
+                    <div class="error">{{ form.date_of_birth.errors }}</div>
+                    {{ form.date_of_birth.label_tag }}
+                    {{ form.date_of_birth }}
+                </div>
+            {% else %}
+
+                <div class="form-field">
+                    <div class="error">{{ form.company_name.errors }}</div>
+                    {{ form.company_name.label_tag }}
+                    {{ form.company_name }}
+                </div>
+
+                <div class="form-field">
+                    <div class="error">{{ form.street_address.errors }}</div>
+                    {{ form.street_address.label_tag }}
+                    {{ form.street_address }}
+                </div>
+
+                <div class="form-field">
+                    <div class="error">{{ form.postcode.errors }}</div>
+                    {{ form.postcode.label_tag }}
+                    {{ form.postcode }}
+                </div>
+
+                <div class="form-field">
+                    <div class="error">{{ form.city.errors }}</div>
+                    {{ form.city.label_tag }}
+                    {{ form.city }}
+                </div>
+
+
+                <div class="form-field">
+                    <div class="error">{{ form.state.errors }}</div>
+                    {{ form.state.label_tag }}
+                    {{ form.state }}
+                </div>
+
+                <div class="form-field">
+                    <div class="error">{{ form.country.errors }}</div>
+                    {{ form.country.label_tag }}
+                    {{ form.country }}
+                </div>
+
+                <div class="form-field">
+                    <div class="error">{{ form.email.errors }}</div>
+                    {{ form.email.label_tag }}
+                    {{ form.email }}
+                </div>
+
+                <div class="form-field">
+                    <div class="error">{{ form.phone.errors }}</div>
+                    {{ form.phone.label_tag }}
+                    {{ form.phone }}
+                </div>
+
+                <div class="form-field">
+                    <div class="error">{{ form.vat.errors }}</div>
+                    {{ form.vat.label_tag }}
+                    {{ form.vat }}
+                </div>
+
+            {% endif %}
+
+            <div class="form-field">
+                <div class="split-cell first">
+                    <input type="submit" value="{% trans 'Save' %}" />
+                </div>
+                <div class="split-cell last">
+                    <a class="button cancel"
+                       href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Cancel' %}</a>
+                </div>
+            </div>
+        </form>
+    </div>
 {% endblock %}
 

@@ -21,7 +21,7 @@ from common import globals as g
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_JSON_categories(request, company):
+def mobile_JSON_categories_strucutred(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
@@ -32,10 +32,28 @@ def mobile_JSON_categories(request, company):
         return JSON_error("no permission")
 
     # return all categories' data in JSON format
-    return JSON_response(get_all_categories_structured(c, sort='name', data=[]))
+    return JSON_response(get_all_categories_structured(c, sort='name'))
 
 
+@api_view(['POST', 'GET'])
+@permission_classes((IsAuthenticated,))
+def mobile_JSON_categories(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
 
+    # permissions
+    if not has_permission(request.user, c, 'category', 'list'):
+        return JSON_error("no permission")
+    data = []
+    category = Category.objects.filter(company=c)
+
+    for c in category:
+        data.append(category_to_dict(c))
+
+    # return all categories' data in JSON format
+    return JSON_response(data)
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
@@ -175,3 +193,11 @@ def mobile_get_category(request, company, category_id):
     return get_category(request, company, category_id)
 
 
+def mobile_JSON_dump_categories(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    cat = Category.objects.filter(company__id=c.id)
+    return JSON_ok(extra="")

@@ -150,6 +150,11 @@ TIME_FORMATS = {
             },
 }
 
+ALPHABETS = {
+    'en': 'abcdefghijklmnopqrstuvwxyz',
+    'si': 'abcčdefghijklmnoprsštuvzž',
+}
+
 DATE = {
     'max_date_length': 10,
 }
@@ -166,11 +171,11 @@ MISC = {
 }
 
 IMAGE_DIMENSIONS = {
-    'logo':(180, 180),
-    'category':(160, 160),
-    'product':(160,160), # must be as large as the largest PRODUCT_BUTTON_DIMENSIONS
-    'thumb_small':(32, 32), # for thumbnails
-    'thumb_large':(64, 64),
+    'logo': (180, 180),
+    'category': (120, 120),
+    'product': (160, 160),  # must be as large as the largest PRODUCT_BUTTON_DIMENSIONS
+    'thumb_small': (32, 32),  # for thumbnails
+    'thumb_large': (125, 128),
 }
 
 # premissions
@@ -182,7 +187,7 @@ PERMISSION_GROUPS = ( # retrieve readable format with get_permission_display()
     ('admin',   _("Admin")),    # can do anything
 )
 
-PERMISSIONS = { # 'chapters' that each group can view or manage
+PERMISSIONS = {  # 'chapters' that each group can view or manage
     # model choices: company, category, discount, product, contact, permission, bill, config
     # views (to prevent users exploring other companies' terminals):
     # manage, terminal

@@ -4,30 +4,185 @@
 {% load i18n %}
 
 {% block section_head %}
-<style type="text/css">
-img.category-placeholder{
-    width:{{image_dimensions.0}}px;
-    height:{{image_dimensions.1}}px;
-}
-</style>
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/categories.css' %}" />
+    <style type="text/css">
+    .thumbnail{
+        width: {{image_dimensions.0}}px;
+        height: {{image_dimensions.1}}px;
+    }
+    </style>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var g = {
+                data: {% autoescape off %}{{ categories }}{% endautoescape %},
+                urls: {
+                    edit_category:   "{% url 'pos:edit_category' company.url_name %}",
+                    add_category:    "{% url 'pos:add_category' company.url_name %}",
+                    delete_category: "{% url 'pos:delete_category' company.url_name %}"
+                },
+                container: $("#category_tree"),
+
+                categories: [], // top-level categories (Category() objects)
+                subcontainers: {}, // dictionary level:div
+                max_level: 8, // 9th level and deeper will be of the same color
+
+                button_width: {{ image_dimensions.0 }},
+                button_height: {{ image_dimensions.1 }},
+                button_margin: 10, // category buttons' margins, in pixels
+
+                draggable_easing_time: 100
+            };
+
+            function get_container(level){
+                if(level in g.subcontainers){
+                    return g.subcontainers[level];
+                }
+                else{
+                    var outer = $("<div>", {"class": "category-children-outer level-" + Math.min(level, g.max_level)});
+
+                    outer.height(g.button_width + 2*g.button_margin);
+                    if(level > 0) outer.hide(); // hide subcategories in the beginning
+
+                    var parent = $("<div>", {"class":"category-children"});
+
+                    g.container.append(outer);
+                    outer.append(parent);
+
+                    set_draggable(parent, ".category-button", g.draggable_easing_time);
+
+                    g.subcontainers[level] = parent;
+
+                    return parent;
+                }
+            }
+
+            function hashchange(){
+                // trigger click on a button with the selected id
+                var id = get_url_hash();
+                if(id) $("div.category-button[data-id='" + id + "']", g.container).click();
+            }
+
+            Category = function(data, parent){
+                var p = this;
+
+                p.data = data;
+                p.parent = parent; // Category() object
+                p.children = []; // Category() objects
+
+                if(p.parent) p.level = p.parent.level + 1;
+                else p.level = 0;
+
+                // get/create a container for this category (and its siblings)
+
+                p.container = get_container(p.level);
+
+                // create a category button (save id for later)
+                p.button = $("<div>", {"class":"category-button thumbnail", "data-id": p.data.id});
+
+                p.button.appendTo(p.container);
+
+                p.background = $("<div>", {"class": "category-background"});
+                if(p.data.image) p.background.css("background-image", "url('" + p.data.image + "')");
+                else p.background.css("background-image", "url('{% static 'graphics/placeholder.png' %}')");
+                p.background.appendTo(p.button);
+
+                // data
+                p.text = $("<div>", {"class": "category-text"});
+                p.text.append(data.name);
+                p.text.appendTo(p.button);
+
+                // edit and delete links
+                p.edit_button = $("<input>", {type: "button", value:"{% trans 'Edit' %}"});
+                p.delete_button = $("<input>", {type: "button", value: "{% trans 'Delete' %}"});
+
+                p.tools = $("<div>", {"class": "category-tools"});
+                p.tools.append(p.edit_button);
+                p.tools.append(p.delete_button);
+
+                p.tools.appendTo(p.button);
+
+                // create children
+                for(var i = 0; i < p.data.children.length; i++){
+                    p.children.push(new Category(p.data.children[i], p));
+                }
+
+                // events
+                // button click: show subcategories
+                p.button.click(function(){
+                    // unselect all buttons
+                    $(".category-button", g.container).removeClass("selected");
+
+                    // hide all containers after this button
+                    var i = 1;
+
+                    while(true){
+                        if(i in g.subcontainers){
+                            // hide all buttons but the topmost (mind that i is never 0)
+                            $(".category-button", g.subcontainers[i]).hide().removeClass("selected");
+
+                            // hide all containers from the selected category (level) on
+                            if(i > p.level) g.subcontainers[i].parent().hide();
+                            else g.subcontainers[i].parent().show();
+                        }
+                        else{
+                            break;
+                        }
+
+                        i++;
+                    }
+
+                    // show all buttons on the path to topmost category
+                    var ip = p;
+                    var sub = false;
+                    while(ip){
+                        ip.button.show().addClass("selected");
+
+                        for(i = 0; i < ip.children.length; i++){
+                            ip.children[i].button.show();
+                            sub = true;
+                        }
+                        if(sub) g.subcontainers[ip.level+1].parent().show();
+
+                        ip = ip.parent;
+                    }
+
+                    // update url
+                    $(window).unbind('hashchange');
+                    window.location.hash = "#" + p.data.id;
+                    $(window).bind('hashchange', hashchange);
+                });
+
+                // edit button: open form
+                p.edit_button.click(function(){
+                    window.location.href = g.urls.edit_category + "/?" + $.param({id: p.data.id});
+                });
+
+                // delete button: send delete request and refresh if ok
+            };
+
+            // create top-level categories
+            var i;
+
+            for(i = 0; i < g.data.length; i++){
+                g.categories.push(new Category(g.data[i], null));
+            }
+
+            // if there's something in the url, click it
+            hashchange();
+            $(window).bins('hashchange', hashchange);
+        });
+    </script>
 {% endblock %}
 
 {% block manage_content %}
     <h1>{% trans 'Categories' %}</h1>
 
-    <a href="{% url 'pos:add_category' company.url_name -1 %}">Add category</a><br />
+    <div id="search">{# TODO #}</div>
 
-{% for c in categories %}
-    {{c.level}}
-    {% thumbnail c.image image_dimensions.2 as im %}
-        <img src="{{ im.url }}">
-    {% empty %}
-        <img src="{% static 'graphics/placeholder.png' %}" class="category-placeholder">
-    {% endthumbnail %}
+    <div id="category_tree">
 
-{% if c.image %}{% endif %}
-    <a href="{% url 'pos:edit_category' company.url_name c.id %}">{{c.name}}</a>
-    <a href="{% url 'pos:add_category' company.url_name c.id %}">Add subcagetory</a>
-    <a href="{% url 'pos:delete_category' company.url_name c.id %}">Delete</a><br />
-{% endfor %}
+    </div>
+
+    <a href="{% url 'pos:add_category' company.url_name %}">Add category</a><br />
 {% endblock %}

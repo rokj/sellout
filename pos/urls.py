@@ -42,9 +42,9 @@ urlpatterns = patterns('',
     url(r_company + r_manage + _('/company') + '/?$', company.edit_company, name='edit_company'),  # company
     # categories
     url(r_company + r_manage + _('/categories') + '/?$', category.list_categories, name='list_categories'),  # list of categories
-    url(r_company + r_manage + _('/category/add') + '/(?P<parent_id>-?\d+)/?$', category.web_add_category, name='add_category'), # add
-    url(r_company + r_manage + _('/category/edit') + '/(?P<category_id>\d+)/?$', category.web_edit_category, name='edit_category'), # edit
-    url(r_company + r_manage + _('/category/delete') + '/(?P<category_id>\d+)/?$', category.web_delete_category, name='delete_category'), # delete
+    url(r_company + r_manage + _('/category/add') + '/?$', category.add_category, name='add_category'), # add
+    url(r_company + r_manage + _('/category/edit') + '/?$', category.edit_category, name='edit_category'), # edit
+    url(r_company + r_manage + _('/category/delete') + '/?$', category.delete_category, name='delete_category'), # delete
     # contacts
     url(r_company + r_manage + _('/contacts') + '/?$', contact.web_list_contacts, name='list_contacts'),
     url(r_company + r_manage + _('/contact/add') + '/?$', contact.web_add_contact, name='add_contact'),
@@ -63,11 +63,11 @@ urlpatterns = patterns('',
     #url(r_company + _('/manage/taxes/edit') + '/?$', manage.misc.edit_taxes, name='edit_taxes'),
     # products
     url(r_company + r_manage + _('/products') + '/?$', product.products, name='products'), # static (template) page
-    url(r_company + r_manage + _('/json/products/search/') + '?$', product.search_products, name='search_products'), # product list (search) - json
-    url(r_company + r_manage + _('/json/products/add/') + '?$', product.web_create_product, name='web_create_product'), # edit (save) product - json
-    url(r_company + r_manage + _('/json/products/get/') + '(?P<product_id>\d+)/?$', product.web_get_product, name='get_product'), # product list (search) - json
-    url(r_company + r_manage + _('/json/products/edit/') + '(?P<product_id>\d+)/?$', product.web_edit_product, name='edit_product'), # edit (save) product - json
-    url(r_company + r_manage + _('/json/products/delete/(?P<product_id>\d+)') + '/?$', product.delete_product, name='delete_product'), # edit (save) product - json
+    url(r_company + r_manage + '/json/products/search/?$', product.search_products, name='search_products'), # product list (search) - json
+    url(r_company + r_manage + '/json/products/add/?$', product.web_create_product, name='web_create_product'), # edit (save) product - json
+    url(r_company + r_manage + '/json/products/get/?$', product.web_get_product, name='get_product'), # product list (search) - json
+    url(r_company + r_manage + '/json/products/edit/?$', product.web_edit_product, name='edit_product'), # edit (save) product - json
+    url(r_company + r_manage + '/json/products/delete/?$', product.web_delete_product, name='delete_product'), # edit (save) product - json
     # users
     #url(r_company + _('/manage/users') + '/?$', manage.users.edit_company, name='edit_users'), # company
     # config (company parameter is needed only for url; configuration is per user, regardless of company

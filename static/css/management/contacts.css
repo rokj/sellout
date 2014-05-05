@@ -1,0 +1,74 @@
+input[type='submit']{
+    width: 100%;
+}
+
+#contacts{
+    max-width: 800px;
+}
+
+#contacts_index{ width: 100%; }
+#contacts_index td{ text-align: center; }
+#contacts_index a{
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #646464;
+    font-weight: bold;
+}
+
+#contacts_index a:hover{ color: #aa0000; }
+#contacts_index .current-letter{
+    background-color: #aa0000;
+    color: white;
+}
+
+div.results{
+    height: 2px;
+    margin-top: 20px;
+    background-color: #000000;
+}
+
+div.results h2{
+    background-color: #ffffff;
+    display: inline-block;
+    font-size: 20px;
+    padding: 10px;
+    position: relative;
+    top: -40px;
+}
+
+
+div.contact-container{
+    padding-top: 3em;
+    position: relative;
+}
+
+div.controls{
+    float: right;
+}
+
+table.type-individual tr:first-child td, a.type-individual{
+    background-color: #4d8ed3;
+    color: #ffffff;
+}
+
+table.type-company tr:first-child td, a.type-company{
+    background-color: #ec5449;
+}
+
+table.details{
+    width: 100%;
+    background-color: #f7f7f7;
+    border-collapse: collapse;
+}
+table.details td{
+    padding: 5px 10px;
+}
+
+table.details tr td:nth-child(1){ width: 30%; }
+table.details tr td:nth-child(2){ width: 1em; text-align: center; }
+table.details tr td:nth-child(3){  }
+
+/* the contact form */
+.hidden{
+    display: none;
+}

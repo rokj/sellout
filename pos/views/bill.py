@@ -101,6 +101,11 @@ def new_bill(user, company):
     return bill_to_dict(user, b)
 
 
+def validate_prices():
+
+    pass
+
+
 def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts):
     """ calculates prices and stuff and return the data
         passing parameters instead of Item object because Item may not exist yet
@@ -213,7 +218,7 @@ def create_bill(request, company):
         status="Active"
     )
     #try:
-    bill.save()
+
     #except:
     #    return JSON_error(_("Error while saving new bill"))
 
@@ -224,6 +229,7 @@ def create_bill(request, company):
             product = Product.objects.get(company=c, id=int(i.get('product_id')))
         except Product.DoesNotExist:
             return JSON_error(_("Product with this id does not exist"))
+
 
         # parse quantity
         r = parse_decimal(request.user, i.get('quantity'), g.DECIMAL['quantity_digits'])
@@ -278,6 +284,7 @@ def create_bill(request, company):
         except:
             return JSON_error(_("Could not save one of items"))  # TODO: a bit more specific, please
 
+    bill.save()
     return JSON_ok()
 
 
@@ -307,6 +314,7 @@ def get_active_bill(request, company):
     return JSON_response({'status': 'ok', 'bill': bill})
 
 
+@DeprecationWarning
 @login_required
 def edit_item(request, company):
     """ add an item to bill:

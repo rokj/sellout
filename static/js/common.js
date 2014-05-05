@@ -146,3 +146,7 @@ function confirmation_dialog(title, text, yes_action, no_action){
 
     return dlg;
 }
+
+function get_url_hash() {
+    return window.location.hash.replace(/^#/,'');
+}
