@@ -51,3 +51,7 @@
 div.clear-floats{
     clear: both;
 }
+
+.hidden{
+    display: none;
+}

@@ -16,12 +16,9 @@
         $(document).ready(function(){
             var g = {
                 data: {% autoescape off %}{{ categories }}{% endautoescape %},
-                urls: {
-                    edit_category:   "{% url 'pos:edit_category' company.url_name %}",
-                    add_category:    "{% url 'pos:add_category' company.url_name %}",
-                    delete_category: "{% url 'pos:delete_category' company.url_name %}"
-                },
+                delete_url: "{% url 'pos:delete_category' company.url_name %}",
                 container: $("#category_tree"),
+                toolbox: $("#tools"),
 
                 categories: [], // top-level categories (Category() objects)
                 subcontainers: {}, // dictionary level:div
@@ -30,8 +27,11 @@
                 button_width: {{ image_dimensions.0 }},
                 button_height: {{ image_dimensions.1 }},
                 button_margin: 10, // category buttons' margins, in pixels
+                toolbox_arrow_height: 30, // see categories.css, #tools .arrow:after
 
-                draggable_easing_time: 100
+                draggable_easing_time: 100,
+                tools_hide_time: 500,
+                tools_hide_timeout: null
             };
 
             function get_container(level){
@@ -74,7 +74,6 @@
                 else p.level = 0;
 
                 // get/create a container for this category (and its siblings)
-
                 p.container = get_container(p.level);
 
                 // create a category button (save id for later)
@@ -92,15 +91,73 @@
                 p.text.append(data.name);
                 p.text.appendTo(p.button);
 
-                // edit and delete links
-                p.edit_button = $("<input>", {type: "button", value:"{% trans 'Edit' %}"});
-                p.delete_button = $("<input>", {type: "button", value: "{% trans 'Delete' %}"});
-
-                p.tools = $("<div>", {"class": "category-tools"});
-                p.tools.append(p.edit_button);
-                p.tools.append(p.delete_button);
-
+                // tools
+                p.tools = $("<img>", {src: "{% static 'graphics/gear.png' %}", "class":"toolbox"});
                 p.tools.appendTo(p.button);
+
+                p.hide_tools = function(){
+                    g.tools_hide_timeout = setTimeout(function(){
+                        g.toolbox.fadeOut("fast");
+                    }, g.tools_hide_time);
+                };
+
+                p.tools.unbind().mouseover(
+                    // mouse over
+                    function(){
+                        if(g.tools_hide_timeout){
+                            clearTimeout(g.tools_hide_timeout);
+                            g.tools_hide_timeout = null;
+                            g.toolbox.hide(); // no hide_tools() because we don't want it to fade out, just hide it
+                        }
+
+                        // position the toolbox
+                        var pos = p.tools.offset();
+                        pos = {
+                            left: pos.left + p.tools.width()/2 - g.toolbox.width()/2,
+                            top: pos.top + p.tools.height() + g.toolbox_arrow_height
+                        };
+
+                        g.toolbox.show();
+                        g.toolbox.offset(pos);
+
+                        // bind button events:
+                        // add subcategory: visit the add url
+                        $("input.add-subcategory", g.toolbox).unbind().click(function(){
+                            window.location.href = p.data.add_child_url;
+                        });
+
+                        // edit this category: visit the edit url
+                        $("input.edit", g.toolbox).unbind().click(function(){
+                            window.location.href = p.data.edit_url;
+                        });
+
+                        // delete category: send ajax request to server, if everything OK, delete this object
+                        $("input.delete", g.toolbox).unbind().click(function(){
+                            send_data(g.delete_url, {category_id: p.data.id}, "{{ csrf_token }}", function(recv_data){
+                                if(recv_data.status != 'ok'){
+                                    error_message(
+                                        gettext("Could not delete category"),
+                                        recv_data.message
+                                    );
+                                }
+                                else{
+                                    // ok, delete this object from the document
+                                    p.button.remove();
+                                    g.toolbox.hide();
+                                }
+                            });
+                        });
+
+                    });
+
+                // mouse out
+                g.toolbox.unbind()
+                    .mouseover(function(){
+                        // clear the hide timeout if mouse is inside the toolbox
+                        if(g.tools_hide_timeout) clearTimeout(g.tools_hide_timeout);
+                    })
+                    .mouseleave(function(){ p.hide_tools(); });
+                p.tools.mouseleave(function(){ p.hide_tools(); });
 
                 // create children
                 for(var i = 0; i < p.data.children.length; i++){
@@ -152,13 +209,6 @@
                     window.location.hash = "#" + p.data.id;
                     $(window).bind('hashchange', hashchange);
                 });
-
-                // edit button: open form
-                p.edit_button.click(function(){
-                    window.location.href = g.urls.edit_category + "/?" + $.param({id: p.data.id});
-                });
-
-                // delete button: send delete request and refresh if ok
             };
 
             // create top-level categories
@@ -170,19 +220,30 @@
 
             // if there's something in the url, click it
             hashchange();
-            $(window).bins('hashchange', hashchange);
+            $(window).bind('hashchange', hashchange);
         });
     </script>
 {% endblock %}
 
 {% block manage_content %}
     <h1>{% trans 'Categories' %}</h1>
+    <div id="add_button_container">
+        <a  class="button do"
+            href="{% url 'pos:add_category' company.url_name -1 %}">{% trans 'Add top-level category v tem pičkasem ozkem knofu jebote' %}</a><br />
+    </div>
 
     <div id="search">{# TODO #}</div>
 
     <div id="category_tree">
-
+        {# filled with javascript #}
     </div>
 
-    <a href="{% url 'pos:add_category' company.url_name %}">Add category</a><br />
+    <div id="tools" class="hidden">
+        <div class="arrow">{# relative positioning, will hold arrow #}</div>
+        <input type="button" class="add-subcategory" value="{% trans 'Add subcategory' %}" />
+        <input type="button" class="edit" value="{% trans 'Edit' %}" />
+        <input type="button" class="delete" value="{% trans 'Delete' %}" />
+        {# TODO: view products (go to products and select this category) #}
+        <input type="button" class="view-products" value="{% trans 'View products' %}" />
+    </div>
 {% endblock %}

@@ -1,15 +1,18 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.core.urlresolvers import reverse
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Category
 from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, resize_image, validate_image, \
     image_dimensions, max_field_length, image_from_base64, has_permission, no_permission_view, JSON_stringify
+
 from common import globals as g
+from common import widgets
 
 
 ########################
@@ -44,6 +47,8 @@ def category_to_dict(c):
         'description': c.description,
         'parent_id': parent_id,
         'image': "",
+        'add_child_url': reverse('pos:add_category', kwargs={'company': c.company.url_name, 'parent_id': c.id}),
+        'edit_url': reverse('pos:edit_category', kwargs={'company': c.company.url_name, 'category_id': c.id}),
     }
 
     if c.image:
@@ -255,9 +260,13 @@ class CategoryForm(forms.ModelForm):
 
     class Meta:
         model = Category
-        fields = ['name',
+        fields = ['parent',
+                  'name',
                   'description',
                   'image']
+        widgets = {
+            'image': widgets.PlainClearableFileInput,
+        }
 
 
 @login_required
@@ -279,7 +288,8 @@ def list_categories(request, company):
     return render(request, 'pos/manage/categories.html', context)
 
 
-def add_category(request, company):
+@login_required
+def add_category(request, company, parent_id=-1):
     # get company
     c = get_object_or_404(Company, url_name=company)
 
@@ -288,26 +298,33 @@ def add_category(request, company):
         return no_permission_view(request, c, _("add categories"))
 
     # if parent_id == -1, this is a top-level category
-    parent_id = int(-1) # TODO MOLTES IMPORTANTES! GET FROM request.POST!
-    if parent_id == -1:
+    try:
+        parent_id = int(parent_id)
+        if parent_id == -1:
+            parent = None
+        else:
+            parent = Category.objects.get(id=parent_id)
+
+            # check if not adding to some other company's category
+            if parent.company != c:
+                return no_permission_view(request, c, _("add to this category"))
+    except Category.DoesNotExist:
+        raise Http404
+    except:
         parent = None
-    else:
-        parent = get_object_or_404(Category, id=parent_id)
-        if parent.company != c:
-            raise Http404
 
     context = {
-        'company':c,
-        'parent_id':parent_id,
-        'add':True,
-        'image_dimensions':image_dimensions('category'),
-        'title':_("Add category"),
-        'site_title':g.MISC['site_title']
+        'company': c,
+        'parent': parent,
+        'add': True,
+        'image_dimensions': image_dimensions('category'),
+        'title': _("Add category"),
+        'site_title': g.MISC['site_title']
     }
 
     if request.method == 'POST':
         # submit data
-        form = CategoryForm(request.POST, request.FILES) # instance = None
+        form = CategoryForm(request.POST, request.FILES)  # instance = None
 
         if form.is_valid():
             # created_by and company_id (only when creatine a new category)
@@ -323,39 +340,43 @@ def add_category(request, company):
             if category.image:
                 resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
 
-            return redirect('pos:list_categories', company=c.url_name)
+            # return to categories and select the just added category
+            return HttpResponseRedirect(
+                reverse('pos:list_categories', kwargs={'company': c.url_name}) + "#" + str(category.id))
+
     else:
-        form = CategoryForm() # create a new category
+        form = CategoryForm(initial={'parent': parent_id})  # create a new category
 
     context['form'] = form
 
     return render(request, 'pos/manage/category.html', context)
 
 
-def edit_category(request, company):
-
-    category_id = 0 # TODO: get from POST! MOLTES IMPORTANTES
-
+@login_required
+def edit_category(request, company, category_id):
     c = get_object_or_404(Company, url_name=company)
-
-    # get category
-    category = get_object_or_404(Category, id=category_id)
-    # check if category actually belongs to the given company
-    if category.company != c:
-        raise Http404 # this category does not exist for the current user
 
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'category', 'edit'):
         return no_permission_view(request, c, _("edit categories"))
 
-    context = {'company':c, 'category_id':category_id}
+    try:
+        category = Category.objects.get(id=category_id)
+    except Category.DoesNotExist:
+        raise Http404
+
+    # check if category actually belongs to the given company
+    if category.company != c: # "you have no permission to edit this category"
+        return no_permission_view(request, c, _("edit this category"))
+
+    context = {'company': c, 'category_id': category_id}
 
     if request.method == 'POST':
         # submit data
         form = CategoryForm(request.POST, request.FILES, instance=category)
 
         if form.is_valid():
-            # created_by and company_id (only when creatine a new category)
+            # created_by and company_id (only when creating a new category)
             category = form.save(False)
             if 'created_by' not in form.cleaned_data:
                 category.created_by = request.user
@@ -366,12 +387,14 @@ def edit_category(request, company):
             if category.image:
                 resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
 
-            return redirect('pos:list_categories', company=c.url_name)
+            # return to categories and select the just added category
+            return HttpResponseRedirect(
+                reverse('pos:list_categories', kwargs={'company': c.url_name}) + "#" + str(category.id))
     else:
         if category:
-            form = CategoryForm(instance=category) # update existing category
+            form = CategoryForm(instance=category)  # update existing category
         else:
-            form = CategoryForm() # create a new category
+            form = CategoryForm()  # create a new category
 
     context['form'] = form
     context['company'] = c
@@ -383,20 +406,23 @@ def edit_category(request, company):
     return render(request, 'pos/manage/category.html', context)
 
 
+@login_required
 def delete_category(request, company):
-    category_id = 0 # TODO: REQUEST.POST!
-
-    c = get_object_or_404(Company, url_name=company)
+    c = Company.objects.get(url_name=company)
     
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'category', 'edit'):
-        return no_permission_view(request, c, _("delete categories"))
+        return JSON_error(_("You have no permission to edit categories"))
     
     # get category
-    category = get_object_or_404(Category, id=category_id)
-    # check if category actually belongs to the given company
-    if category.company != c:
-        raise Http404 # this category does not exist for the current user
+    try:
+        category_id = int(JSON_parse(request.POST.get('data')).get('category_id'))
+        category = Category.objects.get(id=category_id)
+        # check if category actually belongs to the given company
+        if category.company != c:
+            return JSON_error(_("You have no permission to delete this category"))
+    except:
+        return JSON_error(_("No category specified"))
 
     if Category.objects.filter(parent=category).count() > 0:
         return JSON_error("Cannot delete category with subcategories")
@@ -405,9 +431,9 @@ def delete_category(request, company):
     try:
         category.delete()
     except:
-        pass
+        return JSON_error(_("Category could not be deleted"))
     
-    return redirect('pos:list_categories', company=c.url_name)
+    return JSON_ok()
 
 
 def get_category(request, company, category_id):

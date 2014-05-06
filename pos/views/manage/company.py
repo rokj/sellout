@@ -81,7 +81,7 @@ def url_name_suggestions(request):
     # take it and return a list of a few company url suggestions
     suggestions = []
     
-    try: # get name from sent data
+    try:  # get name from sent data
         name = JSON_parse(request.POST.get('data'))['name']
     except:
         return JSON_response({'suggestions':[]})

@@ -1,6 +1,8 @@
 #category_tree{
     margin-right: 300px;
     overflow: hidden;
+    /* to prevent the page from jumping around when toolbox is shown */
+    margin-bottom: 400px;
 }
 
 .category-button{
@@ -66,9 +68,10 @@
 }
 
 /* category levels */
-.level-0{ background-color: rgb(240,240,240); }
-.level-1{ background-color: rgb(230,230,230); }
-.level-2{ background-color: rgb(220,220,220); }
+.level-0{ background-color: rgb(255,255,255); }
+.level-1{ background-color: rgb(240,240,240); }
+.level-2{ background-color: rgb(230,230,230); }
+.level-3{ background-color: rgb(220,220,220); }
 .level-4{ background-color: rgb(210,210,210); }
 .level-5{ background-color: rgb(200,200,200); }
 .level-6{ background-color: rgb(190,190,190); }
@@ -89,11 +92,70 @@
     z-index: 3;
 }
 
-.level-0:after{ border-top-color: rgb(240,240,240); }
-.level-1:after{ border-top-color: rgb(230,230,230); }
-.level-2:after{ border-top-color: rgb(220,220,220); }
+.level-0:after{ border-top-color: rgb(255,255,255); }
+.level-1:after{ border-top-color: rgb(240,240,240); }
+.level-2:after{ border-top-color: rgb(230,230,230); }
+.level-3:after{ border-top-color: rgb(220,220,220); }
 .level-4:after{ border-top-color: rgb(210,210,210); }
 .level-5:after{ border-top-color: rgb(200,200,200); }
 .level-6:after{ border-top-color: rgb(190,190,190); }
 .level-7:after{ border-top-color: rgb(180,180,180); }
 .level-8:after{ border-top-color: rgb(170,170,170); }
+
+#tools{
+    position: absolute;
+    z-index: 5;
+    display: none;
+    width: 200px;
+    background-color: #000000;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+}
+
+#tools input{
+    width: 100%;
+    margin-top: 10px;
+}
+
+#tools .arrow{
+    position: relative;
+    width: 100%;
+    height: 0;
+}
+
+#tools .arrow:after{
+    top: -60px;
+    left: 50%;
+    border: 30px solid rgba(0, 0, 0, 0);
+    border-bottom: 30px solid #000000;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    margin-left: -30px;
+}
+
+img.toolbox{
+    width: 32px;
+    position: absolute;
+    z-index: 4;
+    bottom: 3px;
+    right: 3px;
+    opacity: 0.1;
+}
+
+img.toolbox:hover{ opacity: 1; }
+
+input[type='submit']{
+    width: 100%;
+}
+
+div.form-field a.button{
+    margin-top: 5px;
+}
+
+#add_button_container{
+    width: 1000px;
+}

@@ -190,3 +190,6 @@ a.button.do, input.do { background-color: #0000aa; }
 a.button.ok, input.ok { background-color: #00aa00; }
 a.button.cancel, input.cancel{ background-color: #aa0000; }
 
+#edit_dialog label{
+    display: block;
+}

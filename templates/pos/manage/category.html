@@ -1,54 +1,86 @@
 {% extends "pos/manage/manage.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load i18n %}
 
-{% block head %}
-<style type="text/css">
-img.category-placeholder{
-    width:{{ image_dimensions.0 }}px;
-    height:{{ image_dimensions.1 }}px;
-}
-</style>
+{% block section_head %}
+    <script type="text/javascript" src="{% static 'js/jquery.customfileinput.js' %}"></script>
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/categories.css' %}" />
+    <style type="text/css">
+    img.category-placeholder{
+        width:{{ image_dimensions.0 }}px;
+        height:{{ image_dimensions.1 }}px;
+    }
+    </style>
 
-<script type="text/javascript">
-$(document).ready(function(){
-    $("#id_image").change(function(){
-        preview_image(this, "#image", {{image_dimensions.0}}, {{image_dimensions.1}});
-    });
-})
-</script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $("#id_image")
+            .customFileInput()
+            .change(function(){ preview_image(this, "#image", {{image_dimensions.0}}, {{image_dimensions.1}});
+        });
+    })
+    </script>
 
 {% endblock %}
 
 {% block manage_content %}
-{% if category.image %}
-    <img id="image" src="{{ category.image.url }}" />
-{% else %}
-    <img id="image" src="{% static 'graphics/placeholder.png' %}" class="category-placeholder" />
-{% endif %}
-
-{% comment %} two different urls for adding and editing categories {% endcomment %}
-{% if add %}
-    <form action="{% url 'pos:add_category' company.url_name parent_id %}" method="post" enctype="multipart/form-data">
-{% else %}
-    <form action="{% url 'pos:edit_category' company.url_name category_id %}" method="post" enctype="multipart/form-data">
-{% endif %} 
-    {% csrf_token %}
-    {% for field in form %}
-        <div class="form-field-container">
-        {% if field.errors %}
-            <div class="form-field-error">{{ field.errors }}</div>
-        {% endif %}
-        <div class="field-label-tag">{{ field.label_tag }}</div>
-        <div class="form-field">{{ field }}</div>
-        </div>
-    {% endfor %}
-    <p><input type="submit" value="{% trans 'Save' %}" /></p>
-    <p><a href="{% url 'pos:list_categories' company.url_name %}">Cancel</a></p>
-    {% if not add %}
-        <p><a href="{% url 'pos:delete_category' company.url_name category_id %}">{% trans 'Delete' %}</a></p>
+    {% if add %}
+        <h1>{% trans 'Add category' %}</h1>
+        {% if parent %}{% trans 'In category' %} '{{ parent.name }}'{% endif %}
+        <form action="{% url 'pos:add_category' company.url_name parent.id %}" method="post" enctype="multipart/form-data">
+    {% else %}
+        <h1>{% trans 'Edit category' %}</h1>
+        <form action="{% url 'pos:edit_category' company.url_name category.id %}" method="post" enctype="multipart/form-data">
     {% endif %}
-</form>
 
+    {% if category.image %}
+        <img id="image" src="{{ category.image.url }}" />
+    {% else %}
+        <img id="image" src="{% static 'graphics/placeholder.png' %}" class="category-placeholder" />
+    {% endif %}
+
+    <div class="edit-container">
+        {% csrf_token %}
+
+        <div class="error">{{ form.non_field_errors }}</div>
+
+        <div class="form-field">
+            <div class="error">{{ form.name.errors }}</div>
+            {{ form.name.label_tag }}
+            {{ form.name}}
+        </div>
+
+        {# parent stays hidden when adding category #}
+        <div class="form-field{% if add %} hidden{% endif %}">
+            <div class="error">{{ form.parent.errors }}</div>
+            {{ form.parent.label_tag }}
+            {{ form.parent }}
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.image.errors }}</div>
+            {{ form.image.label_tag }}
+            <div>{{ form.image }}</div>
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.description.errors }}</div>
+            {{ form.description.label_tag }}
+            {{ form.description }}
+        </div>
+
+
+        <div class="form-field">
+            <div class="split-cell first">
+                <input type="submit" value="{% trans 'Save' %}" />
+            </div>
+            <div class="split-cell last">
+                {# return to categories and select the parent #}
+                <a class="button cancel"
+                   href="{% url 'pos:list_categories' company.url_name %}{% if add and parent %}#{{ parent.id }}{% else %}#{{ category.id }}{% endif %}">
+                {% trans 'Cancel' %}</a>
+            </div>
+        </div>
+    </div>
+    </form>
 {% endblock %}
-
