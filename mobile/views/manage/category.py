@@ -58,21 +58,17 @@ def mobile_JSON_categories(request, company):
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_add_category(request, company):
-    return add_category(request, company)
-
-
-def add_category(request, company):
     try:
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
-    
+
     # sellers can add category
     if not has_permission(request.user, c, 'category', 'edit'):
         return JSON_error(_("You have no permission to add products"))
 
     data = JSON_parse(request.POST['data'])
-    
+
     # validate data
     valid = validate_category(request.user, c, data)
     if not valid['status']:
@@ -85,7 +81,7 @@ def add_category(request, company):
         parent = None
     else:
         parent = Category.objects.get(id=parent_id)
-    
+
     # save category:
     category = Category(
         company = c,
@@ -95,14 +91,15 @@ def add_category(request, company):
         created_by = request.user,
     )
     category.save()
-    
+
     # add image, if it's there
     if data['change_image']:
         if 'image' in data:
             category.image = data['image']
             category.save()
-    
+
     return JSON_ok(extra=get_all_categories_structured(c, category))
+
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
