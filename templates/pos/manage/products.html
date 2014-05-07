@@ -49,13 +49,13 @@ var tax_rates = [];
 
 var last_value;
 var update_timeout;
-var last_offset = 0; 
+var last_offset = 0;
 
 var check_interval_duration = 500;
 var update_timeout_duration = 1500;
 
 // remember the category of last added product and show it in new dialog
-last_chosen_category = null;
+var last_chosen_category = null;
 
 $(document).ready(function(){
     // functions:
@@ -80,8 +80,8 @@ $(document).ready(function(){
         
         // send to the view
         send_data("{% url 'pos:search_products' company.url_name %}",
-                search_criteria, "{{ csrf_token }}", function(recv_data){
-                    show_products(recv_data);
+            search_criteria, "{{ csrf_token }}", function(recv_data){
+                show_products(recv_data);
         });
         return false;
     }
@@ -98,13 +98,15 @@ $(document).ready(function(){
         
         var i;
         var max_height = 0;
-        for(i=0; i<data.length; i++){
+        for(i = 0; i < data.length; i++){
+            parse_product(data[i]);
+
             // make a div for each product
             var parent_div = $("<div>", {"class":"product-details"});
             products_div.append(parent_div);
             
             // save product to .data()
-            parent_div.data({product:data[i]});
+            parent_div.data(data[i]);
             render_product(parent_div);
 
             // get product container's height
@@ -134,7 +136,7 @@ $(document).ready(function(){
         // - including tax and discounts (readonly)
         
         // update this div
-        var product = div_obj.data().product;
+        var product = div_obj.data();
         
         // empty parent and copy all stuff from #product_details_template to it
         div_obj.empty();
@@ -192,9 +194,9 @@ $(document).ready(function(){
         $(".product-code", div_obj).append(escape(product.code));
         
         // if a user has no permission to edit/delete, don't show buttons
-        manage_obj = $(".product-management", div_obj);
-        edit_button = $("input.product-edit-button", manage_obj);
-        delete_button = $("input.product-delete-button", manage_obj);
+        var manage_obj = $(".product-management", div_obj);
+        var edit_button = $("input.product-edit-button", manage_obj);
+        var delete_button = $("input.product-delete-button", manage_obj);
         
         if({{can_edit|lower}}){
             // enable and add functionality to:
@@ -219,10 +221,12 @@ $(document).ready(function(){
     }
     
     function discount_amount(discount){
-        if(discount.type == 'Percent') return " (" + discount.amount + "%)";
-        else return " ({{currency|escapejs}} " + discount.amount + ")";
+        if(discount.type == 'Percent')
+            return " (" + display_number(discount.amount, "{{ separator }}", {{ decimal_places }}) + "%)";
+        else
+            return " ({{currency|escapejs}} " + display_number(discount.amount, "{{ separator }}", {{ decimal_places }}) + ")";
     }
-    
+
     function discount_tooltip(discount, li_obj){
         // tooltip - discount details
         var tooltip = "";
@@ -266,7 +270,7 @@ $(document).ready(function(){
         discount_tooltip(discount, li_obj);
         
         // delete button
-        btn_obj = $("<input>", {type:"button", value:"x", "class":"delete-discount"});
+        var btn_obj = $("<input>", {type:"button", value:"x", "class":"delete-discount"});
         btn_obj.click(function(){
             // delete this list Item
             $(this).parent().remove();
@@ -294,8 +298,8 @@ $(document).ready(function(){
         
         // add another Item, this time with all available discounts
         // in a listbox and an 'add' button
-        li_obj = $("<li>");
-        sel_obj = $("<select>", {id:"edit_discount_list"});
+        var li_obj = $("<li>");
+        var sel_obj = $("<select>", {id:"edit_discount_list"});
         li_obj.append(sel_obj);
         li_obj.data({id:false}); // don't store or send this Item
         ul_obj.append(li_obj);
@@ -309,7 +313,7 @@ $(document).ready(function(){
                 continue;
             }
             
-            opt_obj = $("<option>")
+            var opt_obj = $("<option>")
                 .attr("value", all_discounts[i].id)
                 .append(all_discounts[i].code + " " + discount_amount(all_discounts[i]));
             
@@ -322,7 +326,7 @@ $(document).ready(function(){
             sel_obj.prop("selectedIndex", -1);
             
             sel_obj.unbind().change(function(){ // no add buttons
-                d_i = $(":selected", sel_obj).val(); // currently selected discount's list index
+                var d_i = $(":selected", sel_obj).val(); // currently selected discount's list index
                 
                 // add data to product
                 product.discounts.push(all_discounts[find_discount_by_id(all_discounts, d_i)]);
@@ -343,8 +347,12 @@ $(document).ready(function(){
     }
     
     function upload_image_status(status, save_obj, del_obj, upl_obj, img_obj){
+        return;
+        // no showing and hiding at the moment
         var show, hide;
-        
+
+        upl_obj = upl_obj.parent();
+
         switch(status){
            case 'image':
                // product has image and it is not being edited
@@ -353,7 +361,7 @@ $(document).ready(function(){
                break;
            case 'no_image':
                // product has no image and it is not being edited
-               show = [save_obj, upl_obj, img_obj];
+               show = [save_obj, img_obj];
                hide = [del_obj];
                break;
            case 'uploading':
@@ -362,7 +370,8 @@ $(document).ready(function(){
                hide = [save_obj, del_obj, upl_obj];
                break;
         }
-        
+
+        var i;
         for(i = 0; i < show.length; i++) show[i].show();
         for(i = 0; i < hide.length; i++) hide[i].hide();
     }
@@ -385,7 +394,7 @@ $(document).ready(function(){
     function show_product_edit_dialog(parent){
         var i, sel_obj;
         
-        var product = parent.data().product;
+        var product = parent.data();
         
         var edit_obj = $("#edit_dialog");
         
@@ -435,11 +444,7 @@ $(document).ready(function(){
         }
         // when changed, update units
         sel_obj.change(update_unit_types);        
-        // unit amount
-        sel_obj = $("#edit_product_unit_amount", edit_obj);
-        sel_obj.val(product.unit_amount);
-        sel_obj.change(update_unit_types); // when changed...
-        
+
         // update with default
         update_unit_types();
         
@@ -509,7 +514,7 @@ $(document).ready(function(){
             // filetype filter
             var rFilter = /^image\/(?:{{ image_upload_formats|escapejs }})$/i; {% comment %} file formats from globals {% endcomment %}
 
-            var f = f = obj.files[0];
+            var f = obj.files[0];
             if(obj.files && f){ // check for browser compatibility
                 var reader = new FileReader();
                 // read the file
@@ -544,9 +549,10 @@ $(document).ready(function(){
                 // image will have to be uploaded
                 product.change_image = true;
             }
-            
-            del_obj.show();
-            upl_obj.hide();
+
+            // not showing/hiding at the moment
+            //del_obj.show();
+            //upl_obj.hide();
         });
         
         del_obj.unbind().click(function(){
@@ -593,31 +599,50 @@ $(document).ready(function(){
         
         // show the edit dialog
         edit_obj.dialog({
-            modal: true
+            modal: true,
+            draggable: false,
+            height: $(window).height() - 100,
+            width: $(window).width() - 50,
+            resizable: false,
+            closeOnEscape: true
         });
-        
+
         // set dialog title: if there's no name, it's for adding new product
         if(product.name)
             edit_obj.dialog('option', 'title', "{% trans 'Edit product' %}: " + product.name);
         else
             edit_obj.dialog('option', 'title', "{% trans 'Add product' %}");
         
-        edit_obj.dialog('option', 'width', 900); // TODO: remove fixed width
-
         // custom 'widgets'
         $("#edit_product_image_upload").customFileInput();
+    }
+
+    function parse_product(product){
+        // convert all text numbers in product to Big() numbers
+        console.log(product);
+
+        // price, purchase_price, stock, tax, discounts[amount]
+        product.price = get_number(product.price, "{{ separator }}");
+        product.purchase_price = get_number(product.purchase_price, "{{ separator }}");
+        product.stock = get_number(product.stock, "{{ separator }}");
+        product.tax = get_number(product.tax, "{{ separator }}");
+
+        for(var i = 0; i < product.discounts.length; i++){
+            product.discounts[i].amount = get_number(product.discounts[i].amount, "{{ separator }}");
+        }
+
+        return product;
     }
     
     function get_product(parent){
         // get product's data from the server and put
         // it where it was before (product.parent)
-        get_data(parent.data().product.get_url, function(data){
-            parent.data({product:data});
+        var url = "{% url 'pos:get_product' company.url_name %}" + '?' + $.param({product_id: parent.data().id});
+
+        get_data(url, function(data){
+            parent.data(parse_product(data));
             render_product(parent);
         });
-        
-        // close the dialog
-        $("#edit_dialog").dialog("destroy");
     }
     
     function get_product_discounts(ul_obj){
@@ -643,14 +668,10 @@ $(document).ready(function(){
         var price = get_number($("#edit_product_price").val(), "{{ separator }}");
         if(!price) return;
         
-        // unit amount
-        var unit_amount = get_number($("#edit_product_unit_amount").val(), "{{ separator }}");
-        if(!unit_amount) return;
-            
         // if price is entered including tax, remove tax from price first and add it later
         if($("input.product-price-type:checked").val() == 'incl'){
             // remove tax from base price in #edit_product_tax
-            price = do_tax(price, null, t, "{{ separator }}");
+            price = do_tax(price, null, t);
         }
         if(!price) return;
         
@@ -658,7 +679,7 @@ $(document).ready(function(){
         var discounts = get_product_discounts($("ul#edit_discounts"));
             
         // total_price(tax_first, base, tax, discounts, separator)
-        var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), unit_amount, "{{separator}}");
+        var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), "{{separator}}");
 
         $("#total_price").text(display_number(result.total, "{{separator}}", {{decimal_places}}));
         
@@ -670,9 +691,6 @@ $(document).ready(function(){
         var purchase_price = get_number($("input#edit_product_purchase_price").val(), "{{separator}}");
         var profit_obj = $("#profit");
         if(purchase_price){
-            // multiply purchase price by unit_amount first
-            purchase_price = purchase_price.times(unit_amount);
-            
             var profit = result.total_tax_exc.minus(purchase_price);
             profit_obj.text(display_number(profit, "{{separator}}", {{decimal_places}}));
             
@@ -703,7 +721,7 @@ $(document).ready(function(){
         // private notes
         // tax
         // stock
-        var product = parent.data().product;
+        var product = parent.data();
         
         var dlg_obj = $("#edit_dialog");
         
@@ -711,7 +729,6 @@ $(document).ready(function(){
         data['id'] = product.id;
         data['name'] = $("#edit_product_name", dlg_obj).val();
         data['unit_type'] = $("#edit_product_unit_type :selected", dlg_obj).val();
-        data['unit_amount'] = $("#edit_product_unit_amount", dlg_obj).val();
         // image: if changed, encode uploaded image to base64
         data['change_image'] = product.change_image;
         if(product.change_image) data['image'] = product.image_data;
@@ -774,14 +791,17 @@ $(document).ready(function(){
             send_data("{% url 'pos:edit_product' company.url_name %}", data, "{{csrf_token}}",
                 function(response){
                     if(response.status != 'ok') alert(response.message);
-                    else get_product(parent);
+                    else{
+                        get_product(parent);
+                        dlg_obj.dialog("destroy");
+                    }
                 }
             );
         }
     }
     
     function delete_product(parent){
-        var product = parent.data().product;
+        var product = parent.data();
         var data = {};
         data['id'] = product.id;
         // confirm deletion
@@ -801,11 +821,7 @@ $(document).ready(function(){
     function update_unit_types(){
         // when the unit types edit changes, update all static labels with the changed units
         var ut = $("#edit_product_unit_type").val();
-        var unit_amount = $("#edit_product_unit_amount").val() + " " + ut;
 
-        $("span.unit-amount-readonly").each(function(){
-            $(this).text(unit_amount);
-        });
         $("span.unit-readonly").each(function(){
             $(this).text(ut);
         });
@@ -828,6 +844,7 @@ $(document).ready(function(){
             return false;
         }
     );
+
     
     // unit types
     get_data("{% url 'pos:web_JSON_units' company.url_name %}",
@@ -844,6 +861,11 @@ $(document).ready(function(){
     get_data("{% url 'pos:JSON_discounts' company.url_name %}",
         function(data){
             all_discounts = data;
+
+            // convert all amounts to Big() numbers
+            for(var i = 0; i < all_discounts.length; i++){
+                all_discounts[i].amount = get_number(all_discounts[i].amount, "{{ separator }}");
+            }
         }
     );
     
@@ -940,12 +962,11 @@ $(document).ready(function(){
             // empty product
             var product = {
                 "id":-1,// new product's id = -1 until the server assigns an id
-                "discounts":[], // no discounts so far
-                "unit_amount":1
+                "discounts":[] // no discounts so far
             };
             // save it to a dummy div
             parent = $("#new_product_dummy");
-            parent.data({product:product});
+            parent.data(product);
             
             show_product_edit_dialog(parent);
         });
@@ -972,7 +993,7 @@ $(document).ready(function(){
                    class="search-filter"
                    type="text" placeholder="{% trans 'Enter query' context 'search products' %}" />
 
-            <div id="advanced_search">
+            <div id="advanced_search" class="hidden">
                 <label for="category_filter">{% trans 'Category' %}:</label>
                 <input id="category_filter" type="text" /><div id="category_list_select"></div>
 
@@ -1018,7 +1039,7 @@ $(document).ready(function(){
         </div>
 
         <div id="add_product_container">
-            <input type="button" id="add_product" value="{% trans 'Add product' %}">
+            <input type="button" id="add_product" class="do" value="{% trans 'Add product' %}">
         </div>
     </div>
 
@@ -1026,113 +1047,123 @@ $(document).ready(function(){
         <div id="products_list"></div>
 
         {% comment %} a template for editing/adding product (dialog) {% endcomment %}
-        <div id="edit_dialog">
-            <img id="edit_product_image" src="#" alt="" class="preview-product"/>
+        <div id="edit_dialog" class="hidden">
+            <div class="management-column">
+                <img id="edit_product_image" src="#" alt="" class="preview-product"/>
 
-            <div class="form-field">
-                {% comment %} the form that follows is here only because input type="file" cannot be reset unless the form it belongs to is reset {% endcomment %}
-                <form id="edit_product_image_input_form">
-                    <div><input type="file" id="edit_product_image_upload" /></div>
-                </form>
-                <input type="button" id="edit_product_delete_image" value="{% trans 'Delete image' %}" />
-            </div>
-
-            <div class="form-field">
-                <label for="edit_product_name">{% trans 'Name' %}</label>
-                <input type="text" id="edit_product_name" maxlength="{{field_lengths.name}}" />
-            </div>
-
-            <div class="form-field">
-                <label for="edit_product_description">{% trans 'Description' %}</label>
-                {% comment %} max length for textarea: an artibrary value, not set in database {% endcomment %}
-                <textarea id="edit_product_description" maxlength="1000"></textarea>
-            </div>
-
-            <div class="form-field">
-                {% comment %} list of tax rates {% endcomment %}
-                <p><label for="edit_product_tax">{% trans 'Tax' %}</label>
-                    <select id="edit_product_tax" name="edit_product_tax"></select></p>
-            </div>
-
-            <div class="form-field">
-                {% comment %} list of categories {% endcomment %}
-                <label for="edit_product_category">{% trans 'Category' %}</label>
-                <select id="edit_product_category" name="edit_product_category"></select>
-            </div>
-
-            <div class="form-field">
-                {% comment %} unit type: [scale] x [unit type] {% endcomment %}
-                <label for="edit_product_unit_amount">{% trans 'Unit' %}</label>
-                <input type="text" id="edit_product_unit_amount" name="edit_product_unit_amount" /> {% comment %} default value = 1 {% endcomment %}
-                <select id="edit_product_unit_type"></select>
-            </div>
-
-            <div class="form-field">
-                <label for="edit_product_stock">{% trans 'Stock' %}:</label>
-                <input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}" /> <span class="unit-readonly">?</span>
-            </div>
-
-            <div class="form-field">
-                {% comment %} price per unit - can be entered in two ways: including or excluding tax {% endcomment %}
-                <label for="edit_product_purchase_price">{% trans 'Purchase price' %}: </label>
-                {{ currency }} <input type="text" id="edit_product_purchase_price" maxlength="{{ field_lengths.purchase_price}}" />
-                {% trans 'per' %} <span class="unit-readonly">?</span>
-            </div>
-
-            <div class="form-field">
-                <label for="edit_product_price">{% trans 'Sell price' %}: </label>
-                {{ currency }} <input type="text" id="edit_product_price" maxlength="{{ field_lengths.price }}"/>
-                {% trans 'per' %} <span class="unit-amount-readonly">?</span>
-                <input type="radio" name="price_type" class="product-price-type" value="incl" />{% trans 'Incl. tax' %}
-                <input type="radio" name="price_type" class="product-price-type" value="excl" checked="checked" />{% trans 'Excl. tax' %} <br />
-            </div>
-
-            <div class="form-field">
-                <label for="edit_product_private_notes">{% trans 'Private notes' %}:</label>
-                <textarea id="edit_product_private_notes" maxlength="1000"></textarea>
-            </div>
-
-            <div class="form-field">
-            {% comment %} discounts {% endcomment %}
-                <div class="fake-label">{% trans 'Discounts' %}</div>
-                <p>{% blocktrans %} Drag to reorder. Total discount will be calculated in the same order as shown here. {% endblocktrans %}</p>
-                <ul id="edit_discounts"></ul>
-                {% comment %} total price, including tax and discounts {% endcomment %}
-            </div>
-
-            <div class="form-field">
-                <label for="edit_product_shortcut">{% trans 'Shortcut' %}</label>
-                <input type="text" id="edit_product_shortcut" maxlength="{{ field_lengths.shortcut }}" />
-
-                <label for="edit_product_code">{% trans 'Product code' %}</label>
-                <input type="text" id="edit_product_code" maxlength="{{ field_lengths.code }}" />
-            </div>
-
-            <div class="form-field">
-            {% comment %} total price and profit {% endcomment %}
-                <div class="fake-label">{% trans 'Total price' %}: </div>
-                <div id="total_price">&nbsp;</div>
-
-                <div class="fake-label"> {% trans 'Price without tax' %}:</div>
-                <div id="price_without_tax">&nbsp;</div>
-
-                <div class="fake-label"> {% trans 'Profit' %}: </div>
-                <div id="profit">&nbsp;</div>
-            </div>
-
-            <div class="form-field">
-                {% comment %} save/cancel buttons {% endcomment %}
-                <div class="split-cell first">
-                    <input type="button" id="edit_product_save" value="{% trans 'Save' %}">
+                <div class="form-field">
+                    <div class="split-cell first">
+                        {% comment %} the form that follows is here only because input type="file" cannot be reset unless the form it belongs to is reset {% endcomment %}
+                        <form id="edit_product_image_input_form">
+                            <div><input type="file" id="edit_product_image_upload" /></div>
+                        </form>
+                    </div>
+                    <div class="split-cell last">
+                        <input type="button" id="edit_product_delete_image" value="{% trans 'Delete image' %}" />
+                    </div>
                 </div>
-                <div class="split-cell last">
-                    <input type="button" id="edit_product_cancel" value="{% trans 'Cancel' %}">
+
+                <div class="form-field clear-floats">
+                    <label for="edit_product_name">{% trans 'Name' %}</label>
+                    <input type="text" id="edit_product_name" maxlength="{{field_lengths.name}}" />
+                </div>
+
+                <div class="form-field">
+                    <label for="edit_product_description">{% trans 'Description' %}</label>
+                    {% comment %} max length for textarea: an artibrary value, not set in database {% endcomment %}
+                    <textarea id="edit_product_description" maxlength="1000"></textarea>
+                </div>
+
+                <div class="form-field">
+                    {% comment %} list of tax rates {% endcomment %}
+                    <p><label for="edit_product_tax">{% trans 'Tax' %}</label>
+                        <select id="edit_product_tax" name="edit_product_tax"></select></p>
+                </div>
+
+                <div class="form-field">
+                    {% comment %} list of categories {% endcomment %}
+                    <label for="edit_product_category">{% trans 'Category' %}</label>
+                    <select id="edit_product_category" name="edit_product_category"></select>
+                </div>
+
+                <div class="form-field">
+                    {% comment %} unit type: [scale] x [unit type] {% endcomment %}
+                    <label for="edit_product_unit_type">{% trans 'Unit' %}</label>
+                    <select id="edit_product_unit_type"></select>
+                </div>
+            </div>
+
+            <div class="management-column">
+                <div class="form-field">
+                    <label for="edit_product_stock">{% trans 'Stock' %}:</label>
+                    <input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}" /> <span class="unit-readonly">?</span>
+                </div>
+
+                <div class="form-field">
+                    {% comment %} price per unit - can be entered in two ways: including or excluding tax {% endcomment %}
+                    <label for="edit_product_purchase_price">{% trans 'Purchase price' %}: </label>
+                    {{ currency }} <input type="text" id="edit_product_purchase_price" maxlength="{{ field_lengths.purchase_price}}" />
+                    {% trans 'per' %} <span class="unit-readonly">?</span>
+                </div>
+
+                <div class="form-field">
+                    <label for="edit_product_price">{% trans 'Sell price' %}: </label>
+                    {{ currency }} <input type="text" id="edit_product_price" maxlength="{{ field_lengths.price }}"/>
+                    {% trans 'per' %} <span class="unit-readonly">?</span>
+                    <input type="radio" name="price_type" class="product-price-type" value="incl" />{% trans 'Incl. tax' %}
+                    <input type="radio" name="price_type" class="product-price-type" value="excl" checked="checked" />{% trans 'Excl. tax' %} <br />
+                </div>
+
+                <div class="form-field">
+                    <label for="edit_product_private_notes">{% trans 'Private notes' %}:</label>
+                    <textarea id="edit_product_private_notes" maxlength="1000"></textarea>
+                </div>
+
+                <div class="form-field">
+                {% comment %} discounts {% endcomment %}
+                    <div class="fake-label">{% trans 'Discounts' %}</div>
+                    <p>{% blocktrans %} Drag to reorder. Total discount will be calculated in the same order as shown here. {% endblocktrans %}</p>
+                    <ul id="edit_discounts"></ul>
+                    {% comment %} total price, including tax and discounts {% endcomment %}
+                </div>
+
+                <div class="form-field">
+                    <label for="edit_product_shortcut">{% trans 'Shortcut' %}</label>
+                    <input type="text" id="edit_product_shortcut" maxlength="{{ field_lengths.shortcut }}" />
+
+                    <label for="edit_product_code">{% trans 'Product code' %}</label>
+                    <input type="text" id="edit_product_code" maxlength="{{ field_lengths.code }}" />
+                </div>
+
+            </div>
+
+            <div class="management-column">
+                <div class="form-field">
+                {% comment %} total price and profit {% endcomment %}
+                    <div class="fake-label">{% trans 'Total price' %}: </div>
+                    <div id="total_price">&nbsp;</div>
+
+                    <div class="fake-label"> {% trans 'Price without tax' %}:</div>
+                    <div id="price_without_tax">&nbsp;</div>
+
+                    <div class="fake-label"> {% trans 'Profit' %}: </div>
+                    <div id="profit">&nbsp;</div>
+                </div>
+
+                <div class="form-field">
+                    {% comment %} save/cancel buttons {% endcomment %}
+                    <div class="split-cell first">
+                        <input type="button" id="edit_product_save" value="{% trans 'Save' %}" class="ok" />
+                    </div>
+                    <div class="split-cell last">
+                        <input type="button" id="edit_product_cancel" value="{% trans 'Cancel' %}" class="cancel" />
+                    </div>
                 </div>
             </div>
         </div>
 
         {% comment %} a template for viewing products {% endcomment %}
-        <div id="product_details_template">
+        <div id="product_details_template" class="hidden">
             <div class="title">
                 <div class="product-management">
                     <input type="button" value="{% trans 'Edit' %}" class="product-edit-button">

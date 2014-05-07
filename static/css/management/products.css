@@ -101,3 +101,7 @@ div.product-details table.details td.details-label{
     color: #646464;
     width: 40%;
 }
+
+input#edit_product_save, input#edit_product_cancel{
+    width: 100%;
+}

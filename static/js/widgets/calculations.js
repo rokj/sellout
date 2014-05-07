@@ -44,7 +44,7 @@ function do_tax(p_incl, p_excl, tax){
     }
 }
 
-function total_price(tax_first, base_price, tax, discounts, quantity, unit_amount){
+function total_price(tax_first, base_price, tax, discounts, quantity){
     // calculates total price
     // parameters:
     // tax_first: if true, first tax is added and then discounts, else v.v.
@@ -125,13 +125,12 @@ function total_price(tax_first, base_price, tax, discounts, quantity, unit_amoun
         r.total_tax_exc = r.discount_price;
     }
 
-    // multiply everything by quantity and unit amount
-    t = quantity.times(unit_amount);
-    r.base = r.base.times(t); // without tax and discounts
-    r.tax = r.tax.times(t);   // tax, absolute
-    r.discount = r.discount.times(t); // discounts, absolute
-    r.total_tax_exc = r.total_tax_exc.times(t); // total without tax
-    r.total = r.total.times(t); // total total total
+    // multiply everything by quantity
+    r.base = r.base.times(quantity); // without tax and discounts
+    r.tax = r.tax.times(quantity);   // tax, absolute
+    r.discount = r.discount.times(quantity); // discounts, absolute
+    r.total_tax_exc = r.total_tax_exc.times(quantity); // total without tax
+    r.total = r.total.times(quantity); // total total total
 
     return r;
 }

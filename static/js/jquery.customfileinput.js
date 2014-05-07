@@ -1,22 +1,24 @@
 (function($){
-    $.fn.customFileInput = function() {
+    $.fn.customFileInput = function(){
         return this.each(function(){
+            // delete everything from parent and redraw
             var parent = $(this).parent();
+            $(this).detach();
+            parent.empty();
 
-            var container = $("<div>", {'class': "custom-file-input"});
-            container.css("position", "relative");
-            container.height($(this).height());
+            parent.css("position", "relative");
+            parent.height($(this).height());
 
             // append a style-able browse button
             var browse_button = $("<input>", {
                 type: 'button',
-                "class": 'custom-file-input',
+                "class": "custom-file-input",
                 value: gettext("Browse") + "..."
             });
-            container.prepend(browse_button);
-
-            // append the container to current button's parent
-            parent.prepend(container);
+            parent
+                .addClass("custom-file-input")
+                .append($(this))
+                .append(browse_button);
 
             // make the original input transparent and float it above the parent
             $(this).css("opacity", 0);

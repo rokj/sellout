@@ -131,11 +131,7 @@ class ProductAbstract(SkeletonU):
     description = models.TextField(_("Product description"), blank=True, null=True)
     private_notes = models.TextField(_("Notes (only for internal use)"), null=True, blank=True)
     unit_type = models.CharField(_("Product unit type"), max_length=15,
-                                 choices = g.UNITS, blank=False, null=False, default=g.UNITS[0][0])
-    unit_amount = models.DecimalField(_("Product size in basic units"),
-                                      max_digits=g.DECIMAL['quantity_digits'],
-                                      decimal_places=g.DECIMAL['quantity_decimal_places'],
-                                      null=False, blank=False, default=decimal.Decimal('1'))
+                                 choices=g.UNITS, blank=False, null=False, default=g.UNITS[0][0])
     stock = models.DecimalField(_("Number of items left in stock"),
                                 max_digits=g.DECIMAL['quantity_digits'],
                                 decimal_places=g.DECIMAL['quantity_decimal_places'],

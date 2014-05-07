@@ -87,7 +87,7 @@ def product_to_dict(user, product):
         discounts.append(discount_to_dict(user, d))
     ret['discounts'] = discounts
 
-    if product.image: # check if product's image exists
+    if product.image:  # check if product's image exists
         # get the thumbnail
         try:
             ret['image'] = get_thumbnail(product.image, image_dimensions('product')[2]).url
@@ -115,9 +115,7 @@ def product_to_dict(user, product):
     ret['private_notes'] = product.private_notes
     ret['unit_type'] = product.unit_type
     ret['unit_type_display'] = product.get_unit_type_display()
-    ret['unit_amount'] = format_number(user, product.unit_amount)
     ret['stock'] = format_number(user, product.stock)
-
 
     return ret
 
@@ -172,12 +170,18 @@ def products(request, company):
 
 
 @login_required
-def web_get_product(request, company, product_id):
-    return get_product(request, company, product_id)
+def web_get_product(request, company):
+    # there's id in request.GET
+    product_id = request.GET.get('product_id')
+    if not id:
+        return JSON_error(_("No product specified"))
+    else:
+        return get_product(request, company, product_id)
+
 
 def get_product(request, company, product_id):
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
     
@@ -185,7 +189,7 @@ def get_product(request, company, product_id):
     if not has_permission(request.user, c, 'product', 'list'):
         return JSON_error(_("You have no permission to view products"))
     
-    product = get_object_or_404(Product, id = product_id, company = c)
+    product = Product.objects.get(company=c, id=product_id)
     
     return JSON_response(product_to_dict(request.user, product))
 
@@ -196,7 +200,7 @@ def web_search_products(request, company):
 
 def search_products(request, company):
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
     
@@ -220,28 +224,28 @@ def search_products(request, company):
     # product_code_filter
     if criteria.get('product_code_filter'):
         filter_by_product_code = True
-        products = products.filter(code__icontains = criteria.get('product_code_filter'))
+        products = products.filter(code__icontains=criteria.get('product_code_filter'))
     else:
         filter_by_product_code = False
     
     # shortcut_filter
     if criteria.get('shortcut_filter'):
         filter_by_shortcut = True
-        products = products.filter(shortcut__icontains = criteria.get('shortcut_filter'))
+        products = products.filter(shortcut__icontains=criteria.get('shortcut_filter'))
     else:
         filter_by_shortcut = False
     
     # notes_filter
     if criteria.get('notes_filter'):
         filter_by_notes = True
-        products = products.filter(private_notes__icontains = criteria.get('notes_filter'))
+        products = products.filter(private_notes__icontains=criteria.get('notes_filter'))
     else:
         filter_by_notes = False
         
     # description_filter
     if criteria.get('description_filter'):
         filter_by_description = True
-        products = products.filter(description__icontains = criteria.get('description_filter'))
+        products = products.filter(description__icontains=criteria.get('description_filter'))
     else:
         filter_by_description = False
         
@@ -255,7 +259,7 @@ def search_products(request, company):
     # tax_filter
     if criteria.get('tax_filter'):
         #filter_by_tax = True
-        products = products.filter(tax = decimal.Decimal(criteria.get('tax_filter')))
+        products = products.filter(tax=decimal.Decimal(criteria.get('tax_filter')))
     else:
         pass
         #filter_by_tax = False
@@ -263,9 +267,9 @@ def search_products(request, company):
     # price_filter
     if criteria.get('price_filter'):
         try:
-            products = products.filter( \
-                pk__in=Price.objects.filter( \
-                    unit_price=decimal.Decimal(\
+            products = products.filter(
+                pk__in=Price.objects.filter(
+                    unit_price=decimal.Decimal(
                         criteria.get('price_filter'))).order_by('-datetime_updated')[:1])
             #filter_by_price = True
         except Price.DoesNotExist:
@@ -324,13 +328,13 @@ def search_products(request, company):
 
     return JSON_response(ps)
 
+
 def validate_product(user, company, data):
     # data format (*-validation needed):
     # id
     # name*
     # price - numeric value*
     # unit type
-    # unit amount*
     # discounts - list of discount ids (checked in create/edit_product)
     # image
     # category - id (checked in create/edit_product)
@@ -420,15 +424,6 @@ def validate_product(user, company, data):
     if not data['unit_type'] in dict(g.UNITS):
         return r(False, _("Invalid unit type"))
         
-    # unit size: must be a number and must not be 0
-    ret = parse_decimal(user, data['unit_amount'], g.DECIMAL['quantity_digits'])
-    if not ret['success']:
-        return r(False, _("Check unit amount notation"))
-    elif ret['number'] == decimal.Decimal('0'):
-        # amount must not be null
-        return r(False, _("Unit amount must not be zero"))
-    data['unit_amount'] = ret['number']
-
     # image:
     if data['change_image'] == True:
         print 'bla'
@@ -543,7 +538,6 @@ def create_product(request, company):
         category=data.get('category'),
         name=data.get('name'),
         unit_type=data.get('unit_type'),
-        unit_amount=data.get('unit_amount'),
         code=data.get('code'),
         shortcut=data.get('shortcut'),
         description=data.get('description'),
@@ -610,7 +604,6 @@ def edit_product(request, company):
     # update product:
     product.name = data['name']
     product.unit_type = data['unit_type']
-    product.unit_amount = data['unit_amount']
     product.code = data['code']
     product.shortcut = data['shortcut']
     product.description = data['description']

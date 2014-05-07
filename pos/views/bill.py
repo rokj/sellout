@@ -33,7 +33,6 @@ def bill_item_to_dict(user, item):
     i['description'] = item.description
     i['private_notes'] = item.private_notes
     i['unit_type'] = item.unit_type
-    i['unit_amount'] = format_number(user, item.unit_amount)
     i['stock'] = format_number(user, item.stock)
     # values from bill Item
     i['bill_id'] = item.bill.id
@@ -106,7 +105,7 @@ def validate_prices():
     pass
 
 
-def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts):
+def item_prices(user, base_price, tax_percent, quantity, discounts):
     """ calculates prices and stuff and return the data
         passing parameters instead of Item object because Item may not exist yet
     """
@@ -162,15 +161,14 @@ def item_prices(user, base_price, tax_percent, quantity, unit_amount, discounts)
         # total without tax
         r['total_tax_exc'] = r['discount_price']
 
-    # multiply everything by quantity and unit amount
-    t = quantity * unit_amount
-    r['base'] = r['base']*t  # without tax and discounts
-    r['tax_absolute'] = r['tax_absolute']*t  # tax, absolute
-    r['discount_absolute'] = r['discount_absolute']*t  # discounts, absolute
-    r['total_tax_exc'] = r['total_tax_exc']*t  # total without tax
+    # multiply everything by quantity
+    r['base'] = r['base']*quantity  # without tax and discounts
+    r['tax_absolute'] = r['tax_absolute']*quantity  # tax, absolute
+    r['discount_absolute'] = r['discount_absolute']*quantity  # discounts, absolute
+    r['total_tax_exc'] = r['total_tax_exc']*quantity  # total without tax
     # save single total
     r['single_total'] = r['total']
-    r['total'] = r['total']*t  # total total total
+    r['total'] = r['total']*quantity  # total total total
 
     return r
 
@@ -241,14 +239,13 @@ def create_bill(request, company):
         quantity = r['number']
 
         # check if there's enough items left in stock (must be at least zero =D)
-        if product.stock < quantity * product.unit_amount:
+        if product.stock < quantity:
             print 'wtf'
             return JSON_error(_("Cannot sell more items than there are in stock"))
 
         # calculate and set all stuff for this new item:
         discounts = product.get_discounts()
-        prices = item_prices(request.user, product.get_price(), product.tax.amount, quantity, product.unit_amount,
-                             discounts)
+        prices = item_prices(request.user, product.get_price(), product.tax.amount, quantity, discounts)
 
         # notes, if any
         bill_notes = i.get('notes')
@@ -265,7 +262,6 @@ def create_bill(request, company):
             description=product.description,
             private_notes=product.private_notes,
             unit_type=product.get_unit_type_display(), # ! display, not the 'code'
-            unit_amount=product.unit_amount,
             stock=product.stock,
             # billItem's fields
             bill=bill,
@@ -363,13 +359,13 @@ def edit_item(request, company):
     quantity = r['number']
     
     # check if there's enough items left in stock (must be at least zero =D)
-    if product.stock < quantity*product.unit_amount:
+    if product.stock < quantity:
         print 'wtf'
         return JSON_error(_("Cannot sell more items than there are in stock"))
             
     # calculate and set all stuff for this new item:
     discounts = product.get_discounts()
-    prices = item_prices(request.user, product.get_price(), product.tax.amount, quantity, product.unit_amount, discounts)
+    prices = item_prices(request.user, product.get_price(), product.tax.amount, quantity, discounts)
 
     # notes, if any    
     bill_notes = data.get('notes')
@@ -386,7 +382,6 @@ def edit_item(request, company):
         description=product.description,
         private_notes=product.private_notes,
         unit_type=product.get_unit_type_display(),  # ! display, not the 'code'
-        unit_amount=product.unit_amount,
         stock=product.stock,
         # billItem's fields
         bill=bill,

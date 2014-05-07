@@ -105,7 +105,9 @@ div.management-column{
     vertical-align: middle;
 }
 
-div.form-field input[type='text'], div.form-field select, div.form-field textarea{
+div.form-field input[type='text'],
+div.form-field input[type='number'],
+div.form-field select, div.form-field textarea{
     width: calc(100% - 5px); /* mind the paddings (dumb css) */
 }
 
