@@ -138,7 +138,7 @@ def validate_contact(user, company, data):
     # ^[\w\d._+%]+  a string with any number of characters, numbers, and ._+% signs
     # @[\w\d.-]{2,} an @ sign followed by domain name of at least 2 characters long (can contain . and -)
     # \.\w{2,4}$'   domain (2-4 alphabetic characters)
-    m = re.search('^[\w\d._+%]+@[\w\d.-]{2,}\.\w{2,4}$', data['email'])
+    m = re.search('([\w.-]+)@([\w.-]+)', data['email'])
     if data['email'] not in m.group(0):
         return err(_("Invalid email address"))
 
