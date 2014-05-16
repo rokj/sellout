@@ -537,7 +537,6 @@ def create_product(request, company):
         created_by=request.user,
         category=data.get('category'),
         name=data.get('name'),
-        unit_type=data.get('unit_type'),
         code=data.get('code'),
         shortcut=data.get('shortcut'),
         description=data.get('description'),
