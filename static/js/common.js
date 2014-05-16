@@ -101,6 +101,22 @@ function set_draggable(obj, items_selector, easing_time){
     obj.draggable(params);
 }
 
+function scroll_into_view(btn) {
+    // scrolls the object into view;
+    // the object is a category/product button in a container what was set_draggable().
+    var scroller = btn.parent();
+    var frame = scroller.parent();
+
+    // scrolling left: if button.left is less than container.left, scroll it into view
+    if (btn.offset().left < frame.offset().left) {
+        scroller.animate({left : -btn.position().left});
+    }
+    else if(btn.offset().left + btn.outerWidth() > frame.offset().left + frame.width()) {
+        // scrolling right: if button.left + button.width > container.left + container.width, scroll it into view
+        scroller.animate({left:-btn.position().left + frame.width() - btn.outerWidth()});
+    }
+}
+
 function error_message(title, message){
     // create a div for error dialog
     var dlg_obj = $("<div>");

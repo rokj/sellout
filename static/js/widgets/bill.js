@@ -201,24 +201,36 @@ Item = function(bill, product) {
     p.g = p.bill.g;
     p.product = product; // Product() object
     p.data = null; // the actual item data that will be sent to server (initialized later)
-    p.serial = ++p.bill.serial;
+    p.serial = ++p.bill.serial; // a unique id for this bill
 
     p.item_row = p.bill.item_template.clone().appendTo(p.bill.bill_container);
     p.items = {
+        delete_button: $("input.delete", p.item_row),
+
         name: $("div.item.name", p.item_row),
         code: $("div.item.code", p.item_row),
+
         qty: $("input.qty", p.item_row),
         inc_qty_button: $("input.qty-plus", p.item_row),
         dec_qty_button: $("input.qty-minus", p.item_row),
+
         price: $("div.item.price", p.item_row),
+
         tax_relative: $("div.value.item.tax", p.item_row),
         tax_absolute: $("div.subvalue.item.tax", p.item_row),
+
         discount: $("div.item.discount", p.item_row),
-        discount_more_button: $("input.discount-more", p.item_row),
+
         total: $("div.value.item.total", p.item_row),
-        explode_button: $("input.explode", p.item_row).hide(),
-        delete_button: $("input.delete", p.item_row)
+
+        more_button: $("button.more", p.item_row),
+
+        explode_button: $("input.explode", p.item_row).hide()
     };
+    //p.details_box =
+
+    // properties of this item
+    p.expanded = false;
 
     //
     // methods
@@ -351,6 +363,26 @@ Item = function(bill, product) {
         }
     };
 
+    p.expand = function(expand){
+        p.expanded = expand;
+
+        if(expand){
+            // change item's classes
+            p.item_row.addClass("expanded").removeClass("collapsed");
+            // show quantity plus and minus buttons
+            p.items.inc_qty_button.show();
+            p.items.dec_qty_button.show();
+            p.items.more_button.show();
+
+        }
+        else{
+            p.item_row.addClass("collapsed").removeClass("expanded");
+            p.items.inc_qty_button.hide();
+            p.items.dec_qty_button.hide();
+            p.items.more_button.hide();
+        }
+    };
+
     //
     // init
     //
@@ -374,12 +406,36 @@ Item = function(bill, product) {
     p.update();
 
     // bind events
+    // click on an item
+    p.item_row.click(function(){
+        if(p.expanded){
+            // already expanded, just collapse
+            p.expand(false);
+        }
+        else{
+            // collapse all bill's items and expand this
+            for(var i = 0; i < p.bill.items.length; i++){
+                if(p.bill.items[i].serial != p.serial && p.bill.items[i].expanded == true)
+                    p.bill.items[i].expand(false);
+            }
+            p.expand(true);
+        }
+    });
+
     // quantity up/down
-    p.items.inc_qty_button.click(function(){ p.add_quantity(true); });
-    p.items.dec_qty_button.click(function(){ p.add_quantity(false); });
+    p.items.inc_qty_button.click(function(e){
+        e.stopPropagation();
+        p.add_quantity(true);
+    });
+    p.items.dec_qty_button.click(function(e){
+        e.stopPropagation();
+        p.add_quantity(false);
+    });
 
     // remove button
-    p.items.delete_button.click(function(){
+    p.items.delete_button.click(function(e){
+        e.stopPropagation();
+
         confirmation_dialog(
             gettext("Remove bill item"), // message title
             interpolate(gettext("Remove bill item: %(name)s?"), {name: p.data.name}, true),

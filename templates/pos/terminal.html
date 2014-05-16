@@ -10,12 +10,12 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/bill.css' %}" />
 
 {% comment %} the terminal {% endcomment %}
-<script src="{% static 'widgets/terminal.js' %}"></script>
+<script src="{% static 'js/widgets/terminal.js' %}"></script>
 {% comment %} widgets {% endcomment %}
-<script src="{% static 'widgets/categories.js' %}"></script> {% comment %} categories selector {% endcomment %}
-<script src="{% static 'widgets/products.js' %}"></script> {% comment %} products selector {% endcomment %}
-<script src="{% static 'widgets/search.js' %}"></script> {% comment %} searching products/categories {% endcomment %}
-<script src="{% static 'widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
+<script src="{% static 'js/widgets/categories.js' %}"></script> {% comment %} categories selector {% endcomment %}
+<script src="{% static 'js/widgets/products.js' %}"></script> {% comment %} products selector {% endcomment %}
+<script src="{% static 'js/widgets/search.js' %}"></script> {% comment %} searching products/categories {% endcomment %}
+<script src="{% static 'js/widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 
 {% comment %} other {% endcomment %}
 <script src="{% static 'fuckyeah/fuckyeah.jquery.js' %}"></script>
@@ -84,71 +84,75 @@ $(document).ready(function(){
 {% endblock %}
 
 {% block content %}
-{% comment %} the 'loading' div {% endcomment %}
-{% comment %} management, logout, ... links {% endcomment %}
-
-<div id="messages">messages</div> {% comment %} actually in center, but with overflow:hidden {% endcomment %}
-
 {% comment %} the bill (scrolling) {% endcomment %}
 {% comment %} bill header has the same layout as items and will be copied when adding new (items) {% endcomment %}
 <div id="bill_header" class="bill-item header">
+    {% comment %} product name and code {% endcomment %}
     <div class="item-val name header">
-        <p class="bill-title">{% trans 'Name' %}</p> {% comment %} product name and code {% endcomment %}
-        <p class="bill-subtitle">{% trans 'Code' %}</p></div>
+        <div class="">{% trans 'Name' %}</div>
+    </div>
+    {% comment %} quantity and unit type {% endcomment %}
     <div class="item-val quantity header">
-        <p class="bill-title">{% trans 'Qty' %}</p> {% comment %} quantity and unit type {% endcomment %}
-        <p class="bill-subtitle">{% comment %} empty at the moment {% endcomment %}</p></div>
+        <div class="">{% trans 'Qty' %}</div>
+    </div>
+    {% comment %} base price {% endcomment %}
     <div class="item-val price header">
-        <p class="bill-title">{% trans 'Price' %}</p> {% comment %} base price {% endcomment %}
-        <p class="bill-subtitle">[{{ currency }}]   </p></div>
+        <div class="">{% trans 'Price' %}{# {{ currency }} #}</div>
+    </div>
+    {% comment %} tax, percent and absolute value {% endcomment %}
     <div class="item-val tax header">
-        <p class="bill-title">{% trans 'Tax' %}</p>{% comment %} tax, percent and absolute value {% endcomment %}
-        <p class="bill-subtitle">[%/{{ currency }}]</p></div>
+        <div class="">{% trans 'Tax' %}</div>
+    </div>
+    {% comment %} discount {% endcomment %}
     <div class="item-val discount header">
-        <p class="bill-title">{% trans 'Discount' %}</p> {% comment %} discount, absolute value and a 'mode' button {% endcomment %}
-        <p class="bill-subtitle">[{{ currency }}]</p></div>
+        <div class="">{% trans 'Discount' %}</div>
+    </div>
+    {% comment %} total of this Item(s) {% endcomment %}
     <div class="item-val total header">
-        <p class="bill-title">{% trans 'Total' %}</p> {% comment %} total of this Item(s) {% endcomment %}
-        <p class="bill-subtitle">[{{ currency }}]</p></div>
-
-    <div class="item-val edit header">
-        {% comment %} edit buttons for this row {%  endcomment %}
+        <div class="">{% trans 'Total' %}</div>
     </div>
 </div>
 <div id="bill_scroll_outer">
     <div id="bill_scroll_inner">
         <div id="bill">
-            <div class="bill-item" id="bill_item_template">
-                <div class="item-val name"> {# name and code #}
+            <div class="bill-item collapsed" id="bill_item_template">
+                {# name #}
+                <div class="item-val name">
+                    <img src="{% static 'graphics/delete.png' %}"
+                         class=""
+                         alt="{% trans 'Remove' %}"
+                         title="{% trans 'Remove product from bill' %}" />
+
                     <div class="value item name"></div>
-                    <div class="subvalue item code"></div>
                 </div>
-                <div class="item-val quantity"> {# quantity #}
-                    <input type="button" class="qty-plus" value="+" />
+                {# quantity #}
+                <div class="item-val quantity">
+                    <input type="button" class="qty-plus hidden" value="+" />
                     <input type="text" class="qty" />
-                    <input type="button" class="qty-minus" value="-" />
+                    <input type="button" class="qty-minus hidden" value="-" />
                 </div>
-                <div class="item-val price"> {# price #}
+                {# price #}
+                <div class="item-val price">
                     <div class="value item price"></div>
                 </div>
-                <div class="item-val tax"> {# tax #}
+                {# tax #}
+                <div class="item-val tax">
                     <div class="value item tax"></div>
-                    <div class="subvalue item tax"></div>
                 </div>
-                <div class="item-val discount"> {# discount #}
+                {# discount #}
+                <div class="item-val discount">
                     <div class="value item discount"></div>
-                    <input type="button" class="discount-more" value="..." />
                 </div>
-                <div class="item-val total"> {# total #}
-                    <div class="value item total"></div> {% comment %} total of this Item(s) {% endcomment %}
-                </div>
-                <div class="item-val edit"> {# edit buttons #}
-                    <input type="button" class="explode" value="e" />
-                    <input type="button" class="delete" value="x" />
+                {# sub-total #}
+                <div class="item-val total">
+                    <div class="value item total"></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+<div id="details_box_template">
+
 </div>
 {% comment %} bill summary and till: fixed {% endcomment %}
 <div id="till">
@@ -177,15 +181,13 @@ $(document).ready(function(){
 <div id="selector">
     <div id="categories">
         <div id="parents_scroll_outer">
-            {% comment %} fixed buttons: favorites and 'home' {% endcomment %}
-            <div class="category-button" id="category_button_favorites">
-                <img class="category-button-icon" src="{% static 'graphics/favorites.png' %}" alt="{% trans 'Favorites' %}" />
-                {% trans 'Favorites' %}
-            </div>
-            <div class="category-button" id="category_button_home"><img class="category-button-icon" src="{% static 'graphics/home.png' %}" alt="{% trans 'Home' %}" />
+            <div class="category-button hidden" id="category_button_home">
+                <img class="category-button-icon" src="{% static 'graphics/home.png' %}" alt="{% trans 'Home' %}" />
                 {% trans 'All' %}
             </div>
-
+            <div id="category_parent" class="category-button hidden">
+                &lt; GOU BEK
+            </div>
             {% comment %} scrolling: parents {% endcomment %}
             <div id="parents_scroll_inner">
                 <div id="parents"></div>
@@ -207,6 +209,11 @@ $(document).ready(function(){
     <div id="controls">
         <input type="text" id="search_products_filter" />
         <button type="button" id="search_products_submit"><img src="{% static 'graphics/search.png' %}"/></button>
+
+        <div id="category_button_favorites">
+            <img class="category-button-icon" src="{% static 'graphics/favorites.png' %}" alt="{% trans 'Favorites' %}" />
+            {% trans 'Favorites' %}
+        </div>
     </div>
 </div>
 

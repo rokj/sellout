@@ -41,6 +41,8 @@ def terminal(request, company):
         'interface': get_value(request.user, 'pos_interface'),
         'product_button_size': g.PRODUCT_BUTTON_DIMENSIONS[get_value(request.user, 'pos_interface_product_button_size')],
         'bill_width': get_value(request.user, 'pos_interface_bill_width'),
+        'display_breadcrumbs': get_value(request.user, 'pos_display_breadcrumbs'),
+        'product_display': get_value(request.user, 'pos_product_display'),
     }
 
     data = {

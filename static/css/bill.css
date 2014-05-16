@@ -21,7 +21,6 @@
 }
 
 #bill{
-    /* container for category-button */
     width: 100%;
     height: 900000px;
     float:left;
@@ -33,27 +32,74 @@
     position: fixed;
     border-bottom: 3px solid black;
     background-color: #dddddd;
+    display: table-row;
 }
 
+/* bill column values: different widths depending on bill class (narrow/medium/wide) */
 div.item-val{
-    display: table-cell;
+    display: block;
+    overflow: hidden;
+    float: left;
 }
-
-p.bill-title{
-    margin-top:0;
-    margin-bottom:3px;
-}
-
-p.bill-subtitle{
-    font-size:12px;
-    font-family:"Courier New", "Courier", monospace;
-    margin-top:5px;
-    margin-bottom:0;
-}
-
 div.item-val input.qty{
-    width: 30px;
+    width: 60%;
 }
+
+.narrow .item-val.name{ width: 50%; }
+.narrow .item-val.quantity{ width: 15%; }
+.narrow .item-val.price{ width: 15%; }
+.narrow .item-val.tax{ display: none; }
+.narrow .item-val.discount{ display: none; }
+.narrow .item-val.total{ width: 20%; }
+
+.medium .item-val.name{ width: 35%; }
+.medium .item-val.quantity{ width: 15%; }
+.medium .item-val.price{ width: 20%; }
+.medium .item-val.tax{ width: 15%; }
+.medium .item-val.discount{ display: none; }
+.medium .item-val.total{ width: 15%; }
+
+.wide .item-val.name{ width: 30%; }
+.wide .item-val.quantity{ width: 15%; }
+.wide .item-val.price{ width: 10%; }
+.wide .item-val.tax{ width: 15%; }
+.wide .item-val.discount{ width: 15%; }
+.wide .item-val.total{ width: 15%; }
+
+/* bill header */
+#bill_header p{
+    margin: 0;
+    padding: 0;
+}
+
+/* bill item */
+div.bill-item{
+    display: block;
+    clear: both;
+}
+div.bill-item.collapsed{ height: 1em; }
+div.bill-item.expanded{ height: 3em; }
+
+.bill-item .item-val{
+    float: left;
+    display: block;
+    height: 100%;
+}
+
+.bill-item .item-val.name{
+    
+}
+
+.bill-item .item-val.name img{
+    width: 20px;
+    display: inline;
+    
+}
+
+.bill-item .item-val.quantity input{
+    
+}
+
 
 /* bill summary */
 #bill_summary div.total{
