@@ -3,18 +3,23 @@
 #
 # Views for managing POS data: discounts
 from django.utils.translation import ugettext as _
+from rest_framework.decorators import permission_classes, api_view
+from rest_framework.permissions import IsAuthenticated
 from pos.models import Company
+from pos.views.manage import discount
 from pos.views.manage.discount import discount_to_dict
-from pos.views.util import JSON_error, has_permission, JSON_response, JSON_ok
+from pos.views.util import JSON_error, has_permission, JSON_response, JSON_ok, JSON_parse, parse_date
 from pos.models import Discount
 
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
 def mobile_get_discounts(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
 
-    if not has_permission(request.user, c, 'tax', 'list'):
+    if not has_permission(request.user, c, 'discount', 'list'):
         return JSON_error(_("You have no permission to view taxes"))
 
     discounts = Discount.objects.filter(company=c)
@@ -25,3 +30,165 @@ def mobile_get_discounts(request, company):
 
     return JSON_ok(extra=r)
 
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_delete_discount(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # check permissions: needs to be at least manager
+
+    if not has_permission(request.user, c, 'discount', 'edit'):
+        return JSON_error(_("You have no permission to view taxes"))
+
+    data = JSON_parse(request.POST['data'])
+
+    try:
+        d = Discount.objects.get(id=data['id'])
+    except Discount.DoesNotExist:
+        return JSON_error(_("Discount does not exist"))
+
+    if not request.user.has_perm('pos.delete_discount'):
+        return JSON_error(_("You have no permission to delete discounts."))
+
+    d.delete()
+
+    return JSON_ok(extra=discount_to_dict(request.user, d))
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_edit_discount(request, company):
+    # edit an existing contact
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+
+    # check permissions: needs to be at least manager
+    if not has_permission(request.user, c, 'discount', 'edit'):
+        return JSON_error(_("edit discounts"))
+
+    data = JSON_parse(request.POST['data'])
+
+    try:
+        d = Discount.objects.get(id=data['id'])
+    except Discount.DoesNotExist:
+        return JSON_error(_("Discount does not exist"))
+
+    # check if contact actually belongs to the given company
+    if d.company != c:
+        return JSON_error(_("failed"))
+
+
+        # check if user has permissions to change contacts
+    if not request.user.has_perm('pos.change_discount'):
+        return JSON_error(_("You have no permission to edit discounts."))
+
+    if request.method == 'POST':
+        # submit data
+
+        d.description = data.get('description')
+        d.code = data.get('code')
+        d.type = data.get('type')
+        d.amount = data.get('amount')
+        d.start_date = data.get('start_date')
+        d.end_date = data.get('end_date')
+        d.active = data.get('active')
+        d.save()
+
+    return JSON_ok(extra=discount_to_dict(discount))
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_add_discount(request, company):
+    # edit an existing contact
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # check permissions: needs to be at least manager
+    if not has_permission(request.user, c, 'discount', 'edit'):
+        return JSON_error(_("add discounts"))
+
+
+    # check for permission for adding discounts
+    if not request.user.has_perm('pos.add_discount'):
+        return JSON_error(request, _("You have no permission to add discounts."))
+
+    data = JSON_parse(request.POST['data'])
+
+
+    d = Discount(
+        description = data.get('description'),
+        code = data.get('code'),
+        type = data.get('type'),
+        amount = data.get('amount'),
+        start_date = data.get('start_date'),
+        end_date = data.get('end_date'),
+        active = data.get('active'),
+
+        created_by = request.user,
+        company = c
+    )
+    d.save()
+
+    return JSON_ok(extra=discount_to_dict(d))
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_list_discounts(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # check permissions: needs to be guest
+    if not has_permission(request.user, c, 'discount', 'list'):
+        return JSON_error(_("view discounts"))
+
+    discounts = Discount.objects.filter(company__id=c.id)
+
+    results_display = False
+
+    data = JSON_parse(request.POST['data'])
+
+    # show the filter form
+    if request.method == 'POST':
+
+        if data.get('search'):
+            discounts = discounts.filter(description__icontains=data['search']) | \
+                        discounts.filter(code__icontains=data['search'])
+
+        # start_date
+        if data.get('start_date'):
+            # parse date first
+            r = parse_date(request.user, data.get('start_date'))
+            if r['success']:
+                discounts = discounts.filter(start_date__gte=r['date'])
+
+        # end_date
+        if data.get('end_date'):
+            r = parse_date(request.user, data.get('end_date'))
+            if r['success']:
+                discounts = discounts.filter(start_date__gte=r['date'])
+
+        # active
+        if data.get('active') is not None:
+            discounts = discounts.filter(active=data['active'])
+
+        results_display = True  # search results are being displayed
+
+
+    r = []
+    for d in discounts:
+        r.append(discount_to_dict(request.user, d))
+
+    return JSON_ok(extra=r)

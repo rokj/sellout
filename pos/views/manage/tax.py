@@ -138,7 +138,7 @@ def save_taxes(request, company):
     old_tax_ids = [x.id for x in Tax.objects.filter(company=c).all()] # save ids of old taxes for later deletion
     
     default = None
-    
+
     # validate first
     for t in new_taxes:
         r = validate_tax(request.user, t)
@@ -147,6 +147,7 @@ def save_taxes(request, company):
         else:
             t = r['data']
 
+    extra = []
     # enter new taxes
     for t in new_taxes:
         tax = Tax(
@@ -162,12 +163,14 @@ def save_taxes(request, company):
             default = True
             
         tax.save()
+
+        extra.append(tax_to_dict(request.user, tax))
             
     # everything is ok, delete all old taxes from the database
     for i in old_tax_ids:
         Tax.objects.get(id=i).delete()
         
-    return JSON_ok()
+    return JSON_ok(extra=extra)
 
 
 def get_all_taxes(user, company):

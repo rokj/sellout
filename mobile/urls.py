@@ -47,13 +47,17 @@ urlpatterns = patterns('',
 
 
     # discounts
-    url(r_company + r'/manage/json/discounts/?$', discount.mobile_get_discounts, name='get_discounts'),
+    url(r_company + r'/manage/json/discounts/?$', discount.mobile_list_discounts, name='get_discounts'),
+    url(r_company + r'/manage/json/discounts/add/?$', discount.mobile_add_discount, name='add_dicount'),
+    url(r_company + r'/manage/json/discounts/delete/?$', discount.mobile_delete_discount, name='delete_discount'),
+    url(r_company + r'/manage/json/discounts/edit/?$', discount.mobile_edit_discount, name='edit_discount'),
 
     # units
     url(r_company + r'/manage/json/units/?$', mobile_get_units, name='get_units'),
 
     # taxes
     url(r_company + r'/manage/json/taxes/?$', tax.mobile_get_taxes, name='get_taxes'), # get all taxes in a json list
+    url(r_company + r'/manage/json/taxes/save/?$', tax.mobile_save_taxes, name='save_taxes'),
 
     # products
     url(r_company + r'/manage/json/products/?$', product.mobile_get_products, name='get_products'),
