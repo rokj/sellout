@@ -4,7 +4,7 @@ Terminal = function(g){
     p.g = g;
     
     p.items = {
-        manage_bar: $("#manage_bar"),
+        status_bar: $("#status_bar"),
 
         bill: $("#bill_scroll_outer"),
 
@@ -21,30 +21,45 @@ Terminal = function(g){
         controls: $("#controls")
     };
 
+    // bill sizes (in pixels):
+    // showing columns:
+    // width 1 (narrowest):
+    //     - name
+    //     - quantity
+    //     - price
+    //     - subtotal
+    // width 2:
+    //     added tax
+    // width 3 (widest):
+    //     added discount
+    p.bill_sizes = [350, 450, 600];
+
     //
     // methods
     //
     p.size_layout = function(save){
         /* fixed layout, positioned 100% by javascript:
-        __________ manage_bar__________
+        __________ status_bar__________
         bill header  | sp | categories |
         bill         | li | products   |
         till         | t  |            |
         bill_summary | t  | ___________|
-        bill_actions | er | controls   | */
+        bill_actions | er | controls   |
+
+        */
 
         var window_height = $(window).height();
         var window_width = $(window).width();
 
         // manage bar: height is defined with css
-        var manage_height = p.items.manage_bar.height();
-        p.items.manage_bar.width(window_width); // width is 100%
+        var manage_height = p.items.status_bar.height();
+        p.items.status_bar.width(window_width); // width is 100%
 
         // splitter: if it is pushed away further than the width of window, reset it
         var sp = p.g.config.bill_width;
         if(sp > $(window).width()){
             // a reasonable default
-            sp = $(window).width() / 4;
+            sp = $(window).width() / 3.3;
         }
 
         p.items.splitter.offset({ top: manage_height, left: sp });
@@ -87,6 +102,9 @@ Terminal = function(g){
         // refresh if necessary
         if(p.g.objects.products) p.g.objects.products.refresh();
 
+        // show or hide bill columns
+        p.size_bill();
+
         // save?
         if(save){
             // get splitter position
@@ -98,6 +116,28 @@ Terminal = function(g){
         }
     };
 
+    p.size_bill = function(){
+        var bw = p.g.config.bill_width;
+
+        if(bw <= p.bill_sizes[0]){
+            // hide tax and discount columns (hiding is done in css)
+            // size columns (css only)
+            $().add(p.items.bill_header).add(p.items.bill)
+                .removeClass("medium wide").addClass("narrow");
+
+        }
+        else if(bw > p.bill_sizes[0] && bw < p.bill_sizes[1]){
+            // show tax column
+            $().add(p.items.bill_header).add(p.items.bill)
+                .removeClass("narrow wide").addClass("medium");
+        }
+        else{
+            // show tax and discounts column
+            $().add(p.items.bill_header).add(p.items.bill)
+                .removeClass("narrow medium").addClass("wide");
+        }
+    };
+
     //
     // init
     //
@@ -105,8 +145,8 @@ Terminal = function(g){
     // splitter
     p.items.splitter // resize on splitter drag and save data
         .css({
-            height: $(window).height() - p.items.manage_bar.outerHeight(),
-            top: p.items.manage_bar.outerHeight(),
+            height: $(window).height() - p.items.status_bar.outerHeight(),
+            top: p.items.status_bar.outerHeight(),
             left: p.g.config.bill_width
         })
         .draggable({

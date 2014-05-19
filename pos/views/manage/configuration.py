@@ -18,6 +18,7 @@ from config.functions import get_config, set_value, get_value
 import pytz
 import json
 
+
 ########################
 ### helper functions ###
 ########################
@@ -29,6 +30,7 @@ def list_date_formats():
     """
     return sorted([(key, key) for key in g.DATE_FORMATS])
 
+
 def list_timezones():
     timezones = []
     for tz in pytz.common_timezones:
@@ -36,10 +38,12 @@ def list_timezones():
         
     return timezones
 
+
 def list_time_formats():
     """ lists first-level keys in g.TIME_FORMATS (see list_date_formats)
     """
     return sorted([(key, key) for key in g.TIME_FORMATS])
+
 
 #######################
 ### forms and views ###
@@ -65,7 +69,10 @@ class ConfigForm(forms.Form):
     decimal_places = forms.ChoiceField(choices=decimal_places_choices, required=True)
     interface_product_button_size = forms.ChoiceField(choices=button_sizes, label=_("Product button size"))
     discount_calculation = forms.ChoiceField(g.DISCOUNT_CALCULATION, required=True)
-    
+    product_display = forms.ChoiceField((("box", _("In boxes")), ("line", _("In lines"))), required=True)
+    display_breadcrumbs = forms.BooleanField(required=False)
+
+
 @login_required
 def edit_config(request, company):
     c = get_object_or_404(Company, url_name=company)
@@ -91,13 +98,15 @@ def edit_config(request, company):
         'interface_product_button_size': get_value(request.user, 'pos_interface_product_button_size'),
         'discount_calculation': get_value(request.user, 'pos_discount_calculation'),
         'decimal_places': get_value(request.user, 'pos_decimal_places'),
+        'product_display': get_value(request.user, 'pos_product_display'),
+        'display_breadcrumbs': get_value(request.user, 'pos_display_breadcrumbs'),
     }
     
     if request.method == 'POST':
         form = ConfigForm(request.POST)
         if form.is_valid():
             for key in initial:
-                set_value(request.user, "pos_" + key, unicode(form.cleaned_data[key]))
+                set_value(request.user, "pos_" + key, form.cleaned_data[key])
     else:
         form = ConfigForm(initial=initial)  # An unbound form
 

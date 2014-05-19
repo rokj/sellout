@@ -21,6 +21,7 @@ from common import globals as g
 from django.core.cache import cache
 import json
 
+
 defaults = {
     # localization
     'pos_date_format': 'yyyy-mm-dd',  # keys for DATE_FORMATS dictionary in globals
@@ -35,13 +36,16 @@ defaults = {
     'pos_interface': 'keyboard',  # options: 'keyboard', 'mouse'
     'pos_interface_product_button_size': 'medium',  # keys for PRODUCT_BUTTON_DIMENSIONS in globals
     'pos_interface_bill_width': 370,  # width of the bill area in terminal (in pixels)
+    'pos_product_display': 'box',
+    'pos_display_breadcrumbs': True,
     # billing and calculation defaults
     'pos_discount_calculation': "Tax first",  # DISCOUNT_CALCULATION in globals
     'pos_decimal_places': 2,  # default decimal places for display
     # fallback defaults
     'pos_default_tax': '0.0',
 }
-    
+
+
 # caching helpers
 def cache_key(user):
     # TODO: anonymous users
@@ -50,18 +54,20 @@ def cache_key(user):
     else:
         return "config_default"
 
+
 def load_config(user):
     try:
         c = Config.objects.get(user=user)
     except Config.DoesNotExist:
         # use defaults
-        c = Config(created_by = user,
-            user = user,
-            data = json.dumps(defaults))
+        c = Config(created_by=user,
+                   user=user,
+                   data=json.dumps(defaults))
         c.save()
 
     # parse json from the database (or defaults)
     return json.loads(c.data)
+
 
 def save_config(user, data):
     # update or save settings
@@ -70,14 +76,15 @@ def save_config(user, data):
         c.data = json.dumps(data)
         c.save()
     except Config.DoesNotExist:
-        c = Config(created_by = user,
-            user = user,
-            data = json.dumps(data))
+        c = Config(created_by=user,
+            user=user,
+            data=json.dumps(data))
         c.save()
     
     # delete cache
     cache.delete(cache_key(user))
-    
+
+
 def get_config(user):
     """ 
         get user's config either from memcache or from database
@@ -95,6 +102,7 @@ def get_config(user):
     else:
         return defaults
 
+
 def get_value(user, key):
     data = get_config(user)
 
@@ -110,10 +118,17 @@ def get_value(user, key):
         else:
             return "<invalid key: '" + "':'" + key + "'>"
 
+
 def set_value(user, key, value):
     data = get_config(user)
+
+    # if it's not a boolean or an integer, convert it to integer
+    if not isinstance(value, bool) and not isinstance(value, int):
+        value = str(value)
+
     data[key] = value
-    save_config(user, data) # memcache is handled in save_cofig
+    save_config(user, data)  # memcache is handled in save_cofig
+
 
 # shortcuts: date format
 def get_date_format(user, variant):
@@ -121,7 +136,8 @@ def get_date_format(user, variant):
         variant is one of 'python', 'django', 'jquery'
     """
     return g.DATE_FORMATS[get_value(user, 'pos_date_format')][variant]
-    
+
+
 # time format
 def get_time_format(user, variant):
     """ returns g.TIME_FORMATS[user's date format][variant]
