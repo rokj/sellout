@@ -2,6 +2,8 @@
 # date: 9. 8. 2013
 #
 # Views for managing POS data: discounts
+import datetime as dtm
+from decimal import Decimal
 from django.utils.translation import ugettext as _
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework.permissions import IsAuthenticated
@@ -26,7 +28,7 @@ def mobile_get_discounts(request, company):
 
     r = []
     for d in discounts:
-        r.append(discount_to_dict(request.user, d))
+        r.append(discount_to_dict(request.user, d, android=True))
 
     return JSON_ok(extra=r)
 
@@ -56,7 +58,7 @@ def mobile_delete_discount(request, company):
 
     d.delete()
 
-    return JSON_ok(extra=discount_to_dict(request.user, d))
+    return JSON_ok(extra=discount_to_dict(request.user, d, android=True))
 
 
 @api_view(['GET', 'POST'])
@@ -91,17 +93,29 @@ def mobile_edit_discount(request, company):
 
     if request.method == 'POST':
         # submit data
+        start_date = data.get('start_date')
+        if start_date:
+            start = dtm.datetime(year=start_date[0], month=start_date[1],
+                                 day=start_date[2])
+        else:
+            start=None
 
+        end_date = data.get('end_date')
+        if end_date:
+            end = dtm.datetime(year=end_date[0], month=end_date[1],
+                                 day=end_date[2])
+        else:
+            end=None
         d.description = data.get('description')
         d.code = data.get('code')
         d.type = data.get('type')
-        d.amount = data.get('amount')
-        d.start_date = data.get('start_date')
-        d.end_date = data.get('end_date')
+        d.amount = Decimal(data.get('amount'))
+        d.start_date = start
+        d.end_date = end
         d.active = data.get('active')
         d.save()
 
-    return JSON_ok(extra=discount_to_dict(discount))
+    return JSON_ok(extra=discount_to_dict(request.user, d, android=True))
 
 
 @api_view(['GET', 'POST'])
@@ -123,15 +137,27 @@ def mobile_add_discount(request, company):
         return JSON_error(request, _("You have no permission to add discounts."))
 
     data = JSON_parse(request.POST['data'])
+    start_date = data.get('start_date')
+    if start_date:
+        start = dtm.datetime(year=start_date[0], month=start_date[1],
+                             day=start_date[2])
+    else:
+        start=None
 
+    end_date = data.get('end_date')
+    if end_date:
+        end = dtm.datetime(year=end_date[0], month=end_date[1],
+                             day=end_date[2])
+    else:
+        end=None
 
     d = Discount(
         description = data.get('description'),
         code = data.get('code'),
         type = data.get('type'),
-        amount = data.get('amount'),
-        start_date = data.get('start_date'),
-        end_date = data.get('end_date'),
+        amount = Decimal(data.get('amount')),
+        start_date = start,
+        end_date = end,
         active = data.get('active'),
 
         created_by = request.user,
@@ -139,7 +165,7 @@ def mobile_add_discount(request, company):
     )
     d.save()
 
-    return JSON_ok(extra=discount_to_dict(d))
+    return JSON_ok(extra=discount_to_dict(request.user, d, android=True))
 
 
 @api_view(['GET', 'POST'])
@@ -189,6 +215,6 @@ def mobile_list_discounts(request, company):
 
     r = []
     for d in discounts:
-        r.append(discount_to_dict(request.user, d))
+        r.append(discount_to_dict(request.user, d, android=True))
 
     return JSON_ok(extra=r)

@@ -2,20 +2,15 @@ from django.conf.urls import patterns, url
 from django.utils.translation import ugettext as _
 
 from common import globals as g
-from mobile.views.manage.tax import mobile_get_taxes
 from mobile.views.views import mobile_get_cut, mobile_get_units
 
-from pos.views import terminal
 from mobile.views import login
-from mobile.views.manage import manage
-from mobile.views.manage import company
+from mobile.views import bill
 from mobile.views.manage import category
 from mobile.views.manage import product
 from mobile.views.manage import discount
 from mobile.views.manage import tax
 from mobile.views.manage import contact
-from mobile.views.manage import configuration
-from rest_framework.authtoken import views as authtoken_views
 
 
 ### common URL prefixes: ###
@@ -63,7 +58,7 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/products/?$', product.mobile_get_products, name='get_products'),
     url(r_company + r'/manage/json/products/search/?$', product.mobile_search_products, name='search_products'), # product list (search) - json
 
-    url(r_company + r'/manage/json/products/add/?$', product.mobile_create_product, name='mobile_create_product'), # edit (save) product - json
+    url(r_company + r'/manage/json/products/add/?$', product.mobile_create_product, name='mobile_create_product'),
     url(r_company + r'/manage/json/products/get/(?P<product_id>\d+)/?$', product.mobile_get_product, name='get_product'), # product list (search) - json
     url(r_company + r'/manage/json/products/edit/?$', product.mobile_edit_product, name='edit_product'), # edit (save) product - json
     url(r_company + r'/manage/json/products/delete/?$', product.mobile_delete_prodcut, name='delete_product'), # edit (save) product - json
@@ -71,14 +66,12 @@ urlpatterns = patterns('',
     # CUT (Categories, units, taxes)
     url(r_company + r'/manage/json/cut/get', mobile_get_cut, name='get_cut'), # get categories, units, taxes
 
-    
-    # unit types list
-    #
-    # TODO
-    #
 
     url(r_company + r'/manage/json/units/?$', product.mobile_JSON_units, name='mobile_JSON_units'),
-    
+
+    # Mr. Bill
+    url(r_company + r'/manage/json/bill/add', bill.mobile_create_bill, name='mobile_add_bill')
+
     # available discounts list
     # url(r_company + r'/manage/json/discounts/?$', discount.JSON_discounts, name='JSON_discounts'),
     
