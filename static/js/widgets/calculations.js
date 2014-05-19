@@ -102,7 +102,7 @@ function total_price(tax_first, base_price, tax, discounts, quantity){
     }
     else{
         // subtract discounts from base
-        t = subtract_discounts(base_price, discounts);
+        t = discounts_total(base_price, discounts);
 
         r.discount = t.discount;
         if(!r.discount) return null;

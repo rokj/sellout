@@ -349,7 +349,7 @@ def edit_item(request, company):
     except Product.DoesNotExist:
         return JSON_error(_("Product with this id does not exist"))
 
-    # parse quantity    
+    # parse quantity
     r = parse_decimal(request.user, data.get('quantity'), g.DECIMAL['quantity_digits'])
     if not r['success']:
         return JSON_error(_("Invalid quantity value"))

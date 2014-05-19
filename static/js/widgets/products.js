@@ -139,6 +139,18 @@ Product = function(list, data){
     //
     // init
     //
+    // replace all number strings with Big() numbers
+    p.data.price = get_number(p.data.price, p.g.config.separator);
+    p.data.purchase_price = get_number(p.data.purchase_price, p.g.config.separator);
+    p.data.stock = get_number(p.data.stock, p.g.config.separator);
+    p.data.tax = get_number(p.data.tax, p.g.config.separator);
+
+    for(var i = 0; i < p.data.discounts.length; i++){ // discounts
+        p.data.discounts[i].amount = get_number(
+            p.data.discounts[i].amount,
+            p.g.config.separator
+        );
+    }
 
     // create a 'product' div
 	// show: name, code, shortcut and background image
@@ -166,7 +178,7 @@ Product = function(list, data){
     p.items.container.append(p.items.info);
 
     // if the product is out of stock,, add a special class
-    if(get_number(p.data.stock, p.g.config.separator).cmp(Big(0)) <= 0){
+    if(p.data.stock.cmp(Big(0)) <= 0){
         p.items.info.addClass("out-of-stock");
         // this product cannot be clicked
     }
