@@ -41,17 +41,26 @@ def is_discount_active(d):
     return valid
 
 
-def discount_to_dict(user, d):
-    return {
+def discount_to_dict(user, d, android=False):
+    ret = {
         'id':d.id,
         'description':d.description,
         'code':d.code,
         'type':d.type,
         'amount':format_number(user, d.amount),
-        'start_date':format_date(user, d.start_date),
-        'end_date':format_date(user, d.end_date),
         'active':d.active,
     }
+
+    if android and d.start_date:
+        ret['start_date'] = [d.start_date.year, d.start_date.month, d.start_date.day]
+    else:
+        ret['start_date'] = format_date(user, d.start_date)
+
+    if android and d.end_date:
+        ret['end_date'] = [d.end_date.year, d.end_date.month, d.end_date.day]
+    else:
+        ret['end_date'] = format_date(user, d.end_date)
+    return ret
 
 @login_required
 def JSON_discounts(request, company, product_id=None):
