@@ -202,24 +202,24 @@ Item = function(bill, product) {
     p.product = product; // Product() object
     p.data = null; // the actual item data that will be sent to server (initialized later)
     p.serial = ++p.bill.serial; // a unique id for this bill
+    p.details = null; // will initialize ItemDetails (if 'more' button is clicked)
 
     p.item_row = p.bill.item_template.clone().appendTo(p.bill.bill_container);
     p.items = {
-        delete_button: $("input.delete", p.item_row),
+        delete_button: $(".delete", p.item_row),
 
         name: $("div.item.name", p.item_row),
         code: $("div.item.code", p.item_row),
 
         qty: $("input.qty", p.item_row),
-        inc_qty_button: $("input.qty-plus", p.item_row),
-        dec_qty_button: $("input.qty-minus", p.item_row),
+        inc_qty_button: $("button.qty-plus", p.item_row),
+        dec_qty_button: $("button.qty-minus", p.item_row),
 
         price: $("div.item.price", p.item_row),
 
-        tax_relative: $("div.value.item.tax", p.item_row),
-        tax_absolute: $("div.subvalue.item.tax", p.item_row),
+        tax_absolute: $("div.value.item.tax", p.item_row),
 
-        discount: $("div.item.discount", p.item_row),
+        discount: $(".item-val.discount .value", p.item_row),
 
         total: $("div.value.item.total", p.item_row),
 
@@ -227,7 +227,6 @@ Item = function(bill, product) {
 
         explode_button: $("input.explode", p.item_row).hide()
     };
-    //p.details_box =
 
     // properties of this item
     p.expanded = false;
@@ -241,25 +240,21 @@ Item = function(bill, product) {
         // the 'usual' item data
         p.items.name.text(p.data.name);
         p.items.code.text(p.data.code);
-        p.items.qty.val(
-            display_number(p.data.quantity, p.g.config.separator, p.g.config.decimal_places)
-            + " x " + display_number(p.data.unit_amount, p.g.config.separator, p.g.decimal_places)
-        );
 
         // prices:
         var r = total_price(
             p.g.config.tax_first,
             p.data.base_price,
             p.data.tax_percent,
-            [], // TODO: discounts
+            p.product.data.discounts,
             p.data.quantity,
             p.data.unit_amount);
 
         // save calculated numbers
         p.data.tax_absolute = r.tax;
 
-        // TODO: discounts
-        p.data.discount_absolute = null;
+        // discounts
+        p.data.discount_absolute = r.discount;
 
         // total
         p.data.total = r.total;
@@ -277,7 +272,7 @@ Item = function(bill, product) {
         p.items.tax_absolute.text(display_number(p.data.tax_absolute, p.g.config.separator, p.g.config.decimal_places));
 
         // discounts
-        // TODO
+        p.items.discount.text(display_number(p.data.discount_absolute, p.g.config.separator, p.g.config.decimal_places));
 
         // total
         p.items.total.text(display_number(p.data.total, p.g.config.separator, p.g.config.decimal_places));
@@ -369,17 +364,9 @@ Item = function(bill, product) {
         if(expand){
             // change item's classes
             p.item_row.addClass("expanded").removeClass("collapsed");
-            // show quantity plus and minus buttons
-            p.items.inc_qty_button.show();
-            p.items.dec_qty_button.show();
-            p.items.more_button.show();
-
         }
         else{
             p.item_row.addClass("collapsed").removeClass("expanded");
-            p.items.inc_qty_button.hide();
-            p.items.dec_qty_button.hide();
-            p.items.more_button.hide();
         }
     };
 
@@ -392,12 +379,12 @@ Item = function(bill, product) {
         name: p.product.data.name,
         code: p.product.data.code,
         quantity: Big(1),
-        unit_type: get_number(p.product.data.unit_type_display, p.g.config.separator),
-        unit_amount: get_number(p.product.data.unit_amount, p.g.config.separator),
-        base_price: get_number(p.product.data.price, p.g.config.separator),
-        tax_percent: get_number(p.product.data.tax, p.g.config.separator),
+        unit_type: p.product.data.unit_type_display,
+        unit_amount: p.product.data.unit_amount,
+        base_price: p.product.data.price,
+        tax_percent: p.product.data.tax,
         tax_absolute: null, // will be calculated later
-        stock: get_number(p.product.data.stock, p.g.config.separator),
+        stock: p.product.data.stock,
         discount_absolute:null, // calculated later
         total_price: null // calculated later
     };
@@ -427,6 +414,7 @@ Item = function(bill, product) {
         e.stopPropagation();
         p.add_quantity(true);
     });
+
     p.items.dec_qty_button.click(function(e){
         e.stopPropagation();
         p.add_quantity(false);
@@ -444,9 +432,105 @@ Item = function(bill, product) {
         );
     });
 
+    // more button
+    p.items.more_button.click(function(e){
+        // don't collapse the item
+        e.stopPropagation();
+
+        // open the 'more' dialog
+        p.details = new ItemDetails(p);
+    });
+
     // quantity
     p.items.qty.change(function(){ p.check_quantity(); });
 
     // explode button
     p.items.explode_button.click(function(){ p.explode(); });
+};
+
+ItemDetails = function(item){
+    var p = this;
+
+    p.item = item;
+    p.g = p.item.g;
+
+    // gather objects
+    p.box = $("#details_box_template")
+        .clone()
+        .removeAttr("id")
+        .hide()
+        .removeClass("hidden");
+
+    p.items = {
+        tax_percent: $(".tax-percent", p.box),
+        tax_absolute: $(".tax-absolute", p.box),
+        discounts: $(".discounts", p.box),
+        notes: $(".notes", p.box),
+        quantity: $(".quantity", p.box),
+        explode: $(".explode", p.box),
+        save: $("input.ok", p.box),
+        cancel: $("input.cancel", p.box)
+    };
+
+    //
+    // methods
+    //
+    p.discount_row = function(discount){
+        // returns a new jquery object for this discount (to be put in the discount list)
+        var li = $("<li>", {title: discount.description});
+
+        if(discount.type == "Percent"){
+            // example: ND10 (10 %)
+            li.text(
+                discount.code + " (" +
+                display_number(discount.amount, p.g.config.separator, p.g.config.decimal_places) + " %)"
+            );
+        }
+        else{
+            // example ND15 ($ 15)
+            li.text(
+                discount.code + " (" +
+                p.g.config.currency + " " +
+                display_number(discount.amount, p.g.config.separator, p.g.config.decimal_places) + ")"
+            );
+        }
+
+        return li;
+    };
+
+    //
+    // init
+    //
+
+    // move the details box to the correct position
+    p.box
+        .appendTo($("body"))
+        .show()
+        .offset({
+            left: p.item.item_row.offset().left + p.item.item_row.width(),
+            top: 20 // TODO: what is this
+        });
+
+    // fill in the details
+    // tax:
+    p.items.tax_percent.text(
+        display_number(p.item.data.tax_percent,
+            p.g.config.separator,
+            p.g.config.decimal_places));
+
+    p.items.tax_absolute.text(
+        display_number(p.item.data.tax_absolute,
+            p.g.config.separator,
+            p.g.config.decimal_places));
+
+    // discounts: fill in the existing discounts
+    var d = p.item.product.data.discounts;
+    var i, li;
+
+    for(i = 0; i < d.length; i++){
+        p.items.discounts.prepend(p.discount_row(d[i]));
+    }
+
+    // bind button actions
+    p.items.cancel.click(function(){ p.box.remove(); });
 };

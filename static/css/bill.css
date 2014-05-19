@@ -77,27 +77,88 @@ div.bill-item{
     display: block;
     clear: both;
 }
-div.bill-item.collapsed{ height: 1em; }
-div.bill-item.expanded{ height: 3em; }
 
-.bill-item .item-val{
+div.bill-item.collapsed{
+    height: 2em;
+    background-color: #ffffff;
+}
+
+div.bill-item.collapsed .value{
+    margin: 0;
+    font-size: 1em;
+}
+
+div.bill-item.expanded{
+    height: 4em;
+    background-color: #f7f7f7;
+}
+
+div.bill-item + div.bill-item{
+    border-top: 1px dotted #cccccc;
+}
+
+.expanded .value{
+    margin-top: 1.5em;
+    font-size: 1em;
+}
+
+.item-val{
     float: left;
     display: block;
     height: 100%;
 }
 
-.bill-item .item-val.name{
-    
-}
-
-.bill-item .item-val.name img{
+/* item name and delete button */
+.item-val.name img{
     width: 20px;
-    display: inline;
-    
+    float: left;
 }
 
-.bill-item .item-val.quantity input{
-    
+.collapsed .item-val.name .value,
+.collapsed .item-val.name img{
+    margin-top: 0;
+}
+
+.expanded .item-val.name .value,
+.expanded .item-val.name img{
+    margin-top: 1.5em;
+}
+
+/* more button */
+.collapsed .more-button{ display: none; }
+.expanded .more-button{ display: block; }
+
+/* quantity and +/- buttons */
+.item-val.quantity input{
+    width: 100%;
+    border: 1px solid #cccccc;
+}
+.item-val.quantity button{
+    color: #ffffff;
+    width: 100%;
+}
+
+.collapsed .item-val.quantity button{ display: none; }
+.expanded .item-val.quantity button{ display: block; }
+
+.item-val.quantity .qty-plus{ background-color: #00aa00; }
+.item-val.quantity .qty-minus{ background-color: #aa0000; }
+
+/* price */
+
+
+/* tax */
+
+/* discounts */
+
+/* total */
+
+
+/* item details */
+.details-box{
+    background-color: #f7f7f7;
+    position: absolute;
+    z-index: 6; /* above products and categories */
 }
 
 

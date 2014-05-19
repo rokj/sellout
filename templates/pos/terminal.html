@@ -76,8 +76,6 @@ $(document).ready(function(){
     g.objects.products = new Products(g);
     g.objects.search = new Search(g);
     g.objects.bill = new Bill(g);
-
-
 });
 </script>
 
@@ -119,17 +117,20 @@ $(document).ready(function(){
                 {# name #}
                 <div class="item-val name">
                     <img src="{% static 'graphics/delete.png' %}"
-                         class=""
+                         class="delete"
                          alt="{% trans 'Remove' %}"
                          title="{% trans 'Remove product from bill' %}" />
 
                     <div class="value item name"></div>
+                    <div class="more-button">
+                        <button class="more">{% trans 'More' context 'More button in bill item' %}</button>
+                    </div>
                 </div>
                 {# quantity #}
                 <div class="item-val quantity">
-                    <input type="button" class="qty-plus hidden" value="+" />
+                    <button class="qty-plus">+</button>
                     <input type="text" class="qty" />
-                    <input type="button" class="qty-minus hidden" value="-" />
+                    <button class="qty-minus">-</button>
                 </div>
                 {# price #}
                 <div class="item-val price">
@@ -151,9 +152,54 @@ $(document).ready(function(){
         </div>
     </div>
 </div>
-<div id="details_box_template">
 
+<div class="details-box hidden" id="details_box_template">
+    <div>{# tax section #}
+        <p class="details-title">{% trans 'Tax' %}</p>
+        <div class="tax-percent"></div>
+        <div class="tax-absolute"></div>
+    </div>
+
+    <div>{# discounts section #}
+        <p class="details-title">{% trans 'Discounts' %}</p>
+        <ul class="discounts">
+            {# discounts that are already on the products will be added on the fly #}
+            <li class="select-existing">
+                <select>
+                    {# existing and valid discounts #}
+                </select>
+                <button>+</button>
+            </li>
+            <li class="add-new">
+                {# just an input box and select for type of discount #}
+                <input type="text" />
+                <select>
+                    <option value="percent">%</option>
+                    <option value="absolute">{{ currency }}</option>
+                </select>
+                <button>+</button>
+            </li>
+        </ul>
+    </div>
+
+    <div>{# notes #}
+        <p class="details-title">{% trans 'Notes' %}</p>
+        <textarea class="notes"></textarea>
+
+    </div>
+
+    <div>{# quantity box and explode button #}
+        <p class="details-title">{% trans 'Quantity' %}</p>
+        <input type="text" class="quantity"/>
+        <button class="explode">{% trans 'Explode' %}</button>
+    </div>
+
+    <div>{# save and cancel buttons #}
+        <input type="button" value="{% trans 'Save' %}" class="ok"/>
+        <input type="button" value="{% trans 'Cancel' %}" class="cancel"/>
+    </div>
 </div>
+
 {% comment %} bill summary and till: fixed {% endcomment %}
 <div id="till">
     {% comment %} bill summary: discounts total and tax total {% endcomment %}
