@@ -7,10 +7,10 @@ from sorl import thumbnail
 
 from common.models import SkeletonU
 from common.functions import get_image_path
-from config.models import Cleanup, Country
+from config.models import Country
 import common.globals as g
 
-import decimal
+import datetime as dtm
 import json
 
 
@@ -81,24 +81,56 @@ class Category(SkeletonU):
 #        return self.category.name + ": " + self.attribute_name + " = " + self.attribute_value
 
 
-### discounts ### 
-class Discount(SkeletonU):
-    company = models.ForeignKey(Company)
+### discounts ###
+class DiscountAbstract(SkeletonU):
     description = models.TextField(_("Discount description"), null=True, blank=True)
     code = models.CharField(_("Code"), max_length=50, null=True, blank=True)
-    type = models.CharField(_("Discount type"), max_length=30, choices=g.DISCOUNT_TYPES, null=False, blank=False, default=g.DISCOUNT_TYPES[0][0])
+    type = models.CharField(_("Discount type"), max_length=30, choices=g.DISCOUNT_TYPES, null=False, blank=False,
+                            default=g.DISCOUNT_TYPES[0][0])
     amount = models.DecimalField(_("Amount"),
-                                 max_digits=g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
+                                 max_digits=g.DECIMAL['currency_digits'],
+                                 decimal_places=g.DECIMAL['currency_decimal_places'],
                                  null=False, blank=False)
+
+    class Meta:
+        abstract = True
+
+
+class Discount(DiscountAbstract):
+    company = models.ForeignKey(Company)
+
     start_date = models.DateField(_("Start date"), null=True, blank=True)
     end_date = models.DateField(_("End date"), null=True, blank=True)
-    active = models.BooleanField(_("Active"), null=False, blank=True, default=True)
-    
+    enabled = models.BooleanField(_("Enabled"), null=False, blank=True, default=True)
+
     class Meta:
-        unique_together = (('company', 'code'),)
+        unique_together = (('company', 'code'))
     
     def __unicode__(self):
         return self.code + " " + self.description
+
+    @property
+    def is_active(self):
+        today = dtm.date.today()
+
+        if not self.enabled:
+            return False
+
+        valid = False
+
+        if not self.start_date and not self.end_date:
+            valid = True
+        elif self.start_date and not self.end_date:
+            if self.start_date <= today:
+                valid = True
+        elif not self.start_date and self.end_date:
+            if self.end_date >= today:
+                valid = True
+        elif self.start_date and self.end_date:
+            if self.start_date <= today <= self.end_date:
+                valid = True
+
+        return valid
 
 
 ### tax rates ###
@@ -163,7 +195,6 @@ class Product(ProductAbstract):
             return Price.objects.filter(product=self).order_by('-datetime_updated')[0].unit_price
         except:
             return None
-
 
     def get_purchase_price(self):
         """ get product's current purchase price """
@@ -282,7 +313,7 @@ class ProductDiscount(SkeletonU):
     seq_no = models.IntegerField(_("Order of discount on a product"), null=False)
     
     class Meta:
-        ordering = ["seq_no"] # always order by sequence number
+        ordering = ["seq_no"]  # always order by sequence number
     
     def __unicode__(self):
         return self.product.name + ": " + self.discount.description + ": " + str(self.seq_no)
@@ -473,6 +504,12 @@ class BillItem(ProductAbstract): # include all data from Product
     #def save(self):
     #    super(BillItem, self).save()
     #    copy_bill_to_history(self.bill.id) # always put a copy in history
+
+
+### item's discounts
+class BillItemDiscounts(DiscountAbstract):
+    # inherits everything from DiscountAbstract
+    bill_item = models.ForeignKey(BillItem)
 
 
 ### history

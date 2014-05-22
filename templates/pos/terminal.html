@@ -172,12 +172,12 @@ $(document).ready(function(){
             </li>
             <li class="add-new">
                 {# just an input box and select for type of discount #}
-                <input type="text" />
-                <select>
+                <input type="text" class="description" /><br />
+                <input type="text" class="amount" />
+                <select class="type">
                     <option value="percent">%</option>
                     <option value="absolute">{{ currency }}</option>
                 </select>
-                <button>+</button>
             </li>
         </ul>
     </div>
@@ -185,12 +185,9 @@ $(document).ready(function(){
     <div>{# notes #}
         <p class="details-title">{% trans 'Notes' %}</p>
         <textarea class="notes"></textarea>
-
     </div>
 
-    <div>{# quantity box and explode button #}
-        <p class="details-title">{% trans 'Quantity' %}</p>
-        <input type="text" class="quantity"/>
+    <div>{# explode button #}
         <button class="explode">{% trans 'Explode' %}</button>
     </div>
 

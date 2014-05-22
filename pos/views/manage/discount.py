@@ -10,7 +10,7 @@ from django import forms
 from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from pos.models import Company, Discount, ProductDiscount
+from pos.models import Company, Discount
 from pos.views.util import error, JSON_response, JSON_error, \
                            has_permission, no_permission_view, \
                            format_number, format_date, parse_date, parse_decimal, \
@@ -18,37 +18,16 @@ from pos.views.util import error, JSON_response, JSON_error, \
 from common import globals as g
 from config.functions import get_date_format, get_value
 
-from datetime import date
-import re
-
-def is_discount_active(d):
-    today = date.today()
-    
-    valid = False
-    
-    if not d.start_date and not d.end_date:
-        valid = True
-    elif d.start_date and not d.end_date:
-        if d.start_date <= today:
-            valid = True
-    elif not d.start_date and d.end_date:
-        if d.end_date >= today:
-            valid = True
-    elif d.start_date and d.end_date:
-        if d.start_date <= today and d.end_date >= today:
-            valid = True
-        
-    return valid
-
 
 def discount_to_dict(user, d, android=False):
     ret = {
-        'id':d.id,
-        'description':d.description,
-        'code':d.code,
-        'type':d.type,
-        'amount':format_number(user, d.amount),
-        'active':d.active,
+        'id': d.id,
+        'description': d.description,
+        'code': d.code,
+        'type': d.type,
+        'amount': format_number(user, d.amount),
+        'enabled': d.enabled,
+        'active': d.is_active,
     }
 
     if android and d.start_date:
@@ -62,8 +41,9 @@ def discount_to_dict(user, d, android=False):
         ret['end_date'] = format_date(user, d.end_date)
     return ret
 
+
 @login_required
-def JSON_discounts(request, company, product_id=None):
+def JSON_discounts(request, company):
     """ returns all available discounts for this company in a list of dictionaries
         (see discount_to_dict for dictionary format)
     """
@@ -76,11 +56,11 @@ def JSON_discounts(request, company, product_id=None):
     if not has_permission(request.user, c, 'discount', 'list'):
         return JSON_error(_("You have no permission to view discounts"))
 
-    discounts = Discount.objects.filter(company__url_name=company, active=True).order_by('code')
+    discounts = Discount.objects.filter(company__url_name=company, enabled=True).order_by('code')
     
     ds = []
     for d in discounts:
-        if is_discount_active(d):
+        if d.is_active:
             ds.append(discount_to_dict(request.user, d))
     
     # serialize
@@ -97,7 +77,7 @@ def validate_discount(data, user):
     """
     
     def err(message):
-        return {'success':False, 'message':message, 'data':None}
+        return {'success': False, 'message': message, 'data': None}
     
     # description: just trim length
     if 'description' in data:
@@ -107,7 +87,7 @@ def validate_discount(data, user):
     if 'code' not in data:
         return err(_("Code is required"))
     elif len(data['code']) > max_field_length(Discount, 'code'):
-        return err(_("Code is too long (maximum length is %s)"%max_field_length(Discount, 'code')))
+        return err(_("Code is too long (maximum length is %s)" % max_field_length(Discount, 'code')))
     
     # type: see if it's in g.DISCOUNT_TYPES (search the first fields of tuples)
     if data['type'] not in [x[0] for x in g.DISCOUNT_TYPES]:
@@ -143,10 +123,10 @@ def validate_discount(data, user):
     else:
         del data['end_date']
             
-    # active: doesn't matter
+    # enabled: doesn't matter
     
     # ok
-    return {'success':True, 'message':None, 'data':data}
+    return {'success': True, 'message': None, 'data': data}
 
 
 #############
@@ -161,7 +141,7 @@ class DiscountForm(forms.Form):
     # this should be date...
     start_date = forms.CharField(g.DATE['max_date_length'], required=False)
     end_date = forms.CharField(g.DATE['max_date_length'], required=False)
-    active = forms.BooleanField(initial=True, required=False)
+    enabled = forms.BooleanField(initial=True, required=False)
     
     def clean(self):
         # use the same clean method as JSON
@@ -176,7 +156,7 @@ class DiscountFilterForm(forms.Form):
     search = forms.CharField(label=_("Search text"), required=False)
     start_date = forms.CharField(required=False, max_length=g.DATE['max_date_length'])
     end_date = forms.CharField(required=False, max_length=g.DATE['max_date_length'])
-    active = forms.NullBooleanField(required=False)
+    enabled = forms.NullBooleanField(required=False)
 
 
 @login_required
@@ -214,9 +194,9 @@ def list_discounts(request, company):
                 if r['success']:
                     discounts = discounts.filter(start_date__gte=r['date'])
             
-            # active
-            if form.cleaned_data.get('active') is not None:
-                discounts = discounts.filter(active=form.cleaned_data['active'])
+            # enabled
+            if form.cleaned_data.get('enabled') is not None:
+                discounts = discounts.filter(active=form.cleaned_data['enabled'])
                 
             results_display = True  # search results are being displayed
     else:
@@ -276,16 +256,16 @@ def add_discount(request, company):
         if form.is_valid():
             # save the new discount and redirect back to discounts
             d = Discount(
-                description = form.cleaned_data.get('description'),
-                code = form.cleaned_data.get('code'),
-                type = form.cleaned_data.get('type'),
-                amount = form.cleaned_data.get('amount'),
-                start_date = form.cleaned_data.get('start_date'),
-                end_date = form.cleaned_data.get('end_date'),
-                active = form.cleaned_data.get('active'),
+                description=form.cleaned_data.get('description'),
+                code=form.cleaned_data.get('code'),
+                type=form.cleaned_data.get('type'),
+                amount=form.cleaned_data.get('amount'),
+                start_date=form.cleaned_data.get('start_date'),
+                end_date=form.cleaned_data.get('end_date'),
+                enabled=form.cleaned_data.get('enabled'),
                 
-                created_by = request.user,
-                company = c
+                created_by=request.user,
+                company=c
             )
             d.save()
             
@@ -322,9 +302,9 @@ def edit_discount(request, company, discount_id):
     if discount.company != c:
         raise Http404
         
-        # check if user has permissions to change contacts
-        if not request.user.has_perm('pos.change_discount'):
-            return error(request, _("You have no permission to edit discounts."))
+    # check if user has permissions to change contacts
+    if not request.user.has_perm('pos.change_discount'):
+        return error(request, _("You have no permission to edit discounts."))
 
     if request.method == 'POST':
         # submit data
@@ -339,7 +319,7 @@ def edit_discount(request, company, discount_id):
             discount.amount = form.cleaned_data.get('amount')
             discount.start_date = form.cleaned_data.get('start_date')
             discount.end_date = form.cleaned_data.get('end_date')
-            discount.active = form.cleaned_data.get('active')
+            discount.enabled = form.cleaned_data.get('enabled')
             discount.save()
             
             return redirect('pos:list_discounts', company=c.url_name)
@@ -366,18 +346,19 @@ def delete_discount(request, company, discount_id):
         raise Http404
     
     if not request.user.has_perm('pos.delete_discount'):
-        return error(_("You have no permission to delete discounts."))
+        return error(request, _("You have no permission to delete discounts."))
     
     discount.delete()
     
     return redirect('pos:list_discounts', company=c.url_name)
 
 
-def get_all_discounts(user, company):
+def get_all_discounts(user, company, all=True):
     discounts = Discount.objects.filter(company=company)
 
     r = []
     for d in discounts:
-        r.append(discount_to_dict(user, d))
+        if all or d.is_active:
+            r.append(discount_to_dict(user, d))
 
     return r

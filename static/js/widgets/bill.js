@@ -27,6 +27,8 @@ Bill = function(g){
     // save item template for items and remove it from the document
     p.item_template = $("#bill_item_template").detach().removeAttr("id");
 
+    p.temp_discounts = [];
+
     //
     // methods
     //
@@ -246,7 +248,7 @@ Item = function(bill, product) {
             p.g.config.tax_first,
             p.data.base_price,
             p.data.tax_percent,
-            p.product.data.discounts,
+            p.data.discounts,
             p.data.quantity,
             p.data.unit_amount);
 
@@ -384,10 +386,16 @@ Item = function(bill, product) {
         base_price: p.product.data.price,
         tax_percent: p.product.data.tax,
         tax_absolute: null, // will be calculated later
+        discounts: [],
         stock: p.product.data.stock,
-        discount_absolute:null, // calculated later
-        total_price: null // calculated later
+        discount_absolute: null, // calculated later
+        total_price: null, // calculated later
+        bill_notes: ''
     };
+
+    // discounts: copy discounts from product
+    for(var i = 0; i < p.product.data.discounts.length; i++)
+        p.data.discounts.push(p.product.data.discounts[i]);
 
     // then update it
     p.update();
@@ -464,39 +472,219 @@ ItemDetails = function(item){
     p.items = {
         tax_percent: $(".tax-percent", p.box),
         tax_absolute: $(".tax-absolute", p.box),
-        discounts: $(".discounts", p.box),
+
+        // a read-only list of discounts already on the product
+        active_discounts: $("ul.discounts", p.box),
+
+        // all other discounts that could be added to the product
+        all_discounts_li: $("li.select-existing", p.box),
+        all_discounts: $(".select-existing select", p.box),
+        all_discounts_add: $(".select-existing button", p.box),
+
+        // a unique discount (not bound to database discounts) for adding on-the-fly
+        unique_discount_description: $(".add-new .description", p.box),
+        unique_discount_amount: $(".add-new .amount", p.box),
+        unique_discount_type: $(".add-new .type", p.box),
+
         notes: $(".notes", p.box),
-        quantity: $(".quantity", p.box),
         explode: $(".explode", p.box),
         save: $("input.ok", p.box),
         cancel: $("input.cancel", p.box)
     };
 
+    p.temp_discounts = []; // this will be saved into product if details are closed with 'save'
+
     //
     // methods
     //
-    p.discount_row = function(discount){
-        // returns a new jquery object for this discount (to be put in the discount list)
-        var li = $("<li>", {title: discount.description});
+    p.update_discounts = function(){
+        function discount_row(element, discount, editable){
+            // returns an jquery object: list item
+            // if editable == true, it includes a 'remove' button, otherwise not
+            var li = $(element, {title: discount.description, 'class': 'inserted'});
 
-        if(discount.type == "Percent"){
-            // example: ND10 (10 %)
-            li.text(
-                discount.code + " (" +
-                display_number(discount.amount, p.g.config.separator, p.g.config.decimal_places) + " %)"
-            );
+            if(discount.type == "Percent"){
+                // example: ND10 (10 %)
+                li.text(discount.code + " (" +
+                    display_number(discount.amount, p.g.config.separator, p.g.config.decimal_places) + " %)");
+            }
+            else{
+                // example ND15 ($ 15)
+                li.text(discount.code + " (" +
+                    p.g.config.currency + " " +
+                    display_number(discount.amount, p.g.config.separator, p.g.config.decimal_places) + ")");
+            }
+
+            if(editable){
+                // append a delete button that removes the list item
+                var button = $("<input>", {type: 'button', 'class':"remove-item-discount", 'value': 'x'});
+                li.append(button);
+
+                button.click(function(){
+                    // remove this discount from temp_discounts and update discounts
+                    var index = get_index(p.temp_discounts, discount.id);
+                    if(index != null) remove_from_array(p.temp_discounts, index);
+                    p.update_discounts();
+                });
+            }
+
+            return li;
+        }
+
+        // clear what's currently entered
+        $(".inserted", p.items.active_discounts).remove();
+
+        var i, obj, n_available = 0;
+
+        // all available discounts
+        var d_available = p.g.data.discounts;
+
+        // put all discounts from item to list and the rest to select box
+        for(i = 0; i < d_available.length; i++){
+            if(get_by_id(p.temp_discounts, d_available[i].id) != null){
+                // the discount is already on the item, append it to list
+                obj = discount_row("<li>", d_available[i], true);
+
+                // insert after the last inserted discount
+                obj.insertBefore(p.items.all_discounts_li);
+
+                obj.data(d_available[i]);
+            }
+            else{
+                // the discount is not yet there, append it to select box
+                obj = discount_row("<option>", d_available[i], false);
+                obj.appendTo(p.items.all_discounts);
+
+                obj.data(d_available[i]);
+
+                n_available += 1;
+            }
+        }
+
+        // if there's a unique discount (it has id=-1), put the data in
+        var d = get_by_id(p.temp_discounts, -1);
+        if(d){
+            p.items.unique_discount_description.val(d.description);
+            p.items.unique_discount_amount.val(display_number(
+                d.amount, p.g.config.separator, p.g.config.decimal_places
+            ));
+            p.items.unique_discount_type.val(d.type);
+        }
+
+        // do not show a discount in the select box, it's confusing
+        p.items.all_discounts.prop("selectedIndex", -1);
+
+        // if there are no available discounts, disable stuff
+        if(n_available == 0){
+            p.items.all_discounts_add.unbind().prop("enabled", false);
+            p.items.all_discounts.prop("enabled", false);
         }
         else{
-            // example ND15 ($ 15)
-            li.text(
-                discount.code + " (" +
-                p.g.config.currency + " " +
-                display_number(discount.amount, p.g.config.separator, p.g.config.decimal_places) + ")"
-            );
+            p.items.all_discounts_add.unbind().prop("enabled", true);
+            p.items.all_discounts.prop("enabled", true);
+
+            // the add button function
+            p.items.all_discounts_add.unbind().click(function(){
+                // append a new, editable list item to temp_discounts and update
+                var selected_discount = p.items.all_discounts.find(":selected").data();
+
+                p.temp_discounts.push(selected_discount);
+
+                p.update_discounts();
+            });
+        }
+    };
+
+    p.get_discounts = function(){
+        // get the .inserted items from discount list and
+        var d = []; // new discounts
+
+        $("li.inserted", p.active_discounts).each(function(){
+            d.push($(this).data());
+        });
+
+        // see if there is the on-the-fly discount
+        if(p.items.unique_discount_amount.val().trim() != ''){
+            var amount = get_number(p.items.unique_discount_amount.val());
+            if(!amount){
+                error_message(
+                    gettext("Wrong item format"),
+                    gettext("Please check discount number format")
+                );
+
+                return null;
+            }
+
+            d.push({
+                // discount contains:
+                id: -1, // a new discount
+                description: p.items.unique_discount_description.val(),
+                code: "", // no code entered
+                type: p.items.unique_discount_type.val(),
+                amount: amount,
+                enabled: true
+            });
         }
 
-        return li;
+        return d;
     };
+
+    p.update_prices = function(){
+        // update only text fields, not item's data;
+        // if the user cancels this dialog, nothing must be saved
+
+        // fields:
+        // tax in item and details
+        
+        $().add(p.item.items.tax_absolute
+                p.items.tax_absolute)
+
+        // discount sum in item and details
+        // total in item
+
+        p.item.items.discount
+
+        p.item.items.total
+
+    };
+
+    p.cancel_button_action = function(){
+         p.box.remove();
+    };
+
+    p.save_button_action = function(){
+        // copy details' values to item data
+        p.item.data.discounts = p.get_discounts();
+        p.item.data.bill_notes = p.items.notes.val();
+
+        // close the box
+        p.box.remove();
+
+
+    };
+
+    p.details_changed = function(){
+        // compare original item's details to this dialog's values
+        // and there's a difference, return true
+
+        // discounts: check that ids are in the same order than in item
+        if(p.item.data.discounts.length != p.temp_discounts.length) return true;
+
+        for(var i = 0; i < p.item.data.discounts.length; i++){
+            if(p.item.data.discounts[i].id != p.temp_discounts[i].id) return true;
+        }
+
+        // unique discount
+        if(p.items.unique_discount_amount.val().trim() != "") return true;
+
+        // check notes
+        if(p.item.data.bill_notes != p.items.notes.val()) return true;
+
+        // all tests passed, the items are the same
+        return false;
+    };
+
+
 
     //
     // init
@@ -523,14 +711,55 @@ ItemDetails = function(item){
             p.g.config.separator,
             p.g.config.decimal_places));
 
-    // discounts: fill in the existing discounts
-    var d = p.item.product.data.discounts;
-    var i, li;
-
-    for(i = 0; i < d.length; i++){
-        p.items.discounts.prepend(p.discount_row(d[i]));
+    // copy current item's discounts to a temporary list;
+    // it will be edited and when details is saved, the item's discounts will
+    // be pointed to this list
+    for(var i = 0; i < p.item.data.discounts.length; i++){
+        p.temp_discounts.push(p.item.data.discounts[i]);
     }
+    p.update_discounts();
+
+    p.items.active_discounts.sortable({
+        items: "li.inserted",
+        opacity: 0.5,
+        stop: function(){
+            p.temp_discounts = p.get_discounts();
+            p.update_discounts();
+        }
+    });
+
+    p.items.notes.val(p.item.data.bill_notes);
 
     // bind button actions
-    p.items.cancel.click(function(){ p.box.remove(); });
+    p.items.cancel.click(function(){p.cancel_button_action();});
+
+    p.items.save.click(function(){
+        p.save_button_action();
+    });
+
+    // explode button
+    p.items.explode.unbind().click(function(){
+        // if anything has been changed, ask the user to save or cancel
+        if(p.details_changed()){
+            // the user has changed something, ask to save
+            var dlg = confirmation_dialog(
+                gettext("Confirm explode"),
+                gettext("You have made changes to this item that will not be saved. Continue?"),
+                function(){
+                    // yes action: cancel, explode and close the 'dialog'
+                    p.cancel_button_action();
+                    p.item.explode();
+                    dlg.dialog("close");
+                },
+                function(){
+                    // no action: do nothing (just close the dialog)
+                    dlg.dialog("close");
+                }
+            );
+        }
+        else{
+            p.item.explode();
+            p.cancel_button_action();
+        }
+    });
 };

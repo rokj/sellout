@@ -135,7 +135,6 @@ Product = function(list, data){
         if(p.g.objects.bill) p.g.objects.bill.add_product(p, true);
     };
 
-
     //
     // init
     //

@@ -47,11 +47,11 @@ $(document).ready(function(){
     </div>
 
     <div class="form-field clear-floats">
-        {{ filter_form.active.label_tag }}
-        <div class="error">{{ filter_form.active.errors }}</div>
+        {{ filter_form.enabled.label_tag }}
+        <div class="error">{{ filter_form.enabled.errors }}</div>
 
         <div class="split-cell first">
-            {{ filter_form.active }}
+            {{ filter_form.enabled }}
         </div>
         <div class="split-cell last">
             <input type="submit" value="{% trans 'Search' context 'submit button label' %}" />
@@ -116,7 +116,7 @@ $(document).ready(function(){
                     <tr>
                         <td class="details-label">{% trans 'Active' %}</td>
                         <td>
-                            {% if d.active %}
+                            {% if d.is_active %}
                                 <span class="discount-active">{% trans 'Yes' %}</span>
                             {% else %}
                                 <span class="discount-inactive">{% trans 'No' %}</span>

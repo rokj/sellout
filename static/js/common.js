@@ -166,3 +166,40 @@ function confirmation_dialog(title, text, yes_action, no_action){
 function get_url_hash() {
     return window.location.hash.replace(/^#/,'');
 }
+
+
+//
+// manipulation of arrays of objects:
+// data is an array of objects, each object has the 'id' property
+// (and other properties as well)
+//
+function get_ids(data){
+    // data is an array of objects with an 'id' field;
+    // return only an array of ids
+    var ids = [];
+
+    for(var i = 0; i < data.length; i++){
+        ids.push(data[i].id);
+    }
+
+    return ids;
+}
+
+function get_index(data, id){
+    // returns the index of the object with given id
+    for(var i = 0; i < data.length; i++){
+        if(data[i].id == id) return i;
+    }
+
+    return null;
+}
+
+function get_by_id(data, id){
+    // data is an array of objects with an 'id' field;
+    // return the object with the correct id
+    for(var i = 0; i < data.length; i++){
+        if(data[i].id == id) return data[i];
+    }
+
+    return null;
+}

@@ -49,7 +49,7 @@ def terminal(request, company):
         # data for selling stuff
         'categories': get_all_categories_structured(c),
         'products': get_all_products(request.user, c),
-        'discounts': get_all_discounts(request.user, c),
+        'discounts': get_all_discounts(request.user, c, False),
         'contacts': get_all_contacts(request.user, c),
         'taxes':  get_all_taxes(request.user, c),
         'unit_types': g.UNITS,

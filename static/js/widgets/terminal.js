@@ -35,7 +35,7 @@ Terminal = function(g){
     p.bill_sizes = [350, 450, 600];
 
     //
-    // methods
+    // methods: sizing and layout
     //
     p.size_layout = function(save){
         /* fixed layout, positioned 100% by javascript:
@@ -168,4 +168,11 @@ Terminal = function(g){
     // resize everything now and on resize
     p.size_layout(false); // no need to save on load
     $(window).resize(function(){p.size_layout(false); }); // and no need to save on window resize
+
+    // convert all stringed numbers to Big() numbers
+    // discounts:
+    var d = p.g.data.discounts;
+    for(var i = 0; i < d.length; i++){
+        d[i].amount = get_number(d[i].amount, p.g.config.separator);
+    }
 };
