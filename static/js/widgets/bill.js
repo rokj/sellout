@@ -341,13 +341,27 @@ Item = function(bill, product) {
 
     p.format = function(){
         // used for sending to server
+        var discounts = [];
+
+        for(var i = 0; i < p.data.discounts.length; i++){
+            discounts.push({
+                id: p.data.discounts[i].id,
+                description: p.data.discounts[i].description,
+                code: p.data.discounts[i].code,
+                type: p.data.discounts[i].type,
+                amount: display_number(p.data.discounts[i].amount, p.g.config.separator, p.g.config.decimal_places)
+                // enabled: of course it's enabled
+                // active: doesn't matter
+            });
+        }
+
         return {
             product_id: p.data.product_id,
-            unit_amount: display_number(p.data.unit_amount, p.g.config.separator, p.g.config.decimal_places),
             stock: display_number(p.data.stock, p.g.config.separator, p.g.config.decimal_places),
             quantity: display_number(p.data.quantity, p.g.config.separator, p.g.config.decimal_places),
             base_price: display_number(p.data.base_price, p.g.config.separator, p.g.config.decimal_places),
             tax_percent: display_number(p.data.tax_percent, p.g.config.separator, p.g.config.decimal_places),
+            discounts: discounts,
             total: display_number(p.data.total, p.g.config.separator, p.g.config.decimal_places)
         }
     };
@@ -386,7 +400,7 @@ Item = function(bill, product) {
         base_price: p.product.data.price,
         tax_percent: p.product.data.tax,
         tax_absolute: null, // will be calculated later
-        discounts: [],
+        discounts: [], // see below
         stock: p.product.data.stock,
         discount_absolute: null, // calculated later
         total_price: null, // calculated later
