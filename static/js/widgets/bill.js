@@ -538,20 +538,26 @@ ItemDetails = function(item){
 
         // all available discounts
         var d_available = p.g.data.discounts;
+        var d_used = []; // a list of ids
 
         // put all discounts from item to list and the rest to select box
+        for(i = 0; i < p.temp_discounts.length; i++){
+            // ignore the unique discount (it stays in )
+            if(p.temp_discounts[i].id == -1) continue;
+
+            // the discount is already on the item, append it to list
+            obj = discount_row("<li>", p.temp_discounts[i], true);
+
+            // insert after the last inserted discount
+            obj.insertBefore(p.items.all_discounts_li);
+
+            obj.data(p.temp_discounts[i]);
+        }
+
+        // put all other discounts to select box
         for(i = 0; i < d_available.length; i++){
-            if(get_by_id(p.temp_discounts, d_available[i].id) != null){
-                // the discount is already on the item, append it to list
-                obj = discount_row("<li>", d_available[i], true);
-
-                // insert after the last inserted discount
-                obj.insertBefore(p.items.all_discounts_li);
-
-                obj.data(d_available[i]);
-            }
-            else{
-                // the discount is not yet there, append it to select box
+            if(d_used.indexOf(d_available[i].id) == -1){
+                // the discount is not there yet, append it to select box
                 obj = discount_row("<option>", d_available[i], false);
                 obj.appendTo(p.items.all_discounts);
 
@@ -593,6 +599,9 @@ ItemDetails = function(item){
                 p.update_discounts();
             });
         }
+
+        // in the end, show the user what happened
+        p.update_prices();
     };
 
     p.get_discounts = function(){
@@ -630,22 +639,30 @@ ItemDetails = function(item){
     };
 
     p.update_prices = function(){
+        var r = total_price(p.g.config.tax_first,
+            p.item.data.base_price,
+            p.item.data.tax_percent,
+            p.temp_discounts,
+            p.item.data.quantity
+        );
+
         // update only text fields, not item's data;
         // if the user cancels this dialog, nothing must be saved
 
         // fields:
         // tax in item and details
-        
-        $().add(p.item.items.tax_absolute
-                p.items.tax_absolute)
+        $().add(p.item.items.tax_absolute)
+            .add(p.items.tax_absolute)
+            .text(display_number(r.tax, p.g.config.separator, p.g.config.decimal_places));
 
         // discount sum in item and details
+        p.item.items.discount.text(display_number(r.discount, p.g.config.separator, p.g.config.decimal_places));
         // total in item
+        p.item.items.total.text(display_number(r.total, p.g.config.separator, p.g.config.decimal_places));
 
-        p.item.items.discount
-
-        p.item.items.total
-
+        // show update prices when:
+        //  - quantity changes
+        //  - discounts are added or reordered
     };
 
     p.cancel_button_action = function(){
@@ -659,8 +676,6 @@ ItemDetails = function(item){
 
         // close the box
         p.box.remove();
-
-
     };
 
     p.details_changed = function(){
@@ -683,8 +698,6 @@ ItemDetails = function(item){
         // all tests passed, the items are the same
         return false;
     };
-
-
 
     //
     // init
@@ -728,23 +741,28 @@ ItemDetails = function(item){
         }
     });
 
+    $().add(p.items.unique_discount_amount)
+       .add(p.items.unique_discount_type)
+       .blur(function(){
+            p.temp_discounts = p.get_discounts();
+            p.update_prices();
+       });
+
     p.items.notes.val(p.item.data.bill_notes);
 
     // bind button actions
-    p.items.cancel.click(function(){p.cancel_button_action();});
+    p.items.cancel.click(function(){ p.cancel_button_action();});
 
-    p.items.save.click(function(){
-        p.save_button_action();
-    });
+    p.items.save.click(function(){ p.save_button_action(); });
 
     // explode button
     p.items.explode.unbind().click(function(){
         // if anything has been changed, ask the user to save or cancel
         if(p.details_changed()){
-            // the user has changed something, ask to save
+            // warn the user about changed details
             var dlg = confirmation_dialog(
                 gettext("Confirm explode"),
-                gettext("You have made changes to this item that will not be saved. Continue?"),
+                gettext("You have made changes to this item that will not be saved to the new item. Continue?"),
                 function(){
                     // yes action: cancel, explode and close the 'dialog'
                     p.cancel_button_action();
