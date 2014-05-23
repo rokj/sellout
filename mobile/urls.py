@@ -70,7 +70,7 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/units/?$', product.mobile_JSON_units, name='mobile_JSON_units'),
 
     # Mr. Bill
-    url(r_company + r'/manage/json/bill/add', bill.mobile_create_bill, name='mobile_add_bill')
+    url(r_company + r'/manage/json/bill/add/?$', bill.mobile_create_bill, name='mobile_add_bill')
 
     # available discounts list
     # url(r_company + r'/manage/json/discounts/?$', discount.JSON_discounts, name='JSON_discounts'),
