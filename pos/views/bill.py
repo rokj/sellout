@@ -7,6 +7,7 @@
 #     delete_item
 #
 from django.contrib.auth.decorators import login_required
+from django.db import transaction, IntegrityError
 from django.utils.translation import ugettext as _
 
 from pos.models import Company, Bill, BillItem, Product
@@ -182,6 +183,7 @@ def validate_bill_item(data):
 # views #
 #########
 @login_required
+@transaction.atomic
 def create_bill(request, company):
     """ there's bill and items in request.POST['data'], create a new bill, and check all items and all """
 
@@ -207,81 +209,85 @@ def create_bill(request, company):
     # TODO: ... (nothing to check?)
 
     # create a new bill
-    bill = Bill(
-        company=c,
-        user=request.user,  # this can change
-        created_by=request.user,  # this will never change
-        type="Normal",
-        timestamp=dtm.now().replace(tzinfo=timezone(get_value(request.user, 'pos_timezone'))),
-        status="Active"
-    )
-    #try:
+    try:
+        with transaction.atomic():
+            bill = Bill(
+                company=c,
+                user=request.user,  # this can change
+                created_by=request.user,  # this will never change
+                type="Normal",
+                timestamp=dtm.now().replace(tzinfo=timezone(get_value(request.user, 'pos_timezone'))),
+                status="Active"
+            )
+            bill.save()
+            #try:
 
-    #except:
-    #    return JSON_error(_("Error while saving new bill"))
+            #except:
+            #    return JSON_error(_("Error while saving new bill"))
 
-    # create new items
-    print d.get('items')
-    for i in d.get('items'):
-    # get product
-        try:
-            product = Product.objects.get(company=c, id=int(i.get('product_id')))
-        except Product.DoesNotExist:
-            return JSON_error(_("Product with this id does not exist"))
+            # create new items
+            print d.get('items')
+            for i in d.get('items'):
+            # get product
+                try:
+                    product = Product.objects.get(company=c, id=int(i.get('product_id')))
+                except Product.DoesNotExist:
+                    return JSON_error(_("Product with this id does not exist"))
 
 
-        # parse quantity
-        r = parse_decimal(request.user, i.get('quantity'), g.DECIMAL['quantity_digits'])
-        if not r['success']:
-            return JSON_error(_("Invalid quantity value"))
-        else:
-            if r['number'] <= Decimal('0'):
-                return JSON_error(_("Cannot add an item with zero or negative quantity"))
-        quantity = r['number']
+                # parse quantity
+                r = parse_decimal(request.user, i.get('quantity'), g.DECIMAL['quantity_digits'])
+                if not r['success']:
+                    return JSON_error(_("Invalid quantity value"))
+                else:
+                    if r['number'] <= Decimal('0'):
+                        return JSON_error(_("Cannot add an item with zero or negative quantity"))
+                quantity = r['number']
 
-        # check if there's enough items left in stock (must be at least zero =D)
-        if product.stock < quantity:
-            print 'wtf'
-            return JSON_error(_("Cannot sell more items than there are in stock"))
+                # check if there's enough items left in stock (must be at least zero =D)
+                if product.stock < quantity:
+                    print 'wtf'
+                    return JSON_error(_("Cannot sell more items than there are in stock"))
 
-        # calculate and set all stuff for this new item:
-        discounts = product.get_discounts()
-        prices = item_prices(request.user, product.get_price(), product.tax.amount, quantity, discounts)
+                # calculate and set all stuff for this new item:
+                discounts = product.get_discounts()
+                prices = item_prices(request.user, product.get_price(), product.tax.amount, quantity, discounts)
 
-        # notes, if any
-        bill_notes = i.get('notes')
+                # notes, if any
+                bill_notes = i.get('notes')
 
-        # TODO: subtract quantity from stock (if there's enough left)
+                # TODO: subtract quantity from stock (if there's enough left)
+                # TODO: TODO
 
-        # create a bill item and save it to database, then return JSON with its data
-        item = BillItem(
-            created_by=request.user,
-            # copy ProductAbstract's values:
-            code=product.code,
-            shortcut=product.shortcut,
-            name=product.name,
-            description=product.description,
-            private_notes=product.private_notes,
-            unit_type=product.get_unit_type_display(), # ! display, not the 'code'
-            stock=product.stock,
-            # billItem's fields
-            bill=bill,
-            product_id=product.id,
-            quantity=quantity,
-            base_price=prices['base'],
-            tax_percent=product.tax.amount,
-            tax_absolute=prices['tax_absolute'],
-            discount_absolute=prices['discount_absolute'],
-            single_total=prices['single_total'],
-            total=prices['total'],
-            bill_notes=bill_notes
-        )
-        try:
-            item.save()
-        except:
-            return JSON_error(_("Could not save one of items"))  # TODO: a bit more specific, please
+                # create a bill item and save it to database, then return JSON with its data
+                item = BillItem(
+                    created_by=request.user,
+                    # copy ProductAbstract's values:
+                    code=product.code,
+                    shortcut=product.shortcut,
+                    name=product.name,
+                    description=product.description,
+                    private_notes=product.private_notes,
+                    unit_type=product.get_unit_type_display(), # ! display, not the 'code'
+                    stock=product.stock,
+                    # billItem's fields
+                    bill=bill,
+                    product_id=product.id,
+                    quantity=quantity,
+                    base_price=prices['base'],
+                    tax_percent=product.tax.amount,
+                    tax_absolute=prices['tax_absolute'],
+                    discount_absolute=prices['discount_absolute'],
+                    single_total=prices['single_total'],
+                    total=prices['total'],
+                    bill_notes=bill_notes
+                )
 
-    bill.save()
+                item.save()
+
+
+    except IntegrityError:
+        return JSON_error(_("Could not save one of items"))  # TODO: a bit more specific, please
     return JSON_ok()
 
 

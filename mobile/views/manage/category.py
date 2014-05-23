@@ -156,20 +156,23 @@ def edit_category(request, company):
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_delete_category(request, company):
-    c = get_object_or_404(Company, url_name=company)
+    try:
+        c = Company.objects.get(url_name = company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
 
-    # check permissions: needs to be at least manager
-    if not has_permission(request.user, c, 'category', 'edit'):
-        return no_permission_view(request, c, _("delete categories"))
-
-    # get category
     data = JSON_parse(request.POST['data'])
 
     category_id = data['id']
-    category = get_object_or_404(Category, id=category_id)
+    # check permissions: needs to be at least manager
+    try:
+        category = Category.objects.get(id=category_id)
+    except Category.DoesNotExist:
+        return JSON_error(_("Category does not exist"))
+
     # check if category actually belongs to the given company
     if category.company != c:
-        raise Http404 # this category does not exist for the current user
+        return JSON_error("Error") # this category does not exist for the current user
 
     if Category.objects.filter(parent=category).count() > 0:
         return JSON_error("Cannot delete category with subcategories")
@@ -180,8 +183,7 @@ def mobile_delete_category(request, company):
     except:
         pass
 
-    return redirect('pos:list_categories', company=c.url_name)
-    return delete_category(request, company, category_id)
+    return JSON_ok(extra=category_to_dict(category))
 
 
 @api_view(['POST', 'GET'])
