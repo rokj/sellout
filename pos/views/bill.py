@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction, IntegrityError
 from django.utils.translation import ugettext as _
 
-from pos.models import Company, Bill, BillItem, Product
+from pos.models import Company, Bill, BillItem, Product, Discount, BillItemDiscount
 from pos.views.util import has_permission, JSON_response, JSON_ok, JSON_parse, JSON_error, \
     format_number, parse_decimal, format_date, format_time
 from config.functions import get_value
@@ -187,6 +187,9 @@ def validate_bill_item(data):
 def create_bill(request, company):
     """ there's bill and items in request.POST['data'], create a new bill, and check all items and all """
 
+    def item_error(message, product):
+        return JSON_error(message + " " + _("(Item: ") + product.name)
+
     # get company
     try:
         c = Company.objects.get(url_name=company)
@@ -232,22 +235,22 @@ def create_bill(request, company):
                 try:
                     product = Product.objects.get(company=c, id=int(i.get('product_id')))
                 except Product.DoesNotExist:
-                    return JSON_error(_("Product with this id does not exist"))
-
+                    return JSON_error(
+                        _("Product with this id does not exist") +
+                        " (id=" + i.get('product_id') + ")")
 
                 # parse quantity
                 r = parse_decimal(request.user, i.get('quantity'), g.DECIMAL['quantity_digits'])
                 if not r['success']:
-                    return JSON_error(_("Invalid quantity value"))
+                    return item_error(_("Invalid quantity value"), product)
                 else:
                     if r['number'] <= Decimal('0'):
-                        return JSON_error(_("Cannot add an item with zero or negative quantity"))
+                        return item_error(_("Cannot add an item with zero or negative quantity"), product)
                 quantity = r['number']
 
                 # check if there's enough items left in stock (must be at least zero =D)
                 if product.stock < quantity:
-                    print 'wtf'
-                    return JSON_error(_("Cannot sell more items than there are in stock"))
+                    return item_error(_("Cannot sell more items than there are in stock"), product)
 
                 # calculate and set all stuff for this new item:
                 discounts = product.get_discounts()
@@ -257,7 +260,6 @@ def create_bill(request, company):
                 bill_notes = i.get('notes')
 
                 # TODO: subtract quantity from stock (if there's enough left)
-                # TODO: TODO
 
                 # create a bill item and save it to database, then return JSON with its data
                 item = BillItem(
@@ -282,12 +284,47 @@ def create_bill(request, company):
                     total=prices['total'],
                     bill_notes=bill_notes
                 )
-
                 item.save()
 
+                # save discounts for this item
+                for discount in d.get('discounts'):
+                    # check:
+                    # discount id: if it's -1, it's a unique discount on this item;
+                    #              if it's anything else, the discount must belong to this company
+                    #              and must be active and enabled
+                    d_id = int(discount.get('id'))
+                    if d_id != -1:
+                        try:
+                            dbd = Discount.objects.get(id=d_id, company=c)
 
-    except IntegrityError:
-        return JSON_error(_("Could not save one of items"))  # TODO: a bit more specific, please
+                            if not dbd.active:
+                                return item_error(_("The discount is not active"), product)
+                        except Discount.DoesNotExist:
+                            return item_error(_("Chosen discount does not exist or is not valid"), product)
+
+                    # discount type: must be in g.DISCOUNT_TYPES
+                    if discount.get('type') not in [x[0] for x in g.DISCOUNT_TYPES]:
+                        return item_error(_("Wrong discount type"), product)
+
+                    # amount: parse number and check that percentage does not exceed 100%
+                    d_amount = parse_decimal(discount.get('amount'), discount.get('amount'))
+                    if not d_amount or (discount.get('type') == 'Percentage' and d_amount > Decimal('100')):
+                        return item_error(_("Invalid discount amount"), product)
+
+                    # everything seems to be fine, add discount to BillItemDiscount
+                    item_discount = BillItemDiscount(
+                        created_by=request.user,
+                        bill_item=item,
+
+                        description=discount.get('description'),
+                        code=discount.get('code'),
+                        type=discount.get('type'),
+                        amount=d_amount
+                    )
+                    item_discount.save()
+
+    except IntegrityError as e:
+        return JSON_error(_("Creating bill failed") + ": " + e.message)
     return JSON_ok()
 
 

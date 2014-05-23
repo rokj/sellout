@@ -713,6 +713,16 @@ ItemDetails = function(item){
         return false;
     };
 
+    p.check_unique_discount = function(){
+        // check that number is 'parsable'
+        // and that percentage discount does not exceed 100%
+        var a = get_number(p.items.unique_discount_amount.val(), p.g.config.separator);
+
+        if(!a) return false;
+
+        return !(p.items.unique_discount_type.val() == 'Percent' && a.cmp(Big(100)) > 0);
+    };
+
     //
     // init
     //
@@ -758,8 +768,16 @@ ItemDetails = function(item){
     $().add(p.items.unique_discount_amount)
        .add(p.items.unique_discount_type)
        .blur(function(){
-            p.temp_discounts = p.get_discounts();
-            p.update_prices();
+            if(p.check_unique_discount()){
+                p.temp_discounts = p.get_discounts();
+                p.update_prices();
+            }
+            else{
+                error_message(
+                    gettext("Invalid discount"),
+                    gettext("Please check discount format and type")
+                );
+            }
        });
 
     p.items.notes.val(p.item.data.bill_notes);

@@ -507,7 +507,7 @@ class BillItem(ProductAbstract): # include all data from Product
 
 
 ### item's discounts
-class BillItemDiscounts(DiscountAbstract):
+class BillItemDiscount(DiscountAbstract):
     # inherits everything from DiscountAbstract
     bill_item = models.ForeignKey(BillItem)
 
