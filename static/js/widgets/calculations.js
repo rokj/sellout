@@ -126,6 +126,9 @@ function total_price(tax_first, base_price, tax, discounts, quantity){
     }
 
     // multiply everything by quantity
+    //
+    // rounding is done in display_number()
+    //
     r.base = r.base.times(quantity); // without tax and discounts
     r.tax = r.tax.times(quantity);   // tax, absolute
     r.discount = r.discount.times(quantity); // discounts, absolute
