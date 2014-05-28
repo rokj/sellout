@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from common.globals import UNITS
 from pos.models import Company, Tax
 from pos.views.manage.category import get_all_categories
+from pos.views.manage.discount import JSON_discounts, get_all_discounts
 from pos.views.manage.tax import get_taxes, tax_to_dict
 from pos.views.util import JSON_error, has_permission, JSON_response, JSON_ok
 from django.utils.translation import ugettext as _
@@ -47,5 +48,8 @@ def mobile_get_cut(request, company):
 
     categories = get_all_categories(c.id, json=True)
     result['categories'] = categories
+
+    discounts = get_all_discounts(request.user, c, android=True)
+    result['discounts'] = discounts
 
     return JSON_response(result)

@@ -158,8 +158,7 @@ def mobile_add_discount(request, company):
         amount = Decimal(data.get('amount')),
         start_date = start,
         end_date = end,
-        active = data.get('active'),
-
+        enabled = data.get('enabled'),
         created_by = request.user,
         company = c
     )

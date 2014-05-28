@@ -84,6 +84,7 @@ def product_to_dict(user, product):
     discounts = []
     all_discounts = product.get_discounts()
     for d in all_discounts:
+        # discounts.append(d.id)
         discounts.append(discount_to_dict(user, d))
     ret['discounts'] = discounts
 
@@ -611,7 +612,7 @@ def edit_product(request, company):
     product.tax = data['tax']
     
     # update discounts
-    product.update_discounts(request.user, data['discounts'])
+    product.update_discounts(request.user, data['discount_ids'])
     
     # image
     if data['change_image'] == True:

@@ -287,41 +287,42 @@ def create_bill(request, company):
                 item.save()
 
                 # save discounts for this item
-                for discount in d.get('discounts'):
-                    # check:
-                    # discount id: if it's -1, it's a unique discount on this item;
-                    #              if it's anything else, the discount must belong to this company
-                    #              and must be active and enabled
-                    d_id = int(discount.get('id'))
-                    if d_id != -1:
-                        try:
-                            dbd = Discount.objects.get(id=d_id, company=c)
+                if (d.get('discounts')):
+                    for discount in d.get('discounts'):
+                        # check:
+                        # discount id: if it's -1, it's a unique discount on this item;
+                        #              if it's anything else, the discount must belong to this company
+                        #              and must be active and enabled
+                        d_id = int(discount.get('id'))
+                        if d_id != -1:
+                            try:
+                                dbd = Discount.objects.get(id=d_id, company=c)
 
-                            if not dbd.active:
-                                return item_error(_("The discount is not active"), product)
-                        except Discount.DoesNotExist:
-                            return item_error(_("Chosen discount does not exist or is not valid"), product)
+                                if not dbd.active:
+                                    return item_error(_("The discount is not active"), product)
+                            except Discount.DoesNotExist:
+                                return item_error(_("Chosen discount does not exist or is not valid"), product)
 
-                    # discount type: must be in g.DISCOUNT_TYPES
-                    if discount.get('type') not in [x[0] for x in g.DISCOUNT_TYPES]:
-                        return item_error(_("Wrong discount type"), product)
+                        # discount type: must be in g.DISCOUNT_TYPES
+                        if discount.get('type') not in [x[0] for x in g.DISCOUNT_TYPES]:
+                            return item_error(_("Wrong discount type"), product)
 
-                    # amount: parse number and check that percentage does not exceed 100%
-                    d_amount = parse_decimal(discount.get('amount'), discount.get('amount'))
-                    if not d_amount or (discount.get('type') == 'Percentage' and d_amount > Decimal('100')):
-                        return item_error(_("Invalid discount amount"), product)
+                        # amount: parse number and check that percentage does not exceed 100%
+                        d_amount = parse_decimal(discount.get('amount'), discount.get('amount'))
+                        if not d_amount or (discount.get('type') == 'Percentage' and d_amount > Decimal('100')):
+                            return item_error(_("Invalid discount amount"), product)
 
-                    # everything seems to be fine, add discount to BillItemDiscount
-                    item_discount = BillItemDiscount(
-                        created_by=request.user,
-                        bill_item=item,
+                        # everything seems to be fine, add discount to BillItemDiscount
+                        item_discount = BillItemDiscount(
+                            created_by=request.user,
+                            bill_item=item,
 
-                        description=discount.get('description'),
-                        code=discount.get('code'),
-                        type=discount.get('type'),
-                        amount=d_amount
-                    )
-                    item_discount.save()
+                            description=discount.get('description'),
+                            code=discount.get('code'),
+                            type=discount.get('type'),
+                            amount=d_amount
+                        )
+                        item_discount.save()
 
     except IntegrityError as e:
         return JSON_error(_("Creating bill failed") + ": " + e.message)
