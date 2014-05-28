@@ -109,21 +109,22 @@ def validate_prices():
 def item_prices(user, base_price, tax_percent, quantity, discounts):
     """ calculates prices and stuff and return the data
         passing parameters instead of Item object because Item may not exist yet
+        discount is a list of dictionaries (not Discount objects!)
     """
     def get_discount(p):
         """
             accumulates discounts on price p and returns final price and discounts
         """
 
-        discount = Decimal('0') # cumulative discounts
-        final = p # the final price
+        discount = Decimal('0')  # cumulative discounts
+        final = p  # the final price
 
         for di in discounts:
-            if di.type == 'Absolute':
-                final = final - di.amount
-                discount = discount + di.amount
+            if di['type'] == 'Absolute':
+                final = final - di['amount']
+                discount = discount + di['amount']
             else:
-                this_discount = final*(di.amount/100)
+                this_discount = final*(di['amount']/100)
                 discount += this_discount
                 final -= this_discount
 
@@ -133,11 +134,11 @@ def item_prices(user, base_price, tax_percent, quantity, discounts):
 
     if get_value(user, 'pos_discount_calculation') == 'Tax first':
         # price without tax and discounts
-        r['base'] = base_price
+        r['base_price'] = base_price
         # price including tax
         r['tax_price'] = base_price*(Decimal('1') + (tax_percent/Decimal('100')))
         # absolute tax value
-        r['tax_absolute'] = r['tax_price'] - r['base']
+        r['tax_absolute'] = r['tax_price'] - r['base_price']
         # absolute discounts value
         dd = get_discount(r['tax_price'])
         r['discount_absolute'] = dd['discount']
@@ -147,7 +148,7 @@ def item_prices(user, base_price, tax_percent, quantity, discounts):
         r['total_tax_exc'] = r['total'] - r['tax_absolute']
     else:
         # base price
-        r['base'] = base_price
+        r['base_price'] = base_price
         # subtract discounts from base
         dd = get_discount(r['tax_price'])
         r['discount'] = dd['discount']
@@ -163,13 +164,24 @@ def item_prices(user, base_price, tax_percent, quantity, discounts):
         r['total_tax_exc'] = r['discount_price']
 
     # multiply everything by quantity
-    r['base'] = r['base']*quantity  # without tax and discounts
+    r['base_price'] = r['base_price']*quantity  # without tax and discounts
     r['tax_absolute'] = r['tax_absolute']*quantity  # tax, absolute
     r['discount_absolute'] = r['discount_absolute']*quantity  # discounts, absolute
     r['total_tax_exc'] = r['total_tax_exc']*quantity  # total without tax
     # save single total
     r['single_total'] = r['total']
     r['total'] = r['total']*quantity  # total total total
+
+    # and round to current decimal places
+    # https://docs.python.org/2/library/decimal.html#decimal-faq
+    precision = Decimal(10) ** -int(get_value(user, 'pos_decimal_places'))
+
+    r['base_price'] = r['base_price'].quantize(precision)
+    r['tax_absolute'] = r['tax_absolute'].quantize(precision)
+    r['discount_absolute'] = r['discount_absolute'].quantize(precision)
+    r['total_tax_exc'] = r['total_tax_exc'].quantize(precision)
+    r['single_total'] = r['total'].quantize(precision)
+    r['total'] = r['total'].quantize(precision)
 
     return r
 
@@ -183,7 +195,6 @@ def validate_bill_item(data):
 # views #
 #########
 @login_required
-@transaction.atomic
 def create_bill(request, company):
     """ there's bill and items in request.POST['data'], create a new bill, and check all items and all """
 
@@ -201,132 +212,200 @@ def create_bill(request, company):
         return JSON_error(_("You have no permission to create bills"))
 
     # get data
-    d = JSON_parse(request.POST.get('data'))
-    if not d:
+    data = JSON_parse(request.POST.get('data'))
+    if not data:
         return JSON_error(_("No data received"))
 
     # check bill properties
-    # TODO: ... (nothing to check?)
+    r = parse_decimal(request.user, data.get('grand_total'))
+    if not r['success'] or r['number'] <= Decimal('0'):
+        return JSON_error(_("Invalid grand total value"))
+    else:
+        # this number came from javascript
+        grand_total_js = r['number']
 
-    # check items
-    # TODO: ... (nothing to check?)
+    # this number will be calculated below;
+    # both grand totals must match or... ???
+    grand_total_py = Decimal('0')
+
+    # save all validated stuff in bill to a dictionary and insert into database at the end
+    # prepare data for insert
+    bill = {
+        'company': c,
+        'user': request.user,
+        'timestamp': dtm.now(),
+        'type': "Normal",
+        'status': "Saved",
+        'items': [],
+    }
+
+    # validate items
+    for i in data.get('items'):
+        # get product
+        try:
+            product = Product.objects.get(company=c, id=int(i.get('product_id')))
+        except Product.DoesNotExist:
+            return JSON_error(
+                _("Product with this id does not exist") +
+                " (id=" + i.get('product_id') + ")")
+
+        # parse quantity
+        r = parse_decimal(request.user, i.get('quantity'), g.DECIMAL['quantity_digits'])
+        if not r['success']:
+            return item_error(_("Invalid quantity value"), product)
+        else:
+            if r['number'] <= Decimal('0'):
+                return item_error(_("Cannot add an item with zero or negative quantity"), product)
+        quantity = r['number']
+
+        # check if there's enough items left in stock (must be at least zero =D)
+        if product.stock < quantity:
+            return item_error(_("Cannot sell more items than there are in stock"), product)
+
+        # TODO: subtract quantity from stock (if there's enough left)
+
+        item = {
+            'created_by': request.user,
+            'code': product.code,
+            'shortcut': product.shortcut,
+            'name': product.name,
+            'description': product.description,
+            'private_notes': product.private_notes,
+            'unit_type': product.get_unit_type_display(),  # ! display, not the 'code'
+            'stock': product.stock,
+            # 'bill':  not now, after bill is saved
+            'product_id': product.id,
+            'quantity': quantity,
+            'tax_percent': product.tax.amount,
+            'bill_notes': i.get('bill_notes'),
+            'discounts': [],  # validated discounts
+            # prices: will be calculated after discounts are ready
+            'base_price': i.get('base_price'),
+            'tax_absolute': i.get('tax_absolute'),
+            'discount_absolute': i.get('discount_absolute'),
+            'single_total': i.get('single_total'),
+            'total': i.get('total'),
+        }
+
+        bill['items'].append(item)
+
+        for d in i['discounts']:
+            # check:
+            # discount id: if it's -1, it's a unique discount on this item;
+            #              if it's anything else, the discount must belong to this company
+            #              and must be active and enabled
+            d_id = int(d.get('id'))
+            if d_id != -1:
+                try:
+                    dbd = Discount.objects.get(id=d_id, company=c)
+
+                    if not dbd.is_active:
+                        return item_error(_("The discount is not active"), product)
+                except Discount.DoesNotExist:
+                    return item_error(_("Chosen discount does not exist or is not valid"), product)
+
+            # discount type: must be in g.DISCOUNT_TYPES
+            if d.get('type') not in [x[0] for x in g.DISCOUNT_TYPES]:
+                return item_error(_("Wrong discount type"), product)
+
+            # amount: parse number and check that percentage does not exceed 100%
+            r = parse_decimal(request.user, d.get('amount'))
+            if not r['success']:
+                return item_error(_("Invalid discount amount"), product)
+            else:
+                d_amount = r['number']
+                if d_amount < Decimal('0') or (d.get('type') == 'Percentage' and d_amount > Decimal('100')):
+                    return item_error(_("Invalid discount amount"), product)
+
+            # save data to bill
+            discount = {
+                'id': d_id,
+                'code': d.get('code'),
+                'description': d.get('description'),
+                'type': d.get('type'),
+                'amount': d_amount
+            }
+            item['discounts'].append(discount)
+
+        # calculate this item's price
+        prices = item_prices(request.user, product.get_price(), product.tax.amount, item['quantity'], item['discounts'])
+
+        # check prices against price from javascript
+        r = parse_decimal(request.user, i.get('total'))
+        if not r['success']:
+            return item_error(_("Item price is in wrong format"), product)
+        else:
+            if prices['total'] != r['number']:
+                return item_error(_("Item prices do not match"), product)
+            else:
+                # add this price to grand total
+                grand_total_py += r['number']
+
+        # save this item's prices to item's dictionary (will go into database later)
+        item['base_price'] = prices['base_price']
+        item['tax_absolute'] = prices['tax_absolute']
+        item['discount_absolute'] = prices['discount_absolute']
+        item['single_total'] = prices['single_total']
+        item['total'] = prices['total']
+
+    # in the end, check grand totals against each others
+    if grand_total_js != grand_total_py:
+        return JSON_error(_("Total prices do not match"))
+
+    # at this point, everything is fine, insert into database
 
     # create a new bill
-    try:
-        with transaction.atomic():
-            bill = Bill(
-                company=c,
-                user=request.user,  # this can change
-                created_by=request.user,  # this will never change
-                type="Normal",
-                timestamp=dtm.now().replace(tzinfo=timezone(get_value(request.user, 'pos_timezone'))),
-                status="Active"
+    db_bill = Bill(
+        company=c,
+        user=bill['user'],  # this can change
+        created_by=bill['user'],  # this will never change
+        type=bill['type'],
+        timestamp=dtm.now().replace(tzinfo=timezone(get_value(request.user, 'pos_timezone'))),
+        status=bill['status'],
+    )
+    db_bill.save()
+
+    # create new items
+    for item in bill['items']:
+        db_item = BillItem(
+            created_by=item['created_by'],
+            code=item['code'],
+            shortcut=item['shortcut'],
+            name=item['name'],
+            description=item['description'],
+            private_notes=item['private_notes'],
+            unit_type=item['unit_type'],
+            stock=item['stock'],
+            bill=db_bill,
+            product_id=item['product_id'],
+            quantity=item['quantity'],
+            base_price=item['base_price'],
+            tax_percent=item['tax_percent'],
+            tax_absolute=item['tax_absolute'],
+            discount_absolute=item['discount_absolute'],
+            single_total=item['single_total'],
+            total=item['total'],
+            bill_notes=item['bill_notes']
+        )
+        db_item.save()
+
+        # save discounts for this item
+        for discount in item['discounts']:
+            db_discount = BillItemDiscount(
+                created_by=request.user,
+                bill_item=db_item,
+
+                description=discount['description'],
+                code=discount['code'],
+                type=discount['type'],
+                amount=discount['amount']
             )
-            bill.save()
-            #try:
+            db_discount.save()
 
-            #except:
-            #    return JSON_error(_("Error while saving new bill"))
-
-            # create new items
-            print d.get('items')
-            for i in d.get('items'):
-            # get product
-                try:
-                    product = Product.objects.get(company=c, id=int(i.get('product_id')))
-                except Product.DoesNotExist:
-                    return JSON_error(
-                        _("Product with this id does not exist") +
-                        " (id=" + i.get('product_id') + ")")
-
-                # parse quantity
-                r = parse_decimal(request.user, i.get('quantity'), g.DECIMAL['quantity_digits'])
-                if not r['success']:
-                    return item_error(_("Invalid quantity value"), product)
-                else:
-                    if r['number'] <= Decimal('0'):
-                        return item_error(_("Cannot add an item with zero or negative quantity"), product)
-                quantity = r['number']
-
-                # check if there's enough items left in stock (must be at least zero =D)
-                if product.stock < quantity:
-                    return item_error(_("Cannot sell more items than there are in stock"), product)
-
-                # calculate and set all stuff for this new item:
-                discounts = product.get_discounts()
-                prices = item_prices(request.user, product.get_price(), product.tax.amount, quantity, discounts)
-
-                # notes, if any
-                bill_notes = i.get('notes')
-
-                # TODO: subtract quantity from stock (if there's enough left)
-
-                # create a bill item and save it to database, then return JSON with its data
-                item = BillItem(
-                    created_by=request.user,
-                    # copy ProductAbstract's values:
-                    code=product.code,
-                    shortcut=product.shortcut,
-                    name=product.name,
-                    description=product.description,
-                    private_notes=product.private_notes,
-                    unit_type=product.get_unit_type_display(), # ! display, not the 'code'
-                    stock=product.stock,
-                    # billItem's fields
-                    bill=bill,
-                    product_id=product.id,
-                    quantity=quantity,
-                    base_price=prices['base'],
-                    tax_percent=product.tax.amount,
-                    tax_absolute=prices['tax_absolute'],
-                    discount_absolute=prices['discount_absolute'],
-                    single_total=prices['single_total'],
-                    total=prices['total'],
-                    bill_notes=bill_notes
-                )
-                item.save()
-
-                # save discounts for this item
-                if (d.get('discounts')):
-                    for discount in d.get('discounts'):
-                        # check:
-                        # discount id: if it's -1, it's a unique discount on this item;
-                        #              if it's anything else, the discount must belong to this company
-                        #              and must be active and enabled
-                        d_id = int(discount.get('id'))
-                        if d_id != -1:
-                            try:
-                                dbd = Discount.objects.get(id=d_id, company=c)
-
-                                if not dbd.active:
-                                    return item_error(_("The discount is not active"), product)
-                            except Discount.DoesNotExist:
-                                return item_error(_("Chosen discount does not exist or is not valid"), product)
-
-                        # discount type: must be in g.DISCOUNT_TYPES
-                        if discount.get('type') not in [x[0] for x in g.DISCOUNT_TYPES]:
-                            return item_error(_("Wrong discount type"), product)
-
-                        # amount: parse number and check that percentage does not exceed 100%
-                        d_amount = parse_decimal(discount.get('amount'), discount.get('amount'))
-                        if not d_amount or (discount.get('type') == 'Percentage' and d_amount > Decimal('100')):
-                            return item_error(_("Invalid discount amount"), product)
-
-                        # everything seems to be fine, add discount to BillItemDiscount
-                        item_discount = BillItemDiscount(
-                            created_by=request.user,
-                            bill_item=item,
-
-                            description=discount.get('description'),
-                            code=discount.get('code'),
-                            type=discount.get('type'),
-                            amount=d_amount
-                        )
-                        item_discount.save()
-
-    except IntegrityError as e:
-        return JSON_error(_("Creating bill failed") + ": " + e.message)
+    # that's it
+    # TODO: print receipt
     return JSON_ok()
+
 
 
 @login_required
@@ -432,7 +511,7 @@ def edit_item(request, company):
         bill=bill,
         product_id=product.id,
         quantity=quantity,
-        base_price=prices['base'],
+        base_price=prices['base_price'],
         tax_percent=product.tax.amount,
         tax_absolute=prices['tax_absolute'],
         discount_absolute=prices['discount_absolute'],

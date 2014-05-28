@@ -99,6 +99,8 @@ Bill = function(g){
         }
 
         p.summary_total.text(display_number(total, p.g.config.separator, p.g.config.decimal_places));
+
+        return total;
     };
 
     // bill manipulation
@@ -116,11 +118,13 @@ Bill = function(g){
 
         var i;
         var r = {
-            items: []
+            items: [],
+            grand_total: display_number(p.update_summary(), p.g.config.separator, p.g.config.decimal_places)
         };
 
         // get all items
         for(i = 0; i < p.items.length; i++){
+            p.items[i].update();
             r.items.push(p.items[i].format());
         }
 
@@ -134,6 +138,7 @@ Bill = function(g){
                 // TODO: further actions (?!)
             }
             else{
+                error_message("jupi, ratschun je napravljen")
                 // TODO: empty this bill and create a new one
             }
         });
@@ -355,15 +360,22 @@ Item = function(bill, product) {
             });
         }
 
-        return {
+        var r = {
             product_id: p.data.product_id,
             stock: display_number(p.data.stock, p.g.config.separator, p.g.config.decimal_places),
             quantity: display_number(p.data.quantity, p.g.config.separator, p.g.config.decimal_places),
             base_price: display_number(p.data.base_price, p.g.config.separator, p.g.config.decimal_places),
             tax_percent: display_number(p.data.tax_percent, p.g.config.separator, p.g.config.decimal_places),
             discounts: discounts,
-            total: display_number(p.data.total, p.g.config.separator, p.g.config.decimal_places)
-        }
+            single_total: display_number(p.data.single_total, p.g.config.separator, p.g.config.decimal_places),
+            discount_absolute: display_number(p.data.discount_absolute, p.g.config.separator, p.g.config.decimal_places),
+            total: display_number(p.data.total, p.g.config.separator, p.g.config.decimal_places),
+            bill_notes: p.data.bill_notes
+        };
+
+        console.log(r);
+
+        return r;
     };
 
     p.explode = function(){
@@ -396,7 +408,6 @@ Item = function(bill, product) {
         code: p.product.data.code,
         quantity: Big(1),
         unit_type: p.product.data.unit_type_display,
-        unit_amount: p.product.data.unit_amount,
         base_price: p.product.data.price,
         tax_percent: p.product.data.tax,
         tax_absolute: null, // will be calculated later
@@ -687,6 +698,8 @@ ItemDetails = function(item){
         // copy details' values to item data
         p.item.data.discounts = p.get_discounts();
         p.item.data.bill_notes = p.items.notes.val();
+
+        p.item.update();
 
         // close the box
         p.box.remove();
