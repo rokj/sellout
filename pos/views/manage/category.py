@@ -1,3 +1,5 @@
+import base64
+import Image
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -6,6 +8,7 @@ from django import forms
 from django.http import Http404, HttpResponseRedirect
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from sorl.thumbnail import get_thumbnail
 
 from pos.models import Company, Category
 from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, resize_image, validate_image, \
@@ -18,6 +21,9 @@ from common import widgets
 ########################
 ### helper functions ###
 ########################
+import settings
+
+
 def category_breadcrumbs(category):
     # assemble the name in form category>subcategory>subsubcategory>...
     name = []
@@ -35,7 +41,7 @@ def category_breadcrumbs(category):
     return name
 
 
-def category_to_dict(c):
+def category_to_dict(c, android = False):
     if c.parent:
         parent_id = c.parent.id
     else:
@@ -52,7 +58,15 @@ def category_to_dict(c):
     }
 
     if c.image:
-        r['image'] = c.image.url
+        if android:
+            x = c.image
+            with open(c.image.path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
+
+            print encoded_string
+            r['image'] = encoded_string
+        else:
+            r['image'] = c.image.url
 
     return r
 
@@ -194,7 +208,7 @@ def get_subcategories(category_id, sort='name', data=None):
     return data
 
 
-def get_all_categories_structured(company, category=None, data=None, sort='name', level=0):
+def get_all_categories_structured(company, category=None, data=None, sort='name', level=0, android=False):
     """ return a structured list of all categories of given company """
     if data is None:
         data = []
@@ -204,12 +218,12 @@ def get_all_categories_structured(company, category=None, data=None, sort='name'
         category = Category.objects.filter(company=company, parent=None).order_by(sort)
 
         for c in category:
-            data.append(get_all_categories_structured(company, c, data, sort, 0))
+            data.append(get_all_categories_structured(company, c, data, sort, 0, android=android))
 
         return data
     else:
         # add current category to list
-        current = category_to_dict(category)
+        current = category_to_dict(category, android)
         level += 1
         current['level'] = level
         current['children'] = []  # will contain subcategories
@@ -219,7 +233,7 @@ def get_all_categories_structured(company, category=None, data=None, sort='name'
 
         # add them to the list
         for c in children:
-            current['children'].append(get_all_categories_structured(company, c, level=level))
+            current['children'].append(get_all_categories_structured(company, c, level=level, android=android))
 
     return current
 

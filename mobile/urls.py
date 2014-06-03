@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url
 from django.utils.translation import ugettext as _
 
 from common import globals as g
-from mobile.views.views import mobile_get_cut, mobile_get_units
+from mobile.views.views import mobile_get_cut, mobile_get_units, get_mobile_config
 
 from mobile.views import login
 from mobile.views import bill
@@ -66,11 +66,13 @@ urlpatterns = patterns('',
     # CUT (Categories, units, taxes)
     url(r_company + r'/manage/json/cut/get', mobile_get_cut, name='get_cut'), # get categories, units, taxes
 
-
     url(r_company + r'/manage/json/units/?$', product.mobile_JSON_units, name='mobile_JSON_units'),
 
     # Mr. Bill
-    url(r_company + r'/manage/json/bill/add/?$', bill.mobile_create_bill, name='mobile_add_bill')
+    url(r_company + r'/manage/json/bill/add/?$', bill.mobile_create_bill, name='mobile_add_bill'),
+
+    # configuration
+    url(r_company + r'/manage/json/config/?$', get_mobile_config, name='mobile_get_config'),
 
     # available discounts list
     # url(r_company + r'/manage/json/discounts/?$', discount.JSON_discounts, name='JSON_discounts'),

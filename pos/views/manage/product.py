@@ -1,3 +1,4 @@
+import base64
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -41,7 +42,7 @@ def JSON_units(request, company):
     return JSON_response(g.UNITS) # G units!
 
 
-def product_to_dict(user, product):
+def product_to_dict(user, product, android=False):
     # returns all relevant product's data:
     # id
     # product name
@@ -88,12 +89,13 @@ def product_to_dict(user, product):
         discounts.append(discount_to_dict(user, d))
     ret['discounts'] = discounts
 
-    if product.image:  # check if product's image exists
-        # get the thumbnail
-        try:
+    if product.image:  # check if product's image exists:
+        if android:
+            with open(product.image.path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
+            ret['image'] = encoded_string
+        else:
             ret['image'] = get_thumbnail(product.image, image_dimensions('product')[2]).url
-        except:
-            pass
 
     # tax: it's a not-null foreign key
     ret['tax_id'] = product.tax.id
@@ -427,7 +429,6 @@ def validate_product(user, company, data):
         
     # image:
     if data['change_image'] == True:
-        print 'bla'
         if 'image' in data: # new image has been uploaded
             print data['image']
             data['image'] = image_from_base64(data['image'])
@@ -575,7 +576,7 @@ def web_edit_product(request, company):
     return edit_product(request, company)
 
 
-def edit_product(request, company):
+def edit_product(request, company, android=False):
     # update existing product
     try:
         c = Company.objects.get(url_name = company)

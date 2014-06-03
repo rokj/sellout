@@ -1,10 +1,13 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from base64 import b64decode
+from django.db.models.fields.files import ImageField
+from django.core.files.base import ContentFile
+
 from django.utils.translation import ugettext as _
 from django import forms
 from django.http import Http404
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from common.functions import get_image_path
 
 from pos.models import Company, Category
 from pos.views.manage.category import get_category, delete_category, get_all_categories, validate_category, \
@@ -32,7 +35,7 @@ def mobile_JSON_categories_strucutred(request, company):
         return JSON_error("no permission")
 
     # return all categories' data in JSON format
-    return JSON_response(get_all_categories_structured(c, sort='name'))
+    return JSON_response(get_all_categories_structured(c, sort='name', android=True))
 
 
 @api_view(['POST', 'GET'])
@@ -50,7 +53,7 @@ def mobile_JSON_categories(request, company):
     category = Category.objects.filter(company=c)
 
     for c in category:
-        data.append(category_to_dict(c))
+        data.append(category_to_dict(c, android=True))
 
     # return all categories' data in JSON format
     return JSON_response(data)
@@ -93,12 +96,20 @@ def mobile_add_category(request, company):
     category.save()
 
     # add image, if it's there
-    if data['change_image']:
-        if 'image' in data:
-            category.image = data['image']
-            category.save()
 
-    return JSON_ok(extra=get_all_categories_structured(c, category))
+    if data['change_image'] == True:
+        if data['image']: # new image is uploade
+
+            if category.image:
+                category.image.delete()
+            # save a new image
+
+            category.image = data['image']
+
+        else: # delete the old image
+            category.image.delete()
+
+    return JSON_ok(extra=get_all_categories_structured(c, category, android=True))
 
 
 @api_view(['POST', 'GET'])
@@ -141,16 +152,18 @@ def edit_category(request, company):
 
     # image
     if data['change_image'] == True:
-        if data['image']: # new image is uploaded
-            # create a file from the base64 data and save it to product.image
+        if data['image']: # new image is uploade
+
             if category.image:
                 category.image.delete()
             # save a new image
-            category.image = data['image'] # conversion from base64 is done in validate_product
+
+            category.image = data['image']
+
         else: # delete the old image
             category.image.delete()
     category.save()
-    return JSON_ok(extra=get_all_categories_structured(c, category))
+    return JSON_ok(extra=get_all_categories_structured(c, category, android=True))
 
 
 @api_view(['POST', 'GET'])
@@ -183,7 +196,7 @@ def mobile_delete_category(request, company):
     except:
         pass
 
-    return JSON_ok(extra=category_to_dict(category))
+    return JSON_ok(extra=category_to_dict(category, android=True))
 
 
 @api_view(['POST', 'GET'])
