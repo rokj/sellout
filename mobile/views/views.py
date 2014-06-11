@@ -53,16 +53,21 @@ def mobile_get_cut(request, company):
     discounts = get_all_discounts(request.user, c, android=True)
     result['discounts'] = discounts
 
+    result['config'] = get_config_attrs(request.user)
+
     return JSON_response(result)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def get_mobile_config(request, company):
+    return JSON_ok(extra=get_config_attrs(request.user))
 
-    dict = {'user_id': request.user.id,
-            'pos_decimal_separator': get_value(request.user, 'pos_decimal_separator'),
-            'pos_decimal_places': get_value(request.user, 'pos_decimal_places'),
-            'pos_discount_calculation': get_value(request.user, 'pos_discount_calculation')
+
+def get_config_attrs(user):
+
+    dict = {'user_id': user.id,
+            'pos_decimal_separator': get_value(user, 'pos_decimal_separator'),
+            'pos_decimal_places': get_value(user, 'pos_decimal_places'),
+            'pos_discount_calculation': get_value(user, 'pos_discount_calculation')
     }
-
-    return JSON_ok(extra=dict)
+    return dict

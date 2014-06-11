@@ -235,3 +235,18 @@ PRODUCT_BUTTON_DIMENSIONS = {
     'medium': 125,
     'large': 160  # check IMAGE_DIMENSIONS['product']
 }
+
+CATEGORY_COLORS = [  # choices for category.color
+    '000000',
+    'ff7d64',
+    '00dcb4',
+    '143264',
+    'ff465a',
+    '1ee65a',
+    '8287a5',
+    'b9aa9b',
+    '007dff',
+    'ffc864',
+    '5ad2fa',
+]
+

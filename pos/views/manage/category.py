@@ -55,6 +55,7 @@ def category_to_dict(c, android = False):
         'image': "",
         'add_child_url': reverse('pos:add_category', kwargs={'company': c.company.url_name, 'parent_id': c.id}),
         'edit_url': reverse('pos:edit_category', kwargs={'company': c.company.url_name, 'category_id': c.id}),
+        'color': c.color,
     }
 
     if c.image:
@@ -62,8 +63,6 @@ def category_to_dict(c, android = False):
             x = c.image
             with open(c.image.path, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read())
-
-            print encoded_string
             r['image'] = encoded_string
         else:
             r['image'] = c.image.url
@@ -132,7 +131,7 @@ def validate_category(user, company, data):
     data['name'] = data['name'].strip()
 
     # image:
-    if data['change_image'] == True:
+    if data.get('change_image') and data['change_image'] == True:
         if 'image' in data: # new image has been uploaded
             data['image'] = image_from_base64(data['image'])
             if not data['image']:
@@ -277,7 +276,8 @@ class CategoryForm(forms.ModelForm):
         fields = ['parent',
                   'name',
                   'description',
-                  'image']
+                  'image',
+                  'color']
         widgets = {
             'image': widgets.PlainClearableFileInput,
         }
