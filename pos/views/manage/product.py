@@ -119,7 +119,7 @@ def product_to_dict(user, product, android=False):
     ret['unit_type'] = product.unit_type
     ret['unit_type_display'] = product.get_unit_type_display()
     ret['stock'] = format_number(user, product.stock)
-
+    ret['color'] = product.color
     return ret
 
 

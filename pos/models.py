@@ -4,6 +4,7 @@ from django.db.models.signals import pre_save, pre_delete, post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from sorl import thumbnail
+from common.globals import CATEGORY_COLORS
 
 from common.models import SkeletonU
 from common.functions import get_image_path
@@ -59,7 +60,9 @@ class Category(SkeletonU):
     image = models.ImageField(_("Icon"),
                              upload_to=get_image_path(g.DIRS['category_icon_dir'], "pos_category"),
                              null=True, blank=True)
-    
+
+    color = models.CharField(default="000000", blank=False, null=False, max_length=6)
+
     def __unicode__(self):
         return self.name
     
@@ -295,6 +298,13 @@ class Product(ProductAbstract):
                 m2m.save()
 
             i += 1
+
+    @property
+    def color(self):
+        if self.category:
+            return self.category.color
+        else:
+            return CATEGORY_COLORS[0]
 
     class Meta:
         abstract = False

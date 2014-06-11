@@ -91,6 +91,7 @@ def mobile_add_category(request, company):
         parent = parent,
         name = data['name'],
         description = data['description'],
+        color = data.get('color'),
         created_by = request.user,
     )
     category.save()
@@ -148,10 +149,11 @@ def edit_category(request, company):
     # update category:
     category.name = data['name']
     category.description = data['description']
-    
+    if data['color']:
+        category.color = data['color']
 
     # image
-    if data['change_image'] == True:
+    if data.get('change_image') and data['change_image'] == True:
         if data['image']: # new image is uploade
 
             if category.image:
