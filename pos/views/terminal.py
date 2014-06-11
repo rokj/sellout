@@ -4,13 +4,14 @@ from django.utils.translation import ugettext as _
 
 from pos.models import Company
 from pos.views.manage.category import get_all_categories_structured
+from pos.views.manage.company import company_to_dict
 from pos.views.manage.contact import get_all_contacts
 from pos.views.manage.discount import get_all_discounts
 from pos.views.manage.product import get_all_products
 from pos.views.manage.tax import get_all_taxes
 
 from pos.views.util import has_permission, no_permission_view, JSON_ok, JSON_parse, JSON_stringify
-from config.functions import get_value, set_value
+from config.functions import get_value, set_value, get_date_format, get_time_format
 import common.globals as g
 
 import settings
@@ -38,11 +39,16 @@ def terminal(request, company):
         'decimal_places': int(get_value(request.user, 'pos_decimal_places')),
         'tax_first': tax_first,
         # interface parameters
+        'date_format': get_date_format(request.user, 'js'),
+        'time_format': get_time_format(request.user, 'js'),
         'interface': get_value(request.user, 'pos_interface'),
         'product_button_size': g.PRODUCT_BUTTON_DIMENSIONS[get_value(request.user, 'pos_interface_product_button_size')],
         'bill_width': get_value(request.user, 'pos_interface_bill_width'),
         'display_breadcrumbs': get_value(request.user, 'pos_display_breadcrumbs'),
         'product_display': get_value(request.user, 'pos_product_display'),
+        #'printer_port': get_value(request.user, 'pos_printer_port'),
+        'receipt_size': get_value(request.user, 'pos_receipt_size'),
+        'printer_driver': get_value(request.user, 'pos_printer_driver'),
     }
 
     data = {
@@ -53,6 +59,10 @@ def terminal(request, company):
         'contacts': get_all_contacts(request.user, c),
         'taxes':  get_all_taxes(request.user, c),
         'unit_types': g.UNITS,
+        'company': company_to_dict(c),  # this company's details (will be shown on the receipt)
+        # current user  TODO: change when login system changes
+        'user_name': str(request.user),  # TODO: specify how user is displayed
+        'user_id': request.user.id,
     }
 
     context = {

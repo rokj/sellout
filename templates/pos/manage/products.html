@@ -681,10 +681,10 @@ $(document).ready(function(){
         // total_price(tax_first, base, tax, discounts, separator)
         var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), "{{separator}}");
 
-        $("#total_price").text(display_number(result.total, "{{separator}}", {{decimal_places}}));
+        $("#total_price").text(display_number(result.total, "{{separator}}", {{ decimal_places }}));
         
         // price without tax
-        $("#price_without_tax").text(display_number(result.total_tax_exc, "{{separator}}", {{decimal_places}}));
+        $("#price_without_tax").text(display_number(result.total_tax_exc, "{{separator}}", {{ decimal_places }}));
                 
         // calculate profit and if it's lower than zero, use a different style
         // get the purchase price, if entered
@@ -692,7 +692,7 @@ $(document).ready(function(){
         var profit_obj = $("#profit");
         if(purchase_price){
             var profit = result.total_tax_exc.minus(purchase_price);
-            profit_obj.text(display_number(profit, "{{separator}}", {{decimal_places}}));
+            profit_obj.text(display_number(profit, "{{separator}}", {{ decimal_places }}));
             
             if(profit.cmp(Big(0)) < 0){ // use alternate style
                 profit_obj.addClass("negative-profit");
@@ -763,7 +763,7 @@ $(document).ready(function(){
             if(!pwithout){
                 return; // ?
             }
-            data['price'] =  display_number(pwithout, "{{separator}}", {{decimal_places}});
+            data['price'] =  display_number(pwithout, "{{separator}}", {{ decimal_places }});
         }
         else{ // just save the existing price
             data['price'] = $("#edit_product_price", dlg_obj).val();

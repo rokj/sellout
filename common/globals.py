@@ -13,8 +13,8 @@ DIRS = { # goes to MEDIA folder
 
 # attributes' field lengths
 ATTR_LEN = {
-    'name':30,
-    'value':100,
+    'name': 30,
+    'value': 100,
 }
 
 # number of digits for decimal database field
@@ -103,19 +103,19 @@ DATE_FORMATS = {
                    'python': "%d.%m.%Y", # the docs say zero-padded decimal, but will also parse non-padded numbers
                    'django': "j.n.Y", # show no leading zeros in template
                    'android': "%d.%m.%Y",
-                   'jquery': "dd.mm.yy",
+                   'js': "dd.mm.yy",
                    },
     'mm/dd/yyyy': {'regex': "^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros
                    'python': "%m/%d/%Y",
                    'django': "n/j/Y",
                    'android': "%m/%d/%Y",
-                   'jquery': "mm/dd/yy",
+                   'js': "mm/dd/yy",
                   },
     'yyyy-mm-dd': {'regex': "^\d{4}\.\d{2}\.\d{2}$", # strictly with leading zeros
                    'python': "%Y-%m-%d",
                    'django': "Y-m-d",
                    'android': "%Y-%m-%d",
-                   'jquery': "yy-mm-dd",
+                   'js': "yy-mm-dd",
                    },
 }
 
@@ -125,28 +125,28 @@ TIME_FORMATS = {
              'python': "%H:%M",
              'django': "H:i",
              'android': "hh:mm",
-             'js': "HH:mm", # jquery has nothing to do with time, so it will have to be formatted using javascript
+             'js': "hh:mm", # jquery has nothing to do with time, so it will have to be formatted using javascript
             },
     '23:59:59': {  # 24-hour clock with seconds
             'regex': "^[0-2][0-4]:[0-5][0-9]:[0-5][0-9]$",
             'python': "%H:%M:%S",
             'django': "H:i:s",
             'android': "hh:mm:ss",
-            'js': "HH:mm:ss",
+            'js': "hh:mm:ss",
             },
     '12:59 AM/PM': {  # 12-hour clock with AM/PM
             'regex': "^[0-2][0-4]:[0-5][0-9] (AM|PM)$",
             'python': "%I:%M %p",
             'django': "",
             'android': "",
-            'js': "hh:mm <AMPM>",  # <AMPM> will have to be replaced in javascript (python?)
+            'js': "hh:mm AMPM",
             },
     '12:59:59 AM/PM': {  # 12-hour clock with AM/PM
              'regex': "^[0-2][0-4]:[0-5][0-9]:[0-5][0-9] (AM|PM)$",
              'python': "%r",
              'django': "",
              'android': "",
-             'js': "hh:mm:ss <AMPM>", # <AMPM> will have to be replaced in javascript (python?)
+             'js': "hh:mm:ss AMPM",
             },
 }
 

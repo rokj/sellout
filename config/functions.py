@@ -43,6 +43,14 @@ defaults = {
     'pos_decimal_places': 2,  # default decimal places for display
     # fallback defaults
     'pos_default_tax': '0.0',
+
+    # printing
+    #'pos_printer_port': 65336,  # the default port for client's localhost printer server
+    # size of receipt: 'small' (usually from pos printer) or 'large' (usually from normal desktop printer)
+    'pos_receipt_size': 'small',
+    # printer driver: 'system' (system's default printer) or 'pos' (custom printer driver, downloadable)
+    # TODO: rename 'pos' to match the app's name
+    'pos_printer_driver': 'system',
 }
 
 

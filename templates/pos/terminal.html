@@ -9,6 +9,9 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/categories.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'css/bill.css' %}" />
 
+{# jquery libraries (only used in terminal) #}
+<script src="{% static 'js/jquery.printThis.js' %}"></script>
+
 {% comment %} the terminal {% endcomment %}
 <script src="{% static 'js/widgets/terminal.js' %}"></script>
 {% comment %} widgets {% endcomment %}
@@ -16,6 +19,7 @@
 <script src="{% static 'js/widgets/products.js' %}"></script> {% comment %} products selector {% endcomment %}
 <script src="{% static 'js/widgets/search.js' %}"></script> {% comment %} searching products/categories {% endcomment %}
 <script src="{% static 'js/widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
+<script src="{% static 'js/widgets/print.js' %}"></script> {% comment %} formatting and printing receipts {% endcomment %}
 
 {% comment %} other {% endcomment %}
 <script src="{% static 'fuckyeah/fuckyeah.jquery.js' %}"></script>
@@ -30,7 +34,6 @@ $(document).ready(function(){
         urls: {
               // terminal & stuff
               save_terminal_settings: "{% url 'pos:save_terminal' company.url_name  %}",
-
               // bill and items
               create_bill: "{% url 'pos:create_bill' company.url_name %}"
         },
@@ -66,7 +69,12 @@ $(document).ready(function(){
             // items that are ready to be inserted
             spacer: $("<img>", {src:"{% static 'graphics/spacer.png' %}"}),
             loading_animation: $("<img>", {src: "{% static 'graphics/loading.gif' %}"}),
-            subcategory: $("<img>", {src:"{% static 'graphics/subcategory.png' %}"})
+            subcategory: $("<img>", {src:"{% static 'graphics/subcategory.png' %}"}),
+
+            company_logo: null, // will be created when terminal initializes
+
+            small_receipt_template: $("#small_receipt_template"),
+            large_receipt_template: $("")
         }
     };
 
@@ -260,4 +268,12 @@ $(document).ready(function(){
     </div>
 </div>
 
+<div id="templates" class="hidden">
+    <div id="small_receipt_template">
+        {% include 'pos/small_receipt.html' %}
+    </div>
+    <div id="large_receipt_template">
+        {% include 'pos/large_receipt.html' %}
+    </div>
+</div>
 {% endblock %}

@@ -1,6 +1,6 @@
 // sending 
 function send_data(url, data, token, handleFun){
-    var sd = {data:JSON.stringify(data), csrfmiddlewaretoken:token};
+    var sd = {data: JSON.stringify(data), csrfmiddlewaretoken: token};
     $.post(
         url,
         sd,

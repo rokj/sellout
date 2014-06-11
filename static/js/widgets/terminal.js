@@ -175,4 +175,7 @@ Terminal = function(g){
     for(var i = 0; i < d.length; i++){
         d[i].amount = get_number(d[i].amount, p.g.config.separator);
     }
+
+    // load company's logo and store it to terminal
+    p.g.items.company_logo = $("<img>", {src: p.g.data.company.logo_url});
 };

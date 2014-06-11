@@ -167,7 +167,6 @@ function get_url_hash() {
     return window.location.hash.replace(/^#/,'');
 }
 
-
 //
 // manipulation of arrays of objects:
 // data is an array of objects, each object has the 'id' property
@@ -202,4 +201,213 @@ function get_by_id(data, id){
     }
 
     return null;
+}
+
+// date and time formatting
+function check_date(d, m, y){
+    if(isNaN(d)) return false;
+    if(isNaN(m)) return false;
+    if(isNaN(y)) return false;
+
+    // check all numbers (achtung, months are 0-based)
+    // number of months in a year
+    if((m < 0) || (m > 11)) return false;
+     // number of days in a month
+    else if((d < 1) || (d > 31)) return false;
+    // months with 30 days
+    else if(((m == 3) || (m == 5) || (m == 8) || (m == 10)) && (d > 30)) return false;
+    // leap years & Februarys
+    else if((m == 1) && (((y % 400) == 0) || ((y % 4) == 0)) && ((y % 100) != 0) && (d > 29)) return false;
+    else if((m == 1) && ((y % 100) == 0) && (d > 29)) return false;
+    else return true;
+}
+
+function check_time(hours, minutes, seconds, any_value){
+    if(isNaN(hours) || isNaN(minutes)) return false;
+
+    if(!any_value && (hours < 0 || hours > 23)) return false;
+    if(minutes < 0 || minutes > 59) return false;
+    if(seconds < 0 || seconds > 59) return false;
+    else return true;
+}
+function format_date(date, date_format){
+    var dd = "00" + date.getDate();
+    var mm = "00" + String(date.getMonth()+1);
+    var yyyy = date.getFullYear();
+
+    dd = dd.substring(dd.length-2);
+    mm = mm.substring(mm.length-2);
+
+    switch(date_format){
+        default:
+        case 'dd.mm.yyyy':
+        case 'dd.mm.yy':
+            return dd + "." + mm + "." + yyyy;
+        case 'mm/dd/yyyy':
+        case 'mm/dd/yy':
+            return mm + '/' + dd + '/' + yyyy;
+        case 'yyyy-mm-dd':
+        case 'yy-mm-dd':
+            return yyyy + '-' + mm + '-' + dd;
+    }
+}
+
+function parse_date(date, date_format){
+    if(!date) return null;
+
+    var d, m, y;
+
+    switch(date_format){
+        default:
+        case 'yy-mm-dd':
+        case 'yyyy-mm-dd':
+            y = date.substring(0, 4);
+            m = date.substring(5, 7);
+            d = date.substring(8);
+            break;
+        case 'dd.mm.yy':
+        case 'dd.mm.yyyy':
+            d = date.substring(0, 2);
+            m = date.substring(3, 5);
+            y = date.substring(6);
+            break;
+        case 'mm/dd/yy':
+        case 'mm/dd/yyyy':
+            m = date.substring(0, 2);
+            d = date.substring(3, 5);
+            y = date.substring(6);
+            break;
+    }
+
+    d = parseInt(d, 10);
+    m = parseInt(m, 10) - 1; // months are zero-based
+    y = parseInt(y, 10);
+
+    if(check_date(d, m, y)) return new Date(y, m, d);
+    else return null;
+}
+
+function today(date_format){
+    var date = new Date();
+    return format_date(date, date_format);
+}
+
+function now(time_format){
+    var now = new Date();
+    return format_time(time_format, now.getHours(), now.getMinutes(), now.getSeconds());
+}
+
+function parse_time(format, time, any_value){
+    var h24, ampm, seconds;
+
+    // see what's to be read
+    switch(format){
+        case "hh:mm":
+            h24 = true;
+            ampm = false;
+            seconds = false;
+            break;
+        case "hh:mm:ss":
+            h24 = true;
+            ampm = false;
+            seconds = true;
+            break;
+        case "hh:mm AMPM":
+            h24 = false;
+            ampm = true;
+            seconds = false;
+            break;
+        case "hh:mm:ss AMPM":
+            h24 = false;
+            ampm = true;
+            seconds = true;
+            break;
+    }
+
+    // split string at the space (if there's no space, it simply won't be split)
+    var time_ap = time.split(" ");
+    var t, ap, h, m, s;
+
+    // if time format is am/pm, we need two elements in array
+    if(ampm){
+        if(time_ap.length != 2) return null;
+        else ap = time_ap[1];
+    }
+
+    t = time_ap[0].split(":");
+
+    if(seconds){
+        if(t.length != 3) return null;
+        else{
+            h = t[0];
+            m = t[1];
+            s = t[2];
+        }
+    }
+    else{
+        if(t.length != 2) return null;
+        else{
+            h = t[0];
+            m = t[1];
+            s = "0";  // will be parsed to int later
+        }
+    }
+
+    h = parseInt(h, 10);  // explicitly set decimal value or it will convert 07 to octal
+    m = parseInt(m, 10);
+    s = parseInt(s, 10);
+
+    if(ap == "AM" && h > 12){
+        h -= 12; // 12:xx am is actually 00:xx (whatever)
+    }
+
+    // if any_value is true, any hour is allowed, otherwise only up to 24:00
+    if(!check_time(h, m, s, any_value)) return null;
+
+    return {h:h, m:m, s:s};
+}
+
+function format_time(format, hours, minutes, seconds){
+    // nothing to be done with negative numbers
+    if(hours < 0 || minutes < 0 || seconds < 0) return "--:--";
+
+    function str(n){
+        if(n < 10) return "0" + n.toString();
+        else return n.toString();
+    }
+
+    if(format == "hh:mm"){
+        return str(hours) + ":" + str(minutes);
+    }
+    else if(format == "hh:mm:ss"){
+        return str(hours) + ":" + str(minutes) + ":" + str(seconds);
+    }
+    else{
+        // it's a format with AM/PM: if hours > 12, subtract and write PM, otherwise AM
+        var ampm = "AM";
+
+        if(hours > 12){
+            ampm = "PM";
+            hours -= 12;
+        }
+
+        if(format == "hh:mm:ss AMPM"){
+            return str(hours) + ":" + str(minutes) + ":" + str(minutes) + " " + ampm;
+        }
+        else{
+            return str(hours) + ":" + str(minutes) + " " + ampm;
+        }
+    }
+}
+
+function parse_datetime(date_format, time_format, date, time){
+    var d = parse_date(date, date_format);
+    if(!d) return null;
+
+    var t = parse_time(time_format, time, false);
+    if(!t) return null;
+
+    d.setHours(t.h, t.m, t.s, 0);
+
+    return d;
 }

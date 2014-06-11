@@ -1,0 +1,71 @@
+{% load i18n %}
+{% comment %}
+
+Boris                         02.06.2014 / 16:07
+
+{% endcomment %}
+<div class="receipt-logo">
+
+</div>
+{% comment %}
+    Company name           Phone number
+    Company address        Website
+    Postal code & City     VAT ID
+{% endcomment %}
+<div class="receipt-company-details-1"></div>
+<div class="receipt-company-details-2"></div>
+
+{% comment %}
+PRODUCT                     Quantity      Amount
+Price     Tax               Discount
+{% endcomment %}
+<table class="receipt-items">
+    {% comment %}
+    head and items:
+    2 rows per item, 4 columns per row:
+    |product name        |quantity|amount  |
+    |  price      |tax   |discount         |
+    {% endcomment %}
+    <thead>
+        <tr class="receipt-row first">
+            <td colspan="2" class="item-name">{% trans 'Product' %}</td>
+            <td class="item-quantity">{% trans 'Quantity' %}</td>
+            <td class="item-amount">{% trans 'Amount' %}</td>
+        </tr>
+        <tr class="receipt-row second">
+            <td class="item-price">{% trans 'Price' %}</td>
+            <td class="item-tax">{% trans 'Tax' %}</td>
+            <td class="item-discount" colspan="2">{% trans 'Discount' %}</td>
+        </tr>
+    </thead>
+    {% comment %}
+    footer:
+    | total (2 columns) | currency | grand_total |
+    {% endcomment %}
+    <tfoot>
+        <tr>
+            <td colspan="2">{% trans 'Total' %}</td>
+            <td class="receipt-currency">{# currency goes here #}</td>
+            <td class="receipt-grand-total">{# grand_total goes here #}</td>
+        </tr>
+        <tr>
+            {% comment %} the last row: cashier's name and date-time {% endcomment %}
+            <td class="receipt-cashier" colspan="2"></td>
+            <td class="receipt-datetime" colspan="2"></td>
+        </tr>
+
+    </tfoot>
+
+    <tbody>
+
+    </tbody>
+</table>
+
+<div class="receipt-footer">
+    {% comment %}misc stuff that goes on a receipt, such as:
+    - gifts
+    - coupons
+    - pictures of horses
+    {% endcomment %}
+
+</div>

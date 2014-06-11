@@ -200,9 +200,15 @@ def company_to_dict(company):
     c['postcode'] = company.postcode
     c['city'] = company.city
     c['state'] = company.state
-    c['country'] = company.country
+    c['country'] = company.country.name
     c['phone'] = company.phone
     c['vat_no'] = company.vat_no
+    c['website'] = company.website
+
+    if company.image:
+        c['logo_url'] = company.image.url
+    else:
+        c['logo_url'] = None
     
     return c
 

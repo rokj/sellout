@@ -128,8 +128,24 @@ Bill = function(g){
             r.items.push(p.items[i].format());
         }
 
-        // send to server
-        send_data(p.g.urls.create_bill, r, p.g.csrf_token, function(recv_data){
+        // decide what to do depending on user's print settings
+        if(p.g.config.printer_driver == "system"){
+            // use the default, printer;
+            // create a HTML receipt and issue javascript print() method and that's it
+            console.log("printing");
+            var receipt = format_small_receipt(p, r);
+            receipt.printThis();
+        }
+        else{
+            // TODO:
+            console.log("wtf is this driver");
+        }
+
+        // send to print server
+        /*send_data('http://localhost:' + p.g.config.printer_port,  r, null, function(response){
+            alert(response);
+        });*/
+        /*send_data(p.g.urls.create_bill, r, p.g.csrf_token, function(recv_data){
             if(recv_data.status != 'ok'){
                 error_message(
                     gettext("Error while saving bill"),
@@ -141,7 +157,7 @@ Bill = function(g){
                 error_message("jupi, ratschun je napravljen")
                 // TODO: empty this bill and create a new one
             }
-        });
+        });*/
 
         // TODO: what then?
     };
@@ -212,7 +228,7 @@ Item = function(bill, product) {
     p.details = null; // will initialize ItemDetails (if 'more' button is clicked)
 
     p.item_row = p.bill.item_template.clone().appendTo(p.bill.bill_container);
-    p.items = {
+    p.items = { // a list of jQuery objects, not Item() objects
         delete_button: $(".delete", p.item_row),
 
         name: $("div.item.name", p.item_row),
@@ -255,7 +271,7 @@ Item = function(bill, product) {
             p.data.tax_percent,
             p.data.discounts,
             p.data.quantity,
-            p.data.unit_amount);
+            p.g.config.decimal_places);
 
         // save calculated numbers
         p.data.tax_absolute = r.tax;
@@ -360,7 +376,8 @@ Item = function(bill, product) {
             });
         }
 
-        var r = {
+        return {
+            name: p.data.name,
             product_id: p.data.product_id,
             stock: display_number(p.data.stock, p.g.config.separator, p.g.config.decimal_places),
             quantity: display_number(p.data.quantity, p.g.config.separator, p.g.config.decimal_places),
@@ -372,10 +389,6 @@ Item = function(bill, product) {
             total: display_number(p.data.total, p.g.config.separator, p.g.config.decimal_places),
             bill_notes: p.data.bill_notes
         };
-
-        console.log(r);
-
-        return r;
     };
 
     p.explode = function(){
@@ -596,9 +609,7 @@ ItemDetails = function(item){
         var d = get_by_id(p.temp_discounts, -1);
         if(d){
             p.items.unique_discount_description.val(d.description);
-            p.items.unique_discount_amount.val(display_number(
-                d.amount, p.g.config.separator, p.g.config.decimal_places
-            ));
+            p.items.unique_discount_amount.val(display_number(d.amount, p.g.config.separator, p.g.config.decimal_places));
             p.items.unique_discount_type.val(d.type);
         }
 
@@ -668,7 +679,8 @@ ItemDetails = function(item){
             p.item.data.base_price,
             p.item.data.tax_percent,
             p.temp_discounts,
-            p.item.data.quantity
+            p.item.data.quantity,
+            p.g.config.decimal_places
         );
 
         // update only text fields, not item's data;
@@ -752,14 +764,10 @@ ItemDetails = function(item){
     // fill in the details
     // tax:
     p.items.tax_percent.text(
-        display_number(p.item.data.tax_percent,
-            p.g.config.separator,
-            p.g.config.decimal_places));
+        display_number(p.item.data.tax_percent, p.g.config.separator, p.g.config.decimal_places));
 
     p.items.tax_absolute.text(
-        display_number(p.item.data.tax_absolute,
-            p.g.config.separator,
-            p.g.config.decimal_places));
+        display_number(p.item.data.tax_absolute, p.g.config.separator, p.g.config.decimal_places));
 
     // copy current item's discounts to a temporary list;
     // it will be edited and when details is saved, the item's discounts will
