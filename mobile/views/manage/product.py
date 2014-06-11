@@ -76,6 +76,25 @@ def mobile_get_products(request, company):
 
     r = []
     for p in products:
-        r.append(product_to_dict(request.user, p))
+        r.append(product_to_dict(request.user, p, android=True))
+
+    return JSON_response(r)
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_get_product_discounts(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    if not has_permission(request.user, c, 'tax', 'list'):
+        return JSON_error(_("You have no permission to view taxes"))
+
+    products = Product.objects.filter(company=c)
+
+    r = []
+    for p in products:
+        r.append(product_to_dict(request.user, p, android=True))
 
     return JSON_response(r)

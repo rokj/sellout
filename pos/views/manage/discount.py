@@ -44,6 +44,10 @@ def discount_to_dict(user, d, android=False):
 
 @login_required
 def JSON_discounts(request, company):
+    return JSON_response(get_all_discounts(request.user, company))
+
+
+def get_all_discounts(user, company, android=False):
     """ returns all available discounts for this company in a list of dictionaries
         (see discount_to_dict for dictionary format)
     """
@@ -51,20 +55,20 @@ def JSON_discounts(request, company):
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
-    
+
     # permissions
-    if not has_permission(request.user, c, 'discount', 'list'):
+    if not has_permission(user, c, 'discount', 'list'):
         return JSON_error(_("You have no permission to view discounts"))
 
     discounts = Discount.objects.filter(company__url_name=company, enabled=True).order_by('code')
-    
+
     ds = []
     for d in discounts:
         if d.is_active:
-            ds.append(discount_to_dict(request.user, d))
-    
+            ds.append(discount_to_dict(user, d, android))
+    return ds
     # serialize
-    return JSON_response(ds)
+
 
 
 def validate_discount(data, user):
@@ -352,13 +356,3 @@ def delete_discount(request, company, discount_id):
     
     return redirect('pos:list_discounts', company=c.url_name)
 
-
-def get_all_discounts(user, company, all=True):
-    discounts = Discount.objects.filter(company=company)
-
-    r = []
-    for d in discounts:
-        if all or d.is_active:
-            r.append(discount_to_dict(user, d))
-
-    return r

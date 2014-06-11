@@ -187,8 +187,8 @@ def validate_bill_item(data):
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_create_bill(request, company):
-    create_bill(request, company)
-    return JSON_ok()
+    return create_bill(request, company)
+    # return JSON_ok()
 
 
 @login_required

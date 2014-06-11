@@ -6,6 +6,7 @@ import globals as g
 def get_random_string(length=8, chars=string.letters + string.digits):
     return ''.join([choice(chars) for _ in xrange(length)])
 
+
 def get_image_path(path, table_name):
     """ returns a random name for a newly uploaded image 
     takes care of the birthday problem """
