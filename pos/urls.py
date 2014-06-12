@@ -28,11 +28,11 @@ urlpatterns = patterns('',
     #
     # SYSTEM PAGES:
     #
-    url(r_manage + _('register-company') + '$', company.register_company, name='register_company'),
-    url(r_manage + r'url-name-suggestions$', company.url_name_suggestions, name='url_name_suggestions'),
+    url(r_manage + '/' + _('register-company') + '$', company.register_company, name='register_company'),
+    url(r_manage + '/' + r'url-name-suggestions$', company.url_name_suggestions, name='url_name_suggestions'),
     
     #token registration for api devices
-    url(r_manage + r'api-token-auth/$', authtoken_views.obtain_auth_token),  # TODO
+    url(r_manage + '/' + r'api-token-auth/$', authtoken_views.obtain_auth_token),  # TODO
 
     #
     # MANAGEMENT:
