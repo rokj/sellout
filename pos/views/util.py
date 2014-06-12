@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.core.files.base import ContentFile
 
 from common import globals as g
-from config.functions import get_date_format, get_time_format, get_value
+from config.functions import get_date_format, get_time_format, get_user_value
 from pos.models import Permission
 
 import json
@@ -128,8 +128,8 @@ def format_number(user, n, high_precision=False):
     """ returns formatted decimal number n;
         strips zeros, but leaves <p> numbers after decimal point even if they are zero
     """
-    sep = get_value(user, 'pos_decimal_separator')
-    p = int(get_value(user, 'pos_decimal_places'))
+    sep = get_user_value(user, 'pos_decimal_separator')
+    p = int(get_user_value(user, 'pos_decimal_places'))
     
     if not n:
         return '0'
@@ -167,7 +167,7 @@ def parse_decimal(user, string, max_digits=None):
     
     if user: # if user is None, try with the dot (user should never be None - 
              # this is to avoid checking on every function call)
-        string = string.replace(get_value(user, 'pos_decimal_separator'), '.')
+        string = string.replace(get_user_value(user, 'pos_decimal_separator'), '.')
     
     # check for entries too big
     if max_digits:

@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ugettext
 from django.db.models.signals import pre_save, pre_delete, post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
@@ -8,11 +8,24 @@ from common.globals import CATEGORY_COLORS
 
 from common.models import SkeletonU
 from common.functions import get_image_path
-from config.models import Country
 import common.globals as g
 
 import datetime as dtm
 import json
+
+
+### country ###
+class Country(models.Model):
+    # use fill_countries when setting up database, then forget about it
+    two_letter_code = models.CharField(max_length=2, null=False, primary_key=True)
+    name = models.CharField(max_length=64, null=False)
+    three_letter_code = models.CharField(max_length=3, null=False)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = _("Countries")
 
 
 ### company ###
@@ -21,9 +34,14 @@ class Company(SkeletonU):
     url_name = models.SlugField(_("Company name, used in URL address"),
                                 max_length=g.MISC['company_url_length'],
                                 null=False, blank=False, db_index=True)
-    image = models.ImageField(_("Logo"),
-                             upload_to=get_image_path(g.DIRS['logo_dir'], "pos_company"),
-                             null=True, blank=True)
+    color_logo = models.ImageField(_("Logo"),
+                                   upload_to=get_image_path(g.DIRS['color_logo_dir'],
+                                                            "pos_company", "color_logo"),
+                                   null=True, blank=True)
+    monochrome_logo = models.ImageField(_("Receipt logo"),
+                                        upload_to=get_image_path(g.DIRS['monochrome_logo_dir'],
+                                                                 "pos_company", "monochrome_logo"),
+                                        null=True, blank=True)
     street = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
     postcode = models.CharField(_("Postal code"), max_length=20, null=True, blank=True)
     city = models.CharField(_("City"), max_length=50, null=True, blank=True)
@@ -34,7 +52,7 @@ class Company(SkeletonU):
     phone = models.CharField(_("Phone number"), max_length = 30, null=True, blank=True)
     vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=True, blank=True)
     notes = models.TextField(_("Notes"), blank=True, null=True)
-    
+
     def __unicode__(self):
         return self.name
     
@@ -58,10 +76,10 @@ class Category(SkeletonU):
     name = models.CharField(_("Category name"), max_length=100, null=False, blank=False)
     description = models.TextField(_("Description"), null=True, blank=True)
     image = models.ImageField(_("Icon"),
-                             upload_to=get_image_path(g.DIRS['category_icon_dir'], "pos_category"),
+                             upload_to=get_image_path(g.DIRS['category_icon_dir'], "pos_category", "image"),
                              null=True, blank=True)
 
-    color = models.CharField(default="000000", blank=False, null=False, max_length=6)
+    color = models.CharField(default=g.CATEGORY_COLORS[0], blank=False, null=False, max_length=6)
 
     def __unicode__(self):
         return self.name
@@ -628,3 +646,13 @@ def cleanup_images(**kwargs):
         # add image to Cleanup for later deletion
         #c = Cleanup(filename=prev_entry.image.path)
         #c.save()        
+
+
+def fill_countries():  # will only be used once, after install
+    from countries import country_list
+    for c in country_list:
+        country = Country(
+                          name=c[0],
+                          two_letter_code=c[1],
+                          three_letter_code=c[2])
+        country.save()

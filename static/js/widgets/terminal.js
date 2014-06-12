@@ -177,5 +177,6 @@ Terminal = function(g){
     }
 
     // load company's logo and store it to terminal
-    p.g.items.company_logo = $("<img>", {src: p.g.data.company.logo_url});
+    if(p.g.data.receipt_logo)
+        p.g.items.receipt_logo = $("<img>", {src: p.g.data.company.receipt_logo});
 };

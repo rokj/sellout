@@ -15,7 +15,7 @@ from pos.models import Company, Bill, BillItem, Product
 from pos.views.bill import create_bill
 from pos.views.util import has_permission, JSON_response, JSON_ok, JSON_parse, JSON_error, \
     format_number, parse_decimal, format_date, format_time
-from config.functions import get_value
+from config.functions import get_user_value
 import common.globals as g
 
 from pytz import timezone
@@ -95,7 +95,7 @@ def new_bill(user, company):
         user=user,  # this can change
         created_by=user,  # this will never change
         type="Normal",
-        timestamp=dtm.now().replace(tzinfo=timezone(get_value(user, 'pos_timezone'))),
+        timestamp=dtm.now().replace(tzinfo=timezone(get_user_value(user, 'pos_timezone'))),
         status="Active"
     )
     b.save()
@@ -133,7 +133,7 @@ def item_prices(user, base_price, tax_percent, quantity, discounts):
 
     r = {}  # return values
 
-    if get_value(user, 'pos_discount_calculation') == 'Tax first':
+    if get_user_value(user, 'pos_discount_calculation') == 'Tax first':
         # price without tax and discounts
         r['base'] = base_price
         # price including tax

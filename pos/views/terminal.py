@@ -11,7 +11,7 @@ from pos.views.manage.product import get_all_products
 from pos.views.manage.tax import get_all_taxes
 
 from pos.views.util import has_permission, no_permission_view, JSON_ok, JSON_parse, JSON_stringify
-from config.functions import get_value, set_value, get_date_format, get_time_format
+from config.functions import get_user_value, set_user_value, get_date_format, get_time_format
 import common.globals as g
 
 import settings
@@ -27,28 +27,28 @@ def terminal(request, company):
         return no_permission_view(request, c, _("visit this page"))
 
     # terminal settings and other data in JSON (will be put into javascript globals)
-    if get_value(request.user, 'pos_discount_calculation') == 'Tax first':
+    if get_user_value(request.user, 'pos_discount_calculation') == 'Tax first':
         tax_first = True
     else:
         tax_first = False
 
     config = {
         # user's data
-        'currency': get_value(request.user, 'pos_currency'),
-        'separator': get_value(request.user, 'pos_decimal_separator'),
-        'decimal_places': int(get_value(request.user, 'pos_decimal_places')),
+        'currency': get_user_value(request.user, 'pos_currency'),
+        'separator': get_user_value(request.user, 'pos_decimal_separator'),
+        'decimal_places': int(get_user_value(request.user, 'pos_decimal_places')),
         'tax_first': tax_first,
         # interface parameters
         'date_format': get_date_format(request.user, 'js'),
         'time_format': get_time_format(request.user, 'js'),
-        'interface': get_value(request.user, 'pos_interface'),
-        'product_button_size': g.PRODUCT_BUTTON_DIMENSIONS[get_value(request.user, 'pos_interface_product_button_size')],
-        'bill_width': get_value(request.user, 'pos_interface_bill_width'),
-        'display_breadcrumbs': get_value(request.user, 'pos_display_breadcrumbs'),
-        'product_display': get_value(request.user, 'pos_product_display'),
+        'interface': get_user_value(request.user, 'pos_interface'),
+        'product_button_size': g.PRODUCT_BUTTON_DIMENSIONS[get_user_value(request.user, 'pos_interface_product_button_size')],
+        'bill_width': get_user_value(request.user, 'pos_interface_bill_width'),
+        'display_breadcrumbs': get_user_value(request.user, 'pos_display_breadcrumbs'),
+        'product_display': get_user_value(request.user, 'pos_product_display'),
         #'printer_port': get_value(request.user, 'pos_printer_port'),
-        'receipt_size': get_value(request.user, 'pos_receipt_size'),
-        'printer_driver': get_value(request.user, 'pos_printer_driver'),
+        'receipt_size': 'small',
+        'printer_driver': 'system'
     }
 
     data = {
@@ -72,7 +72,7 @@ def terminal(request, company):
         'site_title': g.MISC['site_title'],
 
         # template etc.
-        'currency': get_value(request.user, 'pos_currency'),
+        'currency': get_user_value(request.user, 'pos_currency'),
 
         # user config
         'config': JSON_stringify(config, True),
@@ -87,7 +87,7 @@ def save(request, company):
     data = JSON_parse(request.POST.get('data'))
 
     if data.get('bill_width'):
-        set_value(request.user, 'pos_interface_bill_width', int(data['bill_width']))
+        set_user_value(request.user, 'pos_interface_bill_width', int(data['bill_width']))
 
     # save stuff from data to config
     return JSON_ok()

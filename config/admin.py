@@ -1,6 +1,9 @@
 from django.contrib import admin
-from models import Config, Country 
+from models import UserConfig, CompanyConfig
+from pos.models import Country
 
-admin.site.register(Config)
+admin.site.register(UserConfig)
+admin.site.register(CompanyConfig)
+
 admin.site.register(Country)
- 
+

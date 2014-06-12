@@ -18,6 +18,7 @@ from common import widgets
 
 import re
 
+
 ###
 ### helper functions etc
 ###
@@ -155,7 +156,7 @@ class CompanyForm(forms.ModelForm):
     def clean_url_name(self):
         url_name = self.cleaned_data['url_name']
         
-        if 'url_name' in  self.initial:
+        if 'url_name' in self.initial:
             initial_url_name = self.initial['url_name']
         else:
             initial_url_name = ""
@@ -173,7 +174,8 @@ class CompanyForm(forms.ModelForm):
 
     class Meta:
         model = Company
-        fields = ['image',
+        fields = ['color_logo',
+                  'monochrome_logo',
                   'name',
                   'url_name',
                   'email',
@@ -194,6 +196,7 @@ class CompanyForm(forms.ModelForm):
 # for json etc.
 def company_to_dict(company):
     c = {}
+
     c['name'] = company.name
     c['email'] = company.email
     c['street'] = company.street
@@ -205,11 +208,16 @@ def company_to_dict(company):
     c['vat_no'] = company.vat_no
     c['website'] = company.website
 
-    if company.image:
-        c['logo_url'] = company.image.url
+    if company.color_logo:
+        c['color_logo_url'] = company.color_logo.url
     else:
-        c['logo_url'] = None
-    
+        c['color_logo_url'] = None
+
+    if company.monochrome_logo:
+        c['monochrome_logo_url'] = company.monochrome_logo_url
+    else:
+        c['monochrome_logo_url'] = None
+
     return c
 
 
@@ -249,7 +257,7 @@ def register_company(request):
 @login_required
 def edit_company(request, company):
     # get company, it must exist
-    c = get_object_or_404(Company, url_name = company)
+    c = get_object_or_404(Company, url_name=company)
         
     # check if the user has permission to change it
     # only admins can change company details
@@ -271,9 +279,9 @@ def edit_company(request, company):
         if form.is_valid():
             # save form and resize image to the maximum size that will ever be needed
             form.save()
-            if c.image:
-                resize_image(c.image.path, g.IMAGE_DIMENSIONS['logo'])
-            print form.cleaned_data
+            #if c.image:
+            #    resize_image(c.image.path, g.IMAGE_DIMENSIONS['logo'])
+
             # for an eventual message for the user
             context['saved'] = True
             # if url_name was changed, redirect to new address

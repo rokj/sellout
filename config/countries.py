@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 # (this is used for shell, which defaults to ASCII if not specified)
-from models import Country
+from pos.models import Country
 
 country_list = (
     ("Afghanistan", "AF", "AFG"),

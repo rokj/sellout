@@ -16,19 +16,27 @@
   cache is loaded on load_config and deleted on save_config (and reloaded)
 """
 
-from models import Config
+from models import UserConfig, CompanyConfig
 from common import globals as g
 from django.core.cache import cache
 import json
 
 
-defaults = {
+company_defaults = {
     # localization
-    'pos_date_format': 'yyyy-mm-dd',  # keys for DATE_FORMATS dictionary in globals
-    'pos_time_format': '23:59',  # keys for TIME_FORMATS dictionary in globals
-    'pos_timezone': 'utc',  # keywords for pytz timezones
+    'pos_date_format': 'yyyy-mm-dd', # keys for DATE_FORMATS dictionary in globals
+    'pos_time_format': '23:59', # keys for TIME_FORMATS dictionary in globals
+    'pos_timezone': 'utc', # keywords for pytz timezones
     'pos_currency': "$",
     'pos_decimal_separator': '.',
+    # billing and calculation defaults
+    'pos_discount_calculation': "Tax first", # DISCOUNT_CALCULATION in globals
+    'pos_decimal_places': 2, # default decimal places for display
+    # fallback defaults
+    'pos_default_tax': '0.0',
+}
+
+user_defaults = {
     # ux
     'pos_contacts_per_page': 10,
     'pos_discounts_per_page': 10,
@@ -38,11 +46,6 @@ defaults = {
     'pos_interface_bill_width': 370,  # width of the bill area in terminal (in pixels)
     'pos_product_display': 'box',
     'pos_display_breadcrumbs': True,
-    # billing and calculation defaults
-    'pos_discount_calculation': "Tax first",  # DISCOUNT_CALCULATION in globals
-    'pos_decimal_places': 2,  # default decimal places for display
-    # fallback defaults
-    'pos_default_tax': '0.0',
 
     # printing
     #'pos_printer_port': 65336,  # the default port for client's localhost printer server
@@ -55,7 +58,7 @@ defaults = {
 
 
 # caching helpers
-def cache_key(user):
+def user_cache_key(user):
     # TODO: anonymous users
     if user.is_authenticated():
         return "config_" + str(user.id)
@@ -63,79 +66,156 @@ def cache_key(user):
         return "config_default"
 
 
-def load_config(user):
+def company_cache_key(company):
+    return "company_" + str(company.id)
+
+
+# load config and store it to memcache
+def load_user_config(user):
     try:
-        c = Config.objects.get(user=user)
-    except Config.DoesNotExist:
+        c = UserConfig.objects.get(user=user)
+    except UserConfig.DoesNotExist:
         # use defaults
-        c = Config(created_by=user,
-                   user=user,
-                   data=json.dumps(defaults))
+        c = UserConfig(created_by=user,
+                       user=user,
+                       data=json.dumps(user_defaults))
         c.save()
 
     # parse json from the database (or defaults)
     return json.loads(c.data)
 
 
-def save_config(user, data):
+def load_company_config(user, company):
+    try:
+        c = CompanyConfig.objects.get(company=company)
+    except CompanyConfig.DoesNotExist:
+        # use defaults
+        c = CompanyConfig(created_by=user,
+                          company=company,
+                          data=json.dumps(company_defaults))
+        c.save()
+
+    # parse json from the database (or defaults)
+    return json.loads(c.data)
+
+
+def save_user_config(user, data):
     # update or save settings
     try:
-        c = Config.objects.get(user=user)
+        c = UserConfig.objects.get(user=user)
         c.data = json.dumps(data)
         c.save()
-    except Config.DoesNotExist:
-        c = Config(created_by=user,
-            user=user,
-            data=json.dumps(data))
+    except UserConfig.DoesNotExist:
+        c = UserConfig(created_by=user,
+                       user=user,
+                       data=json.dumps(data))
         c.save()
     
     # delete cache
-    cache.delete(cache_key(user))
+    cache.delete(user_cache_key(user))
 
 
-def get_config(user):
+def save_company_config(user, company, data):
+    # update or save settings
+    try:
+        c = CompanyConfig.objects.get(company=company)
+        c.data = json.dumps(data)
+        c.save()
+    except CompanyConfig.DoesNotExist:
+        c = CompanyConfig(created_by=user,
+            company=company,
+            data=json.dumps(data))
+        c.save()
+
+    # delete cache
+    cache.delete(company_cache_key(user))
+
+
+def get_user_config(user):
     """ 
         get user's config either from memcache or from database
         if user is not authenticated, return defaults
     """
     if user.is_authenticated():
-        ckey = cache_key(user)
+        ckey = user_cache_key(user)
         data = cache.get(ckey)
         
         if not data:
-            data = load_config(user)
+            data = load_user_config(user)
             cache.set(ckey, data)
         
         return data
     else:
-        return defaults
+        return user_defaults
 
 
-def get_value(user, key):
-    data = get_config(user)
+def get_company_config(user, company):
+    """
+        get user's config either from memcache or from database
+        if user is not authenticated, return defaults
+    """
+    ckey = company_cache_key(company)
+    data = cache.get(ckey)
+
+    if not data:
+        data = load_company_config(user, company)
+        cache.set(ckey, data)
+
+    return data
+
+
+def get_user_value(user, key):
+    data = get_user_config(user)
 
     # check if the value is in the dictionary
     if key in data:
         return data[key]
     else:
         # if key is in default settings, add value from defaults and save
-        if key in defaults:
-            data[key] = defaults[key]
-            save_config(user, data)
+        if key in user_defaults:
+            data[key] = user_defaults[key]
+            save_user_config(user, data)
             return data[key]
         else:
             return "<invalid key: '" + "':'" + key + "'>"
 
 
-def set_value(user, key, value):
-    data = get_config(user)
+def get_company_value(user, company, key):
+    data = get_company_config(user, company)
 
-    # if it's not a boolean or an integer, convert it to integer
+    # check if the value is in the dictionary
+    if key in data:
+        return data[key]
+    else:
+        # if key is in default settings, add value from defaults and save
+        if key in company_defaults:
+            data[key] = company_defaults[key]
+            save_company_config(user, company, data)
+            return data[key]
+        else:
+            return "<invalid key: '" + "':'" + key + "'>"
+
+
+def set_user_value(user, key, value):
+    data = get_user_config(user)
+
+    # if it's not a boolean or an integer, convert it to string
     if not isinstance(value, bool) and not isinstance(value, int):
         value = str(value)
 
     data[key] = value
-    save_config(user, data)  # memcache is handled in save_cofig
+    save_user_config(user, data)  # memcache is handled in save_cofig
+
+
+def set_company_value(user, company, key, value):
+    data = get_company_config(user, company)
+
+    # if it's not a boolean or an integer, convert it to string
+    if not isinstance(value, bool) and not isinstance(value, int):
+        value = str(value)
+
+    data[key] = value
+    save_company_config(user, company, data)  # memcache is handled in save_cofig
 
 
 # shortcuts: date format
@@ -143,7 +223,7 @@ def get_date_format(user, variant):
     """ returns g.DATE_FORMATS[user's date format][variant]
         variant is one of 'python', 'django', 'jquery'
     """
-    return g.DATE_FORMATS[get_value(user, 'pos_date_format')][variant]
+    return g.DATE_FORMATS[get_user_value(user, 'pos_date_format')][variant]
 
 
 # time format
@@ -151,4 +231,4 @@ def get_time_format(user, variant):
     """ returns g.TIME_FORMATS[user's date format][variant]
         variant is one of 'python', 'django', 'jquery'
     """
-    return g.TIME_FORMATS[get_value(user, 'pos_time_format')][variant]
+    return g.TIME_FORMATS[get_user_value(user, 'pos_time_format')][variant]

@@ -5,10 +5,11 @@ from django.utils.translation import ugettext as _
 
 # directories
 DIRS = { # goes to MEDIA folder
-    'logo_dir':"img/logo",
-    'category_icon_dir':"img/category",
-    'product_icon_dir':'img/product',
-    'product_image_dir':"img/product",
+    'color_logo_dir': "img/color_logo",
+    'monochrome_logo_dir': "img/monochrome_logo",
+    'category_icon_dir': "img/category",
+    'product_icon_dir': 'img/product',
+    'product_image_dir': "img/product",
 }
 
 # attributes' field lengths
@@ -237,7 +238,7 @@ PRODUCT_BUTTON_DIMENSIONS = {
 }
 
 CATEGORY_COLORS = [  # choices for category.color
-    '000000',
+    '000000',  # the first entry is the default
     'ff7d64',
     '00dcb4',
     '143264',

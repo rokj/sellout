@@ -1,11 +1,11 @@
 from django.db import models
-from common.models import SkeletonU
-
-from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 
+from common.models import SkeletonU
+from pos.models import Company
 
-class Config(SkeletonU):
+
+class UserConfig(SkeletonU):
     user = models.ForeignKey(User)
     
     # all settings are stored in json format
@@ -15,26 +15,13 @@ class Config(SkeletonU):
         return str(self.user.id) + ":" + self.app
 
 
-class Country(models.Model):
-    two_letter_code = models.CharField(max_length=2, null=False, primary_key=True)
-    name = models.CharField(max_length=64, null=False)
-    three_letter_code = models.CharField(max_length=3, null=False)
-    
+class CompanyConfig(SkeletonU):
+    company = models.ForeignKey(Company)
+
+    data = models.TextField(null=False)
+
     def __unicode__(self):
-        return self.name
-    
-    class Meta:
-        verbose_name_plural = _("Countries")
-
-
-def fill_countries(): # will only be used once, after install
-    from countries import country_list 
-    for c in country_list:
-        country = Country(
-                          name=c[0],
-                          two_letter_code=c[1],
-                          three_letter_code=c[2])
-        country.save()
+        return str(self.company.id) + ":" + self.app
 
 
 # cleanup: a helper class for files that need to be removed after change in database was made
@@ -56,6 +43,6 @@ def cleanup_handler(**kwargs):
     for f in filenames:
         for g in glob.glob(f.filename):
             if os.path.exists(g):
-                if mr in g: # do not remove anything outside MEDIA dir
+                if mr in g:  # do not remove anything outside MEDIA dir
                     os.remove(g)
         f.delete()

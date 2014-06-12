@@ -5,9 +5,9 @@ from django import forms
 from django.http import Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from pos.models import Company, Contact
+from pos.models import Company, Contact, Country
 from common import globals as g
-from config.functions import get_date_format, get_value
+from config.functions import get_date_format, get_user_value
 from pos.views.manage.contact import contact_to_dict, get_contact, validate_contact
 from pos.views.util import JSON_response, JSON_ok, JSON_parse, JSON_error, has_permission, no_permission_view, format_date,\
     max_field_length, parse_date
@@ -15,7 +15,6 @@ from pos.views.util import JSON_response, JSON_ok, JSON_parse, JSON_error, has_p
 from rest_framework.decorators import api_view, permission_classes,\
     authentication_classes
 from rest_framework.permissions import IsAuthenticated
-from config.models import Country
 
 import re
 

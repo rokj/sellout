@@ -15,7 +15,7 @@ from pos.views.manage.category import get_subcategories
 from pos.views.manage.tax import get_default_tax
 
 from common import globals as g
-from config.functions import get_value
+from config.functions import get_user_value
 
 import decimal
 from sorl.thumbnail import get_thumbnail
@@ -142,7 +142,7 @@ def products(request, company):
         'tax':g.DECIMAL['percentage_decimal_places'] + 4, # up to '100.' + 'decimal_digits'
     }
     
-    if get_value(request.user, 'pos_discount_calculation') == 'Tax first':
+    if get_user_value(request.user, 'pos_discount_calculation') == 'Tax first':
         tax_first = True
     else:
         tax_first = False
@@ -155,7 +155,7 @@ def products(request, company):
         'add_url':reverse('pos:web_create_product', args=[c.url_name]),
         # config variables 
         'can_edit':has_permission(request.user, c, 'product', 'edit'),
-        'currency':get_value(request.user, 'pos_currency'),
+        'currency':get_user_value(request.user, 'pos_currency'),
         # images
         'image_dimensions':g.IMAGE_DIMENSIONS['product'],
         'image_upload_formats':g.MISC['image_upload_formats'], # what can be uploaded
@@ -163,10 +163,10 @@ def products(request, company):
         'max_upload_size_bytes':g.MISC['max_upload_image_size'], # bytes for javascript
         # html fields
         'field_lengths':lengths,
-        'separator':get_value(request.user, 'pos_decimal_separator'),
+        'separator':get_user_value(request.user, 'pos_decimal_separator'),
         # numbers etc
         'default_tax_id':get_default_tax(request.user, c)['id'],
-        'decimal_places':get_value(request.user, 'pos_decimal_places'),
+        'decimal_places':get_user_value(request.user, 'pos_decimal_places'),
         'tax_first':tax_first,
     }
     return render(request, 'pos/manage/products.html', context)

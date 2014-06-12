@@ -13,7 +13,7 @@ from pos.views.manage.category import get_subcategories
 from pos.views.manage.tax import get_default_tax
 
 from common import globals as g
-from config.functions import get_value
+from config.functions import get_user_value
 
 import decimal
 from sorl.thumbnail import get_thumbnail

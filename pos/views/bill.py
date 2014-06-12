@@ -13,7 +13,7 @@ from django.utils.translation import ugettext as _
 from pos.models import Company, Bill, BillItem, Product, Discount, BillItemDiscount
 from pos.views.util import has_permission, JSON_response, JSON_ok, JSON_parse, JSON_error, \
     format_number, parse_decimal, format_date, format_time
-from config.functions import get_value
+from config.functions import get_user_value
 import common.globals as g
 
 from pytz import timezone
@@ -93,7 +93,7 @@ def new_bill(user, company):
         user=user,  # this can change
         created_by=user,  # this will never change
         type="Normal",
-        timestamp=dtm.now().replace(tzinfo=timezone(get_value(user, 'pos_timezone'))),
+        timestamp=dtm.now().replace(tzinfo=timezone(get_user_value(user, 'pos_timezone'))),
         status="Active"
     )
     b.save()
@@ -132,7 +132,7 @@ def item_prices(user, base_price, tax_percent, quantity, discounts):
 
     r = {}  # return values
 
-    if get_value(user, 'pos_discount_calculation') == 'Tax first':
+    if get_user_value(user, 'pos_discount_calculation') == 'Tax first':
         # price without tax and discounts
         r['base_price'] = base_price
         # price including tax
@@ -174,7 +174,7 @@ def item_prices(user, base_price, tax_percent, quantity, discounts):
 
     # and round to current decimal places
     # https://docs.python.org/2/library/decimal.html#decimal-faq
-    precision = Decimal(10) ** -int(get_value(user, 'pos_decimal_places'))
+    precision = Decimal(10) ** -int(get_user_value(user, 'pos_decimal_places'))
 
     r['base_price'] = r['base_price'].quantize(precision)
     r['tax_absolute'] = r['tax_absolute'].quantize(precision)
@@ -360,7 +360,7 @@ def create_bill(request, company):
         user=bill['user'],  # this can change
         created_by=bill['user'],  # this will never change
         type=bill['type'],
-        timestamp=dtm.now().replace(tzinfo=timezone(get_value(request.user, 'pos_timezone'))),
+        timestamp=dtm.now().replace(tzinfo=timezone(get_user_value(request.user, 'pos_timezone'))),
         status=bill['status'],
     )
     db_bill.save()

@@ -13,7 +13,7 @@ from pos.models import Company
 from pos.views.util import error, JSON_response, resize_image, validate_image, \
                            has_permission, no_permission_view
 from common import globals as g
-from config.functions import get_config, set_value, get_value
+from config.functions import get_config, set_user_value, get_user_value
 
 import pytz
 import json
@@ -87,26 +87,26 @@ def edit_config(request, company):
     # this may be a little wasteful on resources, but config is only edited once in a lifetime or so
     # get_value is needed because dict['key'] will fail if new keys are added but not yet saved
     initial = {
-        'date_format': get_value(request.user, 'pos_date_format'),
-        'time_format': get_value(request.user, 'pos_time_format'),
-        'timezone': get_value(request.user, 'pos_timezone'),
-        'currency': get_value(request.user, 'pos_currency'),
-        'contacts_per_page': get_value(request.user, 'pos_contacts_per_page'),
-        'discounts_per_page': get_value(request.user, 'pos_discounts_per_page'),
-        'default_tax': get_value(request.user, 'pos_default_tax'),
-        'decimal_separator': get_value(request.user, 'pos_decimal_separator'),
-        'interface_product_button_size': get_value(request.user, 'pos_interface_product_button_size'),
-        'discount_calculation': get_value(request.user, 'pos_discount_calculation'),
-        'decimal_places': get_value(request.user, 'pos_decimal_places'),
-        'product_display': get_value(request.user, 'pos_product_display'),
-        'display_breadcrumbs': get_value(request.user, 'pos_display_breadcrumbs'),
+        'date_format': get_user_value(request.user, 'pos_date_format'),
+        'time_format': get_user_value(request.user, 'pos_time_format'),
+        'timezone': get_user_value(request.user, 'pos_timezone'),
+        'currency': get_user_value(request.user, 'pos_currency'),
+        'contacts_per_page': get_user_value(request.user, 'pos_contacts_per_page'),
+        'discounts_per_page': get_user_value(request.user, 'pos_discounts_per_page'),
+        'default_tax': get_user_value(request.user, 'pos_default_tax'),
+        'decimal_separator': get_user_value(request.user, 'pos_decimal_separator'),
+        'interface_product_button_size': get_user_value(request.user, 'pos_interface_product_button_size'),
+        'discount_calculation': get_user_value(request.user, 'pos_discount_calculation'),
+        'decimal_places': get_user_value(request.user, 'pos_decimal_places'),
+        'product_display': get_user_value(request.user, 'pos_product_display'),
+        'display_breadcrumbs': get_user_value(request.user, 'pos_display_breadcrumbs'),
     }
     
     if request.method == 'POST':
         form = ConfigForm(request.POST)
         if form.is_valid():
             for key in initial:
-                set_value(request.user, "pos_" + key, form.cleaned_data[key])
+                set_user_value(request.user, "pos_" + key, form.cleaned_data[key])
     else:
         form = ConfigForm(initial=initial)  # An unbound form
 

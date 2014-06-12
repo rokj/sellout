@@ -16,7 +16,7 @@ from pos.views.util import error, JSON_response, JSON_error, \
                            format_number, format_date, parse_date, parse_decimal, \
                            max_field_length
 from common import globals as g
-from config.functions import get_date_format, get_value
+from config.functions import get_date_format, get_user_value
 
 
 def discount_to_dict(user, d, android=False):
@@ -207,7 +207,7 @@ def list_discounts(request, company):
         form = DiscountFilterForm()
 
     # show discounts
-    paginator = Paginator(discounts, get_value(request.user, 'pos_discounts_per_page'))
+    paginator = Paginator(discounts, get_user_value(request.user, 'pos_discounts_per_page'))
 
     page = request.GET.get('page')
     try:
@@ -227,7 +227,7 @@ def list_discounts(request, company):
         'date_format_django': get_date_format(request.user, 'django'),
         'date_format_jquery': get_date_format(request.user, 'jquery'),
         'results_display': results_display,
-        'currency': get_value(request.user, 'pos_currency'),
+        'currency': get_user_value(request.user, 'pos_currency'),
     }
 
     return render(request, 'pos/manage/discounts.html', context) 
