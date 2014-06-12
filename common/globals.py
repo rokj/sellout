@@ -172,7 +172,8 @@ MISC = {
 }
 
 IMAGE_DIMENSIONS = {
-    'logo': (180, 180),
+    'color_logo': (180, 180),
+    'monochrome_logo': (48, 48),
     'category': (120, 120),
     'product': (160, 160),  # must be as large as the largest PRODUCT_BUTTON_DIMENSIONS
     'thumb_small': (32, 32),  # for thumbnails

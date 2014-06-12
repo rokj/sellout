@@ -4,7 +4,7 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from common.globals import UNITS
-from config.functions import get_user_config, get_user_value
+from config.functions import get_user_config, get_user_value, get_company_value
 from pos.models import Company, Tax
 from pos.views.manage.category import get_all_categories
 from pos.views.manage.discount import JSON_discounts, get_all_discounts
@@ -53,21 +53,20 @@ def mobile_get_cut(request, company):
     discounts = get_all_discounts(request.user, c, android=True)
     result['discounts'] = discounts
 
-    result['config'] = get_config_attrs(request.user)
+    result['config'] = get_config_attrs(request.user, c)
 
     return JSON_response(result)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def get_mobile_config(request, company):
-    return JSON_ok(extra=get_config_attrs(request.user))
+    return JSON_ok(extra=get_config_attrs(request.user, Company.objects.get(url_name=company)))
 
 
-def get_config_attrs(user):
-
-    dict = {'user_id': user.id,
-            'pos_decimal_separator': get_user_value(user, 'pos_decimal_separator'),
-            'pos_decimal_places': get_user_value(user, 'pos_decimal_places'),
-            'pos_discount_calculation': get_user_value(user, 'pos_discount_calculation')
+def get_config_attrs(user, company):
+    return {
+        'user_id': user.id,
+        'pos_decimal_separator': get_company_value(user, company, 'pos_decimal_separator'),
+        'pos_decimal_places': get_company_value(user, company, 'pos_decimal_places'),
+        'pos_discount_calculation': get_company_value(user, company, 'pos_discount_calculation')
     }
-    return dict

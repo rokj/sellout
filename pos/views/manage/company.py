@@ -238,17 +238,18 @@ def register_company(request):
             # continue with registration
             
             # TODO: add 'admin' permissions for newly registered company to request.user
-            return redirect('pos:terminal', company=form.cleaned_data['url_name']) # home page
+            return redirect('pos:terminal', company=form.cleaned_data['url_name'])  # home page
     else:
         # show an empty form
         form = CompanyForm()
-    
+
     context = {
-       'form': form,
-       'pos_url': get_terminal_url(request),
-       'logo_dimensions': g.IMAGE_DIMENSIONS['logo'],
-       'title': _("Registration"),
-       'site_title': g.MISC['site_title'],
+        'form': form,
+        'pos_url': get_terminal_url(request),
+        'color_logo_dimensions': g.IMAGE_DIMENSIONS['color_logo'],
+        'monochrome_logo_dimensions': g.IMAGE_DIMENSIONS['monochrome_logo'],
+        'title': _("Registration"),
+        'site_title': g.MISC['site_title'],
     }
 
     return render(request, 'pos/manage/register.html', context)
@@ -266,7 +267,8 @@ def edit_company(request, company):
     
     context = {
         'company': c,
-        'logo_dimensions': g.IMAGE_DIMENSIONS['logo'],
+        'color_logo_dimensions': g.IMAGE_DIMENSIONS['color_logo'],
+        'monochrome_logo_dimensions': g.IMAGE_DIMENSIONS['monochrome_logo'],
         'title': _("Company details"),
         'site_title': g.MISC['site_title'],
         'pos_url': get_terminal_url(request),

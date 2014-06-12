@@ -13,7 +13,7 @@ from pos.models import Company
 from pos.views.util import error, JSON_response, resize_image, validate_image, \
                            has_permission, no_permission_view
 from common import globals as g
-from config.functions import get_config, set_user_value, get_user_value
+from config.functions import set_user_value, get_user_value
 
 import pytz
 import json

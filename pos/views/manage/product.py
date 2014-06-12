@@ -39,7 +39,7 @@ def web_JSON_units(request, company):
 def JSON_units(request, company):
     # at the moment, company is not needed
     # also, no permission checking is required
-    return JSON_response(g.UNITS) # G units!
+    return JSON_response(g.UNITS)  # G units!
 
 
 def product_to_dict(user, product, android=False):
@@ -133,13 +133,13 @@ def products(request, company):
     
     # fields that need to be limited in length:
     lengths = {
-        'code':max_field_length(Product, 'code'),
-        'price':g.DECIMAL['currency_digits'] + 1,
-        'purchase_price':g.DECIMAL['currency_digits'] + 1,
-        'shortcut':max_field_length(Product, 'shortcut'),
-        'stock':g.DECIMAL['quantity_digits'],
-        'name':max_field_length(Product, 'name'),
-        'tax':g.DECIMAL['percentage_decimal_places'] + 4, # up to '100.' + 'decimal_digits'
+        'code': max_field_length(Product, 'code'),
+        'price': g.DECIMAL['currency_digits'] + 1,
+        'purchase_price': g.DECIMAL['currency_digits'] + 1,
+        'shortcut': max_field_length(Product, 'shortcut'),
+        'stock': g.DECIMAL['quantity_digits'],
+        'name': max_field_length(Product, 'name'),
+        'tax': g.DECIMAL['percentage_decimal_places'] + 4, # up to '100.' + 'decimal_digits'
     }
     
     if get_user_value(request.user, 'pos_discount_calculation') == 'Tax first':
@@ -148,26 +148,26 @@ def products(request, company):
         tax_first = False
     
     context = {
-        'company':c, 
-        'title':_("Products"),
-        'site_title':g.MISC['site_title'],
+        'company': c,
+        'title': _("Products"),
+        'site_title': g.MISC['site_title'],
         # urls for ajax calls
-        'add_url':reverse('pos:web_create_product', args=[c.url_name]),
+        'add_url': reverse('pos:web_create_product', args=[c.url_name]),
         # config variables 
-        'can_edit':has_permission(request.user, c, 'product', 'edit'),
-        'currency':get_user_value(request.user, 'pos_currency'),
+        'can_edit': has_permission(request.user, c, 'product', 'edit'),
+        'currency': get_user_value(request.user, 'pos_currency'),
         # images
-        'image_dimensions':g.IMAGE_DIMENSIONS['product'],
-        'image_upload_formats':g.MISC['image_upload_formats'], # what can be uploaded
-        'max_upload_size':round(g.MISC['max_upload_image_size']/2**20, 2), # show in megabytes
-        'max_upload_size_bytes':g.MISC['max_upload_image_size'], # bytes for javascript
+        'image_dimensions': g.IMAGE_DIMENSIONS['product'],
+        'image_upload_formats': g.MISC['image_upload_formats'], # what can be uploaded
+        'max_upload_size': round(g.MISC['max_upload_image_size']/2**20, 2), # show in megabytes
+        'max_upload_size_bytes': g.MISC['max_upload_image_size'], # bytes for javascript
         # html fields
-        'field_lengths':lengths,
-        'separator':get_user_value(request.user, 'pos_decimal_separator'),
+        'field_lengths': lengths,
+        'separator': get_user_value(request.user, 'pos_decimal_separator'),
         # numbers etc
-        'default_tax_id':get_default_tax(request.user, c)['id'],
-        'decimal_places':get_user_value(request.user, 'pos_decimal_places'),
-        'tax_first':tax_first,
+        'default_tax_id': get_default_tax(request.user, c)['id'],
+        'decimal_places': get_user_value(request.user, 'pos_decimal_places'),
+        'tax_first': tax_first,
     }
     return render(request, 'pos/manage/products.html', context)
 

@@ -22,7 +22,7 @@ from pos.views import bill
 # readable pattern: (?P<company>[\w-]{1,30})
 r_company = r'^(?P<company>[\w-]{1,' + str(g.MISC['company_url_length']) + '})'
 # system pages (registration, login, logout, ...: /pos/app/register-company
-r_manage = '/' + g.MISC['management_url']
+r_manage = g.MISC['management_url'] + '/'
 
 urlpatterns = patterns('',
     #

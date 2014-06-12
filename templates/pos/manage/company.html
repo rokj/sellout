@@ -9,17 +9,22 @@
 
 <style type="text/css">
 img.logo-placeholder{
-    max-width:{{logo_dimensions.0}}px;
-    max-height:{{logo_dimensions.1}}px;
+    max-width:{{color_logo_dimensions.0}}px;
+    max-height:{{color_logo_dimensions.1}}px;
 }
 </style>
 
 <script type="text/javascript">
 $(document).ready(function(){
-    $("#id_image")
+    $("#id_color_logo")
         .customFileInput()
         .change(function(){
-            preview_image(this, "#logo", {{logo_dimensions.0}}, {{logo_dimensions.1}});
+            preview_image(this, "#logo", {{color_logo_dimensions.0}}, {{color_logo_dimensions.1}});
+        });
+    $("#id_monochrome_logo")
+        .customFileInput()
+        .change(function(){
+            preview_image(this, "#logo", {{monochrome_logo_dimensions.0}}, {{monochrome_logo_dimensions.1}});
         });
 });
 
@@ -35,16 +40,22 @@ $(document).ready(function(){
     {% csrf_token %}
 
     <div class="management-column">
-        {% if company.image %}
-            <img id="logo" src="{{ company.image.url }}" alt="company_logo">
+        {% if company.color_logo %}
+            <img id="logo" src="{{ company.color_logo.url }}" alt="company_logo">
         {% else %}
             <img id="logo" src="{% static 'graphics/placeholder.png' %}" alt="company_logo" class="logo-placeholder">
         {% endif %}
 
         <div class="form-field">
-            <div class="error">{{ form.image.errors }}</div>
-            {{ form.image.label_tag }}
-            <div> {{ form.image }} </div>
+            <div class="error">{{ form.color_logo.errors }}</div>
+            {{ form.color_logo.label_tag }}
+            <div> {{ form.color_logo }} </div>
+        </div>
+
+        e<div class="form-field">
+            <div class="error">{{ form.color_logo.errors }}</div>
+            {{ form.color_logo.label_tag }}
+            <div> {{ form.color_logo }} </div>
         </div>
 
         <div class="form-field">

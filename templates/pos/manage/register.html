@@ -48,7 +48,9 @@ $(document).ready(function(){
 {% block content %}
 <img id="logo" src="">
 
-<form action="{% url 'pos:register_company' %}" method="post" {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
+<form action="{% url 'pos:register_company' %}" method="post"
+      {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
+
     {% csrf_token %}
     {{ form.non_field_errors }}
     <!-- name -->
@@ -74,9 +76,9 @@ $(document).ready(function(){
     </div>
     <!-- logo -->
     <div class="form-field">
-        {{ form.image.errors }}
-        <label for="id_image">{% trans 'Company logo' %}:</label>
-        {{ form.image }}
+        {{ form.color_logo.errors }}
+        <label for="id_color_logo">{% trans 'Company logo' %}:</label>
+        {{ form.color_logo }}
         <div class="help-text">{% trans 'Allowed formats: TODO' %}</div>
     </div>
     <!-- e-mail -->
