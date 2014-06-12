@@ -23,7 +23,7 @@ function show_suggestions(data){
 }
                                            
 $(document).ready(function(){
-    // get url suggestions after #id_name loses focus
+    // get url suggestions after #id_name loses fo\cus
     $("#id_name").blur(function(){
         send_data("{% url 'pos:url_name_suggestions' %}",
                 {'name':$(this).val()},
@@ -35,14 +35,18 @@ $(document).ready(function(){
     });
     
     // show image before upload
-    $("#id_image").change(function(){
-        preview_image(this, "#logo", {{logo_dimensions.0}}, {{logo_dimensions.1}});
+    $("#id_color_logo").change(function(){
+        preview_image(this, "#logo", {{color_logo_dimensions.0}}, {{color_logo_dimensions.1}});
     });
 });
 
 // ]]>
 </script>
 
+{% endblock %}
+
+{% block status_bar %}
+    TEH STATUS IS EMPTY
 {% endblock %}
 
 {% block content %}
@@ -65,7 +69,7 @@ $(document).ready(function(){
         <label for="id_url_name">{% trans 'POS address' %}:</label>
         <div>
             {{ pos_url }} {{ form.url_name }} /
-            <div id="suggestion_list"></div> 
+            <div id="suggestion_list"></div>
         </div> 
         <div class="help-text">
         {% blocktrans %}Your POS system will be accessible at this address.

@@ -5,22 +5,21 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
 
-from pos.models import Company, Category, Discount, Product, ProductDiscount, Price, PurchasePrice, Tax
-from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok, \
+from pos.models import Company, Category, Product, Price, PurchasePrice, Tax
+from pos.views.util import JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, image_dimensions, \
-                           image_from_base64, max_field_length
+                           image_from_base64, max_field_length, error
 from pos.views.manage.discount import discount_to_dict
 from pos.views.manage.category import get_subcategories
 from pos.views.manage.tax import get_default_tax
 
 from common import globals as g
-from config.functions import get_user_value
+from config.functions import get_company_value
 
 import decimal
 from sorl.thumbnail import get_thumbnail
-from rest_framework.decorators import api_view, permission_classes,\
-    authentication_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 ###############
@@ -42,7 +41,7 @@ def JSON_units(request, company):
     return JSON_response(g.UNITS)  # G units!
 
 
-def product_to_dict(user, product, android=False):
+def product_to_dict(user, company, product, android=False):
     # returns all relevant product's data:
     # id
     # product name
@@ -72,21 +71,21 @@ def product_to_dict(user, product, android=False):
     if not purchase_price:
         ret['purchase_price'] = ''
     else:
-        ret['purchase_price'] = format_number(user, purchase_price)
+        ret['purchase_price'] = format_number(user, company, purchase_price)
 
     # sale price
     price = product.get_price()
     if not price:
         ret['price'] = ''
     else:
-        ret['price'] = format_number(user, price)
+        ret['price'] = format_number(user, company, price)
 
     # all discounts in a list
     discounts = []
     all_discounts = product.get_discounts()
     for d in all_discounts:
         # discounts.append(d.id)
-        discounts.append(discount_to_dict(user, d))
+        discounts.append(discount_to_dict(user, company, d))
     ret['discounts'] = discounts
 
     if product.image:  # check if product's image exists:
@@ -99,9 +98,9 @@ def product_to_dict(user, product, android=False):
 
     # tax: it's a not-null foreign key
     ret['tax_id'] = product.tax.id
-    ret['tax'] = format_number(user, product.tax.amount)
+    ret['tax'] = format_number(user, company, product.tax.amount)
     # stock: it cannot be 'undefined'
-    ret['stock'] = format_number(user, product.stock)
+    ret['stock'] = format_number(user, company, product.stock)
 
     # category?
     if product.category:
@@ -118,7 +117,7 @@ def product_to_dict(user, product, android=False):
     ret['private_notes'] = product.private_notes
     ret['unit_type'] = product.unit_type
     ret['unit_type_display'] = product.get_unit_type_display()
-    ret['stock'] = format_number(user, product.stock)
+    ret['stock'] = format_number(user, company, product.stock)
     ret['color'] = product.color
     return ret
 
@@ -130,7 +129,15 @@ def products(request, company):
     # needs to be at least guest to view products
     if not has_permission(request.user, c, 'product', 'list'):
         return no_permission_view(request, c, _("view products"))
-    
+
+    # if there are no taxes defined, don't show anything
+    if Tax.objects.filter(company=c).count() == 0:
+        return error(request, _("There are no taxes defined. Please go to tax management and define them."))
+
+    # if there are no categories defined, throw an error
+    if Category.objects.filter(company=c).count() == 0:
+        return error(request, _("There are no categories defined, please go to category management to define them."))
+
     # fields that need to be limited in length:
     lengths = {
         'code': max_field_length(Product, 'code'),
@@ -142,7 +149,7 @@ def products(request, company):
         'tax': g.DECIMAL['percentage_decimal_places'] + 4, # up to '100.' + 'decimal_digits'
     }
     
-    if get_user_value(request.user, 'pos_discount_calculation') == 'Tax first':
+    if get_company_value(request.user, c, 'pos_discount_calculation') == 'Tax first':
         tax_first = True
     else:
         tax_first = False
@@ -155,7 +162,7 @@ def products(request, company):
         'add_url': reverse('pos:web_create_product', args=[c.url_name]),
         # config variables 
         'can_edit': has_permission(request.user, c, 'product', 'edit'),
-        'currency': get_user_value(request.user, 'pos_currency'),
+        'currency': get_company_value(request.user, c, 'pos_currency'),
         # images
         'image_dimensions': g.IMAGE_DIMENSIONS['product'],
         'image_upload_formats': g.MISC['image_upload_formats'], # what can be uploaded
@@ -163,10 +170,10 @@ def products(request, company):
         'max_upload_size_bytes': g.MISC['max_upload_image_size'], # bytes for javascript
         # html fields
         'field_lengths': lengths,
-        'separator': get_user_value(request.user, 'pos_decimal_separator'),
+        'separator': get_company_value(request.user, c, 'pos_decimal_separator'),
         # numbers etc
         'default_tax_id': get_default_tax(request.user, c)['id'],
-        'decimal_places': get_user_value(request.user, 'pos_decimal_places'),
+        'decimal_places': get_company_value(request.user, c, 'pos_decimal_places'),
         'tax_first': tax_first,
     }
     return render(request, 'pos/manage/products.html', context)
@@ -194,7 +201,7 @@ def get_product(request, company, product_id):
     
     product = Product.objects.get(company=c, id=product_id)
     
-    return JSON_response(product_to_dict(request.user, product))
+    return JSON_response(product_to_dict(request.user, c, product))
 
 @login_required
 def web_search_products(request, company):
@@ -327,7 +334,7 @@ def search_products(request, company):
     # return serialized products
     ps = []
     for p in products:
-        ps.append(product_to_dict(request.user, p))
+        ps.append(product_to_dict(request.user, c, p))
 
     return JSON_response(ps)
 
@@ -406,7 +413,7 @@ def validate_product(user, company, data):
     if len(data['price']) > g.DECIMAL['currency_digits']+1:
         return r(False, _("Price too long"))
     
-    ret = parse_decimal(user, data['price'], g.DECIMAL['currency_digits'])
+    ret = parse_decimal(user, company, data['price'], g.DECIMAL['currency_digits'])
     if not ret['success']:
         return r(False, _("Check price notation"))
     data['price'] = ret['number']
@@ -416,8 +423,8 @@ def validate_product(user, company, data):
         if len(data['purchase_price']) > g.DECIMAL['currency_digits']+1:
             return r(False, _("Purchase price too long"))
     
-        if len(data['purchase_price']) > 1: # purchase price is not mandatory, so don't whine if it's not entered
-            ret = parse_decimal(user, data['purchase_price'], g.DECIMAL['currency_digits'])
+        if len(data['purchase_price']) > 1:  # purchase price is not mandatory, so don't whine if it's not entered
+            ret = parse_decimal(user, company, data['purchase_price'], g.DECIMAL['currency_digits'])
             if not ret['success']:
                 return r(False, _("Check purchase price notation"))
             data['purchase_price'] = ret['number']
@@ -495,7 +502,7 @@ def validate_product(user, company, data):
     if len(data['stock']) > g.DECIMAL['quantity_digits']:
         return r(False, _("Stock number too big"))
     
-    ret = parse_decimal(user, data['stock'],
+    ret = parse_decimal(user, company, data['stock'],
         g.DECIMAL['quantity_digits']-g.DECIMAL['quantity_decimal_places']-1)
     if not ret['success']:
         return r(False, _("Check stock notation"))
@@ -505,18 +512,17 @@ def validate_product(user, company, data):
         if data['stock'] < decimal.Decimal('0'):
             return r(False, _("Stock cannot be negative"))
         
-    return {'status':True, 'data':data} 
+    return {'status': True, 'data': data}
 
 @login_required
 def web_create_product(request, company):
     return create_product(request, company)
 
 
-
 def create_product(request, company):
     # create new product
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
     
@@ -638,11 +644,11 @@ def edit_product(request, company, android=False):
     product.updated_by = request.user
     product.save()
 
-    return JSON_ok(extra=product_to_dict(request.user, product))
+    return JSON_ok(extra=product_to_dict(request.user, c, product))
 
 @login_required
-def web_delete_product(request, company, prodcut_id):
-    return delete_product(request, company, prodcut_id)
+def web_delete_product(request, company):
+    return delete_product(request, company)
 
 @login_required
 def web_delete_product(request, company):
@@ -669,7 +675,7 @@ def delete_product(request, company):
     
     product.delete()
     
-    return JSON_ok(extra=product_to_dict(request.user, product))
+    return JSON_ok(extra=product_to_dict(request.user, c, product))
 
 
 def get_all_products(user, company):
@@ -677,6 +683,6 @@ def get_all_products(user, company):
 
     r = []
     for p in products:
-        r.append(product_to_dict(user, p))
+        r.append(product_to_dict(user, company, p))
 
     return r

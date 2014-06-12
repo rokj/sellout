@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load i18n %}
 
 {% block body_tag %}<body class="tasks"> {% endblock %}
+{% block status_bar %}{# nothing to put in status bar #}{% endblock %}
 {% block content %}
 <h1>{% trans "Error!" %}</h1>
 

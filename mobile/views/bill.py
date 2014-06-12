@@ -13,9 +13,9 @@ from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Bill, BillItem, Product
 from pos.views.bill import create_bill
-from pos.views.util import has_permission, JSON_response, JSON_ok, JSON_parse, JSON_error, \
+from pos.views.util import has_permission, JSON_response, JSON_parse, JSON_error, \
     format_number, parse_decimal, format_date, format_time
-from config.functions import get_user_value
+from config.functions import get_company_value
 import common.globals as g
 
 from pytz import timezone
@@ -23,7 +23,7 @@ from datetime import datetime as dtm
 from decimal import Decimal
 
 
-def bill_item_to_dict(user, item):
+def bill_item_to_dict(user, company, item):
     i = {}
     
     i['item_id'] = item.id
@@ -36,22 +36,22 @@ def bill_item_to_dict(user, item):
     i['description'] = item.description
     i['private_notes'] = item.private_notes
     i['unit_type'] = item.unit_type
-    i['stock'] = format_number(user, item.stock)
+    i['stock'] = format_number(user, company, item.stock)
     # values from bill Item
     i['bill_id'] = item.bill.id
-    i['quantity'] = format_number(user, item.quantity)
-    i['base_price'] = format_number(user, item.base_price)
-    i['tax_percent'] = format_number(user, item.tax_percent)
-    i['tax_absolute'] = format_number(user, item.tax_absolute)
-    i['discount_absolute'] = format_number(user, item.discount_absolute)
-    i['single_total'] = format_number(user, item.single_total)
-    i['total'] = format_number(user, item.total)
+    i['quantity'] = format_number(user, company, item.quantity)
+    i['base_price'] = format_number(user, company, item.base_price)
+    i['tax_percent'] = format_number(user, company, item.tax_percent)
+    i['tax_absolute'] = format_number(user, company, item.tax_absolute)
+    i['discount_absolute'] = format_number(user, company, item.discount_absolute)
+    i['single_total'] = format_number(user, company, item.single_total)
+    i['total'] = format_number(user, company, item.total)
     i['bill_notes'] = item.bill_notes
 
     return i
 
 
-def bill_to_dict(user, bill):
+def bill_to_dict(user, company, bill):
     # fields in bill:
     # company
     # type
@@ -68,19 +68,19 @@ def bill_to_dict(user, bill):
     b['type'] = bill.type
     b['recipient_contact'] = bill.recipient_contact
     b['note'] = bill.note
-    b['sub_total'] = format_number(user, bill.sub_total)
-    b['discount'] = format_number(user, bill.discount)
-    b['tax'] = format_number(user, bill.tax)
-    b['total'] = format_number(user, bill.total)
-    b['timestamp'] = format_date(user, bill.timestamp) + " " + format_time(user, bill.timestamp)
-    b['due_date'] = format_date(user, bill.due_date)
+    b['sub_total'] = format_number(user, company, bill.sub_total)
+    b['discount'] = format_number(user, company, bill.discount)
+    b['tax'] = format_number(user, company, bill.tax)
+    b['total'] = format_number(user, company, bill.total)
+    b['timestamp'] = format_date(user, company, bill.timestamp) + " " + format_time(user, company, bill.timestamp)
+    b['due_date'] = format_date(user, company, bill.due_date)
     b['status'] = bill.status
     
     # items:
     items = BillItem.objects.filter(bill=bill)
     i = []
     for item in items:
-        i.append(bill_item_to_dict(user, item))
+        i.append(bill_item_to_dict(user, company, item))
         
     b['items'] = i
 
@@ -95,12 +95,12 @@ def new_bill(user, company):
         user=user,  # this can change
         created_by=user,  # this will never change
         type="Normal",
-        timestamp=dtm.now().replace(tzinfo=timezone(get_user_value(user, 'pos_timezone'))),
+        timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(user, company, 'pos_timezone'))),
         status="Active"
     )
     b.save()
 
-    return bill_to_dict(user, b)
+    return bill_to_dict(user, company, b)
 
 
 def validate_prices():
@@ -108,7 +108,7 @@ def validate_prices():
     pass
 
 
-def item_prices(user, base_price, tax_percent, quantity, discounts):
+def item_prices(user, company, base_price, tax_percent, quantity, discounts):
     """ calculates prices and stuff and return the data
         passing parameters instead of Item object because Item may not exist yet
     """
@@ -133,7 +133,7 @@ def item_prices(user, base_price, tax_percent, quantity, discounts):
 
     r = {}  # return values
 
-    if get_user_value(user, 'pos_discount_calculation') == 'Tax first':
+    if get_company_value(user, company, 'pos_discount_calculation') == 'Tax first':
         # price without tax and discounts
         r['base'] = base_price
         # price including tax
@@ -213,7 +213,7 @@ def get_active_bill(request, company):
         return JSON_error(_("Multiple active bills found"))
         
     # serialize the fetched bill and return it
-    bill = bill_to_dict(request.user, bill)
+    bill = bill_to_dict(request.user, c, bill)
     return JSON_response({'status': 'ok', 'bill': bill})
 
 
@@ -272,7 +272,7 @@ def edit_item(request, company):
             
     # calculate and set all stuff for this new item:
     discounts = product.get_discounts()
-    prices = item_prices(request.user, product.get_price(), product.tax.amount, quantity, discounts)
+    prices = item_prices(request.user, c, product.get_price(), product.tax.amount, quantity, discounts)
 
     # notes, if any    
     bill_notes = data.get('notes')
@@ -305,13 +305,13 @@ def edit_item(request, company):
     item.save()
 
     # return the item in JSON
-    return JSON_response({'item': bill_item_to_dict(request.user, item), 'status': 'ok'})
+    return JSON_response({'item': bill_item_to_dict(request.user, company, item), 'status': 'ok'})
 
 
 @ login_required
 def remove_item(request, company):
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
 

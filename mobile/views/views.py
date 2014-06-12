@@ -1,17 +1,14 @@
-from django.shortcuts import render
-
 # Create your views here.
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from common.globals import UNITS
-from config.functions import get_user_config, get_user_value, get_company_value
+from config.functions import get_company_value
 from pos.models import Company, Tax
 from pos.views.manage.category import get_all_categories
-from pos.views.manage.discount import JSON_discounts, get_all_discounts
-from pos.views.manage.tax import get_taxes, tax_to_dict
+from pos.views.manage.discount import get_all_discounts
+from pos.views.manage.tax import tax_to_dict
 from pos.views.util import JSON_error, has_permission, JSON_response, JSON_ok
 from django.utils.translation import ugettext as _
-
 
 
 @api_view(['GET', 'POST'])
@@ -41,7 +38,7 @@ def mobile_get_cut(request, company):
     result = {}
     r = []
     for t in taxes:
-        r.append(tax_to_dict(request.user, t))
+        r.append(tax_to_dict(request.user, c, t))
     result['taxes'] = r
 
     units = UNITS

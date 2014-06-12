@@ -16,16 +16,16 @@ from pos.views.util import error, JSON_response, JSON_error, \
                            format_number, format_date, parse_date, parse_decimal, \
                            max_field_length
 from common import globals as g
-from config.functions import get_date_format, get_user_value
+from config.functions import get_date_format, get_user_value, get_company_value
 
 
-def discount_to_dict(user, d, android=False):
+def discount_to_dict(user, company, d, android=False):
     ret = {
         'id': d.id,
         'description': d.description,
         'code': d.code,
         'type': d.type,
-        'amount': format_number(user, d.amount),
+        'amount': format_number(user, company, d.amount),
         'enabled': d.enabled,
         'active': d.is_active,
     }
@@ -33,45 +33,43 @@ def discount_to_dict(user, d, android=False):
     if android and d.start_date:
         ret['start_date'] = [d.start_date.year, d.start_date.month, d.start_date.day]
     else:
-        ret['start_date'] = format_date(user, d.start_date)
+        ret['start_date'] = format_date(user, company, d.start_date)
 
     if android and d.end_date:
         ret['end_date'] = [d.end_date.year, d.end_date.month, d.end_date.day]
     else:
-        ret['end_date'] = format_date(user, d.end_date)
+        ret['end_date'] = format_date(user, company, d.end_date)
     return ret
 
 
 @login_required
 def JSON_discounts(request, company):
-    return JSON_response(get_all_discounts(request.user, company))
-
-
-def get_all_discounts(user, company, android=False):
-    """ returns all available discounts for this company in a list of dictionaries
-        (see discount_to_dict for dictionary format)
-    """
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
 
     # permissions
-    if not has_permission(user, c, 'discount', 'list'):
+    if not has_permission(request.user, c, 'discount', 'list'):
         return JSON_error(_("You have no permission to view discounts"))
 
-    discounts = Discount.objects.filter(company__url_name=company, enabled=True).order_by('code')
+    return JSON_response(get_all_discounts(request.user, c))
+
+
+def get_all_discounts(user, company, android=False):
+    """ returns all available discounts for this company in a list of dictionaries
+        (see discount_to_dict for dictionary format)
+    """
+    discounts = Discount.objects.filter(company=company, enabled=True).order_by('code')
 
     ds = []
     for d in discounts:
         if d.is_active:
             ds.append(discount_to_dict(user, d, android))
     return ds
-    # serialize
 
 
-
-def validate_discount(data, user):
+def validate_discount(data, user, company):
     """ validates data for discount
         data is a dictionary with keys equal to model fields
         returns a dictionary: {
@@ -102,7 +100,7 @@ def validate_discount(data, user):
     if 'amount' not in data:
         return err(_("Amount is required"))
     else:
-        r = parse_decimal(user, data['amount'])
+        r = parse_decimal(user, company, data['amount'])
         if r['success']:
             data['amount'] = r['number']
         else:
@@ -110,7 +108,7 @@ def validate_discount(data, user):
     
     # start_date and end_date: parse date (none of them is mandatory)
     if len(data['start_date']) > 0: # date fields are never empty (None)
-        r = parse_date(user, data['start_date'])
+        r = parse_date(user, company, data['start_date'])
         if r['success']:
             data['start_date'] = r['date']
         else:
@@ -119,7 +117,7 @@ def validate_discount(data, user):
         del data['start_date']
 
     if len(data['end_date']) > 0:
-        r = parse_date(user, data['end_date'])
+        r = parse_date(user, company, data['end_date'])
         if r['success']:
             data['end_date'] = r['date']
         else:
@@ -149,7 +147,7 @@ class DiscountForm(forms.Form):
     
     def clean(self):
         # use the same clean method as JSON
-        r = validate_discount(self.cleaned_data, self.user)
+        r = validate_discount(self.cleaned_data, self.user, self.company)
         if not r['success']:
             raise forms.ValidationError(r['message'])
         else:
@@ -188,13 +186,13 @@ def list_discounts(request, company):
             # start_date
             if form.cleaned_data.get('start_date'):
                 # parse date first
-                r = parse_date(request.user, form.cleaned_data.get('start_date'))
+                r = parse_date(request.user, c, form.cleaned_data.get('start_date'))
                 if r['success']:
                     discounts = discounts.filter(start_date__gte=r['date'])
             
             # end_date
             if form.cleaned_data.get('end_date'):
-                r = parse_date(request.user, form.cleaned_data.get('end_date'))
+                r = parse_date(request.user, c, form.cleaned_data.get('end_date'))
                 if r['success']:
                     discounts = discounts.filter(start_date__gte=r['date'])
             
@@ -224,10 +222,10 @@ def list_discounts(request, company):
         'filter_form': form,
         'title': _("Discounts"),
         'site_title': g.MISC['site_title'],
-        'date_format_django': get_date_format(request.user, 'django'),
-        'date_format_jquery': get_date_format(request.user, 'jquery'),
+        'date_format_django': get_date_format(request.user, c, 'django'),
+        'date_format_jquery': get_date_format(request.user, c, 'jquery'),
         'results_display': results_display,
-        'currency': get_user_value(request.user, 'pos_currency'),
+        'currency': get_company_value(request.user, c, 'pos_currency'),
     }
 
     return render(request, 'pos/manage/discounts.html', context) 
@@ -244,7 +242,7 @@ def add_discount(request, company):
         'title':_("Add discount"),
         'site_title':g.MISC['site_title'],
         'company':c,
-        'date_format_jquery':get_date_format(request.user, 'jquery'),
+        'date_format_jquery':get_date_format(request.user, c, 'jquery'),
     }
     
     # check for permission for adding discounts
@@ -295,9 +293,9 @@ def edit_discount(request, company, discount_id):
         return no_permission_view(request, c, _("edit discounts"))
     
     context = {
-        'company':c,
-        'discount_id':discount_id,
-        'date_format_jquery':get_date_format(request.user, 'jquery'),
+        'company': c,
+        'discount_id': discount_id,
+        'date_format_jquery': get_date_format(request.user, c, 'jquery'),
     }
     
     discount = get_object_or_404(Discount, id=discount_id)
@@ -312,7 +310,7 @@ def edit_discount(request, company, discount_id):
 
     if request.method == 'POST':
         # submit data
-        form = DiscountForm(request.POST, initial=discount_to_dict(request.user, discount))
+        form = DiscountForm(request.POST, initial=discount_to_dict(request.user, c, discount))
         form.company = c
         form.user = request.user
         
@@ -328,7 +326,7 @@ def edit_discount(request, company, discount_id):
             
             return redirect('pos:list_discounts', company=c.url_name)
     else:
-        form = DiscountForm(initial=discount_to_dict(request.user, discount))
+        form = DiscountForm(initial=discount_to_dict(request.user, c, discount))
         form.company = c
         form.user = request.user
         

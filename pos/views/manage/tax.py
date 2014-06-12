@@ -1,28 +1,22 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
-from django import forms
-from django.http import Http404
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from pos.models import Company, Tax
 from common import globals as g
-from config.functions import get_date_format, get_user_value
+from config.functions import get_company_value
 from pos.views.util import JSON_response, JSON_parse, JSON_error, JSON_ok, \
                             has_permission, no_permission_view, \
-                            format_date, format_number, \
+                            format_number, \
                             max_field_length, \
                             parse_decimal
-from rest_framework.decorators import api_view, permission_classes,\
-    authentication_classes
-from rest_framework.permissions import IsAuthenticated
 
-def tax_to_dict(user, tax):
+def tax_to_dict(user, company, tax):
     return {
-        'id':tax.id,
-        'name':tax.name,
-        'amount':format_number(user, tax.amount),
-        'default':tax.default,
+        'id': tax.id,
+        'name': tax.name,
+        'amount': format_number(user, company, tax.amount),
+        'default': tax.default,
     }
 
 def get_default_tax(user, company):
@@ -33,17 +27,17 @@ def get_default_tax(user, company):
     try:
         # the 'normal' scenario: there's one default tax
         tax = Tax.objects.get(company=company, default=True)
-    except Tax.MultipleObjectsReturned: # more than one default tax, use the first by id
+    except Tax.MultipleObjectsReturned:  # more than one default tax, use the first by id
         tax = Tax.objects.filter(company=company, default=True).order_by('id')[0]
-    except Tax.DoesNotExist: # no default tax specified, use the first by id
+    except Tax.DoesNotExist:  # no default tax specified, use the first by id
         try:
             tax = Tax.objects.filter(company=company).order_by('id')[0]
         except: # even that doesn't work
-            return {'id':0,'amount':0}
+            return {'id': 0,'amount': 0}
 
-    return {'id':tax.id, 'amount':format_number(user, tax.amount)}
+    return {'id': tax.id, 'amount': format_number(user, company, tax.amount)}
 
-def validate_tax(user, tax):
+def validate_tax(user, company, tax):
     # validate_product, validate_discount, validate_contact for more info
     def err(msg):
         return {'success':False, 'data':None, 'message':msg}
@@ -55,7 +49,7 @@ def validate_tax(user, tax):
     
     # amount: try to parse number
     if tax['amount']:
-        r = parse_decimal(user, tax['amount'])
+        r = parse_decimal(user, company, tax['amount'])
         if r['success']:
             tax['amount'] = r['number'] # this could 
         else:
@@ -86,15 +80,15 @@ def list_taxes(request, company):
     edit_permission = has_permission(request.user, c, 'tax', 'edit')
     
     if not list_permission:
-        return no_permission_view(_("You have no permission to view taxes"))
+        return no_permission_view(request, c, _("You have no permission to view taxes"))
     
     context = {
-        'company':c,
-        'edit_permission':edit_permission,
-        'title':_("Manage Tax Rates"),
-        'site_title':g.MISC['site_title'],
+        'company': c,
+        'edit_permission': edit_permission,
+        'title': _("Manage Tax Rates"),
+        'site_title': g.MISC['site_title'],
         
-        'separator':get_user_value(request.user, 'pos_decimal_separator'),
+        'separator': get_company_value(request.user, c, 'pos_decimal_separator'),
     }
     
     return render(request, 'pos/manage/tax.html', context)
@@ -102,6 +96,7 @@ def list_taxes(request, company):
 @login_required
 def web_get_taxes(request, company):
     return get_taxes(request, company)
+
 
 def get_taxes(request, company):
     try:
@@ -116,7 +111,7 @@ def get_taxes(request, company):
     
     r = []
     for t in taxes:
-        r.append(tax_to_dict(request.user, t))
+        r.append(tax_to_dict(request.user, c, t))
     
     return JSON_response(r)
     
@@ -141,7 +136,7 @@ def save_taxes(request, company):
 
     # validate first
     for t in new_taxes:
-        r = validate_tax(request.user, t)
+        r = validate_tax(request.user, c, t)
         if not r['success']:
             return JSON_error(t['name'] + ": " + r['message'])
         else:
@@ -164,7 +159,7 @@ def save_taxes(request, company):
             
         tax.save()
 
-        extra.append(tax_to_dict(request.user, tax))
+        extra.append(tax_to_dict(request.user, c, tax))
             
     # everything is ok, delete all old taxes from the database
     for i in old_tax_ids:
@@ -178,6 +173,6 @@ def get_all_taxes(user, company):
 
     r = []
     for t in taxes:
-        r.append(tax_to_dict(user, t))
+        r.append(tax_to_dict(user, company, t))
 
     return r

@@ -649,7 +649,7 @@ def cleanup_images(**kwargs):
 
 
 def fill_countries():  # will only be used once, after install
-    from countries import country_list
+    from config.countries import country_list
     for c in country_list:
         country = Country(
                           name=c[0],

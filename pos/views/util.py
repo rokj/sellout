@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.core.files.base import ContentFile
 
 from common import globals as g
-from config.functions import get_date_format, get_time_format, get_user_value
+from config.functions import get_date_format, get_time_format, get_company_value
 from pos.models import Permission
 
 import json
@@ -124,12 +124,12 @@ def image_from_base64(data):
 
 
 # numbers
-def format_number(user, n, high_precision=False):
+def format_number(user, company, n, high_precision=False):
     """ returns formatted decimal number n;
         strips zeros, but leaves <p> numbers after decimal point even if they are zero
     """
-    sep = get_user_value(user, 'pos_decimal_separator')
-    p = int(get_user_value(user, 'pos_decimal_places'))
+    sep = get_company_value(user, company, 'pos_decimal_separator')
+    p = int(get_company_value(user, company, 'pos_decimal_places'))
     
     if not n:
         return '0'
@@ -142,23 +142,23 @@ def format_number(user, n, high_precision=False):
     return s.replace('.', sep)
 
 
-def format_date(user, date, send_to='python'):
+def format_date(user, company, date, send_to='python'):
     """ formats date for display according to user's settings """
     if not date:
         return ''
     else:
-        return date.strftime(get_date_format(user, send_to))
+        return date.strftime(get_date_format(user, company, send_to))
 
 
-def format_time(user, date):
+def format_time(user, company, date):
     """ formats time for display according to user's settings """
     if not date:
         return ''
     else:
-        return date.strftime(get_time_format(user, 'python'))
+        return date.strftime(get_time_format(user, company, 'python'))
 
 
-def parse_decimal(user, string, max_digits=None):
+def parse_decimal(user, company, string, max_digits=None):
     """ replace user's decimal separator with dot and parse
         return dictionary with result status and parsed number:
         
@@ -167,7 +167,7 @@ def parse_decimal(user, string, max_digits=None):
     
     if user: # if user is None, try with the dot (user should never be None - 
              # this is to avoid checking on every function call)
-        string = string.replace(get_user_value(user, 'pos_decimal_separator'), '.')
+        string = string.replace(get_company_value(user, company, 'pos_decimal_separator'), '.')
     
     # check for entries too big
     if max_digits:
@@ -184,18 +184,18 @@ def parse_decimal(user, string, max_digits=None):
         return {'success':False, 'number':None}
 
 
-def parse_date(user, string):
+def parse_date(user, company, string):
     """ parses date in string according to user selected preferences
         return dictionary with result status and parsed datetime:
         
         {'success':True/False, date:<num>/None}
     """
     try:
-        d = datetime.strptime(string, get_date_format(user, 'python'))
+        d = datetime.strptime(string, get_date_format(user, company, 'python'))
     except:
-        return {'success':False, 'date':None}
+        return {'success': False, 'date': None}
    
-    return {'success':True, 'date':d}
+    return {'success': True, 'date': d}
 
 
 # permissions: cached
@@ -235,10 +235,10 @@ def no_permission_view(request, company, action):
     """ the view that is called if user attempts to do shady business without permission """
     
     context = {
-        'title':_("Permission denied"),
-        'site_title':g.MISC['site_title'],
-        'company':company, # required for the 'manage' template: links need company parameter
-        'action':action,
+        'title': _("Permission denied"),
+        'site_title': g.MISC['site_title'],
+        'company': company, # required for the 'manage' template: links need company parameter
+        'action': action,
     }
     
     return render(request, 'pos/no_permission.html', context)

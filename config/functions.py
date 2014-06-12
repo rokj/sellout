@@ -24,14 +24,14 @@ import json
 
 company_defaults = {
     # localization
-    'pos_date_format': 'yyyy-mm-dd', # keys for DATE_FORMATS dictionary in globals
-    'pos_time_format': '23:59', # keys for TIME_FORMATS dictionary in globals
-    'pos_timezone': 'utc', # keywords for pytz timezones
+    'pos_date_format': 'yyyy-mm-dd',  # keys for DATE_FORMATS dictionary in globals
+    'pos_time_format': '23:59',  # keys for TIME_FORMATS dictionary in globals
+    'pos_timezone': 'utc',  # keywords for pytz timezones
     'pos_currency': "$",
     'pos_decimal_separator': '.',
     # billing and calculation defaults
-    'pos_discount_calculation': "Tax first", # DISCOUNT_CALCULATION in globals
-    'pos_decimal_places': 2, # default decimal places for display
+    'pos_discount_calculation': "Tax first",  # DISCOUNT_CALCULATION in globals
+    'pos_decimal_places': 2,  # default decimal places for display
     # fallback defaults
     'pos_default_tax': '0.0',
 }
@@ -67,7 +67,10 @@ def user_cache_key(user):
 
 
 def company_cache_key(company):
-    return "company_" + str(company.id)
+    if not company:
+        return 'company_default'
+    else:
+        return "company_" + str(company.id)
 
 
 # load config and store it to memcache
@@ -177,7 +180,7 @@ def get_user_value(user, key):
             save_user_config(user, data)
             return data[key]
         else:
-            return "<invalid key: '" + "':'" + key + "'>"
+            raise KeyError("Invalid user config key: " + key)
 
 
 def get_company_value(user, company, key):
@@ -193,7 +196,7 @@ def get_company_value(user, company, key):
             save_company_config(user, company, data)
             return data[key]
         else:
-            return "<invalid key: '" + "':'" + key + "'>"
+            raise KeyError("Invalid company config key: " + key)
 
 
 def set_user_value(user, key, value):
@@ -219,16 +222,16 @@ def set_company_value(user, company, key, value):
 
 
 # shortcuts: date format
-def get_date_format(user, variant):
+def get_date_format(user, company, variant):
     """ returns g.DATE_FORMATS[user's date format][variant]
         variant is one of 'python', 'django', 'jquery'
     """
-    return g.DATE_FORMATS[get_user_value(user, 'pos_date_format')][variant]
+    return g.DATE_FORMATS[get_company_value(user, company, 'pos_date_format')][variant]
 
 
 # time format
-def get_time_format(user, variant):
+def get_time_format(user, company, variant):
     """ returns g.TIME_FORMATS[user's date format][variant]
         variant is one of 'python', 'django', 'jquery'
     """
-    return g.TIME_FORMATS[get_user_value(user, 'pos_time_format')][variant]
+    return g.TIME_FORMATS[get_company_value(user, company, 'pos_time_format')][variant]
