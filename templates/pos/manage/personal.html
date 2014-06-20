@@ -4,35 +4,19 @@
 
 {% block section_head %}
     <script type="text/javascript" src="{% static 'js/jquery.customfileinput.js' %}"></script>
-    <link type="text/css" rel="stylesheet" href="{% static 'css/management/categories.css' %}" />
     <style type="text/css">
-    img.category-placeholder{
-        width:{{ image_dimensions.0 }}px;
-        height:{{ image_dimensions.1 }}px;
-    }
+
     </style>
 
     <script type="text/javascript">
     $(document).ready(function(){
-        $("#id_image")
-            .customFileInput()
-            .change(function(){ preview_image(this, "#image", {{image_dimensions.0}}, {{image_dimensions.1}});
-        });
-    })
+
+    });
     </script>
 
 {% endblock %}
 
 {% block manage_content %}
-    {% if add %}
-        <h1>{% trans 'Add category' %}</h1>
-        {% if parent %}{% trans 'In category' %} '{{ parent.name }}'{% endif %}
-        <form action="{% url 'pos:add_category' company.url_name parent.id %}" method="post" enctype="multipart/form-data">
-    {% else %}
-        <h1>{% trans 'Edit category' %}</h1>
-        <form action="{% url 'pos:edit_category' company.url_name category.id %}" method="post" enctype="multipart/form-data">
-    {% endif %}
-
     {% if category.image %}
         <img id="image" src="{{ category.image.url }}" />
     {% else %}
@@ -75,6 +59,7 @@
             {{ form.color }}
         </div>
 
+
         <div class="form-field">
             <div class="split-cell first">
                 <input type="submit" value="{% trans 'Save' %}" />
@@ -87,5 +72,4 @@
             </div>
         </div>
     </div>
-    </form>
 {% endblock %}

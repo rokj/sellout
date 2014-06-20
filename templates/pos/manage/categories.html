@@ -225,13 +225,13 @@
     </script>
 {% endblock %}
 
-{% block manage_content %}
-    <h1>{% trans 'Categories' %}</h1>
-    <div id="add_button_container">
-        <a  class="button do"
-            href="{% url 'pos:add_category' company.url_name -1 %}">{% trans 'Add top-level category v tem pičkasem ozkem knofu jebote' %}</a><br />
-    </div>
+{% block status_bar_title %}{% trans 'Categories' %}{% endblock %}
 
+{% block extra_button %}
+    <a class="extra-button" href="{% url 'pos:add_category' company.url_name -1 %}">{% trans 'Add' %}</a>
+{% endblock %}
+
+{% block manage_content %}
     <div id="search">{# TODO #}</div>
 
     <div id="category_tree">

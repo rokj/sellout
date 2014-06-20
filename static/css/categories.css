@@ -62,7 +62,7 @@ div.category-button-subcategories{ /* this category has more subcategories */
 }
 
 img.category-button-icon{ /* category image in selection buttons */
-    display:inline-block;
+    display: inline-block;
     vertical-align:middle;
     height:24px; /* icons are thumbnails, which are already cropped to a square */
     width:24px;

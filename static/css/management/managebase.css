@@ -1,27 +1,11 @@
-#management_menu{
-    display: block;
-    background-color: #000000;
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
-
-#management_menu li{
-    padding: 0;
+#management_content{
+    margin-top: 3em;
 }
 
 .menu-hidden{
     /* simpleMenus should not be hidden with display: none, but
        height: 0 to keep the necessary horizontal space occupied */
     height: 0;
-}
-
-#management_content{
-    position: absolute;
-    top: 3em;
-    left: 3em;
-    right: 3em;
-    z-index: -1; /* keep it below the statusbar */
 }
 
 h1{

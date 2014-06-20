@@ -72,7 +72,7 @@ def resize_image(path, dimensions):
     # if width <= dimensions[0] and height <= dimensions[1]:
     #     return # no need for resizing, image is smaller than requested
     # also resize to un-animate any animated GIFs
-    image.thumbnail(dimensions, Image.ANTIALIAS)
+    image.fit(dimensions, Image.ANTIALIAS)
     image.save(path, g.MISC['image_format'])
 
 
@@ -165,8 +165,8 @@ def parse_decimal(user, company, string, max_digits=None):
         {'success':True/False, number:<num>/None}
     """
     
-    if user: # if user is None, try with the dot (user should never be None - 
-             # this is to avoid checking on every function call)
+    if user:  # if user is None, try with the dot (user should never be None -
+              # this is to avoid checking on every function call)
         string = string.replace(get_company_value(user, company, 'pos_decimal_separator'), '.')
     
     # check for entries too big
@@ -237,7 +237,7 @@ def no_permission_view(request, company, action):
     context = {
         'title': _("Permission denied"),
         'site_title': g.MISC['site_title'],
-        'company': company, # required for the 'manage' template: links need company parameter
+        'company': company,  # required for the 'manage' template: links need company parameter
         'action': action,
     }
     
