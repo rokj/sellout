@@ -2,6 +2,21 @@
 {% load i18n %}
 <!DOCTYPE html>
 
+{% comment %}
+blocks:
+    {title} (not used, set from view)
+    {head}:
+        common to all pages on the site
+        {section_head}: new block defined in management, to separate common management javascript from specific pages
+    {body_tag}: for replacing plain <body> tag with <body class=...  ...
+    {status_bar_logo}: logo and image in terminal; link to terminal in management
+    {extra_button}: used in management only, for adding stuff
+
+    {content}: the actual webpage
+        {manage_content}: in management only
+
+{% endcomment %}
+
 <head>
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
     {% comment %} CSS {% endcomment %}
@@ -55,17 +70,21 @@
         {% endblock %}
 
         <div id="user_button" class="statusbar-button">
+            <div class="vertical-separator"></div>
+
             <a href="#" class="">{{ request.user }}</a>
 
             <ul id="user_menu">
                 {# store-related stuff #}
-                <li class="separator"><a href="#">{% trans 'User Settings' %}</a> </li>
-                <li class=""><a href="#">{% trans 'Switch User' %}</a> </li>
-                <li class=""><a href="#">{% trans 'Log Out' %}</a> </li>
+                <li class="store separator"><a href="#">{% trans 'User Settings' %}</a></li>
+                <li class="store"><a href="#">{% trans 'Switch User' %}</a> </li>
+                <li class="store"><a href="#">{% trans 'Log Out' %}</a> </li>
             </ul>
         </div>
 
         <div id="management_button" class="statusbar-button">
+            <div class="vertical-separator"></div>
+
             {# will be replaced by manage menu in management #}
             <a href="#" class="statusbar-button-margin">{% trans 'Management' %}</a>
 
@@ -79,8 +98,8 @@
                 <li class="store"><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
                 <li class="store"><a href="">{% trans 'Bills' %}</a></li>
                 {# company-related stuff #}
-                <li class="company"><a href="#">{% trans 'Configuration' %}</a></li>
-                <li class="company separator"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
+                <li class="company separator"><a href="#">{% trans 'Configuration' %}</a></li>
+                <li class="company"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
                 <li class="company"><a href="#">{% trans 'Users' %}</a></li>
             </ul>
         </div>

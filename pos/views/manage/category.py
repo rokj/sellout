@@ -1,5 +1,3 @@
-import base64
-import Image
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -8,22 +6,17 @@ from django import forms
 from django.http import Http404, HttpResponseRedirect
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from sorl.thumbnail import get_thumbnail
 
 from pos.models import Company, Category
-from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, resize_image, validate_image, \
-    image_dimensions, max_field_length, image_from_base64, has_permission, no_permission_view, JSON_stringify
+from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok,  \
+    max_field_length, has_permission, no_permission_view, JSON_stringify
 
 from common import globals as g
-from common import widgets
 
 
 ########################
 ### helper functions ###
 ########################
-import settings
-
-
 def category_breadcrumbs(category):
     # assemble the name in form category>subcategory>subsubcategory>...
     name = []
@@ -52,20 +45,10 @@ def category_to_dict(c, android = False):
         'name': c.name,
         'description': c.description,
         'parent_id': parent_id,
-        'image': "",
         'add_child_url': reverse('pos:add_category', kwargs={'company': c.company.url_name, 'parent_id': c.id}),
         'edit_url': reverse('pos:edit_category', kwargs={'company': c.company.url_name, 'category_id': c.id}),
         'color': c.color,
     }
-
-    if c.image:
-        if android:
-            x = c.image
-            with open(c.image.path, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read())
-            r['image'] = encoded_string
-        else:
-            r['image'] = c.image.url
 
     return r
 
@@ -75,7 +58,6 @@ def validate_category(user, company, data):
     # id
     # name*
     # description
-    # image
 
     def r(status, msg):
         return {'status': status,
@@ -130,20 +112,6 @@ def validate_category(user, company, data):
                     " (" + _("code") + ": " + p[0].code + ")")
     data['name'] = data['name'].strip()
 
-    # image:
-    if data.get('change_image') and data['change_image'] == True:
-        if 'image' in data: # new image has been uploaded
-            data['image'] = image_from_base64(data['image'])
-            if not data['image']:
-                # something has gone wrong during conversion
-                return r(False, _("Image upload failed"))
-        else:
-            # image will be deleted in view
-            pass
-    else:
-        # no change regarding images
-        data['image'] = None
-
     # description, notes - anything can be entered
     data['description'] = data['description'].strip()
 
@@ -157,7 +125,6 @@ def get_all_categories(company_id, category_id=None, sort='name', data=None, lev
     #    return {'id':c.id,
     #            'name':c.name,
     #            'description':c.description,
-    #            'image':c.image,
     #            'level':level
     #    }
 
@@ -268,18 +235,14 @@ def JSON_categories(request, company):
 
 class CategoryForm(forms.ModelForm):
     # take special case of urls
-    def clean_image(self):
-        return validate_image(self)
-
     class Meta:
         model = Category
         fields = ['parent',
                   'name',
                   'description',
-                  'image',
                   'color']
         widgets = {
-            'image': widgets.PlainClearableFileInput,
+            'color': forms.HiddenInput
         }
 
 
@@ -292,11 +255,11 @@ def list_categories(request, company):
         return no_permission_view(request, c, _("view categories"))
 
     context = {
+        'box_dimensions': g.IMAGE_DIMENSIONS['category'],
         'company': c,
         'categories': JSON_stringify(get_all_categories_structured(c), True),
         'title': _("Categories"),
         'site_title': g.MISC['site_title'],
-        'image_dimensions': image_dimensions('thumb_large'),
     }
 
     return render(request, 'pos/manage/categories.html', context)
@@ -331,7 +294,7 @@ def add_category(request, company, parent_id=-1):
         'company': c,
         'parent': parent,
         'add': True,
-        'image_dimensions': image_dimensions('category'),
+        'colors': JSON_stringify(g.CATEGORY_COLORS),
         'title': _("Add category"),
         'site_title': g.MISC['site_title']
     }
@@ -350,9 +313,6 @@ def add_category(request, company, parent_id=-1):
                 category.company_id = c.id
 
             form.save()
-
-            if category.image:
-                resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
 
             # return to categories and select the just added category
             return HttpResponseRedirect(
@@ -398,8 +358,6 @@ def edit_category(request, company, category_id):
                 category.company_id = c.id
 
             form.save()
-            if category.image:
-                resize_image(category.image.path, g.IMAGE_DIMENSIONS['category'])
 
             # return to categories and select the just added category
             return HttpResponseRedirect(
@@ -413,7 +371,7 @@ def edit_category(request, company, category_id):
     context['form'] = form
     context['company'] = c
     context['category'] = category
-    context['image_dimensions'] = g.IMAGE_DIMENSIONS['category']
+    context['colors'] = JSON_stringify(g.CATEGORY_COLORS)
     context['title'] = _("Edit category")
     context['site_title'] = g.MISC['site_title']
 

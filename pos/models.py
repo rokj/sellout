@@ -75,11 +75,12 @@ class Category(SkeletonU):
     parent = models.ForeignKey('self', blank=True, null=True)
     name = models.CharField(_("Category name"), max_length=100, null=False, blank=False)
     description = models.TextField(_("Description"), null=True, blank=True)
-    image = models.ImageField(_("Icon"),
-                             upload_to=get_image_path(g.DIRS['category_icon_dir'], "pos_category", "image"),
-                             null=True, blank=True)
-
     color = models.CharField(default=g.CATEGORY_COLORS[0], blank=False, null=False, max_length=6)
+
+    # image has been replaced by color
+    # image = models.ImageField(_("Icon"),
+    #                          upload_to=get_image_path(g.DIRS['category_icon_dir'], "pos_category", "image"),
+    #                          null=True, blank=True)
 
     def __unicode__(self):
         return self.name

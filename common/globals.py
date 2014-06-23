@@ -185,7 +185,7 @@ MISC = {
 IMAGE_DIMENSIONS = {
     'color_logo': (180, 180),
     'monochrome_logo': (48, 48),
-    'category': (120, 120),
+    'category': (120, 120),  # there's no image, just a colored box
     'product': (160, 160),  # must be as large as the largest PRODUCT_BUTTON_DIMENSIONS
     'thumb_small': (32, 32),  # for thumbnails
     'thumb_large': (125, 128),
@@ -242,7 +242,8 @@ PRODUCT_BUTTON_DIMENSIONS = {
 }
 
 CATEGORY_COLORS = [  # choices for category.color
-    '000000',  # the first entry is the default
+    'ffffff',  # the first entry is the default
+    '000000',
     'ff7d64',
     '00dcb4',
     '143264',
@@ -254,4 +255,3 @@ CATEGORY_COLORS = [  # choices for category.color
     'ffc864',
     '5ad2fa',
 ]
-

@@ -4,39 +4,46 @@
 
 {% block section_head %}
     <script type="text/javascript" src="{% static 'js/jquery.customfileinput.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.colorPicker.js' %}"></script>
+
     <link type="text/css" rel="stylesheet" href="{% static 'css/management/categories.css' %}" />
     <style type="text/css">
-    img.category-placeholder{
-        width:{{ image_dimensions.0 }}px;
-        height:{{ image_dimensions.1 }}px;
+    div.color-button.selected{
+        background-image: url("{% static 'icons/selected_category_color.png' %}");
+        background-position: 90% 90%;
+        background-repeat: no-repeat;
     }
     </style>
 
     <script type="text/javascript">
     $(document).ready(function(){
-        $("#id_image")
-            .customFileInput()
-            .change(function(){ preview_image(this, "#image", {{image_dimensions.0}}, {{image_dimensions.1}});
-        });
+        var colors = {% autoescape off %}{{ colors }}{% endautoescape %};
+
+        var items = {
+            color_input: $("#id_color"),
+            color_list: $("#color_list")
+        };
+
+        items.color_input.colorPicker(colors, items.color_list);
     })
     </script>
 
 {% endblock %}
 
+{% block status_bar_title %}
+    {% if add %}
+        {% trans 'Add category' %}
+    {% else %}
+        {% trans 'Edit category' %}
+    {% endif %}
+{% endblock %}
+
 {% block manage_content %}
     {% if add %}
-        <h1>{% trans 'Add category' %}</h1>
         {% if parent %}{% trans 'In category' %} '{{ parent.name }}'{% endif %}
         <form action="{% url 'pos:add_category' company.url_name parent.id %}" method="post" enctype="multipart/form-data">
     {% else %}
-        <h1>{% trans 'Edit category' %}</h1>
         <form action="{% url 'pos:edit_category' company.url_name category.id %}" method="post" enctype="multipart/form-data">
-    {% endif %}
-
-    {% if category.image %}
-        <img id="image" src="{{ category.image.url }}" />
-    {% else %}
-        <img id="image" src="{% static 'graphics/placeholder.png' %}" class="category-placeholder" />
     {% endif %}
 
     <div class="edit-container">
@@ -69,10 +76,11 @@
             {{ form.description }}
         </div>
 
+        {# color is hidden, javascript deals with it #}
+        {{ form.color }}
         <div class="form-field">
-            <div class="error">{{ form.color.errors }}</div>
             {{ form.color.label_tag }}
-            {{ form.color }}
+            <div id="color_list"></div>
         </div>
 
         <div class="form-field">

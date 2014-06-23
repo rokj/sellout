@@ -1,17 +1,9 @@
 {% extends "pos/manage/manage.html" %}
 {% load static %}
-{% load thumbnail %}
 {% load i18n %}
 
 {% block section_head %}
     <link type="text/css" rel="stylesheet" href="{% static 'css/management/categories.css' %}" />
-    <style type="text/css">
-    .thumbnail{
-        width: {{image_dimensions.0}}px;
-        height: {{image_dimensions.1}}px;
-    }
-    </style>
-
     <script type="text/javascript">
         $(document).ready(function(){
             var g = {
@@ -24,8 +16,8 @@
                 subcontainers: {}, // dictionary level:div
                 max_level: 8, // 9th level and deeper will be of the same color
 
-                button_width: {{ image_dimensions.0 }},
-                button_height: {{ image_dimensions.1 }},
+                button_width: {{ box_dimensions.0 }},
+                button_height: {{ box_dimensions.1 }},
                 button_margin: 10, // category buttons' margins, in pixels
                 toolbox_arrow_height: 30, // see categories.css, #tools .arrow:after
 
@@ -77,19 +69,17 @@
                 p.container = get_container(p.level);
 
                 // create a category button (save id for later)
-                p.button = $("<div>", {"class":"category-button thumbnail", "data-id": p.data.id});
-
+                p.button = $("<div>", {"class":"category-button", "data-id": p.data.id});
+                p.button.css("background-color", "#" + p.data.color);
+                p.button.width(g.button_width);
+                p.button.height(g.button_height);
                 p.button.appendTo(p.container);
 
-                p.background = $("<div>", {"class": "category-background"});
-                if(p.data.image) p.background.css("background-image", "url('" + p.data.image + "')");
-                else p.background.css("background-image", "url('{% static 'graphics/placeholder.png' %}')");
-                p.background.appendTo(p.button);
-
                 // data
-                p.text = $("<div>", {"class": "category-text"});
-                p.text.append(data.name);
-                p.text.appendTo(p.button);
+                p.text = $("<span>").text(data.name);
+                p.button.append(p.text);
+
+                if(is_dark(p.data.color)) p.text.addClass("dark");
 
                 // tools
                 p.tools = $("<img>", {src: "{% static 'graphics/gear.png' %}", "class":"toolbox"});
@@ -133,19 +123,31 @@
 
                         // delete category: send ajax request to server, if everything OK, delete this object
                         $("input.delete", g.toolbox).unbind().click(function(){
-                            send_data(g.delete_url, {category_id: p.data.id}, "{{ csrf_token }}", function(recv_data){
-                                if(recv_data.status != 'ok'){
-                                    error_message(
-                                        gettext("Could not delete category"),
-                                        recv_data.message
-                                    );
+                            var dlg = confirmation_dialog(
+                                "{% trans 'Delete category' context 'confirmation dialog title' %}",
+                                "{% trans 'Are you sure you want to delete category' %} " + p.data.name + "?",
+                                function(){
+                                    send_data(g.delete_url, {category_id: p.data.id}, "{{ csrf_token }}", function(recv_data){
+                                        if(recv_data.status != 'ok'){
+                                            error_message(
+                                                gettext("Could not delete category"),
+                                                recv_data.message
+                                            );
+                                        }
+                                        else{
+                                            // ok, delete this object from the document
+                                            p.button.remove();
+                                            g.toolbox.hide();
+
+                                            dlg.dialog("destroy");
+                                        }
+                                    });
+                                },
+                                function(){
+                                    // do nothing
+                                    dlg.dialog("destroy");
                                 }
-                                else{
-                                    // ok, delete this object from the document
-                                    p.button.remove();
-                                    g.toolbox.hide();
-                                }
-                            });
+                            );
                         });
 
                     });
@@ -228,7 +230,10 @@
 {% block status_bar_title %}{% trans 'Categories' %}{% endblock %}
 
 {% block extra_button %}
-    <a class="extra-button" href="{% url 'pos:add_category' company.url_name -1 %}">{% trans 'Add' %}</a>
+    <a class="extra-button" href="{% url 'pos:add_category' company.url_name -1 %}"
+       title="{% trans 'Add a new top-level category' %}">
+        {% trans 'Add' %}
+    </a>
 {% endblock %}
 
 {% block manage_content %}

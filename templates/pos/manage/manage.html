@@ -23,12 +23,14 @@
 {% block status_bar_title %}{% endblock %}
 
 {% block status_bar_logo %}
-    <div id="logo" class="link">
-        {# logo block will be replaced with link to management in terminal #}
-        <img src="{% static 'icons/logo_black_sign.png' %}"
-             alt="{% trans 'Go to terminal' %}"
-             title="{% trans 'Go to terminal' %}"/>
-    </div>
+    <a href="{% url 'pos:terminal' company.url_name %}" title="{% trans 'Go to terminal' %}">
+        <div id="logo" class="link">
+            {# logo block will be replaced with link to management in terminal #}
+            <img src="{% static 'icons/logo_black_sign.png' %}"
+                 alt="{% trans 'Go to terminal' %}"
+                 title="{% trans 'Go to terminal' %}"/>
+        </div>
+    </a>
 {% endblock %}
 
 {% block content %}

@@ -32,7 +32,6 @@
             .click(function(e){
                 // don't click on document
                 e.stopPropagation();
-                e.preventDefault();
 
                 // close other menus
                 $("." + button_class).not(button).each(function(){

@@ -1,5 +1,7 @@
 #management_content{
-    margin-top: 3em;
+    margin-top: 40px; /* the height of #status_bar */
+    padding-top: 15px;
+    padding-left: 40px;
 }
 
 .menu-hidden{
@@ -52,7 +54,7 @@ div.custom-file-input{
 
 div.custom-file-input input{
     border: none;
-    height: 2.5em;
+    height: 30px;
     background-color: #000000;
     color: #ffffff;
 }
@@ -63,6 +65,9 @@ div.form-field-container{
 
 div.form-field{
     margin-top: 15px;
+    /* to prevent floated elements inside
+       from breaking out (and not taking up space) */
+    overflow: hidden;
 }
 
 div.form-field input, div.form-field textarea, div.form-field select{
@@ -158,8 +163,8 @@ span.no-results{
 
 /* buttons that are actually links */
 a.button{
-    height: 2.5em;
-    line-height: 2.5em;
+    height: 32px;
+    line-height: 32px;
     display: inline-block;
     color: #ffffff;
     text-decoration: none;
