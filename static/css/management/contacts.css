@@ -28,7 +28,7 @@ div.results{
 }
 
 div.results h2{
-    background-color: #ffffff;
+    background-color: #ebebeb;
     display: inline-block;
     font-size: 20px;
     padding: 10px;
@@ -46,12 +46,14 @@ div.controls{
     float: right;
 }
 
-table.type-individual tr:first-child td, a.type-individual{
+.type-individual,
+table.type-individual tr:first-child td{
     background-color: #4d8ed3;
     color: #ffffff;
 }
 
-table.type-company tr:first-child td, a.type-company{
+.type-company,
+table.type-company tr:first-child td{
     background-color: #ec5449;
 }
 

@@ -21,7 +21,7 @@ label{
     color: #999999;
 }
 
-input[type='text'], textarea {
+input[type='text'], input[type='email'], textarea {
     border-radius: 0;
     border-width: 1px;
     padding-top: 10px;
@@ -32,7 +32,7 @@ input[type='text'], textarea {
 input[type='submit'], input[type='button']{
     color: #ffffff;
     border: none;
-    height: 2.5em;
+    height: 40px;
     font-size: inherit;
     text-transform: uppercase;
 }
@@ -95,9 +95,12 @@ div.management-column{
 }
 
 div.form-field input[type='text'],
+div.form-field input[type='email'],
 div.form-field input[type='number'],
 div.form-field select, div.form-field textarea{
-    width: calc(100% - 5px); /* mind the paddings (dumb css) */
+    width: 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
 }
 
 div.clear-columns{
@@ -124,8 +127,7 @@ div.left-column + div.content{
 }
 
 div.left-column form, div.left-column .fake-form{
-    border-top: 3px solid #646464;
-    border-bottom: 3px solid #646464;
+
 }
 
 div.edit-container{
@@ -163,8 +165,8 @@ span.no-results{
 
 /* buttons that are actually links */
 a.button{
-    height: 32px;
-    line-height: 32px;
+    height: 40px;
+    line-height: 40px;
     display: inline-block;
     color: #ffffff;
     text-decoration: none;
@@ -175,6 +177,7 @@ a.button{
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-top: 5px; /* this is defined for all inputs */
 }
 
 a.button.do, input.do { background-color: #0000aa; }

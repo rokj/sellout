@@ -8,8 +8,9 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/contacts.css' %}"/>
 {% endblock %}
 
+{% block status_bar_title %}{% trans 'Add contact' context 'page title' %}{% endblock %}
+
 {% block manage_content %}
-    <h1>{% trans 'Add contact' context 'page title' %}</h1>
     <div class="edit-container">
         {% if type == 'Individual' %}
             I {# TODO: icon #}

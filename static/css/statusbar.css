@@ -33,52 +33,54 @@
     background-color: #22e693;
 }
 
-.statusbar-button{
+.button-container{
     float: right;
     text-align: right;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    max-width: 300px;
-
     cursor: pointer;
-    
     color: #ffffff;
     text-decoration: none;
     text-transform: uppercase;
-}
-
-#management_button, #user_button{
     position: relative;
-    overflow: visible;
+    width: 200px;
 }
 
-#management_menu, #user_menu{
+.button-text{ /* 'a' element, usually */
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.drop-down{ /* 'ul' element */
     background-color: #000000;
     overflow: hidden;
-    z-index: 16;
-    position: absolute;
     display: none; /* will be shown by simpleMenu.js on click */
 
     margin: 0;
     padding: 0;
     list-style-type: none;
+    width: 100%;
 }
 
-#management_menu, #management_button,
-#user_menu, #user_button{
-    width: 200px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+.drop-down:after, .button-container:after{
+    /* the arrow */
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 0;
+    height: 0;
+    margin-left: -15px;
+    border: 15px solid transparent;
+    border-top-color: #000000;
 }
 
-.extra-button{
-    display: block;
-    width: 150px;
-    height: 100%;
+#management_extra_button{
     background-color: #00bbda;
+}
+#management_extra_button.multi:after{
+    border-top-color: #00bbda;
 }
 
 h1.status-bar-title{
@@ -97,7 +99,7 @@ h1.status-bar-title{
     color: #ffffff;
 }
 
-#management_menu a{
+.drop-down a{
     height: 45px;
     margin-left: 20px;
     margin-right: 20px;
@@ -105,17 +107,17 @@ h1.status-bar-title{
     box-sizing: border-box;
 }
 
-#management_menu li.store a{
+.drop-down li.store a{
     color: #d0d0d0;
     border-top: 1px dotted #cccccc;
 }
 
-#management_menu li.company a{
+.drop-down li.company a{
     color: #ffffff;
     border-top: 1px dotted #cccccc;
 }
 
-#management_menu li.separator a{
+.drop-down li.separator a{
     border-top: 1px solid #ffffff;
     margin-top: 5px;
 }

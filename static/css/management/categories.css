@@ -144,7 +144,7 @@ img.toolbox{
     z-index: 4;
     bottom: 3px;
     right: 3px;
-    opacity: 0.1;
+    opacity: 0.5;
 }
 
 img.toolbox:hover{ opacity: 1; }

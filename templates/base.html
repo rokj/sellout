@@ -69,12 +69,12 @@ blocks:
             </div>
         {% endblock %}
 
-        <div id="user_button" class="statusbar-button">
+        <div id="user_button" class="button-container">
             <div class="vertical-separator"></div>
 
-            <a href="#" class="">{{ request.user }}</a>
+            <a href="#" class="button-text">{{ request.user }}</a>
 
-            <ul id="user_menu">
+            <ul id="user_menu" class="drop-down">
                 {# store-related stuff #}
                 <li class="store separator"><a href="#">{% trans 'User Settings' %}</a></li>
                 <li class="store"><a href="#">{% trans 'Switch User' %}</a> </li>
@@ -82,13 +82,13 @@ blocks:
             </ul>
         </div>
 
-        <div id="management_button" class="statusbar-button">
+        <div id="management_button" class="button-container">
             <div class="vertical-separator"></div>
 
             {# will be replaced by manage menu in management #}
-            <a href="#" class="statusbar-button-margin">{% trans 'Management' %}</a>
+            <a href="#" class="button-text">{% trans 'Management' %}</a>
 
-            <ul id="management_menu">
+            <ul id="management_menu" class="drop-down">
                 {# store-related stuff #}
                 <li class="store separator"><a href="{% url 'pos:list_categories' company.url_name %}">{% trans 'Categories' %}</a></li>
                 <li class="store"><a href="{% url 'pos:products' company.url_name %}">{% trans 'Products' %}</a></li>
@@ -104,7 +104,7 @@ blocks:
             </ul>
         </div>
 
-        <div id="management_extra_button" class="statusbar-button">
+        <div id="management_extra_button" class="button-container {% block extra_button_class %}{% endblock %}">
             {% block extra_button %}
             {# the button for (mainly) adding stuff in management, does not exist in terminal #}
             {% endblock %}

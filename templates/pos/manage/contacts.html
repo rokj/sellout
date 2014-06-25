@@ -4,12 +4,36 @@
 
 {% block section_head %}
     <link type="text/css" rel="stylesheet" href="{% static 'css/management/contacts.css' %}"/>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        // create a simple menu
+        $("#add_contact_button").simpleMenu($("#add_contact_menu"));
+    });
+    </script>
+{% endblock %}
 
+{% block status_bar_title %}{% trans 'Contacts' %}{% endblock %}
+
+{% block extra_button_class %}multi{% endblock %}
+{% block extra_button %}
+    {# a very special extra button #}
+    <a id="add_contact_button" href="#" class="button-text">{% trans 'Add' %}</a>
+
+    <ul id="add_contact_menu" class="drop-down">
+        {# add company #}
+        <li class="type-company">
+            <a class="type-company"
+               href="{% url 'pos:add_contact' company.url_name %}?type=Company">{% trans 'company' %}</a>
+        </li>
+        {# add individual #}
+        <li class="type-individual">
+            <a class="type-individual"
+               href="{% url 'pos:add_contact' company.url_name %}?type=Individual">{% trans 'individual' %}</a>
+        </li>
+    </ul>
 {% endblock %}
 
 {% block manage_content %}
-    <h1>{% trans 'Contacts' %}</h1>
-
     <div class="left-column">
         {% comment %} filter contacts {% endcomment %}
         <h2>{% trans 'Search' context 'form title' %}</h2>
@@ -37,18 +61,8 @@
 
             <div class="clear-floats"></div>
         </form>
-
-        {% comment %} add contact {% endcomment %}
-        <h2>{% trans 'Add' %}</h2>
-        <div class="split-cell first">
-            <a class="button type-company"
-               href="{% url 'pos:add_contact' company.url_name %}?type=Company">{% trans 'company' %}</a>
-        </div>
-        <div class="split-cell first">
-            <a class="button type-individual"
-               href="{% url 'pos:add_contact' company.url_name %}?type=Individual">{% trans 'individual' %}</a>
-        </div>
     </div>
+
     <div class="content">
         <div id="contacts">
             <table id="contacts_index">
