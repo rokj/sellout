@@ -8,9 +8,13 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/company.css' %}" />
 
 <style type="text/css">
-img.logo-placeholder{
+#color_logo{
     max-width:{{color_logo_dimensions.0}}px;
     max-height:{{color_logo_dimensions.1}}px;
+}
+#monochrome_logo{
+    max-width: {{ monochrome_logo_dimensions.0 }}px;
+    max-height: {{ monochrome_logo_dimensions.1 }}px;
 }
 </style>
 
@@ -41,9 +45,9 @@ $(document).ready(function(){
 
     <div class="management-column">
         {% if company.color_logo %}
-            <img id="logo" src="{{ company.color_logo.url }}" alt="company_logo">
+            <img id="logo" src="{{ company.color_logo.url }}" alt="company_logo" />
         {% else %}
-            <img id="logo" src="{% static 'graphics/placeholder.png' %}" alt="company_logo" class="logo-placeholder">
+            <img id="logo" src="{% static 'graphics/placeholder.png' %}" alt="company_logo" class="logo-placeholder" />
         {% endif %}
 
         <div class="form-field">
@@ -52,10 +56,10 @@ $(document).ready(function(){
             <div> {{ form.color_logo }} </div>
         </div>
 
-        e<div class="form-field">
-            <div class="error">{{ form.color_logo.errors }}</div>
-            {{ form.color_logo.label_tag }}
-            <div> {{ form.color_logo }} </div>
+        <div class="form-field">
+            <div class="error">{{ form.monochrome_logo.errors }}</div>
+            {{ form.monochrome_logo.label_tag }}
+            <div> {{ form.monochrome_logo }} </div>
         </div>
 
         <div class="form-field">

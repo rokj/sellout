@@ -17,12 +17,13 @@ class SkeletonManager(models.Manager):
         return super(SkeletonManager, self).get_query_set().filter(*args, **kwargs).exclude(datetime_deleted=None)
 
 class Skeleton(models.Model):
-    #datetime_created = models.DateTimeField(auto_now=False, auto_now_add=True, null=False, blank=False)
-    #datetime_updated = models.DateTimeField(auto_now=True, auto_now_add=True, null=False, blank=False)
-    #datetime_deleted = models.DateTimeField(null=True, blank=True)
-    # removed auto_now and auto_now_add field attributes: http://stackoverflow.com/questions/1737017/django-auto-now-and-auto-now-add
-    datetime_created = models.DateTimeField(null=False, blank=True, editable=False) # editable = false: never show in forms
-    datetime_updated = models.DateTimeField(null=True, blank=True, editable=False) # only set updated after first editing - after first save()
+    # datetime_created = models.DateTimeField(auto_now=False, auto_now_add=True, null=False, blank=False)
+    # datetime_updated = models.DateTimeField(auto_now=True, auto_now_add=True, null=False, blank=False)
+    # datetime_deleted = models.DateTimeField(null=True, blank=True)
+    # removed auto_now and auto_now_add field attributes:
+    # http://stackoverflow.com/questions/1737017/django-auto-now-and-auto-now-add
+    datetime_created = models.DateTimeField(null=False, blank=True, editable=False)  # editable = false: never show in forms
+    datetime_updated = models.DateTimeField(null=True, blank=True, editable=False)  # only set updated after first editing - after first save()
     datetime_deleted = models.DateTimeField(null=True, blank=True, editable=False)
 
     def save(self, *args, **kwargs): 

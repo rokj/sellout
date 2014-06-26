@@ -1,0 +1,139 @@
+#status_bar{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+
+    background-color: #000000;
+
+    color: #ffffff;
+}
+
+#status_bar #logo{
+    text-transform: uppercase;
+    font-weight: bold;
+    float: left;
+    text-align: center;
+    margin-right: 10px;
+}
+
+#status_bar img{
+    position: relative;
+    top: 5px;
+}
+
+#status_bar #logo.nolink{
+
+}
+
+#status_bar #logo.link{
+    width: 40px; /* the same width as height */
+    background-color: #22e693;
+}
+
+.button-container{
+    float: right;
+    text-align: right;
+    cursor: pointer;
+    color: #ffffff;
+    text-decoration: none;
+    text-transform: uppercase;
+    position: relative;
+    width: 200px;
+}
+
+.button-text{ /* 'a' element, usually */
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.drop-down{ /* 'ul' element */
+    background-color: #000000;
+    overflow: hidden;
+    display: none; /* will be shown by simpleMenu.js on click */
+
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    width: 100%;
+}
+
+.drop-down:after, .button-container:after{
+    /* the arrow */
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 0;
+    height: 0;
+    margin-left: -15px;
+    border: 15px solid transparent;
+    border-top-color: #000000;
+}
+
+#management_extra_button{
+    background-color: #00bbda;
+}
+#management_extra_button.multi:after{
+    border-top-color: #00bbda;
+}
+
+h1.status-bar-title{
+    font-size: 20px;
+    line-height: 40px;
+    margin-left: 0.5em;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+
+#status_bar a{
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    color: #ffffff;
+}
+
+.drop-down a{
+    height: 45px;
+    margin-left: 20px;
+    margin-right: 20px;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.drop-down li.store a{
+    color: #d0d0d0;
+    border-top: 1px dotted #cccccc;
+}
+
+.drop-down li.company a{
+    color: #ffffff;
+    border-top: 1px dotted #cccccc;
+}
+
+.drop-down li.separator a{
+    border-top: 1px solid #ffffff;
+    margin-top: 5px;
+}
+
+div.vertical-separator{
+    display: block;
+
+    /* height + margin-top + margin_bottom must match statusbar height */
+    height: 30px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+    border-left: 1px solid #aaaaaa;
+
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+
+    float: left;
+}

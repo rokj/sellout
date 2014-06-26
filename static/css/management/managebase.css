@@ -1,27 +1,13 @@
-#management_menu{
-    display: block;
-    background-color: #000000;
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
-
-#management_menu li{
-    padding: 0;
+#management_content{
+    margin-top: 40px; /* the height of #status_bar */
+    padding-top: 15px;
+    padding-left: 40px;
 }
 
 .menu-hidden{
     /* simpleMenus should not be hidden with display: none, but
        height: 0 to keep the necessary horizontal space occupied */
     height: 0;
-}
-
-#management_content{
-    position: absolute;
-    top: 3em;
-    left: 3em;
-    right: 3em;
-    z-index: -1; /* keep it below the statusbar */
 }
 
 h1{
@@ -35,7 +21,7 @@ label{
     color: #999999;
 }
 
-input[type='text'], textarea {
+input[type='text'], input[type='email'], textarea {
     border-radius: 0;
     border-width: 1px;
     padding-top: 10px;
@@ -46,7 +32,7 @@ input[type='text'], textarea {
 input[type='submit'], input[type='button']{
     color: #ffffff;
     border: none;
-    height: 2.5em;
+    height: 40px;
     font-size: inherit;
     text-transform: uppercase;
 }
@@ -68,7 +54,7 @@ div.custom-file-input{
 
 div.custom-file-input input{
     border: none;
-    height: 2.5em;
+    height: 30px;
     background-color: #000000;
     color: #ffffff;
 }
@@ -79,6 +65,9 @@ div.form-field-container{
 
 div.form-field{
     margin-top: 15px;
+    /* to prevent floated elements inside
+       from breaking out (and not taking up space) */
+    overflow: hidden;
 }
 
 div.form-field input, div.form-field textarea, div.form-field select{
@@ -106,9 +95,12 @@ div.management-column{
 }
 
 div.form-field input[type='text'],
+div.form-field input[type='email'],
 div.form-field input[type='number'],
 div.form-field select, div.form-field textarea{
-    width: calc(100% - 5px); /* mind the paddings (dumb css) */
+    width: 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
 }
 
 div.clear-columns{
@@ -135,8 +127,7 @@ div.left-column + div.content{
 }
 
 div.left-column form, div.left-column .fake-form{
-    border-top: 3px solid #646464;
-    border-bottom: 3px solid #646464;
+
 }
 
 div.edit-container{
@@ -174,8 +165,8 @@ span.no-results{
 
 /* buttons that are actually links */
 a.button{
-    height: 2.5em;
-    line-height: 2.5em;
+    height: 40px;
+    line-height: 40px;
     display: inline-block;
     color: #ffffff;
     text-decoration: none;
@@ -186,6 +177,7 @@ a.button{
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-top: 5px; /* this is defined for all inputs */
 }
 
 a.button.do, input.do { background-color: #0000aa; }

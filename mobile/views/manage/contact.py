@@ -1,23 +1,13 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
-from django import forms
-from django.http import Http404
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from pos.models import Company, Contact, Country
+from pos.models import Company, Contact
 from common import globals as g
 from config.functions import get_date_format, get_user_value
 from pos.views.manage.contact import contact_to_dict, get_contact, validate_contact
-from pos.views.util import JSON_response, JSON_ok, JSON_parse, JSON_error, has_permission, no_permission_view, format_date,\
-    max_field_length, parse_date
+from pos.views.util import JSON_response, JSON_ok, JSON_parse, JSON_error, has_permission, no_permission_view
 
-from rest_framework.decorators import api_view, permission_classes,\
-    authentication_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-
-import re
-
 
 
 @api_view(['POST', 'GET'])
@@ -36,8 +26,8 @@ def mobile_list_contacts(request, company):
 
     criteria = JSON_parse(request.POST['data'])
     cs = []
-    for c in contacts:
-        cs.append(contact_to_dict(request.user, c, "android"))
+    for contact in contacts:
+        cs.append(contact_to_dict(request.user, c, contact, "android"))
 
     return JSON_response(cs)
 
@@ -94,7 +84,7 @@ def mobile_add_contact(request, company):
     )
     contact.save()
 
-    return JSON_ok(extra=contact_to_dict(request.user, contact, send_to="android"))
+    return JSON_ok(extra=contact_to_dict(request.user, c, contact, send_to="android"))
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
@@ -144,7 +134,7 @@ def mobile_edit_contact(request, company):
 
     contact.save()
 
-    return JSON_ok(extra=contact_to_dict(request.user, contact))
+    return JSON_ok(extra=contact_to_dict(request.user, c, contact))
     
 
 @api_view(['GET', 'POST'])
@@ -169,4 +159,4 @@ def mobile_delete_contact(request, company):
 
     contact.delete()
 
-    return JSON_ok(extra=contact_to_dict(request.user, contact))
+    return JSON_ok(extra=contact_to_dict(request.user, c, contact))

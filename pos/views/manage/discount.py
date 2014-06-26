@@ -70,7 +70,7 @@ def get_all_discounts(user, company, android=False):
     ds = []
     for d in discounts:
         if d.is_active:
-            ds.append(discount_to_dict(user, c, d, android))
+            ds.append(discount_to_dict(user, company, d, android))
     return ds
 
 
@@ -228,7 +228,7 @@ def list_discounts(request, company):
         'title': _("Discounts"),
         'site_title': g.MISC['site_title'],
         'date_format_django': get_date_format(request.user, c, 'django'),
-        'date_format_jquery': get_date_format(request.user, c, 'jquery'),
+        'date_format_js': get_date_format(request.user, c, 'js'),
         'results_display': results_display,
         'currency': get_company_value(request.user, c, 'pos_currency'),
     }
@@ -244,10 +244,10 @@ def add_discount(request, company):
         return no_permission_view(request, c, _("add discounts"))
     
     context = {
-        'title':_("Add discount"),
-        'site_title':g.MISC['site_title'],
-        'company':c,
-        'date_format_jquery':get_date_format(request.user, c, 'jquery'),
+        'title': _("Add discount"),
+        'site_title': g.MISC['site_title'],
+        'company': c,
+        'date_format_js': get_date_format(request.user, c, 'js'),
     }
     
     # check for permission for adding discounts
@@ -300,7 +300,7 @@ def edit_discount(request, company, discount_id):
     context = {
         'company': c,
         'discount_id': discount_id,
-        'date_format_jquery': get_date_format(request.user, c, 'jquery'),
+        'date_format_js': get_date_format(request.user, c, 'js'),
     }
     
     discount = get_object_or_404(Discount, id=discount_id)

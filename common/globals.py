@@ -8,8 +8,9 @@ DIRS = { # goes to MEDIA folder
     'color_logo_dir': "img/color_logo",
     'monochrome_logo_dir': "img/monochrome_logo",
     'category_icon_dir': "img/category",
-    'product_icon_dir': 'img/product',
+    'product_icon_dir': "img/product",
     'product_image_dir': "img/product",
+    'temp': "/tmp",
 }
 
 # attributes' field lengths
@@ -20,11 +21,11 @@ ATTR_LEN = {
 
 # number of digits for decimal database field
 DECIMAL = {
-    'currency_digits':16, # number of digits for money values (big money) (INCLUDING DECIMAL PLACES)
-    'currency_decimal_places':4, # number of decimal places for money values
-    'percentage_decimal_places':4, # number of decimal places for percentage values
-    'quantity_digits':16,
-    'quantity_decimal_places':4,
+    'currency_digits': 16,  # number of digits for money values (big money) (INCLUDING DECIMAL PLACES)
+    'currency_decimal_places': 4,  # number of decimal places for money values
+    'percentage_decimal_places': 4,  # number of decimal places for percentage values
+    'quantity_digits': 16,
+    'quantity_decimal_places': 4,
 }
 
 # unit types
@@ -81,16 +82,26 @@ SEXES = (
 
 # bills
 BILL_TYPES = (
-    ("Normal",_("Normal")),
+    ("Normal", _("Normal")),
     # TODO add type for company
 )
 
 BILL_STATUS = (  # TODO: check & handle this
-    ("Invoice", _("Invoice")), # racun
-    ("Active", _("Active")), # the bill that's currently open in POS (only one can exist!)
-    ("Offer", _("Offer")), # ponudba # TODO preveriti izrazoslovje
-    ("Quote", _("Quote")), # predracun
+    ("Invoice", _("Invoice")),  # racun
+    ("Active", _("Active")),  # the bill that's currently open in POS (only one can exist!)
+    ("Offer", _("Offer")),  # ponudba # TODO preveriti izrazoslovje
+    ("Quote", _("Quote")),  # predracun
     ("Canceled", _("Canceled")),
+)
+
+RECEIPT_FORMATS = (
+    ("page", _("Full page (Letter/A4)")),
+    ("thermal", _("Thermal (80mm)")),
+)
+
+RECEIPT_TYPES = (
+    ("Print", _("Printed")),
+    ("E-mail", _("E-mail")),
 )
 
 # date formats
@@ -100,19 +111,19 @@ BILL_STATUS = (  # TODO: check & handle this
 #  - django templates
 #  - jquery format string (for datepicker etc.)
 DATE_FORMATS = {
-    'dd.mm.yyyy': {'regex': "^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros
-                   'python': "%d.%m.%Y", # the docs say zero-padded decimal, but will also parse non-padded numbers
-                   'django': "j.n.Y", # show no leading zeros in template
+    'dd.mm.yyyy': {'regex': "^\d{1,2}\.\d{1,2}\.\d{4}$",  # with or without leading zeros
+                   'python': "%d.%m.%Y",  # the docs say zero-padded decimal, but will also parse non-padded numbers
+                   'django': "j.n.Y",  # show no leading zeros in template
                    'android': "%d.%m.%Y",
                    'js': "dd.mm.yy",
                    },
-    'mm/dd/yyyy': {'regex': "^\d{1,2}\.\d{1,2}\.\d{4}$", # with or without leading zeros
+    'mm/dd/yyyy': {'regex': "^\d{1,2}\.\d{1,2}\.\d{4}$",  # with or without leading zeros
                    'python': "%m/%d/%Y",
                    'django': "n/j/Y",
                    'android': "%m/%d/%Y",
                    'js': "mm/dd/yy",
                   },
-    'yyyy-mm-dd': {'regex': "^\d{4}\.\d{2}\.\d{2}$", # strictly with leading zeros
+    'yyyy-mm-dd': {'regex': "^\d{4}\.\d{2}\.\d{2}$",  # strictly with leading zeros
                    'python': "%Y-%m-%d",
                    'django': "Y-m-d",
                    'android': "%Y-%m-%d",
@@ -126,7 +137,7 @@ TIME_FORMATS = {
              'python': "%H:%M",
              'django': "H:i",
              'android': "hh:mm",
-             'js': "hh:mm", # jquery has nothing to do with time, so it will have to be formatted using javascript
+             'js': "hh:mm",  # jquery has nothing to do with time, so it will have to be formatted using javascript
             },
     '23:59:59': {  # 24-hour clock with seconds
             'regex': "^[0-2][0-4]:[0-5][0-9]:[0-5][0-9]$",
@@ -174,14 +185,14 @@ MISC = {
 IMAGE_DIMENSIONS = {
     'color_logo': (180, 180),
     'monochrome_logo': (48, 48),
-    'category': (120, 120),
+    'category': (120, 120),  # there's no image, just a colored box
     'product': (160, 160),  # must be as large as the largest PRODUCT_BUTTON_DIMENSIONS
     'thumb_small': (32, 32),  # for thumbnails
     'thumb_large': (125, 128),
 }
 
 # premissions
-PERMISSION_GROUPS = ( # retrieve readable format with get_permission_display()
+PERMISSION_GROUPS = (  # retrieve readable format with get_permission_display()
     ('guest',   _("Guest")),    # can only view stuff
     ('cashier', _("Cashier")),  # can write and edit bills
     ('seller',  _("Seller")),   # can add and edit products
@@ -193,44 +204,36 @@ PERMISSIONS = {  # 'chapters' that each group can view or manage
     # model choices: company, category, discount, product, contact, permission, bill, config
     # views (to prevent users exploring other companies' terminals):
     # manage, terminal
-    'guest':{
-        'list':('company','category','discount','product','contact','bill','tax',
-            'terminal',),
-        'edit':(),
+    'guest': {
+        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax',
+                 'terminal', ),
+        'edit': (),
         },
-    'cashier':{
-        'list':('company','category','discount','product','contact','bill','config','tax',
-            'terminal',),
-        'edit':('bill',
-            'terminal','config',),
+    'cashier': {
+        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax',
+                 'terminal',),
+        'edit': ('bill',
+                 'terminal', 'config',),
         },
-    'seller':{
-        'list':('company','category','discount','product','contact','bill','config','tax',
-            'terminal','manage',),
-        'edit':('bill','product',
-            'terminal','manage','config','tax',),
+    'seller': {
+        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax',
+                 'terminal', 'manage',),
+        'edit': ('bill', 'product',
+                 'terminal', 'manage', 'config', 'tax',),
         },
-    'manager':{
-        'list':('company','category','discount','product','contact','bill','permission','config','tax',
-            'terminal','manage',),
-        'edit':('category','discount','product','contact','bill','config','tax',
-            'terminal','manage',),
+    'manager': {
+        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config', 'tax',
+                 'terminal', 'manage',),
+        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'config', 'tax',
+                 'terminal', 'manage', ),
         },
-    'admin':{
-        'list':('company','category','discount','product','contact','bill', 'permission','config',
-            'terminal','manage','tax',),
-        'edit':('company','category','discount','product','contact','bill', 'permission','config',
-            'terminal','manage','tax',),
+    'admin': {
+        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config',
+                 'terminal', 'manage', 'tax',),
+        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config',
+                 'terminal', 'manage', 'tax',),
         },
 }
-
-### terminal page configuration ###
-INTERFACES = [
-    'touch', # also for mouse (first entry is default)
-    'keyboard',
-
-
-]
 
 PRODUCT_BUTTON_DIMENSIONS = {
     'small': 90,  # all squares
@@ -239,7 +242,8 @@ PRODUCT_BUTTON_DIMENSIONS = {
 }
 
 CATEGORY_COLORS = [  # choices for category.color
-    '000000',  # the first entry is the default
+    'ffffff',  # the first entry is the default
+    '000000',
     'ff7d64',
     '00dcb4',
     '143264',
@@ -251,4 +255,3 @@ CATEGORY_COLORS = [  # choices for category.color
     'ffc864',
     '5ad2fa',
 ]
-

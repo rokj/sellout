@@ -1,13 +1,6 @@
 /*             */
 /* categories  */
 /*             */
-/*
-  category buttons are in four states:
-    inactive (class category-button) - when not touched
-    focused (class category-button-focused) - for keyboard navigation
-    selected (class category-button-selected) - when this is the currently focused button
-
-*/
 div#children_scroll_outer, div#parents_scroll_outer{
     height:38px;
     /* prevent text selection (interferes with dragging) */
@@ -62,7 +55,7 @@ div.category-button-subcategories{ /* this category has more subcategories */
 }
 
 img.category-button-icon{ /* category image in selection buttons */
-    display:inline-block;
+    display: inline-block;
     vertical-align:middle;
     height:24px; /* icons are thumbnails, which are already cropped to a square */
     width:24px;

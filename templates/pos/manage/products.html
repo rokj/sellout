@@ -679,7 +679,7 @@ $(document).ready(function(){
         var discounts = get_product_discounts($("ul#edit_discounts"));
             
         // total_price(tax_first, base, tax, discounts, separator)
-        var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), "{{separator}}");
+        var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), {{decimal_places}});
 
         $("#total_price").text(display_number(result.total, "{{separator}}", {{ decimal_places }}));
         
@@ -742,7 +742,7 @@ $(document).ready(function(){
         for(var i = 0; i < discounts.length; i++){
             discounts[i] = discounts[i].id;
         }
-        data['discounts'] = discounts;
+        data['discount_ids'] = discounts;
         data['private_notes'] = $("#edit_product_private_notes", dlg_obj).val();
         data['stock'] = $("#edit_product_stock", dlg_obj).val();
         data['shortcut'] = $("#edit_product_shortcut", dlg_obj).val();
@@ -979,12 +979,11 @@ $(document).ready(function(){
 });
 
 </script>
-
 {% endblock %}
 
-{% block manage_content %}
-<h1>Products</h1>
+{% block status_bar_title %} Products {% endblock %}
 
+{% block manage_content %}
 {% comment %} filters {% endcomment %}
     <div class="left-column">
         <div id="filter_form" class="fake-form">

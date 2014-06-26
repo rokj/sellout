@@ -35,8 +35,8 @@ div.object-container div.title{
     top: 0;
     left: 0;
     width: 100%;
-    height: 2em;
-    line-height: 2em;
+    height: 40px;
+    line-height: 40px;
 
     color: #ffffff;
     background-color: #646464;

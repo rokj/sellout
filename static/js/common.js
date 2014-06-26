@@ -411,3 +411,19 @@ function parse_datetime(date_format, time_format, date, time){
 
     return d;
 }
+
+function is_dark(color){
+    if(color.substr(1, 1) == "#") color = color.substr(1, 6);
+
+    if(color.length != 6) return false;
+
+    // returns true if color is darker than 50% grey
+    var r = parseInt(color.substr(0, 2), 16);
+    var g = parseInt(color.substr(2, 2), 16);
+    var b = parseInt(color.substr(4, 2), 16);
+
+    // combine numbers (a.k.a. bit shifting)
+    var val = r*Math.pow(2, 16) + g * Math.pow(2, 8) + b;
+
+    return val < (Math.pow(2, 24)/2);
+}

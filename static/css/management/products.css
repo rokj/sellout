@@ -1,7 +1,9 @@
 #filter_form input[type='text']{
-    width: calc(100% - 5px); /* the padding, defined in managebase.css */
+    width: 100%; /* the padding, defined in managebase.css */
     margin-top: 5px;
     margin-bottom: 15px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
 }
 
 #filter-form label{
@@ -21,7 +23,7 @@
 #advanced_search_toggle + label{
     font-size: inherit;
     width: 100%;
-    line-height: 2.5em;
+    line-height: 40px;
     text-align: center;
     background-color: #000000;
     color: #646464;
@@ -73,8 +75,8 @@ div.product-details .title{
     top: 0;
     left: 0;
     right: 0;
-    height: 2.5em;
-    line-height: 2.5em;
+    height: 40px;
+    line-height: 40px;
     color: #ffffff;
     padding-left: 10px;
 }

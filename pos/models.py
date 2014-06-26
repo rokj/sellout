@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import ugettext as _, ugettext
+from django.utils.translation import ugettext as _
 from django.db.models.signals import pre_save, pre_delete, post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
@@ -75,11 +75,12 @@ class Category(SkeletonU):
     parent = models.ForeignKey('self', blank=True, null=True)
     name = models.CharField(_("Category name"), max_length=100, null=False, blank=False)
     description = models.TextField(_("Description"), null=True, blank=True)
-    image = models.ImageField(_("Icon"),
-                             upload_to=get_image_path(g.DIRS['category_icon_dir'], "pos_category", "image"),
-                             null=True, blank=True)
-
     color = models.CharField(default=g.CATEGORY_COLORS[0], blank=False, null=False, max_length=6)
+
+    # image has been replaced by color
+    # image = models.ImageField(_("Icon"),
+    #                          upload_to=get_image_path(g.DIRS['category_icon_dir'], "pos_category", "image"),
+    #                          null=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -451,6 +452,16 @@ def delete_permission_cache(**kwargs):
     cache.delete(ckey)
 
 
+### register (till) ###
+class Register(SkeletonU):
+    company = models.ForeignKey(Company, null=False, blank=False)
+    # each company must have at least one register; each register carries the following settings
+    name = models.CharField(_("Name of cash register"), max_length=50, null=False, blank=False)
+    receipt_format = models.CharField(_("Receipt format"), max_length=32, choices=g.RECEIPT_FORMATS, null=False)
+    receipt_type = models.CharField(_("Receipt type"), max_length=32, choices=g.RECEIPT_TYPES, null=False)
+    print_logo = models.BooleanField(_("Print logo on thermal receipts"), blank=False)
+
+
 ### bills ###
 class Bill(SkeletonU):
     company = models.ForeignKey(Company, null=False, blank=False)  # also an issuer of the bill
@@ -623,40 +634,10 @@ def copy_bill_to_history(bill_id):
     
     serialized_data = json.dumps(data)
     
-    history = BillHistory(created_by = b.created_by,
-                          bill = b, data = serialized_data)
+    history = BillHistory(created_by=b.created_by,
+                          bill=b, data=serialized_data)
     history.save()
     return True
-
-@receiver(pre_save, sender=Category)
-@receiver(pre_save, sender=Company)
-@receiver(pre_save, sender=Product)
-#@receiver(pre_save, sender=ProductImage)
-def cleanup_images(**kwargs):
-    # new: since sorl-thumbnail's thumbnail.delete() does all this automatically
-    # and also cleans up cache, config.Cleanup is no longer needed
-
-    # if image was deleted or changed, add previous filename and path to
-    # config.Cleanup model. Cleanup will delete listed objects on post_save() signal.
-    # this is only needed for django forms, sorl-thumbnails have a delete() method that do all this
-    try:
-        prev_entry = kwargs['sender'].objects.get(id=kwargs['instance'].id)
-    except: # the entry does not exist, no need to do anything
-        return
-        
-    this_entry = kwargs['instance']
-    
-    if not prev_entry.image:
-        # no image in previous entry, nothing to delete
-        return
-    
-    if prev_entry.image.name != this_entry.image.name:
-        # delete thumbnails and stuff, if it exists
-        thumbnail.delete(prev_entry.image.name)
-
-        # add image to Cleanup for later deletion
-        #c = Cleanup(filename=prev_entry.image.path)
-        #c.save()        
 
 
 def fill_countries():  # will only be used once, after install

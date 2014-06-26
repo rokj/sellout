@@ -2,11 +2,27 @@
 {% load i18n %}
 <!DOCTYPE html>
 
+{% comment %}
+blocks:
+    {title} (not used, set from view)
+    {head}:
+        common to all pages on the site
+        {section_head}: new block defined in management, to separate common management javascript from specific pages
+    {body_tag}: for replacing plain <body> tag with <body class=...  ...
+    {status_bar_logo}: logo and image in terminal; link to terminal in management
+    {extra_button}: used in management only, for adding stuff
+
+    {content}: the actual webpage
+        {manage_content}: in management only
+
+{% endcomment %}
+
 <head>
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
     {% comment %} CSS {% endcomment %}
     <link rel="stylesheet" href="{% static 'jquery-ui-1.10.3/themes/base/jquery-ui.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/statusbar.css' %}">
 
     {% comment %} jQuery {% endcomment %}
     <script type="text/javascript" src="{% static 'jquery-ui-1.10.3/jquery-1.9.1.js' %}"></script>
@@ -22,36 +38,80 @@
     <script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/common.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/widgets/calculations.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/jquery.simplemenu.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.simpleMenu.js' %}"></script>
 
     <title>{% block title %}{{title}} - {{site_title}}{% endblock %}</title>
-    
-    {% block head %}asdf{% endblock %}
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            {# common to management #}
+            var items = {
+                management_menu_button:  $("#management_button"),
+                management_menu_content: $("#management_menu"),
+
+                user_menu_button:        $("#user_button"),
+                user_menu_content:       $("#user_menu")
+            };
+
+            // menus
+            items.management_menu_button.simpleMenu(items.management_menu_content);
+            items.user_menu_button.simpleMenu(items.user_menu_content);
+        });
+    </script>
+    {% block head %}{% endblock %}
 </head>
 {% block body_tag %}<body>{% endblock %}{% comment %} in case something needs to be assigned to body tag (styles, etc.){% endcomment %}
-    {% block status_bar %}
-        <div id="status_bar">
-            <div id="logo">
-                POSSY
+    <div id="status_bar">
+        {% block status_bar_logo %}
+            <div id="logo" class="nolink">
+                {# logo block will be replaced with link to management in terminal #}
+                <img src="{% static 'icons/logo_white.png' %}" alt="" />
             </div>
+        {% endblock %}
 
-            <div id="user_menu_button" class="statusbar-button">
-                {{ request.user }} <a href="#">{% trans 'Logout' %}</a>
-            </div>
+        <div id="user_button" class="button-container">
+            <div class="vertical-separator"></div>
 
-            <div id="management_button" class="statusbar-button">
-                {% block management_menu %}
-                    {# will be replaced by manage menu in management #}
-                    <a href="{% url 'pos:manage_home' company.url_name %}">{% trans 'Management' %}</a>
-                {% endblock %}
-            </div>
+            <a href="#" class="button-text">{{ request.user }}</a>
 
-            <div id="terminal_button" class="statusbar-button">
-                <a href="{% url 'pos:terminal' company.url_name %}">{% trans 'Terminal' %}</a>
-            </div>
-
+            <ul id="user_menu" class="drop-down">
+                {# store-related stuff #}
+                <li class="store separator"><a href="#">{% trans 'User Settings' %}</a></li>
+                <li class="store"><a href="#">{% trans 'Switch User' %}</a> </li>
+                <li class="store"><a href="#">{% trans 'Log Out' %}</a> </li>
+            </ul>
         </div>
-    {% endblock %}
+
+        <div id="management_button" class="button-container">
+            <div class="vertical-separator"></div>
+
+            {# will be replaced by manage menu in management #}
+            <a href="#" class="button-text">{% trans 'Management' %}</a>
+
+            <ul id="management_menu" class="drop-down">
+                {# store-related stuff #}
+                <li class="store separator"><a href="{% url 'pos:list_categories' company.url_name %}">{% trans 'Categories' %}</a></li>
+                <li class="store"><a href="{% url 'pos:products' company.url_name %}">{% trans 'Products' %}</a></li>
+                <li class="store"><a href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Discounts' %}</a></li>
+                <li class="store"><a href="{% url 'pos:list_taxes' company.url_name %}">{% trans 'Taxes' %}</a></li>
+                <li class="store"><a href="#">{% trans 'Cash Registers' %}</a></li>
+                <li class="store"><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
+                <li class="store"><a href="">{% trans 'Bills' %}</a></li>
+                {# company-related stuff #}
+                <li class="company separator"><a href="#">{% trans 'Configuration' %}</a></li>
+                <li class="company"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
+                <li class="company"><a href="#">{% trans 'Users' %}</a></li>
+            </ul>
+        </div>
+
+        <div id="management_extra_button" class="button-container {% block extra_button_class %}{% endblock %}">
+            {% block extra_button %}
+            {# the button for (mainly) adding stuff in management, does not exist in terminal #}
+            {% endblock %}
+        </div>
+
+        <h1 class="status-bar-title">{% block status_bar_title %}{% endblock %}</h1>
+    </div>
 
     {% block content %}{% endblock %}
 </body>

@@ -9,15 +9,6 @@
 
     <script type="text/javascript">
     $(document).ready(function(){
-        {# common to management #}
-        var m = {
-            management_menu_button: $("#management_button"),
-            management_menu_content: $("#management_menu")
-        };
-
-        // menus
-        m.management_menu_button.simpleMenu(m.management_menu_content);
-
         // cancel button: on any static form, refresh the page on click
         $("#static_cancel").click(function(){
             // reload() doesn't do any good (browsers remember form values)
@@ -29,29 +20,24 @@
     {% block section_head %}{% endblock %}
 {% endblock %}
 
-{% comment %} management menu {% endcomment %}
-{% block management_menu %}
-    <a href="#" class="statusbar-button-margin">{% trans 'Management' %}</a>
+{% block status_bar_title %}{% endblock %}
 
-    <ul id="management_menu" class="menu-hidden">
-        <li class="statusbar-button-margin"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
-        <li class="statusbar-button-margin"><a href="{% url 'pos:list_categories' company.url_name %}">{% trans 'Categories' %}</a></li>
-        <li class="statusbar-button-margin"><a href="{% url 'pos:products' company.url_name %}">{% trans 'Products' %}</a></li>
-        <li class="statusbar-button-margin"><a href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Discounts' %}</a></li>
-        <li class="statusbar-button-margin"><a href="{% url 'pos:list_taxes' company.url_name %}">{% trans 'Taxes' %}</a></li>
-        <li class="statusbar-button-margin"><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
-        <li class="statusbar-button-margin"><a href="{% url 'pos:edit_config' company.url_name %}">{% trans 'Configuration' %}</a></li>
-        <li class="statusbar-button-margin"><a href="#">{% trans 'Users' %}</a></li>
-    </ul>
+{% block status_bar_logo %}
+    <a href="{% url 'pos:terminal' company.url_name %}" title="{% trans 'Go to terminal' %}">
+        <div id="logo" class="link">
+            {# logo block will be replaced with link to management in terminal #}
+            <img src="{% static 'icons/logo_black_sign.png' %}"
+                 alt="{% trans 'Go to terminal' %}"
+                 title="{% trans 'Go to terminal' %}"/>
+        </div>
+    </a>
 {% endblock %}
 
 {% block content %}
-<div id="management_content">
-{% comment %} block filled by manage templates {% endcomment %}
-    {% block manage_content %}
-        <span style="font-size:150px; margin: 50px;">Ch00s sumtin to manag, MOFO!</span>
-    {% endblock %}
-</div>
-
-
+    <div id="management_content">
+        {% comment %} block filled by manage templates {% endcomment %}
+        {% block manage_content %}
+            <span style="font-size:150px; margin: 50px;">Ch00s sumtin to manag, MOFO!</span>
+        {% endblock %}
+    </div>
 {% endblock %}

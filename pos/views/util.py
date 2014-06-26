@@ -10,8 +10,9 @@ from config.functions import get_date_format, get_time_format, get_company_value
 from pos.models import Permission
 
 import json
-import Image # PIL or pillow must be installed
+import Image  # PIL or pillow must be installed
 import re
+import os
 from decimal import Decimal
 from datetime import datetime
 
@@ -67,13 +68,31 @@ def max_field_length(model, field_name):
 # image and file handling
 def resize_image(path, dimensions):
     image = Image.open(path)
-    # always "resize" - convert image to maintain consistent format for all uploads
-    # width, height = image.size
-    # if width <= dimensions[0] and height <= dimensions[1]:
-    #     return # no need for resizing, image is smaller than requested
-    # also resize to un-animate any animated GIFs
+
+    # crop the image to make it square
+    w = image.size[0]
+    h = image.size[1]
+
+    dim = min([w, h])
+
+    if w > h:
+        # the image is landscape, crop left and right
+        dist = (w - dim)/2
+        box = (dist, 0, w-dist, h)
+    else:
+        # the image is portrait, crop up and down
+        dist = (h - dim)/2
+        box = (0, dist, w, h-dist)
+
+    image = image.crop(box)
+
+    # create a thumbnail of the cropped image
     image.thumbnail(dimensions, Image.ANTIALIAS)
-    image.save(path, g.MISC['image_format'])
+
+    # strip extension from path and use custom (so the file will be converted to our format)
+    path = os.path.splitext(path)[0]
+
+    image.save(path + '.' + g.MISC['image_format'])
 
 
 def validate_image(obj): # obj is actually "self"
@@ -165,8 +184,8 @@ def parse_decimal(user, company, string, max_digits=None):
         {'success':True/False, number:<num>/None}
     """
     
-    if user: # if user is None, try with the dot (user should never be None - 
-             # this is to avoid checking on every function call)
+    if user:  # if user is None, try with the dot (user should never be None -
+              # this is to avoid checking on every function call)
         string = string.replace(get_company_value(user, company, 'pos_decimal_separator'), '.')
     
     # check for entries too big
@@ -237,7 +256,7 @@ def no_permission_view(request, company, action):
     context = {
         'title': _("Permission denied"),
         'site_title': g.MISC['site_title'],
-        'company': company, # required for the 'manage' template: links need company parameter
+        'company': company,  # required for the 'manage' template: links need company parameter
         'action': action,
     }
     

@@ -3,17 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _, get_language
 from django import forms
 from django.http import Http404
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from pos.models import Company, Contact, Country
 from common import globals as g
-from config.functions import get_date_format, get_user_value
-from pos.views.util import JSON_response, JSON_ok, JSON_parse, JSON_error, has_permission, no_permission_view, format_date,\
+from config.functions import get_date_format
+from pos.views.util import JSON_response, JSON_error, has_permission, no_permission_view, format_date, \
     max_field_length, parse_date
-
-from rest_framework.decorators import api_view, permission_classes,\
-    authentication_classes
-from rest_framework.permissions import IsAuthenticated
 
 import re
 
@@ -108,7 +103,7 @@ def validate_contact(user, company, data):
         
         # date of birth: parse date
         if 'date_if_birth' in data and len(data['date_of_birth']) > 0:
-            r = parse_date(user, data['date_of_birth'])
+            r = parse_date(user, company, data['date_of_birth'])
             if not r['success']:
                 return err(_("Wrong format of date of birth"))
             else:
@@ -183,10 +178,10 @@ def validate_contact(user, company, data):
         return err(_("VAT number too long"))
     
     # everything OK
-    return {'status':True, 'data':data, 'message':None}
+    return {'status': True, 'data': data, 'message': None}
 
 
-def contact_to_dict(user, c, send_to="python"):
+def contact_to_dict(user, company, c, send_to="python"):
     # returns all relevant contact's data
     # id
     # type
@@ -215,7 +210,7 @@ def contact_to_dict(user, c, send_to="python"):
     if c.sex:
         ret['sex'] = c.sex
     if c.date_of_birth:
-        ret['date_of_birth'] = format_date(user, c.date_of_birth, send_to=send_to)
+        ret['date_of_birth'] = format_date(user, company, c.date_of_birth, send_to=send_to)
     if c.street_address:
         ret['street_address'] = c.street_address
     if c.postcode:
@@ -295,7 +290,7 @@ def list_contacts(request, company):
         'filter_form': form,
         'title': _("Contacts"),
         'site_title': g.MISC['site_title'],
-        'date_format_django': get_date_format(request.user, 'django'),
+        'date_format_django': get_date_format(request.user, c, 'django'),
         'alphabet': g.ALPHABETS[get_language()],
     }
 
@@ -317,9 +312,9 @@ def get_contact(request, company, contact_id):
     if not has_permission(request.user, c, 'contact', 'list'):
         return JSON_error(_("You have no permission to view products"))
    
-    contact = get_object_or_404(Contact, id = contact_id, company = c)
+    contact = get_object_or_404(Contact, id=contact_id, company=c)
    
-    return JSON_response(contact_to_dict(request.user, contact))
+    return JSON_response(contact_to_dict(request.user, c, contact))
    
 
 @login_required
@@ -345,7 +340,7 @@ def add_contact(request, company):
         'company': c,
         'title': _("Add contact"),
         'site_title': g.MISC['site_title'],
-        'date_format_jquery': get_date_format(request.user, 'jquery')
+        'date_format_js': get_date_format(request.user, c, 'js')
     }
 
     if request.method == 'POST':
@@ -402,11 +397,11 @@ def edit_contact(request, company, contact_id):
         return no_permission_view(request, c, _("edit contacts"))
     
     context = {
-        'company':c,
-        'contact_id':contact_id,
-        'title':_("Edit contact"),
-        'site_title':g.MISC['site_title'],
-        'date_format_jquery':get_date_format(request.user, 'jquery'),
+        'company': c,
+        'contact_id': contact_id,
+        'title': _("Edit contact"),
+        'site_title': g.MISC['site_title'],
+        'date_format_js': get_date_format(request.user, c, 'js'),
     }
     
     # get contact
@@ -441,7 +436,7 @@ def edit_contact(request, company, contact_id):
             
             return redirect('pos:list_contacts', company=c.url_name)
     else:
-        initial = contact_to_dict(request.user, contact)
+        initial = contact_to_dict(request.user, c, contact)
         form = ContactForm(initial=initial)
         form.user = request.user
         form.company = c
@@ -476,6 +471,6 @@ def get_all_contacts(user, company):
 
     r = []
     for c in contacts:
-        r.append(contact_to_dict(user, c))
+        r.append(contact_to_dict(user, company, c))
 
     return r

@@ -1,8 +1,8 @@
-#category_tree{
+#category_tree {
     margin-right: 300px;
     overflow: hidden;
     /* to prevent the page from jumping around when toolbox is shown */
-    margin-bottom: 400px;
+    padding-bottom: 400px; /* (the height of the toolbox + something) */
 }
 
 .category-button{
@@ -10,26 +10,26 @@
     margin: 10px;
     position: relative;
     cursor: pointer;
+    opacity: 0.2;
+    
+    display: table;
 }
 
-.category-background{
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: 100%;
-    
-    opacity: 0.3;
+.category-button>span{
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    color: #000000;
 }
 
-.category-button.selected .category-background{
-    opacity: 1;
-    z-index: 1;
-    background-color: #ffffff;
+.category-button>span.dark{
+    /* use bright font for categories that have dark background */
+    color: #ffffff;
+}
+
+.category-button.selected{
+    /* must be important to override inline styles from js */
+    opacity: 1 !important;
 }
 
 .category-text{
@@ -62,21 +62,22 @@
     overflow: hidden;
     position: relative;
     width: 10000000px;
+    margin-left: 20px;
 }
 .category-children-outer{
     position: relative;
 }
 
 /* category levels */
-.level-0{ background-color: rgb(255,255,255); }
-.level-1{ background-color: rgb(240,240,240); }
-.level-2{ background-color: rgb(230,230,230); }
-.level-3{ background-color: rgb(220,220,220); }
-.level-4{ background-color: rgb(210,210,210); }
-.level-5{ background-color: rgb(200,200,200); }
-.level-6{ background-color: rgb(190,190,190); }
-.level-7{ background-color: rgb(180,180,180); }
-.level-8{ background-color: rgb(170,170,170); }
+.level-0{ background-color: #ebebeb; }
+.level-1{ background-color: #e1e1e1; }
+.level-2{ background-color: #d7d7d7; }
+.level-3{ background-color: #cdcdcd; }
+.level-4{ background-color: #c3c3c3; }
+.level-5{ background-color: #b9b9b9; }
+.level-6{ background-color: #afafaf; }
+.level-7{ background-color: #a5a5a5; }
+.level-8{ background-color: #9b9b9b; }
 
 /* level arrows */
 .category-children-outer:after{
@@ -92,15 +93,15 @@
     z-index: 3;
 }
 
-.level-0:after{ border-top-color: rgb(255,255,255); }
-.level-1:after{ border-top-color: rgb(240,240,240); }
-.level-2:after{ border-top-color: rgb(230,230,230); }
-.level-3:after{ border-top-color: rgb(220,220,220); }
-.level-4:after{ border-top-color: rgb(210,210,210); }
-.level-5:after{ border-top-color: rgb(200,200,200); }
-.level-6:after{ border-top-color: rgb(190,190,190); }
-.level-7:after{ border-top-color: rgb(180,180,180); }
-.level-8:after{ border-top-color: rgb(170,170,170); }
+.level-0:after{ border-top-color: #ebebeb; }
+.level-1:after{ border-top-color: #e1e1e1; }
+.level-2:after{ border-top-color: #d7d7d7; }
+.level-3:after{ border-top-color: #cdcdcd; }
+.level-4:after{ border-top-color: #c3c3c3; }
+.level-5:after{ border-top-color: #b9b9b9; }
+.level-6:after{ border-top-color: #afafaf; }
+.level-7:after{ border-top-color: #a5a5a5; }
+.level-8:after{ border-top-color: #9b9b9b; }
 
 #tools{
     position: absolute;
@@ -143,7 +144,7 @@ img.toolbox{
     z-index: 4;
     bottom: 3px;
     right: 3px;
-    opacity: 0.1;
+    opacity: 0.5;
 }
 
 img.toolbox:hover{ opacity: 1; }
@@ -158,4 +159,17 @@ div.form-field a.button{
 
 #add_button_container{
     width: 1000px;
+}
+
+#color_list{
+    width: 100%;
+    overflow: hidden; /* to prevent floated elements inside from breaking out */
+}
+
+div.color-button{
+    display: block;
+    float: left;
+    cursor: pointer;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
