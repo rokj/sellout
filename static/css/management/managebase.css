@@ -15,10 +15,14 @@ h1{
 }
 
 /* controls and widgets and stuff */
+label, .custom-label{
+    color: #999999;
+}
+
 label{
+    display: block;
     text-transform: uppercase;
     font-size: 10px;
-    color: #999999;
 }
 
 input[type='text'], input[type='email'], textarea {
@@ -54,7 +58,6 @@ div.custom-file-input{
 
 div.custom-file-input input{
     border: none;
-    height: 30px;
     background-color: #000000;
     color: #ffffff;
 }

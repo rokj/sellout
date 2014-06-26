@@ -1,3 +1,23 @@
-input[type='submit'], input#static_cancel{
-    width: 80%;
+#auto_create{
+    background-color: #00bbda;
+    margin-bottom: 5px;
+}
+
+div.bottom{
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    right: 0;
+}
+
+div.error{
+    margin-left: 20px;
+}
+
+div.bottom input{
+    width: 100%;
+}
+
+input[type='checkbox'].clear{
+    display: none;
 }

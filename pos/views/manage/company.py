@@ -2,21 +2,20 @@
 # date: 9. 8. 2013
 #
 # Views for managing POS data: registration and company details
-from django.core.files import File
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
+from common.images import validate_image, color_to_monochrome_logo
 
 from pos.models import Company
-from pos.views.util import JSON_response, JSON_parse, validate_image, has_permission, no_permission_view
+from pos.views.util import JSON_response, JSON_parse, has_permission, no_permission_view, JSON_ok, JSON_error
 from common import globals as g
 import unidecode
 from common.functions import get_random_string, get_terminal_url
 from common import widgets
-import Image
 
-import re, os
+import re
 
 
 ###
@@ -148,37 +147,6 @@ def url_name_suggestions(request):
     return JSON_response({'suggestions':suggestions})
 
 
-def get_monochrome_logo_url(request, company):
-    # if the company already has the monochrome logo in the database, return that
-    # otherwise, try to create a new one
-    if not company.monochrome_logo and not company.color_logo:
-        return None
-
-    if company.monochrome_logo:
-        return company.monochrome_logo.url
-    else:
-        # get company's color logo
-        color_logo = Image.open(company.color_logo.path)
-        # resize it to monochrome_logo dimension
-        black_logo = color_logo.copy()
-        black_logo.thumbnail(g.IMAGE_DIMENSIONS['monochrome_logo'], Image.ANTIALIAS)
-        # reduce color depth
-        black_logo = black_logo.convert(mode='1')
-        # create a new path for the monochrome logo
-        new_path = os.path.splitext(company.color_logo.path)[0]
-        new_path = new_path + '_monochrome.' + g.MISC['image_format']
-        # save to the new path
-        black_logo.save(new_path, g.MISC['image_format'], bits=1)
-
-        # save to stupid django field
-        django_file = File(open(new_path))
-        company.monochrome_logo.save('new', django_file)
-        django_file.close()
-        company.save()
-
-    return company.monochrome_logo.url
-
-
 ###############
 ### company ###
 ###############
@@ -219,8 +187,10 @@ class CompanyForm(forms.ModelForm):
                   'vat_no',
                   'notes',
                   'website']
+
         widgets = {
-            'image': widgets.PlainClearableFileInput,
+            'color_logo': widgets.PlainClearableFileInput,
+            'monochrome_logo': widgets.PlainClearableFileInput,
         }
 
 
@@ -324,6 +294,15 @@ def edit_company(request, company):
         
     context['form'] = form
 
-    print get_monochrome_logo_url(request, c)
-    
     return render(request, 'pos/manage/company.html', context)
+
+
+@login_required
+def create_monochrome_logo(request, company):
+    # get company
+    c = Company.objects.get(url_name=company)
+
+    if not color_to_monochrome_logo(c):
+        return JSON_error(_("There is no color logo, please save that first."))
+
+    return JSON_ok()

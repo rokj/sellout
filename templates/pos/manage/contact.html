@@ -11,26 +11,28 @@
 {% block status_bar_title %}{% trans 'Add contact' context 'page title' %}{% endblock %}
 
 {% block manage_content %}
-    <div class="edit-container">
-        {% if type == 'Individual' %}
-            I {# TODO: icon #}
-            {% trans 'Individual' %}
-        {% else %}
-            C {# TODO: icon #}
-            {% trans 'Company' %}
-        {% endif %}
+    {% if type == 'Individual' %}
+        I {# TODO: icon #}
+        {% trans 'Individual' %}
+    {% else %}
+        C {# TODO: icon #}
+        {% trans 'Company' %}
+    {% endif %}
 
-        {% if add %}
-            <form action="{% url 'pos:add_contact' company.url_name %}" method="post">
-        {% else %}
-            <form action="{% url 'pos:edit_contact' company.url_name contact_id %}" method="post"> {% endif %}
+    {% if add %}
+        <form action="{% url 'pos:add_contact' company.url_name %}" method="post">
+    {% else %}
+        <form action="{% url 'pos:edit_contact' company.url_name contact_id %}" method="post">
+    {% endif %}
 
-            {% csrf_token %}
-            <div class="hidden"> {{ form.type }} </div> {# a hidden type field #}
+        {% csrf_token %}
+        <div class="hidden"> {{ form.type }} </div> {# a hidden type field #}
 
-            {{ form.non_field_errors }}
+        {{ form.non_field_errors }}
 
+        <div class="management-column">
             {% if type == 'Individual' %}
+                {# individual fields #}
                 <div class="form-field">
                     <div class="error">{{ form.first_name.errors }}</div>
                     {{ form.first_name.label_tag }}
@@ -48,89 +50,81 @@
                     {{ form.sex.label_tag }}
                     {{ form.sex }}
                 </div>
-
+            {% else %}
+                {# company fields #}
                 <div class="form-field">
-                    <div class="error">{{ form.street_address.errors }}</div>
-                    {{ form.street_address.label_tag }}
-                    {{ form.street_address }}
+                    <div class="error">{{ form.company_name.errors }}</div>
+                    {{ form.company_name.label_tag }}
+                    {{ form.company_name }}
                 </div>
+            {% endif %}
 
-                <div class="form-field">
-                    <div class="error">{{ form.postcode.errors }}</div>
-                    {{ form.postcode.label_tag }}
-                    {{ form.postcode }}
+            <div class="form-field">
+                <div class="error">{{ form.email.errors }}</div>
+                {{ form.email.label_tag }}
+                {{ form.email }}
+            </div>
+
+            <div class="form-field">
+                <div class="error">{{ form.street_address.errors }}</div>
+                {{ form.street_address.label_tag }}
+                {{ form.street_address }}
+            </div>
+
+            <div class="form-field">
+                <div class="error">{{ form.postcode.errors }}</div>
+                {{ form.postcode.label_tag }}
+                {{ form.postcode }}
+            </div>
+
+            {% if type == 'Individual' %}
+                {# the column breaks here for individual form #}
                 </div>
+                <div class="management-column">
+            {% endif %}
 
+            <div class="form-field">
+                <div class="error">{{ form.city.errors }}</div>
+                {{ form.city.label_tag }}
+                {{ form.city }}
+            </div>
 
+            <div class="form-field">
+                <div class="error">{{ form.state.errors }}</div>
+                {{ form.state.label_tag }}
+                {{ form.state }}
+            </div>
 
-                <div class="form-field">
-                    <div class="error">{{ form.phone.errors }}</div>
-                    {{ form.phone.label_tag }}
-                    {{ form.phone }}
+            {% if type == 'Company' %}
+                {# the column breaks here for company form #}
                 </div>
+                <div class="management-column">
+            {% endif %}
 
+            <div class="form-field">
+                <div class="error">{{ form.country.errors }}</div>
+                {{ form.country.label_tag }}
+                {{ form.country }}
+            </div>
+
+            <div class="form-field">
+                <div class="error">{{ form.phone.errors }}</div>
+                {{ form.phone.label_tag }}
+                {{ form.phone }}
+            </div>
+
+            {% if type == 'Individual' %}
                 <div class="form-field">
                     <div class="error">{{ form.date_of_birth.errors }}</div>
                     {{ form.date_of_birth.label_tag }}
                     {{ form.date_of_birth }}
                 </div>
             {% else %}
-
-                <div class="form-field">
-                    <div class="error">{{ form.company_name.errors }}</div>
-                    {{ form.company_name.label_tag }}
-                    {{ form.company_name }}
-                </div>
-
-                <div class="form-field">
-                    <div class="error">{{ form.street_address.errors }}</div>
-                    {{ form.street_address.label_tag }}
-                    {{ form.street_address }}
-                </div>
-
-                <div class="form-field">
-                    <div class="error">{{ form.postcode.errors }}</div>
-                    {{ form.postcode.label_tag }}
-                    {{ form.postcode }}
-                </div>
-
-                <div class="form-field">
-                    <div class="error">{{ form.city.errors }}</div>
-                    {{ form.city.label_tag }}
-                    {{ form.city }}
-                </div>
-
-
-                <div class="form-field">
-                    <div class="error">{{ form.state.errors }}</div>
-                    {{ form.state.label_tag }}
-                    {{ form.state }}
-                </div>
-
-                <div class="form-field">
-                    <div class="error">{{ form.country.errors }}</div>
-                    {{ form.country.label_tag }}
-                    {{ form.country }}
-                </div>
-
-                <div class="form-field">
-                    <div class="error">{{ form.email.errors }}</div>
-                    {{ form.email.label_tag }}
-                    {{ form.email }}
-                </div>
-
-                <div class="form-field">
-                    <div class="error">{{ form.phone.errors }}</div>
-                    {{ form.phone.label_tag }}
-                    {{ form.phone }}
-                </div>
-
                 <div class="form-field">
                     <div class="error">{{ form.vat.errors }}</div>
                     {{ form.vat.label_tag }}
                     {{ form.vat }}
                 </div>
-
             {% endif %}
 
             <div class="form-field">
@@ -142,7 +136,7 @@
                        href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Cancel' %}</a>
                 </div>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 {% endblock %}
 

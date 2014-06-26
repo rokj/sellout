@@ -23,7 +23,7 @@ div.discount-active-checkbox{
 
 div.object-container{
     position: relative;
-    padding-top: 2em; /* the height of object-container.title */
+    padding-top: 40px;
 
     background-color: #f7f7f7;
     max-width: 500px;

@@ -32,13 +32,16 @@ table#tax_list tr td:nth-child(4){
     width: 80px;
 }
 
-div.button-container{
+div.form-footer{
     width: 120px;
     float: left;
     margin-right: 20px;
 }
 
-div.button-container input{ width: 100%; }
+div.form-footer > *{
+    /* the button inside this should be wide. */
+    width: 100%;
+}
 
 button.delete-tax, button#add_tax{
     background: none;

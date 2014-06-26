@@ -981,7 +981,10 @@ $(document).ready(function(){
 </script>
 {% endblock %}
 
-{% block status_bar_title %} Products {% endblock %}
+{% block status_bar_title %}{% trans 'Products' %}{% endblock %}
+
+{% block extra_button %}<a id="add_product" class="extra-button">{% trans 'Add product' %}</a>{% endblock %}
+
 
 {% block manage_content %}
 {% comment %} filters {% endcomment %}
@@ -1035,10 +1038,6 @@ $(document).ready(function(){
 
                 <div class="clear-floats"></div>
             </div>
-        </div>
-
-        <div id="add_product_container">
-            <input type="button" id="add_product" class="do" value="{% trans 'Add product' %}">
         </div>
     </div>
 

@@ -28,7 +28,7 @@ class ContactForm(forms.Form):
     company_name = forms.CharField(required=False, max_length=max_field_length(Contact, 'company_name'))
     first_name = forms.CharField(required=False, max_length=max_field_length(Contact, 'first_name'))
     last_name = forms.CharField(required=False, max_length=max_field_length(Contact, 'last_name'))
-    sex = forms.ChoiceField(choices=g.SEXES, required=True)
+    sex = forms.ChoiceField(choices=g.SEXES, required=False)
     street_address = forms.CharField(required=False, max_length=max_field_length(Contact, 'street_address'))
     postcode = forms.CharField(required=False, max_length=max_field_length(Contact, 'postcode'))
     city = forms.CharField(required=False, max_length=max_field_length(Contact, 'city'))

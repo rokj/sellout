@@ -1,13 +1,11 @@
 from django.shortcuts import render
-from django.forms import ValidationError
 from django.utils.translation import ugettext as _
 from django.core.cache import cache
 from django.http import HttpResponse
-from django.core.files.base import ContentFile
 
 from common import globals as g
 from config.functions import get_date_format, get_time_format, get_company_value
-from pos.models import Permission
+from pos.models import Permission, Company
 
 import json
 import Image  # PIL or pillow must be installed
@@ -63,83 +61,6 @@ def JSON_parse(string_data):
 # misc
 def max_field_length(model, field_name):
     return model._meta.get_field(field_name).max_length
-
-
-# image and file handling
-def resize_image(path, dimensions):
-    image = Image.open(path)
-
-    # crop the image to make it square
-    w = image.size[0]
-    h = image.size[1]
-
-    dim = min([w, h])
-
-    if w > h:
-        # the image is landscape, crop left and right
-        dist = (w - dim)/2
-        box = (dist, 0, w-dist, h)
-    else:
-        # the image is portrait, crop up and down
-        dist = (h - dim)/2
-        box = (0, dist, w, h-dist)
-
-    image = image.crop(box)
-
-    # create a thumbnail of the cropped image
-    image.thumbnail(dimensions, Image.ANTIALIAS)
-
-    # strip extension from path and use custom (so the file will be converted to our format)
-    path = os.path.splitext(path)[0]
-
-    image.save(path + '.' + g.MISC['image_format'])
-
-
-def validate_image(obj): # obj is actually "self"
-    image = obj.cleaned_data.get('image', False)
-    
-    # possible cases:
-    # 1. a new upload: image object will contain all data, including _size etc.; check for size
-    # 2. deletion: image = False; do nothing
-    # 3. no change: image object will exist, but image._size will not; do nothing    
-    try:
-        if image._size > g.MISC['max_upload_image_size']:
-            raise ValidationError(_("Image too large, maximum file size for upload is %s MB")%(g.MISC['max_upload_image_size']/2**20))
-    except AttributeError:  # case 3
-        pass
-    
-    return image
-
-
-def image_dimensions(size):
-    """ accepts string - key in g.IMAGE_DIMENSIONS and returns
-        a list: [width, height, sorl_string]
-        sorl_string = <width>x<height> (for use in templates)
-    """
-    if size not in g.IMAGE_DIMENSIONS:
-        return None # an exception will be raised on access
-    
-    dim = g.IMAGE_DIMENSIONS[size]
-    
-    return [dim[0], dim[1], str(dim[0]) + "x" + str(dim[1])]
-
-
-def image_from_base64(data):
-    """ receives base64 data and returns a file for saving to ImageField """
-    # see if header is right (if it's not at the beginning of data, it' not there at all
-    m = re.search(r"^data:image\/(" + g.MISC['image_upload_formats'] + ");base64,", data[:30])
-    if not m:
-        return None
-    header = m.group(0)
-    
-    # get file type from header
-    start = header.index("data:image/") + len("data:image/") # search between these substrings
-    end = header.index(";base64,", start)
-    filetype = header[start:end]
-
-    image_data = data[len(header)-1:].decode("base64")
-
-    return ContentFile(image_data, "fakename." + filetype) # name will be replaced when saving to ImageField
 
 
 # numbers

@@ -14,9 +14,10 @@
 </script>
 {% endblock %}
 
+{% block status_bar_title %}{% trans 'Add discount' %}{% endblock %}
+
 {% block manage_content %}
 {% if add %}
-    <h1>{% trans 'Add discount' %}</h1>
     <form action="{% url 'pos:add_discount' company.url_name %}" method="post">
 {% else %}
     <h1>{% trans 'Edit discount' %}</h1>

@@ -2,21 +2,17 @@
 # date: 9. 8. 2013
 #
 # Views for managing POS data: categories
-from django import forms
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from django.http import Http404, HttpResponse
 
 from pos.models import Company
-from pos.views.util import error, JSON_response, resize_image, validate_image, \
-                           has_permission, no_permission_view
+from pos.views.util import has_permission, no_permission_view
 from common import globals as g
 from config.functions import set_user_value, get_user_value, get_company_value
 
 import pytz
-import json
 
 
 ########################

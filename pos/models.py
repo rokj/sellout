@@ -4,7 +4,7 @@ from django.db.models.signals import pre_save, pre_delete, post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from sorl import thumbnail
-from common.globals import CATEGORY_COLORS
+from common.images import resize_logos
 
 from common.models import SkeletonU
 from common.functions import get_image_path
@@ -59,6 +59,7 @@ class Company(SkeletonU):
     class Meta:
         verbose_name_plural = _("Companies")
 
+
 # not in use at the moment
 #class CompanyAttribute(SkeletonU):
 #    company = models.ForeignKey(Company)
@@ -99,10 +100,13 @@ class Category(SkeletonU):
                 breadcrumb = " > " + breadcrumb
         return breadcrumb
 
-    # only used once for debugging - will not be needed with Pillow (debugged with PIL) 
-    #def get_thumbnail(self, size):
-    #    from easy_thumbnails.files import get_thumbnailer
-    #    get_thumbnailer(self.image)[size].url
+
+# post save signal on company: resize color logo and if necessary, convert monochrome logo
+@receiver(post_save, sender=Company)
+def check_logos(**kwargs):
+    """ deletes cached permissions on save or delete """
+    resize_logos(kwargs['instance'])
+
 
 # not in use at the moment
 #class CategoryAttribute(SkeletonU):
@@ -334,7 +338,7 @@ class Product(ProductAbstract):
         if self.category:
             return self.category.color
         else:
-            return CATEGORY_COLORS[0]
+            return g.CATEGORY_COLORS[0]
 
     class Meta:
         abstract = False

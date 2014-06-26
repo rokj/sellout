@@ -30,7 +30,8 @@ class PlainClearableFileInput(ClearableFileInput):
                 checkbox_id = self.clear_checkbox_id(checkbox_name)
                 substitutions['clear_checkbox_name'] = conditional_escape(checkbox_name)
                 substitutions['clear_checkbox_id'] = conditional_escape(checkbox_id)
-                substitutions['clear'] = CheckboxInput().render(checkbox_name, False, attrs={'id': checkbox_id})
+                substitutions['clear'] = \
+                    CheckboxInput().render(checkbox_name, False, attrs={'id': checkbox_id, 'class': 'clear'})
                 substitutions['clear_template'] = self.template_with_clear % substitutions
 
         return mark_safe(template % substitutions)

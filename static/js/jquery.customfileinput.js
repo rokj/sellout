@@ -1,10 +1,10 @@
 (function($){
-    $.fn.customFileInput = function(){
+    $.fn.customFileInput = function(label){
         return this.each(function(){
             // delete everything from parent and redraw
             var parent = $(this).parent();
-            $(this).detach();
-            parent.empty();
+            //$(this).detach();
+            //parent.empty();
 
             parent.css("position", "relative");
             parent.height($(this).height());
@@ -13,7 +13,7 @@
             var browse_button = $("<input>", {
                 type: 'button',
                 "class": "custom-file-input",
-                value: gettext("Browse") + "..."
+                value: label
             });
             parent
                 .addClass("custom-file-input")

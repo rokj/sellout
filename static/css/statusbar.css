@@ -52,18 +52,25 @@
     display: block;
 }
 
+a.button-text, a.extra-button{
+    color: #ffffff;
+}
+
 .drop-down{ /* 'ul' element */
     background-color: #000000;
-    overflow: hidden;
     display: none; /* will be shown by simpleMenu.js on click */
 
     margin: 0;
     padding: 0;
     list-style-type: none;
     width: 100%;
+
+    position: absolute;
+    z-index: 5; /* above all terminal stuff */
 }
 
-.drop-down:after, .button-container:after{
+.button-container.simple-menu-button:after,
+.drop-down:after{
     /* the arrow */
     content: "";
     position: absolute;
@@ -79,7 +86,9 @@
 #management_extra_button{
     background-color: #00bbda;
 }
-#management_extra_button.multi:after{
+
+#management_extra_button .drop-down:after,
+#management_extra_button.button-container.simple-menu-button:after{
     border-top-color: #00bbda;
 }
 
@@ -96,10 +105,10 @@ h1.status-bar-title{
     text-decoration: none;
     display: block;
     text-align: center;
-    color: #ffffff;
 }
 
 .drop-down a{
+    display: block;
     height: 45px;
     margin-left: 20px;
     margin-right: 20px;

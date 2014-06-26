@@ -1,19 +1,12 @@
-from base64 import b64decode
-from django.db.models.fields.files import ImageField
-from django.core.files.base import ContentFile
-
 from django.utils.translation import ugettext as _
-from django import forms
-from django.http import Http404
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from common.functions import get_image_path
 
 from pos.models import Company, Category
-from pos.views.manage.category import get_category, delete_category, get_all_categories, validate_category, \
+from pos.views.manage.category import get_category, validate_category, \
     get_all_categories_structured, category_to_dict, validate_parent
-from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, resize_image, validate_image, \
-    image_dimensions, max_field_length, image_from_base64, has_permission, no_permission_view
+from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, \
+    has_permission
 from common import globals as g
 
 

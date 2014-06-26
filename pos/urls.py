@@ -76,7 +76,7 @@ urlpatterns = patterns('',
 
     # misc (ajax): urls not translated
     url(r_company + '/' + r_manage + '/json/categories/' + '?$', category.web_JSON_categories, name='JSON_categories'),
-    url(r_company + '/' + r_manage + '/monochrome_logo' + '?$', company.get_monochrome_logo_url, name=''),
+    url(r_company + '/' + r_manage + '/monochrome_logo/' + '?$', company.create_monochrome_logo, name='create_monochrome_logo'),
     # unit types list
     #
     # TODO

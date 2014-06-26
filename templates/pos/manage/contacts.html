@@ -14,10 +14,11 @@
 
 {% block status_bar_title %}{% trans 'Contacts' %}{% endblock %}
 
-{% block extra_button_class %}multi{% endblock %}
+{# this button is actually a drop-down menu and needs a special class for the arrow indicator #}
+{% block extra_button_class %}simple-menu-button{% endblock %}
 {% block extra_button %}
     {# a very special extra button #}
-    <a id="add_contact_button" href="#" class="button-text">{% trans 'Add' %}</a>
+    <a id="add_contact_button" href="#" class="button-text">{% trans 'Add Contact' %}</a>
 
     <ul id="add_contact_menu" class="drop-down">
         {# add company #}

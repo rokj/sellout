@@ -14,9 +14,15 @@ $(document).ready(function(){
 </script>
 {% endblock %}
 
-{% block manage_content %}
+{% block status_bar_title %}{% trans 'Discounts' %}{% endblock %}
 
-<h1>{% trans 'Discounts' %}</h1>
+{% block extra_button %}
+    <a class="add-discount extra-button" href="{% url 'pos:add_discount' company.url_name %}">
+        {% trans 'Add Discount' %}
+    </a>
+{% endblock %}
+
+{% block manage_content %}
 
 {% comment %} filter discounts {% endcomment %}
 <div class="left-column">
@@ -68,16 +74,6 @@ $(document).ready(function(){
         {% endif %}
     </div>
     </form>
-
-    {% comment %} add discount {% endcomment %}
-    <h2>{% trans 'Add' %}</h2>
-    <div class="add-button-container">
-        <a class="add-discount button do"
-           href="{% url 'pos:add_discount' company.url_name %}">
-            {% trans 'New discount' %}
-        </a>
-    </div>
-
 </div>
 
 <div class="content">

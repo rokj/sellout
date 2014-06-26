@@ -4,12 +4,13 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
+from common.images import image_dimensions, image_from_base64
 
 from pos.models import Company, Category, Product, Price, PurchasePrice, Tax
 from pos.views.util import JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
-                           format_number, parse_decimal, image_dimensions, \
-                           image_from_base64, max_field_length, error
+                           format_number, parse_decimal, \
+                           max_field_length, error
 from pos.views.manage.discount import discount_to_dict
 from pos.views.manage.category import get_subcategories
 from pos.views.manage.tax import get_default_tax

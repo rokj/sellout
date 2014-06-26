@@ -62,7 +62,8 @@ $(document).ready(function(){
         // third column: delete button
         td_obj = $("<td>");
         // TODO: button icons
-        var del_button = $("<button>", {"class":"delete-tax"}).append("X");
+        var del_button = $("<button>", {"class":"delete-tax", title:"{% trans 'Delete tax' %}"})
+                .append("X");
         td_obj.append(del_button);
         tr_obj.append(td_obj);
 
@@ -106,8 +107,8 @@ $(document).ready(function(){
             var name = $("input.name", this).val();
             var amount = $("input.amount", this).val();
             
-            // if there's no name and no amount, ignore that row (the last row is one of them)
-            if(!name && !amount) return;
+            // if there's no name, ignore that row (the last row is one of them)
+            if(!name) return;
 
             // amount must be entered correctly
             if(!check_number(amount, '{{separator}}')){
@@ -153,7 +154,10 @@ $(document).ready(function(){
 
 {% block status_bar_title %} {% trans 'Taxes' %} {% endblock %}
 
-{% block extra_button %}<a href="#" id="new_tax" class="extra-button">{% trans 'New tax' %}</a>{% endblock %}
+{% block extra_button %}
+    <a href="#" id="new_tax" class="extra-button">
+        {% trans 'Add Tax' %}</a>
+{% endblock %}
 
 {% block manage_content %}
     <p>{% trans 'Choose default tax' %}</p>
@@ -177,10 +181,10 @@ $(document).ready(function(){
     </table>
 
     <div id="tax_footer">
-        <div class="button-container">
+        <div class="form-footer">
             <input type="button" id="cancel" value="{% trans 'Cancel' %}" class="cancel" />
         </div>
-        <div class="button-container">
+        <div class="form-footer">
             <input type="button" id="save_taxes" value="{% trans 'Save' %}" class="ok"/>
         </div>
     </div>
