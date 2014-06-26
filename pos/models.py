@@ -86,7 +86,18 @@ class Category(SkeletonU):
     
     class Meta:
         verbose_name_plural = _("Categories")
-    
+
+    @property
+    def breadcrumbs(self):
+        current_category = self
+        breadcrumb = ""
+        while current_category is not None:
+            breadcrumb = current_category.name + breadcrumb
+            current_category = current_category.parent
+            if current_category:
+                breadcrumb = " > " + breadcrumb
+        return breadcrumb
+
     # only used once for debugging - will not be needed with Pillow (debugged with PIL) 
     #def get_thumbnail(self, size):
     #    from easy_thumbnails.files import get_thumbnailer

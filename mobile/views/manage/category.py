@@ -11,7 +11,7 @@ from common.functions import get_image_path
 
 from pos.models import Company, Category
 from pos.views.manage.category import get_category, delete_category, get_all_categories, validate_category, \
-    get_all_categories_structured, category_to_dict
+    get_all_categories_structured, category_to_dict, validate_parent
 from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, resize_image, validate_image, \
     image_dimensions, max_field_length, image_from_base64, has_permission, no_permission_view
 from common import globals as g
@@ -85,30 +85,34 @@ def mobile_add_category(request, company):
     else:
         parent = Category.objects.get(id=parent_id)
 
+    color = data.get('color')
+    if not color:
+        color = g.CATEGORY_COLORS[0]
+
     # save category:
     category = Category(
-        company = c,
-        parent = parent,
-        name = data['name'],
-        description = data['description'],
-        color = data.get('color'),
-        created_by = request.user,
+        company=c,
+        parent=parent,
+        name=data['name'],
+        description=data['description'],
+        color=color,
+        created_by=request.user,
     )
     category.save()
 
     # add image, if it's there
 
-    if data['change_image'] == True:
-        if data['image']: # new image is uploade
+    #if data.get('change_image') == True:
+    #    if data['image']: # new image is uploade
 
-            if category.image:
-                category.image.delete()
-            # save a new image
-
-            category.image = data['image']
-
-        else: # delete the old image
-            category.image.delete()
+    #        if category.image:
+    #            category.image.delete()
+    #        # save a new image
+    #
+    #         category.image = data['image']
+    #
+    #     else: # delete the old image
+    #         category.image.delete()
 
     return JSON_ok(extra=get_all_categories_structured(c, category, android=True))
 
@@ -152,6 +156,25 @@ def edit_category(request, company):
     if data['color']:
         category.color = data['color']
 
+    parent_id = data['parent_id']
+    if parent_id != -1:
+        try:
+            p = Category.objects.get(id=parent_id, company=c)
+        except Category.DoesNotExist:
+            return JSON_error(_("Cannot edit product: parent id does not exist"))
+
+        #if p.company != c or not has_permission(request.user, company, 'product', 'edit'):
+        #    return JSON_error(_("You have no permission to edit this product"))
+
+        if not validate_parent(category, parent_id):
+            return JSON_error(_("Cannot set child as parent"))
+
+        if c.id == parent_id:
+            return JSON_error(_("Category cannot be parent of it self"))
+
+        category.parent = p
+    else:
+        category.parent = None
     # image
     if data.get('change_image') and data['change_image'] == True:
         if data['image']: # new image is uploade

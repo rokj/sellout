@@ -56,6 +56,7 @@ def category_to_dict(c, android = False):
         'add_child_url': reverse('pos:add_category', kwargs={'company': c.company.url_name, 'parent_id': c.id}),
         'edit_url': reverse('pos:edit_category', kwargs={'company': c.company.url_name, 'category_id': c.id}),
         'color': c.color,
+        'breadcrumbs': c.breadcrumbs
     }
 
     if c.image:
@@ -115,6 +116,20 @@ def validate_category(user, company, data):
         if p.company != company or not has_permission(user, company, 'product', 'edit'):
             return r(False, _("You have no permission to edit this product"))
 
+        # don't allow adding children as parent when editing
+        if data['id'] != -1:
+            c = Category.objects.get(id=data['id'])
+
+            if c.id == parent_id:
+                return r(False, _("Category cannot be parent of it self"))
+
+            if not validate_parent(c, parent_id):
+                return r(False, _("Cannot set child as parent"))
+
+
+
+
+
     # name
     if not data['name']:
         return r(False, _("No name entered"))
@@ -148,6 +163,17 @@ def validate_category(user, company, data):
     data['description'] = data['description'].strip()
 
     return {'status': True, 'data': data}
+
+def validate_parent(category, parent_id):
+    categories = Category.objects.filter(parent=category)
+    for c in categories:
+        if c.id == parent_id:
+            return False
+        else:
+            validate_parent(c, parent_id)
+    return True
+
+
 
 
 def get_all_categories(company_id, category_id=None, sort='name', data=None, level=0, json=False):
@@ -248,7 +274,6 @@ def web_JSON_categories(request, company):
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_JSON_categories(request, company):
-    print JSON_categories(request, company)
     return JSON_categories(request, company)
 
 

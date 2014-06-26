@@ -60,12 +60,17 @@ def get_all_discounts(user, company, android=False):
     """ returns all available discounts for this company in a list of dictionaries
         (see discount_to_dict for dictionary format)
     """
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
     discounts = Discount.objects.filter(company=company, enabled=True).order_by('code')
 
     ds = []
     for d in discounts:
         if d.is_active:
-            ds.append(discount_to_dict(user, d, android))
+            ds.append(discount_to_dict(user, c, d, android))
     return ds
 
 

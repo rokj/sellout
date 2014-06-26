@@ -95,14 +95,14 @@ def mobile_edit_discount(request, company):
         # submit data
         start_date = data.get('start_date')
         if start_date:
-            start = dtm.datetime(year=start_date[0], month=start_date[1],
+            start = dtm.date(year=start_date[0], month=start_date[1],
                                  day=start_date[2])
         else:
             start=None
 
         end_date = data.get('end_date')
         if end_date:
-            end = dtm.datetime(year=end_date[0], month=end_date[1],
+            end = dtm.date(year=end_date[0], month=end_date[1],
                                  day=end_date[2])
         else:
             end=None
@@ -115,7 +115,7 @@ def mobile_edit_discount(request, company):
         d.active = data.get('active')
         d.save()
 
-    return JSON_ok(extra=discount_to_dict(request.user, d, android=True))
+    return JSON_ok(extra=discount_to_dict(request.user, c, d, android=True))
 
 
 @api_view(['GET', 'POST'])
@@ -139,14 +139,14 @@ def mobile_add_discount(request, company):
     data = JSON_parse(request.POST['data'])
     start_date = data.get('start_date')
     if start_date:
-        start = dtm.datetime(year=start_date[0], month=start_date[1],
+        start = dtm.date(year=start_date[0], month=start_date[1],
                              day=start_date[2])
     else:
         start=None
 
     end_date = data.get('end_date')
     if end_date:
-        end = dtm.datetime(year=end_date[0], month=end_date[1],
+        end = dtm.date(year=end_date[0], month=end_date[1],
                              day=end_date[2])
     else:
         end=None
@@ -164,7 +164,7 @@ def mobile_add_discount(request, company):
     )
     d.save()
 
-    return JSON_ok(extra=discount_to_dict(request.user, d, android=True))
+    return JSON_ok(extra=discount_to_dict(request.user, c, d, android=True))
 
 
 @api_view(['GET', 'POST'])
@@ -195,15 +195,19 @@ def mobile_list_discounts(request, company):
         # start_date
         if data.get('start_date'):
             # parse date first
-            r = parse_date(request.user, data.get('start_date'))
-            if r['success']:
-                discounts = discounts.filter(start_date__gte=r['date'])
+            start_date = data.get('start_date')
+            start = dtm.date(year=start_date[0], month=start_date[1],
+                             day=start_date[2])
+
+            discounts = discounts.filter(start_date__gte=start)
 
         # end_date
         if data.get('end_date'):
-            r = parse_date(request.user, data.get('end_date'))
-            if r['success']:
-                discounts = discounts.filter(start_date__gte=r['date'])
+            end_date = data.get('end_date')
+            end = dtm.date(year=start_date[0], month=start_date[1],
+                             day=start_date[2])
+
+            discounts = discounts.filter(end_date__lse=end)
 
         # active
         if data.get('active') is not None:
@@ -214,6 +218,6 @@ def mobile_list_discounts(request, company):
 
     r = []
     for d in discounts:
-        r.append(discount_to_dict(request.user, d, android=True))
+        r.append(discount_to_dict(request.user, c, d, android=True))
 
     return JSON_ok(extra=r)

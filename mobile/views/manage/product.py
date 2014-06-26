@@ -4,19 +4,8 @@ from django.db.models import Q
 from pos.models import Company, Category, Discount, Product, ProductDiscount, Price, PurchasePrice, Tax
 from pos.views.manage.product import JSON_units, get_product, search_products, create_product, edit_product, \
     delete_product, product_to_dict
-from pos.views.util import error, JSON_response, JSON_parse, JSON_error, JSON_ok, \
-                           has_permission, no_permission_view, \
-                           format_number, parse_decimal, image_dimensions, \
-                           image_from_base64, max_field_length
-from pos.views.manage.discount import discount_to_dict
-from pos.views.manage.category import get_subcategories
-from pos.views.manage.tax import get_default_tax
-
-from common import globals as g
-from config.functions import get_user_value
-
-import decimal
-from sorl.thumbnail import get_thumbnail
+from pos.views.util import JSON_response, JSON_error, \
+                            has_permission
 from rest_framework.decorators import api_view, permission_classes,\
     authentication_classes
 from rest_framework.permissions import IsAuthenticated
@@ -76,7 +65,7 @@ def mobile_get_products(request, company):
 
     r = []
     for p in products:
-        r.append(product_to_dict(request.user, p, android=True))
+        r.append(product_to_dict(request.user, c,  p, android=True))
 
     return JSON_response(r)
 

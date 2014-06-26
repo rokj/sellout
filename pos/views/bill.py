@@ -179,7 +179,7 @@ def item_prices(user, company, base_price, tax_percent, quantity, discounts):
     r['tax_absolute'] = r['tax_absolute'].quantize(precision)
     r['discount_absolute'] = r['discount_absolute'].quantize(precision)
     r['total_tax_exc'] = r['total_tax_exc'].quantize(precision)
-    r['single_total'] = r['total'].quantize(precision)
+    r['single_total'] = r['single_total'].quantize(precision)
     r['total'] = r['total'].quantize(precision)
 
     return r
@@ -361,6 +361,7 @@ def create_bill(request, company):
         type=bill['type'],
         timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
         status=bill['status'],
+        total=grand_total_py
     )
     db_bill.save()
 
@@ -404,10 +405,10 @@ def create_bill(request, company):
     # that's it
     # TODO: print receipt
 
-    s = 'item name  |  price   |   total   |   quantity\n'
-    for item in bill['items']:
-        s += item['name'] + " " + str(item['base_price']) + " " +str(item['total']) + " " + str(item['quantity']) + '\n'
-    d = {'print': s}
+    #s = 'item name  |  price   |   total   |   quantity\n'
+    #for item in bill['items']:
+    #    s += item['name'] + " " + str(item['base_price']) + " " +str(item['total']) + " " + str(item['quantity']) + '\n'
+    d = {'bill': bill_to_dict(request.user, c, db_bill)}
     return JSON_ok(extra=d)
 
 

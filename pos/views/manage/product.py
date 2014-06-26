@@ -327,6 +327,8 @@ def search_products(request, company):
 
         if f:
             products = products.filter(f)
+
+        print products.query
         # omit search by tax, price, discount
 
     products = products.distinct().order_by('name')
