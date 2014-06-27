@@ -1,8 +1,10 @@
 (function($){
     $.fn.customFileInput = function(label){
         return this.each(function(){
-            // delete everything from parent and redraw
             var parent = $(this).parent();
+
+            // delete the input[type='button'] from parent
+            $("input[type='button']", parent).remove();
             //$(this).detach();
             //parent.empty();
 

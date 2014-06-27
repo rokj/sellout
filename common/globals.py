@@ -184,7 +184,7 @@ MISC = {
 
 IMAGE_DIMENSIONS = {
     'color_logo': (180, 180),
-    'monochrome_logo': (48, 48),
+    'monochrome_logo': (64, 64),
     'category': (120, 120),  # there's no image, just a colored box
     'product': (160, 160),  # must be as large as the largest PRODUCT_BUTTON_DIMENSIONS
     'thumb_small': (32, 32),  # for thumbnails
@@ -206,32 +206,32 @@ PERMISSIONS = {  # 'chapters' that each group can view or manage
     # manage, terminal
     'guest': {
         'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax',
-                 'terminal', ),
+                 'terminal', 'register',),
         'edit': (),
         },
     'cashier': {
         'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax',
-                 'terminal',),
+                 'terminal', 'register',),
         'edit': ('bill',
                  'terminal', 'config',),
         },
     'seller': {
         'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax',
-                 'terminal', 'manage',),
+                 'terminal', 'manage', 'register',),
         'edit': ('bill', 'product',
                  'terminal', 'manage', 'config', 'tax',),
         },
     'manager': {
         'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config', 'tax',
-                 'terminal', 'manage',),
+                 'terminal', 'manage', 'register',),
         'edit': ('category', 'discount', 'product', 'contact', 'bill', 'config', 'tax',
-                 'terminal', 'manage', ),
+                 'terminal', 'manage', 'register',),
         },
     'admin': {
         'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config',
-                 'terminal', 'manage', 'tax',),
+                 'terminal', 'manage', 'tax', 'register',),
         'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config',
-                 'terminal', 'manage', 'tax',),
+                 'terminal', 'manage', 'tax', 'register',),
         },
 }
 

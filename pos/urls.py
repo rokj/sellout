@@ -14,6 +14,7 @@ from pos.views.manage import contact
 from pos.views.manage import discount
 from pos.views.manage import tax
 from pos.views.manage import configuration
+from pos.views.manage import till
 
 from pos.views import bill
 
@@ -40,6 +41,9 @@ urlpatterns = patterns('',
     # company
     url(r_company + '/' + r_manage + '/$', manage.manage_home, name='manage_home'),  # management home
     url(r_company + '/' + r_manage + _('/company') + '/$', company.edit_company, name='edit_company'),  # company
+    url(r_company + '/' + r_manage + _('/upload-color-logo') + '/$', company.upload_color_logo, name='upload_color_logo'),
+    url(r_company + '/' + r_manage + _('/upload-monochrome-logo') + '/$', company.upload_monochrome_logo, name='upload_monochrome_logo'),
+    url(r_company + '/' + r_manage + '/monochrome_logo/' + '?$', company.create_monochrome_logo, name='create_monochrome_logo'),
     # categories
     url(r_company + '/' + r_manage + _('/categories'), category.list_categories, name='list_categories'),  # list of categories
     url(r_company + '/' + r_manage + _('/category/add') + '/(?P<parent_id>-?\d+)?/$', category.add_category, name='add_category'),  # add
@@ -68,15 +72,17 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + '/json/products/get/$', product.web_get_product, name='get_product'),  # product list (search) - json
     url(r_company + '/' + r_manage + '/json/products/edit/$', product.web_edit_product, name='edit_product'),  # edit (save) product - json
     url(r_company + '/' + r_manage + '/json/products/delete/$', product.web_delete_product, name='delete_product'),  # edit (save) product - json
+    # cash registers (the module is named 'till' to avoid confusion with registration)
+    url(r_company + '/' + r_manage + _('/registers') + '/$', till.registers, name='registers'),  # static (template) page
     # users
     #url(r_company + _('/manage/users') + '/$', manage.users.edit_company, name='edit_users'), # company
     # config (company parameter is needed only for url; configuration is per user, regardless of company
-    url(r_company + '/' + r_manage + _('/configuration') + '/$', configuration.edit_config, name='edit_config'),  # company
+    url(r_company + '/' + r_manage + _('/configuration') + '/$', configuration.edit_config, name='configuration'),  # company
 
 
     # misc (ajax): urls not translated
     url(r_company + '/' + r_manage + '/json/categories/' + '?$', category.web_JSON_categories, name='JSON_categories'),
-    url(r_company + '/' + r_manage + '/monochrome_logo/' + '?$', company.create_monochrome_logo, name='create_monochrome_logo'),
+
     # unit types list
     #
     # TODO

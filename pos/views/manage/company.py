@@ -1,36 +1,28 @@
-# author: nejc jurkovic
-# date: 9. 8. 2013
-#
-# Views for managing POS data: registration and company details
+import Image
+from StringIO import StringIO
+from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from common.images import validate_image, color_to_monochrome_logo
+from common.images import image_from_base64, resize_image
 
 from pos.models import Company
-from pos.views.util import JSON_response, JSON_parse, has_permission, no_permission_view, JSON_ok, JSON_error
+from pos.views.util import JSON_response, JSON_parse, has_permission, no_permission_view, JSON_ok
 from common import globals as g
 import unidecode
 from common.functions import get_random_string, get_terminal_url
-from common import widgets
 
 import re
+import os
 
 
 ###
 ### helper functions etc
 ###
 def is_url_name_unique(url_name):
-    try:
-        Company.objects.get(url_name=url_name)
-        # select succeeded, url_name exists
-        return False
-    except Company.DoesNotExist:
-        # it does not exist.
-        return True
-    
-    # ??? any other exceptions?
+    return not Company.objects.filter(url_name=url_name).exists()
 
 
 def check_url_name(url_name):
@@ -168,13 +160,10 @@ class CompanyForm(forms.ModelForm):
         else:
             return url_name
 
-    def clean_image(self):
-        return validate_image(self)
-
     class Meta:
         model = Company
-        fields = ['color_logo',
-                  'monochrome_logo',
+        fields = [#'color_logo',  # logos have been left out and moved to separate forms (html only)
+                  #'monochrome_logo',
                   'name',
                   'url_name',
                   'email',
@@ -187,11 +176,10 @@ class CompanyForm(forms.ModelForm):
                   'vat_no',
                   'notes',
                   'website']
-
-        widgets = {
-            'color_logo': widgets.PlainClearableFileInput,
-            'monochrome_logo': widgets.PlainClearableFileInput,
-        }
+        #widgets = {
+        #    'color_logo': widgets.PlainClearableFileInput,
+        #    'monochrome_logo': widgets.PlainClearableFileInput,
+        #}
 
 
 # for json etc.
@@ -249,11 +237,13 @@ def register_company(request):
         'pos_url': get_terminal_url(request),
         'color_logo_dimensions': g.IMAGE_DIMENSIONS['color_logo'],
         'monochrome_logo_dimensions': g.IMAGE_DIMENSIONS['monochrome_logo'],
+        'max_upload_size': g.MISC['max_upload_image_size'],
+
         'title': _("Registration"),
         'site_title': g.MISC['site_title'],
     }
 
-    return render(request, 'pos/manage/register.html', context)
+    return render(request, 'pos/manage/registration.html', context)
 
 # edit after registration
 @login_required
@@ -270,6 +260,8 @@ def edit_company(request, company):
         'company': c,
         'color_logo_dimensions': g.IMAGE_DIMENSIONS['color_logo'],
         'monochrome_logo_dimensions': g.IMAGE_DIMENSIONS['monochrome_logo'],
+        'max_upload_size': g.MISC['max_upload_image_size'],
+
         'title': _("Company details"),
         'site_title': g.MISC['site_title'],
         'pos_url': get_terminal_url(request),
@@ -280,10 +272,7 @@ def edit_company(request, company):
         form = CompanyForm(request.POST, request.FILES, instance=c)
         
         if form.is_valid():
-            # save form and resize image to the maximum size that will ever be needed
             form.save()
-            #if c.image:
-            #    resize_image(c.image.path, g.IMAGE_DIMENSIONS['logo'])
 
             # for an eventual message for the user
             context['saved'] = True
@@ -298,11 +287,153 @@ def edit_company(request, company):
 
 
 @login_required
-def create_monochrome_logo(request, company):
-    # get company
+def upload_color_logo(request, company):
+    # Kudos: https://snipt.net/danfreak/generate-thumbnails-in-django-with-pil/
     c = Company.objects.get(url_name=company)
 
-    if not color_to_monochrome_logo(c):
-        return JSON_error(_("There is no color logo, please save that first."))
+    data = JSON_parse(request.POST.get('data'))
 
-    return JSON_ok()
+    if 'image' in data:
+        # read the new image and upload it
+        image_file = image_from_base64(data.get('image'))
+
+        if file:
+            resize = False
+
+            # resize and convert image if necessary
+            color_logo = Image.open(image_file)
+
+            if color_logo.mode not in ('L', 'RGB'):
+                color_logo = color_logo.convert('RGB')
+
+            if color_logo.size != g.IMAGE_DIMENSIONS['color_logo']:
+                # the logo has wrong dimensions
+                resize = True
+
+            if color_logo.format != g.MISC['image_format']:
+                # the logo is not in the correct format
+                resize = True
+
+            if resize:
+                color_logo = resize_image(color_logo, g.IMAGE_DIMENSIONS['color_logo'])
+
+            if c.color_logo:
+                # the logo exists already, delete it
+                try:
+                    os.remove(c.color_logo.path)
+                except OSError:
+                    pass
+
+            temp_handle = StringIO()
+            color_logo.save(temp_handle, 'png')
+            temp_handle.seek(0)
+
+            # Save to the thumbnail field
+            suf = SimpleUploadedFile('temp', temp_handle.read(), ('image/'+g.MISC['image_format']).lower())
+
+            c.color_logo.save(suf.name + '.png', suf, save=False)
+            c.save()
+
+            return JSON_response({'status': 'ok', 'logo_url': c.color_logo.url})
+    else:
+        # there is no image, remove the existing one
+        try:
+            os.remove(c.color_logo.path)
+        except OSError:
+            pass
+
+        c.color_logo.delete()
+        c.save()
+
+
+@login_required
+def upload_monochrome_logo(request, company):
+    c = Company.objects.get(url_name=company)
+
+    data = JSON_parse(request.POST.get('data'))
+
+    if 'image' in data:
+        # read the new image and upload it
+        image_file = image_from_base64(data.get('image'))
+
+        if file:
+            resize = False
+
+            # resize and convert image if necessary
+            monochrome_logo = Image.open(image_file)
+
+            if monochrome_logo.size != g.IMAGE_DIMENSIONS['monochrome_logo']:
+                # the logo has wrong dimensions
+                resize = True
+
+            if monochrome_logo.format != g.MISC['image_format']:
+                # the logo is not in the correct format
+                resize = True
+
+            # resize first
+            if resize:
+                monochrome_logo = resize_image(monochrome_logo, g.IMAGE_DIMENSIONS['monochrome_logo'])
+
+            # then convert to monochrome
+            if monochrome_logo.mode != '1':
+                monochrome_logo = monochrome_logo.convert('1')
+
+            if c.monochrome_logo:
+                # the logo exists already, delete it
+                try:
+                    os.remove(c.monochrome_logo.path)
+                except OSError:
+                    pass
+
+            temp_handle = StringIO()
+            monochrome_logo.save(temp_handle, 'png')
+            temp_handle.seek(0)
+
+            # Save to the thumbnail field
+            suf = SimpleUploadedFile('temp', temp_handle.read(), ('image/' + g.MISC['image_format']).lower())
+
+            c.monochrome_logo.save(suf.name + '.png', suf, save=False)
+            c.save()
+
+            return JSON_response({'status': 'ok', 'logo_url': c.monochrome_logo.url})
+    else:
+        # there is no image, remove the existing one
+        try:
+            os.remove(c.monochrome_logo.path)
+        except OSError:
+            pass
+
+        c.monochrome_logo.delete()
+        c.save()
+
+        return JSON_ok()
+
+
+@login_required
+def create_monochrome_logo(request, company):
+    c = Company.objects.get(url_name=company)
+
+    if not c.color_logo:
+        return False
+
+    # get company's color logo
+    color_logo = Image.open(c.color_logo.path)
+
+    # resize it to monochrome_logo dimension
+    black_logo = color_logo.copy()
+    black_logo.thumbnail(g.IMAGE_DIMENSIONS['monochrome_logo'], Image.ANTIALIAS)
+    # reduce color depth
+    black_logo = black_logo.convert(mode='1')
+    # create a new path for the monochrome logo
+    new_path = os.path.splitext(c.color_logo.path)[0]
+    new_path = new_path + '_monochrome.' + g.MISC['image_format']
+    # save to the new path
+    black_logo.save(new_path, g.MISC['image_format'], bits=1)
+
+    # save to stupid django field
+    django_file = File(open(new_path))
+    c.monochrome_logo.save('new', django_file)
+    django_file.close()
+
+    # return an url to the new logo
+    return JSON_response({'status': 'ok', 'logo_url': c.monochrome_logo.url})

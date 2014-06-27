@@ -1,3 +1,34 @@
+function upload_image(input, url, token, max_size, callback){
+    // max_size: size of file in Bytes
+    if(input.files && input.files[0]) {
+        // a file is selected, convert it and send
+        var reader = new FileReader();
+
+        reader.onload = function(e){
+            // check size: it must not be larger than 4*max_size/3 (converted to base64)
+            if(e.target.result.length > 4*max_size/3){
+                error_message(
+                    gettext("File too large"),
+                    gettext("Maximum file size is") + " " +
+                        Math.round(max_size/1024) + " kB"
+                );
+
+                return;
+            }
+
+            // send the image to url;
+            // callback will be executed when request ends
+            send_data(url, {image: e.target.result}, token, callback);
+        };
+
+        reader.readAsDataURL(input.files[0]);
+    }
+    else{
+        // there are no files selected, send empty data (the server will remove an existing image)
+        send_data(url, {/* image not in data */}, token, callback);
+    }
+}
+
 function preview_image(input, container_id){
     if (input.files && input.files[0]) {
         var reader = new FileReader();

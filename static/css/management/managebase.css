@@ -25,7 +25,10 @@ label{
     font-size: 10px;
 }
 
-input[type='text'], input[type='email'], textarea {
+input[type='text'],
+input[type='email'],
+input[type='number'],
+textarea {
     border-radius: 0;
     border-width: 1px;
     padding-top: 10px;

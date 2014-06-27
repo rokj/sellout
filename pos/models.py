@@ -4,7 +4,6 @@ from django.db.models.signals import pre_save, pre_delete, post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from sorl import thumbnail
-from common.images import resize_logos
 
 from common.models import SkeletonU
 from common.functions import get_image_path
@@ -99,13 +98,6 @@ class Category(SkeletonU):
             if current_category:
                 breadcrumb = " > " + breadcrumb
         return breadcrumb
-
-
-# post save signal on company: resize color logo and if necessary, convert monochrome logo
-@receiver(post_save, sender=Company)
-def check_logos(**kwargs):
-    """ deletes cached permissions on save or delete """
-    resize_logos(kwargs['instance'])
 
 
 # not in use at the moment
@@ -464,6 +456,10 @@ class Register(SkeletonU):
     receipt_format = models.CharField(_("Receipt format"), max_length=32, choices=g.RECEIPT_FORMATS, null=False)
     receipt_type = models.CharField(_("Receipt type"), max_length=32, choices=g.RECEIPT_TYPES, null=False)
     print_logo = models.BooleanField(_("Print logo on thermal receipts"), blank=False)
+
+    location = models.TextField(_("Location of this register"), max_length=120, null=True, blank=True)
+    print_location = models.BooleanField(_("Print location of register"), blank=False)
+
 
 
 ### bills ###

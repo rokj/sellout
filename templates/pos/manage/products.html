@@ -614,7 +614,7 @@ $(document).ready(function(){
             edit_obj.dialog('option', 'title', "{% trans 'Add product' %}");
         
         // custom 'widgets'
-        $("#edit_product_image_upload").customFileInput();
+        $("#edit_product_image_upload").customFileInput("{% trans 'Choose file...' %}");
     }
 
     function parse_product(product){

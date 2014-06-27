@@ -2,13 +2,6 @@
 {% load static %}
 {% load i18n %}
 
-{% block status_bar_title %}{% trans 'Company' %}{% endblock %}
-
-{% block extra_button %}
-    {# a link to configuration #}
-
-{% endblock %}
-
 {% block section_head %}
 <script type="text/javascript" src="{% static 'js/jquery.customfileinput.js' %}"></script>
 
@@ -56,26 +49,7 @@
     position: relative;
 }
 
-input[type='checkbox'].clear + label{
-    display: block;
-    position: absolute;
-
-    left: 100%;
-    top: 50%;
-
-    margin-top: -10px;
-    margin-left: 5px;
-
-    width: 20px;
-    height: 20px;
-
-    background-image: url("{% static 'icons/delete_image_unchecked.png' %}");
-    background-size: 20px 20px;
-
-    cursor: pointer;
-}
-
-input[type='checkbox'].clear:checked + label{
+.delete-button{
     background-image: url("{% static 'icons/delete_image_checked.png' %}");
 }
 
@@ -86,10 +60,12 @@ $(document).ready(function(){
     var items = {
         color_logo_input: $("#id_color_logo"),
         color_logo_container: $("#color_logo_container"),
+        remove_color_logo: $("#remove_color_logo"),
 
         monochrome_passepartout: $("#passepartout"),
         monochrome_logo_input: $("#id_monochrome_logo"),
         monochrome_logo_container: $("#monochrome_logo_container"),
+        remove_monochrome_logo: $("#remove_monochrome_logo"),
 
         auto_create: $("#auto_create")
     };
@@ -100,51 +76,91 @@ $(document).ready(function(){
     );
 
     // set the monochrome logo 'passepartout'
-    var dist = ({{ color_logo_dimensions.0 }} - {{ monochrome_logo_dimensions.0 }})/2
+    var dist = ({{ color_logo_dimensions.0 }} - {{ monochrome_logo_dimensions.0 }})/2;
     items.monochrome_logo_container.css("top", dist + "px");
     items.monochrome_logo_container.css("left", dist + "px");
 
-    items.color_logo_input
-        .customFileInput("{% trans 'Choose file...' %}")
-        .change(function(){
-            preview_image(this, "#color_logo_container");
-            // hide the auto-create button or the new logo will be created from the old one
-            items.auto_create.hide();
+    // logo upload controls
+    function logo_input(input, container, url){
+        input
+            .customFileInput("{% trans 'Choose file...' %}")
+            .change(function(){
+                upload_image(input.get(0), url, "{{ csrf_token }}", {{ max_upload_size }}, function(response){
+                        if(response.status != 'ok'){
+                            // something went wrong
+                            error_message(
+                                "{% trans 'Error while uploading a new logo' %}",
+                                response.message
+                            );
+                        }
+                        else{
+                            // replace the old logo with the new one
+                            container.css("background-image", "url(" + response.logo_url + ")");
+                        }
+                    });
         });
+    }
 
-    items.monochrome_logo_input
-        .customFileInput("{% trans 'Choose file...' %}")
-        .change(function(){
-            preview_image(this, "#monochrome_logo_container", {{ monochrome_logo_dimensions.0 }}, {{ monochrome_logo_dimensions.1 }});
+    function logo_removal(button, input, container, url){
+        button.click(function(){
+        // replace the input with a new one
+        var new_input = $("<inpu>", {type: 'file', id: input.attr("id")});
+        input.replaceWith(new_input);
+
+        upload_image(input.get(0), url, "{{ csrf_token }}", {{ max_upload_size }}, function(response){
+                if(response.status != 'ok'){
+                    // something went wrong (wtf?!)
+                    error_message(
+                        "{% trans 'Error while deleting logo' %}",
+                        response.message
+                    );
+
+                    // do nothing else
+                }
+                else{
+                    // everything ok, clear the logo from
+                    container.css("background-image", "none");
+                }
+            });
         });
+    }
 
-    // the delete image buttons
-    // replace labels with delete images
-    $("input[type='checkbox'] + label").text("").attr("title", "{% trans 'Remove logo' %}");
+    // init the two functions above for each logo
+    logo_input(items.color_logo_input, items.color_logo_container, "{% url 'pos:upload_color_logo' company.url_name %}");
+    logo_removal(items.remove_color_logo, items.color_logo_input, items.color_logo_container, "{% url 'pos:upload_color_logo' company.url_name %}");
 
-    // what does the auto-create button do:
-    // send an auto-create request to server and when response arrives, refresh the page;
-    // the server will create an image and save it and on refresh, it will be displayed;
-    // since browsers remember values when refreshing, no harm will be done
+    logo_input(items.monochrome_logo_input, items.monochrome_logo_container, "{% url 'pos:upload_monochrome_logo' company.url_name %}");
+    logo_removal(items.remove_monochrome_logo, items.monochrome_logo_input, items.monochrome_logo_container, "{% url 'pos:upload_monochrome_logo' company.url_name %}");
+
     items.auto_create.click(function(){
-        send_data("{% url 'pos:create_monochrome_logo' company.url_name %}", {}, "{{ csrf_token }}", function(response){
-            if(response.status != 'ok'){
-                error_message(
-                    "{% trans 'Creating logo failed' %}",
-                    response.message
-                );
-            }
-            else{
-                // logo created, reload page
-                window.location.reload();
-            }
-        });
+        send_data("{% url 'pos:create_monochrome_logo' company.url_name %}", {}, "{{ csrf_token }}",
+            function(response){
+                if(response.status != 'ok'){
+                    error_message(
+                            "{% trans 'Error while creating logo' %}",
+                            response.message
+                    );
+                }
+                else{
+                    items.monochrome_logo_container.css("background-image", "url(" + response.logo_url + ")");
+                }
+            });
     });
 
 });
 
 </script>
 {% endblock %}
+
+{% block status_bar_title %}{% trans 'Company' %}{% endblock %}
+
+{% block extra_button %}
+    {# a link to configuration #}
+    <a class="button-text" href="{% url 'pos:configuration' company.url_name %}">
+        {% trans 'Configuration' %}
+    </a>
+{% endblock %}
+
 
 {% block manage_content %}
 <form action="{% url 'pos:edit_company' company.url_name %}" method="post" enctype="multipart/form-data">
@@ -158,10 +174,16 @@ $(document).ready(function(){
             <p class="custom-label">{% trans 'For web and full-page bill prints' %}</p>
 
             <div class="image-buttons">
-                <div class="error">{{ form.color_logo.errors }}</div>
+                {% comment %} <div class="error">{{ form.color_logo.errors }}</div> {% endcomment %}
 
                 <div class="bottom">
-                    <div>{{ form.color_logo }}</div>
+                    <div>
+                        <button id="remove_color_logo"
+                                class="delete-button"
+                                title="{% trans 'Remove image' %}"></button>
+
+                        <input type="file" id="id_color_logo" />
+                    </div>
                 </div>
             </div>
 
@@ -179,14 +201,18 @@ $(document).ready(function(){
                 <div class="bottom">
                     <div>{# keep this button in its own block #}
                         {# do not show it if there's no color logo #}
-                        {% if company.color_logo %}
-                            <input type="button"
-                                value="{% trans 'Auto-create' context 'monochrome logo button' %}"
-                                id="auto_create"/>
-                        {% endif %}
+                        <input type="button"
+                            value="{% trans 'Auto-create' context 'monochrome logo button' %}"
+                            id="auto_create"/>
                     </div>
 
-                    <div>{{ form.monochrome_logo }}</div>
+                    <div>
+                        <button id="remove_monochrome_logo"
+                                class="delete-button"
+                                title="{% trans 'Remove image' %}"></button>
+
+                        <input type="file" id="id_monochrome_logo" />
+                    </div>
                 </div>
             </div>
 

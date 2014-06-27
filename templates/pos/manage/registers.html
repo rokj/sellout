@@ -1,0 +1,30 @@
+{% extends "pos/manage/manage.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block section_head %}
+    <script type="text/javascript">
+
+    </script>
+{% endblock %}
+
+{% block status_bar_title %}{% trans 'Registers' %}{% endblock %}
+
+{% block extra_button %}
+    <a class="button-text" href="#" id="add_register">
+        {% trans 'Add Register' %}
+    </a>
+{% endblock %}
+
+{% block manage_content %}
+    {# the list of registers: on the left #}
+    <div class="left-column">
+        left
+    </div>
+
+    <div class="content">
+        {{ empty_form.as_p }}
+    </div>
+
+{% endblock %}
+

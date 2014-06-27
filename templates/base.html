@@ -94,11 +94,11 @@ blocks:
                 <li class="store"><a href="{% url 'pos:products' company.url_name %}">{% trans 'Products' %}</a></li>
                 <li class="store"><a href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Discounts' %}</a></li>
                 <li class="store"><a href="{% url 'pos:list_taxes' company.url_name %}">{% trans 'Taxes' %}</a></li>
-                <li class="store"><a href="#">{% trans 'Cash Registers' %}</a></li>
+                <li class="store"><a href="{% url 'pos:registers' company.url_name %}">{% trans 'Cash Registers' %}</a></li>
                 <li class="store"><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
                 <li class="store"><a href="">{% trans 'Bills' %}</a></li>
                 {# company-related stuff #}
-                <li class="company separator"><a href="#">{% trans 'Configuration' %}</a></li>
+                <li class="company separator"><a href="{% url 'pos:configuration' company.url_name %}">{% trans 'Configuration' %}</a></li>
                 <li class="company"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
                 <li class="company"><a href="#">{% trans 'Users' %}</a></li>
             </ul>

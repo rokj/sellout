@@ -6,11 +6,20 @@
 
 {% endblock %}
 
+{% block status_bar_title %}{% trans 'Configuration' %}{% endblock %}
+
+{% block extra_button %}
+    <a class="button-text" href="{% url 'pos:edit_company' company.url_name %}">
+        {% trans 'Company' %}
+    </a>
+{% endblock %}
+
 {% block manage_content %}
-<form action="{% url 'pos:edit_config' company.url_name %}" method="post" enctype="multipart/form-data">
-{% csrf_token %}
-{{ form.as_p }}
-<p><input type="submit" value="{% trans 'Save' %}" /></p>
+<form action="{% url 'pos:configuration' company.url_name %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <p><input type="submit" value="{% trans 'Save' %}" /></p>
 </form>
 
 {% endblock %}
