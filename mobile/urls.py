@@ -51,8 +51,8 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/units/?$', mobile_get_units, name='get_units'),
 
     # taxes
-    url(r_company + r'/manage/json/taxes/?$', tax.mobile_get_taxes, name='get_taxes'), # get all taxes in a json list
-    url(r_company + r'/manage/json/taxes/save/?$', tax.mobile_save_taxes, name='save_taxes'),
+    #url(r_company + r'/manage/json/taxes/?$', tax.mobile_get_taxes, name='get_taxes'), # get all taxes in a json list
+    #url(r_company + r'/manage/json/taxes/save/?$', tax.mobile_save_taxes, name='save_taxes'),
 
     # products
     url(r_company + r'/manage/json/products/?$', product.mobile_get_products, name='get_products'),

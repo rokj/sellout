@@ -43,7 +43,7 @@ def get_default_tax(user, company):
 def validate_tax(user, company, tax):
     # validate_product, validate_discount, validate_contact for more info
     def err(msg):
-        return {'success':False, 'data':None, 'message':msg}
+        return {'success': False, 'data': None, 'message': msg}
 
     # name: check length
     if len(tax['name']) > 0:
@@ -63,7 +63,7 @@ def validate_tax(user, company, tax):
 
     # default: does not matter
         
-    return {'success':True, 'data':tax, 'message':None}
+    return {'success': True, 'data': tax, 'message': None}
 
 
 #################
@@ -90,6 +90,7 @@ def list_taxes(request, company):
     }
     
     return render(request, 'pos/manage/tax.html', context)
+
 
 @login_required
 def get_taxes(request, company):
@@ -132,10 +133,14 @@ def edit_tax(request, company):
 
     # the data
     data = JSON_parse(request.POST.get('data'))
-    
+    if not data:
+        return JSON_error(_("No data sent"))
 
-    # get the tax
-    tax = Tax.objects.get
+    # validate
+    validate_tax(request.user, c, data)
+
+    # get the tax and save it
+    tax = Tax.objects.get(company=c, )
 
 
 @login_required

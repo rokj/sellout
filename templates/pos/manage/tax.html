@@ -129,7 +129,7 @@ $(document).ready(function(){
         });
         
         if(valid){
-            send_data("{% url 'pos:save_taxes' company.url_name %}", data_to_send, "{{ csrf_token }}", function(recv_data){
+            send_data(" url 'pos:save_taxes' company.url_name ", data_to_send, "{{ csrf_token }}", function(recv_data){
                 if(recv_data.status != 'ok') alert(recv_data.message);
                 else{
                     // TODO: show the 'received' info in a more civilized way than alert

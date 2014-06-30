@@ -8,7 +8,6 @@ from pos.views.manage.company import company_to_dict
 from pos.views.manage.contact import get_all_contacts
 from pos.views.manage.discount import get_all_discounts
 from pos.views.manage.product import get_all_products
-from pos.views.manage.tax import get_all_taxes
 
 from pos.views.util import has_permission, no_permission_view, JSON_ok, JSON_parse, JSON_stringify
 from config.functions import get_user_value, set_user_value, get_date_format, get_time_format, get_company_value
@@ -57,7 +56,7 @@ def terminal(request, company):
         'products': get_all_products(request.user, c),
         'discounts': get_all_discounts(request.user, c, False),
         'contacts': get_all_contacts(request.user, c),
-        'taxes':  get_all_taxes(request.user, c),
+        'taxes':  [], #get_all_taxes(request.user, c), TODO
         'unit_types': g.UNITS,
         'company': company_to_dict(c),  # this company's details (will be shown on the receipt)
         # current user  TODO: change when login system changes
