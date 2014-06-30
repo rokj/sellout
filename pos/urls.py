@@ -50,30 +50,34 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + _('/category/edit') + '/(?P<category_id>\d+)/$', category.edit_category, name='edit_category'),  # edit
     url(r_company + '/' + r_manage + _('/category/delete') + '/$', category.delete_category, name='delete_category'),  # delete
     # contacts
-    url(r_company + '/' + r_manage + _('/contacts') + '/$', contact.web_list_contacts, name='list_contacts'),
-    url(r_company + '/' + r_manage + _('/contact/add') + '/$', contact.web_add_contact, name='add_contact'),
-    url(r_company + '/' + r_manage + _('/contact/edit') + '/(?P<contact_id>\d+)/$', contact.web_edit_contact, name='edit_contact'),
-    url(r_company + '/' + r_manage + _('/contact/delete') + '/(?P<contact_id>\d+)/$', contact.web_delete_contact, name='delete_contact'),
+    url(r_company + '/' + r_manage + _('/contacts') + '/$', contact.list_contacts, name='list_contacts'),
+    url(r_company + '/' + r_manage + _('/contact/add') + '/$', contact.add_contact, name='add_contact'),
+    url(r_company + '/' + r_manage + _('/contact/edit') + '/(?P<contact_id>\d+)/$', contact.edit_contact, name='edit_contact'),
+    url(r_company + '/' + r_manage + _('/contact/delete') + '/$', contact.delete_contact, name='delete_contact'),
     # discounts
     url(r_company + '/' + r_manage + _('/discounts') + '/$', discount.list_discounts, name='list_discounts'),
     url(r_company + '/' + r_manage + _('/discount/add') + '/$', discount.add_discount, name='add_discount'),
     url(r_company + '/' + r_manage + _('/discount/edit') + '/(?P<discount_id>\d+)/$', discount.edit_discount, name='edit_discount'),
-    url(r_company + '/' + r_manage + _('/discount/delete') + '/(?P<discount_id>\d+)/$', discount.delete_discount, name='delete_discount'),
+    url(r_company + '/' + r_manage + _('/discount/delete') + '/$', discount.delete_discount, name='delete_discount'),
     # taxes
-    url(r_company + '/' + r_manage + _('/taxes') + '/$', tax.web_list_taxes, name='list_taxes'),  # template view
-    url(r_company + '/' + r_manage + '/json/taxes/' + '?$', tax.web_get_taxes, name='get_taxes'),  # get all taxes in a json list
-    url(r_company + '/' + r_manage + '/json/taxes/save/' + '?$', tax.web_save_taxes, name='save_taxes'),  # save (override existing) taxes
+    url(r_company + '/' + r_manage + _('/taxes') + '/$', tax.list_taxes, name='list_taxes'),  # template view
+    url(r_company + '/' + r_manage + '/json/taxes/' + '?$', tax.get_taxes, name='get_taxes'),  # get all taxes in a json list
+    url(r_company + '/' + r_manage + '/json/taxes/save/' + '?$', tax.save_taxes, name='save_taxes'),  # save (override existing) taxes
+    # cash registers (the module is named 'till' to avoid confusion with registration)
+    url(r_company + '/' + r_manage + _('/registers') + '/$', till.list_registers, name='list_registers'),
+    url(r_company + '/' + r_manage + _('/register/add') + '/$', till.add_register, name='add_register'),
+    url(r_company + '/' + r_manage + _('/register/edit') + '/(?P<register_id>\d+)/$', till.edit_register, name='edit_register'),
+    url(r_company + '/' + r_manage + _('/register/delete') + '/$', till.delete_register, name='delete_register'),
 
     #url(r_company + _('/manage/taxes/edit') + '/$', manage.misc.edit_taxes, name='edit_taxes'),
     # products
     url(r_company + '/' + r_manage + _('/products') + '/$', product.products, name='products'),  # static (template) page
     url(r_company + '/' + r_manage + '/json/products/search/$', product.search_products, name='search_products'),  # product list (search) - json
-    url(r_company + '/' + r_manage + '/json/products/add/$', product.web_create_product, name='web_create_product'),  # edit (save) product - json
-    url(r_company + '/' + r_manage + '/json/products/get/$', product.web_get_product, name='get_product'),  # product list (search) - json
-    url(r_company + '/' + r_manage + '/json/products/edit/$', product.web_edit_product, name='edit_product'),  # edit (save) product - json
-    url(r_company + '/' + r_manage + '/json/products/delete/$', product.web_delete_product, name='delete_product'),  # edit (save) product - json
-    # cash registers (the module is named 'till' to avoid confusion with registration)
-    url(r_company + '/' + r_manage + _('/registers') + '/$', till.registers, name='registers'),  # static (template) page
+    url(r_company + '/' + r_manage + '/json/products/add/$', product.create_product, name='create_product'),  # edit (save) product - json
+    url(r_company + '/' + r_manage + '/json/products/get/$', product.get_product, name='get_product'),  # product list (search) - json
+    url(r_company + '/' + r_manage + '/json/products/edit/$', product.edit_product, name='edit_product'),  # edit (save) product - json
+    url(r_company + '/' + r_manage + '/json/products/delete/$', product.delete_product, name='delete_product'),  # edit (save) product - json
+
     # users
     #url(r_company + _('/manage/users') + '/$', manage.users.edit_company, name='edit_users'), # company
     # config (company parameter is needed only for url; configuration is per user, regardless of company
@@ -81,13 +85,13 @@ urlpatterns = patterns('',
 
 
     # misc (ajax): urls not translated
-    url(r_company + '/' + r_manage + '/json/categories/' + '?$', category.web_JSON_categories, name='JSON_categories'),
+    url(r_company + '/' + r_manage + '/json/categories/' + '?$', category.JSON_categories, name='JSON_categories'),
 
     # unit types list
     #
     # TODO
     #
-    url(r_company + '/' + r_manage + '/json/units/' + '?$', product.web_JSON_units, name='web_JSON_units'),
+    url(r_company + '/' + r_manage + '/json/units/' + '?$', product.JSON_units, name='JSON_units'),
 
     # available discounts list
     url(r_company + '/' + r_manage + '/json/discounts/' + '?$', discount.JSON_discounts, name='JSON_discounts'),

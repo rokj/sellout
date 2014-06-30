@@ -95,8 +95,8 @@ BILL_STATUS = (  # TODO: check & handle this
 )
 
 RECEIPT_FORMATS = (
-    ("page", _("Full page (Letter/A4)")),
-    ("thermal", _("Thermal (80mm)")),
+    ("Page", _("Full page (Letter/A4)")),
+    ("Thermal", _("Thermal (80mm)")),
 )
 
 RECEIPT_TYPES = (

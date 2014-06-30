@@ -11,6 +11,7 @@ from pos.views.util import JSON_response, JSON_parse, JSON_error, JSON_ok, \
                             max_field_length, \
                             parse_decimal
 
+
 def tax_to_dict(user, company, tax):
     return {
         'id': tax.id,
@@ -18,6 +19,7 @@ def tax_to_dict(user, company, tax):
         'amount': format_number(user, company, tax.amount),
         'default': tax.default,
     }
+
 
 def get_default_tax(user, company):
     """ returns the default tax id and formatted value in dictionary: {id:<id>, amount:<amount>} 
@@ -37,6 +39,7 @@ def get_default_tax(user, company):
 
     return {'id': tax.id, 'amount': format_number(user, company, tax.amount)}
 
+
 def validate_tax(user, company, tax):
     # validate_product, validate_discount, validate_contact for more info
     def err(msg):
@@ -51,7 +54,7 @@ def validate_tax(user, company, tax):
     if tax['amount']:
         r = parse_decimal(user, company, tax['amount'])
         if r['success']:
-            tax['amount'] = r['number'] # this could 
+            tax['amount'] = r['number']  # this could
         else:
             return err(_("Wrong number format for amount"))
     else:
@@ -66,12 +69,7 @@ def validate_tax(user, company, tax):
 #################
 ### tax rates ###
 #################
-
 @login_required
-def web_list_taxes(request, company):
-    return list_taxes(request, company)
-
-
 def list_taxes(request, company):
     c = get_object_or_404(Company, url_name=company)
     
@@ -94,10 +92,6 @@ def list_taxes(request, company):
     return render(request, 'pos/manage/tax.html', context)
 
 @login_required
-def web_get_taxes(request, company):
-    return get_taxes(request, company)
-
-
 def get_taxes(request, company):
     try:
         c = Company.objects.get(url_name=company)
@@ -114,65 +108,42 @@ def get_taxes(request, company):
         r.append(tax_to_dict(request.user, c, t))
     
     return JSON_response(r)
-    
+
+
 @login_required
-def web_save_taxes(request, company):
-    return save_taxes(request, company)
-
-
-def save_taxes(request, company):
+def add_tax(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
 
-    if not has_permission(request.user, c, 'tax', 'edit'):
-        return JSON_error(_("You have no permission to edit taxes"))
+
+
+    pass
+
+
+@login_required
+def edit_tax(request, company):
+    # the company
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # the data
+    data = JSON_parse(request.POST.get('data'))
     
-    new_taxes = JSON_parse(request.POST['data'])
-    old_tax_ids = [x.id for x in Tax.objects.filter(company=c).all()] # save ids of old taxes for later deletion
-    
-    default = None
 
-    # validate first
-    for t in new_taxes:
-        r = validate_tax(request.user, c, t)
-        if not r['success']:
-            return JSON_error(t['name'] + ": " + r['message'])
-        else:
-            t = r['data']
-
-    extra = []
-    # enter new taxes
-    for t in new_taxes:
-        tax = Tax(
-            created_by = request.user,
-            company = c,
-            amount = t['amount'],
-            name = t['name'],
-            default = False
-        )
-        if t['default'] and not default: # onlt the first 'default' can be the 'default'
-                                         # (there should not be more than 1 marked as that anyway)
-            tax.default = True
-            default = True
-            
-        tax.save()
-
-        extra.append(tax_to_dict(request.user, c, tax))
-            
-    # everything is ok, delete all old taxes from the database
-    for i in old_tax_ids:
-        Tax.objects.get(id=i).delete()
-        
-    return JSON_ok(extra=extra)
+    # get the tax
+    tax = Tax.objects.get
 
 
-def get_all_taxes(user, company):
-    taxes = Tax.objects.filter(company=company)
+@login_required
+def delete_tax(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
 
-    r = []
-    for t in taxes:
-        r.append(tax_to_dict(user, company, t))
 
-    return r
+    pass

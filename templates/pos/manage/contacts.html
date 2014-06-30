@@ -108,7 +108,9 @@
                                             {% trans 'Edit' %}{# TODO: icon #}
                                         </a>
                                         {% comment %} delete this contact {% endcomment %}
-                                        <a href="{% url 'pos:delete_contact' company.url_name c.id %}">
+                                        <a href="{% url 'pos:delete_contact' company.url_name %}"
+                                           data-id="{{ c.id }}"
+                                           class="delete-link">
                                             {% trans 'Delete' %} {# TODO: icon #}
                                         </a>
                                     </div>

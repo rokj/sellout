@@ -7,7 +7,7 @@ from django.http import Http404, HttpResponseRedirect
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
-from pos.models import Company, Category
+from pos.models import Company, Category, Product
 from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok,  \
     max_field_length, has_permission, no_permission_view, JSON_stringify
 
@@ -233,17 +233,13 @@ def get_all_categories_structured(company, category=None, data=None, sort='name'
 #############
 ### views ###
 #############
-@login_required
-def web_JSON_categories(request, company):
-    return JSON_categories(request, company)
-
-
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_JSON_categories(request, company):
     return JSON_categories(request, company)
 
 
+@login_required
 def JSON_categories(request, company):
     try:
         c = Company.objects.get(url_name=company)
@@ -422,7 +418,11 @@ def delete_category(request, company):
         return JSON_error(_("No category specified"))
 
     if Category.objects.filter(parent=category).count() > 0:
-        return JSON_error("Cannot delete category with subcategories")
+        return JSON_error(_("Cannot delete category with subcategories"))
+
+    # do not delete a category with products
+    if Product.objects.filter(category=category).exists():
+        return JSON_error(_("There are products in this category, it cannot be deleted"))
 
     # delete the category and return to management page
     try:

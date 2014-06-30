@@ -2,7 +2,6 @@
 # date: 9. 8. 2013
 #
 # Views for managing POS data: discounts
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -14,7 +13,7 @@ from pos.models import Company, Discount
 from pos.views.util import error, JSON_response, JSON_error, \
                            has_permission, no_permission_view, \
                            format_number, format_date, parse_date, parse_decimal, \
-                           max_field_length
+                           max_field_length, JSON_parse, JSON_ok, manage_delete_object
 from common import globals as g
 from config.functions import get_date_format, get_user_value, get_company_value
 
@@ -336,22 +335,9 @@ def edit_discount(request, company, discount_id):
     return render(request, 'pos/manage/discount.html', context)
 
 @login_required
-def delete_discount(request, company, discount_id):
-    c = get_object_or_404(Company, url_name=company)
-    
-    # check permissions: needs to be at least manager
-    if not has_permission(request.user, c, 'discount', 'edit'):
-        return no_permission_view(request, c, _("delete discounts"))
-    
-    discount = get_object_or_404(Discount, id=discount_id)
-    
-    if discount.company != c:
-        raise Http404
-    
-    if not request.user.has_perm('pos.delete_discount'):
-        return error(request, _("You have no permission to delete discounts."))
-    
-    discount.delete()
-    
-    return redirect('pos:list_discounts', company=c.url_name)
+def delete_discount(request, company):
+    return manage_delete_object(request, company, Discount, (
+        _("You have no permission to edit discounts"),
+        _("Could not delete discount: ")
+    ))
 

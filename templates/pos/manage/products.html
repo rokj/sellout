@@ -728,7 +728,7 @@ $(document).ready(function(){
         var data = {};
         data['id'] = product.id;
         data['name'] = $("#edit_product_name", dlg_obj).val();
-        data['unit_type'] = $("#edit_product_unit_type :selected", dlg_obj).val();
+        data['unit_type'] = $("#edit_product_unit_type", dlg_obj).val();
         // image: if changed, encode uploaded image to base64
         data['change_image'] = product.change_image;
         if(product.change_image) data['image'] = product.image_data;
@@ -822,8 +822,19 @@ $(document).ready(function(){
         // when the unit types edit changes, update all static labels with the changed units
         var ut = $("#edit_product_unit_type").val();
 
+        var ut_display = ut;
+
+        // try to find a better name (the actual display unit instead of m^2)
+        console.log(units);
+        for(var i = 0; i < units.length; i++){
+            if(units[i].value == ut){
+                ut_display = units[i].name;
+                break;
+            }
+        }
+
         $("span.unit-readonly").each(function(){
-            $(this).text(ut);
+            $(this).text(ut_display);
         });
     }
     
@@ -847,7 +858,7 @@ $(document).ready(function(){
 
     
     // unit types
-    get_data("{% url 'pos:web_JSON_units' company.url_name %}",
+    get_data("{% url 'pos:JSON_units' company.url_name %}",
         function(data){
             units = [];
             for(var i=0; i<data.length; i++){

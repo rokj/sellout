@@ -1,0 +1,53 @@
+{% extends "pos/manage/manage.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block section_head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/tills.css' %}" />
+{% endblock %}
+
+{% block status_bar_title %}{% trans 'Registers' %}{% endblock %}
+
+{% block extra_button %}
+    <a class="extra-button"
+       href="{% url 'pos:add_register' company.url_name %}">
+        {% trans 'Add Register' %}
+    </a>
+{% endblock %}
+
+{% block manage_content %}
+    {# the list of registers: on the left #}
+    <div class="content">
+        <table id="registers">
+            <thead>
+                {# include: register name, receipt format and type, and location #}
+                <tr>
+                    <td>{% trans 'Register Name' %}</td>
+                    <td>{% trans 'Receipt Format' %}</td>
+                    <td>{% trans 'Receipt Type' %}</td>
+                    <td>{% trans 'Location' %}</td>
+                    <td>{# edit and delete links #}</td>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for r in registers %}
+                <tr>
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.get_receipt_format_display }}</td>
+                    <td>{{ r.get_receipt_type_display }}</td>
+                    <td>{{ r.location }}</td>
+                    <td>
+                        <a href="{% url 'pos:edit_register' company.url_name r.id %}">{% trans 'Edit' %}</a>
+                        <a href="{% url 'pos:delete_register' company.url_name %}"
+                           data-id="{{ r.id }}"
+                           class="delete-link">{% trans 'Delete' %}</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
+

@@ -33,9 +33,6 @@ def mobile_JSON_units(request, company):
     return JSON_units(request, company)
 
 @login_required
-def web_JSON_units(request, company):
-    return JSON_units(request, company)
-
 def JSON_units(request, company):
     # at the moment, company is not needed
     # also, no permission checking is required
@@ -160,7 +157,7 @@ def products(request, company):
         'title': _("Products"),
         'site_title': g.MISC['site_title'],
         # urls for ajax calls
-        'add_url': reverse('pos:web_create_product', args=[c.url_name]),
+        'add_url': reverse('pos:create_product', args=[c.url_name]),
         # config variables 
         'can_edit': has_permission(request.user, c, 'product', 'edit'),
         'currency': get_company_value(request.user, c, 'pos_currency'),
@@ -181,34 +178,27 @@ def products(request, company):
 
 
 @login_required
-def web_get_product(request, company):
-    # there's id in request.GET
-    product_id = request.GET.get('product_id')
-    if not id:
-        return JSON_error(_("No product specified"))
-    else:
-        return get_product(request, company, product_id)
-
-
-def get_product(request, company, product_id):
+def get_product(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
     
-    # permissions: needs to be guest to view products
+    # permissions
     if not has_permission(request.user, c, 'product', 'list'):
         return JSON_error(_("You have no permission to view products"))
-    
+
+    try:
+        product_id = request.GET.get('product_id')
+    except ValueError:
+        return JSON_response(_("No product specified"))
+
     product = Product.objects.get(company=c, id=product_id)
     
     return JSON_response(product_to_dict(request.user, c, product))
 
+
 @login_required
-def web_search_products(request, company):
-    return search_products(request, company)
-
-
 def search_products(request, company):
     try:
         c = Company.objects.get(url_name=company)
@@ -518,10 +508,6 @@ def validate_product(user, company, data):
     return {'status': True, 'data': data}
 
 @login_required
-def web_create_product(request, company):
-    return create_product(request, company)
-
-
 def create_product(request, company):
     # create new product
     try:
@@ -558,7 +544,7 @@ def create_product(request, company):
     product.save()
     
     # update discounts
-    product.update_discounts(request.user, data['discounts'])
+    product.update_discounts(request.user, data['discount_ids'])
     
     # prices have to be updated separately
     price = product.update_price(Price, request.user, data['price']) # purchase price
@@ -581,10 +567,6 @@ def create_product(request, company):
     return JSON_ok()
 
 @login_required
-def web_edit_product(request, company):
-    return edit_product(request, company)
-
-
 def edit_product(request, company, android=False):
     # update existing product
     try:
@@ -650,14 +632,6 @@ def edit_product(request, company, android=False):
     return JSON_ok(extra=product_to_dict(request.user, c, product))
 
 @login_required
-def web_delete_product(request, company):
-    return delete_product(request, company)
-
-@login_required
-def web_delete_product(request, company):
-    return delete_product(request, company)
-
-
 def delete_product(request, company):
     try:
         c = Company.objects.get(url_name = company)

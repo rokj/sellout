@@ -1,3 +1,4 @@
+from django.db.backends.dummy.base import IntegrityError
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.core.cache import cache
@@ -182,3 +183,34 @@ def no_permission_view(request, company, action):
     }
     
     return render(request, 'pos/no_permission.html', context)
+
+
+### deletion of objects in management
+def manage_delete_object(request, company_url_name, model, messages):
+    """
+        a generic delete function (must be wrapped in a view)
+        model: the actual model class (i.e. Discount)
+        messages: a list of error messages:
+           messages[0]: no permission
+           message[1]: does not exist/integrity error
+    """
+    try:
+        c = Company.objects.get(url_name=company_url_name)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company not found"))
+
+    # check permissions: needs to be at least manager
+    if not has_permission(request.user, c, model.__name__.lower(), 'edit'):
+        return JSON_error(messages[0])
+
+    # discount id is in request.POST in JSON format
+    id = JSON_parse(request.POST.get('data')).get('id')
+    if not id:
+        return JSON_error(_("No id specified."))
+
+    try:
+        model.objects.get(id=id, company=c).delete()
+    except (model.DoesNotExist, IntegrityError) as e:
+        return JSON_error(messages[1] + "; " + e.message)
+
+    return JSON_ok()

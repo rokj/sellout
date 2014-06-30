@@ -85,7 +85,9 @@ $(document).ready(function(){
 
                     <div class="controls">
                         <a href="{% url 'pos:edit_discount' company.url_name d.id %}">{% trans 'Edit' %}</a>
-                        <a href="{% url 'pos:delete_discount' company.url_name d.id  %}">{% trans 'Delete' %}</a>
+                        <a href="{% url 'pos:delete_discount' company.url_name %}"
+                           class="delete-link"
+                           data-id="{{ d.id }}"> {% trans 'Delete' %}</a>
                     </div>
                 </div>
 

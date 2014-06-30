@@ -8,7 +8,7 @@ from pos.models import Company, Contact, Country
 from common import globals as g
 from config.functions import get_date_format
 from pos.views.util import JSON_response, JSON_error, has_permission, no_permission_view, format_date, \
-    max_field_length, parse_date
+    max_field_length, parse_date, manage_delete_object
 
 import re
 
@@ -181,6 +181,16 @@ def validate_contact(user, company, data):
     return {'status': True, 'data': data, 'message': None}
 
 
+def get_all_contacts(user, company):
+    contacts = Contact.objects.filter(company=company)
+
+    r = []
+    for c in contacts:
+        r.append(contact_to_dict(user, company, c))
+
+    return r
+
+
 def contact_to_dict(user, company, c, send_to="python"):
     # returns all relevant contact's data
     # id
@@ -233,10 +243,6 @@ def contact_to_dict(user, company, c, send_to="python"):
 
 
 @login_required
-def web_list_contacts(request, company):
-    return list_contacts(request, company)
-
-
 def list_contacts(request, company):
     c = get_object_or_404(Company, url_name=company)
     
@@ -298,10 +304,6 @@ def list_contacts(request, company):
 
 
 @login_required
-def web_get_contact(request, company, contact_id):
-    return get_contact(request, company, contact_id)
-
-
 def get_contact(request, company, contact_id):
     try:
         c = Company.objects.get(url_name=company)
@@ -318,10 +320,6 @@ def get_contact(request, company, contact_id):
    
 
 @login_required
-def web_add_contact(request, company):
-    return add_contact(request, company)
-
-
 def add_contact(request, company):
     # add a new contact
     c = get_object_or_404(Company, url_name=company)
@@ -384,10 +382,6 @@ def add_contact(request, company):
 
 
 @login_required
-def web_edit_contact(request, company, contact_id):
-    return edit_contact(request, company, contact_id)
-
-
 def edit_contact(request, company, contact_id):
     # edit an existing contact
     c = get_object_or_404(Company, url_name=company)
@@ -446,31 +440,6 @@ def edit_contact(request, company, contact_id):
     return render(request, 'pos/manage/contact.html', context)
 
 
-@login_required
-def web_delete_contact(request, company, contact_id):
-    return delete_contact(request, company, contact_id)
-
-
-def delete_contact(request, company, contact_id):
-    c = get_object_or_404(Company, url_name=company)
-    
-    # check permissions: needs to be manager
-    if not has_permission(request.user, c, 'contact', 'edit'):
-        return no_permission_view(request, c, _("delete contacts"))
-    
-    contact = get_object_or_404(Contact, id=contact_id)
-    
-    if contact.company != c:
-        raise Http404
-
-    contact.delete()
-
-
-def get_all_contacts(user, company):
-    contacts = Contact.objects.filter(company=company)
-
-    r = []
-    for c in contacts:
-        r.append(contact_to_dict(user, company, c))
-
-    return r
+def delete_contact(request, company):
+    return manage_delete_object(request, company, Contact, (_("You have no permission to delete contacts"),
+                                                            _("Could not delete contact")))

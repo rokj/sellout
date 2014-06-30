@@ -8,9 +8,8 @@ from django.utils.translation import ugettext as _
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework.permissions import IsAuthenticated
 from pos.models import Company
-from pos.views.manage import discount
 from pos.views.manage.discount import discount_to_dict
-from pos.views.util import JSON_error, has_permission, JSON_response, JSON_ok, JSON_parse, parse_date
+from pos.views.util import JSON_error, has_permission, JSON_ok, JSON_parse
 from pos.models import Discount
 
 @api_view(['GET', 'POST'])
@@ -28,7 +27,7 @@ def mobile_get_discounts(request, company):
 
     r = []
     for d in discounts:
-        r.append(discount_to_dict(request.user, d, android=True))
+        r.append(discount_to_dict(request.user, c, d, android=True))
 
     return JSON_ok(extra=r)
 
@@ -58,7 +57,7 @@ def mobile_delete_discount(request, company):
 
     d.delete()
 
-    return JSON_ok(extra=discount_to_dict(request.user, d, android=True))
+    return JSON_ok(extra=discount_to_dict(request.user, c, d, android=True))
 
 
 @api_view(['GET', 'POST'])
@@ -134,7 +133,7 @@ def mobile_add_discount(request, company):
 
     # check for permission for adding discounts
     if not request.user.has_perm('pos.add_discount'):
-        return JSON_error(request, _("You have no permission to add discounts."))
+        return JSON_error(_("You have no permission to add discounts."))
 
     data = JSON_parse(request.POST['data'])
     start_date = data.get('start_date')
@@ -204,8 +203,8 @@ def mobile_list_discounts(request, company):
         # end_date
         if data.get('end_date'):
             end_date = data.get('end_date')
-            end = dtm.date(year=start_date[0], month=start_date[1],
-                             day=start_date[2])
+            end = dtm.date(year=end_date[0], month=end_date[1],
+                             day=end_date[2])
 
             discounts = discounts.filter(end_date__lse=end)
 

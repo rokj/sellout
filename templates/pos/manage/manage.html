@@ -9,11 +9,51 @@
 
     <script type="text/javascript">
     $(document).ready(function(){
+        // common javascript:
+        // delete links: capture clicks and show a confirmation dialog; visit the delete url (add the id to POST data)
+        $("a.delete-link").click(function(e){
+            e.preventDefault();
+            e.stopPropagation();
+
+            var url = $(this).attr("href");
+            var id = parseInt($(this).attr("data-id"));
+
+            if(!id){
+                console.error("Wrong id: " + id.toString());
+                return;
+            }
+
+            var dlg = confirmation_dialog(
+                "",
+                "{% trans 'Are you sure?' context 'delete confirmation dialog text' %}",
+                function(){
+                    // visit the url and send id in POST data
+                    send_data(url, {id: id}, "{{ csrf_token }}", function(response){
+                        if(response.status != 'ok'){
+                            error_message("{% trans 'Could not delete object' %}", response.message);
+                        }
+                        else{
+                            // the object has been deleted, reload the page
+                            // window.location.reload() is no good because it prompts the user
+                            // to resend search form data (if there's a search form)
+                            window.location = window.location;
+                        }
+                    });
+                },
+                function(){
+                    // close the dialog and do nothing
+                    // (confirmation_dialog handles the closing etc.)
+                }
+            );
+        });
+
         // cancel button: on any static form, refresh the page on click
         $("#static_cancel").click(function(){
             // reload() doesn't do any good (browsers remember form values)
             window.location.href = window.location;
         });
+
+
     });
     </script>
 
