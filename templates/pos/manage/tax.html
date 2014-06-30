@@ -4,150 +4,178 @@
 
 {% block section_head %}
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/taxes.css' %}" />
+<style type="text/css">
+
+</style>
+
 <script type="text/javascript">
 $(document).ready(function(){
-    var taxes = [];
+    var tax_data = {% autoescape off %}{{ taxes }}{% endautoescape %};
+    var tax_objects = [];
 
     var items = {
         table: $("#tax_table"),
         list: $("#tax_list"),
         add_button: $("#new_tax"),
         save_button: $("#save_taxes"),
-        cancel_button: $("#cancel")
+        cancel_button: $("#cancel"),
+
+        tax_template: $("#tax_template").detach().removeAttr("id")
     };
 
-    // buttons buttons buttons
-    items.save_button.click(save_taxes);
-    items.cancel_button.click(update_taxes);
-    items.add_button.click(add_tax);
-    
-    function update_taxes(){
-        // re-create all taxes from tax list
-        var i;
+    Tax = function(data){
+        var p = this;
 
-        // put all taxes in select box
-        items.list.empty();
-        items.table.empty();
+        p.data = data;
 
-        for(i = 0; i < taxes.length; i++){
-            tax_entry(taxes[i]);
-        }
-    }
+        // copy the template row
+        p.row = items.tax_template.clone();
 
-    function add_tax(){
-        if({{ edit_permission|lower }}){
-            // create a new table entry and a new entry in tax list
-            tax_entry({name: "", id: -1, amount: Big(0)});
-        }
-    }
-    
-    // (re)draw the taxes table
-    function tax_entry(tax){
-        var tr_obj = $("<tr>");
-        tr_obj.data(tr_obj); // store id and that
-        
-        // first column: name
-        var td_obj = $("<td>");
-        var input_obj = $("<input>", {type:"text", "class":"name", value:tax.name});
-        if({{ edit_permission|lower}}) td_obj.append(input_obj);
-        else td_obj.append(tax.name);
-        tr_obj.append(td_obj);
-        
-        // second column: tax amount
-        td_obj = $("<td>");
-        if({{ edit_permission|lower }}) td_obj.append($("<input>", {type:"text", "class":"amount", value:tax.amount}));
-        else td_obj.append(tax.amount);
-        tr_obj.append(td_obj);
-        
-        // third column: delete button
-        td_obj = $("<td>");
-        // TODO: button icons
-        var del_button = $("<button>", {"class":"delete-tax", title:"{% trans 'Delete tax' %}"})
-                .append("X");
-        td_obj.append(del_button);
-        tr_obj.append(td_obj);
+        p.items = {
+            read:{
+                name: $(".name .read", p.row),
+                amount: $(".amount .read", p.row)
+            },
+            edit:{
+                name: $(".name .edit", p.row),
+                amount: $(".amount .edit", p.row)
+            },
 
-        // append to the table
-        items.table.append(tr_obj);
+            edit_button: $("button.edit", p.row),
+            save_button: $("button.save", p.row),
+            cancel_button: $("button.cancel", p.row),
+            delete_button: $("button.delete", p.row)
+        };
 
-        // create a new entry in tax list
-        var option = $("<option>", {value:tax.id}).text(tax.name);
-        items.list.append(option);
-
-        // link the two for easier access
-        // and save the id for saving later
-        tr_obj.data({list_item: option});
-        option.data({table_row: tr_obj});
-
-        // select this option if this is the default tax
-        if(tax.default) items.list.val(tax.id);
-
-        // the delete button
-        if({{ edit_permission|lower }}){
-            del_button.click(function(){
-                tr_obj.remove();
-                option.remove();
-            });
-        }
-
-        // focus on tax name
-        input_obj.focus();
-
-        // when name changes, update the list item
-        input_obj.change(function(){
-            option.text(input_obj.val());
-        });
-    }
-
-    function save_taxes(){
-        // cycle through the taxes table and add them to a json object, then send it
-        var data_to_send = [];
-        var valid = true; // if a number is typed in in wrong format, nothing will be sent
-        
-        $("tr", items.table).each(function(){
-            var name = $("input.name", this).val();
-            var amount = $("input.amount", this).val();
-            
-            // if there's no name, ignore that row (the last row is one of them)
-            if(!name) return;
-
-            // amount must be entered correctly
-            if(!check_number(amount, '{{separator}}')){
-                alert("{% trans 'Wrong number format' %}: " + amount);
-                valid = false;
+        //
+        // methods
+        //
+        // edit
+        // save
+        // cancel
+        // delete
+        p.delete_button_action = function(){
+            // if this tax hasn't been saved yet (can't happen)
+            if(p.data.id == -1){
+                // TODO
+                alert("wtf");
             }
 
-            // this is the default tax if the option in data is selected
-            var def = $(this).data().list_item.is(":selected");
+            // send a delete request to the server
+            send_data("{% url 'pos:delete_tax' company.url_name %}",
+                {id: p.data.id}, "{{ csrf_token }}",
+                function(response){
+                    if(response.status != 'ok'){
+                        error_message(
+                            "{% trans 'Could not delete tax' %}",
+                            response.message
+                        );
+                    }
+                    else{
+                        // remove the tax from the list
+                        // remove tax row
+                        // remove row from the defaults list
+                    }
 
-            data_to_send.push({
-                'name':name,
-                'amount':amount,
-                'default':def,
-                'id':$(this).data().id
             });
+        };
+
+        p.save_button_action = function(){
+            // gather the data and send it to the server
+            var data = {
+                id: p.data.id,
+                name: p.items.edit.name.val(),
+                amount: p.items.edit.amount.val()
+            };
+
+            // send to server
+            send_data("{% url 'pos:edit_tax' company.url_name %}",
+                data, "{{ csrf_token }}",
+                function(response){
+                    if(response.status != 'ok'){
+                        error_message(
+                            "{% trans 'Saving tax failed' %}",
+                            response.message
+                        );
+                    }
+                    else{
+                        // update the data and show readonly
+                        p.data = response.data;
+                        p.show_readonly();
+                    }
+                });
+        };
+
+        p.show_readonly = function(){
+            toggle_elements(p.items.read, true);
+            toggle_elements(p.items.edit, false);
+
+            p.items.edit_button.show();
+            p.items.delete_button.show();
+
+            p.items.save_button.hide();
+            p.items.cancel_button.hide();
+
+            p.items.read.name.text(p.data.name);
+            p.items.read.amount.text(p.data.amount);
+        };
+
+        p.show_editable = function(){
+            if(!{{ edit_permission | lower }}){
+                error_message(
+                    "{% trans 'Cannot edit tax' %}",
+                    "{% trans 'You have no permission to edit taxes' %}"
+                );
+                return;
+            }
+
+            toggle_elements(p.items.read, false);
+            toggle_elements(p.items.edit, true);
+
+            p.items.edit_button.hide();
+            p.items.delete_button.hide();
+
+            p.items.save_button.show();
+            p.items.cancel_button.show();
+
+            p.items.edit.name.val(p.data.name);
+            p.items.edit.amount.val(p.data.amount);
+        };
+
+        //
+        // init
+        //
+        // insert the row it into table
+        items.table.append(p.row.show());
+
+        // fill with read-only data
+        p.show_readonly();
+
+        // and insert another row in the tax list (for choosing the default tax)
+        // TODO
+
+        // buttons
+        p.items.edit_button.unbind().click(function(){
+            p.show_editable();
         });
-        
-        if(valid){
-            send_data(" url 'pos:save_taxes' company.url_name ", data_to_send, "{{ csrf_token }}", function(recv_data){
-                if(recv_data.status != 'ok') alert(recv_data.message);
-                else{
-                    // TODO: show the 'received' info in a more civilized way than alert
-                    alert("{% trans 'Saved' %}");
-                    get_taxes();
-                }
-            });
-        }
+
+        p.items.cancel_button.unbind().click(function(){
+            p.show_readonly();
+        });
+        p.items.delete_button.unbind().click(p.delete_button_action);
+        p.items.save_button.unbind().click(p.save_button_action);
+    };
+
+    // create taxes
+    var i;
+    for(i = 0; i < tax_data.length; i++){
+        tax_objects.push(new Tax(tax_data[i]));
     }
 
-    // get all taxes
-    function get_taxes(){
-        get_data("{% url 'pos:get_taxes' company.url_name %}", function(data){
-            taxes = data;
-            update_taxes();
-        });
-    }
-    get_taxes();
+    // the 'add tax' button
+
+    // the 'set default' select box
+
 });
 </script>
 
@@ -176,19 +204,39 @@ $(document).ready(function(){
             </tr>
         </thead>
 
-        <tbody id="tax_table">
+        <tfoot>
+            <tr>
+                <td colspan="2">{# nothing #}</td>
+                <td>
+                    {# the add button #}
+                    <button class="add-tax">+</button>
+                </td>
+            </tr>
+        </tfoot>
 
+        <tbody id="tax_table">
+            <tr id="tax_template" class="tax hidden">
+                <td class="name">
+                    <span class="read"></span>
+                    <input type="text"
+                           maxlength="{{ max_name_length }}"
+                           class="edit hidden" />
+                </td>
+                <td class="amount">
+                    <span class="read"></span>
+                    <input type="text"
+                           class="edit hidden" />
+                </td>
+                <td class="controls">
+                    {% comment %} edit, delete, save and cancel buttons {% endcomment %}
+                    <button class="edit">edit</button>
+                    <button class="delete">delete</button>
+                    <button class="save hidden">save</button>
+                    <button class="cancel hidden">cancel</button>
+                </td>
+            </tr>
         </tbody>
     </table>
-
-    <div id="tax_footer">
-        <div class="form-footer">
-            <input type="button" id="cancel" value="{% trans 'Cancel' %}" class="cancel" />
-        </div>
-        <div class="form-footer">
-            <input type="button" id="save_taxes" value="{% trans 'Save' %}" class="ok"/>
-        </div>
-    </div>
 
 {% endblock %}
 

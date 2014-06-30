@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -9,7 +10,7 @@ from pos.views.util import JSON_response, JSON_parse, JSON_error, JSON_ok, \
                             has_permission, no_permission_view, \
                             format_number, \
                             max_field_length, \
-                            parse_decimal
+                            parse_decimal, JSON_stringify
 
 
 def tax_to_dict(user, company, tax):
@@ -66,6 +67,16 @@ def validate_tax(user, company, tax):
     return {'success': True, 'data': tax, 'message': None}
 
 
+def get_all_taxes(user, company):
+    taxes = Tax.objects.filter(company=company)
+
+    r = []
+    for t in taxes:
+        r.append(tax_to_dict(user, company, t))
+
+    return r
+
+
 #################
 ### tax rates ###
 #################
@@ -82,7 +93,9 @@ def list_taxes(request, company):
     
     context = {
         'company': c,
+        'taxes': JSON_stringify(get_all_taxes(request.user, c)),
         'edit_permission': edit_permission,
+        'max_name_length': max_field_length(Tax, 'name'),
         'title': _("Manage Tax Rates"),
         'site_title': g.MISC['site_title'],
         
@@ -90,37 +103,6 @@ def list_taxes(request, company):
     }
     
     return render(request, 'pos/manage/tax.html', context)
-
-
-@login_required
-def get_taxes(request, company):
-    try:
-        c = Company.objects.get(url_name=company)
-    except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
-    
-    if not has_permission(request.user, c, 'tax', 'list'):
-        return JSON_error(_("You have no permission to view taxes"))
-        
-    taxes = Tax.objects.filter(company=c)
-    
-    r = []
-    for t in taxes:
-        r.append(tax_to_dict(request.user, c, t))
-    
-    return JSON_response(r)
-
-
-@login_required
-def add_tax(request, company):
-    try:
-        c = Company.objects.get(url_name=company)
-    except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
-
-
-
-    pass
 
 
 @login_required
@@ -137,18 +119,63 @@ def edit_tax(request, company):
         return JSON_error(_("No data sent"))
 
     # validate
-    validate_tax(request.user, c, data)
+    valid = validate_tax(request.user, c, data)
+    if not valid['success']:
+        print valid['message']
+        return JSON_error(valid['message'])
+    data = valid['data']
 
-    # get the tax and save it
-    tax = Tax.objects.get(company=c, )
+    if data['id'] != -1:
+        # it's an existing tax, fetch it and update
+        # get the tax and save it
+        try:
+            tax = Tax.objects.get(company=c, id=data['id'])
+        except Tax.DoesNotExist:
+            return JSON_error(_("Tax does not exist"))
+
+        tax.amount = data['amount']
+        tax.name = data['name']
+    else:
+        # it's a new tax, create a new one
+        tax = Tax(
+            created_by=request.user,
+            company=c,
+            amount=data['amount'],
+            name=data['name']
+        )
+
+    try:
+        tax.save()
+    except IntegrityError as e:
+        return JSON_error(_("Could not save tax; ") + e.message)
+
+    return JSON_response({'status': 'ok', 'data': tax_to_dict(request.user, c, tax)})
 
 
 @login_required
 def delete_tax(request, company):
+# the company
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
 
+    # the data
+    data = JSON_parse(request.POST.get('data'))
+    if not data:
+        return JSON_error(_("No data sent"))
 
+    # get the tax and save it
+    tax = Tax.objects.get(company=c, id=data['id'])
+
+    try:
+        tax.delete()
+    except IntegrityError as e:
+        return JSON_error(_("Could not save tax; ") + e.message)
+
+    return JSON_ok()
+
+
+@login_required
+def set_default_tax(request, company):
     pass

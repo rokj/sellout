@@ -61,9 +61,8 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + _('/discount/delete') + '/$', discount.delete_discount, name='delete_discount'),
     # taxes
     url(r_company + '/' + r_manage + _('/taxes') + '/$', tax.list_taxes, name='list_taxes'),  # template view
-    url(r_company + '/' + r_manage + '/json/tax/add' + '?$', tax.add_tax, name='add_tax'),  # get all taxes in a json list
-    url(r_company + '/' + r_manage + '/json/tax/edit' + '?$', tax.edit_tax, name='edit_tax'),  # get all taxes in a json list
-    url(r_company + '/' + r_manage + '/json/taxes/delete' + '?$', tax.delete_tax, name='delete_tax'),  # get all taxes in a json list
+    url(r_company + '/' + r_manage + '/json/tax/edit/?$', tax.edit_tax, name='edit_tax'),  # get all taxes in a json list
+    url(r_company + '/' + r_manage + '/json/taxes/delete/?$', tax.delete_tax, name='delete_tax'),  # get all taxes in a json list
     # cash registers (the module is named 'till' to avoid confusion with registration)
     url(r_company + '/' + r_manage + _('/registers') + '/$', till.list_registers, name='list_registers'),
     url(r_company + '/' + r_manage + _('/register/add') + '/$', till.add_register, name='add_register'),
@@ -87,7 +86,6 @@ urlpatterns = patterns('',
 
     # misc (ajax): urls not translated
     url(r_company + '/' + r_manage + '/json/categories/?$', category.JSON_categories, name='JSON_categories'),
-    url(r_company + '/' + r_manage + '/json/get_taxes//$', tax.get_taxes, name='get_taxes'),  # template view
     # unit types list
     #
     # TODO

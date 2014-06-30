@@ -456,3 +456,12 @@ function is_dark(color){
 
     return val < (Math.pow(2, 24)/2);
 }
+
+function toggle_elements(elements_dict, show){
+    for(var key in elements_dict){
+        if(elements_dict.hasOwnProperty(key)){
+            if(show) elements_dict[key].show();
+            else elements_dict[key].hide();
+        }
+    }
+}
