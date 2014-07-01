@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 
-from pos.models import Company, Tax
+from pos.models import Company, Tax, Product
 from common import globals as g
 from config.functions import get_company_value
 from pos.views.util import JSON_response, JSON_parse, JSON_error, JSON_ok, \
@@ -113,6 +113,10 @@ def edit_tax(request, company):
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
 
+    # permission
+    if not has_permission(request.user, c, 'tax', 'edit'):
+        return JSON_error(_("You have no permission to edit taxes"))
+
     # the data
     data = JSON_parse(request.POST.get('data'))
     if not data:
@@ -141,9 +145,9 @@ def edit_tax(request, company):
             created_by=request.user,
             company=c,
             amount=data['amount'],
-            name=data['name']
+            name=data['name'],
+            default=False,  # false by default, the tax must be selected to become default
         )
-
     try:
         tax.save()
     except IntegrityError as e:
@@ -154,19 +158,27 @@ def edit_tax(request, company):
 
 @login_required
 def delete_tax(request, company):
-# the company
+    # the company
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
+
+    # permissions
+    if not has_permission(request.user, c, 'tax', 'edit'):
+        return JSON_error(_("You have no permission to edit taxes"))
 
     # the data
     data = JSON_parse(request.POST.get('data'))
     if not data:
         return JSON_error(_("No data sent"))
 
-    # get the tax and save it
+    # get the tax
     tax = Tax.objects.get(company=c, id=data['id'])
+
+    # if there's a product that uses this tax, it cannot be deleted
+    if Product.objects.filter(company=c, tax=tax).exists():
+        return JSON_error(_("A product is using this tax - it cannot be deleted"))
 
     try:
         tax.delete()
@@ -178,4 +190,31 @@ def delete_tax(request, company):
 
 @login_required
 def set_default_tax(request, company):
-    pass
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # permissions
+    if not has_permission(request.user, c, 'tax', 'edit'):
+        return JSON_error(_("You have no permission to edit taxes"))
+
+    try:
+        new_id = int(JSON_parse(request.POST.get('data')).get('id'))
+    except (ValueError, KeyError):
+        return JSON_error(_("No tax specified"))
+
+    # get the new default tax
+    try:
+        new_default = Tax.objects.get(id=new_id, company=c)
+    except Tax.DoesNotExist:
+        return JSON_error(_("Tax does not exist"))
+
+    # remove default tax
+    Tax.objects.filter(company=c, default=True).update(default=False)
+
+    # update this task
+    new_default.default = True
+    new_default.save()
+
+    return JSON_ok()

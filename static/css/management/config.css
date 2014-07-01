@@ -1,3 +1,20 @@
-/*
- TODO.
- */
+#id_currency{
+    width: 40px; /* the same as height */
+}
+
+div.form-field.currency input{
+    width: 40px;
+    height: 40px;
+}
+
+#id_display_breadcrumbs + label{
+    float: left;
+    line-height: 40px;
+}
+
+#id_display_breadcrumbs{
+    margin-top: 0;
+    line-height: 40px;
+    height: 40px;
+    margin-left: 20px;
+}

@@ -32,13 +32,10 @@ company_defaults = {
     # billing and calculation defaults
     'pos_discount_calculation': "Tax first",  # DISCOUNT_CALCULATION in globals
     'pos_decimal_places': 2,  # default decimal places for display
-    # fallback defaults
-    'pos_default_tax': '0.0',
 }
 
 user_defaults = {
     # ux
-    'pos_contacts_per_page': 10,
     'pos_discounts_per_page': 10,
     # interface
     'pos_interface': 'keyboard',  # options: 'keyboard', 'mouse'

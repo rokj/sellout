@@ -23,6 +23,8 @@ $(document).ready(function(){
         tax_template: $("#tax_template").detach().removeAttr("id")
     };
 
+    var default_id = -1;
+
     Tax = function(data){
         var p = this;
 
@@ -47,6 +49,8 @@ $(document).ready(function(){
             delete_button: $("button.delete", p.row)
         };
 
+        p.list_item = $("<option>");
+
         //
         // methods
         //
@@ -54,11 +58,29 @@ $(document).ready(function(){
         // save
         // cancel
         // delete
+        p.update_list_item = function(id, name){
+            p.list_item.val(id);
+            p.list_item.text(name);
+
+            if(p.data.default){
+                items.list.val(id);
+                default_id = id;
+            }
+        };
+
+        p.update_to_data = function(){
+            p.update_list_item(data.id, data.name);
+        };
+
+        p.update_to_inputs = function(){
+            p.update_list_item(p.data.id, p.items.edit.name.val());
+        };
+
         p.delete_button_action = function(){
             // if this tax hasn't been saved yet (can't happen)
             if(p.data.id == -1){
-                // TODO
-                alert("wtf");
+                console.error("Deleting tax with id = -1");
+                return;
             }
 
             // send a delete request to the server
@@ -73,10 +95,19 @@ $(document).ready(function(){
                     }
                     else{
                         // remove the tax from the list
+                        p.list_item.remove();
                         // remove tax row
+                        p.row.remove();
                         // remove row from the defaults list
-                    }
 
+                        var i;
+                        for(i = 0; i < tax_objects.length; i++){
+                            if(tax_objects[i] === p){
+                                remove_from_array(tax_objects, i);
+                                return;
+                            }
+                        }
+                    }
             });
         };
 
@@ -102,6 +133,9 @@ $(document).ready(function(){
                         // update the data and show readonly
                         p.data = response.data;
                         p.show_readonly();
+
+                        // update the list item
+                        p.update_to_data();
                     }
                 });
         };
@@ -140,6 +174,9 @@ $(document).ready(function(){
 
             p.items.edit.name.val(p.data.name);
             p.items.edit.amount.val(p.data.amount);
+
+            // focus on tax name
+            p.items.edit.name.focus();
         };
 
         //
@@ -152,7 +189,8 @@ $(document).ready(function(){
         p.show_readonly();
 
         // and insert another row in the tax list (for choosing the default tax)
-        // TODO
+        p.update_to_data();
+        items.list.append(p.list_item);
 
         // buttons
         p.items.edit_button.unbind().click(function(){
@@ -164,6 +202,9 @@ $(document).ready(function(){
         });
         p.items.delete_button.unbind().click(p.delete_button_action);
         p.items.save_button.unbind().click(p.save_button_action);
+
+        // when name changes, reflect it in the list
+        p.items.edit.name.unbind().change(p.update_to_inputs);
     };
 
     // create taxes
@@ -172,10 +213,40 @@ $(document).ready(function(){
         tax_objects.push(new Tax(tax_data[i]));
     }
 
+    // select the default tax
+    if(default_id != -1){
+        items.list.val(default_id);
+    }
+
     // the 'add tax' button
+    items.add_button.click(function(){
+        // create a a new tax with id=-1 and blank values
+        var new_data = {
+            name: "",
+            amount: "0",
+            id: -1,
+            'default': false
+        };
+
+        var tax = new Tax(new_data);
+        tax_objects.push(tax);
+        tax.show_editable();
+    });
 
     // the 'set default' select box
-
+    items.list.change(function(){
+        // send {id:<selected tax id>} to server
+        send_data("{% url 'pos:set_default_tax' company.url_name %}",
+            {id:$(this).val()}, "{{ csrf_token }}",
+            function(response){
+                if(response.status != 'ok'){
+                    error_message("{% trans 'Could not set default tax' %}", response.message);
+                }
+                else{
+                    // nothing to do, everything is selected already
+                }
+        });
+    });
 });
 </script>
 
@@ -203,16 +274,6 @@ $(document).ready(function(){
                 <td></td>{% comment %} new and delete buttons {% endcomment %}
             </tr>
         </thead>
-
-        <tfoot>
-            <tr>
-                <td colspan="2">{# nothing #}</td>
-                <td>
-                    {# the add button #}
-                    <button class="add-tax">+</button>
-                </td>
-            </tr>
-        </tfoot>
 
         <tbody id="tax_table">
             <tr id="tax_template" class="tax hidden">

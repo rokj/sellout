@@ -45,7 +45,7 @@ reference to a product is its parent div (that contains product's .data()).
 var categories = []; // list of pairs "label", "value"
 var units = [];
 var all_discounts = {};
-var tax_rates = [];
+var tax_rates = {% autoescape off %}{{ taxes }}{% endautoescape %};
 
 var last_value;
 var update_timeout;
@@ -619,8 +619,6 @@ $(document).ready(function(){
 
     function parse_product(product){
         // convert all text numbers in product to Big() numbers
-        console.log(product);
-
         // price, purchase_price, stock, tax, discounts[amount]
         product.price = get_number(product.price, "{{ separator }}");
         product.purchase_price = get_number(product.purchase_price, "{{ separator }}");
@@ -825,7 +823,6 @@ $(document).ready(function(){
         var ut_display = ut;
 
         // try to find a better name (the actual display unit instead of m^2)
-        console.log(units);
         for(var i = 0; i < units.length; i++){
             if(units[i].value == ut){
                 ut_display = units[i].name;
@@ -881,12 +878,6 @@ $(document).ready(function(){
     );
     
     // tax rates
-    get_data("{% url 'pos:get_taxes' company.url_name %}",
-        function(data){
-            tax_rates = data;
-        }
-    );
-    
     function get_tax(id){
         // returns the tax object with the given id
         for(var i = 0; i < tax_rates.length; i++){

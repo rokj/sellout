@@ -24,8 +24,9 @@
     top: 5px;
 }
 
-#status_bar #logo.nolink{
-
+#status_bar #logo.nolink img{
+    position: relative;
+    left: 10px;
 }
 
 #status_bar #logo.link{
@@ -128,7 +129,6 @@ h1.status-bar-title{
 
 .drop-down li.separator a{
     border-top: 1px solid #ffffff;
-    margin-top: 5px;
 }
 
 div.vertical-separator{

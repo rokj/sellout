@@ -63,6 +63,7 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + _('/taxes') + '/$', tax.list_taxes, name='list_taxes'),  # template view
     url(r_company + '/' + r_manage + '/json/tax/edit/?$', tax.edit_tax, name='edit_tax'),  # get all taxes in a json list
     url(r_company + '/' + r_manage + '/json/taxes/delete/?$', tax.delete_tax, name='delete_tax'),  # get all taxes in a json list
+    url(r_company + '/' + r_manage + '/json/taxes/set-default/?$', tax.set_default_tax, name='set_default_tax'),  # get all taxes in a json list
     # cash registers (the module is named 'till' to avoid confusion with registration)
     url(r_company + '/' + r_manage + _('/registers') + '/$', till.list_registers, name='list_registers'),
     url(r_company + '/' + r_manage + _('/register/add') + '/$', till.add_register, name='add_register'),

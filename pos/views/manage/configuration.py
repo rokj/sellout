@@ -58,9 +58,7 @@ class ConfigForm(forms.Form):
     time_format = forms.ChoiceField(choices=list_time_formats(), required=True)
     timezone = forms.ChoiceField(choices=list_timezones(), required=True)
     currency = forms.CharField(max_length=4, required=True)
-    contacts_per_page = forms.IntegerField(required=True)
     discounts_per_page = forms.IntegerField(required=True)
-    default_tax = forms.DecimalField(required=True)
     decimal_separator = forms.CharField(max_length=1, required=True)
     decimal_places = forms.ChoiceField(choices=decimal_places_choices, required=True)
     interface_product_button_size = forms.ChoiceField(choices=button_sizes, label=_("Product button size"))
@@ -87,9 +85,7 @@ def edit_config(request, company):
         'time_format': get_company_value(request.user, c, 'pos_time_format'),
         'timezone': get_company_value(request.user, c, 'pos_timezone'),
         'currency': get_company_value(request.user, c, 'pos_currency'),
-        'contacts_per_page': get_user_value(request.user, 'pos_contacts_per_page'),
         'discounts_per_page': get_user_value(request.user, 'pos_discounts_per_page'),
-        'default_tax': get_company_value(request.user, c, 'pos_default_tax'),
         'decimal_separator': get_company_value(request.user, c, 'pos_decimal_separator'),
         'interface_product_button_size': get_user_value(request.user, 'pos_interface_product_button_size'),
         'discount_calculation': get_company_value(request.user, c, 'pos_discount_calculation'),

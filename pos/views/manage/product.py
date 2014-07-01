@@ -10,10 +10,10 @@ from pos.models import Company, Category, Product, Price, PurchasePrice, Tax
 from pos.views.util import JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
-                           max_field_length, error
+                           max_field_length, error, JSON_stringify
 from pos.views.manage.discount import discount_to_dict
 from pos.views.manage.category import get_subcategories
-from pos.views.manage.tax import get_default_tax
+from pos.views.manage.tax import get_default_tax, get_all_taxes
 
 from common import globals as g
 from config.functions import get_company_value
@@ -156,6 +156,7 @@ def products(request, company):
         'company': c,
         'title': _("Products"),
         'site_title': g.MISC['site_title'],
+        'taxes': JSON_stringify(get_all_taxes(request.user, c)),
         # urls for ajax calls
         'add_url': reverse('pos:create_product', args=[c.url_name]),
         # config variables 

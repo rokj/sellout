@@ -3,7 +3,14 @@
 {% load i18n %}
 
 {% block section_head %}
-
+<link type="text/css" rel="stylesheet" href="{% static 'css/management/config.css' %}" />
+<script type="text/javascript">
+$(document).ready(function(){
+    $("input.currency").click(function(){
+        $("#id_currency").val($(this).attr("data-character"));
+    });
+});
+</script>
 {% endblock %}
 
 {% block status_bar_title %}{% trans 'Configuration' %}{% endblock %}
@@ -17,9 +24,89 @@
 {% block manage_content %}
 <form action="{% url 'pos:configuration' company.url_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
 
-    <p><input type="submit" value="{% trans 'Save' %}" /></p>
+    <div class="management-column">
+        <div class="form-field">
+            <div class="error">{{ form.date_format.errors }}</div>
+            {{ form.date_format.label_tag }}
+            {{ form.date_format }}
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.time_format.errors }}</div>
+            {{ form.time_format.label_tag }}
+            {{ form.time_format }}
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.timezone.errors }}</div>
+            {{ form.timezone.label_tag }}
+            {{ form.timezone }}
+        </div>
+
+        <div class="form-field currency">
+            <div class="error">{{ form.currency.errors }}</div>
+            {{ form.currency.label_tag }}
+            {{ form.currency }}
+            <input type="button" class="currency euro" data-character="€" />eur
+            <input type="button" class="currency euro" data-character="$" />usd
+            <input type="button"class="currency euro" data-character="£" />gbp
+            <input type="button"class="currency euro" data-character="¥" />yen
+            <input type="button"class="currency euro" data-character="BTC" />bitcoin
+        </div>
+
+        <div class="form-field">
+            {# decimal separator and decimal places belong in the same row #}
+            <div class="error">{{ form.decimal_separator.errors }}</div>
+            <div class="error">{{ form.decimal_places.errors }}</div>
+
+            <div class="split-cell first">
+                {{ form.decimal_separator.label_tag }}
+                {{ form.decimal_separator }}
+            </div>
+            <div class="split-cell last">
+                {{ form.decimal_places.label_tag }}
+            {{ form.decimal_places }}
+            </div>
+        </div>
+    </div>
+
+    <div class="management-column">
+
+        <div class="form-field">
+            <div class="error">{{ form.interface_product_button_size.errors }}</div>
+            {{ form.interface_product_button_size.label_tag }}
+            {{ form.interface_product_button_size }}
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.discount_calculation.errors }}</div>
+            {{ form.discount_calculation.label_tag }}
+            {{ form.discount_calculation }}
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.product_display.errors }}</div>
+            {{ form.product_display.label_tag }}
+            {{ form.product_display }}
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.display_breadcrumbs.errors }}</div>
+            {{ form.display_breadcrumbs }}
+            {{ form.display_breadcrumbs.label_tag }}
+        </div>
+
+        <div class="form-footer">
+            <div class="form-footer-column">
+                <input type="button" id="static_cancel" value="{% trans 'Cancel' %}" />
+            </div>
+            <div class="form-footer-column">
+                <input type="submit" value="{% trans 'Save' %}" />
+            </div>
+        </div>
+
+    </div>
 </form>
 
 {% endblock %}
