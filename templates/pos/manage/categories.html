@@ -191,9 +191,9 @@
                         i++;
                     }
 
-                    // show all buttons on the path to topmost category
-                    var ip = p;
-                    var sub = false;
+                    // select all buttons on the path to topmost category
+                    var ip = p; // current category object
+                    var sub = false; // has subcategories
                     while(ip){
                         ip.button.show().addClass("selected");
 

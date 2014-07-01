@@ -69,20 +69,14 @@ $(document).ready(function(){
         };
 
         p.update_to_data = function(){
-            p.update_list_item(data.id, data.name);
+            p.update_list_item(p.data.id, p.data.name);
         };
 
         p.update_to_inputs = function(){
             p.update_list_item(p.data.id, p.items.edit.name.val());
         };
 
-        p.delete_button_action = function(){
-            // if this tax hasn't been saved yet (can't happen)
-            if(p.data.id == -1){
-                console.error("Deleting tax with id = -1");
-                return;
-            }
-
+        p.delete_tax = function(){
             // send a delete request to the server
             send_data("{% url 'pos:delete_tax' company.url_name %}",
                 {id: p.data.id}, "{{ csrf_token }}",
@@ -109,6 +103,28 @@ $(document).ready(function(){
                         }
                     }
             });
+        };
+
+        p.delete_button_action = function(){
+            // if this tax hasn't been saved yet (can't happen)
+            if(p.data.id == -1){
+                console.error("Deleting tax with id = -1");
+                return;
+            }
+
+            confirmation_dialog(
+                    "{% trans 'Delete tax' context 'confirmation dialog title' %}",
+                    "{% trans 'Are you sure you want to delete this tax?' %}",
+                    function(){
+                        // yes action:
+                        p.delete_tax();
+                    }
+                    ,
+                    function(){
+                        // no action: do nothing
+
+                    }
+            );
         };
 
         p.save_button_action = function(){

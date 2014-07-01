@@ -271,7 +271,7 @@ class CategoryForm(forms.ModelForm):
 def list_categories(request, company):
     c = get_object_or_404(Company, url_name=company)
 
-    # check permissions: needs to be at least guest to view
+    # check permissions
     if not has_permission(request.user, c, 'category', 'list'):
         return no_permission_view(request, c, _("view categories"))
 
@@ -300,8 +300,10 @@ def add_category(request, company, parent_id=-1):
         parent_id = int(parent_id)
         if parent_id == -1:
             parent = None
+            color = g.CATEGORY_COLORS[0]  # the default color
         else:
             parent = Category.objects.get(id=parent_id)
+            color = parent.color
 
             # check if not adding to some other company's category
             if parent.company != c:
@@ -310,6 +312,7 @@ def add_category(request, company, parent_id=-1):
         raise Http404
     except:
         parent = None
+        color = g.CATEGORY_COLORS[0]
 
     context = {
         'company': c,
@@ -340,7 +343,8 @@ def add_category(request, company, parent_id=-1):
                 reverse('pos:list_categories', kwargs={'company': c.url_name}) + "#" + str(category.id))
 
     else:
-        form = CategoryForm(initial={'parent': parent_id})  # create a new category
+        # create a new category (select parent and its color if adding child)
+        form = CategoryForm(initial={'parent': parent_id, 'color': color})
 
     context['form'] = form
 

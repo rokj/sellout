@@ -153,37 +153,40 @@ Product = function(list, data){
 
     // create a 'product' div
 	// show: name, code, shortcut and background image
-	// gray out if there's no products left
+	// container contains all inner elements and sets background color (defined by category)
+    // image has background image (if product has an image set)
+    // name, code, shortcut are just text elements (appended to image)
     p.items.container = $("<div>", {"class":"product-button"});
     p.items.container.css({
 		width: p.g.config.product_button_size,
-		height: p.g.config.product_button_size
+		height: p.g.config.product_button_size,
+        'background-color': p.data.color
 	});
 
-	if(p.data.image){
-        p.items.container.append($("<img>", {src: p.data.image, "class":"product-button-image"}));
-    }
+    p.items.image = $("<div>", {"class": "product-button-image"});
+    p.items.image.appendTo(p.items.container);
 
-    p.items.info = $("<div>", {"class":"shade"});
+	if(p.data.image) p.items.image.css("background-image", "url(" + p.data.image + ")");
+
     p.items.name = $("<p>", {"class":"product-button-name"}).text(p.data.name);
+    p.items.name.appendTo(p.items.image);
+
     p.items.code = $("<p>", {"class":"product-button-code"}).text(p.data.code);
+    p.items.code.appendTo(p.items.image);
+
     p.items.shortcut = $("<p>", {"class":"product-button-shortcut"}).text(p.data.shortcut);
-
-    p.items.info
-        .append(p.items.name)
-	    .append(p.items.code)
-        .append(p.items.shortcut);
-
-    p.items.container.append(p.items.info);
+    p.items.shortcut.appendTo(p.items.image);
 
     // if the product is out of stock,, add a special class
     if(p.data.stock.cmp(Big(0)) <= 0){
         p.items.info.addClass("out-of-stock");
         // this product cannot be clicked
+        console.log("cannot be added");
     }
     else{
         p.items.container.click(function(){
             p.add_to_bill();
+            console.log("added");
         });
     }
 

@@ -205,33 +205,24 @@ PERMISSIONS = {  # 'chapters' that each group can view or manage
     # views (to prevent users exploring other companies' terminals):
     # manage, terminal
     'guest': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax',
-                 'terminal', 'register',),
+        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register',),
         'edit': (),
         },
     'cashier': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax',
-                 'terminal', 'register',),
-        'edit': ('bill',
-                 'terminal', 'config',),
+        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'register',),
+        'edit': ('bill', 'terminal', 'config',),
         },
     'seller': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax',
-                 'terminal', 'manage', 'register',),
-        'edit': ('bill', 'product',
-                 'terminal', 'manage', 'config', 'tax',),
+        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register',),
+        'edit': ('bill', 'product', 'terminal', 'manage', 'config',),
         },
     'manager': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config', 'tax',
-                 'terminal', 'manage', 'register',),
-        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'config', 'tax',
-                 'terminal', 'manage', 'register',),
+        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config', 'tax', 'terminal', 'manage', 'register',),
+        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register',),
         },
     'admin': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config',
-                 'terminal', 'manage', 'tax', 'register',),
-        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config',
-                 'terminal', 'manage', 'tax', 'register',),
+        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config', 'terminal', 'manage', 'tax', 'register',),
+        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config', 'terminal', 'manage', 'tax', 'register',),
         },
 }
 

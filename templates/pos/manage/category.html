@@ -8,11 +8,20 @@
 
     <link type="text/css" rel="stylesheet" href="{% static 'css/management/categories.css' %}" />
     <style type="text/css">
-    div.color-button.selected{
+    div.color-button.selected:after{
+       position: absolute;
+        right: 5px;
+        bottom: 5px;
+        width: 30px;
+        height: 30px;
+        content: "";
+        background-color: rgba(0,0,0,0.3);
         background-image: url("{% static 'icons/selected_category_color.png' %}");
-        background-position: 90% 90%;
+        background-position: center center;
         background-repeat: no-repeat;
+        border-radius: 100% 100%;
     }
+
     </style>
 
     <script type="text/javascript">

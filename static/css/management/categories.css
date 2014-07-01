@@ -168,8 +168,11 @@ div.form-field a.button{
 
 div.color-button{
     display: block;
+    position: relative;
     float: left;
     cursor: pointer;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+
+    /* .color-button.selected:after is in category.html (required image background) */
 }
