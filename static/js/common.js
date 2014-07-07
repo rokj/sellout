@@ -25,7 +25,8 @@ function upload_image(input, url, token, max_size, callback){
     }
     else{
         // there are no files selected, send empty data (the server will remove an existing image)
-        send_data(url, {/* image not in data */}, token, callback);
+        //send_data(url, {/* image not in data */}, token, callback);
+        console.log("wtf");
     }
 }
 
@@ -451,10 +452,7 @@ function is_dark(color){
     var g = parseInt(color.substr(2, 2), 16);
     var b = parseInt(color.substr(4, 2), 16);
 
-    // combine numbers (a.k.a. bit shifting)
-    var val = r*Math.pow(2, 16) + g * Math.pow(2, 8) + b;
-
-    return val < (Math.pow(2, 24)/2);
+    return r + g + b < 3*Math.pow(2, 8)/2;
 }
 
 function toggle_elements(elements_dict, show){

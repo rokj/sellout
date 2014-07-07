@@ -17,24 +17,7 @@ from common import globals as g
 ########################
 ### helper functions ###
 ########################
-def category_breadcrumbs(category):
-    # assemble the name in form category>subcategory>subsubcategory>...
-    name = []
-
-    while 1:
-        name.append(category.name)
-        category = category.parent
-        if not category:
-            break
-
-    # reverse and join
-    name.reverse()
-    name = ' > '.join(name)
-
-    return name
-
-
-def category_to_dict(c, android = False):
+def category_to_dict(c, android=False):
     if c.parent:
         parent_id = c.parent.id
     else:
@@ -48,7 +31,8 @@ def category_to_dict(c, android = False):
         'add_child_url': reverse('pos:add_category', kwargs={'company': c.company.url_name, 'parent_id': c.id}),
         'edit_url': reverse('pos:edit_category', kwargs={'company': c.company.url_name, 'category_id': c.id}),
         'color': c.color,
-        'breadcrumbs': c.breadcrumbs
+        'breadcrumbs': c.breadcrumbs['name'],
+        'path': c.breadcrumbs['id'],
     }
 
     return r
@@ -142,9 +126,7 @@ def validate_parent(category, parent_id):
     return True
 
 
-
-
-def get_all_categories(company_id, category_id=None, sort='name', data=None, level=0, json=False):
+def get_all_categories(company, category=None, sort='name', data=None, level=0, json=False):
     """ return a 'flat' list of all categories (converted to dictionaries/json) """
 
     #def category_to_dict(c, level): # c = Category object # currently not needed
@@ -157,8 +139,8 @@ def get_all_categories(company_id, category_id=None, sort='name', data=None, lev
     if data is None:
         data = []
 
-    if category_id:
-        c = Category.objects.get(company__id=company_id, id=category_id)
+    if category:
+        c = category
         # add current category to list
         c.level = level
         #data.append(category_to_dict(c, level))
@@ -166,20 +148,21 @@ def get_all_categories(company_id, category_id=None, sort='name', data=None, lev
         if json:
             entry = category_to_dict(c)
             entry['level'] = c.level  # some additional data
-            entry['breadcrumbs'] = category_breadcrumbs(c)
+            entry['breadcrumbs'] = c.breadcrumbs['name']
+            entry['path'] = c.breadcrumbs['id']
             data.append(entry)
         else:
             data.append(c)
 
         # append all children
-        children = Category.objects.filter(company__id=company_id, parent__id=category_id).order_by(sort)
+        children = Category.objects.filter(company=company, parent=category).order_by(sort)
         level += 1
         for c in children:
-            get_all_categories(company_id, c.id, data=data, level=level, sort=sort, json=json)
+            get_all_categories(company, c, data=data, level=level, sort=sort, json=json)
     else:
-        cs = Category.objects.filter(company__id=company_id, parent=None).order_by(sort)
+        cs = Category.objects.filter(company=company, parent=None).order_by(sort)
         for c in cs:
-            get_all_categories(c.company.id, c.id, data=data, level=level, sort=sort, json=json)
+            get_all_categories(c.company, c, data=data, level=level, sort=sort, json=json)
 
     return data
 
@@ -251,7 +234,7 @@ def JSON_categories(request, company):
         return JSON_error("no permission")
 
     # return all categories' data in JSON format
-    return JSON_response(get_all_categories(c.id, sort='name', data=[], json=True))
+    return JSON_response(get_all_categories(c, sort='name', data=[], json=True))
 
 
 class CategoryForm(forms.ModelForm):
@@ -365,8 +348,8 @@ def edit_category(request, company, category_id):
         raise Http404
 
     # check if category actually belongs to the given company
-    if category.company != c: # "you have no permission to edit this category"
-        return no_permission_view(request, c, _("edit this category"))
+    if category.company != c:  # "you have no permission to edit this category"
+        raise Http404
 
     context = {'company': c, 'category_id': category_id}
 

@@ -90,14 +90,25 @@ class Category(SkeletonU):
 
     @property
     def breadcrumbs(self):
+        name_breadcrumbs = ""
+        id_breadcrumbs = []
+
         current_category = self
-        breadcrumb = ""
+
         while current_category is not None:
-            breadcrumb = current_category.name + breadcrumb
+            name_breadcrumbs = current_category.name + name_breadcrumbs
+            id_breadcrumbs.append(current_category.id)
+
             current_category = current_category.parent
             if current_category:
-                breadcrumb = " > " + breadcrumb
-        return breadcrumb
+                name_breadcrumbs = " > " + name_breadcrumbs
+
+        id_breadcrumbs.reverse()
+
+        return {
+            'name': name_breadcrumbs,
+            'id': id_breadcrumbs,
+        }
 
 
 # not in use at the moment

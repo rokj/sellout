@@ -321,11 +321,11 @@ def upload_color_logo(request, company):
         if resize:
             color_logo = resize_image(color_logo, g.IMAGE_DIMENSIONS['color_logo'])
 
-        if c.color_logo:
+        if c.color_logo.name:
             # the logo exists already, delete it
             try:
                 os.remove(c.color_logo.path)
-            except OSError:
+            except (OSError, ValueError):
                 pass
 
         temp_handle = StringIO()
@@ -343,11 +343,10 @@ def upload_color_logo(request, company):
         # there is no image, remove the existing one
         try:
             os.remove(c.color_logo.path)
-        except OSError:
+            c.color_logo.delete()
+            c.save()
+        except (OSError, ValueError):
             pass
-
-        c.color_logo.delete()
-        c.save()
 
         return JSON_ok()
 
@@ -388,11 +387,11 @@ def upload_monochrome_logo(request, company):
         if monochrome_logo.mode != '1':
             monochrome_logo = monochrome_logo.convert('1')
 
-        if c.monochrome_logo:
+        if c.monochrome_logo.name:
             # the logo exists already, delete it
             try:
                 os.remove(c.monochrome_logo.path)
-            except OSError:
+            except (OSError, ValueError):
                 pass
 
         temp_handle = StringIO()
@@ -410,11 +409,10 @@ def upload_monochrome_logo(request, company):
         # there is no image, remove the existing one
         try:
             os.remove(c.monochrome_logo.path)
-        except OSError:
+            c.monochrome_logo.delete()
+            c.save()
+        except (OSError, ValueError):
             pass
-
-        c.monochrome_logo.delete()
-        c.save()
 
         return JSON_ok()
 

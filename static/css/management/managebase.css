@@ -17,12 +17,13 @@ h1{
 /* controls and widgets and stuff */
 label, .custom-label{
     color: #999999;
-}
-
-label{
     display: block;
     text-transform: uppercase;
     font-size: 10px;
+}
+
+.custom-label.description{
+    text-transform: none;
 }
 
 input[type='text'],
@@ -36,7 +37,7 @@ textarea {
     padding-left: 5px;
 }
 
-input[type='submit'], input[type='button']{
+input[type='submit'], input[type='button'], button{
     color: #ffffff;
     border: none;
     height: 40px;
@@ -55,11 +56,13 @@ select{
     padding-bottom: 10px;
 }
 
-div.custom-file-input{
+div.custom-file-input,
+form.custom-file-input{
     display: inline;
 }
 
-div.custom-file-input input{
+div.custom-file-input input,
+form.custom-file-input input{
     border: none;
     background-color: #000000;
     color: #ffffff;
@@ -89,6 +92,10 @@ div.management-column{
     float: left;
     max-width: 350px;
     margin-right: 40px;
+}
+
+div.management-column.fixed{
+    width: 280px;
 }
 
 #image-clear_id + label{
@@ -143,7 +150,6 @@ div.edit-container{
 div.split-cell{
     float: left;
     width: 45%;
-    margin-bottom: 20px;
 }
 
 div.split-cell.first{ padding-right: 5% }
@@ -192,4 +198,41 @@ a.button.cancel, input.cancel{ background-color: #aa0000; }
 
 #edit_dialog label{
     display: block;
+}
+
+.delete-image-button{
+    display: block;
+    position: absolute;
+
+    left: 100%;
+    top: 50%;
+
+    margin-top: -10px;
+    margin-left: 5px;
+
+    width: 20px;
+    height: 20px;
+
+    background-size: 20px 20px;
+    background-color: transparent;
+
+    border: none;
+    cursor: pointer;
+}
+
+div.bottom input{
+    width: 100%;
+}
+
+div.bottom{
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    right: 0;
+}
+
+div.management-column div.read-only-field{
+    /* label height + label top margin */
+    /* (except that there is no label, so margins must be set by hand) */
+    padding-top: 30px;
 }

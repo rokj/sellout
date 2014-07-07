@@ -44,7 +44,7 @@ def mobile_get_cut(request, company):
     units = UNITS
     result['units'] = units
 
-    categories = get_all_categories(c.id, json=True)
+    categories = get_all_categories(c, json=True)
     result['categories'] = categories
 
     discounts = get_all_discounts(request.user, c, android=True)

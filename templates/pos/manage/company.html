@@ -49,7 +49,7 @@
     position: relative;
 }
 
-.delete-button{
+.delete-image-button{
     background-image: url("{% static 'icons/delete_active.png' %}");
 }
 
@@ -102,12 +102,13 @@ $(document).ready(function(){
     }
 
     function logo_removal(button, input, container, url){
-        button.click(function(){
-        // replace the input with a new one
-        var new_input = $("<inpu>", {type: 'file', id: input.attr("id")});
-        input.replaceWith(new_input);
+        button.click(function(e){
+            e.preventDefault();
+            // replace the input with a new one
+            var new_input = $("<inpu>", {type: 'file', id: input.attr("id")});
+            input.replaceWith(new_input);
 
-        upload_image(input.get(0), url, "{{ csrf_token }}", {{ max_upload_size }}, function(response){
+            send_data(url, {/* send nothing */}, "{{ csrf_token }}", function(response){
                 if(response.status != 'ok'){
                     // something went wrong (wtf?!)
                     error_message(
@@ -179,7 +180,7 @@ $(document).ready(function(){
                 <div class="bottom">
                     <div>
                         <button id="remove_color_logo"
-                                class="delete-button"
+                                class="delete-image-button"
                                 title="{% trans 'Remove image' %}"></button>
 
                         <input type="file" id="id_color_logo" />
@@ -202,13 +203,13 @@ $(document).ready(function(){
                     <div>{# keep this button in its own block #}
                         {# do not show it if there's no color logo #}
                         <input type="button"
-                            value="{% trans 'Auto-create' context 'monochrome logo button' %}"
-                            id="auto_create"/>
+                               value="{% trans 'Auto-create' context 'monochrome logo button' %}"
+                               id="auto_create"/>
                     </div>
 
                     <div>
                         <button id="remove_monochrome_logo"
-                                class="delete-button"
+                                class="delete-image-button"
                                 title="{% trans 'Remove image' %}"></button>
 
                         <input type="file" id="id_monochrome_logo" />
@@ -221,15 +222,14 @@ $(document).ready(function(){
             </div>
         </div>
 
-    </div>
-    <div class="management-column">
-
         <div class="form-field">
             <div class="error">{{ form.name.errors }}</div>
             {{ form.name.label_tag }}
             {{ form.name }}
         </div>
 
+    </div>
+    <div class="management-column">
         <div class="form-field">
             <div class="error">{{ form.url_name.errors }}</div>
             {{ form.url_name.label_tag }}

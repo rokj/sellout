@@ -11,8 +11,8 @@ from pos.views.util import JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
                            max_field_length, error, JSON_stringify
-from pos.views.manage.discount import discount_to_dict
-from pos.views.manage.category import get_subcategories
+from pos.views.manage.discount import discount_to_dict, get_all_discounts
+from pos.views.manage.category import get_subcategories, get_all_categories
 from pos.views.manage.tax import get_default_tax, get_all_taxes
 
 from common import globals as g
@@ -156,10 +156,14 @@ def products(request, company):
         'company': c,
         'title': _("Products"),
         'site_title': g.MISC['site_title'],
+        # lists
         'taxes': JSON_stringify(get_all_taxes(request.user, c)),
+        'categories': JSON_stringify(get_all_categories(c, json=True)),
+        'units': JSON_stringify(g.UNITS),
+        'discounts': JSON_stringify(get_all_discounts(request.user, c)),
         # urls for ajax calls
         'add_url': reverse('pos:create_product', args=[c.url_name]),
-        # config variables 
+        # config variables
         'can_edit': has_permission(request.user, c, 'product', 'edit'),
         'currency': get_company_value(request.user, c, 'pos_currency'),
         # images
@@ -430,7 +434,7 @@ def validate_product(user, company, data):
         
     # image:
     if data['change_image'] == True:
-        if 'image' in data: # new image has been uploaded
+        if 'image' in data and data['image']: # new image has been uploaded
             print data['image']
             data['image'] = image_from_base64(data['image'])
             if not data['image']:
@@ -473,9 +477,9 @@ def validate_product(user, company, data):
             p = Product.objects.get(company=company, shortcut=data['shortcut'])
             if p.id != data['id']:
                 return r(False,
-                    _("A product with this shop code already exists: ") + p.name)
+                    _("A product with this shortcut already exists: ") + p.name)
         except Product.DoesNotExist:
-            pass # ok
+            pass  # ok
     
     # description, notes - anything can be entered
     data['description'] = data['description'].strip()

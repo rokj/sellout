@@ -1,8 +1,7 @@
 #category_tree {
-    margin-right: 300px;
     overflow: hidden;
-    /* to prevent the page from jumping around when toolbox is shown */
-    padding-bottom: 400px; /* (the height of the toolbox + something) */
+    /* content is fullscreen here */
+    margin-left: -40px; /* the same as #management_content padding-left */
 }
 
 .category-button{
@@ -10,8 +9,7 @@
     margin: 10px;
     position: relative;
     cursor: pointer;
-    opacity: 0.2;
-    
+
     display: table;
 }
 
@@ -22,14 +20,8 @@
     color: #000000;
 }
 
-.category-button>span.dark{
-    /* use bright font for categories that have dark background */
-    color: #ffffff;
-}
-
-.category-button.selected{
-    /* must be important to override inline styles from js */
-    opacity: 1 !important;
+.category-button.shaded{
+    opacity: 0.3;
 }
 
 .category-text{
@@ -125,17 +117,33 @@
     height: 0;
 }
 
+#tools .arrow-container{
+    position:relative;
+    width: 100%;
+    height: 0;
+}
+
 #tools .arrow:after{
-    top: -60px;
-    left: 50%;
     border: 30px solid rgba(0, 0, 0, 0);
-    border-bottom: 30px solid #000000;
-    content: " ";
+    content: "";
     height: 0;
     width: 0;
     position: absolute;
     pointer-events: none;
+}
+
+#tools .arrow.top:after{
+    top: -60px;
+    left: 50%;
     margin-left: -30px;
+    border-bottom-color: #000000;
+}
+
+#tools .arrow.bottom:after{
+    top: 10px; /* that's for the #toolbox padding */
+    left: 50%;
+    margin-left: -30px;
+    border-top-color: #000000;
 }
 
 img.toolbox{
