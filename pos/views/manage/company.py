@@ -9,7 +9,7 @@ from django import forms
 from common.images import image_from_base64, resize_image
 
 from pos.models import Company
-from pos.views.util import JSON_response, JSON_parse, has_permission, no_permission_view, JSON_ok
+from pos.views.util import JSON_response, JSON_parse, has_permission, no_permission_view, JSON_ok, max_field_length
 from common import globals as g
 import unidecode
 from common.functions import get_random_string, get_terminal_url
@@ -182,11 +182,43 @@ class CompanyForm(forms.ModelForm):
         #}
 
 
+def validate_company(user, company, data):
+
+    def r(status, msg):
+        return {'status': status,
+                'data': data,
+                'message': msg}
+
+    if not has_permission(user, company, 'company', 'edit'):
+        return r(False, _("You have no permission to edit this company"))
+
+    if data.get('url_name'):
+        url_name = data['url_name']
+        if url_name != company.url_name:
+            if not check_url_name(url_name):
+                return r(False, _("Url of the company is invalid or exists already."))
+    else:
+        url_name = company.url_name
+
+    print data
+
+    if not data.get('name'):
+        return r(False, _("No name entered"))
+    elif len(data['name']) > max_field_length(Company, 'name'):
+        return r(False, _("Name too long"))
+
+    if not data.get('email'):
+        return r(False, _("No email entered"))
+
+    return {'status':  True, 'data': data}
+
+
 # for json etc.
-def company_to_dict(company):
+def company_to_dict(company, android=False):
     c = {}
 
     c['name'] = company.name
+    c['url_name'] = company.url_name
     c['email'] = company.email
     c['street'] = company.street
     c['postcode'] = company.postcode
@@ -196,6 +228,7 @@ def company_to_dict(company):
     c['phone'] = company.phone
     c['vat_no'] = company.vat_no
     c['website'] = company.website
+    c['notes'] = company.notes
 
     if company.color_logo:
         c['color_logo_url'] = company.color_logo.url

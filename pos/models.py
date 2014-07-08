@@ -99,6 +99,10 @@ class Category(SkeletonU):
                 breadcrumb = " > " + breadcrumb
         return breadcrumb
 
+    @property
+    def product_count(self):
+        return Product.objects.filter(company=self.company, category=self).count()
+
 
 # not in use at the moment
 #class CategoryAttribute(SkeletonU):

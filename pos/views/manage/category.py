@@ -45,11 +45,16 @@ def category_to_dict(c, android = False):
         'name': c.name,
         'description': c.description,
         'parent_id': parent_id,
-        'add_child_url': reverse('pos:add_category', kwargs={'company': c.company.url_name, 'parent_id': c.id}),
-        'edit_url': reverse('pos:edit_category', kwargs={'company': c.company.url_name, 'category_id': c.id}),
+
         'color': c.color,
         'breadcrumbs': c.breadcrumbs
     }
+
+    if not android:
+        r['add_child_url'] = reverse('pos:add_category', kwargs={'company': c.company.url_name, 'parent_id': c.id})
+        r['edit_url'] = reverse('pos:edit_category', kwargs={'company': c.company.url_name, 'category_id': c.id})
+    else:
+        r['product_cunt'] = c.product_count
 
     return r
 
@@ -132,6 +137,7 @@ def validate_category(user, company, data):
 
     return {'status': True, 'data': data}
 
+
 def validate_parent(category, parent_id):
     categories = Category.objects.filter(parent=category)
     for c in categories:
@@ -140,8 +146,6 @@ def validate_parent(category, parent_id):
         else:
             validate_parent(c, parent_id)
     return True
-
-
 
 
 def get_all_categories(company_id, category_id=None, sort='name', data=None, level=0, json=False):

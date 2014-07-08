@@ -308,7 +308,7 @@ def get_contact(request, company, contact_id):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company doest not exist"))
+        return JSON_error(_("Company does not exist"))
     
     # permissions: needs to be guest to view contacts
     if not has_permission(request.user, c, 'contact', 'list'):
