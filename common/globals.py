@@ -4,7 +4,7 @@ from django.utils.translation import ugettext as _
 # Common stuff to be used anywhere throughout the site
 
 # directories
-DIRS = { # goes to MEDIA folder
+DIRS = {  # all go to MEDIA folder
     'color_logo_dir': "img/color_logo",
     'monochrome_logo_dir': "img/monochrome_logo",
     'category_icon_dir': "img/category",
@@ -55,6 +55,7 @@ UNITS = (
     ("gal", "gal"),
     ("ft^3", "ft³"),
     ("h", _("Hour")),
+    ("other", _("Other")),
 )
 
 # discounts
@@ -180,6 +181,7 @@ MISC = {
     'max_upload_image_size': 2*2**20,  # 2 megabytes
     'image_format': 'png',  # all images will be saved in this format
     'image_upload_formats': 'jpg|jpeg|gif|png|bmp|tiff',  # supported image formats (as regex "options")
+    'discounts_per_page': 2,
 }
 
 IMAGE_DIMENSIONS = {

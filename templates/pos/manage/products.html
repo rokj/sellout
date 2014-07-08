@@ -24,9 +24,15 @@
 }
 
 /* button backgrounds: other styling is in management/products.css */
-.product-edit-button{ background-image: url('{% static 'icons/edit_white.png' %}'); }
-.product-delete-button{ background-image: url('{% static 'icons/delete_white.png' %}'); }
-.product-favorite-button{ background-image: url('{% static 'icons/favorite_white.png' %}'); }
+.product-edit-button{ background-image: url('{% static 'icons/edit_black.png' %}'); }
+.product-delete-button{ background-image: url('{% static 'icons/delete_black.png' %}'); }
+.product-favorite-button{ background-image: url('{% static 'icons/favorite_black.png' %}'); }
+
+.dark .product-edit-button{ background-image: url('{% static 'icons/edit_white.png' %}'); }
+.dark .product-delete-button{ background-image: url('{% static 'icons/delete_white.png' %}'); }
+.dark .product-favorite-button{ background-image: url('{% static 'icons/favorite_white.png' %}'); }
+
+.product-favorite-button.active{ background-image: url('{% static 'icons/favorite_active.png' %}'); }
 
 </style>
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/products.css' %}" />
@@ -142,6 +148,7 @@ $(document).ready(function(){
     }
 
     function render_product(div_obj/*parent*/){
+        // shows a product box (search result), not edit dialog
         var tmp_obj, i;
 
         // update this div
@@ -162,12 +169,12 @@ $(document).ready(function(){
 
         title_row_obj.css("background-color", "#" + product.color);
 
-        if(is_dark(product.color)) name_obj.addClass("dark");
-        else name_obj.removeClass("dark");
+        if(is_dark(product.color)) title_row_obj.addClass("dark");
+        else title_row_obj.removeClass("dark");
 
-        // price and unit
-        tmp_obj = $(".product-base-price", div_obj);
-        tmp_obj.append("{{ currency|escapejs }} " + product.price + " / " + product.unit_type_display);
+        // price
+        tmp_obj = $(".product-price", div_obj);
+        tmp_obj.append("{{ currency|escapejs }} " + product.price);
 
         // image
         show_image(product, $(".product-image", div_obj));
@@ -177,8 +184,9 @@ $(document).ready(function(){
         // tax
         $(".product-tax", div_obj).append(product.tax + "%");
         // description
-        $(".product-description", div_obj).append(escape(product.description));
+        //$(".product-description", div_obj).append(escape(product.description));
         // discount list
+        /* not shown at the moment
         tmp_obj = $(".product-discounts", div_obj);
         if(product.discounts.length > 0){
             var li_obj;
@@ -194,27 +202,26 @@ $(document).ready(function(){
         }
         else{
             tmp_obj.text("/");
-        }
+        }*/
 
-        
         // private notes
-        $(".product-private-notes", div_obj).append(escape(product.private_notes));
+        //$(".product-private-notes", div_obj).append(escape(product.private_notes));
         // stock
-        if(product.stock){
+        /*if(product.stock){
             $(".product-stock", div_obj).append(product.stock + " " + 
                 product.unit_type_display + " {% trans 'left in stock' %}");
-        }
+        }*/
         
         // shortcut
         $(".product-shortcut", div_obj).append(escape(product.shortcut));
         // code
         $(".product-code", div_obj).append(escape(product.code));
         
-        // if a user has no permission to edit/delete, don't show buttons
-        var manage_obj = $(".product-management", div_obj);
-        var edit_button = $("button.product-edit-button", manage_obj);
-        var delete_button = $("button.product-delete-button", manage_obj);
+        var edit_button = $("button.product-edit-button", div_obj);
+        var delete_button = $("button.product-delete-button", div_obj);
+        var favorite_button = $("button.product-favorite-button", div_obj);
 
+        // if a user has no permission to edit/delete, don't show buttons
         if({{can_edit|lower}}){
             // enable and add functionality to:
             // edit button
@@ -227,14 +234,43 @@ $(document).ready(function(){
             delete_button.click(function(){
                 delete_product(div_obj);
             });
+            // favorite button
+            favorite_button.prop('disabled', false);
+            favorite_button.click(function(){
+                toggle_favorite(favorite_button, product);
+            });
         }
         else{
             // just disable
             edit_button.prop('disabled', true);
             delete_button.prop('disabled', true);
+            favorite_button.prop('disabled', true);
         }
+
+        style_favorite_button(favorite_button, product.favorite);
         
         div_obj.show();
+    }
+
+    function style_favorite_button(button_obj, favorited){
+        if(favorited) button_obj.addClass("active");
+        else button_obj.removeClass("active");
+    }
+
+    function toggle_favorite(button_obj, product){
+        send_data("{% url 'pos:toggle_favorite' company.url_name %}", {product_id:product.id}, "{{ csrf_token }}",
+            function(response){
+                if(response.status != 'ok'){
+                    error_message(
+                        "{% trans 'Favorite could not be set' %}",
+                        response.message);
+                }
+                else{
+                    // update product and the button
+                    product.favorite = response.favorite;
+                    style_favorite_button(button_obj, product.favorite);
+                }
+            });
     }
     
     function discount_amount(discount){
@@ -564,6 +600,14 @@ $(document).ready(function(){
             //del_obj.show();
             //upl_obj.hide();
         });
+
+        // set dialog title: if there's no name, it's for adding new product
+        sel_obj = $("#edit_dialog_title");
+        if(product.name)
+            sel_obj.text("{% trans 'Edit product' %}");
+        else
+            sel_obj.text("{% trans 'Add product' %}");
+
         
         del_obj.unbind().click(function(){
             // show/hide controls
@@ -619,6 +663,7 @@ $(document).ready(function(){
             // update price with tax
             var tax = get_number(get_tax($("#edit_product_tax").val()).amount, "{{ separator }}");
 
+            if(!base_price) return;
             if(!tax) return;
 
             tax_price_obj.val(display_number(base_price.times(Big(1).plus(tax.div(Big(100)))), "{{ separator }}", {{ decimal_places }}));
@@ -631,6 +676,7 @@ $(document).ready(function(){
             // update price with tax
             var tax = get_number(get_tax($("#edit_product_tax").val()).amount, "{{ separator }}");
 
+            if(!tax_price) return;
             if(!tax) return;
 
             base_price_obj.val(display_number(tax_price.div(Big(1).plus(tax.div(Big(100)))), "{{ separator }}", {{ decimal_places }}));
@@ -1147,22 +1193,19 @@ $(document).ready(function(){
     </div>
 
     <div class="content">
-        <div id="edit_dialog_title">
-
-        </div>
-
         <div id="products_list"></div>
 
         {% comment %} a template for editing/adding product (dialog) {% endcomment %}
         <div id="dialog_shadow"></div>
         <div id="edit_dialog" class="hidden">
+            <h2 id="edit_dialog_title">{# content by js #}</h2>
             <div class="management-column fixed">
                 <div class="images">
                     <div class="image-buttons">
                         <div class="bottom">
                             <div>
                                 <button id="edit_product_delete_image"
-                                        class="delete-image-button"
+                                        class="delete-image-button no-shadow"
                                         title="{% trans 'Remove image' %}"></button>
 
                                 <form id="edit_product_image_input_form" class="custom-file-input">
@@ -1183,7 +1226,7 @@ $(document).ready(function(){
                 <div class="form-field">
                     <label for="edit_product_description">{% trans 'Description' %}</label>
                     {% comment %} max length for textarea: an artibrary value, not set in database {% endcomment %}
-                    <textarea id="edit_product_description" maxlength="1000"></textarea>
+                    <textarea id="edit_product_description" maxlength="2000"></textarea>
                 </div>
 
                 <div class="form-field">

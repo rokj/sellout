@@ -436,6 +436,7 @@ def edit_contact(request, company, contact_id):
         form.company = c
 
     context['form'] = form
+    context['type'] = contact.type
     
     return render(request, 'pos/manage/contact.html', context)
 

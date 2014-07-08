@@ -81,7 +81,7 @@
                 p.text = $("<span>").text(data.name);
                 p.button.append(p.text);
 
-                if(is_dark(p.data.color)) p.text.addClass("dark");
+                if(is_dark(p.data.color)) p.button.addClass("dark");
 
                 // tools
                 p.tools = $("<img>", {src: "{% static 'graphics/gear.png' %}", "class":"toolbox"});

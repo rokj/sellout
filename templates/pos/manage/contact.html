@@ -11,13 +11,21 @@
 {% block status_bar_title %}{% trans 'Add contact' context 'page title' %}{% endblock %}
 
 {% block manage_content %}
-    {% if type == 'Individual' %}
-        I {# TODO: icon #}
-        {% trans 'Individual' %}
-    {% else %}
-        C {# TODO: icon #}
-        {% trans 'Company' %}
-    {% endif %}
+    <h2>
+        {% if add %}
+            {% if type == 'Individual' %}
+                {% trans 'Add Individual' %}
+            {% else %}
+                {% trans 'Add Company' %}
+            {% endif %}
+        {% else %}
+            {% if type == 'Individual' %}
+                {% trans 'Edit Individual' %}
+            {% else %}
+                {% trans 'Edit Company' %}
+            {% endif %}
+        {% endif %}
+    </h2>
 
     {% if add %}
         <form action="{% url 'pos:add_contact' company.url_name %}" method="post">

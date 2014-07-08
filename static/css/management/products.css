@@ -104,16 +104,30 @@ input#edit_product_save, input#edit_product_cancel{
 }
 
 #edit_dialog{
-    position: fixed;
-    left: 0;
-    top:0;
-    bottom: 0;
-    right: 0;
+    position: absolute;
+    left: 50%;
+    top: 50px;
+    
+    
+    z-index: 7;
+    width: 960px;
+    margin-left: -480px;
+    
+    background-color: #ebebeb;
+    padding-top: 40px;
+    padding-left: 40px;
+    padding-bottom: 40px;
+    margin-bottom: 50px;
+    overflow: hidden;
+}
 
-    background-color: #000000;
-
-
-    z-index: 5;
+#edit_dialog_title{
+    margin-right: 40px;
+    margin-bottom: 10px;
+    margin-bottom: 20px;
+    margin-top: 0; /* it's already set in #edit_dialog */
+    text-align: center;
+}
 }
 
 #dialog_shadow{
@@ -128,23 +142,6 @@ input#edit_product_save, input#edit_product_cancel{
     right: 0;
 
     display: none;
-}
-
-#edit_dialog{
-    /* three times .management-column width including margins */
-    width: 960px;
-    height: 560px;
-
-    padding-left: 40px;
-    position: absolute;
-    z-index: 7;
-    background-color: rgb(255, 255, 255);
-    padding-top: 40px;
-    margin: auto auto;
-}
-
-#edit_dialog_title{
-
 }
 
 #edit_product_description,

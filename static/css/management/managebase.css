@@ -10,52 +10,6 @@
     height: 0;
 }
 
-h1{
-    text-transform: uppercase;
-}
-
-/* controls and widgets and stuff */
-label, .custom-label{
-    color: #999999;
-    display: block;
-    text-transform: uppercase;
-    font-size: 10px;
-}
-
-.custom-label.description{
-    text-transform: none;
-}
-
-input[type='text'],
-input[type='email'],
-input[type='number'],
-textarea {
-    border-radius: 0;
-    border-width: 1px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-left: 5px;
-}
-
-input[type='submit'], input[type='button'], button{
-    color: #ffffff;
-    border: none;
-    height: 40px;
-    font-size: inherit;
-    text-transform: uppercase;
-}
-
-input[type='submit']{ background-color: #00aa00; }
-input#static_cancel{ background-color: #aa0000; }
-
-select{
-    border: none;
-    background-color: #646464;
-    color: #ffffff;
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
 div.custom-file-input,
 form.custom-file-input{
     display: inline;
@@ -96,15 +50,6 @@ div.management-column{
 
 div.management-column.fixed{
     width: 280px;
-}
-
-#image-clear_id + label{
-    /* stupid clear boxes require special attention */
-    display: inline;
-    vertical-align: middle;
-}
-#image-clear_id{
-    vertical-align: middle;
 }
 
 div.form-field input[type='text'],
@@ -155,20 +100,6 @@ div.split-cell{
 div.split-cell.first{ padding-right: 5% }
 div.split-cell.last{ padding-left: 5%; }
 
-.add-button-container{
-    width: 50%;
-}
-
-div.paginator{
-    max-width: 500px;
-    text-align: center;
-}
-div.paginator a{
-    text-decoration: none;
-    font-weight: bold;
-}
-div.paginator a.current-page{ font-size: 120%; }
-
 /* search/filter results */
 span.no-results{
     color: #969696;
@@ -192,13 +123,8 @@ a.button{
     margin-top: 5px; /* this is defined for all inputs */
 }
 
-a.button.do, input.do { background-color: #0000aa; }
 a.button.ok, input.ok { background-color: #00aa00; }
 a.button.cancel, input.cancel{ background-color: #aa0000; }
-
-#edit_dialog label{
-    display: block;
-}
 
 .delete-image-button{
     display: block;
@@ -235,4 +161,13 @@ div.management-column div.read-only-field{
     /* label height + label top margin */
     /* (except that there is no label, so margins must be set by hand) */
     padding-top: 30px;
+}
+
+thead td{
+    /* headers for taxes and cash registers */
+    color: #646464;
+}
+
+.hidden{
+    display: none;
 }

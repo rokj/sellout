@@ -205,7 +205,7 @@ def list_discounts(request, company):
         form = DiscountFilterForm()
 
     # show discounts
-    paginator = Paginator(discounts, get_user_value(request.user, 'pos_discounts_per_page'))
+    paginator = Paginator(discounts, g.MISC['discounts_per_page'])
 
     page = request.GET.get('page')
     try:

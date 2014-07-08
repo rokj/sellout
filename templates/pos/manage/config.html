@@ -6,7 +6,7 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/config.css' %}" />
 <script type="text/javascript">
 $(document).ready(function(){
-    $("input.currency").click(function(){
+    $("img.currency").click(function(){
         $("#id_currency").val($(this).attr("data-character"));
     });
 });
@@ -48,11 +48,25 @@ $(document).ready(function(){
             <div class="error">{{ form.currency.errors }}</div>
             {{ form.currency.label_tag }}
             {{ form.currency }}
-            <input type="button" class="currency euro" data-character="€" />eur
-            <input type="button" class="currency euro" data-character="$" />usd
-            <input type="button"class="currency euro" data-character="£" />gbp
-            <input type="button"class="currency euro" data-character="¥" />yen
-            <input type="button"class="currency euro" data-character="BTC" />bitcoin
+            <img class="hoverable currency"
+                 src="{% static 'icons/currency/eur.png' %}"
+                 title="EUR" alt="EUR" data-character="€" />
+
+            <img class="hoverable currency"
+                 src="{% static 'icons/currency/usd.png' %}"
+                 title="USD" alt="USD" data-character="$" />
+
+            <img class="hoverable currency"
+                 src="{% static 'icons/currency/gbp.png' %}"
+                 title="GBP" alt="GBP" data-character="£" />
+
+            <img class="hoverable currency"
+                 src="{% static 'icons/currency/jpy.png' %}"
+                 title="jpy" alt="jpy" data-character="¥" />
+
+            <img class="hoverable currency"
+                 src="{% static 'icons/currency/btc.png' %}"
+                 title="BTC" alt="BTC" data-character="BTC" />
         </div>
 
         <div class="form-field">

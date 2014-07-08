@@ -5,7 +5,11 @@
 {% block section_head %}
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/taxes.css' %}" />
 <style type="text/css">
-
+    {# styles that contain urls #}
+    button.delete{ background-image: url("{% static 'icons/delete_black.png' %}"); }
+    button.edit{ background-image: url("{% static 'icons/edit_black.png' %}"); }
+    button.save{ background-image: url("{% static 'icons/save.png' %}"); }
+    button.cancel{ background-image: url("{% static 'icons/cancel.png' %}"); }
 </style>
 
 <script type="text/javascript">
@@ -276,7 +280,7 @@ $(document).ready(function(){
 {% endblock %}
 
 {% block manage_content %}
-    <p>{% trans 'Choose default tax' %}</p>
+    <h2>{% trans 'Choose default tax' %}</h2>
     <p class="explanation">
         {% trans 'This will be chosen by default when adding new products' %}
     </p>
@@ -287,29 +291,29 @@ $(document).ready(function(){
             <tr>
                 <td>{% trans 'Name (optional)' %}</td>
                 <td>{% trans 'Amount' %} (%)</td>
-                <td></td>{% comment %} new and delete buttons {% endcomment %}
+                <td class="controls"></td>{% comment %} new and delete buttons {% endcomment %}
             </tr>
         </thead>
 
         <tbody id="tax_table">
             <tr id="tax_template" class="tax hidden">
+                <td class="amount">
+                    <span class="read"></span>
+                    <input type="text"
+                           class="edit hidden" />
+                </td>
                 <td class="name">
                     <span class="read"></span>
                     <input type="text"
                            maxlength="{{ max_name_length }}"
                            class="edit hidden" />
                 </td>
-                <td class="amount">
-                    <span class="read"></span>
-                    <input type="text"
-                           class="edit hidden" />
-                </td>
                 <td class="controls">
                     {% comment %} edit, delete, save and cancel buttons {% endcomment %}
-                    <button class="edit">edit</button>
-                    <button class="delete">delete</button>
-                    <button class="save hidden">save</button>
-                    <button class="cancel hidden">cancel</button>
+                    <button class="edit hoverable"></button>
+                    <button class="delete hoverable"></button>
+                    <button class="save hoverable hidden"></button>
+                    <button class="cancel hoverable hidden"></button>
                 </td>
             </tr>
         </tbody>

@@ -452,7 +452,7 @@ function is_dark(color){
     var g = parseInt(color.substr(2, 2), 16);
     var b = parseInt(color.substr(4, 2), 16);
 
-    return r + g + b < 3*Math.pow(2, 8)/2;
+    return r + g + b < 3*(1 << 8)/2;
 }
 
 function toggle_elements(elements_dict, show){

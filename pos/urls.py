@@ -86,15 +86,10 @@ urlpatterns = patterns('',
 
 
     # misc (ajax): urls not translated
-    url(r_company + '/' + r_manage + '/json/categories/?$', category.JSON_categories, name='JSON_categories'),
-    # unit types list
-    #
-    # TODO
-    #
-    url(r_company + '/' + r_manage + '/json/units/' + '?$', product.JSON_units, name='JSON_units'),
-
-    # available discounts list
-    url(r_company + '/' + r_manage + '/json/discounts/' + '?$', discount.JSON_discounts, name='JSON_discounts'),
+    url(r_company + '/' + r_manage + '/json/categories/?$', category.JSON_categories, name='JSON_categories'), # categories list TODO: in use?
+    url(r_company + '/' + r_manage + '/json/units/' + '?$', product.JSON_units, name='JSON_units'), # unit types list
+    url(r_company + '/' + r_manage + '/json/discounts/' + '?$', discount.JSON_discounts, name='JSON_discounts'), # available discounts list
+    url(r_company + '/' + r_manage + '/json/toggle-favorite/' + '?$', product.toggle_favorite, name='toggle_favorite'), # set/remove favorite prodcut
 
     #
     # TERMINAL:

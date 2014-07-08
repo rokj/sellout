@@ -23,23 +23,29 @@ div.discount-active-checkbox{
 
 div.object-container{
     position: relative;
+    float: left;
     padding-top: 40px;
 
     background-color: #f7f7f7;
-    max-width: 500px;
+    width: 400px;
     margin: 10px;
+
+    padding-left: 10px;
+    padding-bottom: 10px;
 }
 
 div.object-container div.title{
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
+    right: 0;
     height: 40px;
     line-height: 40px;
 
     color: #ffffff;
     background-color: #646464;
+
+    padding-left: 10px;
 }
 
 div.object-container div.title div.controls{
@@ -50,3 +56,37 @@ td.details-label{
     color: #646464;
     padding-right: 30px;
 }
+
+div.paginator{
+    clear: both;
+    text-align: center;
+}
+div.paginator a{
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#content{
+    display: table;
+}
+
+#back_link{
+    width: 40px;
+    height: 100%;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+#forward_link{
+    width: 40px;
+    height: 100%;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: right;
+}
+
+#list{
+    display: table-cell;
+    vertical-align: top;
+}
+

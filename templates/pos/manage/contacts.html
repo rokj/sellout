@@ -97,25 +97,90 @@
                     {% comment %} two different layouts, for company and individual {% endcomment %}
                     {% ifequal c.type 'Individual' %}
                         <table class="details type-individual">
+                            <thead>
+                                <tr>
+                                    <td>{{ c.first_name }} {{ c.last_name }}</td>
+                                    <td>
+                                        <img src="{% static 'icons/individual.png' %}"
+                                             title="{% trans 'Individual' %}"
+                                             alt="{% trans 'Individual' %}" />
+                                    </td>
+                                    <td>
+                                        <div class="controls">
+                                            {% comment %} edit this contact {% endcomment %}
+                                            <a href="{% url 'pos:edit_contact' company.url_name c.id %}">
+                                                <img src="{% static 'icons/edit_white.png' %}"
+                                                     title="{% trans 'Edit' %}"
+                                                     alt="{% trans 'Edit' %}"
+                                                     class="hoverable" />
+                                            </a>
+                                            {% comment %} delete this contact {% endcomment %}
+                                            <a href="{% url 'pos:delete_contact' company.url_name %}"
+                                               data-id="{{ c.id }}"
+                                               class="delete-link">
+                                                <img src="{% static 'icons/delete_white.png' %}"
+                                                     title="{% trans 'Delete' %}"
+                                                     alt="{% trans 'Delete' %}"
+                                                     class="hoverable" />
+                                            </a>
+                                        </div>
+                                        {% trans 'Individual' context 'contact type' %}
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ c.street_address }}</td>
+                                    <td>T</td>
+                                    <td>{{ c.phone }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ c.postcode }} {{ c.city }}</td>
+                                    <td>E</td>
+                                    <td><a href="mailto:{{ c.email }}">{{ c.email }}</a></td>
+                                </tr>
+                                <tr>
+                                    <td>{{ c.country }}</td>
+                                    <td>*</td>
+                                    <td>{{ c.date_of_birth|date:date_format_django }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <table class="details type-company">
+                        <thead>
                             <tr>
-                                <td>{{ c.first_name }} {{ c.last_name }}</td>
-                                <td>I {# that's an image #} </td>
+                                <td>{{ c.company_name }}</td>
                                 <td>
-                                    {% trans 'Individual' context 'contact type' %}
+                                    <img src="{% static 'icons/company.png' %}"
+                                         title="{% trans 'Company' %}"
+                                         alt="{% trans 'Company' %}" />
+                                </td>
+                                <td>
                                     <div class="controls">
                                         {% comment %} edit this contact {% endcomment %}
                                         <a href="{% url 'pos:edit_contact' company.url_name c.id %}">
-                                            {% trans 'Edit' %}{# TODO: icon #}
+                                            <img src="{% static 'icons/edit_white.png' %}"
+                                                 title="{% trans 'Edit' %}"
+                                                 alt="{% trans 'Edit' %}"
+                                                 class="hoverable" />
                                         </a>
                                         {% comment %} delete this contact {% endcomment %}
                                         <a href="{% url 'pos:delete_contact' company.url_name %}"
                                            data-id="{{ c.id }}"
                                            class="delete-link">
-                                            {% trans 'Delete' %} {# TODO: icon #}
+                                            <img src="{% static 'icons/delete_white.png' %}"
+                                                 title="{% trans 'Delete' %}"
+                                                 alt="{% trans 'Delete' %}"
+                                                 class="hoverable" />
                                         </a>
                                     </div>
+                                    {% trans 'Company' context 'contact type' %}
                                 </td>
                             </tr>
+                        </thead>
+                        <tbody>
                             <tr>
                                 <td>{{ c.street_address }}</td>
                                 <td>T</td>
@@ -128,45 +193,10 @@
                             </tr>
                             <tr>
                                 <td>{{ c.country }}</td>
-                                <td>*</td>
-                                <td>{{ c.date_of_birth|date:date_format_django }}</td>
+                                <td>VAT</td>
+                                <td>{{ c.vat }}</td>
                             </tr>
-                        </table>
-                    </div>
-                    {% else %}
-                    <table class="details type-individual">
-                        <tr>
-                            <td>{{ c.company_name }}</td>
-                            <td>I {# that's an image #} </td>
-                            <td>
-                                {% trans 'Company' context 'contact type' %}
-                                <div class="controls">
-                                    {% comment %} edit this contact {% endcomment %}
-                                    <a href="{% url 'pos:edit_contact' company.url_name c.id %}">
-                                        {% trans 'Edit' %}{# TODO: icon #}
-                                    </a>
-                                    {% comment %} delete this contact {% endcomment %}
-                                    <a href="{% url 'pos:delete_contact' company.url_name c.id %}">
-                                        {% trans 'Delete' %} {# TODO: icon #}
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>{{ c.street_address }}</td>
-                            <td>T</td>
-                            <td>{{ c.phone }}</td>
-                        </tr>
-                        <tr>
-                            <td>{{ c.postcode }} {{ c.city }}</td>
-                            <td>E</td>
-                            <td><a href="mailto:{{ c.email }}">{{ c.email }}</a></td>
-                        </tr>
-                        <tr>
-                            <td>{{ c.country }}</td>
-                            <td>VAT</td>
-                            <td>{{ c.vat }}</td>
-                        </tr>
+                        </tbody>
                     </table>
                     {% endifequal %}
                 {% endfor %}
