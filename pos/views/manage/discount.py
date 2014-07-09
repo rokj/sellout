@@ -143,7 +143,8 @@ class DiscountForm(forms.Form):
     # this should be date...
     start_date = forms.CharField(g.DATE['max_date_length'], required=False)
     end_date = forms.CharField(g.DATE['max_date_length'], required=False)
-    enabled = forms.BooleanField(initial=True, required=False)
+    enabled = forms.BooleanField(required=False,
+                                 widget=forms.Select(choices=((True, _("Yes")), (False, _("No")))))
     
     def clean(self):
         # use the same clean method as JSON
@@ -293,6 +294,8 @@ def edit_discount(request, company, discount_id):
         return no_permission_view(request, c, _("edit discounts"))
     
     context = {
+        'title': _("Edit discount"),
+        'site_title': g.MISC['site_title'],
         'company': c,
         'discount_id': discount_id,
         'date_format_js': get_date_format(request.user, c, 'js'),

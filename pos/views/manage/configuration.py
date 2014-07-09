@@ -64,7 +64,8 @@ class ConfigForm(forms.Form):
     interface_product_button_size = forms.ChoiceField(choices=button_sizes, label=_("Product button size"))
     discount_calculation = forms.ChoiceField(g.DISCOUNT_CALCULATION, required=True)
     product_display = forms.ChoiceField((("box", _("In boxes")), ("line", _("In lines"))), required=True)
-    display_breadcrumbs = forms.BooleanField(required=False)
+    display_breadcrumbs = forms.BooleanField(required=False,
+                                             widget=forms.Select(choices=((True, _("Yes")), (False, _("No")))))
 
 
 @login_required

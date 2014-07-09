@@ -117,7 +117,7 @@ $(document).ready(function(){
             }
 
             confirmation_dialog(
-                    "{% trans 'Delete tax' context 'confirmation dialog title' %}",
+                    "{% trans 'Delete taxx' context 'confirmation dialog title' %}",
                     "{% trans 'Are you sure you want to delete this tax?' %}",
                     function(){
                         // yes action:
@@ -310,10 +310,10 @@ $(document).ready(function(){
                 </td>
                 <td class="controls">
                     {% comment %} edit, delete, save and cancel buttons {% endcomment %}
-                    <button class="edit hoverable"></button>
-                    <button class="delete hoverable"></button>
-                    <button class="save hoverable hidden"></button>
-                    <button class="cancel hoverable hidden"></button>
+                    <button class="edit hoverable no-shadow"></button>
+                    <button class="delete hoverable no-shadow"></button>
+                    <button class="save hoverable hidden no-shadow"></button>
+                    <button class="cancel hoverable hidden no-shadow"></button>
                 </td>
             </tr>
         </tbody>

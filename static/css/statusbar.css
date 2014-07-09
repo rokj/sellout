@@ -1,5 +1,5 @@
 #status_bar{
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
     width: 100%;
@@ -9,6 +9,7 @@
     background-color: #000000;
 
     color: #ffffff;
+    z-index: 5;
 }
 
 #status_bar #logo{

@@ -250,13 +250,14 @@ def list_contacts(request, company):
     if not has_permission(request.user, c, 'contact', 'list'):
         return no_permission_view(request, c, _("view contacts"))
 
-    #
     l = request.GET.get('letter')
+    results_display = False  # true if there was something in the search form
 
     # show the filter form
     if request.method == 'POST':
         contacts = Contact.objects.all()
         form = ContactFilterForm(request.POST)
+        results_display = True
 
         if form.is_valid():
             # filter by whatever is in the form
@@ -294,6 +295,7 @@ def list_contacts(request, company):
         'letter': l,
         'contacts': contacts,
         'filter_form': form,
+        'results_display': results_display,
         'title': _("Contacts"),
         'site_title': g.MISC['site_title'],
         'date_format_django': get_date_format(request.user, c, 'django'),

@@ -202,14 +202,14 @@ $(document).ready(function(){
                 <div class="bottom">
                     <div>{# keep this button in its own block #}
                         {# do not show it if there's no color logo #}
-                        <input type="button"
+                        <input type="button" class="hoverable"
                                value="{% trans 'Auto-create' context 'monochrome logo button' %}"
                                id="auto_create"/>
                     </div>
 
                     <div>
                         <button id="remove_monochrome_logo"
-                                class="delete-image-button"
+                                class="delete-image-button hoverable no-shadow"
                                 title="{% trans 'Remove image' %}"></button>
 
                         <input type="file" id="id_monochrome_logo" />
@@ -298,12 +298,12 @@ $(document).ready(function(){
             {{ form.website }}
         </div>
 
-        <div class="form-footer">
-            <div class="form-footer-column">
-                <input type="button" id="static_cancel" value="{% trans 'Cancel' %}" />
+        <div class="form-field no-label">
+            <div class="split-cell first">
+                <input type="button" id="static_cancel" value="{% trans 'Cancel' %}" class="hoverable" />
             </div>
-            <div class="form-footer-column">
-                <input type="submit" value="{% trans 'Save' %}" />
+            <div class="split-cell last">
+                <input type="submit" value="{% trans 'Save' %}" class="hoverable" />
             </div>
         </div>
     </div>

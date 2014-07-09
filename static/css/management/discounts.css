@@ -6,13 +6,6 @@ span.discount-active, span.discount-inactive{ text-transform: uppercase; }
 span.discount-active{ color: #00aa00; }
 span.discount-inactive { color: #aa0000; }
 
-div.clear-results{
-    text-align: right;
-}
-div.clear-results a{
-    color: #646464;
-}
-
 #id_description{
     height: 80px;
 }

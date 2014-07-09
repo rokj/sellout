@@ -1,5 +1,5 @@
 #id_currency{
-    width: 40px; /* the same as height */
+    width: 60px; /* the same as height */
 }
 
 div.form-field.currency input{
@@ -7,14 +7,24 @@ div.form-field.currency input{
     height: 40px;
 }
 
-#id_display_breadcrumbs + label{
-    float: left;
-    line-height: 40px;
+img.fake-button{
+    display: inline;
+    vertical-align: bottom;
 }
 
-#id_display_breadcrumbs{
-    margin-top: 0;
-    line-height: 40px;
-    height: 40px;
-    margin-left: 20px;
+div.currency-table{
+    display: table;
+    width: 100%;
+}
+
+div.spacer{
+    display: table-cell;
+    width: 16.6667%;
+    text-align: right;
+    vertical-align: bottom;
+}
+
+
+div.spacer.left{
+    text-align: left;
 }

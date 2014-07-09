@@ -1,37 +1,39 @@
-from django.core.exceptions import ValidationError
+import ImageOps
 from django.core.files.base import ContentFile
-from django.core.files import File
-from django.utils.translation import ugettext as _
-
 import Image
 import re
-import os
 
 import common.globals as g
 
 
-def resize_image(image, dimensions):
-    # crop the image to make it square
-    w = image.size[0]
-    h = image.size[1]
+def resize_image(image, dimensions, mode='fill', color=(255, 255, 255, 0)):
+    if mode == 'fill':
+        # crop the image to fill the whole 'dimensions' rectangle
+        return ImageOps.fit(image, dimensions, Image.ANTIALIAS)
 
-    dim = min([w, h])
+    if mode == 'fit':
+        # make a border around the image and paste a resized image into it
+        # kudos: http://stackoverflow.com/questions/1386352/
 
-    if w > h:
-        # the image is landscape, crop left and right
-        dist = (w - dim)/2
-        box = (dist, 0, w-dist, h)
-    else:
-        # the image is portrait, crop up and down
-        dist = (h - dim)/2
-        box = (0, dist, w, h-dist)
+        # resize image to maximum dimension
+        required_aspect = float(dimensions[0]) / float(dimensions[1])
+        current_aspect = float(image.size[0]) / float(image.size[1])
 
-    image = image.crop(box)
+        if current_aspect > required_aspect:
+            # the current image is wider than expected, make it narrower (and shorter)
+            new_width = dimensions[0]
+            new_height = int(float(dimensions[0])/float(current_aspect))
+        else:
+            # the current image is higher than expected
+            new_height = dimensions[1]
+            new_width = int(current_aspect*float(dimensions[1]))
 
-    # create a thumbnail of the cropped image
-    image.thumbnail(dimensions, Image.ANTIALIAS)
+        image = image.resize((new_width, new_height), Image.ANTIALIAS)
 
-    return image
+        background = Image.new('RGBA', dimensions, color)
+        background.paste(image, ((dimensions[0] - new_width) / 2, (dimensions[1] - new_height) / 2))
+
+        return background
 
 
 def image_dimensions(size):

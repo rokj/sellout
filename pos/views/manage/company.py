@@ -293,8 +293,6 @@ def upload_color_logo(request, company):
 
     data = JSON_parse(request.POST.get('data'))
 
-    print data
-
     if 'image' in data:
         # read the new image and upload it
         image_file = image_from_base64(data.get('image'))
@@ -308,7 +306,16 @@ def upload_color_logo(request, company):
         color_logo = Image.open(image_file)
 
         if color_logo.mode not in ('L', 'RGB'):
+            # Kudos: http://stackoverflow.com/questions/9166400/convert-rgba-png-to-rgb-with-pil
+            # create a white image the same size as color_logo
+            color_logo.load()
+
+            background = Image.new("RGB", color_logo.size, (255, 255, 255))
+            background.paste(color_logo, mask=color_logo.split()[3]) # 3 is the alpha channel
+
+            color_logo = background
             color_logo = color_logo.convert('RGB')
+
 
         if color_logo.size != g.IMAGE_DIMENSIONS['color_logo']:
             # the logo has wrong dimensions
@@ -319,7 +326,7 @@ def upload_color_logo(request, company):
             resize = True
 
         if resize:
-            color_logo = resize_image(color_logo, g.IMAGE_DIMENSIONS['color_logo'])
+            color_logo = resize_image(color_logo, g.IMAGE_DIMENSIONS['color_logo'], 'fit')
 
         if c.color_logo.name:
             # the logo exists already, delete it
@@ -381,7 +388,7 @@ def upload_monochrome_logo(request, company):
 
         # resize first
         if resize:
-            monochrome_logo = resize_image(monochrome_logo, g.IMAGE_DIMENSIONS['monochrome_logo'])
+            monochrome_logo = resize_image(monochrome_logo, g.IMAGE_DIMENSIONS['monochrome_logo'], 'fit')
 
         # then convert to monochrome
         if monochrome_logo.mode != '1':

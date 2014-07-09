@@ -56,7 +56,15 @@
                     {{ filter_form.type }}
                 </div>
                 <div class="split-cell last">
-                    <input type="submit" value="{% trans 'Search' context 'submit button label' %}"/>
+                    <input type="submit" value="{% trans 'Search' context 'submit button label' %}" class="hoverable"/>
+
+                    {#  only display if search results are being displayed (it's just a link back to 'discounts') #}
+                    {% if results_display %}
+                        <div class="clear-results">
+                            <a href="{% url 'pos:list_contacts' company.url_name %}">
+                                {% trans 'Clear results' %}</a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 

@@ -50,6 +50,11 @@ class RegisterForm(forms.ModelForm):
             'updated_by',
             'company']
 
+        widgets = {
+            'print_logo': forms.Select(choices=((True, _("Yes")), (False, _("No")))),
+            'print_location': forms.Select(choices=((True, _("Yes")), (False, _("No")))),
+        }
+
 
 @login_required
 def list_registers(request, company):

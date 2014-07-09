@@ -17,6 +17,7 @@
 
             var url = $(this).attr("href");
             var id = parseInt($(this).attr("data-id"));
+            var title = $(this).attr("data-text");
 
             if(!id){
                 console.error("Wrong id: " + id.toString());
@@ -24,8 +25,8 @@
             }
 
             var dlg = confirmation_dialog(
-                "",
                 "{% trans 'Are you sure?' context 'delete confirmation dialog text' %}",
+                title,
                 function(){
                     // visit the url and send id in POST data
                     send_data(url, {id: id}, "{{ csrf_token }}", function(response){

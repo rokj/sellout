@@ -2,6 +2,9 @@
     margin-top: 40px; /* the height of #status_bar */
     padding-top: 15px;
     padding-left: 40px;
+    margin-bottom: 40px;
+    /* to prevent floated elements from not taking up space */
+    overflow: hidden;
 }
 
 .menu-hidden{
@@ -20,17 +23,16 @@ form.custom-file-input input{
     border: none;
     background-color: #000000;
     color: #ffffff;
-}
-
-div.form-field-container{
-    display: inline;
+    cursor: pointer;
 }
 
 div.form-field{
     margin-top: 15px;
-    /* to prevent floated elements inside
-       from breaking out (and not taking up space) */
-    overflow: hidden;
+}
+
+div.form-field.no-label{
+    /* fields that have no labels */
+    padding-top: 12px;
 }
 
 div.form-field input, div.form-field textarea, div.form-field select{
@@ -65,16 +67,6 @@ div.clear-columns{
     clear: both;
 }
 
-div.form-footer{
-    margin-top: 30px;
-}
-
-div.form-footer-column{
-    float: left;
-    width: 50%;
-    text-align: center;
-}
-
 div.left-column{
     float: left;
     width: 300px;
@@ -84,9 +76,7 @@ div.left-column + div.content{
     margin-left: 330px; /* the same as .left-column width plus some border */
 }
 
-div.left-column form, div.left-column .fake-form{
-
-}
+div.left-column form, div.left-column .fake-form{ }
 
 div.edit-container{
     max-width: 400px;
@@ -99,6 +89,7 @@ div.split-cell{
 
 div.split-cell.first{ padding-right: 5% }
 div.split-cell.last{ padding-left: 5%; }
+div.cleared{ clear: both; }
 
 /* search/filter results */
 span.no-results{
@@ -108,13 +99,9 @@ span.no-results{
 
 /* buttons that are actually links */
 a.button{
-    height: 40px;
     line-height: 40px;
     display: inline-block;
-    color: #ffffff;
     text-decoration: none;
-    text-transform: uppercase;
-    cursor: default;
     width: 100%;
     text-align: center;
     white-space: nowrap;
@@ -170,4 +157,14 @@ thead td{
 
 .hidden{
     display: none;
+}
+
+/* search results */
+div.clear-results{
+    text-align: center;
+    padding-top: 10px;
+}
+div.clear-results a{
+    color: #969696;
+    font-size: 12px;
 }

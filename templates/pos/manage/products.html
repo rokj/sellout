@@ -323,7 +323,7 @@ $(document).ready(function(){
         discount_tooltip(discount, li_obj);
         
         // delete button
-        var btn_obj = $("<input>", {type:"button", value:"x", "class":"delete-discount"});
+        var btn_obj = $("<img>", {"class":"delete-discount hoverable", src: "{% static 'icons/cancel.png' %}"});
         btn_obj.click(function(){
             // delete this list Item
             $(this).parent().remove();
@@ -884,19 +884,23 @@ $(document).ready(function(){
         var data = {};
         data['id'] = product.id;
         // confirm deletion
-        if(confirm("{% trans 'Delete product ' %} '" + product.name + "'?")){
-            // TODO: GET or POST method? CSRF tokens? security?
-            send_data("{% url 'pos:delete_product' company.url_name %}", data, "{{ csrf_token }}",
-                function(data){
-                    if(data.status != 'ok') alert(data.message);
-                    else{
-                    // remove the product's div and delete the variable
-                    parent.remove();
-                }
-            });
-        }
+        confirmation_dialog(
+            "{% trans 'Are you sure?' context 'confirmation dialog title' %}",
+            "{% trans 'Delete product ' %} '" + product.name + "'?",
+                function(){
+                    send_data("{% url 'pos:delete_product' company.url_name %}", data, "{{ csrf_token }}",
+                        function(data){
+                            if(data.status != 'ok') alert(data.message);
+                            else{
+                            // remove the product's div and delete the variable
+                            parent.remove();
+                        }
+                    });
+                },
+                function(){}
+        );
     }
-    
+
     function update_unit_types(){
         // when the unit types edit changes, update all static labels with the changed units
         var ut = $("#edit_product_unit_type").val();
@@ -1135,7 +1139,7 @@ $(document).ready(function(){
         <div id="filter_form" class="fake-form">
             <h2>{% trans 'Search' context 'form title' %}</h2>
             <input id="general_filter"
-                   class="search-filter"
+                   class="search-filter hoverable"
                    type="text" placeholder="{% trans 'Enter query' context 'search products' %}" />
 
             <div id="advanced_search" class="hidden">
@@ -1169,7 +1173,7 @@ $(document).ready(function(){
 
             <div id="filter_form_controls">
                 <div class="split-cell first">
-                    <button id="advanced_search_toggle">
+                    <button id="advanced_search_toggle" class="hoverable">
                         <span class="basic">
                             {% trans 'Advanced' %}
                             <img src="{% static 'icons/arrow_white_down.png' %}" alt="" />
@@ -1183,11 +1187,11 @@ $(document).ready(function(){
 
                 <div class="split-cell last">
                     <input type="button" id="update_results"
-                           class="ok"
+                           class="ok hoverable"
                            value="{% trans 'Search' context 'submit button label' %}" />
                 </div>
 
-                <div class="clear-floats"></div>
+                <div class="cleared"></div>
             </div>
         </div>
     </div>
@@ -1205,7 +1209,7 @@ $(document).ready(function(){
                         <div class="bottom">
                             <div>
                                 <button id="edit_product_delete_image"
-                                        class="delete-image-button no-shadow"
+                                        class="delete-image-button no-shadow hoverable"
                                         title="{% trans 'Remove image' %}"></button>
 
                                 <form id="edit_product_image_input_form" class="custom-file-input">
@@ -1259,6 +1263,8 @@ $(document).ready(function(){
                         <label for="edit_product_unit_type">{% trans 'Unit' %}</label>
                         <select id="edit_product_unit_type"></select>
                     </div>
+
+                    <div class="cleared"></div>
                 </div>
 
                 <div class="form-field">
@@ -1269,6 +1275,8 @@ $(document).ready(function(){
                     <div class="split-cell last read-only-field">
                         {{ currency }} {% trans 'per' %} <span class="unit-readonly">?</span>
                     </div>
+
+                    <div class="cleared"></div>
                 </div>
 
                 <div class="form-field">
@@ -1280,6 +1288,8 @@ $(document).ready(function(){
                         <label for="edit_product_price_with_tax">{% trans 'Sell price (incl. tax)' %}: </label>
                         <input type="text" id="edit_product_price_with_tax" maxlength="{{ field_lengths.price }}"/>
                     </div>
+
+                    <div class="cleared"></div>
                 </div>
 
                 <div class="form-field">
@@ -1310,6 +1320,8 @@ $(document).ready(function(){
                         <div class="custom-label"> {% trans 'Profit' %}: </div>
                         <div id="profit">&nbsp;</div>
                     </div>
+
+                    <div class="cleared"></div>
                 </div>
 
                 <div class="form-field">
@@ -1320,11 +1332,13 @@ $(document).ready(function(){
                 <div class="form-field">
                     {% comment %} save/cancel buttons {% endcomment %}
                     <div class="split-cell first">
-                        <input type="button" id="edit_product_save" value="{% trans 'Save' %}" class="ok" />
+                        <input type="button" id="edit_product_save" value="{% trans 'Save' %}" class="ok hoverable" />
                     </div>
                     <div class="split-cell last">
-                        <input type="button" id="edit_product_cancel" value="{% trans 'Cancel' %}" class="cancel" />
+                        <input type="button" id="edit_product_cancel" value="{% trans 'Cancel' %}" class="cancel hoverable" />
                     </div>
+
+                    <div class="cleared"></div>
                 </div>
             </div>
         </div>
@@ -1333,9 +1347,9 @@ $(document).ready(function(){
         <div id="product_details_template" class="hidden">
             <div class="title">
                 <div class="product-management">
-                    <button class="product-controls product-favorite-button"></button>
-                    <button class="product-controls product-edit-button"></button>
-                    <button class="product-controls product-delete-button"></button>
+                    <button class="product-controls product-favorite-button no-shadow hoverable"></button>
+                    <button class="product-controls product-edit-button no-shadow hoverable"></button>
+                    <button class="product-controls product-delete-button no-shadow hoverable"></button>
                 </div>
 
                 <p class="product-name"></p>

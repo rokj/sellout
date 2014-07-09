@@ -1,7 +1,3 @@
-input[type='submit']{
-    width: 100%;
-}
-
 #contacts{
     width: 650px;
 }
@@ -114,4 +110,8 @@ table.details td:first-child{
 table.details td:nth-child(2){
     text-align: center;
     font-weight: bold;
+}
+
+#add_contact_menu a{
+    color: #ffffff;
 }

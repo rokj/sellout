@@ -53,7 +53,7 @@
                 </div>
             </div>
 
-            <div class="form-field clear-floats">
+            <div class="form-field">
                 {{ filter_form.enabled.label_tag }}
                 <div class="error">{{ filter_form.enabled.errors }}</div>
 
@@ -61,19 +61,21 @@
                     {{ filter_form.enabled }}
                 </div>
                 <div class="split-cell last">
-                    <input type="submit" value="{% trans 'Search' context 'submit button label' %}"/>
+                    <input type="submit" value="{% trans 'Search' context 'submit button label' %}" class="hoverable"/>
+
+                    {#  only display if search results are being displayed (it's just a link back to 'discounts') #}
+                    {% if results_display %}
+                        <div class="clear-results">
+                            <a href="{% url 'pos:list_discounts' company.url_name %}">
+                                {% trans 'Clear results' %}</a>
+                        </div>
+                    {% endif %}
                 </div>
+
+                <div class="cleared"></div>
             </div>
 
-            <div class="clear-floats">
-                {% comment %} only display if search results are being displayed (it's just a link back to 'discounts') {% endcomment %}
-                {% if results_display %}
-                    <div class="clear-results">
-                        <a href="{% url 'pos:list_discounts' company.url_name %}">
-                            {% trans 'Clear results' %}</a>
-                    </div>
-                {% endif %}
-            </div>
+
         </form>
     </div>
 
@@ -105,7 +107,7 @@
                                 </a>
                                 <a href="{% url 'pos:delete_discount' company.url_name %}"
                                    class="delete-link"
-                                   data-id="{{ d.id }}">
+                                   data-id="{{ d.id }}" data-text="{% trans 'Delete discount: ' %} {{ d.code }}">
                                     <img src="{% static 'icons/delete_white.png' %}"
                                          alt="{% trans 'Delete' %}"
                                          title="{% trans 'Delete' %}"

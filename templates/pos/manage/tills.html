@@ -42,6 +42,7 @@
                     <td class="controls">
                         <a href="{% url 'pos:delete_register' company.url_name %}"
                            data-id="{{ r.id }}"
+                           data-text="{% trans 'Delete register: ' %} {{ r.name }}"
                            class="delete-link">
                             <img src="{% static 'icons/delete_black.png' %}"
                                  alt="{% trans 'Delete' %}"
