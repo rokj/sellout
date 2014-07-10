@@ -24,7 +24,7 @@ def mobile_JSON_categories_strucutred(request, company):
         return JSON_error(_("Company does not exist"))
 
     # permissions
-    if not has_permission(request.user, c, 'category', 'list'):
+    if not has_permission(request.user, c, 'category', 'view'):
         return JSON_error("no permission")
 
     # return all categories' data in JSON format

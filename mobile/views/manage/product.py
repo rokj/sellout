@@ -29,7 +29,7 @@ def mobile_get_product(request, company, product_id):
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_search_products(request, company):
-    return search_products(request, company)
+    return search_products(request, company, android=True)
 
 
 @api_view(['GET', 'POST'])
@@ -58,7 +58,7 @@ def mobile_get_products(request, company):
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
 
-    if not has_permission(request.user, c, 'tax', 'list'):
+    if not has_permission(request.user, c, 'tax', 'view'):
         return JSON_error(_("You have no permission to view taxes"))
 
     products = Product.objects.filter(company=c)

@@ -1,7 +1,3 @@
-# author: nejc jurkovic
-# date: 9. 8. 2013
-#
-# Views for managing POS data: categories
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _

@@ -277,12 +277,11 @@ def list_contacts(request, company):
         if l:
             if l == '*':
                 # get all contacts that don't begin with any letter of the alphabet
-                print r'^[^' + g.ALPHABETS[get_language()] + '].*'
                 contacts = Contact.objects.filter(company=c,
                                                   company_name__iregex=r'^[^' + g.ALPHABETS[get_language()] + '].*') | \
                            Contact.objects.filter(company=c,
                                                   first_name__iregex=r'^[^' + g.ALPHABETS[get_language()] + '].*')
-                print contacts
+
             else:
                 # get contacts beginning with the selected letter
                 contacts = Contact.objects.filter(company=c, company_name__istartswith=l) | \

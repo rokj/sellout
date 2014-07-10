@@ -203,8 +203,6 @@ def validate_company(user, company, data):
     else:
         url_name = company.url_name
 
-    print data
-
     if not data.get('name'):
         return r(False, _("No name entered"))
     elif len(data['name']) > max_field_length(Company, 'name'):
@@ -399,8 +397,6 @@ def upload_monochrome_logo(request, company):
     c = Company.objects.get(url_name=company)
 
     data = JSON_parse(request.POST.get('data'))
-
-    print data
 
     if 'image' in data:
         # read the new image and upload it

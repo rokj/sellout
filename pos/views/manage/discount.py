@@ -1,7 +1,3 @@
-# author: nejc jurkovic
-# date: 9. 8. 2013
-#
-# Views for managing POS data: discounts
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -93,7 +89,6 @@ def validate_discount(data, user, company):
     
     # type: see if it's in g.DISCOUNT_TYPES (search the first fields of tuples)
     if data['type'] not in [x[0] for x in g.DISCOUNT_TYPES]:
-        print g.DISCOUNT_TYPES
         return err(_("Wrong discount type"))
         
     # amount: parse number

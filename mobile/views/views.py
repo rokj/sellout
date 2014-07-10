@@ -31,7 +31,7 @@ def mobile_get_cut(request, company):
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
 
-    if not has_permission(request.user, c, 'tax', 'list'):
+    if not has_permission(request.user, c, 'tax', 'view'):
         return JSON_error(_("You have no permission to view taxes"))
 
     taxes = Tax.objects.filter(company=c)

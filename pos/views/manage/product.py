@@ -66,7 +66,6 @@ def product_to_dict(user, company, product, android=False):
         # discounts.append(d.id)
         discounts.append(discount_to_dict(user, company, d, android))
     ret['discounts'] = discounts
-
     if product.image:  # check if product's image exists:
         if android:
             with open(product.image.path, "rb") as image_file:
@@ -186,7 +185,7 @@ def get_product(request, company):
 
 
 @login_required
-def search_products(request, company):
+def search_products(request, company, android=False):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
@@ -306,7 +305,6 @@ def search_products(request, company):
         if f:
             products = products.filter(f)
 
-        print products.query
         # omit search by tax, price, discount
 
     products = products.distinct().order_by('name')
@@ -314,7 +312,7 @@ def search_products(request, company):
     # return serialized products
     ps = []
     for p in products:
-        ps.append(product_to_dict(request.user, c, p))
+        ps.append(product_to_dict(request.user, c, p, android=android))
 
     return JSON_response(ps)
 
@@ -417,7 +415,6 @@ def validate_product(user, company, data):
     # image:
     if data['change_image'] == True:
         if 'image' in data and data['image']: # new image has been uploaded
-            print data['image']
             data['image'] = image_from_base64(data['image'])
             if not data['image']:
                 # something has gone wrong during conversion
@@ -438,8 +435,6 @@ def validate_product(user, company, data):
             return r(False, _("Code too long"))
         
         try:
-            print company
-            print data['code']
             p = Product.objects.get(company=company, code=data['code'])
             if p.id != data['id']:
                 # same ids = product is being edited, so codes can be the same
@@ -511,7 +506,6 @@ def create_product(request, company, android=False):
     # validate data
     valid = validate_product(request.user, c, data)
     if not valid['status']:
-        print valid['message']
         return JSON_error(valid['message'])
     data = valid['data']
     
@@ -595,7 +589,7 @@ def edit_product(request, company, android=False):
     
     # image
     if data['change_image'] == True:
-        if data['image']: # new image is uploaded
+        if data.get('image'): # new image is uploaded
             # create a file from the base64 data and save it to product.image
             if product.image:
                 product.image.delete()
