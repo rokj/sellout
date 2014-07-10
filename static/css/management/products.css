@@ -97,6 +97,7 @@ button.product-controls{
     height: 40px;
     background-position: center center;
     background-repeat: no-repeat;
+    vertical-align: middle;
 }
 
 input#edit_product_save, input#edit_product_cancel{

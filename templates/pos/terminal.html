@@ -35,7 +35,11 @@ $(document).ready(function(){
               // terminal & stuff
               save_terminal_settings: "{% url 'pos:save_terminal' company.url_name  %}",
               // bill and items
-              create_bill: "{% url 'pos:create_bill' company.url_name %}"
+              create_bill: "{% url 'pos:create_bill' company.url_name %}",
+              // management: registers
+              manage_registers: "{% url 'pos:list_registers' company.url_name %}",
+              // save last used register
+              set_register: "{% url 'pos:set_register' company.url_name %}"
         },
 
         // config (data comes directly from view)
@@ -74,7 +78,7 @@ $(document).ready(function(){
             company_logo: null, // will be created when terminal initializes
 
             small_receipt_template: $("#small_receipt_template"),
-            large_receipt_template: $("")
+            large_receipt_template: $()
         }
     };
 
@@ -84,6 +88,8 @@ $(document).ready(function(){
     g.objects.products = new Products(g);
     g.objects.search = new Search(g);
     g.objects.bill = new Bill(g);
+
+    $(".product-button-image").click(function(){alert("wtf")});
 });
 </script>
 

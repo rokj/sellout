@@ -146,25 +146,70 @@ Terminal = function(g){
     };
 
     p.get_register = function(id){
+        if(p.g.data.registers.length == 0){
+            alert(gettext("There are no registers defined, please add one"));
+            window.location.href = p.g.urls.manage_registers;
+        }
+
         if(id){
-            // the id is set already, just find the right one in the
-            var i;
+            // the id is set already, just find the right one in the list
+            var i, selected = false;
 
             for(i = 0; i < p.g.data.registers.length; i++){
                 if(p.g.data.registers[i].id == id){
                     p.register = p.g.data.registers[i];
-                    return;
+                    selected = true;
+                    break;
                 }
             }
+
+            if(!selected){
+                error_message(
+                    gettext("Register could not be set"),
+                    gettext("There was an error while setting your register, " +
+                        "the first available register settings will be used")
+                );
+
+                p.register = p.g.data.registers[0];
+            }
+
+            return;
         }
 
         // at this point, prompt the user to choose one
         if(!p.register){
+            // bind the choose button
+            p.items.select_register.unbind().click(function(){
+                // get the selected register id from the list
+                var id = parseInt(p.items.registers_list.val());
+                if(isNaN(id)) id = -1; // the first register will be chosen
+
+                // call this function again, with (more or less) known id
+                p.get_register(id);
+
+                // close the dialog
+                p.items.registers_dialog.dialog("destroy");
+
+                // send the register to the server so that it will be remembered
+                send_data(p.g.urls.set_register, {id: p.register.id},
+                    p.g.csrf_token, function(response){
+                        if(response.status != 'ok'){
+                            // just log the response the console;
+                            // if this fails, the only nuissance for the user is
+                            // to select the register at next logon
+                            console.error("Could not set register: " + response.message);
+                        }
+                    });
+            });
+
             // show the registers dialog
             p.items.registers_dialog.dialog({
                 title: gettext("Choose a register"),
                 closeOnEscape: false,
-                open: function(event, ui) { $(".ui-dialog-titlebar-close", ui.dialog || ui).hide(); }
+                modal: true,
+                // the dialog can only close on 'select' button
+                beforeClose: function(){ return false; },
+                dialogClass: "no-close"
             });
         }
     };
@@ -212,5 +257,5 @@ Terminal = function(g){
         p.g.items.receipt_logo = $("<img>", {src: p.g.data.company.receipt_logo});
 
     // get register
-    p.register = p.get_register(p.g.data.register_id);
+    p.get_register(p.g.config.register_id);
 };

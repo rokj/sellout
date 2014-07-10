@@ -30,10 +30,10 @@ Products = function(g){
     };
 
     p.empty = function(){
-        // detach current products (do not remove, it will unbind events as well)
-        $(".product-button", p.items.container).detach();
-        // empty product columns
-        $(".product-column", p.items.container).remove();
+        // remove product buttons
+        $(".product-button", p.items.container).remove();
+        // and columns that contain it
+        $(".products-column", p.items.container).remove();
     };
 
     p.show_products = function(ids){
@@ -72,6 +72,9 @@ Products = function(g){
                 tmp_div.append(
                     p.products_by_id[ids[i]].items.container.show()
                 );
+
+                // register events on that button
+                p.products_by_id[ids[i]].bind_events();
 
                 i++;
                 if(i == ids.length) break;
@@ -135,6 +138,22 @@ Product = function(list, data){
         if(p.g.objects.bill) p.g.objects.bill.add_product(p, true);
     };
 
+    p.bind_events = function(){
+        p.items.container.unbind();
+
+        // if the product is out of stock,, add a special class
+        if(p.data.stock.cmp(Big(0)) <= 0){
+            // this product cannot be clicked
+            p.items.container.addClass("out-of-stock");
+        }
+        else{
+            p.items.container.on("click", null, null, function(){
+                p.add_to_bill();
+            });
+        }
+
+    };
+
     //
     // init
     //
@@ -177,19 +196,8 @@ Product = function(list, data){
     p.items.shortcut = $("<p>", {"class":"product-button-shortcut"}).text(p.data.shortcut);
     p.items.shortcut.appendTo(p.items.image);
 
-    // if the product is out of stock,, add a special class
-    if(p.data.stock.cmp(Big(0)) <= 0){
-        p.items.info.addClass("out-of-stock");
-        // this product cannot be clicked
-        console.log("cannot be added");
-    }
-    else{
-        p.items.container.click(function(){
-            p.add_to_bill();
-            console.log("added");
-        });
-    }
-
     // add id to access this object via document tree, not javascript
     p.items.container.data({id: p.data.id});
+
+    p.bind_events();
 };

@@ -9,9 +9,6 @@ from config.functions import get_date_format, get_time_format, get_company_value
 from pos.models import Permission, Company
 
 import json
-import Image  # PIL or pillow must be installed
-import re
-import os
 from decimal import Decimal
 from datetime import datetime
 
@@ -19,9 +16,11 @@ from datetime import datetime
 # requests and responses
 def error(request, message):
     
-    context = {'message': message,
-               'back_link': request.build_absolute_uri(),
-               }
+    context = {
+        'message': message,
+        'back_link': request.build_absolute_uri(),
+    }
+
     return render(request, 'pos/error.html', context)
 
 

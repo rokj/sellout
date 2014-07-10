@@ -2,13 +2,13 @@
 {% load static %}
 {% load i18n %}
 
-{% block body_tag %}<body class="tasks"> {% endblock %}
+{% block body_tag %}<body> {% endblock %}
 {% block status_bar %}{# nothing to put in status bar #}{% endblock %}
 {% block content %}
-<h1>{% trans "Error!" %}</h1>
+<h1>{% trans "Error" %}</h1>
 
 <p class="error">{{message}}</p>
 
-<p><a href="{{back_link}}">Back</a></p>
+<p><a href="{{back_link}}">{% trans 'Back' %}</a></p>
 
 {% endblock %}
