@@ -567,12 +567,18 @@ $(document).ready(function(){
                 reader.onload = function(e){
                     // check file type
                     if (!rFilter.test(f.type)){
-                        alert("{% trans 'Wrong file type for the uploaded image!' %}");
+                        error_message(
+                            "{% trans 'Error while uploading image' %}",
+                            "{% trans 'Wrong file type for the uploaded image!' %}"
+                        );
                         upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
                         return false;
                     }
                     if(f.size > {{ max_upload_size_bytes|escapejs }}){
-                        alert("{% trans 'File too large, maximum size for upload is' %} {{ max_upload_size|escapejs }} MB");
+                        error_message(
+                            "{% trans 'Error while uploading image' %}",
+                            "{% trans 'File too large, maximum size for upload is' %} {{ max_upload_size|escapejs }} MB"
+                        );
                         upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
                         return false;
                     }
@@ -830,7 +836,10 @@ $(document).ready(function(){
         data['price'] = $("#edit_product_price_without_tax", dlg_obj).val();
 
         if(!data['price']){
-            alert("{% trans 'Please check product price' %}");
+            error_message(
+                "{% trans 'Invalid data' %}",
+                "{% trans 'Please check product price' %}"
+            );
         }
 
         // purchase price
@@ -841,7 +850,8 @@ $(document).ready(function(){
             // refresh search criteria
             send_data("{{ add_url|escapejs }}", data, "{{csrf_token}}",
                 function(response){
-                    if(response.status != 'ok') alert(response.message);
+                    if(response.status != 'ok')
+                        error_message("{% trans 'Error saving product' %}", response.message);
                     else{
                         // re-do the current search and close the dialog
                         update_products();
@@ -855,7 +865,8 @@ $(document).ready(function(){
             // send data to server and update the div with the retrieved 'cleaned' data
             send_data("{% url 'pos:edit_product' company.url_name %}", data, "{{csrf_token}}",
                 function(response){
-                    if(response.status != 'ok') alert(response.message);
+                    if(response.status != 'ok')
+                        error_message("{% trans 'Error saving product' %}", response.message);
                     else{
                         get_product(parent);
                         close_edit_dialog();
@@ -890,7 +901,7 @@ $(document).ready(function(){
                 function(){
                     send_data("{% url 'pos:delete_product' company.url_name %}", data, "{{ csrf_token }}",
                         function(data){
-                            if(data.status != 'ok') alert(data.message);
+                            if(data.status != 'ok') error_message("{% trans 'Error deleting product' %}", data.message);
                             else{
                             // remove the product's div and delete the variable
                             parent.remove();
@@ -1139,7 +1150,7 @@ $(document).ready(function(){
         <div id="filter_form" class="fake-form">
             <h2>{% trans 'Search' context 'form title' %}</h2>
             <input id="general_filter"
-                   class="search-filter hoverable"
+                   class="search-filter"
                    type="text" placeholder="{% trans 'Enter query' context 'search products' %}" />
 
             <div id="advanced_search" class="hidden">

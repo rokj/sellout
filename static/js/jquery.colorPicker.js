@@ -54,16 +54,24 @@
         }
 
         // register events
-        $(".color-button", container).click(function(){
-            // remove the 'selected' class from the currently selected color
-            $(".selected", container).removeClass("selected");
-            // add class to current element
-            $(this).addClass("selected");
-            input.val($(this).attr("data-color"));
+        // if input is disabled, don't bind actions
+        if(input.prop("disabled") ||
+           input.prop("readonly") ||
+           input.hasClass("disabled")){
+            // add a disabled class
+            $(".color-button", container).addClass("disabled");
+        }
+        else{
+            $(".color-button", container).click(function(){
+                // remove the 'selected' class from the currently selected color
+                $(".selected", container).removeClass("selected");
+                // add class to current element
+                $(this).addClass("selected");
+                input.val($(this).attr("data-color"));
 
-            // anything else?
-            if(callback) callback()
-        });
-
+                // anything else?
+                if(callback) callback()
+            });
+        }
     };
 }(jQuery));

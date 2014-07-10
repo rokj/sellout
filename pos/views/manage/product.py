@@ -107,8 +107,8 @@ def products(request, company):
     c = get_object_or_404(Company, url_name=company)
     
     # needs to be at least guest to view products
-    if not has_permission(request.user, c, 'product', 'list'):
-        return no_permission_view(request, c, _("view products"))
+    if not has_permission(request.user, c, 'product', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view products."))
 
     # if there are no taxes defined, don't show anything
     if Tax.objects.filter(company=c).count() == 0:
@@ -172,7 +172,7 @@ def get_product(request, company):
         return JSON_error(_("Company does not exist"))
     
     # permissions
-    if not has_permission(request.user, c, 'product', 'list'):
+    if not has_permission(request.user, c, 'product', 'view'):
         return JSON_error(_("You have no permission to view products"))
 
     try:
@@ -193,7 +193,7 @@ def search_products(request, company):
         return JSON_error(_("Company does not exist"))
     
     # permissions: needs to be guest
-    if not has_permission(request.user, c, 'product', 'list'):
+    if not has_permission(request.user, c, 'product', 'view'):
         return JSON_error(_("You have no permission to view products"))
     
     # get all products from this company and filter them by entered criteria

@@ -180,6 +180,9 @@ div.color-button{
     cursor: pointer;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-
     /* .color-button.selected:after is in category.html (required image background) */
+}
+div.color-button.disabled{
+    opacity: 0.6;
+    cursor: default;
 }

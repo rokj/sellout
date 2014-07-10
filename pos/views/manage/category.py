@@ -230,7 +230,7 @@ def JSON_categories(request, company):
         return JSON_error(_("Company does not exist"))
 
     # permissions
-    if not has_permission(request.user, c, 'category', 'list'):
+    if not has_permission(request.user, c, 'category', 'view'):
         return JSON_error("no permission")
 
     # return all categories' data in JSON format
@@ -255,8 +255,8 @@ def list_categories(request, company):
     c = get_object_or_404(Company, url_name=company)
 
     # check permissions
-    if not has_permission(request.user, c, 'category', 'list'):
-        return no_permission_view(request, c, _("view categories"))
+    if not has_permission(request.user, c, 'category', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view categories."))
 
     context = {
         'box_dimensions': g.IMAGE_DIMENSIONS['category'],
@@ -276,7 +276,7 @@ def add_category(request, company, parent_id=-1):
 
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'category', 'edit'):
-        return no_permission_view(request, c, _("add categories"))
+        return no_permission_view(request, c, _("You have no permission to add categories."))
 
     # if parent_id == -1, this is a top-level category
     try:
@@ -290,7 +290,7 @@ def add_category(request, company, parent_id=-1):
 
             # check if not adding to some other company's category
             if parent.company != c:
-                return no_permission_view(request, c, _("add to this category"))
+                return no_permission_view(request, c, _("You have no permission to add to this category."))
     except Category.DoesNotExist:
         raise Http404
     except:
@@ -340,7 +340,7 @@ def edit_category(request, company, category_id):
 
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'category', 'edit'):
-        return no_permission_view(request, c, _("edit categories"))
+        return no_permission_view(request, c, _("You have no permission to edit categories."))
 
     try:
         category = Category.objects.get(id=category_id)
@@ -392,7 +392,7 @@ def delete_category(request, company):
     
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'category', 'edit'):
-        return JSON_error(_("You have no permission to edit categories"))
+        return JSON_error(_("You have no permission to delete categories"))
     
     # get category
     try:
@@ -427,10 +427,10 @@ def get_category(request, company, category_id):
         return JSON_error(_("Company does not exist"))
     
     # permissions: needs to be guest to view products
-    if not has_permission(request.user, c, 'product', 'list'):
+    if not has_permission(request.user, c, 'product', 'view'):
         return JSON_error(_("You have no permission to view products"))
     
-    category = get_object_or_404(Category, id = category_id, company = c)
+    category = get_object_or_404(Category, id=category_id, company=c)
     
     return JSON_response(category_to_dict(category))
 

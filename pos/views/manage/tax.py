@@ -85,11 +85,11 @@ def list_taxes(request, company):
     c = get_object_or_404(Company, url_name=company)
     
     # permissions
-    list_permission = has_permission(request.user, c, 'tax', 'list')
+    list_permission = has_permission(request.user, c, 'tax', 'view')
     edit_permission = has_permission(request.user, c, 'tax', 'edit')
     
     if not list_permission:
-        return no_permission_view(request, c, _("You have no permission to view taxes"))
+        return no_permission_view(request, c, _("You have no permission to view taxes."))
     
     context = {
         'company': c,

@@ -202,29 +202,26 @@ PERMISSION_GROUPS = (  # retrieve readable format with get_permission_display()
     ('admin',   _("Admin")),    # can do anything
 )
 
-PERMISSIONS = {  # 'chapters' that each group can view or manage
-    # model choices: company, category, discount, product, contact, permission, bill, config
-    # views (to prevent users exploring other companies' terminals):
-    # manage, terminal
+PERMISSIONS = {
     'guest': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register',),
         'edit': (),
         },
     'cashier': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'register',),
-        'edit': ('bill', 'terminal', 'config',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register',),
+        'edit': ('bill', 'terminal',),
         },
     'seller': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register',),
-        'edit': ('bill', 'product', 'terminal', 'manage', 'config',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register',),
+        'edit': ('bill', 'product', 'terminal', 'manage',),
         },
     'manager': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config', 'tax', 'terminal', 'manage', 'register',),
-        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register',),
+        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register',),
         },
     'admin': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config', 'terminal', 'manage', 'tax', 'register',),
-        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config', 'terminal', 'manage', 'tax', 'register',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register',),
+        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register',),
         },
 }
 

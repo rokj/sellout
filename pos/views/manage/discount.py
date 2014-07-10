@@ -49,7 +49,7 @@ def JSON_discounts(request, company):
         return JSON_error(_("Company does not exist"))
 
     # permissions
-    if not has_permission(request.user, c, 'discount', 'list'):
+    if not has_permission(request.user, c, 'discount', 'view'):
         return JSON_error(_("You have no permission to view discounts"))
 
     return JSON_response(get_all_discounts(request.user, c))
@@ -167,8 +167,8 @@ def list_discounts(request, company):
     c = get_object_or_404(Company, url_name=company)
     
     # check permissions: needs to be guest
-    if not has_permission(request.user, c, 'discount', 'list'):
-        return no_permission_view(request, c, _("view discounts"))
+    if not has_permission(request.user, c, 'discount', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view discounts."))
     
     discounts = Discount.objects.filter(company__id=c.id)
 
@@ -237,7 +237,7 @@ def add_discount(request, company):
     
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'discount', 'edit'):
-        return no_permission_view(request, c, _("add discounts"))
+        return no_permission_view(request, c, _("You have no permission to add discounts."))
     
     context = {
         'title': _("Add discount"),
@@ -291,7 +291,7 @@ def edit_discount(request, company, discount_id):
     
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'discount', 'edit'):
-        return no_permission_view(request, c, _("edit discounts"))
+        return no_permission_view(request, c, _("You have no permission to edit discounts."))
     
     context = {
         'title': _("Edit discount"),
@@ -340,7 +340,7 @@ def edit_discount(request, company, discount_id):
 @login_required
 def delete_discount(request, company):
     return manage_delete_object(request, company, Discount, (
-        _("You have no permission to edit discounts"),
+        _("You have no permission to delete discounts"),
         _("Could not delete discount: ")
     ))
 

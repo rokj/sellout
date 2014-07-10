@@ -74,7 +74,7 @@ def edit_config(request, company):
     
     # permissions
     if not has_permission(request.user, c, 'config', 'edit'):
-        return no_permission_view(request, c, _("visit this page"))
+        return no_permission_view(request, c, _("You have no permission to edit system configuration."))
     
     # get config: specify initial data manually (also for security reasons,
     # to not accidentally include secret data in request.POST or whatever)
