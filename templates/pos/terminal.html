@@ -268,6 +268,16 @@ $(document).ready(function(){
     </div>
 </div>
 
+<div id="registers">
+    {% trans 'Which register have you logged on?' %}
+    <select id="registers_list">
+        {% for r in  registers %}
+            <option value="{{ r.id }}">{{ r.name }}</option>
+        {% endfor %}
+    </select>
+    <input type="button" value="{% trans 'Go' %}" id="select_register"/>
+</div>
+
 <div id="templates" class="hidden">
     <div id="small_receipt_template">
         {% include 'pos/small_receipt.html' %}

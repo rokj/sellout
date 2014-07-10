@@ -18,7 +18,11 @@ Terminal = function(g){
         selector: $("#selector"),
         categories: $("#categories"),
         products: $("#products_scroll_outer"),
-        controls: $("#controls")
+        controls: $("#controls"),
+
+        registers_dialog: $("#registers"),
+        registers_list: $("#registers_list"),
+        select_register: $("#select_register")
     };
 
     // bill sizes (in pixels):
@@ -33,6 +37,9 @@ Terminal = function(g){
     // width 3 (widest):
     //     added discount
     p.bill_sizes = [350, 450, 600];
+
+    // register: will point to a register object in g.data.registers
+    p.register = null;
 
     //
     // methods: sizing and layout
@@ -138,6 +145,30 @@ Terminal = function(g){
         }
     };
 
+    p.get_register = function(id){
+        if(id){
+            // the id is set already, just find the right one in the
+            var i;
+
+            for(i = 0; i < p.g.data.registers.length; i++){
+                if(p.g.data.registers[i].id == id){
+                    p.register = p.g.data.registers[i];
+                    return;
+                }
+            }
+        }
+
+        // at this point, prompt the user to choose one
+        if(!p.register){
+            // show the registers dialog
+            p.items.registers_dialog.dialog({
+                title: gettext("Choose a register"),
+                closeOnEscape: false,
+                open: function(event, ui) { $(".ui-dialog-titlebar-close", ui.dialog || ui).hide(); }
+            });
+        }
+    };
+
     //
     // init
     //
@@ -179,4 +210,7 @@ Terminal = function(g){
     // load company's logo and store it to terminal
     if(p.g.data.receipt_logo)
         p.g.items.receipt_logo = $("<img>", {src: p.g.data.company.receipt_logo});
+
+    // get register
+    p.register = p.get_register(p.g.data.register_id);
 };

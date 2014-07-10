@@ -18,13 +18,13 @@ def manage_home(request, company):
     c = get_object_or_404(Company, url_name=company)
     
     # see if user has permission to view or edit management stuff
-    if not has_permission(request.user, c, 'manage','list'):
-        return no_permission_view(request, c, _("visit this page"))
+    if not has_permission(request.user, c, 'manage', 'view'):
+        return no_permission_view(request, c, _("You have no permission to manage POS settings."))
     
     context = {
-        'title':_("Management"),
-        'site_title':g.MISC['site_title'],
-        'company':c,
+        'title': _("Management"),
+        'site_title': g.MISC['site_title'],
+        'company': c,
     }
     
     return render(request, 'pos/manage/manage.html', context)
