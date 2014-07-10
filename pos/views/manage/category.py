@@ -17,24 +17,7 @@ from common import globals as g
 ########################
 ### helper functions ###
 ########################
-def category_breadcrumbs(category):
-    # assemble the name in form category>subcategory>subsubcategory>...
-    name = []
-
-    while 1:
-        name.append(category.name)
-        category = category.parent
-        if not category:
-            break
-
-    # reverse and join
-    name.reverse()
-    name = ' > '.join(name)
-
-    return name
-
-
-def category_to_dict(c, android = False):
+def category_to_dict(c, android=False):
     if c.parent:
         parent_id = c.parent.id
     else:
@@ -47,7 +30,8 @@ def category_to_dict(c, android = False):
         'parent_id': parent_id,
 
         'color': c.color,
-        'breadcrumbs': c.breadcrumbs
+        'breadcrumbs': c.breadcrumbs['name'],
+        'path': c.breadcrumbs['id'],
     }
 
     if not android:
@@ -148,7 +132,11 @@ def validate_parent(category, parent_id):
     return True
 
 
+<<<<<<< HEAD
 def get_all_categories(company_id, category_id=None, sort='name', data=None, level=0, json=False):
+=======
+def get_all_categories(company, category=None, sort='name', data=None, level=0, json=False):
+>>>>>>> e2f9d03bcc5e4d02b78b901196633827f9f98509
     """ return a 'flat' list of all categories (converted to dictionaries/json) """
 
     #def category_to_dict(c, level): # c = Category object # currently not needed
@@ -161,8 +149,8 @@ def get_all_categories(company_id, category_id=None, sort='name', data=None, lev
     if data is None:
         data = []
 
-    if category_id:
-        c = Category.objects.get(company__id=company_id, id=category_id)
+    if category:
+        c = category
         # add current category to list
         c.level = level
         #data.append(category_to_dict(c, level))
@@ -170,20 +158,21 @@ def get_all_categories(company_id, category_id=None, sort='name', data=None, lev
         if json:
             entry = category_to_dict(c)
             entry['level'] = c.level  # some additional data
-            entry['breadcrumbs'] = category_breadcrumbs(c)
+            entry['breadcrumbs'] = c.breadcrumbs['name']
+            entry['path'] = c.breadcrumbs['id']
             data.append(entry)
         else:
             data.append(c)
 
         # append all children
-        children = Category.objects.filter(company__id=company_id, parent__id=category_id).order_by(sort)
+        children = Category.objects.filter(company=company, parent=category).order_by(sort)
         level += 1
         for c in children:
-            get_all_categories(company_id, c.id, data=data, level=level, sort=sort, json=json)
+            get_all_categories(company, c, data=data, level=level, sort=sort, json=json)
     else:
-        cs = Category.objects.filter(company__id=company_id, parent=None).order_by(sort)
+        cs = Category.objects.filter(company=company, parent=None).order_by(sort)
         for c in cs:
-            get_all_categories(c.company.id, c.id, data=data, level=level, sort=sort, json=json)
+            get_all_categories(c.company, c, data=data, level=level, sort=sort, json=json)
 
     return data
 
@@ -251,11 +240,11 @@ def JSON_categories(request, company):
         return JSON_error(_("Company does not exist"))
 
     # permissions
-    if not has_permission(request.user, c, 'category', 'list'):
+    if not has_permission(request.user, c, 'category', 'view'):
         return JSON_error("no permission")
 
     # return all categories' data in JSON format
-    return JSON_response(get_all_categories(c.id, sort='name', data=[], json=True))
+    return JSON_response(get_all_categories(c, sort='name', data=[], json=True))
 
 
 class CategoryForm(forms.ModelForm):
@@ -275,9 +264,9 @@ class CategoryForm(forms.ModelForm):
 def list_categories(request, company):
     c = get_object_or_404(Company, url_name=company)
 
-    # check permissions: needs to be at least guest to view
-    if not has_permission(request.user, c, 'category', 'list'):
-        return no_permission_view(request, c, _("view categories"))
+    # check permissions
+    if not has_permission(request.user, c, 'category', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view categories."))
 
     context = {
         'box_dimensions': g.IMAGE_DIMENSIONS['category'],
@@ -297,23 +286,26 @@ def add_category(request, company, parent_id=-1):
 
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'category', 'edit'):
-        return no_permission_view(request, c, _("add categories"))
+        return no_permission_view(request, c, _("You have no permission to add categories."))
 
     # if parent_id == -1, this is a top-level category
     try:
         parent_id = int(parent_id)
         if parent_id == -1:
             parent = None
+            color = g.CATEGORY_COLORS[0]  # the default color
         else:
             parent = Category.objects.get(id=parent_id)
+            color = parent.color
 
             # check if not adding to some other company's category
             if parent.company != c:
-                return no_permission_view(request, c, _("add to this category"))
+                return no_permission_view(request, c, _("You have no permission to add to this category."))
     except Category.DoesNotExist:
         raise Http404
     except:
         parent = None
+        color = g.CATEGORY_COLORS[0]
 
     context = {
         'company': c,
@@ -344,7 +336,8 @@ def add_category(request, company, parent_id=-1):
                 reverse('pos:list_categories', kwargs={'company': c.url_name}) + "#" + str(category.id))
 
     else:
-        form = CategoryForm(initial={'parent': parent_id})  # create a new category
+        # create a new category (select parent and its color if adding child)
+        form = CategoryForm(initial={'parent': parent_id, 'color': color})
 
     context['form'] = form
 
@@ -357,7 +350,7 @@ def edit_category(request, company, category_id):
 
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'category', 'edit'):
-        return no_permission_view(request, c, _("edit categories"))
+        return no_permission_view(request, c, _("You have no permission to edit categories."))
 
     try:
         category = Category.objects.get(id=category_id)
@@ -365,8 +358,8 @@ def edit_category(request, company, category_id):
         raise Http404
 
     # check if category actually belongs to the given company
-    if category.company != c: # "you have no permission to edit this category"
-        return no_permission_view(request, c, _("edit this category"))
+    if category.company != c:  # "you have no permission to edit this category"
+        raise Http404
 
     context = {'company': c, 'category_id': category_id}
 
@@ -409,7 +402,7 @@ def delete_category(request, company):
     
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'category', 'edit'):
-        return JSON_error(_("You have no permission to edit categories"))
+        return JSON_error(_("You have no permission to delete categories"))
     
     # get category
     try:
@@ -444,10 +437,10 @@ def get_category(request, company, category_id):
         return JSON_error(_("Company does not exist"))
     
     # permissions: needs to be guest to view products
-    if not has_permission(request.user, c, 'product', 'list'):
+    if not has_permission(request.user, c, 'product', 'view'):
         return JSON_error(_("You have no permission to view products"))
     
-    category = get_object_or_404(Category, id = category_id, company = c)
+    category = get_object_or_404(Category, id=category_id, company=c)
     
     return JSON_response(category_to_dict(category))
 

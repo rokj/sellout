@@ -4,7 +4,7 @@ from django.utils.translation import ugettext as _
 # Common stuff to be used anywhere throughout the site
 
 # directories
-DIRS = { # goes to MEDIA folder
+DIRS = {  # all go to MEDIA folder
     'color_logo_dir': "img/color_logo",
     'monochrome_logo_dir': "img/monochrome_logo",
     'category_icon_dir': "img/category",
@@ -55,6 +55,7 @@ UNITS = (
     ("gal", "gal"),
     ("ft^3", "ft³"),
     ("h", _("Hour")),
+    ("other", _("Other")),
 )
 
 # discounts
@@ -180,6 +181,7 @@ MISC = {
     'max_upload_image_size': 2*2**20,  # 2 megabytes
     'image_format': 'png',  # all images will be saved in this format
     'image_upload_formats': 'jpg|jpeg|gif|png|bmp|tiff',  # supported image formats (as regex "options")
+    'discounts_per_page': 2,
 }
 
 IMAGE_DIMENSIONS = {
@@ -200,38 +202,26 @@ PERMISSION_GROUPS = (  # retrieve readable format with get_permission_display()
     ('admin',   _("Admin")),    # can do anything
 )
 
-PERMISSIONS = {  # 'chapters' that each group can view or manage
-    # model choices: company, category, discount, product, contact, permission, bill, config
-    # views (to prevent users exploring other companies' terminals):
-    # manage, terminal
+PERMISSIONS = {
     'guest': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax',
-                 'terminal', 'register',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register',),
         'edit': (),
         },
     'cashier': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax',
-                 'terminal', 'register',),
-        'edit': ('bill',
-                 'terminal', 'config',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register',),
+        'edit': ('bill', 'terminal',),
         },
     'seller': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax',
-                 'terminal', 'manage', 'register',),
-        'edit': ('bill', 'product',
-                 'terminal', 'manage', 'config', 'tax',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register',),
+        'edit': ('bill', 'product', 'terminal', 'manage',),
         },
     'manager': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config', 'tax',
-                 'terminal', 'manage', 'register',),
-        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'config', 'tax',
-                 'terminal', 'manage', 'register',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register',),
+        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register',),
         },
     'admin': {
-        'list': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config',
-                 'terminal', 'manage', 'tax', 'register',),
-        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'permission', 'config',
-                 'terminal', 'manage', 'tax', 'register',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register',),
+        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register',),
         },
 }
 

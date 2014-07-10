@@ -11,8 +11,8 @@ from pos.views.util import JSON_response, JSON_parse, JSON_error, JSON_ok, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
                            max_field_length, error, JSON_stringify
-from pos.views.manage.discount import discount_to_dict
-from pos.views.manage.category import get_subcategories
+from pos.views.manage.discount import discount_to_dict, get_all_discounts
+from pos.views.manage.category import get_subcategories, get_all_categories
 from pos.views.manage.tax import get_default_tax, get_all_taxes
 
 from common import globals as g
@@ -40,26 +40,7 @@ def JSON_units(request, company):
 
 
 def product_to_dict(user, company, product, android=False):
-    # returns all relevant product's data:
-    # id
-    # product name
-    # price (sale price, excluding tax) - numeric value
-    # purchase price - numeric value
-    # unit type
-    # unit type display
-    # discounts - dictionary or all discounts for this product
-    #    (see discounts.discount_to_dict for details)
-    # image
-    # category - name
-    # category - id
-    # code
-    # shortcut
-    # description
-    # private notes
-    # tax
-    # tax - id
-    # stock
-    # edit url
+    # returns all relevant product's data
     ret = {}
 
     ret['id'] = product.id
@@ -117,6 +98,7 @@ def product_to_dict(user, company, product, android=False):
     ret['unit_type_display'] = product.get_unit_type_display()
     ret['stock'] = format_number(user, company, product.stock)
     ret['color'] = product.color
+    ret['favorite'] = product.favorite
     return ret
 
 
@@ -125,8 +107,8 @@ def products(request, company):
     c = get_object_or_404(Company, url_name=company)
     
     # needs to be at least guest to view products
-    if not has_permission(request.user, c, 'product', 'list'):
-        return no_permission_view(request, c, _("view products"))
+    if not has_permission(request.user, c, 'product', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view products."))
 
     # if there are no taxes defined, don't show anything
     if Tax.objects.filter(company=c).count() == 0:
@@ -156,10 +138,14 @@ def products(request, company):
         'company': c,
         'title': _("Products"),
         'site_title': g.MISC['site_title'],
+        # lists
         'taxes': JSON_stringify(get_all_taxes(request.user, c)),
+        'categories': JSON_stringify(get_all_categories(c, json=True)),
+        'units': JSON_stringify(g.UNITS),
+        'discounts': JSON_stringify(get_all_discounts(request.user, c)),
         # urls for ajax calls
         'add_url': reverse('pos:create_product', args=[c.url_name]),
-        # config variables 
+        # config variables
         'can_edit': has_permission(request.user, c, 'product', 'edit'),
         'currency': get_company_value(request.user, c, 'pos_currency'),
         # images
@@ -186,7 +172,7 @@ def get_product(request, company):
         return JSON_error(_("Company does not exist"))
     
     # permissions
-    if not has_permission(request.user, c, 'product', 'list'):
+    if not has_permission(request.user, c, 'product', 'view'):
         return JSON_error(_("You have no permission to view products"))
 
     try:
@@ -207,7 +193,7 @@ def search_products(request, company):
         return JSON_error(_("Company does not exist"))
     
     # permissions: needs to be guest
-    if not has_permission(request.user, c, 'product', 'list'):
+    if not has_permission(request.user, c, 'product', 'view'):
         return JSON_error(_("You have no permission to view products"))
     
     # get all products from this company and filter them by entered criteria
@@ -430,7 +416,7 @@ def validate_product(user, company, data):
         
     # image:
     if data['change_image'] == True:
-        if 'image' in data: # new image has been uploaded
+        if 'image' in data and data['image']: # new image has been uploaded
             print data['image']
             data['image'] = image_from_base64(data['image'])
             if not data['image']:
@@ -473,9 +459,9 @@ def validate_product(user, company, data):
             p = Product.objects.get(company=company, shortcut=data['shortcut'])
             if p.id != data['id']:
                 return r(False,
-                    _("A product with this shop code already exists: ") + p.name)
+                    _("A product with this shortcut already exists: ") + p.name)
         except Product.DoesNotExist:
-            pass # ok
+            pass  # ok
     
     # description, notes - anything can be entered
     data['description'] = data['description'].strip()
@@ -664,3 +650,34 @@ def get_all_products(user, company):
         r.append(product_to_dict(user, company, p))
 
     return r
+
+
+@login_required
+def toggle_favorite(request, company):
+    # company
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # permissions
+    if not has_permission(request.user, c, 'product', 'edit'):
+        return JSON_error(_("You have no permission to edit products"))
+
+    # data in POST request: product
+    try:
+        product_id = int(JSON_parse(request.POST.get('data')).get('product_id'))
+    except ValueError:
+        return JSON_error(_("Invalid data"))
+
+    # get the product
+    try:
+        product = Product.objects.get(id=product_id, company=c)
+    except Product.DoesNotExist:
+        return JSON_error(_("Product does not exist"))
+
+    # if product is already a favorite, remove it
+    product.favorite = not product.favorite
+    product.save()
+
+    return JSON_response({'status': 'ok', 'favorite': product.favorite})

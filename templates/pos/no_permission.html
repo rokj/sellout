@@ -1,8 +1,9 @@
-{% extends "base.html" %}
-{% load staticfiles %}
-{% load thumbnail %}
+{% extends "pos/manage/manage.html" %}
+{% load static %}
 {% load i18n %}
 
-{% block content %}
-<p>{% trans 'You have no permission to' %} {{ action }}.</p>
+{% block status_bar_title %}{% trans 'Permission denied' %}{% endblock %}
+
+{% block manage_content %}
+<p>{{ action }}</p>
 {% endblock %}

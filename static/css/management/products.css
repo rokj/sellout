@@ -14,27 +14,13 @@
     width: 100%;
 }
 
+/* the 'advanced' "button" */
 #advanced_search_toggle{
     vertical-align: middle;
-}
-
-/* the 'advanced' "button" */
-#advanced_search_toggle{ display: none; }
-#advanced_search_toggle + label{
-    font-size: inherit;
     width: 100%;
-    line-height: 40px;
-    text-align: center;
     background-color: #000000;
-    color: #646464;
-    display: block;
-    font-weight: normal;
 }
 
-#advanced_search_toggle:checked + label{
-    color: #ffffff;
-    font-weight: bold;
-}
 
 .negative-profit{
     color:white;
@@ -57,17 +43,29 @@ div.product-details{
     margin-bottom: 20px;
 }
 
+div.product-details table{
+    width: 100%;
+    height: 100px;
+    border-spacing: 0;
+}
+
 div.product-details p{
     margin: 0;
 }
 
-div.product-details table.details ul{
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+div.product-details table.details td{
+    vertical-align: bottom;
 }
 
-div.product-details table.details td{ vertical-align: top;}
+div.product-details table.details td.padded{
+    padding: 5px;
+}
+
+div.product-details table.details td.product-image{
+    width: 100px; /* the same as table height */
+    background-position: center center;
+    background-size: cover;
+}
 
 div.product-details .title{
     background-color: #646464;
@@ -77,33 +75,95 @@ div.product-details .title{
     right: 0;
     height: 40px;
     line-height: 40px;
-    color: #ffffff;
     padding-left: 10px;
+    color: #000000;
 }
 
 div.product-details .product-management{
     float: right;
 }
 
-div.product-details .product-details-image{
-    float: left;
-    width: 20%;
-    margin: 5%
-    
-}
-div.product-details .product-details-image img{
-    width: 100%;
-}
-
-div.product-details table.details{
-    width: 70%;
-}
-
-div.product-details table.details td.details-label{
+p.details-label{
     color: #646464;
     width: 40%;
+    font-size: 10px;
+    text-transform: uppercase;
+}
+
+button.product-controls{
+    background-color: transparent;
+    border: none;
+    width: 40px; /* the same as .title height */
+    height: 40px;
+    background-position: center center;
+    background-repeat: no-repeat;
 }
 
 input#edit_product_save, input#edit_product_cancel{
     width: 100%;
+}
+
+#edit_dialog{
+    position: absolute;
+    left: 50%;
+    top: 50px;
+    
+    
+    z-index: 7;
+    width: 960px;
+    margin-left: -480px;
+    
+    background-color: #ebebeb;
+    padding-top: 40px;
+    padding-left: 40px;
+    padding-bottom: 40px;
+    margin-bottom: 50px;
+    overflow: hidden;
+}
+
+#edit_dialog_title{
+    margin-right: 40px;
+    margin-bottom: 20px;
+    margin-top: 0; /* it's already set in #edit_dialog */
+    text-align: center;
+}
+
+#dialog_shadow{
+    position: fixed;
+    z-index: 6; /* above menus and shiat */
+    background-color: #000000;
+    opacity: 0.4;
+
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    display: none;
+}
+
+#edit_product_description,
+#edit_product_private_notes{
+    /* must match all paddings, margins, height of all junk inside div.form-field */
+    height: 114px;
+}
+
+/* minor details etc. */
+div.management-column.hand-margin-2{
+    /* margins for second column */
+    margin-top: 5px;
+}
+
+div.management-column.hand-margin-3{
+    /* margins for third column */
+    margin-top: 5px;
+}
+
+img.delete-discount{
+    vertical-align: top;
+    margin-left: 10px;
+    width: 16px;
+    height: 16px;
+    position: relative;
+    top: 3px;
 }

@@ -9,7 +9,11 @@ from django import forms
 from common.images import image_from_base64, resize_image
 
 from pos.models import Company
+<<<<<<< HEAD
 from pos.views.util import JSON_response, JSON_parse, has_permission, no_permission_view, JSON_ok, max_field_length
+=======
+from pos.views.util import JSON_response, JSON_parse, has_permission, no_permission_view, JSON_ok, JSON_error
+>>>>>>> e2f9d03bcc5e4d02b78b901196633827f9f98509
 from common import globals as g
 import unidecode
 from common.functions import get_random_string, get_terminal_url
@@ -287,7 +291,7 @@ def edit_company(request, company):
     # check if the user has permission to change it
     # only admins can change company details
     if not has_permission(request.user, c, 'company', 'edit'):
-        return no_permission_view(request, c, _("edit company details"))
+        return no_permission_view(request, c, _("You have no permission to edit company details."))
     
     context = {
         'company': c,
@@ -330,53 +334,65 @@ def upload_color_logo(request, company):
         # read the new image and upload it
         image_file = image_from_base64(data.get('image'))
 
-        if file:
-            resize = False
+        if not image_file:
+            return JSON_error(_("No file sent"))
 
-            # resize and convert image if necessary
-            color_logo = Image.open(image_file)
+        resize = False
 
-            if color_logo.mode not in ('L', 'RGB'):
-                color_logo = color_logo.convert('RGB')
+        # resize and convert image if necessary
+        color_logo = Image.open(image_file)
 
-            if color_logo.size != g.IMAGE_DIMENSIONS['color_logo']:
-                # the logo has wrong dimensions
-                resize = True
+        if color_logo.mode not in ('L', 'RGB'):
+            # Kudos: http://stackoverflow.com/questions/9166400/convert-rgba-png-to-rgb-with-pil
+            # create a white image the same size as color_logo
+            color_logo.load()
 
-            if color_logo.format != g.MISC['image_format']:
-                # the logo is not in the correct format
-                resize = True
+            background = Image.new("RGB", color_logo.size, (255, 255, 255))
+            background.paste(color_logo, mask=color_logo.split()[3]) # 3 is the alpha channel
 
-            if resize:
-                color_logo = resize_image(color_logo, g.IMAGE_DIMENSIONS['color_logo'])
+            color_logo = background
+            color_logo = color_logo.convert('RGB')
 
-            if c.color_logo:
-                # the logo exists already, delete it
-                try:
-                    os.remove(c.color_logo.path)
-                except OSError:
-                    pass
 
-            temp_handle = StringIO()
-            color_logo.save(temp_handle, 'png')
-            temp_handle.seek(0)
+        if color_logo.size != g.IMAGE_DIMENSIONS['color_logo']:
+            # the logo has wrong dimensions
+            resize = True
 
-            # Save to the thumbnail field
-            suf = SimpleUploadedFile('temp', temp_handle.read(), ('image/'+g.MISC['image_format']).lower())
+        if color_logo.format != g.MISC['image_format']:
+            # the logo is not in the correct format
+            resize = True
 
-            c.color_logo.save(suf.name + '.png', suf, save=False)
-            c.save()
+        if resize:
+            color_logo = resize_image(color_logo, g.IMAGE_DIMENSIONS['color_logo'], 'fit')
 
-            return JSON_response({'status': 'ok', 'logo_url': c.color_logo.url})
+        if c.color_logo.name:
+            # the logo exists already, delete it
+            try:
+                os.remove(c.color_logo.path)
+            except (OSError, ValueError):
+                pass
+
+        temp_handle = StringIO()
+        color_logo.save(temp_handle, 'png')
+        temp_handle.seek(0)
+
+        # Save to the thumbnail field
+        suf = SimpleUploadedFile('temp', temp_handle.read(), ('image/'+g.MISC['image_format']).lower())
+
+        c.color_logo.save(suf.name + '.png', suf, save=False)
+        c.save()
+
+        return JSON_response({'status': 'ok', 'logo_url': c.color_logo.url})
     else:
         # there is no image, remove the existing one
         try:
             os.remove(c.color_logo.path)
-        except OSError:
+            c.color_logo.delete()
+            c.save()
+        except (OSError, ValueError):
             pass
 
-        c.color_logo.delete()
-        c.save()
+        return JSON_ok()
 
 
 @login_required
@@ -385,59 +401,62 @@ def upload_monochrome_logo(request, company):
 
     data = JSON_parse(request.POST.get('data'))
 
+    print data
+
     if 'image' in data:
         # read the new image and upload it
         image_file = image_from_base64(data.get('image'))
 
-        if file:
-            resize = False
+        if not image_file:
+            return JSON_error(_("No file sent"))
 
-            # resize and convert image if necessary
-            monochrome_logo = Image.open(image_file)
+        resize = False
 
-            if monochrome_logo.size != g.IMAGE_DIMENSIONS['monochrome_logo']:
-                # the logo has wrong dimensions
-                resize = True
+        # resize and convert image if necessary
+        monochrome_logo = Image.open(image_file)
 
-            if monochrome_logo.format != g.MISC['image_format']:
-                # the logo is not in the correct format
-                resize = True
+        if monochrome_logo.size != g.IMAGE_DIMENSIONS['monochrome_logo']:
+            # the logo has wrong dimensions
+            resize = True
 
-            # resize first
-            if resize:
-                monochrome_logo = resize_image(monochrome_logo, g.IMAGE_DIMENSIONS['monochrome_logo'])
+        if monochrome_logo.format != g.MISC['image_format']:
+            # the logo is not in the correct format
+            resize = True
 
-            # then convert to monochrome
-            if monochrome_logo.mode != '1':
-                monochrome_logo = monochrome_logo.convert('1')
+        # resize first
+        if resize:
+            monochrome_logo = resize_image(monochrome_logo, g.IMAGE_DIMENSIONS['monochrome_logo'], 'fit')
 
-            if c.monochrome_logo:
-                # the logo exists already, delete it
-                try:
-                    os.remove(c.monochrome_logo.path)
-                except OSError:
-                    pass
+        # then convert to monochrome
+        if monochrome_logo.mode != '1':
+            monochrome_logo = monochrome_logo.convert('1')
 
-            temp_handle = StringIO()
-            monochrome_logo.save(temp_handle, 'png')
-            temp_handle.seek(0)
+        if c.monochrome_logo.name:
+            # the logo exists already, delete it
+            try:
+                os.remove(c.monochrome_logo.path)
+            except (OSError, ValueError):
+                pass
 
-            # Save to the thumbnail field
-            suf = SimpleUploadedFile('temp', temp_handle.read(), ('image/' + g.MISC['image_format']).lower())
+        temp_handle = StringIO()
+        monochrome_logo.save(temp_handle, 'png')
+        temp_handle.seek(0)
 
-            c.monochrome_logo.save(suf.name + '.png', suf, save=False)
-            c.save()
+        # Save to the thumbnail field
+        suf = SimpleUploadedFile('temp', temp_handle.read(), ('image/' + g.MISC['image_format']).lower())
 
-            return JSON_response({'status': 'ok', 'logo_url': c.monochrome_logo.url})
+        c.monochrome_logo.save(suf.name + '.png', suf, save=False)
+        c.save()
+
+        return JSON_response({'status': 'ok', 'logo_url': c.monochrome_logo.url})
     else:
         # there is no image, remove the existing one
         try:
             os.remove(c.monochrome_logo.path)
-        except OSError:
+            c.monochrome_logo.delete()
+            c.save()
+        except (OSError, ValueError):
             pass
-
-        c.monochrome_logo.delete()
-        c.save()
 
         return JSON_ok()
 

@@ -24,7 +24,7 @@ ul.actionlist li {
 }
 
 ul.actionlist li.changelink {
-    overflow: hidden;
+    opacity: ;verflow: hidden;
     text-overflow: ellipsis;
     -o-text-overflow: ellipsis;
 }

@@ -90,14 +90,25 @@ class Category(SkeletonU):
 
     @property
     def breadcrumbs(self):
+        name_breadcrumbs = ""
+        id_breadcrumbs = []
+
         current_category = self
-        breadcrumb = ""
+
         while current_category is not None:
-            breadcrumb = current_category.name + breadcrumb
+            name_breadcrumbs = current_category.name + name_breadcrumbs
+            id_breadcrumbs.append(current_category.id)
+
             current_category = current_category.parent
             if current_category:
-                breadcrumb = " > " + breadcrumb
-        return breadcrumb
+                name_breadcrumbs = " > " + name_breadcrumbs
+
+        id_breadcrumbs.reverse()
+
+        return {
+            'name': name_breadcrumbs,
+            'id': id_breadcrumbs,
+        }
 
     @property
     def product_count(self):
@@ -212,12 +223,13 @@ class Product(ProductAbstract):
     company = models.ForeignKey(Company, null=False, blank=False)
     discounts = models.ManyToManyField(Discount, null=True, blank=True, through='ProductDiscount')
     category = models.ForeignKey(Category, null=True, blank=True)
+    # images = models.ManyToManyField(ProductImage, null=True, blank=True) # one image per product is enough
     image = thumbnail.ImageField(_("Icon"),
          upload_to=get_image_path(g.DIRS['product_icon_dir'], "pos_product"),
          null=True, blank=True)
     tax = models.ForeignKey(Tax, null=False, blank=False)
-    # images = models.ManyToManyField(ProductImage, null=True, blank=True) # one image per product is enough
-    
+    favorite = models.BooleanField(null=False, default=False)
+
     def __unicode__(self):
         return self.company.name + ":" + self.name
 
@@ -463,7 +475,6 @@ class Register(SkeletonU):
 
     location = models.TextField(_("Location of this register"), max_length=120, null=True, blank=True)
     print_location = models.BooleanField(_("Print location of register"), blank=False)
-
 
 
 ### bills ###

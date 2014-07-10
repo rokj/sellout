@@ -22,26 +22,32 @@
             <thead>
                 {# include: register name, receipt format and type, and location #}
                 <tr>
-                    <td>{% trans 'Register Name' %}</td>
-                    <td>{% trans 'Receipt Format' %}</td>
-                    <td>{% trans 'Receipt Type' %}</td>
-                    <td>{% trans 'Location' %}</td>
-                    <td>{# edit and delete links #}</td>
+                    <td class="name">{% trans 'Register Name' %}</td>
+                    <td class="format">{% trans 'Receipt Format' %}</td>
+                    <td class="type">{% trans 'Receipt Type' %}</td>
+                    <td class="location">{% trans 'Location' %}</td>
+                    <td class="controls">{# edit and delete links #}</td>
                 </tr>
             </thead>
 
             <tbody>
                 {% for r in registers %}
                 <tr>
-                    <td>{{ r.name }}</td>
-                    <td>{{ r.get_receipt_format_display }}</td>
-                    <td>{{ r.get_receipt_type_display }}</td>
-                    <td>{{ r.location }}</td>
-                    <td>
-                        <a href="{% url 'pos:edit_register' company.url_name r.id %}">{% trans 'Edit' %}</a>
+                    <td class="name">{# register name is a link to edit form #}
+                        <a href="{% url 'pos:edit_register' company.url_name r.id %}"> {{ r.name }} </a>
+                    </td>
+                    <td class="format">{{ r.get_receipt_format_display }}</td>
+                    <td class="type">{{ r.get_receipt_type_display }}</td>
+                    <td class="location">{{ r.location }}</td>
+                    <td class="controls">
                         <a href="{% url 'pos:delete_register' company.url_name %}"
                            data-id="{{ r.id }}"
-                           class="delete-link">{% trans 'Delete' %}</a>
+                           data-text="{% trans 'Delete register: ' %} {{ r.name }}"
+                           class="delete-link">
+                            <img src="{% static 'icons/delete_black.png' %}"
+                                 alt="{% trans 'Delete' %}"
+                                 title="{% trans 'Delete' %}" />
+                        </a>
                     </td>
                 </tr>
                 {% endfor %}

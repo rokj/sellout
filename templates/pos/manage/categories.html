@@ -13,16 +13,18 @@
                 toolbox: $("#tools"),
 
                 categories: [], // top-level categories (Category() objects)
-                subcontainers: {}, // dictionary level:div
+                subcontainers: {}, // dictionary {level:div}
                 max_level: 8, // 9th level and deeper will be of the same color
 
                 button_width: {{ box_dimensions.0 }},
                 button_height: {{ box_dimensions.1 }},
                 button_margin: 10, // category buttons' margins, in pixels
-                toolbox_arrow_height: 30, // see categories.css, #tools .arrow:after
+                toolbox_arrow_height: 30, // see categories.css, #tools .arrow:after (half of that value)
 
                 draggable_easing_time: 100,
                 tools_hide_time: 500,
+                tools_show_delay: 800,
+                tools_show_timeout: null,
                 tools_hide_timeout: null
             };
 
@@ -79,7 +81,7 @@
                 p.text = $("<span>").text(data.name);
                 p.button.append(p.text);
 
-                if(is_dark(p.data.color)) p.text.addClass("dark");
+                if(is_dark(p.data.color)) p.button.addClass("dark");
 
                 // tools
                 p.tools = $("<img>", {src: "{% static 'graphics/gear.png' %}", "class":"toolbox"});
@@ -94,63 +96,93 @@
                 p.tools.unbind().mouseover(
                     // mouse over
                     function(){
-                        if(g.tools_hide_timeout){
-                            clearTimeout(g.tools_hide_timeout);
-                            g.tools_hide_timeout = null;
-                            g.toolbox.hide(); // no hide_tools() because we don't want it to fade out, just hide it
-                        }
+                        g.tools_show_timeout = setTimeout(function(){
+                            if(g.tools_hide_timeout){
+                                clearTimeout(g.tools_hide_timeout);
+                                g.tools_hide_timeout = null;
+                                g.toolbox.hide(); // no hide_tools() because we don't want it to fade out, just hide it
+                            }
 
-                        // position the toolbox
-                        var pos = p.tools.offset();
-                        pos = {
-                            left: pos.left + p.tools.width()/2 - g.toolbox.width()/2,
-                            top: pos.top + p.tools.height() + g.toolbox_arrow_height
-                        };
+                            // position the toolbox: find in which direction there will be enough space to show the box
+                            var toolbox_size = {width: g.toolbox.outerWidth(), height: g.toolbox.outerHeight()};
 
-                        g.toolbox.show();
-                        g.toolbox.offset(pos);
+                            var button_pos = p.tools.offset();
+                            var button_size = {width: p.tools.outerWidth(), height: p.tools.outerHeight()};
 
-                        // bind button events:
-                        // add subcategory: visit the add url
-                        $("input.add-subcategory", g.toolbox).unbind().click(function(){
-                            window.location.href = p.data.add_child_url;
-                        });
+                            var document_size = {width: $(window).width(), height: $(window).height()};
 
-                        // edit this category: visit the edit url
-                        $("input.edit", g.toolbox).unbind().click(function(){
-                            window.location.href = p.data.edit_url;
-                        });
+                            var toolbox_pos = {left: button_pos.left + button_size.width/2 - toolbox_size.width/2, top: 0};
 
-                        // delete category: send ajax request to server, if everything OK, delete this object
-                        $("input.delete", g.toolbox).unbind().click(function(){
-                            var dlg = confirmation_dialog(
-                                "{% trans 'Delete category' context 'confirmation dialog title' %}",
-                                "{% trans 'Are you sure you want to delete category' %} " + p.data.name + "?",
-                                function(){
-                                    send_data(g.delete_url, {category_id: p.data.id}, "{{ csrf_token }}", function(recv_data){
-                                        if(recv_data.status != 'ok'){
-                                            error_message(
-                                                gettext("Could not delete category"),
-                                                recv_data.message
-                                            );
-                                        }
-                                        else{
-                                            // ok, delete this object from the document
-                                            p.button.remove();
-                                            g.toolbox.hide();
+                            // make some vertical space for the box:
+                            if(document_size.height - button_pos.top - g.toolbox_arrow_height > toolbox_size.height){
+                                toolbox_pos.top = button_pos.top + g.toolbox_arrow_height + button_size.height/2;
+                                $(".bottom", g.toolbox).hide();
+                                $(".top", g.toolbox).show();
+                            }
+                            else{
+                                toolbox_pos.top = button_pos.top -
+                                        toolbox_size.height -
+                                        g.toolbox_arrow_height +
+                                        button_size.height/2;
+                                $(".top", g.toolbox).hide();
+                                $(".bottom", g.toolbox).show();
+                            }
 
-                                            dlg.dialog("destroy");
-                                        }
-                                    });
-                                },
-                                function(){
-                                    // do nothing
-                                    dlg.dialog("destroy");
-                                }
-                            );
-                        });
+                            // if there's no space to the bottom, show the toolbar above the button
+                            g.toolbox.show();
+                            g.toolbox.offset(toolbox_pos);
+
+                            // bind button events:
+                            // add subcategory: visit the add url
+                            $("input.add-subcategory", g.toolbox).unbind().click(function(){
+                                window.location.href = p.data.add_child_url;
+                            });
+
+                            // edit this category: visit the edit url
+                            $("input.edit", g.toolbox).unbind().click(function(){
+                                window.location.href = p.data.edit_url;
+                            });
+
+                            // delete category: send ajax request to server, if everything OK, delete this object
+                            $("input.delete", g.toolbox).unbind().click(function(){
+                                var dlg = confirmation_dialog(
+                                    "{% trans 'Delete category' context 'confirmation dialog title' %}",
+                                    "{% trans 'Are you sure you want to delete category' %} " + p.data.name + "?",
+                                    function(){
+                                        send_data(g.delete_url, {category_id: p.data.id}, "{{ csrf_token }}", function(recv_data){
+                                            if(recv_data.status != 'ok'){
+                                                error_message(
+                                                    gettext("Could not delete category"),
+                                                    recv_data.message
+                                                );
+                                            }
+                                            else{
+                                                // ok, delete this object from the document
+                                                p.button.remove();
+                                                g.toolbox.hide();
+
+                                                dlg.dialog("destroy");
+                                            }
+                                        });
+                                    },
+                                    function(){
+                                        // do nothing
+                                        dlg.dialog("destroy");
+                                    }
+                                );
+                            });
+
+                            // view products: visit url: <products>#category:<id>
+                            $("input.view-products", g.toolbox).unbind().click(function(){
+                                window.location.href = "{% url 'pos:products' company.url_name %}" + "#category:" + p.data.id;
+                            });
+
+                        }, g.tools_show_delay);
 
                     });
+                p.tools.mouseout(function(){
+                    if(g.tools_show_timeout) clearTimeout(g.tools_show_timeout);
+                });
 
                 // mouse out
                 g.toolbox.unbind()
@@ -167,43 +199,63 @@
                 }
 
                 // events
-                // button click: show subcategories
                 p.button.click(function(){
-                    // unselect all buttons
-                    $(".category-button", g.container).removeClass("selected");
+                    // show and shade all categories on the path to this
+                    // if this category has children, shade everything from this category on
+                    // if this category has no children, shade everything from this category's parent on
+                    var i, level = 0;
+                    var categories = null;
+                    var container = null;
+                    var new_categories = null;
 
-                    // hide all containers after this button
-                    var i = 1;
-
-                    while(true){
-                        if(i in g.subcontainers){
-                            // hide all buttons but the topmost (mind that i is never 0)
-                            $(".category-button", g.subcontainers[i]).hide().removeClass("selected");
-
-                            // hide all containers from the selected category (level) on
-                            if(i > p.level) g.subcontainers[i].parent().hide();
-                            else g.subcontainers[i].parent().show();
-                        }
-                        else{
-                            break;
-                        }
-
+                    // first, hide all containers deeper than the selected level
+                    i = p.level + 1;
+                    while(i in g.subcontainers){
+                        g.subcontainers[i].parent().hide();
                         i++;
                     }
 
-                    // show all buttons on the path to topmost category
-                    var ip = p;
-                    var sub = false;
-                    while(ip){
-                        ip.button.show().addClass("selected");
-
-                        for(i = 0; i < ip.children.length; i++){
-                            ip.children[i].button.show();
-                            sub = true;
+                    do{
+                        if(level == 0) categories = g.categories;
+                        else{
+                            if(new_categories) categories = new_categories;
+                            else break;
                         }
-                        if(sub) g.subcontainers[ip.level+1].parent().show();
 
-                        ip = ip.parent;
+                        container = g.subcontainers[level];
+                        container.parent().show();
+
+                        // hide all buttons in this container
+                        $(".category-button", container).hide();
+
+                        // show only buttons that belong to current category
+                        for(i = 0; i < categories.length; i++){
+                            categories[i].button.show();
+
+                            // if this button is in the path, highlight it, otherwise shade it
+                            if(categories[i].data.id != p.data.path[level]){
+                                categories[i].button.addClass("shaded");
+                            }
+                            else{
+                                // this is the next list of children to be shown
+                                categories[i].button.removeClass("shaded");
+                                new_categories = categories[i].children;
+                            }
+                        }
+
+                        level++;
+                    }
+                    while(level <= p.level);
+
+                    // show subcategories of this very category
+                    if(p.children.length > 0 && (level in g.subcontainers)){
+                        container = g.subcontainers[level];
+                        container.parent().show();
+                        $(".category-button", container).hide();
+
+                        for(i = 0; i < p.children.length; i++){
+                            p.children[i].button.show().removeClass("shaded");
+                        }
                     }
 
                     // update url
@@ -214,9 +266,7 @@
             };
 
             // create top-level categories
-            var i;
-
-            for(i = 0; i < g.data.length; i++){
+            for(var i = 0; i < g.data.length; i++){
                 g.categories.push(new Category(g.data[i], null));
             }
 
@@ -244,11 +294,17 @@
     </div>
 
     <div id="tools" class="hidden">
-        <div class="arrow">{# relative positioning, will hold arrow #}</div>
-        <input type="button" class="add-subcategory" value="{% trans 'Add subcategory' %}" />
-        <input type="button" class="edit" value="{% trans 'Edit' %}" />
-        <input type="button" class="delete" value="{% trans 'Delete' %}" />
-        {# TODO: view products (go to products and select this category) #}
-        <input type="button" class="view-products" value="{% trans 'View products' %}" />
+        <div class="arrow-container">
+            <div class="arrow top"></div>
+        </div>
+
+        <input type="button" class="add-subcategory hoverable" value="{% trans 'Add subcategory' %}" />
+        <input type="button" class="edit hoverable" value="{% trans 'Edit' %}" />
+        <input type="button" class="delete hoverable" value="{% trans 'Delete' %}" />
+        <input type="button" class="view-products hoverable" value="{% trans 'View products' %}" />
+
+        <div class="arrow-container">
+            <div class="arrow bottom"></div>
+        </div>
     </div>
 {% endblock %}

@@ -1,6 +1,6 @@
-/*          */
-/* products */
-/*          */
+/*                      */
+/* products in terminal */
+/*                      */
 #products_scroll_outer {
     position: fixed;
     border: 1px solid black;
@@ -18,7 +18,7 @@
     height: 100%;
 }
 
-div .products-column {
+.products-column{
     float: left;
 }
 
@@ -26,38 +26,26 @@ div.product-button {
     position: relative; /* this is required for product image to work correctly (to position another div above it) */
     border: 1px solid black;
     /* do not set margin: it will be set by javascript every time products are rendered for even spacing */
-    background: no-repeat center;
-
     cursor: pointer;
 }
 
-div.product-button-focused {
+div.product-button-focused{
     border: 1px solid red;
 }
 
-img.product-button-image {
+div.product-button-image {
     position: absolute; /* positioned above product-button */
     top: 0;
     left: 0;
-    max-width: 100%;
-    max-height: 100%;
-    z-index: 2;
-}
-
-div.product-button div.shade {
-    position: absolute; /* positioned above product-button-image */
-    top: 0;
-    left: 0;
-    bottom: 0;
     right: 0;
-    background-color: white;
-    opacity: 0.8;
-    z-index: 3;
+    bottom: 0;
+    z-index: 1;
+    background-size: cover;
+    background-position: center center;
 }
 
-div.shade.out-of-stock {
-    opacity: 0.95;
-    color: #cccccc;
+.out-of-stock {
+    opacity: 0.7;
 }
 
 p.product-button-name {

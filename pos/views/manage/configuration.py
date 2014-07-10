@@ -64,7 +64,8 @@ class ConfigForm(forms.Form):
     interface_product_button_size = forms.ChoiceField(choices=button_sizes, label=_("Product button size"))
     discount_calculation = forms.ChoiceField(g.DISCOUNT_CALCULATION, required=True)
     product_display = forms.ChoiceField((("box", _("In boxes")), ("line", _("In lines"))), required=True)
-    display_breadcrumbs = forms.BooleanField(required=False)
+    display_breadcrumbs = forms.BooleanField(required=False,
+                                             widget=forms.Select(choices=((True, _("Yes")), (False, _("No")))))
 
 
 @login_required
@@ -73,7 +74,7 @@ def edit_config(request, company):
     
     # permissions
     if not has_permission(request.user, c, 'config', 'edit'):
-        return no_permission_view(request, c, _("visit this page"))
+        return no_permission_view(request, c, _("You have no permission to edit system configuration."))
     
     # get config: specify initial data manually (also for security reasons,
     # to not accidentally include secret data in request.POST or whatever)

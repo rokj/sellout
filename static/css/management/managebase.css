@@ -1,7 +1,10 @@
 #management_content{
     margin-top: 40px; /* the height of #status_bar */
-    padding-top: 15px;
+    padding-top: 30px;
     padding-left: 40px;
+    margin-bottom: 40px;
+    /* to prevent floated elements from not taking up space */
+    overflow: hidden;
 }
 
 .menu-hidden{
@@ -10,70 +13,26 @@
     height: 0;
 }
 
-h1{
-    text-transform: uppercase;
-}
-
-/* controls and widgets and stuff */
-label, .custom-label{
-    color: #999999;
-}
-
-label{
-    display: block;
-    text-transform: uppercase;
-    font-size: 10px;
-}
-
-input[type='text'],
-input[type='email'],
-input[type='number'],
-textarea {
-    border-radius: 0;
-    border-width: 1px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-left: 5px;
-}
-
-input[type='submit'], input[type='button']{
-    color: #ffffff;
-    border: none;
-    height: 40px;
-    font-size: inherit;
-    text-transform: uppercase;
-}
-
-input[type='submit']{ background-color: #00aa00; }
-input#static_cancel{ background-color: #aa0000; }
-
-select{
-    border: none;
-    background-color: #646464;
-    color: #ffffff;
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
-div.custom-file-input{
+div.custom-file-input,
+form.custom-file-input{
     display: inline;
 }
 
-div.custom-file-input input{
+div.custom-file-input input,
+form.custom-file-input input{
     border: none;
     background-color: #000000;
     color: #ffffff;
-}
-
-div.form-field-container{
-    display: inline;
+    cursor: pointer;
 }
 
 div.form-field{
     margin-top: 15px;
-    /* to prevent floated elements inside
-       from breaking out (and not taking up space) */
-    overflow: hidden;
+}
+
+div.form-field.no-label{
+    /* fields that have no labels */
+    padding-top: 12px;
 }
 
 div.form-field input, div.form-field textarea, div.form-field select{
@@ -91,13 +50,8 @@ div.management-column{
     margin-right: 40px;
 }
 
-#image-clear_id + label{
-    /* stupid clear boxes require special attention */
-    display: inline;
-    vertical-align: middle;
-}
-#image-clear_id{
-    vertical-align: middle;
+div.management-column.fixed{
+    width: 280px;
 }
 
 div.form-field input[type='text'],
@@ -113,16 +67,6 @@ div.clear-columns{
     clear: both;
 }
 
-div.form-footer{
-    margin-top: 30px;
-}
-
-div.form-footer-column{
-    float: left;
-    width: 50%;
-    text-align: center;
-}
-
 div.left-column{
     float: left;
     width: 300px;
@@ -132,9 +76,7 @@ div.left-column + div.content{
     margin-left: 330px; /* the same as .left-column width plus some border */
 }
 
-div.left-column form, div.left-column .fake-form{
-
-}
+div.left-column form, div.left-column .fake-form{ }
 
 div.edit-container{
     max-width: 400px;
@@ -143,25 +85,11 @@ div.edit-container{
 div.split-cell{
     float: left;
     width: 45%;
-    margin-bottom: 20px;
 }
 
 div.split-cell.first{ padding-right: 5% }
 div.split-cell.last{ padding-left: 5%; }
-
-.add-button-container{
-    width: 50%;
-}
-
-div.paginator{
-    max-width: 500px;
-    text-align: center;
-}
-div.paginator a{
-    text-decoration: none;
-    font-weight: bold;
-}
-div.paginator a.current-page{ font-size: 120%; }
+div.cleared{ clear: both; }
 
 /* search/filter results */
 span.no-results{
@@ -171,13 +99,9 @@ span.no-results{
 
 /* buttons that are actually links */
 a.button{
-    height: 40px;
     line-height: 40px;
     display: inline-block;
-    color: #ffffff;
     text-decoration: none;
-    text-transform: uppercase;
-    cursor: default;
     width: 100%;
     text-align: center;
     white-space: nowrap;
@@ -186,10 +110,61 @@ a.button{
     margin-top: 5px; /* this is defined for all inputs */
 }
 
-a.button.do, input.do { background-color: #0000aa; }
 a.button.ok, input.ok { background-color: #00aa00; }
 a.button.cancel, input.cancel{ background-color: #aa0000; }
 
-#edit_dialog label{
+.delete-image-button{
     display: block;
+    position: absolute;
+
+    left: 100%;
+    top: 50%;
+
+    margin-top: -10px;
+    margin-left: 5px;
+
+    width: 20px;
+    height: 20px;
+
+    background-size: 20px 20px;
+    background-color: transparent;
+
+    border: none;
+    cursor: pointer;
+}
+
+div.bottom input{
+    width: 100%;
+}
+
+div.bottom{
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    right: 0;
+}
+
+div.management-column div.read-only-field{
+    /* label height + label top margin */
+    /* (except that there is no label, so margins must be set by hand) */
+    padding-top: 30px;
+}
+
+thead td{
+    /* headers for taxes and cash registers */
+    color: #646464;
+}
+
+.hidden{
+    display: none;
+}
+
+/* search results */
+div.clear-results{
+    text-align: center;
+    padding-top: 10px;
+}
+div.clear-results a{
+    color: #969696;
+    font-size: 12px;
 }

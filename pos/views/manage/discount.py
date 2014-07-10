@@ -49,7 +49,7 @@ def JSON_discounts(request, company):
         return JSON_error(_("Company does not exist"))
 
     # permissions
-    if not has_permission(request.user, c, 'discount', 'list'):
+    if not has_permission(request.user, c, 'discount', 'view'):
         return JSON_error(_("You have no permission to view discounts"))
 
     return JSON_response(get_all_discounts(request.user, c))
@@ -143,7 +143,8 @@ class DiscountForm(forms.Form):
     # this should be date...
     start_date = forms.CharField(g.DATE['max_date_length'], required=False)
     end_date = forms.CharField(g.DATE['max_date_length'], required=False)
-    enabled = forms.BooleanField(initial=True, required=False)
+    enabled = forms.BooleanField(required=False,
+                                 widget=forms.Select(choices=((True, _("Yes")), (False, _("No")))))
     
     def clean(self):
         # use the same clean method as JSON
@@ -166,8 +167,8 @@ def list_discounts(request, company):
     c = get_object_or_404(Company, url_name=company)
     
     # check permissions: needs to be guest
-    if not has_permission(request.user, c, 'discount', 'list'):
-        return no_permission_view(request, c, _("view discounts"))
+    if not has_permission(request.user, c, 'discount', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view discounts."))
     
     discounts = Discount.objects.filter(company__id=c.id)
 
@@ -205,7 +206,7 @@ def list_discounts(request, company):
         form = DiscountFilterForm()
 
     # show discounts
-    paginator = Paginator(discounts, get_user_value(request.user, 'pos_discounts_per_page'))
+    paginator = Paginator(discounts, g.MISC['discounts_per_page'])
 
     page = request.GET.get('page')
     try:
@@ -236,7 +237,7 @@ def add_discount(request, company):
     
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'discount', 'edit'):
-        return no_permission_view(request, c, _("add discounts"))
+        return no_permission_view(request, c, _("You have no permission to add discounts."))
     
     context = {
         'title': _("Add discount"),
@@ -290,9 +291,11 @@ def edit_discount(request, company, discount_id):
     
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'discount', 'edit'):
-        return no_permission_view(request, c, _("edit discounts"))
+        return no_permission_view(request, c, _("You have no permission to edit discounts."))
     
     context = {
+        'title': _("Edit discount"),
+        'site_title': g.MISC['site_title'],
         'company': c,
         'discount_id': discount_id,
         'date_format_js': get_date_format(request.user, c, 'js'),
@@ -337,7 +340,7 @@ def edit_discount(request, company, discount_id):
 @login_required
 def delete_discount(request, company):
     return manage_delete_object(request, company, Discount, (
-        _("You have no permission to edit discounts"),
+        _("You have no permission to delete discounts"),
         _("Could not delete discount: ")
     ))
 

@@ -8,11 +8,20 @@
 
     <link type="text/css" rel="stylesheet" href="{% static 'css/management/categories.css' %}" />
     <style type="text/css">
-    div.color-button.selected{
+    div.color-button.selected:after{
+       position: absolute;
+        right: 5px;
+        bottom: 5px;
+        width: 30px;
+        height: 30px;
+        content: "";
+        background-color: rgba(0,0,0,0.3);
         background-image: url("{% static 'icons/selected_category_color.png' %}");
-        background-position: 90% 90%;
+        background-position: center center;
         background-repeat: no-repeat;
+        border-radius: 100% 100%;
     }
+
     </style>
 
     <script type="text/javascript">
@@ -85,14 +94,16 @@
 
         <div class="form-field">
             <div class="split-cell first">
-                <input type="submit" value="{% trans 'Save' %}" />
+                <input type="submit" value="{% trans 'Save' %}" class="hoverable" />
             </div>
             <div class="split-cell last">
                 {# return to categories and select the parent #}
-                <a class="button cancel"
+                <a class="button cancel hoverable"
                    href="{% url 'pos:list_categories' company.url_name %}{% if add and parent %}#{{ parent.id }}{% else %}#{{ category.id }}{% endif %}">
                 {% trans 'Cancel' %}</a>
             </div>
+
+            <div class="cleared"></div>
         </div>
     </div>
     </form>

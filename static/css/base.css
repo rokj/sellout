@@ -4,6 +4,23 @@ body{
     background-color: #ebebeb;
 }
 
+*{ font-family: "Roboto", Arial, Helvetica, sans-serif; }
+
+h1{
+    text-transform: uppercase;
+}
+
+h2{
+    text-transform: uppercase;
+    color: #323232;
+}
+
+
+/* 'generic' links */
+a{ text-decoration: none; }
+a:link, a:visited{ color: #00bbda; }
+a:hover, a:active{ color: #33e2ff; }
+
 #content_wrapper{
     margin-top: 3em; /* the height of statusbar */
 }
@@ -15,4 +32,74 @@ div.clear-floats{
 
 .hidden{
     display: none;
+}
+
+.dark *{
+    /* use bright font for categories (and all other buttons)
+       that have dark background */
+    color: #ffffff;
+}
+
+*:disabled{
+    opacity: 0.3;
+    cursor: default;
+}
+
+.hoverable{
+    cursor: pointer;
+}
+
+/* controls and widgets and stuff */
+label, .custom-label{
+    color: #999999;
+    display: block;
+    text-transform: uppercase;
+    font-size: 10px;
+}
+
+.custom-label.description{
+    text-transform: none;
+}
+
+input[type='text'],
+input[type='email'],
+input[type='number'],
+textarea {
+    border-radius: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 5px;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    border-top: 2px solid rgba(180,180,180,0.5);
+}
+
+input[type='submit'],
+input[type='button'],
+button,
+a.button,
+.fake-button{
+    color: #ffffff;
+    height: 40px;
+    font-size: inherit;
+    text-transform: uppercase;
+    border: none;
+    background-color: #c8c8c8;
+    box-shadow: 0 2px 0 rgba(180,180,180,0.8);
+}
+input[type='submit']{ background-color: #00aa00; width: 100%; }
+input#static_cancel{ background-color: #aa0000; width: 100%; }
+
+select{
+    border: none;
+    background-color: #c8c8c8;
+    color: #646464;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    box-shadow: 0 2px 0 rgba(180,180,180,0.8);
+}
+
+.no-shadow{
+    box-shadow: none;
 }

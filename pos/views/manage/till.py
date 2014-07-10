@@ -50,14 +50,19 @@ class RegisterForm(forms.ModelForm):
             'updated_by',
             'company']
 
+        widgets = {
+            'print_logo': forms.Select(choices=((True, _("Yes")), (False, _("No")))),
+            'print_location': forms.Select(choices=((True, _("Yes")), (False, _("No")))),
+        }
+
 
 @login_required
 def list_registers(request, company):
     c = get_object_or_404(Company, url_name=company)
 
     # check permissions: needs to be guest
-    if not has_permission(request.user, c, 'register', 'list'):
-        return no_permission_view(request, c, _("view registers"))
+    if not has_permission(request.user, c, 'register', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view registers."))
     
     context = {
         'company': c,
@@ -79,7 +84,7 @@ def add_register(request, company):
 
     # check permissions: needs to be manager
     if not has_permission(request.user, c, 'register', 'edit'):
-        return no_permission_view(request, c, _("add registers"))
+        return no_permission_view(request, c, _("You have no permission to add registers."))
 
     context = {
         'add': True,
@@ -127,7 +132,7 @@ def edit_register(request, company, register_id):
 
     # check permissions: needs to be guest
     if not has_permission(request.user, c, 'register', 'edit'):
-        return no_permission_view(request, c, _("edit registers"))
+        return no_permission_view(request, c, _("You have no permission to edit registers."))
 
     context = {
         'company': c,

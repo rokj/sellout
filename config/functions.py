@@ -35,22 +35,12 @@ company_defaults = {
 }
 
 user_defaults = {
-    # ux
-    'pos_discounts_per_page': 10,
     # interface
     'pos_interface': 'keyboard',  # options: 'keyboard', 'mouse'
     'pos_interface_product_button_size': 'medium',  # keys for PRODUCT_BUTTON_DIMENSIONS in globals
     'pos_interface_bill_width': 370,  # width of the bill area in terminal (in pixels)
     'pos_product_display': 'box',
     'pos_display_breadcrumbs': True,
-
-    # printing
-    #'pos_printer_port': 65336,  # the default port for client's localhost printer server
-    # size of receipt: 'small' (usually from pos printer) or 'large' (usually from normal desktop printer)
-    'pos_receipt_size': 'small',
-    # printer driver: 'system' (system's default printer) or 'pos' (custom printer driver, downloadable)
-    # TODO: rename 'pos' to match the app's name
-    'pos_printer_driver': 'system',
 }
 
 

@@ -247,16 +247,17 @@ def list_contacts(request, company):
     c = get_object_or_404(Company, url_name=company)
     
     # check permissions: needs to be guest
-    if not has_permission(request.user, c, 'contact', 'list'):
-        return no_permission_view(request, c, _("view contacts"))
+    if not has_permission(request.user, c, 'contact', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view contacts."))
 
-    #
     l = request.GET.get('letter')
+    results_display = False  # true if there was something in the search form
 
     # show the filter form
     if request.method == 'POST':
         contacts = Contact.objects.all()
         form = ContactFilterForm(request.POST)
+        results_display = True
 
         if form.is_valid():
             # filter by whatever is in the form
@@ -294,6 +295,7 @@ def list_contacts(request, company):
         'letter': l,
         'contacts': contacts,
         'filter_form': form,
+        'results_display': results_display,
         'title': _("Contacts"),
         'site_title': g.MISC['site_title'],
         'date_format_django': get_date_format(request.user, c, 'django'),
@@ -311,7 +313,7 @@ def get_contact(request, company, contact_id):
         return JSON_error(_("Company does not exist"))
     
     # permissions: needs to be guest to view contacts
-    if not has_permission(request.user, c, 'contact', 'list'):
+    if not has_permission(request.user, c, 'contact', 'view'):
         return JSON_error(_("You have no permission to view products"))
    
     contact = get_object_or_404(Contact, id=contact_id, company=c)
@@ -326,7 +328,7 @@ def add_contact(request, company):
     
     # check permissions: needs to be manager
     if not has_permission(request.user, c, 'contact', 'edit'):
-        return no_permission_view(request, c, _("add contacts"))
+        return no_permission_view(request, c, _("You have no permission to add contacts."))
 
     t = request.GET.get('type')
     if not t:
@@ -388,7 +390,7 @@ def edit_contact(request, company, contact_id):
     
     # check permissions: needs to be guest
     if not has_permission(request.user, c, 'contact', 'edit'):
-        return no_permission_view(request, c, _("edit contacts"))
+        return no_permission_view(request, c, _("You have no permission to edit contacts."))
     
     context = {
         'company': c,
@@ -436,6 +438,7 @@ def edit_contact(request, company, contact_id):
         form.company = c
 
     context['form'] = form
+    context['type'] = contact.type
     
     return render(request, 'pos/manage/contact.html', context)
 
