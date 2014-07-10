@@ -2,6 +2,7 @@ from django.conf.urls import patterns, url
 from django.utils.translation import ugettext as _
 
 from common import globals as g
+from mobile.views.manage.company import get_company, edit_company
 from mobile.views.views import mobile_get_cut, mobile_get_units, get_mobile_config
 
 from mobile.views import login
@@ -51,9 +52,9 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/units/?$', mobile_get_units, name='get_units'),
 
     # taxes
-    #url(r_company + r'/manage/json/taxes/?$', tax.mobile_get_taxes, name='get_taxes'), # get all taxes in a json list
-    #url(r_company + r'/manage/json/taxes/save/?$', tax.mobile_save_taxes, name='save_taxes'),
-
+    url(r_company + r'/manage/json/taxes/?$', tax.mobile_list_taxes, name='get_taxes'), # get all taxes in a json list
+    url(r_company + r'/manage/json/taxes/edit/?$', tax.mobile_edit_tax, name='edit_tax'),
+    url(r_company + r'/manage/json/taxes/delete/?$', tax.mobile_delete_tax, name='delete_tax'),
     # products
     url(r_company + r'/manage/json/products/?$', product.mobile_get_products, name='get_products'),
     url(r_company + r'/manage/json/products/search/?$', product.mobile_search_products, name='search_products'), # product list (search) - json
@@ -73,6 +74,10 @@ urlpatterns = patterns('',
 
     # configuration
     url(r_company + r'/manage/json/config/?$', get_mobile_config, name='mobile_get_config'),
+
+    # company
+    url(r_company + r'/manage/json/company/get', get_company, name='mobile_get_company'),
+    url(r_company + r'/manage/json/company/edit', edit_company, name='mobile_edit_company'),
 
     # available discounts list
     # url(r_company + r'/manage/json/discounts/?$', discount.JSON_discounts, name='JSON_discounts'),

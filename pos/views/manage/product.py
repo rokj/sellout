@@ -64,7 +64,7 @@ def product_to_dict(user, company, product, android=False):
     all_discounts = product.get_discounts()
     for d in all_discounts:
         # discounts.append(d.id)
-        discounts.append(discount_to_dict(user, company, d))
+        discounts.append(discount_to_dict(user, company, d, android))
     ret['discounts'] = discounts
 
     if product.image:  # check if product's image exists:
@@ -495,7 +495,7 @@ def validate_product(user, company, data):
     return {'status': True, 'data': data}
 
 @login_required
-def create_product(request, company):
+def create_product(request, company, android=False):
     # create new product
     try:
         c = Company.objects.get(url_name=company)
@@ -551,13 +551,13 @@ def create_product(request, company):
             product.image = data['image']
             product.save()
     
-    return JSON_ok()
+    return JSON_ok(extra=product_to_dict(request.user, c, product, android))
 
 @login_required
 def edit_product(request, company, android=False):
     # update existing product
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
     
@@ -581,14 +581,14 @@ def edit_product(request, company, android=False):
     data = valid['data']
     
     # update product:
-    product.name = data['name']
-    product.unit_type = data['unit_type']
-    product.code = data['code']
-    product.shortcut = data['shortcut']
-    product.description = data['description']
-    product.private_notes = data['private_notes']
-    product.stock = data['stock']
-    product.tax = data['tax']
+    product.name = data.get('name')
+    product.unit_type = data.get('unit_type')
+    product.code = data.get('code')
+    product.shortcut = data.get('shortcut')
+    product.description = data.get('description')
+    product.private_notes = data.get('private_notes')
+    product.stock = data.get('stock')
+    product.tax = data.get('tax')
     
     # update discounts
     product.update_discounts(request.user, data['discount_ids'])
@@ -616,7 +616,7 @@ def edit_product(request, company, android=False):
     product.updated_by = request.user
     product.save()
 
-    return JSON_ok(extra=product_to_dict(request.user, c, product))
+    return JSON_ok(extra=product_to_dict(request.user, c, product, android))
 
 @login_required
 def delete_product(request, company):

@@ -45,12 +45,14 @@ def JSON_response(data):
 def JSON_error(message):
     return JSON_response({'status': 'error', 'message': message})
 
+
 def JSON_ok(extra=None):
     data = {'status': 'ok'}
     if extra:
-        data['result'] = extra
+        data['data'] = extra
 
     return JSON_response(data)
+
 
 def JSON_parse(string_data):
     try:

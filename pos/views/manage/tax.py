@@ -119,6 +119,7 @@ def edit_tax(request, company):
 
     # the data
     data = JSON_parse(request.POST.get('data'))
+
     if not data:
         return JSON_error(_("No data sent"))
 
@@ -128,7 +129,7 @@ def edit_tax(request, company):
         print valid['message']
         return JSON_error(valid['message'])
     data = valid['data']
-
+    print data
     if data['id'] != -1:
         # it's an existing tax, fetch it and update
         # get the tax and save it
@@ -153,7 +154,7 @@ def edit_tax(request, company):
     except IntegrityError as e:
         return JSON_error(_("Could not save tax; ") + e.message)
 
-    return JSON_response({'status': 'ok', 'data': tax_to_dict(request.user, c, tax)})
+    return JSON_ok(extra=tax_to_dict(request.user, c, tax))
 
 
 @login_required
@@ -185,7 +186,7 @@ def delete_tax(request, company):
     except IntegrityError as e:
         return JSON_error(_("Could not save tax; ") + e.message)
 
-    return JSON_ok()
+    return JSON_ok(extra=tax_to_dict(request.user, c, tax))
 
 
 @login_required

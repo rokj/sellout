@@ -35,13 +35,13 @@ def mobile_search_products(request, company):
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_create_product(request, company):
-    return create_product(request, company)
+    return create_product(request, company, android=True)
 
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_edit_product(request, company):
-    return edit_product(request, company)
+    return edit_product(request, company, android=True)
 
 
 @api_view(['GET', 'POST'])
