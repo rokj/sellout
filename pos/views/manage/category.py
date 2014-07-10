@@ -132,11 +132,7 @@ def validate_parent(category, parent_id):
     return True
 
 
-<<<<<<< HEAD
-def get_all_categories(company_id, category_id=None, sort='name', data=None, level=0, json=False):
-=======
 def get_all_categories(company, category=None, sort='name', data=None, level=0, json=False):
->>>>>>> e2f9d03bcc5e4d02b78b901196633827f9f98509
     """ return a 'flat' list of all categories (converted to dictionaries/json) """
 
     #def category_to_dict(c, level): # c = Category object # currently not needed

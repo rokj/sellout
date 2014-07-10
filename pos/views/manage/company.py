@@ -9,11 +9,10 @@ from django import forms
 from common.images import image_from_base64, resize_image
 
 from pos.models import Company
-<<<<<<< HEAD
-from pos.views.util import JSON_response, JSON_parse, has_permission, no_permission_view, JSON_ok, max_field_length
-=======
-from pos.views.util import JSON_response, JSON_parse, has_permission, no_permission_view, JSON_ok, JSON_error
->>>>>>> e2f9d03bcc5e4d02b78b901196633827f9f98509
+
+from pos.views.util import JSON_response, JSON_parse, has_permission, no_permission_view, JSON_ok, JSON_error, \
+    max_field_length
+
 from common import globals as g
 import unidecode
 from common.functions import get_random_string, get_terminal_url
