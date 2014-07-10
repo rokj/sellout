@@ -126,10 +126,8 @@ def edit_tax(request, company):
     # validate
     valid = validate_tax(request.user, c, data)
     if not valid['success']:
-        print valid['message']
         return JSON_error(valid['message'])
     data = valid['data']
-    print data
     if data['id'] != -1:
         # it's an existing tax, fetch it and update
         # get the tax and save it
