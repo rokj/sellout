@@ -3,7 +3,7 @@
     position:fixed;
     width: 10px;
     cursor:move;
-    z-index:15;
+    z-index: 7;
 }
 
 #splitter img{
@@ -28,7 +28,7 @@ div#selector{
 /*          */
 div#controls{
     position:fixed;
-    height:100px;
+    height: 100px;
     padding: 10px;
 }
 
@@ -71,4 +71,18 @@ div.selector-title{
 
 div.selector-title.absolute{
     position: absolute;
+}
+
+#fullscreen_shadow{
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+
+    z-index: 10; /* above everything  */
+                 /* that must be shown should therefore have z-index at least 11 */
+
+    background-color: #000000;
+    opacity: 0.3;
 }

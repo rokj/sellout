@@ -207,21 +207,112 @@ button.more{
 
 /* price */
 
-
 /* tax */
 
 /* discounts */
 
 /* total */
 
-
 /* item details */
 .details-box{
-    background-color: #f7f7f7;
     position: absolute;
-    z-index: 6; /* above products and categories */
+    z-index: 11; /* above #fullscreen_shadow */
+    width: 300px;
+    padding: 0;
 }
 
+.details-box, .details-box .details-container{
+    background-color: #f7f7f7;
+    border-radius: 8px;
+}
+
+.details-box, .details-box .item-arrow{
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    background-color: #f7f7f7;
+}
+
+.details-box .details-container{
+    position: relative;
+    width: 300px;
+    height: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    
+}
+
+.details-box .details-title{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.details-box div.tax-percent{
+    width: 50%;
+    float: left;
+}
+
+.details-box .notes{
+    width: 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+
+.details-box .details-footer{
+    display: table;
+    width: 100%;
+}
+
+.details-box .buttons{
+    display: table-cell;
+    width: 33.3%;
+    vertical-align: bottom;
+}
+
+.details-box .buttons button, .details-box .buttons input{
+    width: 100%;
+}
+
+.details-box .explode{
+    padding-right: 5px;
+}
+
+.details-box .cancel{
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.details-box .ok{
+    padding-left: 5px;
+}
+
+.details-box button.explode{
+    
+}
+
+.details-box input.cancel{
+    background-color: #aa0000;
+}
+
+.details-box input.ok{
+    background-color: #00aa00;
+}
+
+.details-box .item-arrow{
+    position: absolute;
+    z-index: -1; /* between details-box and details-box container */
+    
+    left: -20px; /* rotation */
+    margin-top: -20px; /* rotation */
+    width: 40px;
+    height: 40px;
+    
+    transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    
+    display: none; /* will be shown by javascript when the details open */
+}
 
 /* bill summary */
 #bill_summary div.total{

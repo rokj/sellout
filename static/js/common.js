@@ -463,3 +463,10 @@ function toggle_elements(elements_dict, show){
         }
     }
 }
+
+function parseInt_zero(s){
+    // same as parseInt, except that returns 0 if parsing failed
+    var r = parseInt(s, 10);
+    if(isNaN(r)) return 0;
+    else return r;
+}

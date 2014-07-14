@@ -530,7 +530,9 @@ ItemDetails = function(item){
         notes: $(".notes", p.box),
         explode: $(".explode", p.box),
         save: $("input.ok", p.box),
-        cancel: $("input.cancel", p.box)
+        cancel: $("input.cancel", p.box),
+
+        arrow: $(".item-arrow", p.box)
     };
 
     p.temp_discounts = []; // this will be saved into product if details are closed with 'save'
@@ -705,8 +707,16 @@ ItemDetails = function(item){
         //  - discounts are added or reordered
     };
 
+    p.cleanup = function(){
+        // common to cancel and save buttons
+        p.box.remove();
+
+        p.g.items.fullscreen_shadow.unbind();
+        p.g.items.fullscreen_shadow.fadeOut("fast");
+    };
+
     p.cancel_button_action = function(){
-         p.box.remove();
+        p.cleanup();
     };
 
     p.save_button_action = function(){
@@ -716,8 +726,7 @@ ItemDetails = function(item){
 
         p.item.update();
 
-        // close the box
-        p.box.remove();
+        p.cleanup();
     };
 
     p.details_changed = function(){
@@ -755,85 +764,142 @@ ItemDetails = function(item){
     // init
     //
 
-    // move the details box to the correct position
-    p.box
-        .appendTo($("body"))
-        .show()
-        .offset({
-            left: p.item.item_row.offset().left + p.item.item_row.width(),
-            top: 20 // TODO: what is this
-        });
+    // shadow the screen
+    p.g.items.fullscreen_shadow.fadeIn("fast", function(){
+        // move the details box to the correct position
+        p.box
+            .appendTo($("body"))
+            .show();
 
-    // fill in the details
-    // tax:
-    p.items.tax_percent.text(
-        display_number(p.item.data.tax_percent, p.g.config.separator, p.g.config.decimal_places));
+        // the position of the item
+        var item_position = {
+            left: p.item.item_row.offset().left + p.item.item_row.outerWidth(true),
+            top: p.item.item_row.offset().top + p.item.item_row.outerHeight(true)/2
+        };
 
-    p.items.tax_absolute.text(
-        display_number(p.item.data.tax_absolute, p.g.config.separator, p.g.config.decimal_places));
+        var box_size = {
+            width: p.box.outerWidth(true),
+            height: p.box.outerHeight(true)
+        };
 
-    // copy current item's discounts to a temporary list;
-    // it will be edited and when details is saved, the item's discounts will
-    // be pointed to this list
-    for(var i = 0; i < p.item.data.discounts.length; i++){
-        p.temp_discounts.push(p.item.data.discounts[i]);
-    }
-    p.update_discounts();
+        var WINDOW_MARGIN = 10; // minimum distance from window edges
+        var window_height = $(window).height();
 
-    p.items.active_discounts.sortable({
-        items: "li.inserted",
-        opacity: 0.5,
-        stop: function(){
-            p.temp_discounts = p.get_discounts();
-            p.update_discounts();
+        if(item_position.top >= box_size.height/2 &&
+           (window_height - item_position.top) >= box_size.height/2){
+            // there's enough space above and below, center the box
+            p.box.offset({
+                left: item_position.left,
+                top: item_position.top - box_size.height/2
+            });
+
+            // position the arrow to the middle
+            p.items.arrow.css("top", Math.round(box_size.height/2) + "px").show();
         }
-    });
+        else if(item_position.top <= box_size.height/2){
+            // show the box (almost) at the top of the screen, then adjust the arrow position
+            p.box.offset({
+                left: item_position.left,
+                top: WINDOW_MARGIN
+            });
 
-    $().add(p.items.unique_discount_amount)
-       .add(p.items.unique_discount_type)
-       .blur(function(){
-            if(p.check_unique_discount()){
-                p.temp_discounts = p.get_discounts();
-                p.update_prices();
-            }
-            else{
-                error_message(
-                    gettext("Invalid discount"),
-                    gettext("Please check discount format and type")
-                );
-            }
-       });
-
-    p.items.notes.val(p.item.data.bill_notes);
-
-    // bind button actions
-    p.items.cancel.click(function(){ p.cancel_button_action();});
-
-    p.items.save.click(function(){ p.save_button_action(); });
-
-    // explode button
-    p.items.explode.unbind().click(function(){
-        // if anything has been changed, ask the user to save or cancel
-        if(p.details_changed()){
-            // warn the user about changed details
-            var dlg = confirmation_dialog(
-                gettext("Confirm explode"),
-                gettext("You have made changes to this item that will not be saved to the new item. Continue?"),
-                function(){
-                    // yes action: cancel, explode and close the 'dialog'
-                    p.cancel_button_action();
-                    p.item.explode();
-                    dlg.dialog("close");
-                },
-                function(){
-                    // no action: do nothing (just close the dialog)
-                    dlg.dialog("close");
-                }
-            );
+            // arrow position
+            p.items.arrow.css("top", Math.round(item_position.top - WINDOW_MARGIN) + "px").show();
         }
         else{
-            p.item.explode();
-            p.cancel_button_action();
+            // show the box (almost) at the bottom of the screen
+            p.box.css({
+                left: item_position.left,
+                bottom: WINDOW_MARGIN
+            });
+
+            // arrow position
+            p.items.arrow.css("bottom",
+                Math.round(window_height - item_position.top - WINDOW_MARGIN - p.items.arrow.width()/2)
+                    + "px").show();
         }
+
+
+        // fill in the details
+        // tax:
+        p.items.tax_percent.text(display_number(
+            p.item.data.tax_percent,
+            p.g.config.separator,
+            p.g.config.decimal_places) + " %");
+
+        p.items.tax_absolute.text(display_number(
+            p.item.data.tax_absolute,
+            p.g.config.separator,
+            p.g.config.decimal_places) + p.g.config.currency);
+
+        // copy current item's discounts to a temporary list;
+        // it will be edited and when details is saved, the item's discounts will
+        // be pointed to this list
+        for(var i = 0; i < p.item.data.discounts.length; i++){
+            p.temp_discounts.push(p.item.data.discounts[i]);
+        }
+        p.update_discounts();
+
+        p.items.active_discounts.sortable({
+            items: "li.inserted",
+            opacity: 0.5,
+            stop: function(){
+                p.temp_discounts = p.get_discounts();
+                p.update_discounts();
+            }
+        });
+
+        $().add(p.items.unique_discount_amount)
+           .add(p.items.unique_discount_type)
+           .blur(function(){
+                if(p.check_unique_discount()){
+                    p.temp_discounts = p.get_discounts();
+                    p.update_prices();
+                }
+                else{
+                    error_message(
+                        gettext("Invalid discount"),
+                        gettext("Please check discount format and type")
+                    );
+                }
+           });
+
+        p.items.notes.val(p.item.data.bill_notes);
+
+        // bind button actions
+        p.items.cancel.click(function(){ p.cancel_button_action();});
+
+        p.items.save.click(function(){ p.save_button_action(); });
+
+        // explode button
+        p.items.explode.unbind().click(function(){
+            // if anything has been changed, ask the user to save or cancel
+            if(p.details_changed()){
+                // warn the user about changed details
+                var dlg = confirmation_dialog(
+                    gettext("Confirm explode"),
+                    gettext("You have made changes to this item that will not be saved to the new item. Continue?"),
+                    function(){
+                        // yes action: cancel, explode and close the 'dialog'
+                        p.cancel_button_action();
+                        p.item.explode();
+                        dlg.dialog("close");
+                    },
+                    function(){
+                        // no action: do nothing (just close the dialog)
+                        dlg.dialog("close");
+                    }
+                );
+            }
+            else{
+                p.item.explode();
+                p.cancel_button_action();
+            }
+        });
+
+        // when shadow is clicked, cancel this thing
+        p.g.items.fullscreen_shadow.click(function(){
+            p.cancel_button_action();
+        });
     });
 };

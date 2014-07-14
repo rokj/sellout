@@ -83,6 +83,8 @@ $(window).load(function(){
 
             company_logo: null, // will be created when terminal initializes
 
+            fullscreen_shadow: $("#fullscreen_shadow"),
+
             small_receipt_template: $("#small_receipt_template"),
             large_receipt_template: $()
         }
@@ -94,8 +96,6 @@ $(window).load(function(){
     g.objects.products = new Products(g);
     g.objects.search = new Search(g);
     g.objects.bill = new Bill(g);
-
-    $(".product-button-image").click(function(){alert("wtf")});
 });
 </script>
 
@@ -165,50 +165,6 @@ $(window).load(function(){
                             <div class="value item total"></div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="details-box hidden" id="details_box_template">
-                <div>{# tax section #}
-                    <p class="details-title">{% trans 'Tax' %}</p>
-                    <div class="tax-percent"></div>
-                    <div class="tax-absolute"></div>
-                </div>
-
-                <div>{# discounts section #}
-                    <p class="details-title">{% trans 'Discounts' %}</p>
-                    <ul class="discounts">
-                        {# discounts that are already on the products will be added on the fly #}
-                        <li class="select-existing">
-                            <select>
-                                {# existing and valid discounts #}
-                            </select>
-                            <button>+</button>
-                        </li>
-                        <li class="add-new">
-                            {# just an input box and select for type of discount #}
-                            <input type="text" class="description" /><br />
-                            <input type="text" class="amount" />
-                            <select class="type">
-                                <option value="Percent">%</option>
-                                <option value="Absolute">{{ currency }}</option>
-                            </select>
-                        </li>
-                    </ul>
-                </div>
-
-                <div>{# notes #}
-                    <p class="details-title">{% trans 'Notes' %}</p>
-                    <textarea class="notes"></textarea>
-                </div>
-
-                <div>{# explode button #}
-                    <button class="explode">{% trans 'Explode' %}</button>
-                </div>
-
-                <div>{# save and cancel buttons #}
-                    <input type="button" value="{% trans 'Save' %}" class="ok"/>
-                    <input type="button" value="{% trans 'Cancel' %}" class="cancel"/>
                 </div>
             </div>
 
@@ -303,5 +259,63 @@ $(window).load(function(){
     <div id="large_receipt_template">
         {% include 'pos/large_receipt.html' %}
     </div>
+
+    <div class="details-box hidden" id="details_box_template">
+        {# the arrow that should point to bill item #}
+        <div class="item-arrow"></div>
+
+        {# and the arrow should be behind the stuff below #}
+        <div class="details-container">
+            <div>{# tax section #}
+                <p class="details-title">{% trans 'Tax' %}</p>
+                <div class="tax-percent"></div>
+                <div class="tax-absolute"></div>
+            </div>
+
+            <div>{# discounts section #}
+                <p class="details-title">{% trans 'Discounts' %}</p>
+                <ul class="discounts">
+                    {# discounts that are already on the products will be added on the fly #}
+                    <li class="select-existing">
+                        <select>
+                            {# existing and valid discounts #}
+                        </select>
+                        <button>+</button>
+                    </li>
+                    <li class="add-new">
+                        {# just an input box and select for type of discount #}
+                        <input type="text" class="description" /><br />
+                        <input type="text" class="amount" />
+                        <select class="type">
+                            <option value="Percent">%</option>
+                            <option value="Absolute">{{ currency }}</option>
+                        </select>
+                    </li>
+                </ul>
+            </div>
+
+            <div>{# notes #}
+                <p class="details-title">{% trans 'Notes' %}</p>
+                <textarea class="notes"></textarea>
+            </div>
+
+            <div class="details-footer">
+                <div class="buttons explode">
+                    <button class="explode">{% trans 'Explode' %}</button>
+                </div>
+
+                <div class="buttons cancel">
+                    <input type="button" value="{% trans 'Cancel' %}" class="cancel"/>
+                </div>
+
+                <div class="buttons ok">
+                    <input type="button" value="{% trans 'Save' %}" class="ok"/>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<div id="fullscreen_shadow" class="hidden"></div>
+
 {% endblock %}
