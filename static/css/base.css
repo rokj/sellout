@@ -103,3 +103,7 @@ select{
 .no-shadow{
     box-shadow: none;
 }
+
+.contain-floats{
+    overflow: hidden; /* the div will expand so that floats inside don't overflow */
+}

@@ -5,24 +5,27 @@ Terminal = function(g){
     
     p.items = {
         status_bar: $("#status_bar"),
+        status_bar_company: $("#status_bar_company"),
 
-        bill: $("#bill_scroll_outer"),
+        left_column: $("#left_column"),
+        bill_container: $("#bill_container"),
 
         till: $("#till"),
         bill_header: $("#bill_header"),
-        bill_summary: $("#bill_summary"),
-        bill_actions: $("#bill_actions"),
 
         splitter: $("#splitter"),
 
         selector: $("#selector"),
         categories: $("#categories"),
         products: $("#products_scroll_outer"),
+        products_title: $("#products_title"),
         controls: $("#controls"),
 
         registers_dialog: $("#registers"),
         registers_list: $("#registers_list"),
-        select_register: $("#select_register")
+        select_register: $("#select_register"),
+
+        current_till: $("#current_till")
     };
 
     // bill sizes (in pixels):
@@ -45,22 +48,12 @@ Terminal = function(g){
     // methods: sizing and layout
     //
     p.size_layout = function(save){
-        /* fixed layout, positioned 100% by javascript:
-        __________ status_bar__________
-        bill header  | sp | categories |
-        bill         | li | products   |
-        till         | t  |            |
-        bill_summary | t  | ___________|
-        bill_actions | er | controls   |
-
-        */
-
+        // position: #bill_container, #splitter, #selector
         var window_height = $(window).height();
         var window_width = $(window).width();
 
         // manage bar: height is defined with css
         var manage_height = p.items.status_bar.height();
-        p.items.status_bar.width(window_width); // width is 100%
 
         // splitter: if it is pushed away further than the width of window, reset it
         var sp = p.g.config.bill_width;
@@ -71,22 +64,17 @@ Terminal = function(g){
 
         p.items.splitter.offset({ top: manage_height, left: sp });
         p.items.splitter.height(window_height - manage_height);
-        var splitter_left = sp + p.items.splitter.width();
+        var splitter_width = p.items.splitter.width();
+        var splitter_left = sp + splitter_width;
 
-        // till
-        var till_height = p.items.till.height();
-        p.items.till.offset({left: 0, top: window_height - till_height});
-        p.items.till.width(sp);
+        // left column: according to splitter
+        p.items.left_column.offset({ top: manage_height, left: 0 });
+        p.items.left_column.height(window_height - manage_height);
+        p.items.left_column.width(sp - splitter_width);
 
-        // bill header
-        var header_height = p.items.bill_header.height();
-        p.items.bill_header.offset({top: manage_height, left: 0});
-        p.items.bill_header.width(sp);
-
-        // bill
-        p.items.bill.offset({ top: manage_height + header_height, left: 0 });
-        p.items.bill.height(window_height - manage_height - till_height - header_height);
-        p.items.bill.width(sp);
+        // bill container
+        p.items.bill_container.css("top", p.items.bill_header.outerHeight() + "px");
+        p.items.bill_container.css("bottom", p.items.till.outerHeight() + "px");
 
         // controls
         var controls_height = p.items.controls.height();
@@ -94,7 +82,7 @@ Terminal = function(g){
         p.items.controls.width(window_width - splitter_left);
 
         // selection
-        p.items.selector.offset({left: splitter_left, top: manage_height});
+        p.items.selector.offset({left: splitter_left , top: manage_height});
         p.items.selector.width(window_width - splitter_left);
         p.items.selector.height(window_height - manage_height - controls_height);
 
@@ -102,9 +90,8 @@ Terminal = function(g){
         var categories_height = p.items.categories.height();
 
         // products
-        p.items.products.offset({left: splitter_left});
         p.items.products.width(window_width - splitter_left);
-        p.items.products.height(window_height - manage_height - controls_height - categories_height);
+        p.items.products.css("top", p.items.categories.outerHeight() + p.items.categories.position().top);
 
         // refresh if necessary
         if(p.g.objects.products) p.g.objects.products.refresh();
@@ -129,20 +116,34 @@ Terminal = function(g){
         if(bw <= p.bill_sizes[0]){
             // hide tax and discount columns (hiding is done in css)
             // size columns (css only)
-            $().add(p.items.bill_header).add(p.items.bill)
+            $().add(p.items.bill_header).add(p.items.bill_container)
                 .removeClass("medium wide").addClass("narrow");
 
         }
         else if(bw > p.bill_sizes[0] && bw < p.bill_sizes[1]){
             // show tax column
-            $().add(p.items.bill_header).add(p.items.bill)
+            $().add(p.items.bill_header).add(p.items.bill_container)
                 .removeClass("narrow wide").addClass("medium");
         }
         else{
             // show tax and discounts column
-            $().add(p.items.bill_header).add(p.items.bill)
+            $().add(p.items.bill_header).add(p.items.bill_container)
                 .removeClass("narrow medium").addClass("wide");
         }
+    };
+
+    p.set_register = function(r){
+        if(!r){
+            console.log("No register set");
+            return;
+        }
+
+        // the register must be set (p.register)
+        p.register = r;
+
+        p.items.current_till.text(p.register.name);
+
+        // TODO: ?
     };
 
     p.get_register = function(id){
@@ -157,7 +158,7 @@ Terminal = function(g){
 
             for(i = 0; i < p.g.data.registers.length; i++){
                 if(p.g.data.registers[i].id == id){
-                    p.register = p.g.data.registers[i];
+                    p.set_register(p.g.data.registers[i]);
                     selected = true;
                     break;
                 }
@@ -170,7 +171,7 @@ Terminal = function(g){
                         "the first available register settings will be used")
                 );
 
-                p.register = p.g.data.registers[0];
+                p.set_register(p.g.data.registers[0]);
             }
 
             return;
@@ -229,7 +230,7 @@ Terminal = function(g){
             axis: "x",
             stop: function(){
                 var new_width = $(this).offset().left;
-                var min_width = parseInt(p.items.bill.css("min-width"));
+                var min_width = parseInt(p.items.bill_container.css("min-width"));
 
                 // if minimum bill width more than new_width, set to minimum value
                 if(min_width > new_width){
@@ -258,4 +259,7 @@ Terminal = function(g){
 
     // get register
     p.get_register(p.g.config.register_id);
+
+    // set status bar title
+    p.items.status_bar_company.text(p.g.data.company.name);
 };

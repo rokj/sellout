@@ -1,34 +1,74 @@
-/* TODO: remove */
-/*div{
-    border: 1px solid black;
-    margin:1px;
-}*/
-
 /* splitter */
 #splitter{
     position:fixed;
-    width:6px;
-    background-color:black;
-    opacity:0.6;
+    width: 10px;
     cursor:move;
     z-index:15;
 }
 
-/*              */
-/* main content */
-/*              */
-
-div#selector{
-    position:fixed;
-    top:35px;
+#splitter img{
+    position: relative;
+    top: 50%;
+    left: 1px;
 }
 
+#splitter.ui-draggable-dragging{
+    background-color: rgba(0,0,0,0.2);
+}
+
+/*          */
+/* selector */
+/*          */
+div#selector{
+    position:fixed;
+}
+
+/*          */
+/* controls */
+/*          */
 div#controls{
     position:fixed;
     height:100px;
-    border:1px solid black;
+    padding: 10px;
 }
 
+#search_container{
+    display: inline;
+    line-height: 100px;
+}
+
+#search_products_filter{
+    margin-right: 10px;
+    width: 200px;
+
+}
+
+#search_products_submit{
+    width: 40px;
+    background-color: #00aa00;
+}
+
+/*       */
+/* other */
+/*       */
 .no-close .ui-dialog-titlebar-close{
     display:none;
+}
+
+div.selector-title{
+    display: inline-block;
+    margin-left: 10px;
+    background-color: #969696;
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+    padding-left: 10px;
+    color: #ffffff;
+
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+div.selector-title.absolute{
+    position: absolute;
 }

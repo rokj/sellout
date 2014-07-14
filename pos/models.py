@@ -469,7 +469,8 @@ class Register(SkeletonU):
     company = models.ForeignKey(Company, null=False, blank=False)
     # each company must have at least one register; each register carries the following settings
     name = models.CharField(_("Name of cash register"), max_length=50, null=False, blank=False)
-    receipt_format = models.CharField(_("Receipt format"), max_length=32, choices=g.RECEIPT_FORMATS, null=False)
+    printer_driver = models.CharField(_("Printer driver"), max_length=50, null=False, choices=g.PRINTER_DRIVERS)
+    receipt_format = models.CharField(_("Receipt format"), max_length=32, choices=g.RECEIPT_FORMATS, null=False, blank=False)
     receipt_type = models.CharField(_("Receipt type"), max_length=32, choices=g.RECEIPT_TYPES, null=False)
     print_logo = models.BooleanField(_("Print logo on thermal receipts"), blank=False)
 

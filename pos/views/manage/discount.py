@@ -243,7 +243,7 @@ def add_discount(request, company):
     
     # check for permission for adding discounts
     if not request.user.has_perm('pos.add_discount'):
-        return error(request, _("You have no permission to add discounts."))
+        return no_permission_view(request, c, _("You have no permission to add discounts."))
 
     if request.method == 'POST':
         # submit data
@@ -304,7 +304,7 @@ def edit_discount(request, company, discount_id):
         
     # check if user has permissions to change contacts
     if not request.user.has_perm('pos.change_discount'):
-        return error(request, _("You have no permission to edit discounts."))
+        return no_permission_view(request, c, _("You have no permission to edit discounts."))
 
     if request.method == 'POST':
         # submit data

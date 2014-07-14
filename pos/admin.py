@@ -18,6 +18,7 @@ admin.site.register(Contact)
 admin.site.register(Permission)
 admin.site.register(Bill)
 admin.site.register(BillItem)
+admin.site.register(Register)
 
 # TODO: remove history
 admin.site.register(BillHistory)

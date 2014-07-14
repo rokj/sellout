@@ -40,6 +40,12 @@
             </div>
 
             <div class="form-field">
+                <div class="error">{{ form.printer_driver.errors }}</div>
+                {{ form.printer_driver.label_tag }}
+                {{ form.printer_driver }}
+            </div>
+
+            <div class="form-field">
                 <div class="error">{{ form.print_logo.errors }}</div>
                 {{ form.print_logo.label_tag }}
                 {{ form.print_logo }}
@@ -69,4 +75,3 @@
         </form>
     </div>
 {% endblock %}
-

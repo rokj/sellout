@@ -85,10 +85,8 @@ Products = function(g){
         // space product buttons evenly:
         i = Math.floor((div_height - n*p_size[1])/(n+1));
         $("div.product-button", p.items.container)
-            .css("margin-top", i.toString() + "px")
             .css("margin-bottom", i.toString() + "px")
-            .css("margin-left", Math.floor((i/2).toString()) + "px")
-            .css("margin-right", Math.floor((i/2).toString()) + "px");
+            .css("margin-right", i + "px");
 
         // save currently shown products in case of refresh etc.
         p.shown_products = ids;
@@ -179,8 +177,10 @@ Product = function(list, data){
     p.items.container.css({
 		width: p.g.config.product_button_size,
 		height: p.g.config.product_button_size,
-        'background-color': p.data.color
+        'background-color': "#" + p.data.color
 	});
+
+    if(is_dark(p.data.color)) p.items.container.addClass("dark");
 
     p.items.image = $("<div>", {"class": "product-button-image"});
     p.items.image.appendTo(p.items.container);

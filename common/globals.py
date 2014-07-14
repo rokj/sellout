@@ -105,6 +105,11 @@ RECEIPT_TYPES = (
     ("E-mail", _("E-mail")),
 )
 
+PRINTER_DRIVERS = (
+    ("System", _("Default system printer")),
+    ("Sellout", _("Sellout serial (must be installed)")),
+)
+
 # date formats
 # specify all formats for each date:
 #  - regular expression for checking format

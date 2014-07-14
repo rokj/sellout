@@ -14,7 +14,7 @@ Bill = function(g){
     p.serial = 0; // a number that will be assigned to every item
                    // (like an unique id - has nothing to do with id on server)
 
-    p.bill_container = $("#bill");
+    p.bill = $("#bill");
 
     // summary numbers
     p.summary = $("#bill_summary");
@@ -128,61 +128,65 @@ Bill = function(g){
             r.items.push(p.items[i].format());
         }
 
-        // decide what to do depending on user's print settings
-        if(p.g.config.printer_driver == "system"){
-            // use the default, printer;
-            // create a HTML receipt and issue javascript print() method and that's it
-            console.log("printing");
-            var receipt = format_small_receipt(p, r);
-            receipt.printThis();
-        }
-        else{
-            // TODO:
-            console.log("wtf is this driver");
-        }
-
-        // send to print server
-        /*send_data('http://localhost:' + p.g.config.printer_port,  r, null, function(response){
-            alert(response);
-        });*/
-        /*send_data(p.g.urls.create_bill, r, p.g.csrf_token, function(recv_data){
-            if(recv_data.status != 'ok'){
+        // send to server, when it's done, print if everything is OK
+        send_data(p.g.urls.create_bill, r, p.g.csrf_token, function(response){
+            if(response.status != 'ok'){
                 error_message(
-                    gettext("Error while saving bill"),
-                    recv_data.message);
-
-                // TODO: further actions (?!)
+                    gettext("Could not create bill"),
+                    response.message
+                );
             }
             else{
-                error_message("jupi, ratschun je napravljen")
-                // TODO: empty this bill and create a new one
+                p.print(response.data.bill);
             }
-        });*/
+        });
+    };
 
-        // TODO: what then?
+    p.print = function(bill){
+        // decide what to do depending on user's print settings
+
+        // printer driver:
+        switch(p.g.objects.terminal.register.printer_driver){
+            case 'System':
+                // create a fine html graphics, just check the receipt format first
+                if(p.g.objects.terminal.register.receipt_format == 'Thermal'){
+                    // use the default, printer;
+                    // create a HTML receipt and issue javascript print() method and that's it
+                    var receipt = format_small_receipt(p.g, bill);
+                    receipt.printThis();
+                }
+                else{
+                    alert("printing on A4");
+                }
+                break;
+            default:
+                alert("Printer driver not implemented: " +
+                    p.g.objects.terminal.register.printer_driver);
+                break;
+        }
     };
 
     //
     // init
     //
     // draggable: the same as set_draggable(), but vertical
-    p.bill_container.draggable({
+    p.bill.draggable({
         helper: function () {
             return $("<div>").css("opacity", 0);
         },
         drag: function (event, ui) {
             // the position of parent obviously has to be taken into account
-            var pos = ui.helper.position().top - p.bill_container.parent().position().top;
+            var pos = ui.helper.offset().top - p.bill.parent().offset().top;
             $(this).stop().animate({top: pos},
                 p.g.settings.t_easing,
                 'easeOutCirc',
                 function () {
                     // check if this has scrolled past the last
                     // (first) button
-                    var all_buttons = $("div.bill-item", p.bill_container);
+                    var all_buttons = $("div.bill-item", p.bill);
                     var first_button = all_buttons.filter(":first");
                     var last_button = all_buttons.filter(":last");
-                    var container = p.bill_container.parent().parent();
+                    var container = p.bill.parent();
 
                     if(first_button.length < 1 || last_button.length < 1) return;
 
@@ -190,14 +194,14 @@ Bill = function(g){
                     // container's, always slide it back to top border
 
                     if (first_button.position().top + last_button.position().top + last_button.outerHeight() < container.height()){
-                        p.bill_container.animate({top: 0}, "fast");
+                        p.bill.animate({top: 0}, "fast");
                     }
                     else {
                         if (first_button.offset().top > container.offset().top) {
-                            p.bill_container.animate({top: 0}, "fast");
+                            p.bill.animate({top: 0}, "fast");
                         }
                         else if (last_button.offset().top + last_button.height() < container.offset().top + container.height()) {
-                            p.bill_container.animate({
+                            p.bill.animate({
                                 top: -last_button.position().top + container.height() - last_button.height()}, "fast");
                         }
                     }
@@ -205,7 +209,6 @@ Bill = function(g){
         },
         axis: "y"
     });
-
 
     // bindings
     p.finish_button.click(function(){
@@ -227,7 +230,7 @@ Item = function(bill, product) {
     p.serial = ++p.bill.serial; // a unique id for this bill
     p.details = null; // will initialize ItemDetails (if 'more' button is clicked)
 
-    p.item_row = p.bill.item_template.clone().appendTo(p.bill.bill_container);
+    p.item_row = p.bill.item_template.clone().appendTo(p.bill.bill);
     p.items = { // a list of jQuery objects, not Item() objects
         delete_button: $(".delete", p.item_row),
 

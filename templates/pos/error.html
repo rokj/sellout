@@ -1,14 +1,13 @@
-{% extends "base.html" %}
+{% extends "pos/manage/manage.html" %}
 {% load static %}
 {% load i18n %}
 
 {% block body_tag %}<body> {% endblock %}
-{% block status_bar %}{# nothing to put in status bar #}{% endblock %}
-{% block content %}
-<h1>{% trans "Error" %}</h1>
+{% block status_bar_title %}{% trans 'Error' %}{% endblock %}
 
-<p class="error">{{message}}</p>
-
-<p><a href="{{back_link}}">{% trans 'Back' %}</a></p>
-
+{% block manage_content %}
+    <div class="edit-container">
+        <p class="error">{{message}}</p>
+        <p><a href="{{back_link}}">{% trans 'Back' %}</a></p>
+    </div>
 {% endblock %}

@@ -16,18 +16,29 @@
     text-transform: uppercase;
     font-weight: bold;
     float: left;
-    text-align: center;
     margin-right: 10px;
+
+    white-space: nowrap;
 }
 
 #status_bar img{
     position: relative;
     top: 5px;
+    display: inline;
 }
 
 #status_bar #logo.nolink img{
     position: relative;
     left: 10px;
+    display: inline;
+}
+
+#status_bar_company{
+    display: inline;
+    margin-left: 25px;
+    height: 40px;
+
+    margin-top: 2px; /* to match with logo font */
 }
 
 #status_bar #logo.link{

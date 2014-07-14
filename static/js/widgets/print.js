@@ -1,8 +1,6 @@
-function format_small_receipt(bill, data){
+function format_small_receipt(g, bill){
     // g: terminal globals
     // bill: Bill() objects
-
-    var g = bill.g;
     var receipt = g.items.small_receipt_template.clone().removeAttr("id");
 
     // company details:
@@ -30,9 +28,9 @@ function format_small_receipt(bill, data){
     var item_template_2 = $(".receipt-row.second", receipt);
     var i, item, io1, io2;
 
-    for(i = 0; i < data.items.length; i++){
+    for(i = 0; i < bill.items.length; i++){
         // get item data
-        item = data.items[i];
+        item = bill.items[i];
 
         // clone the two rows
         io1 = item_template_1.clone();
@@ -57,7 +55,7 @@ function format_small_receipt(bill, data){
     // currency
     $(".receipt-currency", receipt).text(g.config.currency);
     // the grand total
-    $(".receipt-grand-total", receipt).text(data.grand_total);
+    $(".receipt-grand-total", receipt).text(bill.grand_total);
 
     // cashier name
     $(".receipt-cashier", receipt).text(g.data.user_name);

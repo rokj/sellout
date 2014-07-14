@@ -14,10 +14,13 @@ from datetime import datetime
 
 
 # requests and responses
-def error(request, message):
+def error(request, company, message):
     
     context = {
+        'company': company,
         'message': message,
+        'title': _("Error"),
+        'site_title': g.MISC['site_title'],
         'back_link': request.build_absolute_uri(),
     }
 

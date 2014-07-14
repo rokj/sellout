@@ -44,7 +44,7 @@ blocks:
     <title>{% block title %}{{title}} - {{site_title}}{% endblock %}</title>
 
     <script type="text/javascript">
-        $(document).ready(function(){
+        $(window).load(function(){
             {# common to management #}
             var items = {
                 management_menu_button:  $("#management_button"),
@@ -67,6 +67,7 @@ blocks:
             <div id="logo" class="nolink">
                 {# logo block will be replaced with link to management in terminal #}
                 <img src="{% static 'icons/logo_white.png' %}" alt="" />
+                <div id="status_bar_company"></div>
             </div>
         {% endblock %}
 

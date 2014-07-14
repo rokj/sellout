@@ -402,15 +402,8 @@ def create_bill(request, company):
             )
             db_discount.save()
 
-    # that's it
-    # TODO: print receipt
-
-    #s = 'item name  |  price   |   total   |   quantity\n'
-    #for item in bill['items']:
-    #    s += item['name'] + " " + str(item['base_price']) + " " +str(item['total']) + " " + str(item['quantity']) + '\n'
     d = {'bill': bill_to_dict(request.user, c, db_bill)}
     return JSON_ok(extra=d)
-
 
 
 @login_required

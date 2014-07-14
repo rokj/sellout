@@ -9,6 +9,14 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/categories.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'css/bill.css' %}" />
 
+<style type="text/css">
+.item-val.quantity input[type='text']{
+    background-image: url("{% static 'icons/quantity_background.png' %}");
+    background-position: center center;
+    background-repeat:  no-repeat;
+}
+</style>
+
 {# jquery libraries (only used in terminal) #}
 <script src="{% static 'js/jquery.printThis.js' %}"></script>
 
@@ -24,19 +32,17 @@
 {% comment %} other {% endcomment %}
 <script src="{% static 'fuckyeah/fuckyeah.jquery.js' %}"></script>
 
-
 {% comment %} 'embedded' javascript {% endcomment %}
 <script type="text/javascript">
-$(document).ready(function(){
+$(window).load(function(){
     // global data and objects
     var g = { // global data for the terminal
         csrf_token: "{{ csrf_token }}",
         urls: {
               // terminal & stuff
               save_terminal_settings: "{% url 'pos:save_terminal' company.url_name  %}",
-              // bill and items
               create_bill: "{% url 'pos:create_bill' company.url_name %}",
-              // management: registers
+              // management: registers (a link is needed for choosing current register)
               manage_registers: "{% url 'pos:list_registers' company.url_name %}",
               // save last used register
               set_register: "{% url 'pos:set_register' company.url_name %}"
@@ -97,192 +103,198 @@ $(document).ready(function(){
 
 {% block content %}
 {% comment %} the bill (scrolling) {% endcomment %}
-{% comment %} bill header has the same layout as items and will be copied when adding new (items) {% endcomment %}
-<div id="bill_header" class="bill-item header">
-    {% comment %} product name and code {% endcomment %}
-    <div class="item-val name header">
-        <div class="">{% trans 'Name' %}</div>
-    </div>
-    {% comment %} quantity and unit type {% endcomment %}
-    <div class="item-val quantity header">
-        <div class="">{% trans 'Qty' %}</div>
-    </div>
-    {% comment %} base price {% endcomment %}
-    <div class="item-val price header">
-        <div class="">{% trans 'Price' %}{# {{ currency }} #}</div>
-    </div>
-    {% comment %} tax, percent and absolute value {% endcomment %}
-    <div class="item-val tax header">
-        <div class="">{% trans 'Tax' %}</div>
-    </div>
-    {% comment %} discount {% endcomment %}
-    <div class="item-val discount header">
-        <div class="">{% trans 'Discount' %}</div>
-    </div>
-    {% comment %} total of this Item(s) {% endcomment %}
-    <div class="item-val total header">
-        <div class="">{% trans 'Total' %}</div>
-    </div>
-</div>
-<div id="bill_scroll_outer">
-    <div id="bill_scroll_inner">
-        <div id="bill">
-            <div class="bill-item collapsed" id="bill_item_template">
-                {# name #}
-                <div class="item-val name">
-                    <img src="{% static 'icons/delete_active.png' %}"
-                         class="delete"
-                         alt="{% trans 'Remove' %}"
-                         title="{% trans 'Remove product from bill' %}" />
+    <div id="left_column">
+        <div>
+            {% comment %} bill header has the same layout as items and will be copied when adding new item {% endcomment %}
+            <div id="bill_header" class="bill-item header">
+                <div class="bill-border-bottom contain-floats">
+                    {% comment %} product name and code {% endcomment %}
+                    <div class="item-val name header"> {% trans 'Name' %} </div>
+                    {% comment %} quantity and unit type {% endcomment %}
+                    <div class="item-val quantity header"> {% trans 'Qty' %} </div>
+                    {% comment %} base price {% endcomment %}
+                    <div class="item-val price header">{% trans 'Price' %}{# {{ currency }} #}</div>
+                    {% comment %} tax, percent and absolute value {% endcomment %}
+                    <div class="item-val tax header"> {% trans 'Tax' %} </div>
+                    {% comment %} discount {% endcomment %}
+                    <div class="item-val discount header"> {% trans 'Discount' %} </div>
 
-                    <div class="value item name"></div>
-                    <div class="more-button">
-                        <button class="more">{% trans 'More' context 'More button in bill item' %}</button>
+                    {% comment %} total of this Item(s) {% endcomment %}
+                    <div class="item-val total header">{% trans 'Total' %}</div>
+                </div>
+            </div>
+
+            <div id="bill_container">
+                <div id="bill">
+                    <div class="bill-item collapsed" id="bill_item_template">
+                        {# name #}
+                        <div class="item-val name">
+                            <img src="{% static 'icons/delete_active.png' %}"
+                                 class="delete"
+                                 alt="{% trans 'Remove' %}"
+                                 title="{% trans 'Remove product from bill' %}" />
+
+                            <div class="value item name"></div>
+
+                            {# more button #}
+                            <button class="more">{% trans 'More' context 'More button in bill item' %}</button>
+                        </div>
+                        {# quantity #}
+                        <div class="item-val quantity">
+                            {# wrap everything in another div so that everything will be centered #}
+                            <div>
+                                <button class="qty-plus">+</button>
+                                <input type="text" class="qty" />
+                                <button class="qty-minus">-</button>
+                            </div>
+                        </div>
+                        {# price #}
+                        <div class="item-val price">
+                            <div class="value item price"></div>
+                        </div>
+                        {# tax #}
+                        <div class="item-val tax">
+                            <div class="value item tax"></div>
+                        </div>
+                        {# discount #}
+                        <div class="item-val discount">
+                            <div class="value item discount"></div>
+                        </div>
+                        {# sub-total #}
+                        <div class="item-val total">
+                            <div class="value item total"></div>
+                        </div>
                     </div>
                 </div>
-                {# quantity #}
-                <div class="item-val quantity">
-                    <button class="qty-plus">+</button>
-                    <input type="text" class="qty" />
-                    <button class="qty-minus">-</button>
+            </div>
+
+            <div class="details-box hidden" id="details_box_template">
+                <div>{# tax section #}
+                    <p class="details-title">{% trans 'Tax' %}</p>
+                    <div class="tax-percent"></div>
+                    <div class="tax-absolute"></div>
                 </div>
-                {# price #}
-                <div class="item-val price">
-                    <div class="value item price"></div>
+
+                <div>{# discounts section #}
+                    <p class="details-title">{% trans 'Discounts' %}</p>
+                    <ul class="discounts">
+                        {# discounts that are already on the products will be added on the fly #}
+                        <li class="select-existing">
+                            <select>
+                                {# existing and valid discounts #}
+                            </select>
+                            <button>+</button>
+                        </li>
+                        <li class="add-new">
+                            {# just an input box and select for type of discount #}
+                            <input type="text" class="description" /><br />
+                            <input type="text" class="amount" />
+                            <select class="type">
+                                <option value="Percent">%</option>
+                                <option value="Absolute">{{ currency }}</option>
+                            </select>
+                        </li>
+                    </ul>
                 </div>
-                {# tax #}
-                <div class="item-val tax">
-                    <div class="value item tax"></div>
+
+                <div>{# notes #}
+                    <p class="details-title">{% trans 'Notes' %}</p>
+                    <textarea class="notes"></textarea>
                 </div>
-                {# discount #}
-                <div class="item-val discount">
-                    <div class="value item discount"></div>
+
+                <div>{# explode button #}
+                    <button class="explode">{% trans 'Explode' %}</button>
                 </div>
-                {# sub-total #}
-                <div class="item-val total">
-                    <div class="value item total"></div>
+
+                <div>{# save and cancel buttons #}
+                    <input type="button" value="{% trans 'Save' %}" class="ok"/>
+                    <input type="button" value="{% trans 'Cancel' %}" class="cancel"/>
+                </div>
+            </div>
+
+            {% comment %} bill summary and till: fixed {% endcomment %}
+            <div id="till">
+                {% comment %} bill summary: discounts total and tax total {% endcomment %}
+                <div id="bill_summary">
+                    <div class="total bill-border-top bill-border-bottom">
+                        <p class="total">{# placeholder, this is #}-</p>
+                        {% trans "Fakin total" %}:
+                    </div>
+                </div>
+
+                {% comment %} buttons etc. {% endcomment %}
+                <div id="bill_actions">
+                    <button class="till-button" id="finish_the_fukin_bill">Finish</button>
+                    <button class="till-button" id="save_the_fukin_bill">Save</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="details-box hidden" id="details_box_template">
-    <div>{# tax section #}
-        <p class="details-title">{% trans 'Tax' %}</p>
-        <div class="tax-percent"></div>
-        <div class="tax-absolute"></div>
+    {% comment %} separator: draggable div for resizing bill/controls {% endcomment %}
+    <div id="splitter">
+        <img src="{% static 'icons/grip_vertical.png' %}"
+             alt="" title="{% trans 'Drag to resize bill' %}" />
     </div>
 
-    <div>{# discounts section #}
-        <p class="details-title">{% trans 'Discounts' %}</p>
-        <ul class="discounts">
-            {# discounts that are already on the products will be added on the fly #}
-            <li class="select-existing">
-                <select>
-                    {# existing and valid discounts #}
-                </select>
-                <button>+</button>
-            </li>
-            <li class="add-new">
-                {# just an input box and select for type of discount #}
-                <input type="text" class="description" /><br />
-                <input type="text" class="amount" />
-                <select class="type">
-                    <option value="Percent">%</option>
-                    <option value="Absolute">{{ currency }}</option>
-                </select>
-            </li>
-        </ul>
-    </div>
+    {% comment %} product selector and other controls {% endcomment %}
+    <div id="selector">
+        <div id="categories">
+            <div id="parents_scroll_outer">
+                <div class="category-button hidden" id="category_button_home">{% trans 'All products' %}</div>
 
-    <div>{# notes #}
-        <p class="details-title">{% trans 'Notes' %}</p>
-        <textarea class="notes"></textarea>
-    </div>
+                <div class="category-button" id="category_button_favorites">{% trans 'Favorites' %}</div>
 
-    <div>{# explode button #}
-        <button class="explode">{% trans 'Explode' %}</button>
-    </div>
-
-    <div>{# save and cancel buttons #}
-        <input type="button" value="{% trans 'Save' %}" class="ok"/>
-        <input type="button" value="{% trans 'Cancel' %}" class="cancel"/>
-    </div>
-</div>
-
-{% comment %} bill summary and till: fixed {% endcomment %}
-<div id="till">
-    {% comment %} bill summary: discounts total and tax total {% endcomment %}
-    <div id="bill_summary">
-        <div class="total">
-            {% trans "Fakin total" %}:
-            <p class="total">{# placeholder, this is #}</p>
-        </div>
-    </div>
-
-    {% comment %} buttons etc. {% endcomment %}
-    <div id="bill_actions">
-        <button class="finish-the-fukin-bill">
-            <span style="font-size: 30px; font-weight: bold; width: 100%;">
-                FINISH THE FUKIN BILL
-            </span>
-        </button>
-    </div>
-</div>
-
-{% comment %} separator: draggable div for resizing bill/controls {% endcomment %}
-<div id="splitter"></div>
-
-{% comment %} product selector and other controls {% endcomment %}
-<div id="selector">
-    <div id="categories">
-        <div id="parents_scroll_outer">
-            <div class="category-button hidden" id="category_button_home">
-                <img class="category-button-icon" src="{% static 'graphics/home.png' %}" alt="{% trans 'Home' %}" />
-                {% trans 'All' %}
+                <div id="category_parent" class="category-button hidden">
+                    &lt; GOU BEK
+                </div>
+                {% comment %} scrolling: parents {% endcomment %}
+                <div id="parents_scroll_inner">
+                    <div id="parents"></div>
+                </div>
             </div>
-            <div id="category_parent" class="category-button hidden">
-                &lt; GOU BEK
-            </div>
-            {% comment %} scrolling: parents {% endcomment %}
-            <div id="parents_scroll_inner">
-                <div id="parents"></div>
+
+            <div class="selector-title">{% trans 'Subcategories' %}</div>
+
+            {% comment %} scrolling: children {% endcomment %}
+            <div id="children_scroll_outer">
+                <div id="children_scroll_inner">
+                    <div id="children"></div>
+                </div>
             </div>
         </div>
-        
-        {% comment %} scrolling: children {% endcomment %}
-        <div id="children_scroll_outer">
-            <div id="children_scroll_inner">
-                <div id="children"></div>
+
+        <div id="products_scroll_outer">
+            <div class="selector-title absolute">{% trans 'Products' %}</div>
+            <div id="products_scroll_inner">
+                <div id="products"></div>
+            </div>
+        </div>
+        <div id="controls">
+            <div class="bill-border-top"></div>
+                <div id="search_container">
+                <input type="text" id="search_products_filter" placeholder="{% trans 'Search' %}" />
+                <button type="button" id="search_products_submit">
+                    {% trans 'Go' context 'Search button text' %}
+                </button>
+            </div>
+
+            <div id="till_selector_container">
+                <div id="current_till"></div>
             </div>
         </div>
     </div>
-    <div id="products_scroll_outer">
-        <div id="products_scroll_inner">
-            <div id="products"></div>
-        </div>
-    </div>
-    <div id="controls">
-        <input type="text" id="search_products_filter" />
-        <button type="button" id="search_products_submit"><img src="{% static 'graphics/search.png' %}"/></button>
 
-        <div id="category_button_favorites">
-            <img class="category-button-icon" src="{% static 'graphics/favorites.png' %}" alt="{% trans 'Favorites' %}" />
-            {% trans 'Favorites' %}
-        </div>
+    <div id="registers" class="hidden">
+        {% comment %} the dialog for selecting register on login {% endcomment %}
+        {% trans 'Which register have you logged on?' %}
+        <select id="registers_list">
+            {% for r in  registers %}
+                <option value="{{ r.id }}">{{ r.name }}</option>
+            {% endfor %}
+        </select>
+        <input type="button" value="{% trans 'Go' %}" id="select_register"/>
     </div>
-</div>
-
-<div id="registers">
-    {% trans 'Which register have you logged on?' %}
-    <select id="registers_list">
-        {% for r in  registers %}
-            <option value="{{ r.id }}">{{ r.name }}</option>
-        {% endfor %}
-    </select>
-    <input type="button" value="{% trans 'Go' %}" id="select_register"/>
-</div>
 
 <div id="templates" class="hidden">
     <div id="small_receipt_template">

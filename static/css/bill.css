@@ -1,9 +1,35 @@
 /*      */
 /* Bill */
 /*      */
-#bill_scroll_outer{
+.bill-border-top{ border-top: 2px solid #000000; }
+.bill-border-bottom{ border-bottom: 2px solid #000000; }
+
+/* main elements */
+#left_column{
     position: fixed;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: #ffffff;
+}
+
+#left_column > div{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#bill_header{
+    position: absolute;
+    width: 100%;
+    top: 0;
+}
+
+#bill_container{
+    position: absolute;
     min-width: 300px; /* must be defined for js (separator dragging) */
+    overflow: hidden;
+
+    width: 100%;
 
     /* prevent text selection (interferes with dragging) */
     -webkit-touch-callout: none;
@@ -14,37 +40,57 @@
     user-select: none;
 }
 
-#bill_scroll_inner{
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
-}
-
 #bill{
     width: 100%;
     height: 900000px;
     float:left;
     position:relative;
-    border: 1px solid black;
 }
 
-#bill_header{
-    position: fixed;
-    border-bottom: 3px solid black;
-    background-color: #dddddd;
-    display: table-row;
+#till{
+    position: absolute;
+    bottom:0;
+    width: 100%;
 }
 
-/* bill column values: different widths depending on bill class (narrow/medium/wide) */
+/* items */
 div.item-val{
     display: block;
     overflow: hidden;
     float: left;
-}
-div.item-val input.qty{
-    width: 60%;
+    position: relative;
+    
+    font-size: 14px;
 }
 
+/* header */
+div.item-val.header{
+    height: 40px;
+    line-height: 40px;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+/* common to bill */
+.bill-item .item-val.name{  }
+.bill-item .item-val.quantity{ 
+    height: 100%;
+    text-align: center; 
+}
+.bill-item .item-val.quantity > div{
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: inline-block;
+    width: 40px;
+    
+}
+.item-val.price{ text-align: right; }
+.item-val.tax{ text-align:right; }
+.item-val.discount{ text-align: right; }
+.item-val.total{ text-align: right; }
+
+/* sizing for various bill widths (different layouts) */
 .narrow .item-val.name{ width: 50%; }
 .narrow .item-val.quantity{ width: 15%; }
 .narrow .item-val.price{ width: 15%; }
@@ -52,97 +98,112 @@ div.item-val input.qty{
 .narrow .item-val.discount{ display: none; }
 .narrow .item-val.total{ width: 20%; }
 
-.medium .item-val.name{ width: 35%; }
-.medium .item-val.quantity{ width: 15%; }
+.medium .item-val.name{ width: 40%; }
+.medium .item-val.quantity{ width: 10%; }
 .medium .item-val.price{ width: 20%; }
 .medium .item-val.tax{ width: 15%; }
 .medium .item-val.discount{ display: none; }
 .medium .item-val.total{ width: 15%; }
 
 .wide .item-val.name{ width: 30%; }
-.wide .item-val.quantity{ width: 15%; }
+.wide .item-val.quantity{ width: 10%; /* height: 100%; */}
 .wide .item-val.price{ width: 10%; }
 .wide .item-val.tax{ width: 15%; }
 .wide .item-val.discount{ width: 15%; }
 .wide .item-val.total{ width: 15%; }
 
-/* bill header */
-#bill_header p{
-    margin: 0;
-    padding: 0;
-}
-
 /* bill item */
 div.bill-item{
     display: block;
     clear: both;
+    white-space: nowrap;
 }
 
 div.bill-item.collapsed{
-    height: 2em;
-    background-color: #ffffff;
+    height: 50px;
 }
 
 div.bill-item.collapsed .value{
-    margin: 0;
-    font-size: 1em;
+    line-height: 50px;
 }
 
 div.bill-item.expanded{
-    height: 4em;
-    background-color: #f7f7f7;
+    height: 120px;
+    line-height: 120px;
 }
 
-div.bill-item + div.bill-item{
-    border-top: 1px dotted #cccccc;
+div.bill-item + div.bill-item{ /* border between two items */
+    border-top: 1px solid #cccccc;
 }
 
-.expanded .value{
-    margin-top: 1.5em;
-    font-size: 1em;
+div.bill-item button, div.bill-item input[type='button']{
+    height: 30px;
+    box-shadow:  none;
 }
 
-.item-val{
-    float: left;
-    display: block;
-    height: 100%;
+/* item name, delete and more button */
+.item-val.name{
+    text-align: left;
 }
 
-/* item name and delete button */
+.item-val.name .value.item.name{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-left: 25px;
+}
+
 .item-val.name img{
     width: 20px;
     float: left;
+    position: absolute;
+    top: 50%;
+    margin-top: -10px;
 }
-
-.collapsed .item-val.name .value,
-.collapsed .item-val.name img{
-    margin-top: 0;
-}
-
-.expanded .item-val.name .value,
-.expanded .item-val.name img{
-    margin-top: 1.5em;
-}
-
 /* more button */
-.collapsed .more-button{ display: none; }
-.expanded .more-button{ display: block; }
+.collapsed button.more{ display: none; }
+.expanded button.more{ display: block; }
+
+button.more{
+    position: absolute;
+    bottom: 10px;
+    left: 25px;
+}
 
 /* quantity and +/- buttons */
-.item-val.quantity input{
+.item-val.quantity input[type='text']{
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    display: block;
+    height: 30px;
     width: 100%;
-    border: 1px solid #cccccc;
+    
+    position: absolute;
+    top: 50%;
+    margin-top: -15px;
+    
+    box-shadow: none;
+    border: none;
+    font-size: 14px;
 }
 .item-val.quantity button{
     color: #ffffff;
+    border: none;
+    position: absolute;
     width: 100%;
 }
 
 .collapsed .item-val.quantity button{ display: none; }
-.expanded .item-val.quantity button{ display: block; }
+.expanded .item-val.quantity button{ display: block;}
 
-.item-val.quantity .qty-plus{ background-color: #00aa00; }
-.item-val.quantity .qty-minus{ background-color: #aa0000; }
+.item-val.quantity .qty-plus{
+    background-color: #00aa00; 
+    top: 10px;
+}
+.item-val.quantity .qty-minus{
+    background-color: #aa0000;
+    bottom: 10px;
+}
 
 /* price */
 
@@ -164,12 +225,37 @@ div.bill-item + div.bill-item{
 
 /* bill summary */
 #bill_summary div.total{
-    height: 50px;
+    height: 40px;
+    line-height: 40px;
 }
 
-/*      */
-/* till */
-/*      */
-#till{
-    position: fixed;
+#bill_summary p.total{
+    float:right;
+    line-height: 40px;
+    margin: 0;
+    padding: 0;
+}
+
+#bill_actions{
+    height: 80px;
+    position: relative;
+}
+
+button.till-button{
+    position: absolute;
+    top: 50%;
+    margin-top: -25px;
+    height: 50px;
+    width: 40%;
+    font-size: 26px;
+}
+
+#finish_the_fukin_bill{
+    left: 0;
+    background-color: fuchsia;
+}
+
+#save_the_fukin_bill{
+    right: 0;
+    background-color: cyan;
 }

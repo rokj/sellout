@@ -527,7 +527,7 @@ $(document).ready(function(){
                 .append(escape(categories[i].label));
             
             if(product){ // current product's category (if editing)
-                if(categories[i].label == product.category){
+                if(categories[i].value == product.category_id){
                     opt_obj.attr("selected", "selected");
                 }
             }
@@ -654,8 +654,8 @@ $(document).ready(function(){
         $("#edit_product_shortcut", edit_obj).val(product.shortcut);
         $("#edit_product_code", edit_obj).val(product.code);
 
-        var base_price_obj = $("#edit_product_price_without_tax");
-        var tax_price_obj = $("#edit_product_price_with_tax");
+        var base_price_obj = $("#edit_product_price_without_tax").val(product.price);
+        var tax_price_obj = $("#edit_product_price_with_tax").val(""); // will be updated with base_price_obj.change()
 
         // update total price when tax, price or discounts change
         $("#edit_product_tax, " +
@@ -675,7 +675,7 @@ $(document).ready(function(){
             tax_price_obj.val(display_number(base_price.times(Big(1).plus(tax.div(Big(100)))), "{{ separator }}", {{ decimal_places }}));
 
             get_total_price();
-        });
+        }).change();
 
         tax_price_obj.change(function(){
             var tax_price = get_number($(this).val(), "{{ separator }}");

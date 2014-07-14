@@ -18,12 +18,13 @@ Categories = function(g){
         parents: $("#parents"), // parent categories
         children: $("#children"), // children categories
         home_button: $("#category_button_home"),
-        back_button: $("#category_parent"),
-        favorites_button: $("#category_button_favorites")
+        favorites_button: $("#category_button_favorites"),
+        back_button: $("#category_parent")
     };
 
     // show the home button if displaying breadcrumbs
     if(p.g.config.display_breadcrumbs){
+        console.log("displaying breadcrumbes");
         p.items.home_button.show();
     }
 
@@ -108,15 +109,13 @@ CategoryButton = function(list, parent, data){
         // a paragraph with category name
         p.button.append($("<span>", {"class": "category-button-text"}).text(p.data.name));
 
-        // category icon
-        var img_obj;
-        if (p.data.image) // create a new image from category's icon
-            img_obj = $("<img>", {src: p.data.image });
-        else // use an existing spacer from template
-            img_obj = p.g.items.spacer;
-
-        img_obj.addClass("category-button-icon");
-        p.button.prepend(img_obj); // add image
+        // category color
+        p.button.css("background-color", "#" + p.data.color);
+        p.button.css("border-left-color", "#" + p.data.color); // so that :after pseudo-class will inherit it
+        // text color
+        if(is_dark(p.data.color)){
+            p.button.addClass("dark");
+        }
 
         // appending: in parents div, prepend (subcategory is the last to be shown)
         //            in children, append (sorted by name, alphabetically)
@@ -125,8 +124,9 @@ CategoryButton = function(list, parent, data){
         p.children_button = p.button.clone().appendTo(p.list.items.children);
 
         // append to parents div only if it has subcategories
-        if(p.subcategories.length > 0)
+        if(p.subcategories.length > 0){
             p.parents_button = p.button.clone().prependTo(p.list.items.parents);
+        }
     };
 
     p.show_children = function(){
@@ -143,11 +143,20 @@ CategoryButton = function(list, parent, data){
 
             // show parents: if display_breadcrumbs is on
             if(p.g.config.display_breadcrumbs){
+                var z = 1;
+
                 var c = p;
                 while(c){
-                    if(c.parents_button) c.parents_button.show();
+                    if(c.parents_button){
+                        c.parents_button.show();
+                        c.parents_button.css("z-index", z);
+                        z += 1;
+                    }
                     c = c.parent;
                 }
+
+                // adjust z-index of all visible parent
+
             }
             else{
                 // if display_breadcrumbs is off, show only this category's parent and back button

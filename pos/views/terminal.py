@@ -25,28 +25,34 @@ def terminal(request, company):
     if not has_permission(request.user, c, 'terminal', 'view'):
         return no_permission_view(request, c, _("You have no permission to use terminal."))
 
-    # check for data that needs to be entered before the terminal can start:
-    # registers: at least one must be entered
+    # registers:
+    # count: at least one register must be entered
     reg_count = Register.objects.all().count()
     if reg_count < 1:
-        return error(request,  _("There are no registers defined. Please set one up in management/registers."))
+        return error(request, c, _("There are no registers defined. Please set one up in management/registers."))
+
+    if reg_count == 1:
+        # if there's only one register, just choose that
+        register_id = Register.objects.filter(company=c).only('id')[0].id
+    else:
+        # there's more registers, see if there's one stored in this session
+        try:
+            register_id = int(request.session.get('register_id'))
+
+            # if it's stored, check if it exists (it may have been deleted)
+            if not Register.objects.filter(company=c, id=register_id).exists():
+                del request.session['register_id']
+                raise Register.DoesNotExist
+
+        except (TypeError, ValueError, KeyError, Register.DoesNotExist):
+            # the user will have to choose another register
+            register_id = None
 
     # terminal settings and other data in JSON (will be put into javascript globals)
     if get_company_value(request.user, c, 'pos_discount_calculation') == 'Tax first':
         tax_first = True
     else:
         tax_first = False
-
-    # current register: if it's not stored in the session, the user will have to select it
-    try:
-        register_id = int(request.session.get('register_id'))
-    except (TypeError, ValueError, KeyError):
-        if reg_count == 1:
-            # if there's only one register defined, choose that automatically
-            register_id = Register.objects.all().only('id')[0].id
-        else:
-            # there are many registers, let the user select one
-            register_id = None
 
     config = {
         # user's data

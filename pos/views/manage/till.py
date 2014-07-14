@@ -16,10 +16,16 @@ def register_to_dict(company, user, register):
     return {
         'id': register.id,
         'name': register.name,
+
         'receipt_format_display': register.get_receipt_format_display(),
         'receipt_format': register.receipt_format,
+
+        'printer_driver_display': register.get_printer_driver_display(),
+        'printer_driver': register.printer_driver,
+
         'receipt_type_display': register.get_receipt_type_display(),
         'receipt_type': register.receipt_type,
+
         'print_logo': register.print_logo,
 
         'location': register.location,
@@ -106,6 +112,7 @@ def add_register(request, company):
                 name=form.cleaned_data.get('name'),
                 receipt_format=form.cleaned_data.get('receipt_format'),
                 receipt_type=form.cleaned_data.get('receipt_type'),
+                printer_driver=form.cleaned_data.get('printer_driver'),
                 print_logo=form.cleaned_data.get('print_logo'),
                 location=form.cleaned_data.get('location'),
                 print_location=form.cleaned_data.get('print_location'),
@@ -155,6 +162,7 @@ def edit_register(request, company, register_id):
             register.name= form.cleaned_data.get('name')
             register.receipt_format = form.cleaned_data.get('receipt_format')
             register.receipt_type = form.cleaned_data.get('receipt_type')
+            register.printer_driver = form.cleaned_data.get('printer_driver')
             register.print_logo = form.cleaned_data.get('print_logo')
             register.location = form.cleaned_data.get('location')
             register.print_location = form.cleaned_data.get('print_location')

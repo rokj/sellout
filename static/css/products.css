@@ -2,14 +2,18 @@
 /* products in terminal */
 /*                      */
 #products_scroll_outer {
-    position: fixed;
-    border: 1px solid black;
+    position: absolute;
+    bottom: 0;
 }
 
 #products_scroll_inner {
     overflow: auto;
     overflow-x: hidden;
     height: 100%;
+    margin-left: 10px;
+    padding-top: 50px; /* this includes the 'products' title plus some margins */
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
 }
 
 #products {
@@ -24,14 +28,11 @@
 
 div.product-button {
     position: relative; /* this is required for product image to work correctly (to position another div above it) */
-    border: 1px solid black;
     /* do not set margin: it will be set by javascript every time products are rendered for even spacing */
     cursor: pointer;
 }
 
-div.product-button-focused{
-    border: 1px solid red;
-}
+div.product-button-focused{}
 
 div.product-button-image {
     position: absolute; /* positioned above product-button */
