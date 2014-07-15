@@ -22,7 +22,7 @@ $(document).ready(function(){
 {% endblock %}
 
 {% block manage_content %}
-<form action="{% url 'pos:configuration' company.url_name %}" method="post" enctype="multipart/form-data">
+<form action="{% url 'pos:company_settings' company.url_name %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
     <div class="management-column">

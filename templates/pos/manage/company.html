@@ -105,8 +105,9 @@ $(document).ready(function(){
         button.click(function(e){
             e.preventDefault();
             // replace the input with a new one
-            var new_input = $("<inpu>", {type: 'file', id: input.attr("id")});
+            var new_input = $("<input>", {type: 'file', id: input.attr("id")});
             input.replaceWith(new_input);
+            logo_input(new_input, container, url);
 
             send_data(url, {/* send nothing */}, "{{ csrf_token }}", function(response){
                 if(response.status != 'ok'){
@@ -157,7 +158,7 @@ $(document).ready(function(){
 
 {% block extra_button %}
     {# a link to configuration #}
-    <a class="button-text" href="{% url 'pos:configuration' company.url_name %}">
+    <a class="button-text" href="{% url 'pos:company_settings' company.url_name %}">
         {% trans 'Configuration' %}
     </a>
 {% endblock %}

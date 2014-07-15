@@ -78,7 +78,7 @@ blocks:
 
             <ul id="user_menu" class="drop-down">
                 {# store-related stuff #}
-                <li class="store separator"><a href="#">{% trans 'User Settings' %}</a></li>
+                <li class="store separator"><a href="{% url 'pos:user_settings' company.url_name %}">{% trans 'User Settings' %}</a></li>
                 <li class="store"><a href="#">{% trans 'Switch User' %}</a> </li>
                 <li class="store"><a href="#">{% trans 'Log Out' %}</a> </li>
             </ul>
@@ -100,7 +100,7 @@ blocks:
                 <li class="store"><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
                 <li class="store"><a href="">{% trans 'Bills' %}</a></li>
                 {# company-related stuff #}
-                <li class="company separator"><a href="{% url 'pos:configuration' company.url_name %}">{% trans 'Configuration' %}</a></li>
+                <li class="company separator"><a href="{% url 'pos:company_settings' company.url_name %}">{% trans 'Configuration' %}</a></li>
                 <li class="company"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
                 <li class="company"><a href="#">{% trans 'Users' %}</a></li>
             </ul>

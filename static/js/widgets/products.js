@@ -38,8 +38,6 @@ Products = function(g){
 
     p.show_products = function(ids){
         // products: a list of product ids (normally returned from Search())
-
-
         p.empty();
 
 	    if(ids.length == 0) return;
@@ -55,10 +53,12 @@ Products = function(g){
     		p_size, // size [width, height] of a product button
     		tmp_div; // a 'column' div
 
+        var MIN_MARGIN = 5; // minimum margin between product boxes
+
 	    div_height = p.items.container.height();
 	    p_size = get_size(p.products[0].items.container); // there's at least one product in the list
 
-        n = Math.floor(div_height/p_size[1]);
+        n = Math.floor(div_height/(p_size[1] + MIN_MARGIN));
         if(n == 0){
             console.warn("Products div too narrow");
             return;
@@ -176,8 +176,7 @@ Product = function(list, data){
     p.items.container = $("<div>", {"class":"product-button"});
     p.items.container.css({
 		width: p.g.config.product_button_size,
-		height: p.g.config.product_button_size,
-        'background-color': "#" + p.data.color
+		height: p.g.config.product_button_size
 	});
 
     if(is_dark(p.data.color)) p.items.container.addClass("dark");
@@ -185,16 +184,29 @@ Product = function(list, data){
     p.items.image = $("<div>", {"class": "product-button-image"});
     p.items.image.appendTo(p.items.container);
 
-	if(p.data.image) p.items.image.css("background-image", "url(" + p.data.image + ")");
+    p.items.overlay = $("<div>", {"class": "product-image-overlay"});
+    p.items.overlay.appendTo(p.items.container);
+    p.items.overlay.css("background-color", "#" + p.data.color);
+
+	if(p.data.image){
+        p.items.image.css("background-image", "url(" + p.data.image + ")");
+    }
+    else{
+        // remove background opacity if there's no background image
+        p.items.overlay.css("opacity", "1");
+    }
+
+    p.items.text = $("<div>", {"class": "product-button-text"});
+    p.items.text.appendTo(p.items.container);
 
     p.items.name = $("<p>", {"class":"product-button-name"}).text(p.data.name);
-    p.items.name.appendTo(p.items.image);
+    p.items.name.appendTo(p.items.text);
 
     p.items.code = $("<p>", {"class":"product-button-code"}).text(p.data.code);
-    p.items.code.appendTo(p.items.image);
+    p.items.code.appendTo(p.items.text);
 
     p.items.shortcut = $("<p>", {"class":"product-button-shortcut"}).text(p.data.shortcut);
-    p.items.shortcut.appendTo(p.items.image);
+    p.items.shortcut.appendTo(p.items.text);
 
     // add id to access this object via document tree, not javascript
     p.items.container.data({id: p.data.id});

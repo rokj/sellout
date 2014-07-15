@@ -342,10 +342,10 @@ def upload_color_logo(request, company):
         if color_logo.mode not in ('L', 'RGB'):
             # Kudos: http://stackoverflow.com/questions/9166400/convert-rgba-png-to-rgb-with-pil
             # create a white image the same size as color_logo
-            color_logo.load()
+            color_logo = color_logo.convert('RGBA')
 
             background = Image.new("RGB", color_logo.size, (255, 255, 255))
-            background.paste(color_logo, mask=color_logo.split()[3]) # 3 is the alpha channel
+            background.paste(color_logo, mask=color_logo.split()[3])  # 3 is the alpha channel
 
             color_logo = background
             color_logo = color_logo.convert('RGB')
@@ -461,7 +461,7 @@ def create_monochrome_logo(request, company):
     c = Company.objects.get(url_name=company)
 
     if not c.color_logo:
-        return False
+        return JSON_error(_("Color logo does not exist"))
 
     # get company's color logo
     color_logo = Image.open(c.color_logo.path)

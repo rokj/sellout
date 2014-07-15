@@ -26,10 +26,19 @@ div#selector{
 /*          */
 /* controls */
 /*          */
-div#controls{
+#controls{
     position:fixed;
-    height: 100px;
+    height: 120px;
+}
+
+#controls > div{
+    display: block;
+    width: 100%;
+    height: 100%;
     padding: 10px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    position: relative;
 }
 
 #search_container{
@@ -48,6 +57,12 @@ div#controls{
     background-color: #00aa00;
 }
 
+#till_selector_container{
+    float:right;
+    width: 200px;
+    margin-top: 10px;
+}
+
 /*       */
 /* other */
 /*       */
@@ -57,32 +72,75 @@ div#controls{
 
 div.selector-title{
     display: inline-block;
-    margin-left: 10px;
-    background-color: #969696;
-    width: 100%;
     height: 30px;
     line-height: 30px;
-    padding-left: 10px;
-    color: #ffffff;
 
     margin-top: 10px;
     margin-bottom: 10px;
+    width: 100%;
+    
+    padding-left: 10px;
+    padding-right: 10px;
+    
+    box-sizing: border-box;
+}
+div.selector-title > div{
+    width: 100%;
+    background-color: #969696;
+    color: #ffffff;
+    padding-left: 10px;
+    box-sizing: border-box;
 }
 
 div.selector-title.absolute{
     position: absolute;
 }
 
-#fullscreen_shadow{
+#loading{
     position: fixed;
     top: 0;
     left: 0;
-    bottom: 0;
     right: 0;
+    bottom: 0;
 
+    background-color: rgba(255,255,255,0.95);
+
+    z-index: 15; /* above everything known */
+}
+
+#loading > div{
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    height: 100px;
+    margin-top: -50px;
+}
+
+#loading img.loading{
+    display: inline-block;
+    position: relative;
+    top: 47px;
+}
+
+.shadow{
     z-index: 10; /* above everything  */
                  /* that must be shown should therefore have z-index at least 11 */
 
     background-color: #000000;
-    opacity: 0.3;
+    opacity: 0.6;
+
+    position: fixed;
+}
+
+.fullscreen.shadow{
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.blocker{
+    position: absolute;
+    background-color: rgba(0,0,0,0.2);
 }

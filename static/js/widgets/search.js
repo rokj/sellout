@@ -5,13 +5,15 @@ Search = function(g){
 
     p.items = {
         field: $("#search_products_filter"),
-        submit: $("#search_products_submit")
+        submit: $("#search_products_submit"),
     };
 
     // save search results to avoid linear search over and over:
     p.subcategories = {}; // pairs {category_id:[subcategory ids]}
     p.results_by_category = {}; // pairs {category_id:[products list]}
     p.results_by_text = {}; // pairs {search_text:[products list]}
+
+    p.favorites = []; // will hold references to favorited products
 
     //
     // methods
@@ -86,12 +88,9 @@ Search = function(g){
         // create a p.subcategories dictionary:
         // p.g.data.categories is in format:
         //  [category
-        //        <other data>
         //        children: [category, category]
         //   category
-        //        <other data>
         //        children: [category
-        //                    <other data>
         //                    children: [... etc]
         //                  ]
         //   category]
@@ -170,13 +169,31 @@ Search = function(g){
         }
     };
 
+    p.init_favorites = function(){
+        // traverse all products and add favorites to a favorites list
+        for(var i = 0; i < p.g.data.products.length; i++){
+            if(p.g.data.products[i].favorite){
+                p.favorites.push(p.g.data.products[i].id);
+            }
+        }
+    };
+
+    p.show_favorites = function(){
+        // will be called from favorites button
+        p.g.objects.products.show_products(p.favorites);
+    };
+
     //
     // init
     //
     // firefox (and other browsers as well) remember last entered data, clear it
     p.items.field.val("");
 
+    // which products belong to which category
     p.init_subcategories();
+
+    // favorite products
+    p.init_favorites();
 
     // events
     p.items.submit.click(function(){
@@ -189,5 +206,4 @@ Search = function(g){
             p.search_by_text($(this).val())
         );
     });
-
 };

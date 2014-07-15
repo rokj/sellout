@@ -69,17 +69,11 @@ div.category-button-subcategories:after{
 }
 
 #children_scroll_inner div.category-button,
-#category_button_home, #category_button_favorites{
-    max-width: 200px;
+#category_button_favorites{
     margin-right: 10px;
 }
 
-#category_button_home{
-    background-color: #323232;
-    color: #ffffff;
-}
-
 #category_button_favorites{
-    background-color: #323232;
+    background-color: sandybrown;
     color: #ffffff;
 }

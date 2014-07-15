@@ -15,6 +15,11 @@
     background-position: center center;
     background-repeat:  no-repeat;
 }
+
+.details-box button.remove-item-discount{
+    background-image: url("{% static 'icons/delete_active.png' %}");
+}
+
 </style>
 
 {# jquery libraries (only used in terminal) #}
@@ -28,9 +33,6 @@
 <script src="{% static 'js/widgets/search.js' %}"></script> {% comment %} searching products/categories {% endcomment %}
 <script src="{% static 'js/widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 <script src="{% static 'js/widgets/print.js' %}"></script> {% comment %} formatting and printing receipts {% endcomment %}
-
-{% comment %} other {% endcomment %}
-<script src="{% static 'fuckyeah/fuckyeah.jquery.js' %}"></script>
 
 {% comment %} 'embedded' javascript {% endcomment %}
 <script type="text/javascript">
@@ -84,6 +86,7 @@ $(window).load(function(){
             company_logo: null, // will be created when terminal initializes
 
             fullscreen_shadow: $("#fullscreen_shadow"),
+           loading: $("#loading"),
 
             small_receipt_template: $("#small_receipt_template"),
             large_receipt_template: $()
@@ -96,13 +99,33 @@ $(window).load(function(){
     g.objects.products = new Products(g);
     g.objects.search = new Search(g);
     g.objects.bill = new Bill(g);
+
+    // in the beginning, show favorites and topmost category
+    g.objects.categories.favorites_button_action();
+
+    // when everything is loaded, remove the loading screen and show the terminal
+    setTimeout(function(){
+            g.items.loading.fadeOut("fast", function(){
+            g.items.loading.remove();
+        });
+    }, 500);
+
 });
 </script>
 
 {% endblock %}
 
 {% block content %}
-{% comment %} the bill (scrolling) {% endcomment %}
+    {% comment %} the loading screen {% endcomment %}
+    <div id="loading">
+        <div>
+            <img src="{% static 'icons/loading.gif' %}" alt="loading" class="loading" />
+            {% trans 'Loading' %}
+        </div>
+    </div>
+
+
+    {% comment %} the bill (scrolling) {% endcomment %}
     <div id="left_column">
         <div>
             {% comment %} bill header has the same layout as items and will be copied when adding new item {% endcomment %}
@@ -197,12 +220,12 @@ $(window).load(function(){
     <div id="selector">
         <div id="categories">
             <div id="parents_scroll_outer">
-                <div class="category-button hidden" id="category_button_home">{% trans 'All products' %}</div>
-
                 <div class="category-button" id="category_button_favorites">{% trans 'Favorites' %}</div>
 
                 <div id="category_parent" class="category-button hidden">
-                    &lt; GOU BEK
+                    <img src="{% static 'icons/back_black.png' %}"
+                         alt="{% trans 'Back' %}"
+                         title="{% trans 'Back' %}" />
                 </div>
                 {% comment %} scrolling: parents {% endcomment %}
                 <div id="parents_scroll_inner">
@@ -210,7 +233,9 @@ $(window).load(function(){
                 </div>
             </div>
 
-            <div class="selector-title">{% trans 'Subcategories' %}</div>
+            <div class="selector-title">
+                <div id="subcategories_title">{# text will be set by categories.js:set_texts #}</div>
+            </div>
 
             {% comment %} scrolling: children {% endcomment %}
             <div id="children_scroll_outer">
@@ -221,22 +246,26 @@ $(window).load(function(){
         </div>
 
         <div id="products_scroll_outer">
-            <div class="selector-title absolute">{% trans 'Products' %}</div>
+            <div class="selector-title absolute">
+                <div id="products_title">{# text will be set by categories.js:set_texts #}</div>
+            </div>
             <div id="products_scroll_inner">
                 <div id="products"></div>
             </div>
         </div>
         <div id="controls">
-            <div class="bill-border-top"></div>
-                <div id="search_container">
-                <input type="text" id="search_products_filter" placeholder="{% trans 'Search' %}" />
-                <button type="button" id="search_products_submit">
-                    {% trans 'Go' context 'Search button text' %}
-                </button>
-            </div>
+            <div> {# for margins and position: absolute #}
+                <div id="till_selector_container">
+                    <div id="current_till"></div>
+                </div>
 
-            <div id="till_selector_container">
-                <div id="current_till"></div>
+                <div class="bill-border-top"></div>
+                    <div id="search_container">
+                    <input type="text" id="search_products_filter" placeholder="{% trans 'Search' %}" />
+                    <button type="button" id="search_products_submit">
+                        {% trans 'Go' context 'Search button text' %}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -280,12 +309,12 @@ $(window).load(function(){
                         <select>
                             {# existing and valid discounts #}
                         </select>
-                        <button>+</button>
+                        <button class="add-discount">+</button>
                     </li>
                     <li class="add-new">
                         {# just an input box and select for type of discount #}
-                        <input type="text" class="description" /><br />
-                        <input type="text" class="amount" />
+                        <input type="text" class="description" placeholder="{% trans 'Description' %}" /><br />
+                        <input type="text" class="amount" placeholder="{% trans 'Amount' %}"/>
                         <select class="type">
                             <option value="Percent">%</option>
                             <option value="Absolute">{{ currency }}</option>
@@ -316,6 +345,7 @@ $(window).load(function(){
     </div>
 </div>
 
-<div id="fullscreen_shadow" class="hidden"></div>
+<div class="fullscreen shadow hidden" id="fullscreen_shadow"></div>
 
 {% endblock %}
+

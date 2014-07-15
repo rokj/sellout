@@ -217,7 +217,7 @@ button.more{
 .details-box{
     position: absolute;
     z-index: 11; /* above #fullscreen_shadow */
-    width: 300px;
+    min-width: 350px;
     padding: 0;
 }
 
@@ -233,7 +233,6 @@ button.more{
 
 .details-box .details-container{
     position: relative;
-    width: 300px;
     height: 100%;
     padding: 15px;
     box-sizing: border-box;
@@ -312,6 +311,39 @@ button.more{
     -webkit-transform: rotate(45deg);
     
     display: none; /* will be shown by javascript when the details open */
+}
+
+.details-box button.remove-item-discount{
+    width: 20px;
+    height: 20px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    background-size: 75%;
+    box-shadow: none;
+    position: relative;
+    top: 2px;
+    margin-left: 5px;
+}
+.details-box ul.discounts{
+    margin: 0;
+}
+
+.details-box ul.discounts li{
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.details-box button.add-discount{
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    background-color: #00aa00;
+    line-height: 20px;
+}
+
+.details-box .details-footer{
+    margin-top: 15px;
 }
 
 /* bill summary */

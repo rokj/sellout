@@ -98,7 +98,7 @@ Bill = function(g){
             total = total.plus(p.items[i].data.total);
         }
 
-        p.summary_total.text(display_number(total, p.g.config.separator, p.g.config.decimal_places));
+        p.summary_total.text(dn(total, p.g));
 
         return total;
     };
@@ -119,7 +119,7 @@ Bill = function(g){
         var i;
         var r = {
             items: [],
-            grand_total: display_number(p.update_summary(), p.g.config.separator, p.g.config.decimal_places)
+            grand_total: dn(p.update_summary(), p.g)
         };
 
         // get all items
@@ -249,9 +249,7 @@ Item = function(bill, product) {
 
         total: $("div.value.item.total", p.item_row),
 
-        more_button: $("button.more", p.item_row),
-
-        explode_button: $("input.explode", p.item_row).hide()
+        more_button: $("button.more", p.item_row)
     };
 
     // properties of this item
@@ -286,22 +284,19 @@ Item = function(bill, product) {
         p.data.total = r.total;
 
         // quantity
-        p.items.qty.val(display_number(p.data.quantity, p.g.config.separator, p.g.config.decimal_places));
-        if(p.data.quantity.cmp(Big(1)) > 0) // if qty is more than 1, show the explode button, otherwise it has no function
-            p.items.explode_button.show();
-        else p.items.explode_button.hide();
+        p.items.qty.val(dn(p.data.quantity, p.g));
 
         // base price
-        p.items.price.text(display_number(p.data.base_price, p.g.config.separator, p.g.config.decimal_places));
+        p.items.price.text(dn(p.data.base_price, p.g));
 
         // tax (only absolute value)
-        p.items.tax_absolute.text(display_number(p.data.tax_absolute, p.g.config.separator, p.g.config.decimal_places));
+        p.items.tax_absolute.text(dn(p.data.tax_absolute, p.g));
 
         // discounts
-        p.items.discount.text(display_number(p.data.discount_absolute, p.g.config.separator, p.g.config.decimal_places));
+        p.items.discount.text(dn(p.data.discount_absolute, p.g));
 
         // total
-        p.items.total.text(display_number(p.data.total, p.g.config.separator, p.g.config.decimal_places));
+        p.items.total.text(dn(p.data.total, p.g));
 
         // also update bill
         p.bill.update_summary();
@@ -373,7 +368,7 @@ Item = function(bill, product) {
                 description: p.data.discounts[i].description,
                 code: p.data.discounts[i].code,
                 type: p.data.discounts[i].type,
-                amount: display_number(p.data.discounts[i].amount, p.g.config.separator, p.g.config.decimal_places)
+                amount: dn(p.data.discounts[i].amount, p.g)
                 // enabled: of course it's enabled
                 // active: doesn't matter
             });
@@ -382,14 +377,14 @@ Item = function(bill, product) {
         return {
             name: p.data.name,
             product_id: p.data.product_id,
-            stock: display_number(p.data.stock, p.g.config.separator, p.g.config.decimal_places),
-            quantity: display_number(p.data.quantity, p.g.config.separator, p.g.config.decimal_places),
-            base_price: display_number(p.data.base_price, p.g.config.separator, p.g.config.decimal_places),
-            tax_percent: display_number(p.data.tax_percent, p.g.config.separator, p.g.config.decimal_places),
+            stock: dn(p.data.stock, p.g),
+            quantity: dn(p.data.quantity, p.g),
+            base_price: dn(p.data.base_price, p.g),
+            tax_percent: dn(p.data.tax_percent, p.g),
             discounts: discounts,
-            single_total: display_number(p.data.single_total, p.g.config.separator, p.g.config.decimal_places),
-            discount_absolute: display_number(p.data.discount_absolute, p.g.config.separator, p.g.config.decimal_places),
-            total: display_number(p.data.total, p.g.config.separator, p.g.config.decimal_places),
+            single_total: dn(p.data.single_total, p.g),
+            discount_absolute: dn(p.data.discount_absolute, p.g),
+            total: dn(p.data.total, p.g),
             bill_notes: p.data.bill_notes
         };
     };
@@ -492,9 +487,6 @@ Item = function(bill, product) {
 
     // quantity
     p.items.qty.change(function(){ p.check_quantity(); });
-
-    // explode button
-    p.items.explode_button.click(function(){ p.explode(); });
 };
 
 ItemDetails = function(item){
@@ -527,8 +519,8 @@ ItemDetails = function(item){
         unique_discount_amount: $(".add-new .amount", p.box),
         unique_discount_type: $(".add-new .type", p.box),
 
-        notes: $(".notes", p.box),
-        explode: $(".explode", p.box),
+        notes: $("textarea.notes", p.box),
+        explode: $("button.explode", p.box),
         save: $("input.ok", p.box),
         cancel: $("input.cancel", p.box),
 
@@ -536,6 +528,12 @@ ItemDetails = function(item){
     };
 
     p.temp_discounts = []; // this will be saved into product if details are closed with 'save'
+
+    // will contain $ shadow divs once the box is displayed
+    p.shadow_top = null; // shadow above the item
+    p.shadow_bottom = null; // below the item
+    p.shadow_left = null; // everything else
+    p.item_blocker = null; // an element to block all actions on item (directly above item)
 
     //
     // methods
@@ -548,19 +546,16 @@ ItemDetails = function(item){
 
             if(discount.type == "Percent"){
                 // example: ND10 (10 %)
-                li.text(discount.code + " (" +
-                    display_number(discount.amount, p.g.config.separator, p.g.config.decimal_places) + " %)");
+                li.text(discount.code + " (" + dn(discount.amount, p.g) + " %)");
             }
             else{
-                // example ND15 ($ 15)
-                li.text(discount.code + " (" +
-                    p.g.config.currency + " " +
-                    display_number(discount.amount, p.g.config.separator, p.g.config.decimal_places) + ")");
+                // example ND15 (15 $)
+                li.text(discount.code + " (" + display_currency(discount.amount, p.g) + ")");
             }
 
             if(editable){
                 // append a delete button that removes the list item
-                var button = $("<input>", {type: 'button', 'class':"remove-item-discount", 'value': 'x'});
+                var button = $("<button>", {'class':"remove-item-discount"});
                 li.append(button);
 
                 button.click(function(){
@@ -614,7 +609,7 @@ ItemDetails = function(item){
         var d = get_by_id(p.temp_discounts, -1);
         if(d){
             p.items.unique_discount_description.val(d.description);
-            p.items.unique_discount_amount.val(display_number(d.amount, p.g.config.separator, p.g.config.decimal_places));
+            p.items.unique_discount_amount.val(dn(d.amount, p.g));
             p.items.unique_discount_type.val(d.type);
         }
 
@@ -634,6 +629,7 @@ ItemDetails = function(item){
             p.items.all_discounts_add.unbind().click(function(){
                 // append a new, editable list item to temp_discounts and update
                 var selected_discount = p.items.all_discounts.find(":selected").data();
+                if(!selected_discount) return;
 
                 p.temp_discounts.push(selected_discount);
 
@@ -643,6 +639,9 @@ ItemDetails = function(item){
 
         // in the end, show the user what happened
         p.update_prices();
+
+        // reposition the box if need to
+        p.position_box();
     };
 
     p.get_discounts = function(){
@@ -693,14 +692,13 @@ ItemDetails = function(item){
 
         // fields:
         // tax in item and details
-        $().add(p.item.items.tax_absolute)
-            .add(p.items.tax_absolute)
-            .text(display_number(r.tax, p.g.config.separator, p.g.config.decimal_places));
+        p.item.items.tax_absolute.text(dn(r.tax, p.g));
+        p.items.tax_absolute.text(display_currency(r.tax, p.g));
 
         // discount sum in item and details
-        p.item.items.discount.text(display_number(r.discount, p.g.config.separator, p.g.config.decimal_places));
+        p.item.items.discount.text(dn(r.discount, p.g));
         // total in item
-        p.item.items.total.text(display_number(r.total, p.g.config.separator, p.g.config.decimal_places));
+        p.item.items.total.text(dn(r.total, p.g));
 
         // show update prices when:
         //  - quantity changes
@@ -711,8 +709,15 @@ ItemDetails = function(item){
         // common to cancel and save buttons
         p.box.remove();
 
-        p.g.items.fullscreen_shadow.unbind();
-        p.g.items.fullscreen_shadow.fadeOut("fast");
+        var shadows = $()
+            .add(p.shadow_top)
+            .add(p.shadow_bottom)
+            .add(p.shadow_left)
+            .add(p.item_blocker);
+
+        shadows.fadeOut("fast", function(){
+            shadows.remove();
+        });
     };
 
     p.cancel_button_action = function(){
@@ -760,21 +765,27 @@ ItemDetails = function(item){
         return !(p.items.unique_discount_type.val() == 'Percent' && a.cmp(Big(100)) > 0);
     };
 
-    //
-    // init
-    //
+    p.create_shadows = function(){
+        var body = $("body");
 
-    // shadow the screen
-    p.g.items.fullscreen_shadow.fadeIn("fast", function(){
-        // move the details box to the correct position
-        p.box
-            .appendTo($("body"))
-            .show();
+        p.shadow_top = $("<div>", {"class": "shadow"}).appendTo(body);
+        p.shadow_bottom = $("<div>", {"class": "shadow"}).appendTo(body);
+        p.shadow_left = $("<div>", {"class": "shadow"}).appendTo(body);
+        p.item_blocker = $("<div>", {"class": "blocker"}).appendTo(body);
+    };
 
+    p.position_box = function(){
         // the position of the item
-        var item_position = {
-            left: p.item.item_row.offset().left + p.item.item_row.outerWidth(true),
-            top: p.item.item_row.offset().top + p.item.item_row.outerHeight(true)/2
+        var item_position = p.item.item_row.offset();
+
+        var arrow_position = {
+            left: item_position.left + p.item.item_row.outerWidth(true),
+            top: item_position.top + p.item.item_row.outerHeight(true)/2
+        };
+
+        var item_size = {
+            width: p.item.item_row.outerWidth(),
+            height: p.item.item_row.outerHeight()
         };
 
         var box_size = {
@@ -785,73 +796,104 @@ ItemDetails = function(item){
         var WINDOW_MARGIN = 10; // minimum distance from window edges
         var window_height = $(window).height();
 
-        if(item_position.top >= box_size.height/2 &&
-           (window_height - item_position.top) >= box_size.height/2){
+        if(arrow_position.top >= (box_size.height/2 + WINDOW_MARGIN) &&
+           (window_height - arrow_position.top) >= box_size.height/2){
             // there's enough space above and below, center the box
             p.box.offset({
-                left: item_position.left,
-                top: item_position.top - box_size.height/2
+                left: arrow_position.left,
+                top: arrow_position.top - box_size.height/2
             });
 
             // position the arrow to the middle
             p.items.arrow.css("top", Math.round(box_size.height/2) + "px").show();
         }
-        else if(item_position.top <= box_size.height/2){
+        else if(arrow_position.top <= (box_size.height/2 + WINDOW_MARGIN)){
             // show the box (almost) at the top of the screen, then adjust the arrow position
             p.box.offset({
-                left: item_position.left,
+                left: arrow_position.left,
                 top: WINDOW_MARGIN
             });
 
             // arrow position
-            p.items.arrow.css("top", Math.round(item_position.top - WINDOW_MARGIN) + "px").show();
+            p.items.arrow.css("top", Math.round(arrow_position.top - WINDOW_MARGIN) + "px").show();
         }
         else{
             // show the box (almost) at the bottom of the screen
             p.box.css({
-                left: item_position.left,
+                left: arrow_position.left,
                 bottom: WINDOW_MARGIN
             });
 
             // arrow position
             p.items.arrow.css("bottom",
-                Math.round(window_height - item_position.top - WINDOW_MARGIN - p.items.arrow.width()/2)
+                Math.round(window_height - arrow_position.top - WINDOW_MARGIN - p.items.arrow.width()/2)
                     + "px").show();
         }
 
-
-        // fill in the details
-        // tax:
-        p.items.tax_percent.text(display_number(
-            p.item.data.tax_percent,
-            p.g.config.separator,
-            p.g.config.decimal_places) + " %");
-
-        p.items.tax_absolute.text(display_number(
-            p.item.data.tax_absolute,
-            p.g.config.separator,
-            p.g.config.decimal_places) + p.g.config.currency);
-
-        // copy current item's discounts to a temporary list;
-        // it will be edited and when details is saved, the item's discounts will
-        // be pointed to this list
-        for(var i = 0; i < p.item.data.discounts.length; i++){
-            p.temp_discounts.push(p.item.data.discounts[i]);
-        }
-        p.update_discounts();
-
-        p.items.active_discounts.sortable({
-            items: "li.inserted",
-            opacity: 0.5,
-            stop: function(){
-                p.temp_discounts = p.get_discounts();
-                p.update_discounts();
-            }
+        // move the shadow around the item
+        p.shadow_top.css({
+            top: 0, left: 0, width: item_size.width, height: item_position.top
         });
+        p.shadow_bottom.css({
+            top: item_position.top + item_size.height,
+            left: 0, width: item_size.width,
+            bottom: 0
+        });
+        p.shadow_left.css({
+            top: 0, left: item_size.width, right: 0, bottom: 0
+        });
+        p.item_blocker.click(function(e){
+                e.preventDefault();
+                e.stopPropagation();
+            })
+            .css({
+                top: item_position.top, left: 0,
+                width: item_size.width, height: item_size.height
+            })
+            .css("z-index", p.box.css("z-index")); // use the same index as the details box
+    };
 
-        $().add(p.items.unique_discount_amount)
-           .add(p.items.unique_discount_type)
-           .blur(function(){
+    //
+    // init
+    //
+
+    // shade the stuff
+    p.create_shadows();
+
+    // move the details box to the correct position
+    p.box
+        .appendTo($("body"))
+        .show();
+
+    p.position_box();
+
+    // fill in the details
+    // tax:
+    p.items.tax_percent.text(dn(p.item.data.tax_percent, p.g) + " %");
+
+    p.items.tax_absolute.text(display_currency(p.item.data.tax_absolute, p.g));
+
+    // copy current item's discounts to a temporary list;
+    // it will be edited and when details is saved, the item's discounts will
+    // be pointed to this list
+    for(var i = 0; i < p.item.data.discounts.length; i++){
+        p.temp_discounts.push(p.item.data.discounts[i]);
+    }
+    p.update_discounts();
+
+    p.items.active_discounts.sortable({
+        items: "li.inserted",
+        opacity: 0.5,
+        stop: function(){
+            p.temp_discounts = p.get_discounts();
+            p.update_discounts();
+        }
+    });
+
+    $().add(p.items.unique_discount_amount)
+       .add(p.items.unique_discount_type)
+       .blur(function(){
+            if(p.items.unique_discount_amount.val().trim() != ''){
                 if(p.check_unique_discount()){
                     p.temp_discounts = p.get_discounts();
                     p.update_prices();
@@ -862,32 +904,34 @@ ItemDetails = function(item){
                         gettext("Please check discount format and type")
                     );
                 }
-           });
+            }
+       });
 
-        p.items.notes.val(p.item.data.bill_notes);
+    p.items.notes.val(p.item.data.bill_notes);
 
-        // bind button actions
-        p.items.cancel.click(function(){ p.cancel_button_action();});
+    // bind button actions
+    p.items.cancel.click(function(){ p.cancel_button_action();});
 
-        p.items.save.click(function(){ p.save_button_action(); });
+    p.items.save.click(function(){ p.save_button_action(); });
 
-        // explode button
+    // explode button: if quantity is 1, hide it
+    if(p.item.data.quantity.cmp(Big(1)) > 0){
+        enable_element(p.items.explode, true);
+
         p.items.explode.unbind().click(function(){
             // if anything has been changed, ask the user to save or cancel
             if(p.details_changed()){
                 // warn the user about changed details
-                var dlg = confirmation_dialog(
+                confirmation_dialog(
                     gettext("Confirm explode"),
                     gettext("You have made changes to this item that will not be saved to the new item. Continue?"),
                     function(){
-                        // yes action: cancel, explode and close the 'dialog'
+                        // yes action: cancel and explode
                         p.cancel_button_action();
                         p.item.explode();
-                        dlg.dialog("close");
                     },
                     function(){
-                        // no action: do nothing (just close the dialog)
-                        dlg.dialog("close");
+                        // no action: do nothing
                     }
                 );
             }
@@ -897,9 +941,17 @@ ItemDetails = function(item){
             }
         });
 
-        // when shadow is clicked, cancel this thing
-        p.g.items.fullscreen_shadow.click(function(){
+    }
+    else{
+        enable_element(p.items.explode, false);
+    }
+
+    // when any part of the shadow is clicked, close the details
+    $()
+        .add(p.shadow_top)
+        .add(p.shadow_bottom)
+        .add(p.shadow_left)
+        .click(function(){
             p.cancel_button_action();
         });
-    });
 };

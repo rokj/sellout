@@ -470,3 +470,26 @@ function parseInt_zero(s){
     if(isNaN(r)) return 0;
     else return r;
 }
+
+function enable_element(element, enabled){
+    // a common function to enable all kinds of elements
+    if(enabled){
+        // enable the element:
+        // add hoverable class if the element had one before it was disabled
+        if(element.attr("data-hoverable") == "1"){
+            element.addClass("hoverable");
+        }
+
+        element.removeClass("disabled").prop("disabled", false);
+    }
+    else{
+        // disable the element:
+        // first, remember if the element had hoverable class
+        if(element.hasClass("hoverable")){
+            element.attr("data-hoverable", "1");
+        }
+
+        // then disable everything
+        element.addClass("disabled").removeClass("hoverable").prop("disabled", true);
+    }
+}

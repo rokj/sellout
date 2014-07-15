@@ -17,20 +17,27 @@ Categories = function(g){
     p.items = {
         parents: $("#parents"), // parent categories
         children: $("#children"), // children categories
-        home_button: $("#category_button_home"),
         favorites_button: $("#category_button_favorites"),
-        back_button: $("#category_parent")
-    };
+        back_button: $("#category_parent"),
 
-    // show the home button if displaying breadcrumbs
-    if(p.g.config.display_breadcrumbs){
-        console.log("displaying breadcrumbes");
-        p.items.home_button.show();
-    }
+        subcategories_title: $("#subcategories_title"),
+        products_title: $("#products_title")
+    };
 
     //
     // methods
     //
+    p.set_texts = function(showing_favorites){
+        if(showing_favorites){
+            p.items.subcategories_title.text(gettext("Categories"));
+            p.items.products_title.text(gettext("Favorite products"));
+        }
+        else{
+            p.items.subcategories_title.text(gettext("Subcategories"));
+            p.items.products_title.text(gettext("Products"));
+        }
+    };
+
     p.clear_parents = function(){ $("div.category-button", p.items.parents).hide(); };
     p.clear_children = function(){ $("div.category-button", p.items.children).hide(); };
     p.clear = function(){
@@ -38,7 +45,7 @@ Categories = function(g){
         p.clear_children();
     };
 
-    p.home_button_action = function(){
+    p.favorites_button_action = function(){
         // clear everything first
         p.clear();
 
@@ -52,7 +59,10 @@ Categories = function(g){
             p.items.back_button.hide();
         }
 
-        // TODO: display what products?
+        // display favorites
+        p.g.objects.search.show_favorites();
+
+        p.set_texts(true); // showing favorites
     };
 
     //
@@ -71,10 +81,7 @@ Categories = function(g){
     }
 
     // home button action
-    p.items.home_button.click(function(){ p.home_button_action(); });
-
-    // in the beginning, show the home button
-    p.home_button_action();
+    p.items.favorites_button.click(function(){p.favorites_button_action(); });
 };
 
 CategoryButton = function(list, parent, data){
@@ -169,12 +176,12 @@ CategoryButton = function(list, parent, data){
                     if(p.subcategories.length > 0){
                         // if it has no children, show its parent
                         if(p.parent) p.parent.click_action();
-                        else p.list.home_button_action();
+                        else p.list.favorites_button_action();
                     }
                     else{
                         // if it has children, show its parent's parent
                         if(p.parent.parent) p.parent.parent.click_action();
-                        else p.list.home_button_action();
+                        else p.list.favorites_button_action();
                     }
                 });
             }
@@ -189,6 +196,8 @@ CategoryButton = function(list, parent, data){
         p.g.objects.products.show_products(
             p.g.objects.search.search_by_category(p.data.id)
         );
+
+        p.list.set_texts(false); // not showing favorites anymore
     };
 
     //
