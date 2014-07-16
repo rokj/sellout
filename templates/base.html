@@ -31,13 +31,17 @@ blocks:
     
     {% comment %} bignumber (for all number manipulation) {% endcomment %}
     <script src="{% static 'js/big.js' %}"></script>
-    
+
+    {% comment %} mousewheel events {% endcomment %}
+    <script src="{% static 'js/jquery.mousewheel.js' %}"></script>
+
     {% comment %} translation {% endcomment %}
     <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
 
     {% comment %} common javascript files {% endcomment %}
     <script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/common.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/draggable.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/widgets/calculations.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/jquery.simpleMenu.js' %}"></script>
 

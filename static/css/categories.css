@@ -47,6 +47,24 @@ div.category-button{ /* category selection buttons (the scrolling ones) */
     text-align:center;
 }
 
+/* the back button (only when not displaying breadcrumbs) */
+#category_parent{
+    height: 40px;
+    line-height: 40px;
+    text-align: right;
+    width: 30px;
+    min-width: 30px; /* must be here or width property will not
+                        override min-width from .category-button */
+}
+#category_parent > img{
+    height: 30px;
+    vertical-align: top;
+    position: relative;
+    top: 5px;
+    margin-right: 10px;
+    
+}
+
 div.category-button span{
     margin-left: 30px;
     margin-right: 30px;

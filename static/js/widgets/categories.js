@@ -70,8 +70,8 @@ Categories = function(g){
     //
 
     // draggable parents and children
-    set_draggable(p.items.parents, "div.category-button:visible", p.g.settings.t_easing);
-    set_draggable(p.items.children, "div.category-button:visible", p.g.settings.t_easing);
+    set_horizontal_draggable(p.items.parents, "div.category-button:visible", p.g.settings.t_easing);
+    set_horizontal_draggable(p.items.children, "div.category-button:visible", p.g.settings.t_easing);
 
     // create all top-level categories
     var i, c;
@@ -189,6 +189,13 @@ CategoryButton = function(list, parent, data){
     };
 
     p.click_action = function(){
+        // if the parent has the 'no-click' class, do nothing
+        // (it's being dragged)
+        if(p.list.items.parents.hasClass("no-click") ||
+           p.list.items.children.hasClass("no-click")){
+            return;
+        }
+
         // show children
         p.show_children();
 
@@ -213,5 +220,7 @@ CategoryButton = function(list, parent, data){
     p.create_button();
 
     // register events
-    $().add(p.parents_button).add(p.children_button).click(function(){ p.click_action(); });
+    $().add(p.parents_button)
+       .add(p.children_button)
+       .click(p.click_action);
 };

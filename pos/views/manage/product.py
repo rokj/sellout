@@ -125,7 +125,7 @@ def products(request, company):
         'shortcut': max_field_length(Product, 'shortcut'),
         'stock': g.DECIMAL['quantity_digits'],
         'name': max_field_length(Product, 'name'),
-        'tax': g.DECIMAL['percentage_decimal_places'] + 4, # up to '100.' + 'decimal_digits'
+        'tax': g.DECIMAL['percentage_decimal_places'] + 4,  # up to '100.' + 'decimal_digits'
     }
     
     if get_company_value(request.user, c, 'pos_discount_calculation') == 'Tax first':

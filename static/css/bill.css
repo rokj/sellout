@@ -141,7 +141,7 @@ div.bill-item button, div.bill-item input[type='button']{
     box-shadow:  none;
 }
 
-/* item name, delete and more button */
+/* item name, code, delete and more button */
 .item-val.name{
     text-align: left;
 }
@@ -160,6 +160,19 @@ div.bill-item button, div.bill-item input[type='button']{
     top: 50%;
     margin-top: -10px;
 }
+
+div.code{
+    position: absolute;
+    top: -25px;
+    margin-left: 25px;
+    
+    font-size: 12px;
+    color: #969696;
+}
+
+.collapsed div.code{ display: none; }
+.expanded div.code{ display: block; }
+
 /* more button */
 .collapsed button.more{ display: none; }
 .expanded button.more{ display: block; }

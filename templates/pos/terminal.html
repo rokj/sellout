@@ -159,8 +159,11 @@ $(window).load(function(){
 
                             <div class="value item name"></div>
 
-                            {# more button #}
+                            {# more button (expanded item only) #}
                             <button class="more">{% trans 'More' context 'More button in bill item' %}</button>
+
+                            {# item code (expanded item only) #}
+                            <div class="item code" title="{% trans 'Product code' %}"></div>
                         </div>
                         {# quantity #}
                         <div class="item-val quantity">
@@ -225,7 +228,7 @@ $(window).load(function(){
                 <div id="category_parent" class="category-button hidden">
                     <img src="{% static 'icons/back_black.png' %}"
                          alt="{% trans 'Back' %}"
-                         title="{% trans 'Back' %}" />
+                         title="{% trans 'Back to parent category' %}" />
                 </div>
                 {% comment %} scrolling: parents {% endcomment %}
                 <div id="parents_scroll_inner">

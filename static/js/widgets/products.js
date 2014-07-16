@@ -61,7 +61,8 @@ Products = function(g){
         n = Math.floor(div_height/(p_size[1] + MIN_MARGIN));
         if(n == 0){
             console.warn("Products div too narrow");
-            return;
+            n = 1;
+            div_height = p_size + MIN_MARGIN;
         }
 
         for(i = 0; i < ids.length;){
@@ -116,7 +117,7 @@ Products = function(g){
     }
 
     // make the div draggable
-    set_draggable(p.items.container, "div.products-column", p.g.settings.t_easing);
+    set_horizontal_draggable(p.items.container, "div.products-column", p.g.settings.t_easing);
 };
 
 Product = function(list, data){
@@ -146,6 +147,10 @@ Product = function(list, data){
         }
         else{
             p.items.container.on("click", null, null, function(){
+                // if the bill has the 'no-click' class, do nothing
+                // (it is being dragged)
+                if(p.list.items.container.hasClass("no-click")) return;
+
                 p.add_to_bill();
             });
         }
@@ -169,31 +174,28 @@ Product = function(list, data){
     }
 
     // create a 'product' div
-	// show: name, code, shortcut and background image
-	// container contains all inner elements and sets background color (defined by category)
-    // image has background image (if product has an image set)
-    // name, code, shortcut are just text elements (appended to image)
+    // the square that holds everything
     p.items.container = $("<div>", {"class":"product-button"});
     p.items.container.css({
 		width: p.g.config.product_button_size,
 		height: p.g.config.product_button_size
 	});
 
+    p.items.container.css("background-color", "#" + p.data.color);
+
+    // show light text if background is dark
     if(is_dark(p.data.color)) p.items.container.addClass("dark");
 
+    // if there's an image, show it in image
     p.items.image = $("<div>", {"class": "product-button-image"});
     p.items.image.appendTo(p.items.container);
 
-    p.items.overlay = $("<div>", {"class": "product-image-overlay"});
-    p.items.overlay.appendTo(p.items.container);
-    p.items.overlay.css("background-color", "#" + p.data.color);
-
 	if(p.data.image){
         p.items.image.css("background-image", "url(" + p.data.image + ")");
+        p.items.container.addClass("no-image"); // so that text will placed in the middle
     }
     else{
-        // remove background opacity if there's no background image
-        p.items.overlay.css("opacity", "1");
+        p.items.container.addClass("image");
     }
 
     p.items.text = $("<div>", {"class": "product-button-text"});
@@ -202,11 +204,12 @@ Product = function(list, data){
     p.items.name = $("<p>", {"class":"product-button-name"}).text(p.data.name);
     p.items.name.appendTo(p.items.text);
 
+    /* no code or shortcut is displayed at the moment
     p.items.code = $("<p>", {"class":"product-button-code"}).text(p.data.code);
     p.items.code.appendTo(p.items.text);
 
     p.items.shortcut = $("<p>", {"class":"product-button-shortcut"}).text(p.data.shortcut);
-    p.items.shortcut.appendTo(p.items.text);
+    p.items.shortcut.appendTo(p.items.text); */
 
     // add id to access this object via document tree, not javascript
     p.items.container.data({id: p.data.id});

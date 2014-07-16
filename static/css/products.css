@@ -39,29 +39,26 @@ div.product-button-image {
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: 24px;
     z-index: 0;
     background-size: cover;
     background-position: center center;
 }
 
-div.product-image-overlay{
-    position:absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    opacity: 0.5;
-    z-index: 1;
-}
-
 div.product-button-text{
     position: absolute;
-    top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
     z-index: 2;
+}
+
+div.product-button.image div.product-button-text{
+    top: 39.2%; /* golden ratio */
+}
+
+div.product-button.no-image div.product-button-text{
+    bottom: 0;
+    height: 24px;
 }
 
 p.product-button-name {
@@ -69,13 +66,13 @@ p.product-button-name {
     padding: 0;
     font-weight: bolder;
     text-align: center;
-    margin-top: 30%;
-    font-size: 16px;
+    /* margin-top: 30%; */
+    font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: 3px;
+    padding-right: 3px;
 }
 
 p.product-button-code {

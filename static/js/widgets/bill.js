@@ -138,6 +138,8 @@ Bill = function(g){
             }
             else{
                 p.print(response.data.bill);
+
+                // TODO: when the bill is finished, remove from each item's stock
             }
         });
     };
@@ -166,49 +168,16 @@ Bill = function(g){
         }
     };
 
+    p.show_item = function(item){
+        // scrolls the bill so that the current item is shown
+        vertical_scroll_into_view(item.item_row);
+    };
+
     //
     // init
     //
-    // draggable: the same as set_draggable(), but vertical
-    p.bill.draggable({
-        helper: function () {
-            return $("<div>").css("opacity", 0);
-        },
-        drag: function (event, ui) {
-            // the position of parent obviously has to be taken into account
-            var pos = ui.helper.offset().top - p.bill.parent().offset().top;
-            $(this).stop().animate({top: pos},
-                p.g.settings.t_easing,
-                'easeOutCirc',
-                function () {
-                    // check if this has scrolled past the last
-                    // (first) button
-                    var all_buttons = $("div.bill-item", p.bill);
-                    var first_button = all_buttons.filter(":first");
-                    var last_button = all_buttons.filter(":last");
-                    var container = p.bill.parent();
-
-                    if(first_button.length < 1 || last_button.length < 1) return;
-
-                    // if the whole scroller's height is less than
-                    // container's, always slide it back to top border
-
-                    if (first_button.position().top + last_button.position().top + last_button.outerHeight() < container.height()){
-                        p.bill.animate({top: 0}, "fast");
-                    }
-                    else {
-                        if (first_button.offset().top > container.offset().top) {
-                            p.bill.animate({top: 0}, "fast");
-                        }
-                        else if (last_button.offset().top + last_button.height() < container.offset().top + container.height()) {
-                            p.bill.animate({
-                                top: -last_button.position().top + container.height() - last_button.height()}, "fast");
-                        }
-                    }
-                });
-        },
-        axis: "y"
-    });
+    // draggable bill
+    set_vertical_draggable(p.bill, "div.bill-item", p.g.settings.t_easing);
 
     // bindings
     p.finish_button.click(function(){
@@ -439,6 +408,9 @@ Item = function(bill, product) {
     // bind events
     // click on an item
     p.item_row.click(function(){
+        // if the bill has the 'no-click' class, do nothing (it's being dragged)
+        if(p.bill.bill.hasClass("no-click")) return;
+
         if(p.expanded){
             // already expanded, just collapse
             p.expand(false);
@@ -451,6 +423,9 @@ Item = function(bill, product) {
             }
             p.expand(true);
         }
+
+        // show the item
+        p.bill.show_item(p);
     });
 
     // quantity up/down
@@ -487,6 +462,9 @@ Item = function(bill, product) {
 
     // quantity
     p.items.qty.change(function(){ p.check_quantity(); });
+
+    // when the item is added, scroll the bill to show it
+    p.bill.show_item(p);
 };
 
 ItemDetails = function(item){
