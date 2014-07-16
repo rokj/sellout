@@ -14,13 +14,18 @@
 </script>
 {% endblock %}
 
-{% block status_bar_title %}{% trans 'Add discount' %}{% endblock %}
+{% block status_bar_title %}
+    {% if add %}
+        {% trans 'Add discount' %}
+    {% else %}
+        {% trans 'Edit discount' %}
+    {% endif %}
+{% endblock %}
 
 {% block manage_content %}
 {% if add %}
     <form action="{% url 'pos:add_discount' company.url_name %}" method="post">
 {% else %}
-    <h1>{% trans 'Edit discount' %}</h1>
     <form action="{% url 'pos:edit_discount' company.url_name discount_id %}" method="post">
 {% endif %}
     <div class="edit-container">

@@ -78,11 +78,6 @@ $(window).load(function(){
         items: {
             focused: null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
 
-            // items that are ready to be inserted
-            spacer: $("<img>", {src:"{% static 'graphics/spacer.png' %}"}),
-            loading_animation: $("<img>", {src: "{% static 'graphics/loading.gif' %}"}),
-            subcategory: $("<img>", {src:"{% static 'graphics/subcategory.png' %}"}),
-
             company_logo: null, // will be created when terminal initializes
 
             fullscreen_shadow: $("#fullscreen_shadow"),

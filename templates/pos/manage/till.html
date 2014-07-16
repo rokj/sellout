@@ -8,7 +8,13 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/tills.css' %}"/>
 {% endblock %}
 
-{% block status_bar_title %}{% trans 'Add a register' context 'page title' %}{% endblock %}
+{% block status_bar_title %}
+    {% if add %}
+        {% trans 'Add register' context 'page title' %}
+    {% else %}
+        {% trans 'Edit register' context 'page title' %}
+    {% endif %}
+{% endblock %}
 
 {% block manage_content %}
     <div class="edit-container">

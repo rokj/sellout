@@ -350,7 +350,6 @@ def upload_color_logo(request, company):
             color_logo = background
             color_logo = color_logo.convert('RGB')
 
-
         if color_logo.size != g.IMAGE_DIMENSIONS['color_logo']:
             # the logo has wrong dimensions
             resize = True

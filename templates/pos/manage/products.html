@@ -432,7 +432,7 @@ $(document).ready(function(){
     function show_image(product, obj){
         if(!product.image){
             // show 'placeholder' image
-            obj.css("background-image", "url('{% static 'graphics/placeholder.png' %}')");
+            obj.css("background-image", "url('{% static 'images/product_placeholder.png' %}')");
             obj.attr("alt", "{% trans 'No image' %}");
         }
         else{
@@ -1214,7 +1214,7 @@ $(document).ready(function(){
         <div id="dialog_shadow"></div>
         <div id="edit_dialog" class="hidden">
             <h2 id="edit_dialog_title">{# content by js #}</h2>
-            <div class="management-column fixed">
+            <div class="management-column narrow">
                 <div class="images">
                     <div class="image-buttons">
                         <div class="bottom">
@@ -1250,7 +1250,7 @@ $(document).ready(function(){
                 </div>
 
             </div>
-            <div class="management-column fixed hand-margin-2">
+            <div class="management-column narrow hand-margin-2">
 
                 <div class="form-field">
                     {% comment %} list of tax rates {% endcomment %}
@@ -1309,7 +1309,7 @@ $(document).ready(function(){
                 </div>
 
             </div>
-            <div class="management-column fixed hand-margin-3">
+            <div class="management-column narrow hand-margin-3">
 
                 <div class="form-field">
                 {% comment %} discounts {% endcomment %}

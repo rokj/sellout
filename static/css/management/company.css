@@ -6,3 +6,28 @@
 div.error{
     margin-left: 20px;
 }
+
+#color_logo_container, #monochrome_logo_container{
+    position: relative;
+    background-size: cover; /* crop fill */
+    background-position: center center;
+}
+
+#default_color_logo, #default_monochrome_logo{
+    position: absolute;
+    z-index: -1; /* stay behind its parent */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: #ffffff;
+    background-size: cover;
+    background-position: center center;
+}
+
+#monochrome_passepartout{
+    position: relative;
+    z-index: 1; /* so that default logo will be above it */
+    background-color: #ffffff;
+}
