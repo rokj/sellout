@@ -162,7 +162,7 @@ def item_prices(user, company, base_price, tax_percent, quantity, discounts):
         # total without tax
         r['total_tax_exc'] = r['discount_price']
 
-    # multiply everything by quantity
+    # multiply by quantity
     r['base_price'] = r['base_price']*quantity  # without tax and discounts
     r['tax_absolute'] = r['tax_absolute']*quantity  # tax, absolute
     r['discount_absolute'] = r['discount_absolute']*quantity  # discounts, absolute
@@ -216,16 +216,16 @@ def create_bill(request, company):
         return JSON_error(_("No data received"))
 
     # check bill properties
-    r = parse_decimal(request.user, c, data.get('grand_total'))
+    r = parse_decimal(request.user, c, data.get('total'))
     if not r['success'] or r['number'] <= Decimal('0'):
         return JSON_error(_("Invalid grand total value"))
     else:
         # this number came from javascript
-        grand_total_js = r['number']
+        total_js = r['number']
 
     # this number will be calculated below;
     # both grand totals must match or... ???
-    grand_total_py = Decimal('0')
+    total_py = Decimal('0')
 
     # save all validated stuff in bill to a dictionary and insert into database at the end
     # prepare data for insert
@@ -338,7 +338,7 @@ def create_bill(request, company):
                 return item_error(_("Item prices do not match"), product)
             else:
                 # add this price to grand total
-                grand_total_py += r['number']
+                total_py += r['number']
 
         # save this item's prices to item's dictionary (will go into database later)
         item['base_price'] = prices['base_price']
@@ -348,7 +348,7 @@ def create_bill(request, company):
         item['total'] = prices['total']
 
     # in the end, check grand totals against each others
-    if grand_total_js != grand_total_py:
+    if total_js != total_py:
         return JSON_error(_("Total prices do not match"))
 
     # at this point, everything is fine, insert into database
@@ -361,7 +361,7 @@ def create_bill(request, company):
         type=bill['type'],
         timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
         status=bill['status'],
-        total=grand_total_py
+        total=total_py
     )
     db_bill.save()
 

@@ -1,71 +1,67 @@
 {% load i18n %}
-{% comment %}
+{% load static %}
 
-Boris                         02.06.2014 / 16:07
-
-{% endcomment %}
-<div class="receipt-logo">
-
-</div>
-{% comment %}
-    Company name           Phone number
-    Company address        Website
-    Postal code & City     VAT ID
-{% endcomment %}
-<div class="receipt-company-details-1"></div>
-<div class="receipt-company-details-2"></div>
-
-{% comment %}
-PRODUCT                     Quantity      Amount
-Price     Tax               Discount
-{% endcomment %}
-<table class="receipt-items">
+<div class="receipt-80mm">
+    <div class="receipt-logo"></div>
     {% comment %}
-    head and items:
-    2 rows per item, 4 columns per row:
-    |product name        |quantity|amount  |
-    |  price      |tax   |discount         |
+        <logo>
+        Company name
+
+        Company address    Phone number
+        Postal code        VAT ID
+        City               Website
+
     {% endcomment %}
-    <thead>
-        <tr class="receipt-row first">
-            <td colspan="2" class="item-name">{% trans 'Product' %}</td>
-            <td class="item-quantity">{% trans 'Quantity' %}</td>
-            <td class="item-amount">{% trans 'Amount' %}</td>
-        </tr>
-        <tr class="receipt-row second">
-            <td class="item-price">{% trans 'Price' %}</td>
-            <td class="item-tax">{% trans 'Tax' %}</td>
-            <td class="item-discount" colspan="2">{% trans 'Discount' %}</td>
-        </tr>
-    </thead>
+    <div class="issuing-company">
+        <div class="company-details-name"></div>
+
+        <div class="company-details-1"></div>
+        <div class="company-details-2"></div>
+    </div>
+
+    <div class="register-location"></div>
+
     {% comment %}
-    footer:
-    | total (2 columns) | currency | grand_total |
+    PRODUCT                     Quantity      Amount
+    Price     Tax               Discount
     {% endcomment %}
-    <tfoot>
-        <tr>
-            <td colspan="2">{% trans 'Total' %}</td>
-            <td class="receipt-currency">{# currency goes here #}</td>
-            <td class="receipt-grand-total">{# grand_total goes here #}</td>
-        </tr>
-        <tr>
-            {% comment %} the last row: cashier's name and date-time {% endcomment %}
-            <td class="receipt-cashier" colspan="2"></td>
-            <td class="receipt-datetime" colspan="2"></td>
-        </tr>
+    <div class="receipt-items">
+        <div class="items-header">
+            <div class="receipt-row first">
+                <div class="item-name">{% trans 'Product' %}</div>
+                <div class="item-quantity">{% trans 'Quantity' %}</div>
+                <div class="item-unit">&nbsp;{# unit has no label #}</div>
+                <div class="item-amount">{% trans 'Amount' %}</div>
+            </div>
+            <div class="receipt-row second">
+                <div class="item-price">{% trans 'Price' %}</div>
+                <div class="item-tax">{% trans 'Tax' %}</div>
+                <div class="item-discount">{% trans 'Discount' %}</div>
+            </div>
+        </div>
 
-    </tfoot>
+        <div class="items-body"></div>
 
-    <tbody>
+        <div class="items-footer">
+            <div class="receipt-total-text">{% trans 'Total' context 'Receipt footer text' %}</div>
+            <div class="receipt-currency">{# currency goes here #}</div>
+            <div class="receipt-total">{# grand_total goes here #}</div>
+        </div>
+    </div>
 
-    </tbody>
-</table>
+    <div class="receipt-cashier">
+        {% comment %} the last row: cashier's name and date-time {% endcomment %}
+            <div class="receipt-cashier-text">{% trans 'Cashier' %}: </div>
+            <div class="receipt-cashier-name"></div>
+            <div class="receipt-datetime"></div>
+    </div>
 
-<div class="receipt-footer">
-    {% comment %}misc stuff that goes on a receipt, such as:
-    - gifts
-    - coupons
-    - pictures of horses
-    {% endcomment %}
-
+    <div class="receipt-footer">
+        {% comment %}misc stuff that goes on a receipt, such as:
+        - gifts
+        - coupons
+        - pictures of horses
+        {% endcomment %}
+        <img src="{% static 'images/bill_horse.jpg' %}" alt="" class="horse-picture" />
+    </div>
 </div>

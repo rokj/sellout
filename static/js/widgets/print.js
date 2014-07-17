@@ -5,25 +5,33 @@ function format_small_receipt(g, bill){
 
     // company details:
     // logo:
-    if(g.data.company.logo_url){
+    if(g.objects.terminal.register.print_logo && g.items.company_monochrome_logo){
         // if company's logo exists, append
-        $(".receipt-logo", receipt).append(g.items.company_logo);
+        $(".receipt-logo", receipt).append(g.items.company_monochrome_logo);
     }
 
     // company details: create some
-    $("receipt-company-details-1", receipt).text(
-        escape(g.data.company.name) + "<br/>" +
+    $(".company-details-name", receipt).text(g.data.company.name);
+
+    $(".company-details-1", receipt).html(
         escape(g.data.company.street) + "<br/>" +
-        escape(g.data.company.postcode) + " " + escape(g.data.company.city)
-    );
-    $("receipt-company-details-2", receipt).text(
-        escape(g.data.company.phone) + "<br/>" +
-        escape(g.data.company.website) + "<br/>" +
-        escape(g.data.company.vat_no)
+        escape(g.data.company.postcode) + " " + escape(g.data.company.city) +
+        escape(g.data.company.state) + " " + escape(g.data.company.country)
     );
 
+    $(".company-details-2", receipt).html(
+        escape(g.data.company.phone) + "<br/>" +
+        escape(g.data.company.vat_no) + "<br/>" +
+        escape(g.data.company.website)
+    );
+
+    // register location (if selected in register settings)
+    if(g.objects.terminal.register.print_location && g.objects.terminal.register.location){
+        $(".register-location", receipt).text(g.objects.terminal.register.location);
+    }
+
     // bill items:
-    var items_list = $("tbody", receipt);
+    var items_list = $(".items-body", receipt);
     var item_template_1 = $(".receipt-row.first", receipt);
     var item_template_2 = $(".receipt-row.second", receipt);
     var i, item, io1, io2;
@@ -38,8 +46,12 @@ function format_small_receipt(g, bill){
 
         // name
         $(".item-name", io1).text(item.name);
-        // quantity
+
+        // quantity and unit type
+        if(item.unit_type != 'Piece') $(".item-unit", io1).text(item.unit_type);
+
         $(".item-quantity", io1).text(item.quantity);
+
         // amount
         $(".item-amount", io1).text(item.total);
 
@@ -55,10 +67,10 @@ function format_small_receipt(g, bill){
     // currency
     $(".receipt-currency", receipt).text(g.config.currency);
     // the grand total
-    $(".receipt-grand-total", receipt).text(bill.grand_total);
+    $(".receipt-total", receipt).text(bill.total);
 
     // cashier name
-    $(".receipt-cashier", receipt).text(g.data.user_name);
+    $(".receipt-cashier-name", receipt).text(g.data.user_name);
     $(".receipt-datetime", receipt).text(
         today(g.config.date_format) + " " + now(g.config.time_format)
     );

@@ -8,6 +8,7 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/products.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'css/categories.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'css/bill.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'css/print.css' %}" />
 
 <style type="text/css">
 .item-val.quantity input[type='text']{
@@ -76,12 +77,11 @@ $(window).load(function(){
 
         // cached jquery items
         items: {
-            focused: null, // will be assigned a jquery element as soon as a key is pressed/mouse clicked
-
-            company_logo: null, // will be created when terminal initializes
+            company_color_logo: {% if company.color_logo %}$("<img>", {src: "{{ company.color_logo.url }}"}){% else %}null{% endif %},
+            company_monochrome_logo: {% if company.monochrome_logo %}$("<img>", {src: "{{ company.monochrome_logo.url }}"}){% else %}null{% endif %},
 
             fullscreen_shadow: $("#fullscreen_shadow"),
-           loading: $("#loading"),
+            loading: $("#loading"),
 
             small_receipt_template: $("#small_receipt_template"),
             large_receipt_template: $()

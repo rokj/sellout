@@ -22,7 +22,7 @@ Bill = function(g){
 
     // the 'finish' button
     p.actions = $("#bill_actions");
-    p.finish_button = $(".finish-the-fukin-bill", p.actions);
+    p.finish_button = $("#finish_the_fukin_bill", p.actions);
 
     // save item template for items and remove it from the document
     p.item_template = $("#bill_item_template").detach().removeAttr("id");
@@ -119,7 +119,7 @@ Bill = function(g){
         var i;
         var r = {
             items: [],
-            grand_total: dn(p.update_summary(), p.g)
+            total: dn(p.update_summary(), p.g)
         };
 
         // get all items
@@ -155,6 +155,10 @@ Bill = function(g){
                     // use the default, printer;
                     // create a HTML receipt and issue javascript print() method and that's it
                     var receipt = format_small_receipt(p.g, bill);
+
+                    // TODO: temporary
+                    //receipt.appendTo("body").show();
+                    // TODO: permanent
                     receipt.printThis();
                 }
                 else{
