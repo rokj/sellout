@@ -214,11 +214,11 @@ PERMISSIONS = {
         },
     'cashier': {
         'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register',),
-        'edit': ('bill', 'terminal',),
+        'edit': ('bill', 'terminal', 'contact'),  # cashiers must write bills
         },
     'seller': {
         'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register',),
-        'edit': ('bill', 'product', 'terminal', 'manage',),
+        'edit': ('bill', 'product', 'terminal', 'manage', 'contact',),
         },
     'manager': {
         'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register',),

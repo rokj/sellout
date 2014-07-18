@@ -10,20 +10,22 @@ function format_small_receipt(g, bill){
         $(".receipt-logo", receipt).append(g.items.company_monochrome_logo);
     }
 
-    // company details: create some
-    $(".company-details-name", receipt).text(g.data.company.name);
+    // issuing company details: create some
+    $(".issuing.company-details-name", receipt).text(g.data.company.name);
 
-    $(".company-details-1", receipt).html(
+    $(".issuing.company-details-1", receipt).html(
         escape(g.data.company.street) + "<br/>" +
         escape(g.data.company.postcode) + " " + escape(g.data.company.city) +
         escape(g.data.company.state) + " " + escape(g.data.company.country)
     );
 
-    $(".company-details-2", receipt).html(
+    $(".issuing.company-details-2", receipt).html(
         escape(g.data.company.phone) + "<br/>" +
         escape(g.data.company.vat_no) + "<br/>" +
         escape(g.data.company.website)
     );
+
+    // the same for client company (if selected)
 
     // register location (if selected in register settings)
     if(g.objects.terminal.register.print_location && g.objects.terminal.register.location){

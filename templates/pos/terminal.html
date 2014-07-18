@@ -8,6 +8,7 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/products.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'css/categories.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'css/bill.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'css/contacts.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'css/print.css' %}" />
 
 <style type="text/css">
@@ -32,6 +33,7 @@
 <script src="{% static 'js/widgets/categories.js' %}"></script> {% comment %} categories selector {% endcomment %}
 <script src="{% static 'js/widgets/products.js' %}"></script> {% comment %} products selector {% endcomment %}
 <script src="{% static 'js/widgets/search.js' %}"></script> {% comment %} searching products/categories {% endcomment %}
+<script src="{% static 'js/widgets/contacts.js' %}"></script> {% comment %} selecting clients (for bills) {% endcomment %}
 <script src="{% static 'js/widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 <script src="{% static 'js/widgets/print.js' %}"></script> {% comment %} formatting and printing receipts {% endcomment %}
 
@@ -48,7 +50,9 @@ $(window).load(function(){
               // management: registers (a link is needed for choosing current register)
               manage_registers: "{% url 'pos:list_registers' company.url_name %}",
               // save last used register
-              set_register: "{% url 'pos:set_register' company.url_name %}"
+              set_register: "{% url 'pos:set_register' company.url_name %}",
+              // create contacts on the fly
+              quick_create_contact: "{% url 'pos:quick_create_contact' company.url_name %}"
         },
 
         // config (data comes directly from view)
@@ -93,6 +97,7 @@ $(window).load(function(){
     g.objects.categories = new Categories(g); // categories selector (level 0 is the topmost category)
     g.objects.products = new Products(g);
     g.objects.search = new Search(g);
+    g.objects.contacts = new Contacts(g);
     g.objects.bill = new Bill(g);
 
     // in the beginning, show favorites and topmost category
@@ -105,6 +110,8 @@ $(window).load(function(){
         });
     }, 500);
 
+    // datepickers
+    $(".datepicker").datepicker({dateFormat: g.config.date_format});
 });
 </script>
 
@@ -201,8 +208,21 @@ $(window).load(function(){
 
                 {% comment %} buttons etc. {% endcomment %}
                 <div id="bill_actions">
-                    <button class="till-button" id="finish_the_fukin_bill">Finish</button>
-                    <button class="till-button" id="save_the_fukin_bill">Save</button>
+                    <div class="till-button-container" id="finish_the_fukin_bill">
+                        <button>{% trans 'Finish' context 'Create bill button text' %}</button>
+                    </div>
+
+                    <div class="till-button-container" id="bill_options">
+                        <button class="open-menu">
+                            {% trans 'Options' context 'bill options button text' %}
+                            <img src="{% static 'icons/arrow_white_up.png' %}" alt="" />
+                        </button>
+
+                        <div id="bill_options_menu">
+                            <button class="bill-option-menu-item save">{% trans 'Save' %}</button>
+                            <button class="bill-option-menu-item select-client">{% trans 'Select client' %}</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -268,8 +288,8 @@ $(window).load(function(){
         </div>
     </div>
 
+    {% comment %} the dialog for selecting register on login {% endcomment %}
     <div id="registers" class="hidden">
-        {% comment %} the dialog for selecting register on login {% endcomment %}
         {% trans 'Which register have you logged on?' %}
         <select id="registers_list">
             {% for r in  registers %}
@@ -279,71 +299,126 @@ $(window).load(function(){
         <input type="button" value="{% trans 'Go' %}" id="select_register"/>
     </div>
 
-<div id="templates" class="hidden">
-    <div id="small_receipt_template">
-        {% include 'pos/small_receipt.html' %}
+    {% comment %} the dialog for selecting contact {% endcomment %}
+    <div id="contacts" class="hidden">
+        <div class="contact-type">
+            <input type="button" class="company-switch" value="{% trans 'Company' %}" />
+            <input type="button" class="individual-switch" value="{% trans 'Individual' %}" />
+        </div>
+
+        <div class="contact-form individual-form">
+            <div class="left-column">
+                <input type="text" class="first-name" placeholder="{% trans 'First name' %}" />
+                <input type="text" class="last-name" placeholder="{% trans 'Last name' %}" />
+                <select class="sex" autocomplete="off">
+                    {% for s in sexes %}<option value="{{ s.0 }}">{{ s.1 }}</option>{% endfor %}
+                </select>
+                <input type="text" class="email" placeholder="{% trans 'E-mail' %}" />
+                <input type="text" class="street-address" placeholder="{% trans 'Street address' %}" />
+                <input type="text" class="postcode" placeholder="{% trans 'Post code' %}" />
+            </div>
+            <div class="right-column">
+                <input type="text" class="city" placeholder="{% trans 'City' %}" />
+                <input type="text" class="state" placeholder="{% trans 'State' %}" />
+                <select class="country">{% for c in countries %}
+                    {# default is the company's country #}
+                    <option value="{{ c.0 }}" {% if c.0 == company.country %}selected{% endif %}>{{ c.1 }}</option>
+                {% endfor %}</select>
+                <input type="text" class="phone" placeholder="{% trans 'Phone' %}" />
+                <input type="text" class="date-of-birth datepicker" placeholder="{% trans 'Date of birth' %}" />
+            </div>
+        </div>
+
+        <div class="contact-form company-form">
+            <div class="left-column">
+                <input type="text" class="name" placeholder="{% trans 'Name' %}" />
+                <input type="text" class="vat" placeholder="{% trans 'VAT' %}" />
+                <input type="text" class="street-address" placeholder="{% trans 'Street address' %}" />
+                <input type="text" class="postcode" placeholder="{% trans 'Post code' %}" />
+                <input type="text" class="city" placeholder="{% trans 'City' %}" />
+            </div>
+            <div class="right-column">
+                <input type="text" class="state" placeholder="{% trans 'State' %}" />
+                <select class="country">{% for c in countries %}
+                    <option value="{{ c.0 }}" {% if c.0 == company.country %}selected{% endif %}>{{ c.1 }}</option>
+                {% endfor %}</select>
+                <input type="text" class="email" placeholder="{% trans 'E-mail' %}" />
+                <input type="text" class="phone" placeholder="{% trans 'Phone' %}" />
+            </div>
+        </div>
+
+        <div class="dialog-footer">
+            {# save and cancel buttons #}
+            <input type="button" class="cancel" value="{% trans 'Cancel' %}" />
+            <input type="button" class="save" value="{% trans 'Save' %}" />
+        </div>
     </div>
-    <div id="large_receipt_template">
-        {% include 'pos/large_receipt.html' %}
-    </div>
 
-    <div class="details-box hidden" id="details_box_template">
-        {# the arrow that should point to bill item #}
-        <div class="item-arrow"></div>
+    <div id="templates" class="hidden">
+        <div id="small_receipt_template">
+            {% include 'pos/small_receipt.html' %}
+        </div>
+        <div id="large_receipt_template">
+            {% include 'pos/large_receipt.html' %}
+        </div>
 
-        {# and the arrow should be behind the stuff below #}
-        <div class="details-container">
-            <div>{# tax section #}
-                <p class="details-title">{% trans 'Tax' %}</p>
-                <div class="tax-percent"></div>
-                <div class="tax-absolute"></div>
-            </div>
+        <div class="details-box hidden" id="details_box_template">
+            {# the arrow that should point to bill item #}
+            <div class="item-arrow"></div>
 
-            <div>{# discounts section #}
-                <p class="details-title">{% trans 'Discounts' %}</p>
-                <ul class="discounts">
-                    {# discounts that are already on the products will be added on the fly #}
-                    <li class="select-existing">
-                        <select>
-                            {# existing and valid discounts #}
-                        </select>
-                        <button class="add-discount">+</button>
-                    </li>
-                    <li class="add-new">
-                        {# just an input box and select for type of discount #}
-                        <input type="text" class="description" placeholder="{% trans 'Description' %}" /><br />
-                        <input type="text" class="amount" placeholder="{% trans 'Amount' %}"/>
-                        <select class="type">
-                            <option value="Percent">%</option>
-                            <option value="Absolute">{{ currency }}</option>
-                        </select>
-                    </li>
-                </ul>
-            </div>
-
-            <div>{# notes #}
-                <p class="details-title">{% trans 'Notes' %}</p>
-                <textarea class="notes"></textarea>
-            </div>
-
-            <div class="details-footer">
-                <div class="buttons explode">
-                    <button class="explode">{% trans 'Explode' %}</button>
+            {# and the arrow should be behind the stuff below #}
+            <div class="details-container">
+                <div>{# tax section #}
+                    <p class="details-title">{% trans 'Tax' %}</p>
+                    <div class="tax-percent"></div>
+                    <div class="tax-absolute"></div>
                 </div>
 
-                <div class="buttons cancel">
-                    <input type="button" value="{% trans 'Cancel' %}" class="cancel"/>
+                <div>{# discounts section #}
+                    <p class="details-title">{% trans 'Discounts' %}</p>
+                    <ul class="discounts">
+                        {# discounts that are already on the products will be added on the fly #}
+                        <li class="select-existing">
+                            <select>
+                                {# existing and valid discounts #}
+                            </select>
+                            <button class="add-discount">+</button>
+                        </li>
+                        <li class="add-new">
+                            {# just an input box and select for type of discount #}
+                            <input type="text" class="description" placeholder="{% trans 'Description' %}" /><br />
+                            <input type="text" class="amount" placeholder="{% trans 'Amount' %}"/>
+                            <select class="type">
+                                <option value="Percent">%</option>
+                                <option value="Absolute">{{ currency }}</option>
+                            </select>
+                        </li>
+                    </ul>
                 </div>
 
-                <div class="buttons ok">
-                    <input type="button" value="{% trans 'Save' %}" class="ok"/>
+                <div>{# notes #}
+                    <p class="details-title">{% trans 'Notes' %}</p>
+                    <textarea class="notes"></textarea>
+                </div>
+
+                <div class="details-footer">
+                    <div class="buttons explode">
+                        <button class="explode">{% trans 'Explode' %}</button>
+                    </div>
+
+                    <div class="buttons cancel">
+                        <input type="button" value="{% trans 'Cancel' %}" class="cancel"/>
+                    </div>
+
+                    <div class="buttons ok">
+                        <input type="button" value="{% trans 'Save' %}" class="ok"/>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="fullscreen shadow hidden" id="fullscreen_shadow"></div>
+    <div class="fullscreen shadow hidden" id="fullscreen_shadow"></div>
 
 {% endblock %}
 

@@ -4,11 +4,12 @@ from django.utils.translation import ugettext as _, get_language
 from django import forms
 from django.http import Http404
 
-from pos.models import Company, Contact, Country
+from pos.models import Company, Contact
 from common import globals as g
 from config.functions import get_date_format
+from config.countries import country_choices, country_by_code
 from pos.views.util import JSON_response, JSON_error, has_permission, no_permission_view, format_date, \
-    max_field_length, parse_date, manage_delete_object
+    max_field_length, parse_date, manage_delete_object, JSON_parse, JSON_ok
 
 import re
 
@@ -18,10 +19,6 @@ import re
 ################
 class ContactForm(forms.Form):
     # do not use forms.ModelForm - we're formatting numbers and dates in our way
-
-    # countries list for ChoiceField
-    countries = [(c.two_letter_code, c.name) for c in Country.objects.all()]
-
     type = forms.ChoiceField(required=True, choices=g.CONTACT_TYPES)  # thid field will be hidden in the form
     # none of the fields are required (the form doesn't know for the company/individual whatchamacallit -
     # stuff will be checked in validate_contact)
@@ -33,7 +30,7 @@ class ContactForm(forms.Form):
     postcode = forms.CharField(required=False, max_length=max_field_length(Contact, 'postcode'))
     city = forms.CharField(required=False, max_length=max_field_length(Contact, 'city'))
     state = forms.CharField(required=False, max_length=max_field_length(Contact, 'state'))
-    country = forms.ChoiceField(required=False, choices=countries)
+    country = forms.ChoiceField(required=False, choices=country_choices)
     # except that email is required in any case
     email = forms.EmailField(required=True, max_length=max_field_length(Contact, 'email'))
     phone = forms.CharField(required=False, max_length=max_field_length(Contact, 'phone'))
@@ -137,10 +134,8 @@ def validate_contact(user, company, data):
         return err(_("Invalid email address"))
 
     # country: check for correct code
-    if 'country' in data and data['country']:
-        try:
-            data['country'] = Country.objects.get(two_letter_code=data['country'])
-        except Country.DoesNotExist:
+    if 'country' in data:
+        if data['country'] not in country_by_code:
             return err(_("Country does not exist"))
     
     # other, non-mandatory fields: check length only
@@ -230,8 +225,8 @@ def contact_to_dict(user, company, c, send_to="python"):
     if c.state:
         ret['state'] = c.state
     if c.country:
-        ret['country'] = c.country.name
-        ret['country_code'] = c.country.two_letter_code
+        ret['country'] = c.country
+        ret['country_name'] = c.country_name
     if c.email:
         ret['email'] = c.email
     if c.phone:
@@ -373,7 +368,7 @@ def add_contact(request, company):
 
             return redirect('pos:list_contacts', company=c.url_name)
     else:
-        form = ContactForm(initial={'type': t})
+        form = ContactForm(initial={'type': t, 'country': c.country})
         form.user = request.user
         form.company = c
 
@@ -441,7 +436,62 @@ def edit_contact(request, company, contact_id):
     
     return render(request, 'pos/manage/contact.html', context)
 
-
+@login_required
 def delete_contact(request, company):
     return manage_delete_object(request, company, Contact, (_("You have no permission to delete contacts"),
                                                             _("Could not delete contact")))
+
+
+@login_required
+def quick_create_contact(request, company):
+    """
+        creates contact on the fly (while creating bill on the terminal)
+        contact data is in request.POST
+    """
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist."))
+
+    # permissions
+    if not has_permission(request.user, c, 'contact', 'edit'):
+        return JSON_error(_("You have no permission to add contacts"))
+
+    contact = JSON_parse(request.POST.get('data'))
+
+    if not contact:
+        return JSON_error(_("No data in request"))
+
+    r = validate_contact(request.user, c, contact)
+    if not r['status']:
+        return JSON_error(r['message'])
+
+    contact = r['data']
+
+    # use .get() and forget about different types
+    new_contact = Contact(
+        created_by=request.user,
+        company=c,
+
+        type=contact.get('type'),
+        company_name=c.get('company_name'),
+        first_name=c.get('first_name'),
+        last_name=c.get('last_name'),
+        sex=c.get('sex'),
+        date_of_birth=c.get('date_of_birth'),
+        street_address=c.get('street_address'),
+        postcode=c.get('postcode'),
+        city=c.get('city'),
+        state=c.get('state'),
+        country=c.get('country'),
+        email=c.get('email'),
+        phone=c.get('phone'),
+        vat=c.get('vat')
+    )
+
+    try:
+        new_contact.save()
+    except Exception, e:
+        return JSON_response(_("Saving contact failed") + ": " + str(e))
+
+    return JSON_ok(extra=contact_to_dict(request.user, c, new_contact))

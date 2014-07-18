@@ -13,6 +13,7 @@ from pos.views.manage.till import get_all_registers
 
 from pos.views.util import has_permission, no_permission_view, JSON_ok, JSON_parse, JSON_stringify, error, JSON_error
 from config.functions import get_user_value, set_user_value, get_date_format, get_time_format, get_company_value
+from config.countries import country_choices
 import common.globals as g
 
 
@@ -98,6 +99,8 @@ def terminal(request, company):
 
         # template etc.
         'currency': get_company_value(request.user, c, 'pos_currency'),
+        'sexes': g.SEXES,
+        'countries': country_choices,
 
         # user config
         'config': JSON_stringify(config, True),

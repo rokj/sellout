@@ -363,6 +363,7 @@ button.more{
 #bill_summary div.total{
     height: 40px;
     line-height: 40px;
+    font-weight: bold;
 }
 
 #bill_summary p.total{
@@ -377,21 +378,42 @@ button.more{
     position: relative;
 }
 
-button.till-button{
+.till-button-container{
     position: absolute;
-    top: 50%;
-    margin-top: -25px;
-    height: 50px;
     width: 40%;
-    font-size: 26px;
+    top: 20px;
 }
 
-#finish_the_fukin_bill{
-    left: 0;
-    background-color: fuchsia;
+.till-button-container > button{
+    width: 100%;
+    height: 50px;
+    font-size: 20px;
 }
 
-#save_the_fukin_bill{
-    right: 0;
-    background-color: cyan;
+#finish_the_fukin_bill{ left: 0; }
+#finish_the_fukin_bill button{ background-color: fuchsia; }
+
+#bill_options{ right: 0; }
+#bill_options > button{ background-color: cyan; white-space: nowrap; text-align: center;}
+#bill_options > button > img{
+    position: relative;
+    top: 0;
+    margin-left: 4px;
+    display: inline-block;
+}
+
+#bill_options_menu{
+    position: absolute;
+    bottom: 50px; /* the height of the button */
+    text-align: center;
+    background-color: #00ff00;
+    padding-top: 10px;
+    
+    display: none;
+}
+
+
+#bill_options_menu button{
+    width: 90%;
+    margin-bottom: 10px;
 }

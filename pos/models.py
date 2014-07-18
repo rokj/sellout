@@ -9,22 +9,10 @@ from common.models import SkeletonU
 from common.functions import get_image_path
 import common.globals as g
 
+from config.countries import country_choices, country_by_code
+
 import datetime as dtm
 import json
-
-
-### country ###
-class Country(models.Model):
-    # use fill_countries when setting up database, then forget about it
-    two_letter_code = models.CharField(max_length=2, null=False, primary_key=True)
-    name = models.CharField(max_length=64, null=False)
-    three_letter_code = models.CharField(max_length=3, null=False)
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        verbose_name_plural = _("Countries")
 
 
 ### company ###
@@ -45,16 +33,20 @@ class Company(SkeletonU):
     postcode = models.CharField(_("Postal code"), max_length=20, null=True, blank=True)
     city = models.CharField(_("City"), max_length=50, null=True, blank=True)
     state = models.CharField(_("State"), max_length=50, null=True, blank=True)
-    country = models.ForeignKey(Country, null=True, blank=True)
+    country = models.CharField(max_length=2,  choices=country_choices, null=True, blank=True)
     email = models.CharField(_("E-mail address"), max_length=256, null=False, blank=False)
     website = models.CharField(_("Website"), max_length=256, null=True, blank=True)
-    phone = models.CharField(_("Phone number"), max_length = 30, null=True, blank=True)
+    phone = models.CharField(_("Phone number"), max_length=30, null=True, blank=True)
     vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=True, blank=True)
     notes = models.TextField(_("Notes"), blank=True, null=True)
 
     def __unicode__(self):
         return self.name
-    
+
+    @property
+    def country_name(self):
+        return country_by_code.get(self.country)
+
     class Meta:
         verbose_name_plural = _("Companies")
 
@@ -422,7 +414,7 @@ class Contact(SkeletonU):
     postcode = models.CharField(_("Post code/ZIP"), max_length=12, null=True, blank=True)
     city = models.CharField(_("City"), max_length=50, null=True, blank=True)
     state = models.CharField(_("State"), max_length=50, null=True, blank=True)
-    country = models.ForeignKey(Country) 
+    country = models.CharField(max_length=2, choices=country_choices)
     email = models.CharField(_("E-mail address"), max_length=255, blank=False, null=False)
     phone = models.CharField(_("Telephone number"), max_length=30, blank=True, null=True)
     vat = models.CharField(_("VAT identification number"), max_length=30, null=True, blank=True)
@@ -432,7 +424,11 @@ class Contact(SkeletonU):
             return "Individual: " + self.first_name + " " + self.last_name
         else:
             return "Company: " + str(self.company_name)
- 
+
+    @property
+    def country_name(self):
+        return country_by_code.get(self.country)
+
 # not in use at the moment   
 #class ContactAttribute(SkeletonU):
 #    contact = models.ForeignKey(Contact)
@@ -654,13 +650,3 @@ def copy_bill_to_history(bill_id):
                           bill=b, data=serialized_data)
     history.save()
     return True
-
-
-def fill_countries():  # will only be used once, after install
-    from config.countries import country_list
-    for c in country_list:
-        country = Country(
-                          name=c[0],
-                          two_letter_code=c[1],
-                          three_letter_code=c[2])
-        country.save()

@@ -95,6 +95,7 @@ urlpatterns = patterns('',
     # save terminal settings (will width and such)
     url(r_company + '/save/$', terminal.save, name='save_terminal'),
     url(r_company + '/set-register/$', terminal.set_register, name='set_register'),
+    url(r_company + '/quick-contact/$', contact.quick_create_contact, name='quick_create_contact'),
 
     # views for bill
     url(r_company + '/bill/save/$', bill.create_bill, name='create_bill'),  # adds an item to bill

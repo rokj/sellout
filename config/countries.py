@@ -1,7 +1,4 @@
 # -*- coding: UTF-8 -*-
-# (this is used for shell, which defaults to ASCII if not specified)
-from pos.models import Country
-
 country_list = (
     ("Afghanistan", "AF", "AFG"),
     ("Åland Islands", "AX", "ALA"),
@@ -253,12 +250,6 @@ country_list = (
     ("Zambia", "ZM", "ZMB"),
     ("Zimbabwe", "ZW", "ZWE"))
 
-def fill_countries():
-    """ fills the countries table;
-        data is in countries.py;
-        must be called from the shell after syncdb """
-    for c in country_list:
-        country = Country(two_letter_code = c[1],
-                          three_letter_code = c[2],
-                          name = c[0])
-        country.save()
+country_choices = tuple((x[1], x[0]) for x in country_list)
+
+country_by_code = {x[1]:x[0] for x in country_list}

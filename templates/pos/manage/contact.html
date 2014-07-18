@@ -6,6 +6,14 @@
 
 {% block section_head %}
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/contacts.css' %}"/>
+<script type="text/javascript">
+$(document).ready(function(){
+    // date of birth needs a datepicker
+    $("#id_date_of_birth").datepicker({
+        dateFormat: "{{ date_format_js|escapejs }}"
+    });
+});
+</script>
 {% endblock %}
 
 {% block status_bar_title %}

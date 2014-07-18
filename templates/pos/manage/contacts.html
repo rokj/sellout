@@ -148,7 +148,7 @@
                                     <td><a href="mailto:{{ c.email }}">{{ c.email }}</a></td>
                                 </tr>
                                 <tr>
-                                    <td>{{ c.country }}</td>
+                                    <td>{{ c.country_name }}</td>
                                     <td>*</td>
                                     <td>{{ c.date_of_birth|date:date_format_django }}</td>
                                 </tr>
@@ -200,7 +200,7 @@
                                 <td><a href="mailto:{{ c.email }}">{{ c.email }}</a></td>
                             </tr>
                             <tr>
-                                <td>{{ c.country }}</td>
+                                <td>{{ c.country_name }}</td>
                                 <td>VAT</td>
                                 <td>{{ c.vat }}</td>
                             </tr>

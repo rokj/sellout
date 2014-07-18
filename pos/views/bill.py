@@ -163,11 +163,6 @@ def item_prices(user, company, base_price, tax_percent, quantity, discounts):
         r['total_tax_exc'] = r['discount_price']
 
     # multiply by quantity
-    r['base_price'] = r['base_price']*quantity  # without tax and discounts
-    r['tax_absolute'] = r['tax_absolute']*quantity  # tax, absolute
-    r['discount_absolute'] = r['discount_absolute']*quantity  # discounts, absolute
-    r['total_tax_exc'] = r['total_tax_exc']*quantity  # total without tax
-    # save single total
     r['single_total'] = r['total']
     r['total'] = r['total']*quantity  # total total total
 

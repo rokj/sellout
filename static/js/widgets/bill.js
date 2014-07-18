@@ -13,6 +13,7 @@ Bill = function(g){
     p.items = [];
     p.serial = 0; // a number that will be assigned to every item
                    // (like an unique id - has nothing to do with id on server)
+    p.contact = null; // company id (if chosen)
 
     p.bill = $("#bill");
 
@@ -23,6 +24,11 @@ Bill = function(g){
     // the 'finish' button
     p.actions = $("#bill_actions");
     p.finish_button = $("#finish_the_fukin_bill", p.actions);
+
+    // the options menu
+    p.options_button = $("button.open-menu", "#bill_options");
+    p.options_menu = $("#bill_options_menu");
+    p.option_contacts = $(".select-client", p.options_menu);
 
     // save item template for items and remove it from the document
     p.item_template = $("#bill_item_template").detach().removeAttr("id");
@@ -177,15 +183,43 @@ Bill = function(g){
         vertical_scroll_into_view(item.item_row);
     };
 
+    p.toggle_options = function(show){
+        if(show){
+            // slide the menu down (it will slide up because of its positioning)
+            p.options_menu.slideDown("fast");
+
+            // bind hide events on button and document
+            p.options_button.unbind().click(function(){
+                p.toggle_options(false);
+            });
+        }
+        else{
+            p.options_menu.slideUp("fast");
+
+            // bind show events on the button
+            p.options_button.unbind().click(function(){
+                p.toggle_options(true);
+            });
+        }
+    };
+
     //
     // init
     //
     // draggable bill
     set_vertical_draggable(p.bill, "div.bill-item", p.g.settings.t_easing);
 
-    // bindings
+    // bindings:
     p.finish_button.click(function(){
         p.finish();
+    });
+
+    // bill options
+    p.toggle_options(false);
+
+    p.option_contacts.click(function(){
+        // show the contacts dialog (is handled by Contacts class)
+        p.g.objects.contacts.choose_contact();
     });
 };
 

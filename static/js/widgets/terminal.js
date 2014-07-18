@@ -25,7 +25,7 @@ Terminal = function(g){
         registers_list: $("#registers_list"),
         select_register: $("#select_register"),
 
-        current_till: $("#current_till")
+        current_till: $("#current_till"),
     };
 
     // bill sizes (in pixels):
