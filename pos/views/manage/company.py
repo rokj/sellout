@@ -1,12 +1,14 @@
 import Image
 from StringIO import StringIO
+import base64
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from common.images import image_from_base64, resize_image
+from sorl.thumbnail import get_thumbnail
+from common.images import image_from_base64, resize_image, image_dimensions
 
 from pos.models import Company
 
@@ -231,15 +233,19 @@ def company_to_dict(company, android=False):
     c['website'] = company.website
     c['notes'] = company.notes
 
-    if company.color_logo:
+    if android:
+        with open(company.color_logo.path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        c['color_logo'] = encoded_string
+    else:
         c['color_logo_url'] = company.color_logo.url
-    else:
-        c['color_logo_url'] = None
 
-    if company.monochrome_logo:
-        c['monochrome_logo_url'] = company.monochrome_logo.url
+    if android:
+        with open(company.monochrome_logo.path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        c['monochrome_logo'] = encoded_string
     else:
-        c['monochrome_logo_url'] = None
+        c['monochrome_logo_url'] = company.monochrome_logo.url
 
     return c
 
@@ -327,6 +333,9 @@ def upload_color_logo(request, company):
 
     data = JSON_parse(request.POST.get('data'))
 
+    return save_color_image(c, data)
+
+def save_color_image(c, data):
     if 'image' in data:
         # read the new image and upload it
         image_file = image_from_base64(data.get('image'))
@@ -391,13 +400,15 @@ def upload_color_logo(request, company):
 
         return JSON_ok()
 
-
 @login_required
 def upload_monochrome_logo(request, company):
     c = Company.objects.get(url_name=company)
 
     data = JSON_parse(request.POST.get('data'))
 
+    return save_monochrome_image(c, data)
+
+def save_monochrome_image(c, data):
     if 'image' in data:
         # read the new image and upload it
         image_file = image_from_base64(data.get('image'))
@@ -454,7 +465,6 @@ def upload_monochrome_logo(request, company):
             pass
 
         return JSON_ok()
-
 
 @login_required
 def create_monochrome_logo(request, company):

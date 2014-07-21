@@ -33,11 +33,11 @@ class Company(SkeletonU):
     url_name = models.SlugField(_("Company name, used in URL address"),
                                 max_length=g.MISC['company_url_length'],
                                 null=False, blank=False, db_index=True)
-    color_logo = models.ImageField(_("Logo"),
+    color_logo = thumbnail.ImageField(_("Logo"),
                                    upload_to=get_image_path(g.DIRS['color_logo_dir'],
                                                             "pos_company", "color_logo"),
                                    null=True, blank=True)
-    monochrome_logo = models.ImageField(_("Receipt logo"),
+    monochrome_logo = thumbnail.ImageField(_("Receipt logo"),
                                         upload_to=get_image_path(g.DIRS['monochrome_logo_dir'],
                                                                  "pos_company", "monochrome_logo"),
                                         null=True, blank=True)
