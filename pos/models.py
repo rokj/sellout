@@ -286,14 +286,18 @@ class Product(ProductAbstract):
 
         discounts = []
         for i in m2mids: # this is obviously the only way to NOT sort the queryset by 'whatever, not by seq_no'
+            # filter out inactive/invalid discounts
+
             td = Discount.objects.get(id=i[0])
             td.m2mid = i[1]
-            discounts.append(td)
+
+            if td.is_active:
+                discounts.append(td)
 
         return discounts
 
     def update_discounts(self, user, discount_ids):
-        """ smartly handles ProductDiscount m2m fields with as little repetition/deletion as possible
+        """ 'smartly' handles ProductDiscount m2m fields with as little repetition/deletion as possible
             discount_ids: list of discount ids (integers) that will have to be on product when this method returns """
 
         current_discounts_list = self.get_discounts()
@@ -306,7 +310,6 @@ class Product(ProductAbstract):
 
         # add missing discounts with a valid sequence
         i = 1
-        modify = False
         for d in discount_ids:
             try:  # see if this discount exists at all
                 discount = Discount.objects.get(company=self.company, id=d)
@@ -415,7 +418,7 @@ class Contact(SkeletonU):
     city = models.CharField(_("City"), max_length=50, null=True, blank=True)
     state = models.CharField(_("State"), max_length=50, null=True, blank=True)
     country = models.CharField(max_length=2, choices=country_choices)
-    email = models.CharField(_("E-mail address"), max_length=255, blank=False, null=False)
+    email = models.CharField(_("E-mail address"), max_length=255, blank=True, null=True)
     phone = models.CharField(_("Telephone number"), max_length=30, blank=True, null=True)
     vat = models.CharField(_("VAT identification number"), max_length=30, null=True, blank=True)
     
@@ -522,12 +525,12 @@ def set_serial(instance, created, **kwargs):
     if not instance.company:
         return
 
-    last_bill = Bill.objects.filter(company=instance.company).order_by('-serial')[:0]
-
-    if len(last_bill) == 0:
-        instance.serial = 1
-    else:
+    try:
+        # get the second bill (because the last is this bill without serial)
+        last_bill = Bill.objects.only('serial').filter(company=instance.company).order_by('-serial')[1]
         instance.serial = last_bill.serial + 1
+    except:
+        instance.serial = 1
 
     instance.save()
 

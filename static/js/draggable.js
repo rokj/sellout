@@ -79,10 +79,10 @@ function set_horizontal_draggable(obj, items_selector, easing_time){
         var interval = 50; // move by this number of pixels
         var timeout_duration = 500;
 
-        var current_position = obj.position().left;
+        var current_position = obj.position().left - obj.parent().position().left;
 
         // always use deltaY events, the usual vertical scrolling
-        obj.css({left: current_position + interval*e.deltaY});
+        obj.css({left: current_position - interval*e.deltaY});
 
         // see if there's a timeout for checking boundaries
         if(obj.data().timeout){

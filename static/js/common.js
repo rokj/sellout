@@ -194,6 +194,7 @@ function check_time(hours, minutes, seconds, any_value){
     if(seconds < 0 || seconds > 59) return false;
     else return true;
 }
+
 function format_date(date, date_format){
     var dd = "00" + date.getDate();
     var mm = "00" + String(date.getMonth()+1);

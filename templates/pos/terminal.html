@@ -52,7 +52,7 @@ $(window).load(function(){
               // save last used register
               set_register: "{% url 'pos:set_register' company.url_name %}",
               // create contacts on the fly
-              quick_create_contact: "{% url 'pos:quick_create_contact' company.url_name %}"
+              quick_contacts: "{% url 'pos:quick_contacts' company.url_name %}"
         },
 
         // config (data comes directly from view)

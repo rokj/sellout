@@ -63,7 +63,7 @@ def validate_contact(user, company, data):
     # city
     # country
     # state
-    # email*
+    # email
     # phone
     # vat
 
@@ -120,18 +120,22 @@ def validate_contact(user, company, data):
         data['date_of_birth'] = None
             
     # common fields:
-    # email*
-    if 'email' not in data:
-        return err(_("Email is required"))
-    if len(data['email']) > max_field_length(Contact, 'email'):
-        return err(_("Email address too long"))
-    # validate email with regex:
-    # ^[\w\d._+%]+  a string with any number of characters, numbers, and ._+% signs
-    # @[\w\d.-]{2,} an @ sign followed by domain name of at least 2 characters long (can contain . and -)
-    # \.\w{2,4}$'   domain (2-4 alphabetic characters)
-    m = re.search('([\w.-]+)@([\w.-]+)', data['email'])
-    if data['email'] not in m.group(0):
-        return err(_("Invalid email address"))
+    # email is not required
+    if 'email' in data:
+        if len(data['email']) > max_field_length(Contact, 'email'):
+            return err(_("Email address too long"))
+        if len(data['email']) < 6:  #
+            return err(_("Email address too short"))
+
+        # validate email with regex:
+        # ^[\w\d._+%]+  a string with any number of characters, numbers, and ._+% signs
+        # @[\w\d.-]{2,} an @ sign followed by domain name of at least 2 characters long (can contain . and -)
+        # \.\w{2,4}$'   domain (2-4 alphabetic characters)
+        m = re.search('([\w.-]+)@([\w.-]+)', data['email'])
+        if not m or not m.group() or data['email'] not in m.group():
+            return err(_("Invalid email address"))
+    else:
+        data['email'] = None
 
     # country: check for correct code
     if 'country' in data:
@@ -443,7 +447,7 @@ def delete_contact(request, company):
 
 
 @login_required
-def quick_create_contact(request, company):
+def quick_contacts(request, company):
     """
         creates contact on the fly (while creating bill on the terminal)
         contact data is in request.POST
@@ -468,30 +472,58 @@ def quick_create_contact(request, company):
 
     contact = r['data']
 
-    # use .get() and forget about different types
-    new_contact = Contact(
-        created_by=request.user,
-        company=c,
+    if int(contact.get('id')) == -1:
+        print 'creating new contact'
 
-        type=contact.get('type'),
-        company_name=c.get('company_name'),
-        first_name=c.get('first_name'),
-        last_name=c.get('last_name'),
-        sex=c.get('sex'),
-        date_of_birth=c.get('date_of_birth'),
-        street_address=c.get('street_address'),
-        postcode=c.get('postcode'),
-        city=c.get('city'),
-        state=c.get('state'),
-        country=c.get('country'),
-        email=c.get('email'),
-        phone=c.get('phone'),
-        vat=c.get('vat')
-    )
+        # it's a new contact: use .get() and forget about different types
+        try:
+            obj = Contact(
+                created_by=request.user,
+                company=c,
 
-    try:
-        new_contact.save()
-    except Exception, e:
-        return JSON_response(_("Saving contact failed") + ": " + str(e))
+                type=contact.get('type'),
+                company_name=contact.get('company_name'),
+                first_name=contact.get('first_name'),
+                last_name=contact.get('last_name'),
+                sex=contact.get('sex'),
+                date_of_birth=contact.get('date_of_birth'),
+                street_address=contact.get('street_address'),
+                postcode=contact.get('postcode'),
+                city=contact.get('city'),
+                state=contact.get('state'),
+                country=contact.get('country'),
+                email=contact.get('email'),
+                phone=contact.get('phone'),
+                vat=contact.get('vat')
+            )
 
-    return JSON_ok(extra=contact_to_dict(request.user, c, new_contact))
+            obj.save()
+        except Exception, e:
+            return JSON_response(_("Saving contact failed") + ": " + str(e))
+
+    else:
+        print 'editing existing contact'
+        # editing an existing contact
+        try:
+            obj = Contact.objects.get(id=contact.get('id'))
+
+            obj.company_name = contact.get('company_name')
+            obj.first_name = contact.get('first_name')
+            obj.last_name = contact.get('last_name')
+            obj.sex = contact.get('sex')
+            obj.date_of_birth = contact.get('date_of_birth')
+            obj.street_address = contact.get('street_address')
+            obj.postcode = contact.get('postcode')
+            obj.city = contact.get('city')
+            obj.state = contact.get('state')
+            obj.country = contact.get('country')
+            obj.email = contact.get('email')
+            obj.phone = contact.get('phone')
+            obj.vat = contact.get('vat')
+
+            obj.save()
+
+        except Exception, e:
+            return JSON_response(_("Saving contact failed") + ": " + str(e))
+
+    return JSON_ok(extra=contact_to_dict(request.user, c, obj))

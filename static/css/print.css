@@ -24,20 +24,20 @@
     text-align: center;
 }
 
-.receipt-80mm .company-details-name{
+.receipt-80mm .issuing.company-details-name{
     text-align: center;
     font-weight: bold;
     font-size: 12pt;
 }
 
-.receipt-80mm .company-details-1{
+.receipt-80mm .issuing.company-details-1{
     float: left;
     width: 37mm;
     text-align: right;
     margin-right: 2mm;
 }
 
-.receipt-80mm .company-details-2{
+.receipt-80mm .issuing.company-details-2{
     text-align: left;
 }
 
@@ -45,21 +45,40 @@
     overflow: hidden;
 }
 
+.receipt-80mm .client-company .client.company-details-name,
+.receipt-80mm .client-individual .client.individual-details-name{
+    font-weight: bold;
+}
+
+.receipt-80mm .client-company *{
+    margin-left: 5mm;
+}
+
 .receipt-80mm .register-location{
-    margin-top: 3mm;
+    padding-top: 3mm;
+    padding-bottom: 3mm;
     text-align: center;
+    clear: both;
+}
+
+.receipt-80mm .bill-serial{
+    font-weight: bold;
+    padding-top: 3mm;
+}
+
+.receipt-80mm .bill-serial-content{
+    font-weight: normal;
 }
 
 /* items table: each item takes up two rows:
- * first row: product | quantity | amount
- *             60%         20%       20%
- * second row: price | tax | discount
- *              40%      30%    30%  
+ * first row: name
+ * second row: price | quantity | unit type | discount | amount
+ *              25%       20%        10%       20%         25%
  */
 .receipt-80mm div.receipt-items{
     width: 100%;
     clear: both;
-    margin-top: 10mm;
+    margin-top: 2mm;
     overflow: hidden;
 }
 
@@ -89,8 +108,14 @@
 /* cells */
 .receipt-80mm .receipt-items .item-name{
     text-align: left;
-    width: 40%;
+    width: 100%;
 }
+
+.receipt-80mm .receipt-items .item-price{
+    width: 25%;
+    text-align: right;
+}
+
 
 .receipt-80mm .receipt-items .item-quantity{
     text-align: right;
@@ -99,30 +124,20 @@
 
 .receipt-80mm .receipt-items .item-unit{
     text-align: left;
-    width: 20%;
-}
-
-.receipt-80mm .receipt-items .item-amount{
-    width: 20%;
-    text-align: right;
-    
-}
-
-.receipt-80mm .receipt-items .item-price{
-    width: 40%;
-    text-align: right;
-}
-
-.receipt-80mm .receipt-items .item-tax{
-    text-align: right;
-    width: 20%;
-    padding-right: 10%;
+    width: 10%;
+    padding-left: 1mm;
+    box-sizing: border-box;
 }
 
 .receipt-80mm .receipt-items .item-discount{
     width: 20%;
-    padding-right: 10%;
     text-align: right;
+}
+
+.receipt-80mm .receipt-items .item-amount{
+    width: 25%;
+    text-align: right;
+    
 }
 
 .receipt-80mm .receipt-items .items-footer{
@@ -179,6 +194,35 @@
     text-align: center;
 }
 
+/* table of tax rates */
+.receipt-80mm .tax-rates{
+    padding-top: 5mm;
+    overflow: hidden;
+}
+.receipt-80mm .tax-rates .tax-row{
+    width: 100%;
+}
+
+.receipt-80mm .tax-rates div{
+    float: left;
+    text-align: right;
+}
+
+.receipt-80mm .tax-rates .tax-id{ width: 8%; }
+.receipt-80mm .tax-rates .tax-percent{ width: 22%; }
+.receipt-80mm .tax-rates .tax-net{ width: 22%; }
+.receipt-80mm .tax-rates .tax-absolute{ width: 22%; }
+.receipt-80mm .tax-rates .tax-gross{ width: 22%; }
+
+.receipt-80mm .tax-rates .header{
+    border-bottom: 0.5mm dotted black;
+    font-weight: bold;
+    font-size: 80%;
+}
+
+.receipt-80mm .tax-rates .footer{
+    border-top: 0.5mm dotted black;
+}
 
 .horse-picture{
     width: 60%;

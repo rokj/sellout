@@ -9,11 +9,11 @@ Bill = function(g){
 
     p.g = g;
 
-    p.data = null; // will be fetched in init
+    p.data = null;
     p.items = [];
     p.serial = 0; // a number that will be assigned to every item
                    // (like an unique id - has nothing to do with id on server)
-    p.contact = null; // company id (if chosen)
+    p.contact = null; // reference to contact (object with details) (if chosen)
 
     p.bill = $("#bill");
 
@@ -143,14 +143,15 @@ Bill = function(g){
                 );
             }
             else{
-                p.print(response.data.bill);
+                p.data = response.data.bill;
+                p.print();
 
                 // TODO: when the bill is finished, remove from each item's stock
             }
         });
     };
 
-    p.print = function(bill){
+    p.print = function(){
         // decide what to do depending on user's print settings
 
         // printer driver:
@@ -160,7 +161,7 @@ Bill = function(g){
                 if(p.g.objects.terminal.register.receipt_format == 'Thermal'){
                     // use the default, printer;
                     // create a HTML receipt and issue javascript print() method and that's it
-                    var receipt = format_small_receipt(p.g, bill);
+                    var receipt = format_small_receipt(p.g, p);
 
                     // TODO: temporary
                     //receipt.appendTo("body").show();

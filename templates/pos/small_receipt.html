@@ -17,32 +17,43 @@
 
         <div class="issuing company-details-1"></div>
         <div class="issuing company-details-2"></div>
+        <div class="register-location"></div>
     </div>
 
 
-    <div class="client-company">
+    <div class="client-company hidden">
+        {% trans 'Client' %}:
         <div class="client company-details-name"></div>
 
         <div class="client company-details-1"></div>
         <div class="client company-details-2"></div>
+        <div class="client company-details-3"></div>
     </div>
 
-    {% comment %}
-    PRODUCT                     Quantity      Amount
-    Price     Tax               Discount
-    {% endcomment %}
+    <div class="client-individual hidden">
+        {% trans 'Client' %}:
+        <div class="client individual-details-name"></div>
+
+        <div class="client individual-details-1"></div>
+        <div class="client individual-details-2"></div>
+    </div>
+
+    <div class="bill-serial">
+        {% trans 'Bill No.' %}:&nbsp;
+        <span class="bill-serial-content"></span>
+    </div>
+
     <div class="receipt-items">
         <div class="items-header">
             <div class="receipt-row first">
-                <div class="item-name">{% trans 'Product' %}</div>
-                <div class="item-quantity">{% trans 'Quantity' %}</div>
-                <div class="item-unit">&nbsp;{# unit has no label #}</div>
-                <div class="item-amount">{% trans 'Amount' %}</div>
+                <div class="item-name"></div>
             </div>
             <div class="receipt-row second">
                 <div class="item-price">{% trans 'Price' %}</div>
-                <div class="item-tax">{% trans 'Tax' %}</div>
+                <div class="item-quantity">{% trans 'Qty' %}</div>
+                <div class="item-unit">&nbsp;{# unit has no label #}</div>
                 <div class="item-discount">{% trans 'Discount' %}</div>
+                <div class="item-amount">{% trans 'Amount' %}</div>
             </div>
         </div>
 
@@ -55,9 +66,34 @@
         </div>
     </div>
 
+    {# a collection of tax rates #}
+    <div class="tax-rates">
+        <div class="tax-row header">
+            <div class="tax-id">&nbsp;</div>
+            <div class="tax-percent">{% trans 'Rate' %}</div>
+            <div class="tax-net">{% trans 'Subtotal' %}</div>
+            <div class="tax-absolute">{% trans 'Tax' %}</div>
+            <div class="tax-gross">{% trans 'Total' %}</div>
+        </div>
+
+        <div class="tax-body">
+            <div class="tax-row">
+
+            </div>
+        </div>
+
+        <div class="tax-row footer">
+            <div class="tax-id">&nbsp;</div>
+            <div class="tax-percent">&nbsp;</div>
+            <div class="tax-net"></div>
+            <div class="tax-absolute"></div>
+            <div class="tax-gross"></div>
+        </div>
+    </div>
+
     <div class="receipt-cashier">
         {% comment %} the last row: cashier's name and date-time {% endcomment %}
-            <div class="receipt-cashier-text">{% trans 'Cashier' %}: </div>
+            <div class="receipt-cashier-text">{% trans 'Cashier' %}:&nbsp;</div>
             <div class="receipt-cashier-name"></div>
             <div class="receipt-datetime"></div>
     </div>

@@ -11,7 +11,8 @@ Contacts = function(g){
     p.companies_list = [];
     p.companies_by_id = {};
 
-    p.selected_id = null; // will be used on save
+    p.selected = null; // will be used on save
+    p.data_changed = false; // if true, the contact will have to be re-saved
 
     // dialog and its items
     p.dialog = $("#contacts");
@@ -44,7 +45,10 @@ Contacts = function(g){
             vat: $(".vat", p.company_form)
         },
         company_switch: $(".company-switch", p.dialog),
-        individual_switch: $(".individual-switch", p.dialog)
+        individual_switch: $(".individual-switch", p.dialog),
+
+        save_button: $(".save", p.dialog),
+        cancel_button: $(".cancel", p.dialog)
     };
 
     p.dialog_width = parseInt(p.dialog.css("width")); // only works for the first time,
@@ -54,10 +58,23 @@ Contacts = function(g){
     // methods
     //
     p.prepare_contact = function(c){
-        var t;
+        var i, t;
 
         // adds contact to internal dictionaries for later retrieval
         if(c.type == 'Company'){
+            // see if the contact exists already
+            if(c.id in p.companies_by_id){
+                // find the entry in companies_list and remove it,
+                // the dictionary entry will be overwritten anyway
+                for(i = 0; i < p.companies_list.length; i++){
+                    if(p.companies_list[i].id == c.id){
+                        remove_from_array(p.companies_list, i);
+                        break;
+                    }
+                }
+
+            }
+
             if(c.vat) t = c.vat + ": ";
             else t = "";
 
@@ -69,6 +86,18 @@ Contacts = function(g){
             p.companies_by_id[c.id] = c;
         }
         else{
+            if(c.id in p.individuals_by_id){
+                // find the entry in companies_list and remove it,
+                // the dictionary entry will be overwritten anyway
+                for(i = 0; i < p.individuals_list.length; i++){
+                    if(p.individuals_list[i].id == c.id){
+                        remove_from_array(p.individuals_list, i);
+                        break;
+                    }
+                }
+
+            }
+
             if(c.street_address) t = ", " + c.street_address;
             else t = "";
 
@@ -89,6 +118,20 @@ Contacts = function(g){
             modal: true,
             title: gettext("Select contact")
         });
+
+        p.data_changed = false;
+
+        if(p.g.objects.bill.contact){
+            // there is already a contact selected, show it
+            p.selected = p.g.objects.bill.contact;
+
+            if(p.selected.type == 'Individual') p.select_individual(p.selected.id);
+            else p.select_company(p.selected.id);
+        }
+        else{
+            // no contact is selected yet, clear fields
+            p.clear_fields();
+        }
     };
 
     p.toggle_type = function(company){
@@ -134,7 +177,7 @@ Contacts = function(g){
     p.select_company = function(id){
         if(!id){
             p.clear_fields();
-            p.selected_id = null;
+            p.selected = null;
         }
 
         // get the company details from the id and fill all data
@@ -150,13 +193,13 @@ Contacts = function(g){
         p.items.company.phone.val(c.phone);
         p.items.company.vat.val(c.vat);
 
-        p.selected_id = id;
+        p.selected = c;
     };
 
     p.select_individual = function(id){
         if(!id){
             p.clear_fields();
-            p.selected_id = null;
+            p.selected = null;
         }
 
         // get the company details from the id and fill all data
@@ -174,64 +217,79 @@ Contacts = function(g){
         p.items.individual.phone.val(c.phone);
         p.items.individual.date_of_birth.val(c.date_of_birth);
 
-        p.selected_id = id;
+        p.selected = c;
     };
 
-    p.create_contact = function(){
-        var data;
-
-        // see which type of contact is being created (check button classes)
-        if(p.items.individual_switch.hasClass("active")){
-            // it's an individual
-            data = {
-                type: 'Individual',
-                first_name: p.items.individual.first_name.val(),
-                last_name: p.items.individual.last_name.val(),
-                sex: p.items.individual.sex.val(),
-                street_address: p.items.individual.street_address.val(),
-                postcode: p.items.individual.postcode.val(),
-                city: p.items.individual.city.val(),
-                state: p.items.individual.state.val(),
-                country: p.items.individual.country.val(),
-                email: p.items.individual.email.val(),
-                phone: p.items.individual.phone.val(),
-                date_of_birth: p.items.individual.date_of_birth.val()
-            };
+    p.select_contact = function(){
+        if(p.selected && !p.data_changed){
+            // an existing contact is selected, use that data
+            p.g.objects.bill.contact = p.selected;
+            p.close_action();
         }
         else{
-            // it's a company
-            data = {
-                type: 'Company',
-                company_name: p.items.company.name.val(),
-                street_address: p.items.company.street_address.val(),
-                postcode: p.items.company.postcode.val(),
-                city: p.items.company.city.val(),
-                state: p.items.company.state.val(),
-                country: p.items.company.country.val(),
-                email: p.items.company.email.val(),
-                phone: p.items.company.phone.val(),
-                vat: p.items.company.vat.val()
-            }
-        }
+            // nothing is selected, create a new contact or edit existing one
+            var data, id;
 
-        send_data(p.g.urls.quick_create_contact, data, p.g.csrf_token, function(response){
-            if(response.status != 'ok'){
-                error_message(
-                    gettext("Saving contact failed"),
-                    response.message
-                );
+            if(p.selected && p.selected.id) id = p.selected.id; // editing an existing contact
+            else id = -1; // creating a new contacts
+
+            // see which type of contact is being created (check button classes)
+            if(p.items.individual_switch.hasClass("active")){
+                // it's an individual
+                data = {
+                    id: id,
+                    type: 'Individual',
+                    first_name: p.items.individual.first_name.val(),
+                    last_name: p.items.individual.last_name.val(),
+                    sex: p.items.individual.sex.val(),
+                    street_address: p.items.individual.street_address.val(),
+                    postcode: p.items.individual.postcode.val(),
+                    city: p.items.individual.city.val(),
+                    state: p.items.individual.state.val(),
+                    country: p.items.individual.country.val(),
+                    email: p.items.individual.email.val(),
+                    phone: p.items.individual.phone.val(),
+                    date_of_birth: p.items.individual.date_of_birth.val()
+                };
             }
             else{
-                // add the new contact to current lists
-                p.prepare_contact(response.data);
-                // the contact is added
-                p.selected_id = response.data.id;
+                // it's a company
+                data = {
+                    id: id,
+                    type: 'Company',
+                    company_name: p.items.company.name.val(),
+                    street_address: p.items.company.street_address.val(),
+                    postcode: p.items.company.postcode.val(),
+                    city: p.items.company.city.val(),
+                    state: p.items.company.state.val(),
+                    country: p.items.company.country.val(),
+                    email: p.items.company.email.val(),
+                    phone: p.items.company.phone.val(),
+                    vat: p.items.company.vat.val()
+                };
             }
-        });
+
+            send_data(p.g.urls.quick_contacts, data, p.g.csrf_token, function(response){
+                    if(response.status != 'ok'){
+                        error_message(
+                            gettext("Saving contact failed"),
+                            response.message
+                        );
+                    }
+                    else{
+                        // add the new contact to current lists
+                        p.prepare_contact(response.data);
+                        // the contact is added
+                        p.selected = response.data;
+
+                        p.close_action();
+                    }
+                });
+        }
     };
 
     p.close_action = function(){
-
+        p.dialog.dialog("close");
     };
 
     //
@@ -240,38 +298,52 @@ Contacts = function(g){
 
     // buttons and bindings
     p.toggle_type(true); // default is company
+
     p.items.individual_switch.click(function(){ p.toggle_type(false); });
     p.items.company_switch.click(function(){ p.toggle_type(true); });
 
     // prepare data: labels and values
     for(var i = 0; i < p.g.data.contacts.length; i++){
         p.prepare_contact(p.g.data.contacts[i]);
-
     }
 
     // initialize autocompletes
+    function cs(event, ui){
+        event.preventDefault(); // on select event: fill in the company details
+        p.select_company(ui.item.value); // value contains company id
+    }
+
     p.items.company.name.autocomplete({
         source: p.companies_list,
         appendTo: p.dialog,
-        select: function(event, ui){
-            // on select event: fill in the company details
-            p.select_company(ui.item.value); // value contains company id
-
-            event.preventDefault();
-        }
+        select: cs,
+        focus: cs
     });
+
+    function is(event, ui){
+        event.preventDefault(); // on select event: fill in the company details
+        p.select_individual(ui.item.value); // value contains company id
+    }
 
     p.items.individual.first_name.autocomplete({
         source: p.individuals_list,
         appendTo: p.dialog,
-        select: function(event, ui){
-            // on select event: fill in the company details
-            p.select_individual(ui.item.value); // value contains company id
-
-            event.preventDefault();
-        }
+        select: is,
+        focus: is
     });
 
     // clear if there's anything left from the previous contact
     p.clear_fields();
+
+    // save and cancel buttons
+    p.items.save_button.unbind().click(p.select_contact);
+    p.items.cancel_button.unbind().click(p.close_action);
+
+    // most inputs: when changed, re-save the contact entry
+    $.each(p.items.individual, function(key, value){
+        value.change(function(){ p.data_changed = true; });
+    });
+    $.each(p.items.company, function(key, value){
+        value.change(function(){p.data_changed = true; });
+    });
 };

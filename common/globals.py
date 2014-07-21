@@ -208,8 +208,8 @@ PERMISSION_GROUPS = (  # retrieve readable format with get_permission_display()
 )
 
 PERMISSIONS = {
-    'guest': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register',),
+    'disabled': {
+        'view': (),
         'edit': (),
         },
     'cashier': {

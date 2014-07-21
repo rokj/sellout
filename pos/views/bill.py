@@ -17,7 +17,7 @@ import common.globals as g
 
 from pytz import timezone
 from datetime import datetime as dtm
-from decimal import Decimal
+from decimal import Decimal, getcontext, ROUND_UP
 
 
 def bill_item_to_dict(user, company, item):
@@ -41,6 +41,7 @@ def bill_item_to_dict(user, company, item):
     i['tax_percent'] = format_number(user, company, item.tax_percent)
     i['tax_absolute'] = format_number(user, company, item.tax_absolute)
     i['discount_absolute'] = format_number(user, company, item.discount_absolute)
+    i['total_without_tax'] = format_number(user, company, item.single_total - item.tax_absolute)
     i['single_total'] = format_number(user, company, item.single_total)
     i['total'] = format_number(user, company, item.total)
     i['bill_notes'] = item.bill_notes
@@ -60,7 +61,8 @@ def bill_to_dict(user, company, bill):
     # timestamp
     # status > choices in g.BILL_STATUS
     b = {}
-    b['bill_id'] = bill.id
+    b['id'] = bill.id
+    b['serial'] = bill.serial
     b['till'] = bill.till
     b['type'] = bill.type
     b['recipient_contact'] = bill.recipient_contact
@@ -129,6 +131,9 @@ def item_prices(user, company, base_price, tax_percent, quantity, discounts):
 
         return {'discount': discount, 'final': final}
 
+    # round up:
+    getcontext().rounding = ROUND_UP
+
     r = {}  # return values
 
     if get_company_value(user, company, 'pos_discount_calculation') == 'Tax first':
@@ -163,6 +168,11 @@ def item_prices(user, company, base_price, tax_percent, quantity, discounts):
         r['total_tax_exc'] = r['discount_price']
 
     # multiply by quantity
+    r['base_price'] = r['base_price']*quantity  # without tax and discounts
+    r['tax_absolute'] = r['tax_absolute']*quantity  # tax, absolute
+    r['discount_absolute'] = r['discount_absolute']*quantity  # discounts, absolute
+    r['total_tax_exc'] = r['total_tax_exc']*quantity  # total without tax
+    # save single total
     r['single_total'] = r['total']
     r['total'] = r['total']*quantity  # total total total
 
@@ -193,7 +203,7 @@ def create_bill(request, company):
     """ there's bill and items in request.POST['data'], create a new bill, and check all items and all """
 
     def item_error(message, product):
-        return JSON_error(message + " " + _("(Item: ") + product.name)
+        return JSON_error(message + " " + _("(Item" + ": ") + product.name + ")")
 
     # get company
     try:
@@ -412,7 +422,7 @@ def get_active_bill(request, company):
     # check permissions
     if not has_permission(request.user, c, 'bill', 'list'):
         return JSON_error(_("You have no permission to view bills"))
-    
+
     try:
         bill = Bill.objects.get(company=c, user=request.user, status="Active")
     except Bill.DoesNotExist:
@@ -425,118 +435,3 @@ def get_active_bill(request, company):
     # serialize the fetched bill and return it
     bill = bill_to_dict(request.user, c,  bill)
     return JSON_response({'status': 'ok', 'bill': bill})
-
-
-@DeprecationWarning
-@login_required
-def edit_item(request, company):
-    """ add an item to bill:
-         - received data: {item_id, bill_id, 'product_id':<id>, 'qty':<qty>, 'notes':<notes>}
-         - calculate all item's fields (tax, discount, total, ...)
-         - add to bill object
-         - return item_to_dict
-    """
-    try:
-        c = Company.objects.get(url_name=company)
-    except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
-
-    # permissions
-    if not has_permission(request.user, c, 'bill', 'edit'):
-        return JSON_error(_("You have no permission to edit bills"))
-    
-    # data
-    try:
-        data = JSON_parse(request.POST.get('data'))
-    except:
-        return JSON_error(_("No data in POST"))
-    
-    # get bill
-    if not data.get('bill_id'):
-        return JSON_error(_("No bill specified"))
-        
-    try:
-        bill = Bill.objects.get(company=c, id=int(data.get('bill_id')))
-    except Bill.DoesNotExist:
-        return JSON_error(_("This bill does not exist"))
-    
-    # get product
-    try:
-        product = Product.objects.get(company=c, id=int(data.get('product_id')))
-    except Product.DoesNotExist:
-        return JSON_error(_("Product with this id does not exist"))
-
-    # parse quantity
-    r = parse_decimal(request.user, c, data.get('quantity'), g.DECIMAL['quantity_digits'])
-    if not r['success']:
-        return JSON_error(_("Invalid quantity value"))
-    else:
-        if r['number'] <= Decimal('0'):
-            return JSON_error(_("Cannot add an item with zero or negative quantity"))
-    quantity = r['number']
-    
-    # check if there's enough items left in stock (must be at least zero =D)
-    if product.stock < quantity:
-        print 'wtf'
-        return JSON_error(_("Cannot sell more items than there are in stock"))
-            
-    # calculate and set all stuff for this new item:
-    discounts = product.get_discounts()
-    prices = item_prices(request.user, c, product.get_price(), product.tax.amount, quantity, discounts)
-
-    # notes, if any    
-    bill_notes = data.get('notes')
-
-    # TODO: subtract quantity from stock (if there's enough left)
-
-    # create a bill item and save it to database, then return JSON with its data
-    item = BillItem(
-        created_by=request.user,
-        # copy ProductAbstract's values:
-        code=product.code,
-        shortcut=product.shortcut,
-        name=product.name,
-        description=product.description,
-        private_notes=product.private_notes,
-        unit_type=product.get_unit_type_display(),  # ! display, not the 'code'
-        stock=product.stock,
-        # billItem's fields
-        bill=bill,
-        product_id=product.id,
-        quantity=quantity,
-        base_price=prices['base_price'],
-        tax_percent=product.tax.amount,
-        tax_absolute=prices['tax_absolute'],
-        discount_absolute=prices['discount_absolute'],
-        single_total=prices['single_total'],
-        total=prices['total'],
-        bill_notes=bill_notes
-    )
-    item.save()
-
-    # return the item in JSON
-    return JSON_response({'item': bill_item_to_dict(request.user, c, item), 'status': 'ok'})
-
-
-@ login_required
-def remove_item(request, company):
-    try:
-        c = Company.objects.get(url_name = company)
-    except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
-
-    # data contains only id:<item_id>
-    try:
-        data = JSON_parse(request.POST.get('data'))
-    except:
-        return JSON_error(_("No data in POST"))
-        
-    # get item and remove it
-    try:
-        item = BillItem.objects.get(id=int(data.get('id')))
-        # save Item id for later
-        id = item.id
-        item.delete()
-        return JSON_response({'status':'ok', 'item_id':id})
-    except:
-        return JSON_error(_("Could not delete the item"))
