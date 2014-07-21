@@ -175,7 +175,7 @@ def mobile_list_discounts(request, company):
         return JSON_error(_("Company does not exist"))
 
     # check permissions: needs to be guest
-    if not has_permission(request.user, c, 'discount', 'list'):
+    if not has_permission(request.user, c, 'discount', 'view'):
         return JSON_error(_("view discounts"))
 
     discounts = Discount.objects.filter(company__id=c.id)

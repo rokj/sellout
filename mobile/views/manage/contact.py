@@ -19,7 +19,7 @@ def mobile_list_contacts(request, company):
         return JSON_error(_("Company does not exist"))
 
     # check permissions: needs to be guest
-    if not has_permission(request.user, c, 'contact', 'list'):
+    if not has_permission(request.user, c, 'contact', 'view'):
         return JSON_error(_("You have no permission to view products"))
 
     contacts = Contact.objects.filter(company__id=c.id)
