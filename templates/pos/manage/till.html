@@ -8,7 +8,13 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/tills.css' %}"/>
 {% endblock %}
 
-{% block status_bar_title %}{% trans 'Add a register' context 'page title' %}{% endblock %}
+{% block status_bar_title %}
+    {% if add %}
+        {% trans 'Add register' context 'page title' %}
+    {% else %}
+        {% trans 'Edit register' context 'page title' %}
+    {% endif %}
+{% endblock %}
 
 {% block manage_content %}
     <div class="edit-container">
@@ -37,6 +43,12 @@
                 <div class="error">{{ form.receipt_type.errors }}</div>
                 {{ form.receipt_type.label_tag }}
                 {{ form.receipt_type }}
+            </div>
+
+            <div class="form-field">
+                <div class="error">{{ form.printer_driver.errors }}</div>
+                {{ form.printer_driver.label_tag }}
+                {{ form.printer_driver }}
             </div>
 
             <div class="form-field">
@@ -69,4 +81,3 @@
         </form>
     </div>
 {% endblock %}
-

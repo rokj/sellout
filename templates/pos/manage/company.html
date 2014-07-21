@@ -8,10 +8,12 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/company.css' %}" />
 
 <style type="text/css">
-#color_logo_container, #monochrome_logo_container{
-    background-size: cover; /* crop fill */
-    background-position: center center;
-    background-color: #ffffff;
+#default_color_logo{
+    background-image: url("{% static 'images/company_placeholder_color.png' %}"); /* the default background image */
+}
+
+#default_monochrome_logo{
+    background-image: url("{% static 'images/company_placeholder_monochrome.png' %}"); /* the default background image */
 }
 
 .image-buttons{
@@ -21,32 +23,18 @@
 }
 
 #color_logo_container{
-    {# if there's an image for the company, show it in background #}
-    {% if company.color_logo %}
-        background-image: url("{{ company.color_logo.url }}");
-    {% endif %}
-
     width:{{ color_logo_dimensions.0 }}px;
     height:{{ color_logo_dimensions.1 }}px;
 }
 
 #monochrome_passepartout{
-    background-color: #ffffff;
     width:{{ color_logo_dimensions.0 }}px;
     height:{{ color_logo_dimensions.1 }}px;
 }
 
 #monochrome_logo_container{
-    background-color: #ffffff;
-
-    {% if company.monochrome_logo %}
-        background-image: url("{{ company.monochrome_logo.url }}");
-    {% endif %}
-
     width:{{ monochrome_logo_dimensions.0 }}px;
     height:{{ monochrome_logo_dimensions.1 }}px;
-
-    position: relative;
 }
 
 .delete-image-button{
@@ -80,6 +68,20 @@ $(document).ready(function(){
     items.monochrome_logo_container.css("top", dist + "px");
     items.monochrome_logo_container.css("left", dist + "px");
 
+    // setting background
+    function set_background(object, url){
+        if(url){
+            // background color is initial and background image is url
+            object.css("background-color", "#ffffff");
+            object.css("background-image", "url(" + url + ")");
+        }
+        else{
+            // the background is transparent and there's no image
+            object.css("background-color", "transparent");
+            object.css("background-image", "none");
+        }
+    }
+
     // logo upload controls
     function logo_input(input, container, url){
         input
@@ -95,9 +97,12 @@ $(document).ready(function(){
                         }
                         else{
                             // replace the old logo with the new one
-                            container.css("background-image", "url(" + response.logo_url + ")");
+                            set_background(container, response.logo_url);
                         }
                     });
+
+                // reset the form or it won't be changed when deleting and re-uploading the same image
+                logo_input(input, container, url);
         });
     }
 
@@ -105,8 +110,9 @@ $(document).ready(function(){
         button.click(function(e){
             e.preventDefault();
             // replace the input with a new one
-            var new_input = $("<inpu>", {type: 'file', id: input.attr("id")});
+            var new_input = $("<input>", {type: 'file', id: input.attr("id")});
             input.replaceWith(new_input);
+            logo_input(new_input, container, url);
 
             send_data(url, {/* send nothing */}, "{{ csrf_token }}", function(response){
                 if(response.status != 'ok'){
@@ -120,7 +126,7 @@ $(document).ready(function(){
                 }
                 else{
                     // everything ok, clear the logo from
-                    container.css("background-image", "none");
+                    set_background(container, null);
                 }
             });
         });
@@ -148,6 +154,14 @@ $(document).ready(function(){
             });
     });
 
+    // set initial backgrounds
+    {% if company.color_logo %}
+        set_background(items.color_logo_container, "{{ company.color_logo.url }}");
+    {% endif %}
+
+    {% if company.monochrome_logo %}
+        set_background(items.monochrome_logo_container, "{{ company.monochrome_logo.url|default:'null' }}");
+    {% endif %}
 });
 
 </script>
@@ -157,7 +171,7 @@ $(document).ready(function(){
 
 {% block extra_button %}
     {# a link to configuration #}
-    <a class="button-text" href="{% url 'pos:configuration' company.url_name %}">
+    <a class="button-text" href="{% url 'pos:company_settings' company.url_name %}">
         {% trans 'Configuration' %}
     </a>
 {% endblock %}
@@ -188,7 +202,9 @@ $(document).ready(function(){
                 </div>
             </div>
 
-            <div id="color_logo_container"></div>
+            <div id="color_logo_container">
+                <div id="default_color_logo"></div>
+            </div>
         </div>
 
         {# monochrome logo: image, auto-create button and browse button #}
@@ -218,7 +234,9 @@ $(document).ready(function(){
             </div>
 
             <div id="monochrome_passepartout">
-                <div id="monochrome_logo_container"></div>
+                <div id="monochrome_logo_container">
+                    <div id="default_monochrome_logo"></div>
+                </div>
             </div>
         </div>
 

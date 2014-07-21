@@ -1,30 +1,146 @@
-/* TODO: remove */
-/*div{
-    border: 1px solid black;
-    margin:1px;
-}*/
-
 /* splitter */
 #splitter{
     position:fixed;
-    width:6px;
-    background-color:black;
-    opacity:0.6;
+    width: 10px;
     cursor:move;
-    z-index:15;
+    z-index: 7;
 }
 
-/*              */
-/* main content */
-/*              */
+#splitter img{
+    position: relative;
+    top: 50%;
+    left: 1px;
+}
 
+#splitter.ui-draggable-dragging{
+    background-color: rgba(0,0,0,0.2);
+}
+
+/*          */
+/* selector */
+/*          */
 div#selector{
     position:fixed;
-    top:35px;
 }
 
-div#controls{
+/*          */
+/* controls */
+/*          */
+#controls{
     position:fixed;
-    height:100px;
-    border:1px solid black;
+    height: 120px;
+}
+
+#controls > div{
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    position: relative;
+}
+
+#search_container{
+    display: inline;
+    line-height: 100px;
+}
+
+#search_products_filter{
+    margin-right: 10px;
+    width: 200px;
+
+}
+
+#search_products_submit{
+    width: 40px;
+    background-color: #00aa00;
+}
+
+#till_selector_container{
+    float:right;
+    width: 200px;
+    margin-top: 10px;
+}
+
+/*       */
+/* other */
+/*       */
+.no-close .ui-dialog-titlebar-close{
+    display:none;
+}
+
+div.selector-title{
+    display: inline-block;
+    height: 30px;
+    line-height: 30px;
+
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+    
+    padding-left: 10px;
+    padding-right: 10px;
+    
+    box-sizing: border-box;
+}
+div.selector-title > div{
+    width: 100%;
+    background-color: #969696;
+    color: #ffffff;
+    padding-left: 10px;
+    box-sizing: border-box;
+}
+
+div.selector-title.absolute{
+    position: absolute;
+}
+
+#loading{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: rgba(255,255,255,0.95);
+
+    z-index: 15; /* above everything known */
+}
+
+#loading > div{
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    height: 100px;
+    margin-top: -50px;
+}
+
+#loading img.loading{
+    display: inline-block;
+    position: relative;
+    top: 47px;
+}
+
+.shadow{
+    z-index: 10; /* above everything  */
+                 /* that must be shown should therefore have z-index at least 11 */
+
+    background-color: #000000;
+    opacity: 0.6;
+
+    position: fixed;
+}
+
+.fullscreen.shadow{
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.blocker{
+    position: absolute;
+    background-color: rgba(0,0,0,0.2);
 }

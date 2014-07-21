@@ -44,6 +44,7 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + _('/upload-color-logo') + '/$', company.upload_color_logo, name='upload_color_logo'),
     url(r_company + '/' + r_manage + _('/upload-monochrome-logo') + '/$', company.upload_monochrome_logo, name='upload_monochrome_logo'),
     url(r_company + '/' + r_manage + '/monochrome_logo/' + '?$', company.create_monochrome_logo, name='create_monochrome_logo'),
+    url(r_company + '/' + r_manage + _('/company-settings') + '/$', configuration.company_settings, name='company_settings'), # company settings
     # categories
     url(r_company + '/' + r_manage + _('/categories'), category.list_categories, name='list_categories'),  # list of categories
     url(r_company + '/' + r_manage + _('/category/add') + '/(?P<parent_id>-?\d+)?/$', category.add_category, name='add_category'),  # add
@@ -79,11 +80,8 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + '/json/products/edit/$', product.edit_product, name='edit_product'),  # edit (save) product - json
     url(r_company + '/' + r_manage + '/json/products/delete/$', product.delete_product, name='delete_product'),  # edit (save) product - json
 
-    # users
-    #url(r_company + _('/manage/users') + '/$', manage.users.edit_company, name='edit_users'), # company
-    # config (company parameter is needed only for url; configuration is per user, regardless of company
-    url(r_company + '/' + r_manage + _('/configuration') + '/$', configuration.edit_config, name='configuration'),  # company
-
+    # user
+    url(r_company + '/' + r_manage + _('/user-settings') + '/$', configuration.user_settings, name='user_settings'),  # user settings
 
     # misc (ajax): urls not translated
     url(r_company + '/' + r_manage + '/json/categories/?$', category.JSON_categories, name='JSON_categories'), # categories list TODO: in use?
@@ -96,6 +94,7 @@ urlpatterns = patterns('',
     #
     # save terminal settings (will width and such)
     url(r_company + '/save/$', terminal.save, name='save_terminal'),
+    url(r_company + '/set-register/$', terminal.set_register, name='set_register'),
 
     # views for bill
     url(r_company + '/bill/save/$', bill.create_bill, name='create_bill'),  # adds an item to bill

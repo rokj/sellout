@@ -1,8 +1,7 @@
 /*             */
 /* categories  */
 /*             */
-div#children_scroll_outer, div#parents_scroll_outer{
-    height:38px;
+#children_scroll_outer, #parents_scroll_outer{
     /* prevent text selection (interferes with dragging) */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -10,18 +9,23 @@ div#children_scroll_outer, div#parents_scroll_outer{
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    height: 40px;
+    margin-left: 10px;
 }
 
-div#children_scroll_inner, div#parents_scroll_inner{ /* category scrolling: outer div*/
-    height:34px;
+#parents_scroll_outer{
+    margin-top: 20px;
+}
+
+#children_scroll_inner, #parents_scroll_inner{ /* category scrolling: outer div*/
+    height:40px;
     overflow:auto;
     overflow-x:hidden;
-    border:1px solid black;
 }
 
-div#children, div#parents{ /* scrolling: inner div */
+#children, div#parents{ /* scrolling: inner div */
     /* container for category-button */
-    height:32px;
+    height:40px;
     width:1280000px; /* this will hold 10,000 buttons */
     overflow:hidden;
     float:left;
@@ -31,32 +35,63 @@ div#children, div#parents{ /* scrolling: inner div */
 div.category-button{ /* category selection buttons (the scrolling ones) */
     float:left;
     min-width:120px;
-    max-width:180px;
-    padding:3px;
-    margin-left:3px;
-    margin-right:3px;
     cursor:pointer;
-    border:1px solid black;
+    /* border:1px solid black; */
     white-space: nowrap;
-    overflow: hidden;
+    
     text-overflow: ellipsis;
+    height: 40px;
+    line-height: 40px;
+    position: relative;
+    
+    text-align:center;
 }
 
-div.category-button-focused{ /* only for keyboard-arrow selection */
-    border:1px dotted gray;
+/* the back button (only when not displaying breadcrumbs) */
+#category_parent{
+    height: 40px;
+    line-height: 40px;
+    text-align: right;
+    width: 30px;
+    min-width: 30px; /* must be here or width property will not
+                        override min-width from .category-button */
+}
+#category_parent > img{
+    height: 30px;
+    vertical-align: top;
+    position: relative;
+    top: 5px;
+    margin-right: 10px;
+    
 }
 
-div.category-button-selected{ /* selected and products are shown*/
-    background-color:orange;
+div.category-button span{
+    margin-left: 30px;
+    margin-right: 30px;
 }
 
-div.category-button-subcategories{ /* this category has more subcategories */
-    border-color:red;
+div.category-button-focused{ } /* only for keyboard-arrow selection */
+div.category-button-selected{ } /* selected and products are shown */
+div.category-button-subcategories{ } /* this category has more subcategories */
+
+#parents_scroll_inner
+div.category-button-subcategories:after{
+    content: "";
+    width: 0;
+    height: 0;
+    position: absolute;
+    top: 0;
+    right: -40px;
+    border: 20px solid rgba(0,0,0,0);
+    border-left-color: inherit;
 }
 
-img.category-button-icon{ /* category image in selection buttons */
-    display: inline-block;
-    vertical-align:middle;
-    height:24px; /* icons are thumbnails, which are already cropped to a square */
-    width:24px;
+#children_scroll_inner div.category-button,
+#category_button_favorites{
+    margin-right: 10px;
+}
+
+#category_button_favorites{
+    background-color: sandybrown;
+    color: #ffffff;
 }

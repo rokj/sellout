@@ -43,15 +43,25 @@ form div.error{
     color: #ff0000;
 }
 
+/* column width: keep it narrow for small screens, but wide on larger */
 div.management-column{
-    width: 30%;
     float: left;
-    max-width: 350px;
     margin-right: 40px;
 }
 
-div.management-column.fixed{
-    width: 280px;
+@media only screen and (max-width: 1000px){
+    div.management-column{
+        width: 260px;
+    }
+}
+@media only screen and (min-width: 1001px){
+    div.management-column{
+        width: 340px;
+    }
+}
+
+div.management-column.narrow{
+    width: 260px !important; /* regardless of screen sizes */
 }
 
 div.form-field input[type='text'],

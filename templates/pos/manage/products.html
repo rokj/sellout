@@ -432,7 +432,7 @@ $(document).ready(function(){
     function show_image(product, obj){
         if(!product.image){
             // show 'placeholder' image
-            obj.css("background-image", "url('{% static 'graphics/placeholder.png' %}')");
+            obj.css("background-image", "url('{% static 'images/product_placeholder.png' %}')");
             obj.attr("alt", "{% trans 'No image' %}");
         }
         else{
@@ -527,7 +527,7 @@ $(document).ready(function(){
                 .append(escape(categories[i].label));
             
             if(product){ // current product's category (if editing)
-                if(categories[i].label == product.category){
+                if(categories[i].value == product.category_id){
                     opt_obj.attr("selected", "selected");
                 }
             }
@@ -654,8 +654,8 @@ $(document).ready(function(){
         $("#edit_product_shortcut", edit_obj).val(product.shortcut);
         $("#edit_product_code", edit_obj).val(product.code);
 
-        var base_price_obj = $("#edit_product_price_without_tax");
-        var tax_price_obj = $("#edit_product_price_with_tax");
+        var base_price_obj = $("#edit_product_price_without_tax").val(product.price);
+        var tax_price_obj = $("#edit_product_price_with_tax").val(""); // will be updated with base_price_obj.change()
 
         // update total price when tax, price or discounts change
         $("#edit_product_tax, " +
@@ -675,7 +675,7 @@ $(document).ready(function(){
             tax_price_obj.val(display_number(base_price.times(Big(1).plus(tax.div(Big(100)))), "{{ separator }}", {{ decimal_places }}));
 
             get_total_price();
-        });
+        }).change();
 
         tax_price_obj.change(function(){
             var tax_price = get_number($(this).val(), "{{ separator }}");
@@ -1214,7 +1214,7 @@ $(document).ready(function(){
         <div id="dialog_shadow"></div>
         <div id="edit_dialog" class="hidden">
             <h2 id="edit_dialog_title">{# content by js #}</h2>
-            <div class="management-column fixed">
+            <div class="management-column narrow">
                 <div class="images">
                     <div class="image-buttons">
                         <div class="bottom">
@@ -1250,7 +1250,7 @@ $(document).ready(function(){
                 </div>
 
             </div>
-            <div class="management-column fixed hand-margin-2">
+            <div class="management-column narrow hand-margin-2">
 
                 <div class="form-field">
                     {% comment %} list of tax rates {% endcomment %}
@@ -1309,7 +1309,7 @@ $(document).ready(function(){
                 </div>
 
             </div>
-            <div class="management-column fixed hand-margin-3">
+            <div class="management-column narrow hand-margin-3">
 
                 <div class="form-field">
                 {% comment %} discounts {% endcomment %}
@@ -1358,7 +1358,8 @@ $(document).ready(function(){
         <div id="product_details_template" class="hidden">
             <div class="title">
                 <div class="product-management">
-                    <button class="product-controls product-favorite-button no-shadow hoverable"></button>
+                    <button class="product-controls product-favorite-button no-shadow hoverable"
+                            title="{% trans 'Favorite this product: it will be displayed by default in terminal' %}"></button>
                     <button class="product-controls product-edit-button no-shadow hoverable"></button>
                     <button class="product-controls product-delete-button no-shadow hoverable"></button>
                 </div>

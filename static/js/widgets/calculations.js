@@ -27,6 +27,16 @@ function display_number(number, separator, decimal_places){
     else return '';
 }
 
+// a few number shortcuts
+function dn(number, g){
+    return display_number(number, g.config.separator, g.config.decimal_places);
+}
+
+function display_currency(number, g){
+    // receives a BigNumber as a parameter and returns a string with user specified decimal separator
+    return dn(number, g) + " " + g.config.currency;
+}
+
 function do_tax(p_incl, p_excl, tax){
     // add or remove tax from price
 

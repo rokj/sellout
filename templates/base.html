@@ -31,20 +31,24 @@ blocks:
     
     {% comment %} bignumber (for all number manipulation) {% endcomment %}
     <script src="{% static 'js/big.js' %}"></script>
-    
+
+    {% comment %} mousewheel events {% endcomment %}
+    <script src="{% static 'js/jquery.mousewheel.js' %}"></script>
+
     {% comment %} translation {% endcomment %}
     <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
 
     {% comment %} common javascript files {% endcomment %}
     <script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/common.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/draggable.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/widgets/calculations.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/jquery.simpleMenu.js' %}"></script>
 
     <title>{% block title %}{{title}} - {{site_title}}{% endblock %}</title>
 
     <script type="text/javascript">
-        $(document).ready(function(){
+        $(window).load(function(){
             {# common to management #}
             var items = {
                 management_menu_button:  $("#management_button"),
@@ -67,6 +71,7 @@ blocks:
             <div id="logo" class="nolink">
                 {# logo block will be replaced with link to management in terminal #}
                 <img src="{% static 'icons/logo_white.png' %}" alt="" />
+                <div id="status_bar_company"></div>
             </div>
         {% endblock %}
 
@@ -77,7 +82,7 @@ blocks:
 
             <ul id="user_menu" class="drop-down">
                 {# store-related stuff #}
-                <li class="store separator"><a href="#">{% trans 'User Settings' %}</a></li>
+                <li class="store separator"><a href="{% url 'pos:user_settings' company.url_name %}">{% trans 'User Settings' %}</a></li>
                 <li class="store"><a href="#">{% trans 'Switch User' %}</a> </li>
                 <li class="store"><a href="#">{% trans 'Log Out' %}</a> </li>
             </ul>
@@ -99,7 +104,7 @@ blocks:
                 <li class="store"><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
                 <li class="store"><a href="">{% trans 'Bills' %}</a></li>
                 {# company-related stuff #}
-                <li class="company separator"><a href="{% url 'pos:configuration' company.url_name %}">{% trans 'Configuration' %}</a></li>
+                <li class="company separator"><a href="{% url 'pos:company_settings' company.url_name %}">{% trans 'Configuration' %}</a></li>
                 <li class="company"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
                 <li class="company"><a href="#">{% trans 'Users' %}</a></li>
             </ul>

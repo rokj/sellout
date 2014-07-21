@@ -8,25 +8,23 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/contacts.css' %}"/>
 {% endblock %}
 
-{% block status_bar_title %}{% trans 'Add contact' context 'page title' %}{% endblock %}
+{% block status_bar_title %}
+    {% if add %}
+        {% if type == 'Individual' %}
+            {% trans 'Add contact: Individual' %}
+        {% else %}
+            {% trans 'Add contact: Company' %}
+        {% endif %}
+    {% else %}
+        {% if type == 'Individual' %}
+            {% trans 'Edit contact: Individual' %}
+        {% else %}
+            {% trans 'Edit contact: Company' %}
+        {% endif %}
+    {% endif %}
+{% endblock %}
 
 {% block manage_content %}
-    <h2>
-        {% if add %}
-            {% if type == 'Individual' %}
-                {% trans 'Add Individual' %}
-            {% else %}
-                {% trans 'Add Company' %}
-            {% endif %}
-        {% else %}
-            {% if type == 'Individual' %}
-                {% trans 'Edit Individual' %}
-            {% else %}
-                {% trans 'Edit Company' %}
-            {% endif %}
-        {% endif %}
-    </h2>
-
     {% if add %}
         <form action="{% url 'pos:add_contact' company.url_name %}" method="post">
     {% else %}

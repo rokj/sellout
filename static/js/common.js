@@ -81,72 +81,6 @@ function get_size(element){ // get computed element size before it's inserted in
     }
 }
 
-function set_draggable(obj, items_selector, easing_time){
-    // items_selector (string): items that should be fitted into view
-    // obj: the inner div of the 'scrolling trinity':
-    //  div scroll_outer (prevents selection)
-    //    div scroll inner (overflow-x: hidden)
-    //      div content ('infinite' width)
-
-    var params = {
-        // Kudos:
-        // http://stackoverflow.com/questions/6602568/jquery-ui-draggable-deaccelerate-on-stop
-        helper: function () {
-            return $("<div>").css("opacity", 0);
-        },
-        drag: function (event, ui) {
-            // the position of parent obviously has to be taken into account
-            var pos = ui.helper.position().left - obj.parent().position().left;
-            $(this).stop().animate({left: pos},
-                easing_time,
-                'easeOutCirc',
-                function () {
-                    // check if this has scrolled past the last
-                    // (first) button
-                    var all_buttons = $(items_selector, obj);
-                    var first_button = all_buttons.filter(":first");
-                    var last_button = all_buttons.filter(":last");
-                    var container = obj.parent();
-
-                    if(first_button.length < 1 || last_button.length < 1) return;
-
-                    // if the whole scroller's width is less than
-                    // container's, always slide it back to left border
-                    if (first_button.position().left + last_button.position().left + last_button.outerWidth() < container.width()) {
-                        first_button.parent().animate({left: 0}, "fast");
-                    }
-                    else {
-                        if (first_button.offset().left > container.offset().left) {
-                            first_button.parent().animate({left: 0}, "fast");
-                        }
-                        else if (last_button.offset().left + last_button.outerWidth() < container.offset().left + container.width()) {
-                            first_button.parent().animate({left: -last_button.position().left + container.width() - last_button.outerWidth()}, "fast");
-                        }
-                    }
-                });
-        },
-        axis: "x"
-    };
-
-    obj.draggable(params);
-}
-
-function scroll_into_view(btn) {
-    // scrolls the object into view;
-    // the object is a category/product button in a container what was set_draggable().
-    var scroller = btn.parent();
-    var frame = scroller.parent();
-
-    // scrolling left: if button.left is less than container.left, scroll it into view
-    if (btn.offset().left < frame.offset().left) {
-        scroller.animate({left : -btn.position().left});
-    }
-    else if(btn.offset().left + btn.outerWidth() > frame.offset().left + frame.width()) {
-        // scrolling right: if button.left + button.width > container.left + container.width, scroll it into view
-        scroller.animate({left:-btn.position().left + frame.width() - btn.outerWidth()});
-    }
-}
-
 function error_message(title, message){
     // create a div for error dialog
     var dlg_obj = $("<div>");
@@ -461,5 +395,35 @@ function toggle_elements(elements_dict, show){
             if(show) elements_dict[key].show();
             else elements_dict[key].hide();
         }
+    }
+}
+
+function parseInt_zero(s){
+    // same as parseInt, except that returns 0 if parsing failed
+    var r = parseInt(s, 10);
+    if(isNaN(r)) return 0;
+    else return r;
+}
+
+function enable_element(element, enabled){
+    // a common function to enable all kinds of elements
+    if(enabled){
+        // enable the element:
+        // add hoverable class if the element had one before it was disabled
+        if(element.attr("data-hoverable") == "1"){
+            element.addClass("hoverable");
+        }
+
+        element.removeClass("disabled").prop("disabled", false);
+    }
+    else{
+        // disable the element:
+        // first, remember if the element had hoverable class
+        if(element.hasClass("hoverable")){
+            element.attr("data-hoverable", "1");
+        }
+
+        // then disable everything
+        element.addClass("disabled").removeClass("hoverable").prop("disabled", true);
     }
 }
