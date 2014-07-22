@@ -66,7 +66,7 @@ def terminal(request, company):
         'date_format': get_date_format(request.user, c, 'js'),
         'time_format': get_time_format(request.user, c, 'js'),
         'interface': get_user_value(request.user, 'pos_interface'),
-        'product_button_size': g.PRODUCT_BUTTON_DIMENSIONS[get_user_value(request.user, 'pos_interface_product_button_size')],
+        'product_button_size': g.PRODUCT_BUTTON_DIMENSIONS[get_user_value(request.user, 'pos_product_button_size')],
         'bill_width': get_user_value(request.user, 'pos_interface_bill_width'),
         'display_breadcrumbs': get_user_value(request.user, 'pos_display_breadcrumbs'),
         'product_display': get_user_value(request.user, 'pos_product_display'),

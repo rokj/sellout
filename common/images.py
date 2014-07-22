@@ -11,6 +11,12 @@ def resize_image(image, dimensions, mode='fill', color=(255, 255, 255, 0)):
         # crop the image to fill the whole 'dimensions' rectangle
         return ImageOps.fit(image, dimensions, Image.ANTIALIAS)
 
+    if mode == 'aspect':
+        # resize image to fit the dimensions and keep the aspect ratio
+        image.thumbnail(dimensions, Image.ANTIALIAS)
+
+        return image
+
     if mode == 'fit':
         # make a border around the image and paste a resized image into it
         # kudos: http://stackoverflow.com/questions/1386352/

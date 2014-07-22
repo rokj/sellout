@@ -28,7 +28,11 @@ Bill = function(g){
     // the options menu
     p.options_button = $("button.open-menu", "#bill_options");
     p.options_menu = $("#bill_options_menu");
+
+    p.option_save = $(".save", p.options_menu);
     p.option_contacts = $(".select-client", p.options_menu);
+    p.option_clear = $(".clear", p.options_menu);
+    p.option_print = $(".print", p.options_menu);
 
     // save item template for items and remove it from the document
     p.item_template = $("#bill_item_template").detach().removeAttr("id");
@@ -86,12 +90,22 @@ Bill = function(g){
 
     p.remove_item = function(item){
         // item is an actual Item() object
-        var i = p.get_item(item.id);
+        var i = p.get_item(item.serial);
 
         item.item_row.remove();
         remove_from_array(p.items, i);
 
         item = null;
+
+        p.update_summary();
+    };
+
+    p.clear = function(){
+        // remove all items one by one
+        for(var i = 0; i < p.items.length; i++){
+            p.items[i].item_row.remove();
+        }
+        p.items = [];
 
         p.update_summary();
     };
@@ -189,16 +203,22 @@ Bill = function(g){
             // slide the menu down (it will slide up because of its positioning)
             p.options_menu.slideDown("fast");
 
-            // bind hide events on button and document
-            p.options_button.unbind().click(function(){
-                p.toggle_options(false);
-            });
+            // hide it on click
+            $()
+                .add($(document))
+                .add(p.options_button)
+                .unbind("click.bill-options")
+                .on("click.bill-options", function(){
+                    p.toggle_options(false);
+                });
         }
         else{
             p.options_menu.slideUp("fast");
 
             // bind show events on the button
-            p.options_button.unbind().click(function(){
+            p.options_button.unbind().click(function(e){
+                e.stopPropagation(); // or the event will bubble up and drigger document.click,
+                                     // which will close the menu
                 p.toggle_options(true);
             });
         }
@@ -222,6 +242,9 @@ Bill = function(g){
         // show the contacts dialog (is handled by Contacts class)
         p.g.objects.contacts.choose_contact();
     });
+
+    p.option_print.click(function(){  });
+    p.option_clear.click(p.clear);
 };
 
 /* Item 'class' */
@@ -306,6 +329,10 @@ Item = function(bill, product) {
         // total
         p.items.total.text(dn(p.data.total, p.g));
 
+        // out of stock class
+        if(p.data.quantity.cmp(p.product.data.stock) >= 0) p.item_row.addClass("out-of-stock");
+        else p.item_row.removeClass("out-of-stock");
+
         // also update bill
         p.bill.update_summary();
     };
@@ -315,17 +342,16 @@ Item = function(bill, product) {
         var n, q = p.data.quantity;
         var update = false;
 
-        if(!add){ // don't set a value of 0 or less
+        if(!add){
             n = q.minus(1);
-            if(n.cmp(Big(0)) > 0){
+            if(n.cmp(Big(0)) > 0){ // don't set a value of 0 or less
                 q = n;
                 update = true;
             }
         }
-        else{ // do not add more items than there are in stock
-            // add in increments of unit_amount
+        else{
             n = p.data.quantity.plus(Big(1));
-            if(n.cmp(p.data.stock) <= 0){
+            if(n.cmp(p.data.stock) <= 0){ // do not add more items than there are in stock
                 q = n;
                 update = true;
             }
@@ -347,6 +373,9 @@ Item = function(bill, product) {
             error_message(title, gettext("Wrong number format"));
             q = Big(1);
         }
+
+        // round to set precision
+        q = q.round(p.g.config.decimal_places);
 
         // check if there's enough of it in stock
         if(q.cmp(p.data.stock) > 0){
@@ -500,7 +529,9 @@ Item = function(bill, product) {
     });
 
     // quantity
-    p.items.qty.change(function(){ p.check_quantity(); });
+    p.items.qty
+        .click(function(e){ e.stopPropagation(); })
+        .change(function(){ p.check_quantity(); });
 
     // when the item is added, scroll the bill to show it
     p.bill.show_item(p);

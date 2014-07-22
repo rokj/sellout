@@ -30,6 +30,7 @@ div.product-button {
     position: relative; /* this is required for product image to work correctly (to position another div above it) */
     /* do not set margin: it will be set by javascript every time products are rendered for even spacing */
     cursor: pointer;
+    overflow: hidden;
 }
 
 div.product-button-focused{}
@@ -85,6 +86,53 @@ p.product-button-shortcut {
     text-align: center;
 }
 
-.out-of-stock {
-    opacity: 0.7;
+.stock-container{
+    display: none;
+}
+
+.out-of-stock .stock-container{
+    display: block;
+    position: absolute;
+    
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    
+    background-color: white;
+    opacity: 0.5;
+    
+    z-index: 3; /* see product-button-text */
+}
+
+.out-of-stock.product-button:after{
+    display: block;
+    position: absolute;
+    z-index: 5;
+    
+    /*content: "Out of stock"; /* this goes to terminal inline-stylesheet (translation) */
+    
+    font-family: "RobotoCondensed", "Arial Narrow", arial, helvetica, sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    
+    background-color: #ff0000;
+    opacity: 0.8;
+    width: 200%;
+    height: 30px;
+    
+    left: -50%;
+    top: 30px;
+    
+    line-height: 30px;
+    text-align: center;
+    color:white;
+    
+    transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -webkit-transform: rotate(-45deg);
+    
+    transform-origin: 50% 30px;
+    -ms-transform-origin: 50% 30px;
+    -webkit-transform-origin: 50% 30px;
 }

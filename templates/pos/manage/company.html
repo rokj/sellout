@@ -40,7 +40,6 @@
 .delete-image-button{
     background-image: url("{% static 'icons/delete_active.png' %}");
 }
-
 </style>
 
 <script type="text/javascript">
@@ -64,9 +63,8 @@ $(document).ready(function(){
     );
 
     // set the monochrome logo 'passepartout'
-    var dist = ({{ color_logo_dimensions.0 }} - {{ monochrome_logo_dimensions.0 }})/2;
-    items.monochrome_logo_container.css("top", dist + "px");
-    items.monochrome_logo_container.css("left", dist + "px");
+    items.monochrome_logo_container.css("left", ({{ color_logo_dimensions.0 }} - {{ monochrome_logo_dimensions.0 }})/2 + "px");
+    items.monochrome_logo_container.css("top", ({{ color_logo_dimensions.1 }} - {{ monochrome_logo_dimensions.1 }})/2 + "px");
 
     // setting background
     function set_background(object, url){

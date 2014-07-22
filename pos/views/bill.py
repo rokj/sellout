@@ -17,7 +17,7 @@ import common.globals as g
 
 from pytz import timezone
 from datetime import datetime as dtm
-from decimal import Decimal, getcontext, ROUND_UP
+from decimal import Decimal, getcontext, ROUND_HALF_UP
 
 
 def bill_item_to_dict(user, company, item):
@@ -34,17 +34,22 @@ def bill_item_to_dict(user, company, item):
     i['private_notes'] = item.private_notes
     i['unit_type'] = item.unit_type
     i['stock'] = format_number(user, company, item.stock)
+
     # values from bill Item
     i['bill_id'] = item.bill.id
+    i['bill_notes'] = item.bill_notes
+
     i['quantity'] = format_number(user, company, item.quantity)
+
+    # these values are for one unit (not multiplied by quantity)
     i['base_price'] = format_number(user, company, item.base_price)
     i['tax_percent'] = format_number(user, company, item.tax_percent)
+    i['single_total'] = format_number(user, company, item.single_total)
+
     i['tax_absolute'] = format_number(user, company, item.tax_absolute)
     i['discount_absolute'] = format_number(user, company, item.discount_absolute)
-    i['total_without_tax'] = format_number(user, company, item.single_total - item.tax_absolute)
-    i['single_total'] = format_number(user, company, item.single_total)
     i['total'] = format_number(user, company, item.total)
-    i['bill_notes'] = item.bill_notes
+    i['total_without_tax'] = format_number(user, company, item.total - item.tax_absolute)
 
     return i
 
@@ -132,7 +137,7 @@ def item_prices(user, company, base_price, tax_percent, quantity, discounts):
         return {'discount': discount, 'final': final}
 
     # round up:
-    getcontext().rounding = ROUND_UP
+    getcontext().rounding = ROUND_HALF_UP
 
     r = {}  # return values
 

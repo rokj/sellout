@@ -20,7 +20,7 @@ def discount_to_dict(user, company, d, android=False):
         'description': d.description,
         'code': d.code,
         'type': d.type,
-        'amount': format_number(user, company, d.amount),
+        'amount': format_number(user, company, d.amount, True),
         'enabled': d.enabled,
         'active': d.is_active,
     }

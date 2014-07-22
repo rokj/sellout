@@ -191,7 +191,7 @@ MISC = {
 
 IMAGE_DIMENSIONS = {
     'color_logo': (180, 180),
-    'monochrome_logo': (64, 64),
+    'monochrome_logo': (180, 64),
     'category': (120, 120),  # there's no image, just a colored box
     'product': (160, 160),  # must be as large as the largest PRODUCT_BUTTON_DIMENSIONS
     'thumb_small': (32, 32),  # for thumbnails

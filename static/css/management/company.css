@@ -9,8 +9,8 @@ div.error{
 
 #color_logo_container, #monochrome_logo_container{
     position: relative;
-    background-size: cover; /* crop fill */
     background-position: center center;
+    background-repeat: no-repeat;
 }
 
 #default_color_logo, #default_monochrome_logo{

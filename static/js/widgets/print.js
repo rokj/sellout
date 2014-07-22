@@ -28,15 +28,15 @@ function format_small_receipt(g, bill){
     // issuing company details: create some
     $(".issuing.company-details-name", receipt).text(g.data.company.name);
 
-    $(".issuing.company-details-1", receipt).html(g.data.company.street_address + "<br/>" +
-        join(g.data.company.postcode, g.data.company.city, "") + "</br>" +
+    $(".issuing.company-details-1", receipt).text(
+        join(g.data.company.street, join(g.data.company.postcode, g.data.company.city, ""), ",")
+    );
+    $(".issuing.company-details-2", receipt).text(
         join(g.data.company.state, g.data.company.country_name, ",")
     );
 
-    $(".issuing.company-details-2", receipt).html(
-        escape(g.data.company.phone) + "<br/>" +
-        escape(g.data.company.vat_no) + "<br/>" +
-        escape(g.data.company.website)
+    $(".issuing.company-details-3", receipt).html(
+        join(gettext("VAT") + ": " + g.data.company.vat_no, g.data.company.website, "<br />")
     );
 
     // the same for client company (if selected)
@@ -47,9 +47,12 @@ function format_small_receipt(g, bill){
             $(".client-individual", receipt).show();
 
             $(".client.individual-details-name", receipt).text(bill.contact.first_name + " " + bill.contact.last_name);
-            $(".client.individual-details-1", receipt).text(bill.contact.street_address);
-            $(".client.individual-details-2", receipt).html(
-                join(bill.contact.postcode, bill.contact.city, ",") + "<br/>" +
+            $(".client.individual-details-1", receipt).text(
+                join(bill.contact.street_address,
+                    join(bill.contact.postcode, bill.contact.city, ","),
+                    ", ")
+            );
+            $(".client.individual-details-2", receipt).text(
                 join(bill.contact.state, bill.contact.country_name, ", ")
             );
         }
@@ -59,9 +62,16 @@ function format_small_receipt(g, bill){
             $(".client-company", receipt).show();
 
             $(".client.company-details-name", receipt).text(bill.contact.company_name);
-            $(".client.company-details-1", receipt).text(bill.contact.street_address);
-            $(".client.company-details-2", receipt).text(join(bill.contact.postcode, bill.contact.city, ""));
-            $(".client.company-details-3", receipt).text(join(bill.contact.state, bill.contact.country, ", "));
+            $(".client.company-details-1", receipt).text(
+                join(bill.contact.street_address,
+                    join(bill.contact.postcode, bill.contact.city, ""),
+                    ", "
+                )
+            );
+            $(".client.company-details-2", receipt).text(
+                    join(bill.contact.state, bill.contact.country_name, ", ")
+            );
+            $(".client.company-details-3", receipt).text(join(gettext("VAT") + ": " + bill.contact.vat, "", ""));
         }
     }
 
@@ -152,7 +162,7 @@ function format_small_receipt(g, bill){
         gross_sum = gross_sum.plus(data.gross_sum);
 
         $(".tax-id", tax_row).text(data.letter);
-        $(".tax-percent", tax_row).text(rate);
+        $(".tax-percent", tax_row).text(rate + " %");
         $(".tax-net", tax_row).text(dn(data.net_sum, g));
         $(".tax-absolute", tax_row).text(dn(data.tax_sum, g));
         $(".tax-gross", tax_row).text(dn(data.gross_sum, g));

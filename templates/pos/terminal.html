@@ -15,11 +15,15 @@
 .item-val.quantity input[type='text']{
     background-image: url("{% static 'icons/quantity_background.png' %}");
     background-position: center center;
-    background-repeat:  no-repeat;
+    background-repeat: no-repeat;
 }
 
 .details-box button.remove-item-discount{
     background-image: url("{% static 'icons/delete_active.png' %}");
+}
+
+.out-of-stock.product-button:after{
+    content: "{% trans 'Out of stock' %}";
 }
 
 </style>
@@ -171,6 +175,7 @@ $(window).load(function(){
                         <div class="item-val quantity">
                             {# wrap everything in another div so that everything will be centered #}
                             <div>
+                                <div class="out-of-stock-message">{% trans 'No more in stock' %}</div>
                                 <button class="qty-plus">+</button>
                                 <input type="text" class="qty" />
                                 <button class="qty-minus">-</button>
@@ -221,6 +226,8 @@ $(window).load(function(){
                         <div id="bill_options_menu">
                             <button class="bill-option-menu-item save">{% trans 'Save' %}</button>
                             <button class="bill-option-menu-item select-client">{% trans 'Select client' %}</button>
+                            <button class="bill-option-menu-item clear">{% trans 'Clear bill' %}</button>
+                            <button class="bill-option-menu-item print">{% trans 'Print...' %}</button>
                         </div>
                     </div>
                 </div>

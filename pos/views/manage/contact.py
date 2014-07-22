@@ -124,7 +124,7 @@ def validate_contact(user, company, data):
     if 'email' in data:
         if len(data['email']) > max_field_length(Contact, 'email'):
             return err(_("Email address too long"))
-        if len(data['email']) < 6:  #
+        if 0 < len(data['email']) < 6:  # there's something entered, but nothing useful
             return err(_("Email address too short"))
 
         # validate email with regex:

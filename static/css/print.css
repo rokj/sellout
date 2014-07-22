@@ -1,23 +1,27 @@
 /* receipt/bill styles  */
 @page{
     margin: 0;
-    font-family: "RobotoCondensed", "Arial Narrow", arial, helvetica, sans-serif;
 }
 
 .receipt-80mm{
     width: 70mm; /* wtf happened to "80 mm " printer? */
-    padding-top: 10mm;
+    padding-top: 5mm;
     padding-bottom: 20mm;
-    
+
     font-size: 12px;
     margin: 0;
     
-    /* TODO: remove */
-    /*position: absolute;
+    /* TODO: remove
+    position: absolute;
     z-index: 100;
     right: 0;
     bottom: 0;
     background-color: white;*/
+}
+
+.receipt-80mm *{
+    /* use condensed font for narrow receipts */
+    font-family: "RobotoCondensed", "Arial Narrow", arial, helvetica, sans-serif;
 }
 
 .receipt-80mm .receipt-logo{
@@ -31,14 +35,13 @@
 }
 
 .receipt-80mm .issuing.company-details-1{
-    float: left;
-    width: 37mm;
-    text-align: right;
-    margin-right: 2mm;
+    text-align: center;
 }
-
 .receipt-80mm .issuing.company-details-2{
-    text-align: left;
+    text-align: center;
+}
+.receipt-80mm .issuing.company-details-3{
+    text-align: center;
 }
 
 .receipt-80mm .issuing-company{
@@ -56,7 +59,6 @@
 
 .receipt-80mm .register-location{
     padding-top: 3mm;
-    padding-bottom: 3mm;
     text-align: center;
     clear: both;
 }
@@ -85,6 +87,7 @@
 /* table head: bold and bottom border */
 .receipt-80mm .receipt-items .items-header{
     font-weight: bold;
+    border-top: 0.5mm solid black;
     border-bottom: 0.5mm solid black;
     overflow: hidden;
 }
@@ -199,6 +202,10 @@
     padding-top: 5mm;
     overflow: hidden;
 }
+
+.receipt-80mm .tax-rates > div{
+    width: 100%;
+}
 .receipt-80mm .tax-rates .tax-row{
     width: 100%;
 }
@@ -208,7 +215,7 @@
     text-align: right;
 }
 
-.receipt-80mm .tax-rates .tax-id{ width: 8%; }
+.receipt-80mm .tax-rates .tax-id{ width: 8%; text-align: left; }
 .receipt-80mm .tax-rates .tax-percent{ width: 22%; }
 .receipt-80mm .tax-rates .tax-net{ width: 22%; }
 .receipt-80mm .tax-rates .tax-absolute{ width: 22%; }

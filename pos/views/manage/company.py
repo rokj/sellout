@@ -336,6 +336,7 @@ def upload_color_logo(request, company):
 
     return save_color_image(c, data)
 
+
 def save_color_image(c, data):
     if 'image' in data:
         # read the new image and upload it
@@ -369,7 +370,7 @@ def save_color_image(c, data):
             resize = True
 
         if resize:
-            color_logo = resize_image(color_logo, g.IMAGE_DIMENSIONS['color_logo'], 'fit')
+            color_logo = resize_image(color_logo, g.IMAGE_DIMENSIONS['color_logo'], 'aspect')
 
         if c.color_logo.name:
             # the logo exists already, delete it
@@ -400,6 +401,7 @@ def save_color_image(c, data):
 
         return JSON_ok()
 
+
 @login_required
 def upload_monochrome_logo(request, company):
     c = Company.objects.get(url_name=company)
@@ -407,6 +409,7 @@ def upload_monochrome_logo(request, company):
     data = JSON_parse(request.POST.get('data'))
 
     return save_monochrome_image(c, data)
+
 
 def save_monochrome_image(c, data):
     if 'image' in data:
@@ -477,8 +480,7 @@ def create_monochrome_logo(request, company):
     color_logo = Image.open(c.color_logo.path)
 
     # resize it to monochrome_logo dimension
-    black_logo = color_logo.copy()
-    black_logo.thumbnail(g.IMAGE_DIMENSIONS['monochrome_logo'], Image.ANTIALIAS)
+    black_logo = resize_image(color_logo.copy(), g.IMAGE_DIMENSIONS['monochrome_logo'], 'fit')
     # reduce color depth
     black_logo = black_logo.convert(mode='1')
     # create a new path for the monochrome logo

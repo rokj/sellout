@@ -50,14 +50,14 @@ def product_to_dict(user, company, product, android=False):
     if not purchase_price:
         ret['purchase_price'] = ''
     else:
-        ret['purchase_price'] = format_number(user, company, purchase_price)
+        ret['purchase_price'] = format_number(user, company, purchase_price, True)
 
     # sale price
     price = product.get_price()
     if not price:
         ret['price'] = ''
     else:
-        ret['price'] = format_number(user, company, price)
+        ret['price'] = format_number(user, company, price, True)
 
     # all discounts in a list
     discounts = []
@@ -157,7 +157,7 @@ def products(request, company):
         'separator': get_company_value(request.user, c, 'pos_decimal_separator'),
         # numbers etc
         'default_tax_id': get_default_tax(request.user, c)['id'],
-        'decimal_places': get_company_value(request.user, c, 'pos_decimal_places'),
+        'decimal_places': get_company_value(request.user, c, 'pos_decimal_places')*2,  # ACHTUNG: rounding comes at the end
         'tax_first': tax_first,
     }
     return render(request, 'pos/manage/products.html', context)

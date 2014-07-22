@@ -1,5 +1,5 @@
 // Big() setup
-Big.RM = 3; // ROUND_UP, away from zero (must match settings in python)
+Big.RM = 1; // ROUND_HALF_UP, away from zero (must match settings in python)
 
 // utilities for calculation of prices etc.
 function check_number(string, separator){

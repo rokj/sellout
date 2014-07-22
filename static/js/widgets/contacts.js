@@ -67,7 +67,7 @@ Contacts = function(g){
                 // find the entry in companies_list and remove it,
                 // the dictionary entry will be overwritten anyway
                 for(i = 0; i < p.companies_list.length; i++){
-                    if(p.companies_list[i].id == c.id){
+                    if(p.companies_list[i].value == c.id){ // ACHTUNG, it's value, not ID (autocomplete...)
                         remove_from_array(p.companies_list, i);
                         break;
                     }
@@ -90,7 +90,7 @@ Contacts = function(g){
                 // find the entry in companies_list and remove it,
                 // the dictionary entry will be overwritten anyway
                 for(i = 0; i < p.individuals_list.length; i++){
-                    if(p.individuals_list[i].id == c.id){
+                    if(p.individuals_list[i].value == c.id){
                         remove_from_array(p.individuals_list, i);
                         break;
                     }
@@ -277,10 +277,12 @@ Contacts = function(g){
                         );
                     }
                     else{
-                        // add the new contact to current lists
+                        // add a new contact
                         p.prepare_contact(response.data);
+
                         // the contact is added
                         p.selected = response.data;
+                        p.g.objects.bill.contact = response.data;
 
                         p.close_action();
                     }
