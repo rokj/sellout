@@ -3,7 +3,7 @@ from django.db.models import Q
 
 from pos.models import Company, Category, Discount, Product, ProductDiscount, Price, PurchasePrice, Tax
 from pos.views.manage.product import JSON_units, get_product, search_products, create_product, edit_product, \
-    delete_product, product_to_dict
+    delete_product, product_to_dict, toggle_favorite
 from pos.views.util import JSON_response, JSON_error, \
                             has_permission
 from rest_framework.decorators import api_view, permission_classes,\
@@ -87,3 +87,9 @@ def mobile_get_product_discounts(request, company):
         r.append(product_to_dict(request.user, p, android=True))
 
     return JSON_response(r)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_toggle_favorite(request, company):
+    return toggle_favorite(request, company)

@@ -3,6 +3,7 @@ from django.utils.translation import ugettext as _
 
 from common import globals as g
 from mobile.views.manage.company import get_company, edit_company
+from mobile.views.manage.till import mobile_get_all_registers
 from mobile.views.views import mobile_get_cut, mobile_get_units, get_mobile_config
 
 from mobile.views import login
@@ -63,6 +64,7 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/products/get/(?P<product_id>\d+)/?$', product.mobile_get_product, name='get_product'), # product list (search) - json
     url(r_company + r'/manage/json/products/edit/?$', product.mobile_edit_product, name='edit_product'), # edit (save) product - json
     url(r_company + r'/manage/json/products/delete/?$', product.mobile_delete_prodcut, name='delete_product'), # edit (save) product - json
+    url(r_company + r'/manage/json/products/favourite/?$', product.mobile_toggle_favorite, name='delete_product'), # edit (save) product - json
 
     # CUT (Categories, units, taxes)
     url(r_company + r'/manage/json/cut/get', mobile_get_cut, name='get_cut'), # get categories, units, taxes
@@ -78,6 +80,8 @@ urlpatterns = patterns('',
     # company
     url(r_company + r'/manage/json/company/get', get_company, name='mobile_get_company'),
     url(r_company + r'/manage/json/company/edit', edit_company, name='mobile_edit_company'),
+
+    url(r_company + r'/manage/json/registers/get', mobile_get_all_registers, name='mobile_get_registers'),
 
     # available discounts list
     # url(r_company + r'/manage/json/discounts/?$', discount.JSON_discounts, name='JSON_discounts'),
