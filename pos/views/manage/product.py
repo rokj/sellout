@@ -179,6 +179,9 @@ def get_product(request, company):
     except ValueError:
         return JSON_response(_("No product specified"))
 
+    if product_id == -1:
+        return JSON_ok()  # ?
+
     product = Product.objects.get(company=c, id=product_id)
     
     return JSON_response(product_to_dict(request.user, c, product))
@@ -307,7 +310,7 @@ def search_products(request, company, android=False):
 
         # omit search by tax, price, discount
 
-    products = products.distinct().order_by('name')
+    products = products.distinct().order_by('name')[:g.SEARCH_RESULTS['products']]
     
     # return serialized products
     ps = []

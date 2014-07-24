@@ -481,7 +481,7 @@ class Register(SkeletonU):
 class Bill(SkeletonU):
     company = models.ForeignKey(Company, null=False, blank=False)  # also an issuer of the bill
     user = models.ForeignKey(User, null=False)
-    till = models.CharField(_("Cash register id"), max_length=50, null=True)  # TODO: what's this?
+    till = models.ForeignKey(Register, null=False, blank=False)
     serial = models.IntegerField(_("Bill number, unique over all company's bills"), null=True)  # will be updated in post_save signal
 
     type = models.CharField(_("Bill type"), max_length=20, choices=g.BILL_TYPES, null=False, blank=False, default=g.BILL_TYPES[0][0])

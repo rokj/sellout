@@ -1,11 +1,3 @@
-/* categories:
- *  there are two divs in terminal: #parents and #children;
- *    parent shows:
- *      - path to the current children, shown below, or nothing if in topmost category
- *    children shows:
- *      - topmost categories if there's no parent selected
- *      - after selecting parent, a button goes to #parent and all its children are shown in children
- */
 Categories = function(g){
     var p = this;
 
@@ -14,11 +6,12 @@ Categories = function(g){
     p.categories = []; // will hold Category() objects
     p.categories_by_id = {}; // will hold pairs id:{category reference} for faster searching
 
+    p.section = $("#categories"); // terminal section
     p.items = {
         parents: $("#parents"), // parent categories
         children: $("#children"), // children categories
         favorites_button: $("#category_button_favorites"),
-        back_button: $("#category_parent"),
+        back_button: $("#category_button_back"),
 
         subcategories_title: $("#subcategories_title"),
         products_title: $("#products_title")
@@ -27,19 +20,23 @@ Categories = function(g){
     //
     // methods
     //
-    p.set_texts = function(showing_favorites){
+    p.set_texts = function(showing_favorites, has_children){
         if(showing_favorites){
             p.items.subcategories_title.text(gettext("Categories"));
             p.items.products_title.text(gettext("Favorite products"));
         }
         else{
-            p.items.subcategories_title.text(gettext("Subcategories"));
-            p.items.products_title.text(gettext("Products"));
+            p.items.products_title.text(gettext("Products in this category"));
+            if(has_children) p.items.subcategories_title.text(gettext("Subcategories"));
+            else p.items.subcategories_title.text(gettext("No Subcategories"));
+
         }
     };
 
     p.clear_parents = function(){ $("div.category-button", p.items.parents).hide(); };
+
     p.clear_children = function(){ $("div.category-button", p.items.children).hide(); };
+
     p.clear = function(){
         p.clear_parents();
         p.clear_children();
@@ -56,21 +53,25 @@ Categories = function(g){
 
         // hide the back button if displaying breadcrumbs
         if(!p.g.config.display_breadcrumbs){
-            p.items.back_button.hide();
+            enable_element(p.items.back_button, false);
         }
 
         // display favorites
         p.g.objects.search.show_favorites();
 
-        p.set_texts(true); // showing favorites
+        p.set_texts(true, p.categories.length != 0); // showing favorites
     };
 
     //
     // init
     //
+    if(p.g.config.display_breadcrumbs) p.section.parent().addClass("breadcrumbs");
+    else p.section.parent().addClass("no-breadcrumbs");
 
     // draggable parents and children
-    set_horizontal_draggable(p.items.parents, "div.category-button:visible", p.g.settings.t_easing);
+    if(p.g.config.display_breadcrumbs){
+        set_horizontal_draggable(p.items.parents, "div.category-button:visible", p.g.settings.t_easing);
+    }
     set_horizontal_draggable(p.items.children, "div.category-button:visible", p.g.settings.t_easing);
 
     // create all top-level categories
@@ -97,7 +98,7 @@ CategoryButton = function(list, parent, data){
     p.subcategories = []; // an object for each subcategory
 
     p.children_button = null; // the button in the children div
-    p.parents_button = null; // the button in the parents div (this may not be there at all)
+    p.parents_button = null; // the button in the parents div
 
     // add a pair to list.categories_by_id
     p.list.categories_by_id[p.data.id] = p.data;
@@ -131,23 +132,16 @@ CategoryButton = function(list, parent, data){
         p.children_button = p.button.clone().appendTo(p.list.items.children);
 
         // append to parents div only if it has subcategories
-        if(p.subcategories.length > 0){
-            p.parents_button = p.button.clone().prependTo(p.list.items.parents);
-        }
+        p.parents_button = p.button.clone().prependTo(p.list.items.parents);
+        p.parents_button.addClass("has-subcategories");
     };
 
     p.show_children = function(){
-        if(p.has_children){
-            // this category has children: show parents_button and all subcategories
+        if(p.g.config.display_breadcrumbs){
+            // TODO (if, that is)
+            console.warn("Not implemented: display breadcrumbs");
 
-            // remove current children
-            p.list.clear();
-
-            // show all buttons of all subcategories
-            for(var i = 0; i < p.subcategories.length; i++){
-                p.subcategories[i].children_button.show();
-            }
-
+            /*
             // show parents: if display_breadcrumbs is on
             if(p.g.config.display_breadcrumbs){
                 var z = 1;
@@ -165,26 +159,28 @@ CategoryButton = function(list, parent, data){
                 // adjust z-index of all visible parent
 
             }
-            else{
-                // if display_breadcrumbs is off, show only this category's parent and back button
-                p.parents_button.show();
+            */
+        }
+        else{
+            // remove current children
+            p.list.clear();
 
-                // show the back button (unless showing breadcrumbs)
-                // and bind an action to it
-                p.list.items.back_button.unbind().show().click(function(){
-                    // 'p' is the selected category;
-                    if(p.subcategories.length > 0){
-                        // if it has no children, show its parent
-                        if(p.parent) p.parent.click_action();
-                        else p.list.favorites_button_action();
-                    }
-                    else{
-                        // if it has children, show its parent's parent
-                        if(p.parent.parent) p.parent.parent.click_action();
-                        else p.list.favorites_button_action();
-                    }
-                });
+            // show all buttons of all subcategories (if there's any)
+            for(var i = 0; i < p.subcategories.length; i++){
+                p.subcategories[i].children_button.show();
             }
+
+            // if display_breadcrumbs is off, show only this category's parent and back button
+            p.parents_button.show();
+
+            // show the back button (unless showing breadcrumbs)
+            // and bind an action to it
+            enable_element(p.list.items.back_button, true);
+            p.list.items.back_button.unbind().click(function(){
+                // 'p' is the selected category;
+                if(p.parent) p.parent.click_action();
+                else p.list.favorites_button_action();
+            });
         }
     };
 
@@ -204,7 +200,7 @@ CategoryButton = function(list, parent, data){
             p.g.objects.search.search_by_category(p.data.id)
         );
 
-        p.list.set_texts(false); // not showing favorites anymore
+        p.list.set_texts(false, p.has_children); // not showing favorites anymore
     };
 
     //

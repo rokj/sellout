@@ -11,9 +11,12 @@ Bill = function(g){
 
     p.data = null;
     p.items = [];
+
+    // bill properties
     p.serial = 0; // a number that will be assigned to every item
                    // (like an unique id - has nothing to do with id on server)
     p.contact = null; // reference to contact (object with details) (if chosen)
+    p.saved = false; // true if the bill in this state is saved on the server
 
     p.bill = $("#bill");
 
@@ -85,6 +88,9 @@ Bill = function(g){
             }
         }
 
+        // bill has been changed and it must be saved
+        p.bill.saved = false;
+
         p.update_summary();
     };
 
@@ -97,6 +103,9 @@ Bill = function(g){
 
         item = null;
 
+        // updated bill
+        p.bill.saved = saved = false;
+
         p.update_summary();
     };
 
@@ -106,6 +115,9 @@ Bill = function(g){
             p.items[i].item_row.remove();
         }
         p.items = [];
+
+        // the bill is empty, saving is not needed
+        p.bill.saved = true;
 
         p.update_summary();
     };
@@ -124,6 +136,43 @@ Bill = function(g){
     };
 
     // bill manipulation
+    p.load = function(data){
+        // load bill from data (loaded from the server or localStorage)
+        p.clear();
+
+        var i, product;
+
+        for(i = 0; i < data.items.length; i++){
+            // get products from items' ids and create new items
+            product = p.g.objects.products.products_by_id[data.items[i].product_id];
+
+            if(!product) continue;
+
+            p.items.push(new Item(p, product));
+        }
+
+        p.bill.saved = true;
+
+    };
+
+    p.get_data = function(){
+        // returns bill and item data for saving/sending
+        var i;
+        var r = {
+            items: [],
+            total: dn(p.update_summary(), p.g),
+            till_id: p.g.config.register_id
+        };
+
+        // get all items
+        for(i = 0; i < p.items.length; i++){
+            p.items[i].update();
+            r.items.push(p.items[i].format());
+        }
+
+        return r;
+    };
+
     p.finish = function(){
         // put this bill, including all items in a neat json
         // and send it to server
@@ -136,20 +185,10 @@ Bill = function(g){
             return;
         }
 
-        var i;
-        var r = {
-            items: [],
-            total: dn(p.update_summary(), p.g)
-        };
-
-        // get all items
-        for(i = 0; i < p.items.length; i++){
-            p.items[i].update();
-            r.items.push(p.items[i].format());
-        }
+        var data = p.get_data();
 
         // send to server, when it's done, print if everything is OK
-        send_data(p.g.urls.create_bill, r, p.g.csrf_token, function(response){
+        send_data(p.g.urls.create_bill, data, p.g.csrf_token, function(response){
             if(response.status != 'ok'){
                 error_message(
                     gettext("Could not create bill"),
@@ -160,7 +199,7 @@ Bill = function(g){
                 p.data = response.data.bill;
                 p.print();
 
-                // TODO: when the bill is finished, remove from each item's stock
+                // TODO: clear bill and create a new one
             }
         });
     };
@@ -245,6 +284,15 @@ Bill = function(g){
 
     p.option_print.click(function(){  });
     p.option_clear.click(p.clear);
+
+    // if there's a bill in localStorage, load its items
+    if(localStorage.bill){
+        var data = load_local('bill');
+
+        if(data){
+            p.load(data);
+        }
+    }
 };
 
 /* Item 'class' */
@@ -530,8 +578,11 @@ Item = function(bill, product) {
 
     // quantity
     p.items.qty
+        .unbind()
         .click(function(e){ e.stopPropagation(); })
-        .change(function(){ p.check_quantity(); });
+        .change(function(){
+            p.check_quantity();
+        });
 
     // when the item is added, scroll the bill to show it
     p.bill.show_item(p);
@@ -626,7 +677,7 @@ ItemDetails = function(item){
         var d_available = p.g.data.discounts;
         var d_used = []; // a list of ids
 
-        // put all discounts from item to list and the rest to select box
+        // put all discounts from item to list
         for(i = 0; i < p.temp_discounts.length; i++){
             // ignore the unique discount (it stays in )
             if(p.temp_discounts[i].id == -1) continue;
@@ -638,6 +689,8 @@ ItemDetails = function(item){
             obj.insertBefore(p.items.all_discounts_li);
 
             obj.data(p.temp_discounts[i]);
+
+            d_used.push(p.temp_discounts[i].id);
         }
 
         // put all other discounts to select box

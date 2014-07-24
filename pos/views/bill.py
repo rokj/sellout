@@ -9,7 +9,7 @@
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 
-from pos.models import Company, Bill, BillItem, Product, Discount, BillItemDiscount
+from pos.models import Company, Bill, BillItem, Product, Discount, BillItemDiscount, Register
 from pos.views.util import has_permission, JSON_response, JSON_ok, JSON_parse, JSON_error, \
     format_number, parse_decimal, format_date, format_time
 from config.functions import get_company_value
@@ -68,7 +68,7 @@ def bill_to_dict(user, company, bill):
     b = {}
     b['id'] = bill.id
     b['serial'] = bill.serial
-    b['till'] = bill.till
+    b['till_id'] = bill.till.id
     b['type'] = bill.type
     b['recipient_contact'] = bill.recipient_contact
     b['note'] = bill.note
@@ -233,6 +233,12 @@ def create_bill(request, company):
         # this number came from javascript
         total_js = r['number']
 
+    try:
+        print
+        till = Register.objects.get(id=int(data.get('till_id')), company=c)
+    except (TypeError, ValueError, Register.DoesNotExist):
+        return JSON_error(_("Invalid register specified."))
+
     # this number will be calculated below;
     # both grand totals must match or... ???
     total_py = Decimal('0')
@@ -242,6 +248,7 @@ def create_bill(request, company):
     bill = {
         'company': c,
         'user': request.user,
+        'till': till,
         'timestamp': dtm.now(),
         'type': "Normal",
         'status': "Saved",
@@ -367,6 +374,7 @@ def create_bill(request, company):
     db_bill = Bill(
         company=c,
         user=bill['user'],  # this can change
+        till=till,
         created_by=bill['user'],  # this will never change
         type=bill['type'],
         timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),

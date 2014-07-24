@@ -58,6 +58,12 @@ UNITS = (
     ("other", _("Other")),
 )
 
+# products
+SEARCH_RESULTS = {
+    'products': 50,  # return max 100 products from search
+}
+
+
 # discounts
 DISCOUNT_TYPES = (
     ("Percent", _("Percentage")),
@@ -238,7 +244,7 @@ PRODUCT_BUTTON_DIMENSIONS = {
 
 CATEGORY_COLORS = [  # choices for category.color
     'ffffff',  # the first entry is the default
-    '000000',
+    '323232',
     'ff7d64',
     '00dcb4',
     '143264',

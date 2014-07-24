@@ -1,3 +1,13 @@
+/* terminal-specific */
+* {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 /* splitter */
 #splitter{
     position:fixed;
@@ -68,32 +78,6 @@ div#selector{
 /*       */
 .no-close .ui-dialog-titlebar-close{
     display:none;
-}
-
-div.selector-title{
-    display: inline-block;
-    height: 30px;
-    line-height: 30px;
-
-    margin-top: 10px;
-    margin-bottom: 10px;
-    width: 100%;
-    
-    padding-left: 10px;
-    padding-right: 10px;
-    
-    box-sizing: border-box;
-}
-div.selector-title > div{
-    width: 100%;
-    background-color: #969696;
-    color: #ffffff;
-    padding-left: 10px;
-    box-sizing: border-box;
-}
-
-div.selector-title.absolute{
-    position: absolute;
 }
 
 #loading{

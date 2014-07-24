@@ -5,7 +5,7 @@ Search = function(g){
 
     p.items = {
         field: $("#search_products_filter"),
-        submit: $("#search_products_submit"),
+        submit: $("#search_products_submit")
     };
 
     // save search results to avoid linear search over and over:
@@ -14,6 +14,10 @@ Search = function(g){
     p.results_by_text = {}; // pairs {search_text:[products list]}
 
     p.favorites = []; // will hold references to favorited products
+
+    // search box parameters and timeout
+    p.query_delay = 1000; // automatically trigger search after this much milliseconds
+    p.query_timeout = null;
 
     //
     // methods
@@ -183,6 +187,24 @@ Search = function(g){
         p.g.objects.products.show_products(p.favorites);
     };
 
+    p.search = function(add_to_bill){
+        if(p.query_timeout){
+            clearTimeout(p.query_timeout);
+            p.query_timeout = null;
+        }
+
+        var ids = p.search_by_text(p.items.field.val());
+
+        p.g.objects.products.show_products(ids);
+
+        if(add_to_bill && ids.length == 1){
+            // one product only: show it and add it to bill immediately
+            p.g.objects.products.search_to_bill(ids[0], true);
+            // clear the search field for the next search
+            p.items.field.val("");
+        }
+    };
+
     //
     // init
     //
@@ -195,15 +217,46 @@ Search = function(g){
     // favorite products
     p.init_favorites();
 
+    // if results by text are saved in localStorage, load it
+    load_local('search_results_by_text');
+
     // events
     p.items.submit.click(function(){
-        p.g.objects.products.show_products(
-            p.search_by_text(p.items.field.val())
-        );
+        p.search(false);
     });
-    p.items.field.change(function(){
-        p.g.objects.products.show_products(
-            p.search_by_text($(this).val())
-        );
+
+    // search:
+    // when user finishes typing (wait p.query_delay ms), search for products and display results
+    // when user presses enter, search immediately and if there is only one result, add it to bill
+    //   without further clicking
+    p.items.field.keyup(function(e){
+        // if enter has been pressed, trigger search immediately
+        if(e.keyCode == 13){
+            p.search(true);
+        }
+        else{
+            // another key has been pressed, only search after timeout
+            if(p.query_timeout){
+                clearTimeout(p.query_timeout);
+                p.query_timeout = null;
+            }
+
+            p.query_timeout = setTimeout(function(){ p.search(false); }, p.query_delay);
+        }
+    });
+
+    // whenever the user hits the keyboard and focus is not on another input, focus on search
+    $(document).keydown(function(e){
+        switch($(e.target).prop("tagName").toLowerCase()){
+            case "input":
+            case "textarea":
+            case "select":
+            case "option":
+                // the user is typing somewhere else, don't search
+                return;
+            default:
+                // nothing useful is focused, search
+                p.items.field.focus();
+        }
     });
 };

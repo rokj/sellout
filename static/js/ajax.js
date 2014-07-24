@@ -9,12 +9,12 @@ function send_data(url, data, token, handleFun){
         timeout: 30000,
 		success: function(data){
             if(handleFun) handleFun(data);
-        },
+        }/*,
         error: function(xhr, textStatus, error){
             console.error("AJAX Error: " + JSON.stringify({
                 xhr: xhr, status: textStatus, error: error
             }));
-        }
+        }*/
 	});
 }
 
@@ -27,9 +27,9 @@ function get_data(url, handleFun){
 		url: url,
 		success: function(data){
             if(handleFun) handleFun(data);
-        },
+        }/*,
         error: function(jqXHR, textStatus, error){
             console.error("AJAX Error: " + textStatus + "; " + error);
-        }
+        }*/
 	});
 }

@@ -86,14 +86,9 @@ Terminal = function(g){
         p.items.selector.width(window_width - splitter_left);
         p.items.selector.height(window_height - manage_height - controls_height);
 
-        // categories
-        var categories_height = p.items.categories.height();
+        // categories & products (handled with css)
 
-        // products
-        p.items.products.width(window_width - splitter_left);
-        p.items.products.css("top", p.items.categories.outerHeight() + p.items.categories.position().top);
-
-        // refresh if necessary
+        // refresh products if necessary
         if(p.g.objects.products) p.g.objects.products.refresh();
 
         // show or hide bill columns

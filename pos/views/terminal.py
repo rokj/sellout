@@ -68,7 +68,7 @@ def terminal(request, company):
         'interface': get_user_value(request.user, 'pos_interface'),
         'product_button_size': g.PRODUCT_BUTTON_DIMENSIONS[get_user_value(request.user, 'pos_product_button_size')],
         'bill_width': get_user_value(request.user, 'pos_interface_bill_width'),
-        'display_breadcrumbs': get_user_value(request.user, 'pos_display_breadcrumbs'),
+        'display_breadcrumbs': False, # get_user_value(request.user, 'pos_display_breadcrumbs'), (currently hardcodedly disabled)
         'product_display': get_user_value(request.user, 'pos_product_display'),
         # registers and printers
         #'printer_port': get_value(request.user, 'pos_printer_port'),

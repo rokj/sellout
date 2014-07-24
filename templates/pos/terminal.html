@@ -44,6 +44,18 @@
 {% comment %} 'embedded' javascript {% endcomment %}
 <script type="text/javascript">
 $(window).load(function(){
+    function load_error(text){
+        $("#loading_text").text("{% trans 'Error' %}");
+        alert(text);
+    }
+
+    // check for support for some HTML5 functions
+    if(typeof Storage == 'undefined'){
+        load_error("{% trans 'Javascript function localStorage is not supported. Please update your browser.' %}");
+
+        return;
+    }
+
     // global data and objects
     var g = { // global data for the terminal
         csrf_token: "{{ csrf_token }}",
@@ -116,6 +128,21 @@ $(window).load(function(){
 
     // datepickers
     $(".datepicker").datepicker({dateFormat: g.config.date_format});
+
+    // unloading the window: save what's there to be saved
+    window.onbeforeunload = function(){
+        // the existing bill, if it needs saving
+        if(!g.objects.bill.saved){
+            save_local('bill', g.objects.bill.get_data());
+        }
+        else{
+            clear_local('bill');
+        }
+
+        // search results
+        save_local('search_results_by_text', g.objects.search.results_by_text);
+
+    };
 });
 </script>
 
@@ -126,7 +153,7 @@ $(window).load(function(){
     <div id="loading">
         <div>
             <img src="{% static 'icons/loading.gif' %}" alt="loading" class="loading" />
-            {% trans 'Loading' %}
+            <span id="loading_text">{% trans 'Loading' %}</span>
         </div>
     </div>
 
@@ -245,9 +272,13 @@ $(window).load(function(){
     <div id="selector">
         <div id="categories">
             <div id="parents_scroll_outer">
-                <div class="category-button" id="category_button_favorites">{% trans 'Favorites' %}</div>
+                <div id="category_button_favorites">
+                    <img src="{% static 'icons/home.png' %}"
+                         alt="{% trans 'Home' %}"
+                         title="{% trans 'Home (show favorites)' %}" />
+                </div>
 
-                <div id="category_parent" class="category-button hidden">
+                <div id="category_button_back">
                     <img src="{% static 'icons/back_black.png' %}"
                          alt="{% trans 'Back' %}"
                          title="{% trans 'Back to parent category' %}" />
@@ -258,8 +289,8 @@ $(window).load(function(){
                 </div>
             </div>
 
-            <div class="selector-title">
-                <div id="subcategories_title">{# text will be set by categories.js:set_texts #}</div>
+            <div id="subcategories_title" class="selector-title">
+                &nbsp;{# text will be set by categories.js:set_texts #}
             </div>
 
             {% comment %} scrolling: children {% endcomment %}
@@ -270,10 +301,11 @@ $(window).load(function(){
             </div>
         </div>
 
+        <div class="selector-title" id="products_title">
+            &nbsp;{# text will be set by categories.js:set_texts #}
+        </div>
+
         <div id="products_scroll_outer">
-            <div class="selector-title absolute">
-                <div id="products_title">{# text will be set by categories.js:set_texts #}</div>
-            </div>
             <div id="products_scroll_inner">
                 <div id="products"></div>
             </div>

@@ -1,97 +1,118 @@
 /*             */
 /* categories  */
 /*             */
-#children_scroll_outer, #parents_scroll_outer{
-    /* prevent text selection (interferes with dragging) */
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    height: 40px;
-    margin-left: 10px;
-}
-
-#parents_scroll_outer{
-    margin-top: 20px;
-}
-
-#children_scroll_inner, #parents_scroll_inner{ /* category scrolling: outer div*/
-    height:40px;
+.no-breadcrumbs #parents_scroll_inner{
+    height:60px;
     overflow:auto;
     overflow-x:hidden;
+    background-color: #d0d0d0;
 }
 
-#children, div#parents{ /* scrolling: inner div */
-    /* container for category-button */
-    height:40px;
+.no-breadcrumbs #children_scroll_outer{
+    height: 60px;
+}
+
+.no-breadcrumbs #children_scroll_inner{
+    height: 40px;
+    overflow: auto;
+    overflow-x: hidden;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.no-breadcrumbs #children{ /* scrolling: inner div */
+    height: 40px;
     width:1280000px; /* this will hold 10,000 buttons */
     overflow:hidden;
     float:left;
     position:relative;
+    padding-left: 20px;
 }
 
-div.category-button{ /* category selection buttons (the scrolling ones) */
+.no-breadcrumbs #children div.category-button{
     float:left;
-    min-width:120px;
-    cursor:pointer;
-    /* border:1px solid black; */
-    white-space: nowrap;
-    
-    text-overflow: ellipsis;
     height: 40px;
     line-height: 40px;
     position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
     
-    text-align:center;
+    min-width: 120px;
+    text-align: center;
+    
+    padding-left: 10px;
+    padding-right: 10px;
+    
+    margin-right: 20px;
+    
+    border-radius: 5px;
+    
 }
 
-/* the back button (only when not displaying breadcrumbs) */
-#category_parent{
-    height: 40px;
-    line-height: 40px;
-    text-align: right;
-    width: 30px;
-    min-width: 30px; /* must be here or width property will not
-                        override min-width from .category-button */
+.no-breadcrumbs #category_button_favorites,
+.no-breadcrumbs #category_button_back{
+    float:left;
+    width: 60px;
+    height: 60px;
+    text-align: center;
 }
-#category_parent > img{
-    height: 30px;
+
+.no-breadcrumbs #category_button_favorites{
+    background-color: #646464;
+}
+
+.no-breadcrumbs #category_button_favorites img{
+    position: relative;
+    top: 12px;
+}
+
+.no-breadcrumbs #category_button_back{
+    width: 60px;
+    background-color: #b0b0b0;
+    
+}
+
+.no-breadcrumbs #category_button_back > img{
+    height: 32px;
     vertical-align: top;
     position: relative;
-    top: 5px;
-    margin-right: 10px;
-    
+    top: 12px;    
 }
 
-div.category-button span{
-    margin-left: 30px;
-    margin-right: 30px;
+.no-breadcrumbs #category_button_back.disabled{
+    background-color: #d0d0d0;
 }
 
-div.category-button-focused{ } /* only for keyboard-arrow selection */
-div.category-button-selected{ } /* selected and products are shown */
-div.category-button-subcategories{ } /* this category has more subcategories */
-
-#parents_scroll_inner
-div.category-button-subcategories:after{
-    content: "";
-    width: 0;
-    height: 0;
-    position: absolute;
-    top: 0;
-    right: -40px;
-    border: 20px solid rgba(0,0,0,0);
-    border-left-color: inherit;
+.no-breadcrumbs #category_button_back.disabled img{
+    opacity: 0.2;
 }
 
-#children_scroll_inner div.category-button,
-#category_button_favorites{
-    margin-right: 10px;
+
+.no-breadcrumbs #parents div.category-button{
+    height: 60px;
+    line-height: 60px;
+    padding-left: 20px;
+    text-transform: uppercase;
+    font-size: 20px;
 }
 
-#category_button_favorites{
-    background-color: sandybrown;
+.no-breadcrumbs #subcategories_title{
+    float: left;
+    height: 60px;
+    line-height: 60px;
+    padding-left: 10px;
+    text-transform: uppercase;
+    color: #969696;
+}
+
+.no-breadcrumbs #products_title{
+    clear: both;
+    background-color: #444444;
     color: #ffffff;
+    text-transform: uppercase;
+    padding-left: 20px;
+    height: 30px;
+    line-height: 30px;
+    margin-bottom: 10px;
+    width: 100%;
 }

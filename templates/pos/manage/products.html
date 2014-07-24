@@ -174,7 +174,7 @@ $(document).ready(function(){
 
         // price
         tmp_obj = $(".product-price", div_obj);
-        tmp_obj.append("{{ currency|escapejs }} " + product.price);
+        tmp_obj.append(product.price);
 
         // image
         show_image(product, $(".product-image", div_obj));

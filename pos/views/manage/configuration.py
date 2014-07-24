@@ -63,8 +63,9 @@ class UserForm(forms.Form):
 
     product_button_size = forms.ChoiceField(choices=button_sizes)
     product_display = forms.ChoiceField((("box", _("In boxes")), ("line", _("In lines"))), required=True)
-    display_breadcrumbs = forms.BooleanField(required=False,
-                                             widget=forms.Select(choices=((True, _("Yes")), (False, _("No")))))
+    # currently disabled
+    # display_breadcrumbs = forms.BooleanField(required=False,
+    #                                          widget=forms.Select(choices=((True, _("Yes")), (False, _("No")))))
 
 
 @login_required

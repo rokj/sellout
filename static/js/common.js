@@ -75,7 +75,7 @@ function get_size(element){ // get computed element size before it's inserted in
     element.hide();
     $("body").append(element); // add to DOM, in order to read the CSS property
     try {
-        return [element.outerWidth(), element.outerHeight()];
+        return [element.outerWidth(true), element.outerHeight(true)];
     } finally {
         element.remove(); // and remove from DOM
     }
@@ -427,4 +427,23 @@ function enable_element(element, enabled){
         // then disable everything
         element.addClass("disabled").removeClass("hoverable").prop("disabled", true);
     }
+}
+
+function save_local(key, object){
+    // object is a JS object or something.  it will be JSON.stringified
+    localStorage[key] = JSON.stringify(object);
+}
+
+function load_local(key){
+    try{
+        return JSON.parse(localStorage[key]);
+    }
+    catch(e){
+        localStorage.bill = null;
+        return null;
+    }
+}
+
+function clear_local(key){
+    delete localStorage[key];
 }
