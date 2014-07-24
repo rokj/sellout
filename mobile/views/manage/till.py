@@ -7,12 +7,23 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Register, Company
-from pos.views.util import has_permission, no_permission_view, manage_delete_object
+from pos.views.manage.till import get_all_registers
+from pos.views.util import has_permission, no_permission_view, manage_delete_object, JSON_response, JSON_ok
 
 from common import globals as g
 from config.functions import get_date_format, get_user_value, get_company_value
 
 
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_get_all_registers(request, company):
+    user = request.user
+
+    c = Company.objects.get(url_name=company)
+
+    return JSON_ok(extra=get_all_registers(c, user))
+
+"""
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def list_registers(request, company):
@@ -136,3 +147,5 @@ def edit_register(request, company, register_id):
 def delete_register(request, company):
     return manage_delete_object(request, company, Register,
                                 (_("You have no permission to delete registers"), _("Could not delete register")))
+
+"""
