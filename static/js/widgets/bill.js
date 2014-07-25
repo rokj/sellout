@@ -140,8 +140,8 @@ Bill = function(g){
         // load bill from data (loaded from the server or localStorage)
         p.clear();
 
+        // bill items
         var i, product;
-
         for(i = 0; i < data.items.length; i++){
             // get products from items' ids and create new items
             product = p.g.objects.products.products_by_id[data.items[i].product_id];
@@ -151,8 +151,11 @@ Bill = function(g){
             p.items.push(new Item(p, product));
         }
 
-        p.bill.saved = true;
+        // contact
+        p.contact = data.contact;
 
+        p.bill.saved = true;
+        p.update_summary();
     };
 
     p.get_data = function(){
@@ -161,7 +164,8 @@ Bill = function(g){
         var r = {
             items: [],
             total: dn(p.update_summary(), p.g),
-            till_id: p.g.config.register_id
+            till_id: p.g.config.register_id,
+            contact: p.contact
         };
 
         // get all items
@@ -237,32 +241,6 @@ Bill = function(g){
         vertical_scroll_into_view(item.item_row);
     };
 
-    p.toggle_options = function(show){
-        if(show){
-            // slide the menu down (it will slide up because of its positioning)
-            p.options_menu.slideDown("fast");
-
-            // hide it on click
-            $()
-                .add($(document))
-                .add(p.options_button)
-                .unbind("click.bill-options")
-                .on("click.bill-options", function(){
-                    p.toggle_options(false);
-                });
-        }
-        else{
-            p.options_menu.slideUp("fast");
-
-            // bind show events on the button
-            p.options_button.unbind().click(function(e){
-                e.stopPropagation(); // or the event will bubble up and drigger document.click,
-                                     // which will close the menu
-                p.toggle_options(true);
-            });
-        }
-    };
-
     //
     // init
     //
@@ -275,7 +253,8 @@ Bill = function(g){
     });
 
     // bill options
-    p.toggle_options(false);
+    //p.toggle_options(false);
+    p.options_button.simpleMenu(p.options_menu);
 
     p.option_contacts.click(function(){
         // show the contacts dialog (is handled by Contacts class)
@@ -283,7 +262,16 @@ Bill = function(g){
     });
 
     p.option_print.click(function(){  });
-    p.option_clear.click(p.clear);
+    p.option_clear.click(function(){
+        // a confirmation is required
+        confirmation_dialog(
+            gettext("Confirm bill clear"),
+            gettext("Are you sure you want to clear bill? All items will be removed."),
+            p.clear,
+            function(){}
+        );
+
+    });
 
     // if there's a bill in localStorage, load its items
     if(localStorage.bill){
@@ -580,8 +568,12 @@ Item = function(bill, product) {
     p.items.qty
         .unbind()
         .click(function(e){ e.stopPropagation(); })
-        .change(function(){
+        .blur(function(e){ // there is a bug in chrome that sends change() event twice;
+                           // as a workaround, use blur and keyup(enter)
             p.check_quantity();
+        })
+        .keyup(function(e){
+            if(e.keyCode == 13) p.items.qty.blur();
         });
 
     // when the item is added, scroll the bill to show it

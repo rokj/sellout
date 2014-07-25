@@ -853,6 +853,8 @@ $(document).ready(function(){
                     if(response.status != 'ok')
                         error_message("{% trans 'Error saving product' %}", response.message);
                     else{
+                        // save the new product data
+                        parent.data(response.data);
                         // re-do the current search and close the dialog
                         update_products();
                         close_edit_dialog();

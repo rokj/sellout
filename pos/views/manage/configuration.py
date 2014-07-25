@@ -57,6 +57,13 @@ class ConfigForm(forms.Form):
     decimal_places = forms.ChoiceField(choices=decimal_places_choices, required=True)
     discount_calculation = forms.ChoiceField(g.DISCOUNT_CALCULATION, required=True)
 
+    def clean_decimal_places(self):
+        data = self.cleaned_data['decimal_places']
+
+        try:
+            return int(data)
+        except:
+            return 2
 
 class UserForm(forms.Form):
     button_sizes = [(key, key) for key, value in g.PRODUCT_BUTTON_DIMENSIONS.iteritems()]
@@ -90,7 +97,7 @@ def company_settings(request, company):
         'decimal_places': get_company_value(request.user, c, 'pos_decimal_places'),
         'discount_calculation': get_company_value(request.user, c, 'pos_discount_calculation'),
     }
-    
+
     if request.method == 'POST':
         form = ConfigForm(request.POST)
         if form.is_valid():

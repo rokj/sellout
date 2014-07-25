@@ -48,7 +48,12 @@ Contacts = function(g){
         individual_switch: $(".individual-switch", p.dialog),
 
         save_button: $(".save", p.dialog),
-        cancel_button: $(".cancel", p.dialog)
+        cancel_button: $(".cancel", p.dialog),
+        clear_button: $(".clear", p.dialog),
+
+        bill_label: $("#bill_contact_label"), // the label for selected contact
+        bill_contact: $("#bill_contact_name") // the name of the selected contact (right after label)
+
     };
 
     p.dialog_width = parseInt(p.dialog.css("width")); // only works for the first time,
@@ -134,6 +139,14 @@ Contacts = function(g){
         }
     };
 
+    p.remove_contact = function(){
+        p.clear_fields();
+        p.g.objects.bill.contact = null;
+
+        p.update_labels();
+        p.close_action();
+    };
+
     p.toggle_type = function(company){
         if(company){
             // hide the individual form and change buttons' classes
@@ -193,6 +206,9 @@ Contacts = function(g){
         p.items.company.phone.val(c.phone);
         p.items.company.vat.val(c.vat);
 
+        // show the company section (tab) of the dialog
+        p.toggle_type(true);
+
         p.selected = c;
     };
 
@@ -217,7 +233,36 @@ Contacts = function(g){
         p.items.individual.phone.val(c.phone);
         p.items.individual.date_of_birth.val(c.date_of_birth);
 
+        // select the individual section of the dialog
+        p.toggle_type(false);
+
         p.selected = c;
+    };
+
+    p.update_labels = function(){
+        if(p.g.objects.bill.contact){
+            p.items.bill_label.show();
+            p.items.bill_contact.show();
+
+            // fill the contact with names
+            var c = p.g.objects.bill.contact;
+
+            if(c.type == 'Individual'){
+                p.items.bill_contact.text(
+                    join(c.first_name, c.last_name, " ") // the function comes from print.js
+                );
+            }
+            else{
+                p.items.bill_contact.text(c.company_name);
+            }
+        }
+        else{
+            p.items.bill_label.hide();
+            p.items.bill_contact.hide();
+        }
+
+        // resize the terminal
+        p.g.objects.terminal.size_layout();
     };
 
     p.select_contact = function(){
@@ -292,6 +337,7 @@ Contacts = function(g){
 
     p.close_action = function(){
         p.dialog.dialog("close");
+        p.update_labels();
     };
 
     //
@@ -337,7 +383,8 @@ Contacts = function(g){
     // clear if there's anything left from the previous contact
     p.clear_fields();
 
-    // save and cancel buttons
+    // clear, save and cancel buttons
+    p.items.clear_button.unbind().click(p.remove_contact);
     p.items.save_button.unbind().click(p.select_contact);
     p.items.cancel_button.unbind().click(p.close_action);
 
@@ -348,4 +395,7 @@ Contacts = function(g){
     $.each(p.items.company, function(key, value){
         value.change(function(){p.data_changed = true; });
     });
+
+    // if there's a contact selected already, update bill
+    p.update_labels();
 };

@@ -75,15 +75,15 @@ def format_number(user, company, n, high_precision=False):
     """
     sep = get_company_value(user, company, 'pos_decimal_separator')
     p = int(get_company_value(user, company, 'pos_decimal_places'))
-    
+
     if not n:
         return '0'
     
     if high_precision:
-        s = str(n.quantize(Decimal('1.'+'0'*8)))  # for calculation, use more decimal places
+        s = str(n.quantize(Decimal('1.'+'0'*p*2)))  # for calculation, use more decimal places
     else:
         s = str(n.quantize(Decimal('1.'+'0'*p)))
-    
+
     return s.replace('.', sep)
 
 

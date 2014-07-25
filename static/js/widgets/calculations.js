@@ -14,6 +14,8 @@ function check_number(string, separator){
 }
 
 function get_number(string, separator){
+    console.log(string);
+
     // receives a string with number with decimal separator <separator> and returns BigNumber
     // bignumber: https://github.com/MikeMcl/bignumber.js/
     try{

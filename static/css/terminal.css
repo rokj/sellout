@@ -1,11 +1,17 @@
 /* terminal-specific */
 * {
+    /* disable selection on any item */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+body{
+    /* do not show the text-select cursor */
+    cursor: default;
 }
 
 /* splitter */
@@ -52,8 +58,7 @@ div#selector{
 }
 
 #search_container{
-    display: inline;
-    line-height: 100px;
+    margin-top: 10px;
 }
 
 #search_products_filter{
@@ -66,6 +71,17 @@ div#selector{
     width: 40px;
     background-color: #00aa00;
 }
+
+#controls_more{
+    float: right;
+    margin-right: 10px;
+    margin-top: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+
+    width: 200px;
+}
+
 
 #till_selector_container{
     float:right;
@@ -127,4 +143,60 @@ div#selector{
 .blocker{
     position: absolute;
     background-color: rgba(0,0,0,0.2);
+}
+
+/* terminal menus (sliding upwards) */
+.terminal-menu{
+    position: relative;
+}
+
+.terminal-menu-items{
+    position: absolute;
+    bottom: 50px; /* the height of the button */
+    text-align: center;
+    background-color: #00ff00;
+    padding: 10px;
+
+    display: none;
+}
+
+.terminal-menu > button.open-menu{
+    background-color: cyan;
+    white-space: nowrap;
+    text-align: center;
+    height: 50px;
+    width: 100%;
+}
+
+.terminal-menu > button > img{
+    position: relative;
+    top: 0;
+    margin-left: 4px;
+    display: inline-block;
+}
+
+.terminal-menu button.terminal-menu-item{
+    width: 100%;
+    margin-top: 10px;
+}
+
+.terminal-menu button.terminal-menu-item:first-child{
+    margin-top: 0;
+}
+
+/* status bar at the bottom: terminal status */
+#terminal_status{
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    height:20px;
+    line-height: 20px;
+}
+
+#terminal_status div{
+    float: right;
+    margin-right: 10px;
+    
+    color: #969696;
 }

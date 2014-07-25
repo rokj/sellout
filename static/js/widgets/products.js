@@ -38,6 +38,9 @@ Products = function(g){
     };
 
     p.show_products = function(ids){
+        // reset the container's position
+        p.items.container.css({left: 0});
+
         // products: a list of product ids (normally returned from Search())
         p.empty();
 
@@ -67,7 +70,6 @@ Products = function(g){
         if(n == 0){
             console.warn("Products div too narrow");
             n = 1;
-            div_height = p_size;
         }
 
         for(i = 0; i < ids.length;){

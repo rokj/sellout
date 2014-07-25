@@ -48,3 +48,7 @@
 #contacts .ui-autocomplete{
     z-index: 16 !important;
 }
+
+#contacts input.clear{
+    float: left;
+}

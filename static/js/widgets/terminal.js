@@ -19,13 +19,20 @@ Terminal = function(g){
         categories: $("#categories"),
         products: $("#products_scroll_outer"),
         products_title: $("#products_title"),
+
         controls: $("#controls"),
+        controls_options_button: $("button.open-menu", "#controls_more"),
+        controls_options_menu: $("#controls_menu"),
+        controls_change_register: $(".terminal-menu-item.change-register", "#controls_more"),
 
         registers_dialog: $("#registers"),
         registers_list: $("#registers_list"),
         select_register: $("#select_register"),
 
+        /* terminal status */
         current_till: $("#current_till"),
+        current_date: $("#current_date"),
+        current_time: $("#current_time")
     };
 
     // bill sizes (in pixels):
@@ -136,9 +143,8 @@ Terminal = function(g){
         // the register must be set (p.register)
         p.register = r;
 
+        // show the current register in terminal
         p.items.current_till.text(p.register.name);
-
-        // TODO: ?
     };
 
     p.get_register = function(id){
@@ -257,4 +263,34 @@ Terminal = function(g){
 
     // set status bar title
     p.items.status_bar_company.text(p.g.data.company.name);
+
+    // the bottom status bar: update date and time
+    setInterval(function(){
+        var now = new Date();
+
+        p.items.current_date.text(format_date(now, p.g.config.date_format));
+        p.items.current_time.text(
+            format_time(p.g.config.time_format, now.getHours(), now.getMinutes(), now.getSeconds())
+        );
+
+    }, 1000);
+
+    // controls menu
+    p.items.controls_options_button.simpleMenu(p.items.controls_options_menu);
+
+    // controls menu items
+    p.items.controls_change_register.click(function(){
+        // register cannot be changed if there is an unfinished bill
+        if(p.g.objects.bill.items.length > 0){
+            error_message(
+                gettext("Could not switch register"),
+                gettext("There is a bill opened. Please finish or cancel it before switching registers.")
+            );
+        }
+        else{
+            // the bill is empty, reset the current register settings and choose the till again
+            p.register = null;
+            p.get_register(null);
+        }
+    });
 };

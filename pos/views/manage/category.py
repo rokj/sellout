@@ -13,6 +13,7 @@ from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok,  \
 
 from common import globals as g
 
+import random
 
 ########################
 ### helper functions ###
@@ -289,7 +290,7 @@ def add_category(request, company, parent_id=-1):
         parent_id = int(parent_id)
         if parent_id == -1:
             parent = None
-            color = g.CATEGORY_COLORS[0]  # the default color
+            color = random.choice(g.CATEGORY_COLORS)
         else:
             parent = Category.objects.get(id=parent_id)
             color = parent.color

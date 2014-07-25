@@ -1,22 +1,22 @@
+function join(text1, text2, separator){
+    if(text1){
+        // text1, text2
+        if(text2) return escape(text1) + separator + " " + escape(text2);
+        // text1
+        else return escape(text1);
+    }
+    else{
+        // text2
+        if(text2) return escape(text2);
+        // no texts at all
+        else return "";
+    }
+}
+
 function format_small_receipt(g, bill){
     // g: terminal globals
     // bill: Bill() objects
     var receipt = g.items.small_receipt_template.clone().removeAttr("id");
-
-    function join(text1, text2, separator){
-        if(text1){
-            // text1, text2
-            if(text2) return escape(text1) + separator + " " + escape(text2);
-            // text1
-            else return escape(text1);
-        }
-        else{
-            // text2
-            if(text2) return escape(text2);
-            // no texts at all
-            else return "";
-        }
-    }
 
     // company details:
     // logo:

@@ -244,7 +244,7 @@ PRODUCT_BUTTON_DIMENSIONS = {
 
 CATEGORY_COLORS = [  # choices for category.color
     'ffffff',  # the first entry is the default
-    '323232',
+    '444444',
     'ff7d64',
     '00dcb4',
     '143264',

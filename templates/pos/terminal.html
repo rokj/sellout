@@ -113,18 +113,11 @@ $(window).load(function(){
     g.objects.categories = new Categories(g); // categories selector (level 0 is the topmost category)
     g.objects.products = new Products(g);
     g.objects.search = new Search(g);
-    g.objects.contacts = new Contacts(g);
     g.objects.bill = new Bill(g);
+    g.objects.contacts = new Contacts(g);
 
     // in the beginning, show favorites and topmost category
     g.objects.categories.favorites_button_action();
-
-    // when everything is loaded, remove the loading screen and show the terminal
-    setTimeout(function(){
-            g.items.loading.fadeOut("fast", function(){
-            g.items.loading.remove();
-        });
-    }, 500);
 
     // datepickers
     $(".datepicker").datepicker({dateFormat: g.config.date_format});
@@ -143,6 +136,13 @@ $(window).load(function(){
         save_local('search_results_by_text', g.objects.search.results_by_text);
 
     };
+
+    // when everything is loaded, remove the loading screen and show the terminal
+    setTimeout(function(){
+            g.items.loading.fadeOut("fast", function(){
+            g.items.loading.remove();
+        });
+    }, 500);
 });
 </script>
 
@@ -157,12 +157,15 @@ $(window).load(function(){
         </div>
     </div>
 
-
     {% comment %} the bill (scrolling) {% endcomment %}
     <div id="left_column">
-        <div>
+        <div id="bill_outer_container">
             {% comment %} bill header has the same layout as items and will be copied when adding new item {% endcomment %}
             <div id="bill_header" class="bill-item header">
+                {# contact (if selected) #}
+                <div id="bill_contact_label" class="hidden">{% trans 'Invoice for: ' %}</div>
+                <div id="bill_contact_name" class="hidden bill-border-bottom"></div>
+
                 <div class="bill-border-bottom contain-floats">
                     {% comment %} product name and code {% endcomment %}
                     <div class="item-val name header"> {% trans 'Name' %} </div>
@@ -244,17 +247,17 @@ $(window).load(function(){
                         <button>{% trans 'Finish' context 'Create bill button text' %}</button>
                     </div>
 
-                    <div class="till-button-container" id="bill_options">
+                    <div class="till-button-container terminal-menu" id="bill_options">
                         <button class="open-menu">
                             {% trans 'Options' context 'bill options button text' %}
                             <img src="{% static 'icons/arrow_white_up.png' %}" alt="" />
                         </button>
 
-                        <div id="bill_options_menu">
-                            <button class="bill-option-menu-item save">{% trans 'Save' %}</button>
-                            <button class="bill-option-menu-item select-client">{% trans 'Select client' %}</button>
-                            <button class="bill-option-menu-item clear">{% trans 'Clear bill' %}</button>
-                            <button class="bill-option-menu-item print">{% trans 'Print...' %}</button>
+                        <div id="bill_options_menu" class="terminal-menu-items">
+                            <button class="terminal-menu-item save">{% trans 'Save' %}</button>
+                            <button class="terminal-menu-item select-client">{% trans 'Select client' %}</button>
+                            <button class="terminal-menu-item clear">{% trans 'Clear bill' %}</button>
+                            <button class="terminal-menu-item print">{% trans 'Print...' %}</button>
                         </div>
                     </div>
                 </div>
@@ -310,10 +313,21 @@ $(window).load(function(){
                 <div id="products"></div>
             </div>
         </div>
+
         <div id="controls">
             <div> {# for margins and position: absolute #}
-                <div id="till_selector_container">
-                    <div id="current_till"></div>
+
+                <div id="controls_more" class="terminal-menu">
+                    <button class="open-menu">
+                        {% trans 'Stuff' %}
+                        <img src="{% static 'icons/arrow_white_up.png' %}" alt="" />
+                    </button>
+
+                    <div id="controls_menu" class="terminal-menu-items">
+                        <button class="terminal-menu-item change-register">
+                            {% trans 'Change register' %}<br/>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="bill-border-top"></div>
@@ -322,6 +336,12 @@ $(window).load(function(){
                     <button type="button" id="search_products_submit">
                         {% trans 'Go' context 'Search button text' %}
                     </button>
+                </div>
+
+                <div id="terminal_status">
+                    <div id="current_date" class=""></div>
+                    <div id="current_time" class=""></div>
+                    <div id="current_till" class=""></div>
                 </div>
             </div>
         </div>
@@ -387,6 +407,8 @@ $(window).load(function(){
         </div>
 
         <div class="dialog-footer">
+            {# clear: remove contact from the bill #}
+            <input type="button" class="clear" value="{% trans 'Clear' %}" />
             {# save and cancel buttons #}
             <input type="button" class="cancel" value="{% trans 'Cancel' %}" />
             <input type="button" class="save" value="{% trans 'Save' %}" />

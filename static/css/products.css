@@ -144,4 +144,5 @@ p.product-button-shortcut {
 #no_products{
     text-transform: uppercase;
     color: #969696;
+    margin-top: 10px;
 }

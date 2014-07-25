@@ -17,7 +17,7 @@
     font-family: "RobotoCondensed", "Arial Narrow", sans-serif;
 }
 
-#left_column > div{
+#bill_outer_container{
     position: relative;
     width: 100%;
     height: 100%;
@@ -70,10 +70,26 @@ div.item-val{
 
 /* header */
 div.item-val.header{
-    height: 40px;
-    line-height: 40px;
+    height: 30px;
+    line-height: 30px;
     text-transform: uppercase;
     font-size: 12px;
+}
+
+#bill_contact_label,
+#bill_contact_name{
+    height: 25px;
+    line-height: 25px;
+    font-size: 13px;
+}
+
+#bill_contact_label{
+    float: left;
+    margin-right: 10px;
+}
+
+#bill_contact_name{
+
 }
 
 /* common to bill */
@@ -275,7 +291,8 @@ button.more{
     padding: 0;
 }
 
-.details-box, .details-box .details-container{
+.details-box,
+.details-box .details-container{
     background-color: #f7f7f7;
     border-radius: 8px;
 }
@@ -435,26 +452,3 @@ button.more{
 #finish_the_fukin_bill button{ background-color: fuchsia; }
 
 #bill_options{ right: 0; }
-#bill_options > button{ background-color: cyan; white-space: nowrap; text-align: center;}
-#bill_options > button > img{
-    position: relative;
-    top: 0;
-    margin-left: 4px;
-    display: inline-block;
-}
-
-#bill_options_menu{
-    position: absolute;
-    bottom: 50px; /* the height of the button */
-    text-align: center;
-    background-color: #00ff00;
-    padding-top: 10px;
-    
-    display: none;
-}
-
-
-#bill_options_menu button{
-    width: 90%;
-    margin-bottom: 10px;
-}
