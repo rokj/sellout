@@ -50,7 +50,7 @@ def get_all_registers(company, user):
 class RegisterForm(forms.ModelForm):
     class Meta:
         model = Register
-        # unused fields (will be added programatically)
+        # unused fields (will be added within view)
         exclude = [
             'created_by',
             'updated_by',

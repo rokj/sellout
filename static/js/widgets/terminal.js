@@ -145,17 +145,65 @@ Terminal = function(g){
 
         // show the current register in terminal
         p.items.current_till.text(p.register.name);
+
+        // save the register to localStorage
+        save_local('register_id', r.id);
+
+        // load any possible unfinished/saved bills from this register
+        send_data(p.g.urls.get_unpaid_bill, { register_id: r.id }, p.g.csrf_token, function(response){
+            if(response.status == 'ok'){
+                // there may be or may not be an unfinished bill on the server
+                if(response.data){
+                    // there's an unpaid bill on the server, load that
+                    p.g.unfinished_bill = response.data;
+                }
+                else{
+                    // there's no bill on the server, check local storage (it may noy be finished at all)
+                   if(localStorage.bill){
+                        var data = load_local('bill');
+
+                        if(data){
+                            // if bill is not loaded yet, wait for it
+                            var i = setInterval(function(){
+                                if(p.g.objects.bill){
+                                    p.g.objects.bill.load(data);
+                                    clearInterval(i);
+                                }
+                            }, 500);
+                        }
+                    }
+                }
+            }
+            else{
+                // do nothing at the moment, just don't load the bill.
+                // TODO: something went wrong, is there anything to do?
+            }
+
+        });
     };
 
     p.get_register = function(id){
+        // if there are no registers defined, send user to create one
         if(p.g.data.registers.length == 0){
+            // do not use error_message() here because it won't block and redirect will be  instant
             alert(gettext("There are no registers defined, please add one"));
             window.location.href = p.g.urls.manage_registers;
         }
 
+        // if there's only one register, use that
+        if(p.g.data.registers.length == 1){
+            p.set_register(p.g.data.registers[0]);
+        }
+
+        var i;
+
+        // the register is not set: see if there's one stored locally
+        if(id == null) id = parseInt(load_local('register_id'));
+
+        // try to set one
         if(id){
             // the id is set already, just find the right one in the list
-            var i, selected = false;
+            var selected = false;
 
             for(i = 0; i < p.g.data.registers.length; i++){
                 if(p.g.data.registers[i].id == id){
@@ -178,9 +226,9 @@ Terminal = function(g){
             return;
         }
 
-        // at this point, prompt the user to choose one
+        // selecting the register failed, at this point prompt the user to choose one
         if(!p.register){
-            // bind the choose button
+            // bind the choose button in dialog
             p.items.select_register.unbind().click(function(){
                 // get the selected register id from the list
                 var id = parseInt(p.items.registers_list.val());
@@ -191,18 +239,16 @@ Terminal = function(g){
 
                 // close the dialog
                 p.items.registers_dialog.dialog("destroy");
-
-                // send the register to the server so that it will be remembered
-                send_data(p.g.urls.set_register, {id: p.register.id},
-                    p.g.csrf_token, function(response){
-                        if(response.status != 'ok'){
-                            // just log the response the console;
-                            // if this fails, the only nuissance for the user is
-                            // to select the register at next logon
-                            console.error("Could not set register: " + response.message);
-                        }
-                    });
             });
+
+            // fill the registers
+            p.items.registers_list.empty();
+
+            for(i = 0; i < p.g.data.registers.length; i++){
+                p.items.registers_list.append(
+                    $("<option>", { value: p.g.data.registers[i].id }).text(p.g.data.registers[i].name)
+                );
+            }
 
             // show the registers dialog
             p.items.registers_dialog.dialog({
@@ -219,7 +265,6 @@ Terminal = function(g){
     //
     // init
     //
-
     // splitter
     p.items.splitter // resize on splitter drag and save data
         .css({
@@ -259,7 +304,7 @@ Terminal = function(g){
         p.g.items.receipt_logo = $("<img>", {src: p.g.data.company.receipt_logo});
 
     // get register
-    p.get_register(p.g.config.register_id);
+    p.get_register(null);
 
     // set status bar title
     p.items.status_bar_company.text(p.g.data.company.name);
@@ -280,17 +325,10 @@ Terminal = function(g){
 
     // controls menu items
     p.items.controls_change_register.click(function(){
-        // register cannot be changed if there is an unfinished bill
-        if(p.g.objects.bill.items.length > 0){
-            error_message(
-                gettext("Could not switch register"),
-                gettext("There is a bill opened. Please finish or cancel it before switching registers.")
-            );
-        }
-        else{
-            // the bill is empty, reset the current register settings and choose the till again
-            p.register = null;
-            p.get_register(null);
-        }
+        // clear register settings from memory and local storage so that the dialog will be shown
+        p.register = null;
+        clear_local('register_id');
+
+        p.get_register(null);
     });
 };

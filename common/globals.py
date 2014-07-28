@@ -93,11 +93,9 @@ BILL_TYPES = (
     # TODO add type for company
 )
 
-BILL_STATUS = (  # TODO: check & handle this
-    ("Invoice", _("Invoice")),  # racun
-    ("Active", _("Active")),  # the bill that's currently open in POS (only one can exist!)
-    ("Offer", _("Offer")),  # ponudba # TODO preveriti izrazoslovje
-    ("Quote", _("Quote")),  # predracun
+BILL_STATUS = (
+    ("Unpaid", _("Awaiting payment")),
+    ("Paid", _("Paid")),
     ("Canceled", _("Canceled")),
 )
 
@@ -111,10 +109,17 @@ RECEIPT_TYPES = (
     ("E-mail", _("E-mail")),
 )
 
+PAYMENT_TYPES = (
+    ("cash", _("Cash")),  # the keys should match javascript payment types (see payment.js)
+    ("credit-card", _("Credit card")),
+    ("bitcoin", _("Bitcoin")),
+)
+
 PRINTER_DRIVERS = (
     ("System", _("Default system printer")),
     ("Sellout", _("Sellout serial (must be installed)")),
 )
+
 
 # date formats
 # specify all formats for each date:

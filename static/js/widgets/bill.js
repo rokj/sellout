@@ -18,6 +18,11 @@ Bill = function(g){
     p.contact = null; // reference to contact (object with details) (if chosen)
     p.saved = false; // true if the bill in this state is saved on the server
 
+    p.payment = null; // will hold the Payment() object
+
+    p.temp_discounts = [];
+
+    // items
     p.bill = $("#bill");
 
     // summary numbers
@@ -26,7 +31,7 @@ Bill = function(g){
 
     // the 'finish' button
     p.actions = $("#bill_actions");
-    p.finish_button = $("#finish_the_fukin_bill", p.actions);
+    p.pay_button = $("#finish_the_fukin_bill", p.actions);
 
     // the options menu
     p.options_button = $("button.open-menu", "#bill_options");
@@ -40,7 +45,6 @@ Bill = function(g){
     // save item template for items and remove it from the document
     p.item_template = $("#bill_item_template").detach().removeAttr("id");
 
-    p.temp_discounts = [];
 
     //
     // methods
@@ -164,7 +168,7 @@ Bill = function(g){
         var r = {
             items: [],
             total: dn(p.update_summary(), p.g),
-            till_id: p.g.config.register_id,
+            till_id: p.g.objects.terminal.register.id,
             contact: p.contact
         };
 
@@ -177,21 +181,20 @@ Bill = function(g){
         return r;
     };
 
-    p.finish = function(){
+    p.pay = function(){
         // put this bill, including all items in a neat json
         // and send it to server
-
         if(p.items.length == 0){
             error_message(
                 gettext("Cannot create bill"),
-                gettext("There are no items on it")
+                gettext("The bill is empty")
             );
             return;
         }
 
         var data = p.get_data();
 
-        // send to server, when it's done, print if everything is OK
+        // send to server, continue with payment when response returns
         send_data(p.g.urls.create_bill, data, p.g.csrf_token, function(response){
             if(response.status != 'ok'){
                 error_message(
@@ -201,44 +204,28 @@ Bill = function(g){
             }
             else{
                 p.data = response.data.bill;
-                p.print();
 
-                // TODO: clear bill and create a new one
+                p.payment = new Payment(p.g, p);
             }
         });
-    };
-
-    p.print = function(){
-        // decide what to do depending on user's print settings
-
-        // printer driver:
-        switch(p.g.objects.terminal.register.printer_driver){
-            case 'System':
-                // create a fine html graphics, just check the receipt format first
-                if(p.g.objects.terminal.register.receipt_format == 'Thermal'){
-                    // use the default, printer;
-                    // create a HTML receipt and issue javascript print() method and that's it
-                    var receipt = format_small_receipt(p.g, p);
-
-                    // TODO: temporary
-                    //receipt.appendTo("body").show();
-                    // TODO: permanent
-                    receipt.printThis();
-                }
-                else{
-                    alert("printing on A4");
-                }
-                break;
-            default:
-                alert("Printer driver not implemented: " +
-                    p.g.objects.terminal.register.printer_driver);
-                break;
-        }
     };
 
     p.show_item = function(item){
         // scrolls the bill so that the current item is shown
         vertical_scroll_into_view(item.item_row);
+    };
+
+    p.reset = function(){
+        p.clear();
+
+        // used when the bill is finished and a new one is to be created
+        p.data = null;
+        p.items = [];
+        p.serial = 0;
+        p.contact = null;
+        p.saved = false;
+        p.payment = null; // will hold the Payment() object
+        p.temp_discounts = [];
     };
 
     //
@@ -248,8 +235,8 @@ Bill = function(g){
     set_vertical_draggable(p.bill, "div.bill-item", p.g.settings.t_easing);
 
     // bindings:
-    p.finish_button.click(function(){
-        p.finish();
+    p.pay_button.click(function(){
+        p.pay();
     });
 
     // bill options
@@ -270,17 +257,7 @@ Bill = function(g){
             p.clear,
             function(){}
         );
-
     });
-
-    // if there's a bill in localStorage, load its items
-    if(localStorage.bill){
-        var data = load_local('bill');
-
-        if(data){
-            p.load(data);
-        }
-    }
 };
 
 /* Item 'class' */

@@ -2,7 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 
-from pos.models import Company, Register
+from pos.models import Company, Register, Bill
+from pos.views.bill import bill_to_dict
 from pos.views.manage.category import get_all_categories_structured
 from pos.views.manage.company import company_to_dict
 from pos.views.manage.contact import get_all_contacts
@@ -26,29 +27,6 @@ def terminal(request, company):
     if not has_permission(request.user, c, 'terminal', 'view'):
         return no_permission_view(request, c, _("You have no permission to use terminal."))
 
-    # registers:
-    # count: at least one register must be entered
-    reg_count = Register.objects.all().count()
-    if reg_count < 1:
-        return error(request, c, _("There are no registers defined. Please set one up in management/registers."))
-
-    if reg_count == 1:
-        # if there's only one register, just choose that
-        register_id = Register.objects.filter(company=c).only('id')[0].id
-    else:
-        # there's more registers, see if there's one stored in this session
-        try:
-            register_id = int(request.session.get('register_id'))
-
-            # if it's stored, check if it exists (it may have been deleted)
-            if not Register.objects.filter(company=c, id=register_id).exists():
-                del request.session['register_id']
-                raise Register.DoesNotExist
-
-        except (TypeError, ValueError, KeyError, Register.DoesNotExist):
-            # the user will have to choose another register
-            register_id = None
-
     # terminal settings and other data in JSON (will be put into javascript globals)
     if get_company_value(request.user, c, 'pos_discount_calculation') == 'Tax first':
         tax_first = True
@@ -61,7 +39,6 @@ def terminal(request, company):
         'separator': get_company_value(request.user, c, 'pos_decimal_separator'),
         'decimal_places': get_company_value(request.user, c, 'pos_decimal_places'),
         'tax_first': tax_first,
-        'register_id': register_id,
         # interface parameters
         'date_format': get_date_format(request.user, c, 'js'),
         'time_format': get_time_format(request.user, c, 'js'),
@@ -73,7 +50,7 @@ def terminal(request, company):
         # registers and printers
         #'printer_port': get_value(request.user, 'pos_printer_port'),
         'receipt_size': 'small',
-        'printer_driver': 'system'
+        'printer_driver': 'system',
     }
 
     data = {
@@ -113,7 +90,7 @@ def terminal(request, company):
 
 @login_required
 def save(request, company):
-    """ save stuff when the terminal page closes/unloads """
+    """ terminal settings on change """
     try:
         width = int(JSON_parse(request.POST.get('data')).get('bill_width'))
     except (ValueError, TypeError):
@@ -138,11 +115,8 @@ def set_register(request, company):
 
     # get the number and
     try:
-        id = int(JSON_parse(request.POST.get('data')).get('id'))
+        id = int(JSON_parse(request.POST.get('data')).get('register_id'))
     except (ValueError, TypeError):
         return JSON_error("Data error")
-
-    # store the id to this session
-    request.session['register_id'] = id
 
     return JSON_ok()

@@ -9,6 +9,7 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/categories.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'css/bill.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'css/contacts.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'css/payment.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'css/print.css' %}" />
 
 <style type="text/css">
@@ -39,6 +40,7 @@
 <script src="{% static 'js/widgets/search.js' %}"></script> {% comment %} searching products/categories {% endcomment %}
 <script src="{% static 'js/widgets/contacts.js' %}"></script> {% comment %} selecting clients (for bills) {% endcomment %}
 <script src="{% static 'js/widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
+<script src="{% static 'js/widgets/payment.js' %}"></script> {% comment %} formatting and printing receipts {% endcomment %}
 <script src="{% static 'js/widgets/print.js' %}"></script> {% comment %} formatting and printing receipts {% endcomment %}
 
 {% comment %} 'embedded' javascript {% endcomment %}
@@ -63,6 +65,8 @@ $(window).load(function(){
               // terminal & stuff
               save_terminal_settings: "{% url 'pos:save_terminal' company.url_name  %}",
               create_bill: "{% url 'pos:create_bill' company.url_name %}",
+              get_unpaid_bill: "{% url 'pos:get_unpaid_bill' company.url_name %}",
+              finish_bill: "{% url 'pos:finish_bill' company.url_name %}",
               // management: registers (a link is needed for choosing current register)
               manage_registers: "{% url 'pos:list_registers' company.url_name %}",
               // save last used register
@@ -92,7 +96,9 @@ $(window).load(function(){
             t: 100, // duration of show/hide events
             t_easing: 200, // duration of easing functions (drag start/stop)
             last_search: "", // last searched query
-            search_update_interval: 1000 // checking if search query has changed
+            search_update_interval: 1000, // checking if search query has changed
+
+            last_payment_type: null // saves the last payment type so that the Payment() dialog will remember
         },
 
         // cached jquery items
@@ -105,7 +111,10 @@ $(window).load(function(){
 
             small_receipt_template: $("#small_receipt_template"),
             large_receipt_template: $()
-        }
+        },
+
+        // other (mostly temporary) stuff
+        unfinished_bill: null
     };
 
     // object initialization
@@ -134,10 +143,10 @@ $(window).load(function(){
 
         // search results
         save_local('search_results_by_text', g.objects.search.results_by_text);
-
     };
 
-    // when everything is loaded, remove the loading screen and show the terminal
+    // when everything is done, remove the loading screen and show the terminal
+    // (this does not include request that are still waiting for response
     setTimeout(function(){
             g.items.loading.fadeOut("fast", function(){
             g.items.loading.remove();
@@ -349,12 +358,8 @@ $(window).load(function(){
 
     {% comment %} the dialog for selecting register on login {% endcomment %}
     <div id="registers" class="hidden">
-        {% trans 'Which register have you logged on?' %}
-        <select id="registers_list">
-            {% for r in  registers %}
-                <option value="{{ r.id }}">{{ r.name }}</option>
-            {% endfor %}
-        </select>
+        {% trans 'Which register have you logged on to?' %}
+        <select id="registers_list"> {# filled by javascript #} </select>
         <input type="button" value="{% trans 'Go' %}" id="select_register"/>
     </div>
 
@@ -412,6 +417,50 @@ $(window).load(function(){
             {# save and cancel buttons #}
             <input type="button" class="cancel" value="{% trans 'Cancel' %}" />
             <input type="button" class="save" value="{% trans 'Save' %}" />
+        </div>
+    </div>
+
+    {% comment %} the payment dialog {% endcomment %}
+    <div id="payment" class="hidden">
+        <div id="payment_types_menu">
+            <div class="payment-type cash">{% trans 'Cash' %}</div>
+            <div class="payment-type credit-card">{% trans 'Credit card' %}</div>
+            <div class="payment-type bitcoin">{% trans 'Bitcoin' %}</div>
+        </div>
+
+        <div id="payment_details">
+            <div class="bill-total-container">
+                <div class="bill-total-text label"> {% trans 'Total' %} </div>
+                <div class="bill-total-number"> </div>
+            </div>
+
+            <div class="payment-details cash hidden">
+                <div class="cash-calc">
+                    <div>
+                        <div class="label">{% trans 'Customer paid' %}</div>
+                        <input type="text" class="customer-paid" />
+                    </div>
+                    <div class="return-change-container">
+                        <div class="label">{% trans 'Return change' %}</div>
+                        <input type="text" class="return-change" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <div class="payment-details credit-card hidden">
+                som ditejls abaut kredit kard
+            </div>
+
+            <div class="payment-details bitcoin hidden">
+                som ditejls abaut bitkojn
+
+            </div>
+        </div>
+
+        <div id="payment_controls">
+            <button class="cancel">{% trans 'Cancel' %}</button>
+
+            <button class="print"> {% trans 'Print' %} </button>
         </div>
     </div>
 

@@ -1,0 +1,104 @@
+#payment{
+    position: fixed;
+    
+    width: 800px; /* must be set so that javascript will size the payment dialog */
+    height: 500px; /* -||- */
+    
+    /* center positioning */
+    top: 50%;
+    left: 50%;
+    margin-left: -400px;
+    margin-top: -250px;
+    
+    z-index: 16;
+    
+    background-color: #ebebeb;
+}
+
+#payment_types_menu{
+    position: absolute;
+    
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 150px;
+    
+    padding-top: 30px;
+    
+    background-color: #e1e1e1;
+}
+
+#payment_types_menu .payment-type{
+    position: relative;
+    
+    width: 100%;
+    padding-left: 20px;
+    border-bottom: 1px solid #ffffff;
+    
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    
+    height: 50px;
+    line-height: 50px;    
+}
+
+#payment_types_menu .payment-type:first-child{
+    border-top: 1px solid #ffffff;
+}
+
+#payment_types_menu .payment-type.active:after{
+    position: absolute;
+    top: 0;
+    right: -50px;
+    
+    width: 0;
+    height: 0;
+    
+    content: "";
+    
+    border: 25px solid transparent;
+    border-left-color: #e1e1e1;
+}
+
+#payment_controls{
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+
+#payment_details{
+    position: relative;
+    margin-left: 150px; /* the same as #payment_types_menu width */
+    
+    padding-left: 50px;
+    padding-top: 30px;
+}
+#payment_details label,
+#payment_details .label{
+    text-transform: uppercase;
+}
+
+#payment_details .bill-total-container{
+    position: absolute;
+    left: 50px;
+    top: 50px;
+    height: 50px;
+}
+
+#payment_details .bill-total-text{
+    text-transform: uppercase;
+}
+
+#payment_details .bill-total-number{
+    font-size: 30px;
+}
+
+#payment_details .cash-calc{
+    position: absolute;
+    left: 200px;
+    top: 50px;
+}
+
+#payment_details .return-change-container{
+    margin-top: 30px;
+}

@@ -104,18 +104,18 @@ function format_small_receipt(g, bill){
         if(!(t in tax_rates)){
             tax_rates[t] = {
                 letter: c,
-                tax_sum: get_number(item.tax_absolute, g.decimal_separator),
-                net_sum: get_number(item.total_without_tax, g.decimal_separator),
-                gross_sum: get_number(item.total, g.decimal_separator)
+                tax_sum: get_number(item.tax_absolute, g.config.separator),
+                net_sum: get_number(item.total_without_tax, g.config.separator),
+                gross_sum: get_number(item.total, g.config.separator)
             };
 
             // next character for next tax rate
             c = String.fromCharCode(c.charCodeAt(0)+1);
         }
         else{
-            tax_rates[t].tax_sum = tax_rates[t].tax_sum.plus(get_number(item.tax_absolute, g.decimal_separator));
-            tax_rates[t].net_sum = tax_rates[t].net_sum.plus(get_number(item.total_without_tax, g.decimal_separator));
-            tax_rates[t].gross_sum = tax_rates[t].gross_sum.plus(get_number(item.total, g.decimal_separator));
+            tax_rates[t].tax_sum = tax_rates[t].tax_sum.plus(get_number(item.tax_absolute, g.config.separator));
+            tax_rates[t].net_sum = tax_rates[t].net_sum.plus(get_number(item.total_without_tax, g.config.separator));
+            tax_rates[t].gross_sum = tax_rates[t].gross_sum.plus(get_number(item.total, g.config.separator));
         }
 
         // clone the two rows

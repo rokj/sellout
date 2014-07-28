@@ -91,22 +91,6 @@ def bill_to_dict(user, company, bill):
     return b
 
 
-def new_bill(user, company):
-    # creates an 'empty' bill in database
-    # with active status
-    b = Bill(
-        company=company,
-        user=user,  # this can change
-        created_by=user,  # this will never change
-        type="Normal",
-        timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(user, company, 'pos_timezone'))),
-        status="Active"
-    )
-    b.save()
-
-    return bill_to_dict(user, company, b)
-
-
 def validate_prices():
 
     pass
@@ -195,11 +179,6 @@ def item_prices(user, company, base_price, tax_percent, quantity, discounts):
     return r
 
 
-def validate_bill_item(data):
-    """ TODO: finds bill and item in database and """
-    pass
-
-
 #########
 # views #
 #########
@@ -251,7 +230,7 @@ def create_bill(request, company):
         'till': till,
         'timestamp': dtm.now(),
         'type': "Normal",
-        'status': "Saved",
+        'status': "Unpaid",  # the bill is awaiting payment, a second request on the server will confirm it
         'items': [],
     }
 
@@ -425,26 +404,68 @@ def create_bill(request, company):
 
 
 @login_required
-def get_active_bill(request, company):
-    """ returns the last edited (active) bill if any, or an empty one """
+def get_unpaid_bill(request, company):
+    """ returns unpaid bill for specified company and register, if there's any """
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JSON_error(_("Company does not exist"))
-    
-    # check permissions
-    if not has_permission(request.user, c, 'bill', 'list'):
+
+    # permissions
+    if not has_permission(request.user, c, 'bill', 'view'):
         return JSON_error(_("You have no permission to view bills"))
 
+    # get register from data
     try:
-        bill = Bill.objects.get(company=c, user=request.user, status="Active")
-    except Bill.DoesNotExist:
-        # if there's no active bill, start a new one
-        return JSON_response(new_bill(request.user, c))
-    except Bill.MultipleObjectsReturned:
-        # two active bills (that shouldn't happen at all)
-        return JSON_error(_("Multiple active bills found"))
-        
-    # serialize the fetched bill and return it
-    bill = bill_to_dict(request.user, c,  bill)
-    return JSON_response({'status': 'ok', 'bill': bill})
+        register_id = int(JSON_parse(request.POST.get('data')).get('register_id'))
+    except (ValueError, TypeError):
+        return JSON_error(_("No valid register specified"))
+
+    # return bill, if there's any
+    unfinished_bills = Bill.objects\
+        .filter(company=c, till_id=register_id, status='Unfinished')\
+        .order_by('-timestamp')
+
+    if len(unfinished_bills) > 0:
+        return JSON_ok(extra=bill_to_dict(request.user, c, unfinished_bills[0]))
+    else:
+        return JSON_ok()
+
+
+@login_required
+def finish_bill(request, company):
+    """
+        find the bill, update its status and set payment type and reference
+    """
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # permissions
+    if not has_permission(request.user, c, 'bill', 'edit'):
+        return JSON_error(_("You have no permission to edit bills"))
+
+    # data must contain: bill_id, payment_type, payment_reference
+    d = JSON_parse(request.POST.get('data'))
+
+    if not d or not d.get('bill_id'):
+        return JSON_error(_("No data in request"))
+
+    # check payment type
+    if d.get('payment_type') not in [x[0] for x in g.PAYMENT_TYPES]:
+        return JSON_error(_("Payment type does not exist"))
+
+    # get that bill and update it
+    try:
+        bill = Bill.objects.get(company=c, id=int(d.get('bill_id')))
+    except (ValueError, TypeError, Bill.DoesNotExist):
+        return JSON_error(_("No bill found"))
+
+    bill.status = 'Paid'
+    bill.payment_type = d.get('payment_type')
+    bill.payment_reference = d.get('payment_reference')
+
+    bill.save()
+
+    return JSON_ok()
