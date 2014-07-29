@@ -85,11 +85,8 @@
     height: 50px;
 }
 
-#payment_details .bill-total-text{
-    text-transform: uppercase;
-}
-
-#payment_details .bill-total-number{
+#payment_details .bill-total,
+#payment_details .btc-amount{
     font-size: 30px;
 }
 
@@ -101,4 +98,26 @@
 
 #payment_details .return-change-container{
     margin-top: 30px;
+}
+
+/* bitcoin payment */
+#payment_details .btc-qrcode{
+    position: absolute;
+    top: 150px;
+}
+
+#payment_details .btc-amount-container{
+    position: absolute;
+    left: 280px;
+    top: 50px;
+}
+
+#payment_details .btc-address-container{
+    position: absolute;
+    top: 150px;
+    left: 280px;
+}
+
+#payment_details .btc-address{
+    width: 260px;
 }

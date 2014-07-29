@@ -193,7 +193,10 @@ Search = function(g){
             p.query_timeout = null;
         }
 
-        var ids = p.search_by_text(p.items.field.val());
+        var q = p.items.field.val();
+        if(q.trim() == '') return; // never search for nothing. o.0
+
+        var ids = p.search_by_text(q);
 
         p.g.objects.products.show_products(ids);
 

@@ -111,11 +111,11 @@ def products(request, company):
 
     # if there are no taxes defined, don't show anything
     if Tax.objects.filter(company=c).count() == 0:
-        return error(request, _("There are no taxes defined. Please go to tax management and define them."))
+        return error(request, c, _("There are no taxes defined. Please go to tax management and define them."))
 
     # if there are no categories defined, throw an error
     if Category.objects.filter(company=c).count() == 0:
-        return error(request, _("There are no categories defined, please go to category management to define them."))
+        return error(request, c, _("There are no categories defined, please go to category management to define them."))
 
     # fields that need to be limited in length:
     lengths = {

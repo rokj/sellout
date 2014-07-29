@@ -53,7 +53,7 @@ Categories = function(g){
 
         // hide the back button if displaying breadcrumbs
         if(!p.g.config.display_breadcrumbs){
-            enable_element(p.items.back_button, false);
+            toggle_element(p.items.back_button, false);
         }
 
         // display favorites
@@ -175,7 +175,7 @@ CategoryButton = function(list, parent, data){
 
             // show the back button (unless showing breadcrumbs)
             // and bind an action to it
-            enable_element(p.list.items.back_button, true);
+            toggle_element(p.list.items.back_button, true);
             p.list.items.back_button.unbind().click(function(){
                 // 'p' is the selected category;
                 if(p.parent) p.parent.click_action();

@@ -485,7 +485,7 @@ class Bill(SkeletonU):
     serial = models.IntegerField(_("Bill number, unique over all company's bills"), null=True)  # will be updated in post_save signal
 
     type = models.CharField(_("Bill type"), max_length=20, choices=g.BILL_TYPES, null=False, blank=False, default=g.BILL_TYPES[0][0])
-    recipient_contact = models.ForeignKey(Contact, null=True, blank=True, related_name='bill_recipient_company')
+    contact = models.ForeignKey(Contact, null=True, blank=True, related_name='bill_recipient_company')
     note = models.CharField(_("Notes"), max_length=1000, null=True, blank=True)
     sub_total = models.DecimalField(_("Sub total"),
                                     max_digits=g.DECIMAL['currency_digits'],

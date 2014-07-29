@@ -67,7 +67,9 @@ reference to a product is its parent div (that contains product's .data()).
 {% endcomment %}
 <script type="text/javascript">
 var category_data = {% autoescape off %}{{ categories }}{% endautoescape %};
-var categories = []; // list of pairs "label", "value"
+var categories_list = []; // list of category names (source for the autocomplete)
+var categories_by_breadcrumbs = {}; // dictionary path:category_id for saving
+var categories_by_id = {}; // dictionary id:path for loading
 
 var units_data = {% autoescape off %}{{ units }}{% endautoescape %};
 var units = [];
@@ -103,9 +105,17 @@ $(document).ready(function(){
                     search_criteria[$(this).attr("id")] = $(this).val(); 
                 }
             });
+
             // add the category id (stored in .data())
-            var cat_fil_id = "category_filter";
-            search_criteria[cat_fil_id] = $("#" + cat_fil_id).data().id;
+            var cat_filter_id = "category_filter";
+            var category = $("#" + cat_filter_id);
+            var cat_val = category.val().trim();
+
+            if(cat_val != ""){
+                if(cat_val in categories_by_breadcrumbs){
+                    search_criteria[cat_filter_id] = categories_by_breadcrumbs[cat_val];
+                }
+            }
         }
         
         // send to the view
@@ -517,28 +527,12 @@ $(document).ready(function(){
             sel_obj.append(opt_obj);
         }
         
-        // listbox with categories
+        // autocomplete with categories
         sel_obj = $("#edit_product_category", edit_obj).empty();
-        var opt_obj;
+        sel_obj.autocomplete({source: categories_list });
+        if(!isNaN(product.category_id)) sel_obj.val(categories_by_id[product.category_id]);
+        else sel_obj.val("");
 
-        for(i=0; i < categories.length; i++){
-            opt_obj = $("<option>")
-                .attr("value", categories[i].value)
-                .append(escape(categories[i].label));
-            
-            if(product){ // current product's category (if editing)
-                if(categories[i].value == product.category_id){
-                    opt_obj.attr("selected", "selected");
-                }
-            }
-            else{ // last selected category (if adding new)
-                if(last_chosen_category == categories[i].value){
-                    opt_obj.attr("selected", "selected");
-                }
-            }
-            sel_obj.append(opt_obj);
-        }
-        
         // product image
         var del_obj = $("#edit_product_delete_image", edit_obj);
         var upl_obj = $("#edit_product_image_upload", edit_obj);
@@ -818,8 +812,8 @@ $(document).ready(function(){
         data['change_image'] = product.change_image;
         if(product.change_image) data['image'] = product.image_data;
         
-        data['category_id'] = $("#edit_product_category", dlg_obj).val();
-        last_chosen_category = data['category']; // remember the last used
+        data['category_id'] = categories_by_breadcrumbs[$("#edit_product_category", dlg_obj).val()];
+        last_chosen_category = data['category_id']; // remember the last used
         data['tax_id'] = $("#edit_product_tax", dlg_obj).val();
         data['description'] = $("#edit_product_description", dlg_obj).val();
         // discounts: strip off everything but ids
@@ -938,9 +932,14 @@ $(document).ready(function(){
     ////////////////////
     // categories list
     var i;
-    categories = [];
+    categories_list = [];
+    categories_by_breadcrumbs = {};
+    categories_by_id = {};
+
     for(i = 0; i < category_data.length; i++){
-        categories.push({label:category_data[i].breadcrumbs, value:category_data[i].id})
+        categories_list.push(category_data[i].breadcrumbs);
+        categories_by_breadcrumbs[category_data[i].breadcrumbs] = category_data[i].id;
+        categories_by_id[category_data[i].id] = category_data[i].breadcrumbs;
     }
 
     // unit types
@@ -1017,7 +1016,7 @@ $(document).ready(function(){
     // categories autocomplete list
     var cat_inp_obj = $("#category_filter");
     cat_inp_obj.autocomplete({
-        source: categories,
+        source: categories_list,
         minLength: 0,
         delay: check_interval_duration
     });
@@ -1025,21 +1024,7 @@ $(document).ready(function(){
     cat_inp_obj.focus(function(){
         cat_inp_obj.autocomplete("search", "");
     });
-    
-    cat_inp_obj.on("autocompleteselect", function (e, ui) {
-        // override the default autocomplete behavior:
-        e.preventDefault(); // prevent the "value" being written to the edit box
-        this.value = ui.item.label; // write label
-        cat_inp_obj.data("id", ui.item.value); // save the value (category id) to data field
-    });
-    
-    cat_inp_obj.blur(function(){
-        // if nothing is selected, remove data from the object
-        if(cat_inp_obj.val().length == 0){
-            cat_inp_obj.removeData();
-        }
-    });
-    
+
     // update products on button click
     $("#update_results").click(function(){
         update_products();
@@ -1263,7 +1248,7 @@ $(document).ready(function(){
                 <div class="form-field">
                     {% comment %} list of categories {% endcomment %}
                     <label for="edit_product_category">{% trans 'Category' %}</label>
-                    <select id="edit_product_category" name="edit_product_category"></select>
+                    <input type="text" id="edit_product_category" name="edit_product_category" />
                 </div>
 
                 <div class="form-field">

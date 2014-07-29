@@ -70,7 +70,7 @@ def bill_to_dict(user, company, bill):
     b['serial'] = bill.serial
     b['till_id'] = bill.till.id
     b['type'] = bill.type
-    b['recipient_contact'] = bill.recipient_contact
+    b['contact'] = bill.contact
     b['note'] = bill.note
     b['sub_total'] = format_number(user, company, bill.sub_total)
     b['discount'] = format_number(user, company, bill.discount)
@@ -204,6 +204,17 @@ def create_bill(request, company):
     if not data:
         return JSON_error(_("No data received"))
 
+    # if there's an id in data and it's not -1, we're updating an existing unpaid bill,
+    # loaded to terminal and edited; delete the old one first
+    if 'id' in data:
+        existing_id = int(data['id'])
+        if existing_id != -1:
+            try:
+                Bill.objects.get(id=existing_id, company=c).delete()
+            except Bill.DoesNotExist:
+                # whatever
+                pass
+
     # check bill properties
     r = parse_decimal(request.user, c, data.get('total'))
     if not r['success'] or r['number'] <= Decimal('0'):
@@ -253,11 +264,13 @@ def create_bill(request, company):
                 return item_error(_("Cannot add an item with zero or negative quantity"), product)
         quantity = r['number']
 
-        # check if there's enough items left in stock (must be at least zero =D)
-        if product.stock < quantity:
-            return item_error(_("Cannot sell more items than there are in stock"), product)
+        # this has been disabled until it is enabled (you don't say!).
+        # check if there's enough items left in stock (must be at least zero)
+        # if product.stock < quantity:
+        #     return item_error(_("Cannot sell more items than there are in stock"), product)
 
-        # TODO: subtract quantity from stock (if there's enough left)
+        product.stock = product.stock - quantity
+        product.save()
 
         item = {
             'created_by': request.user,
@@ -433,6 +446,29 @@ def get_unpaid_bill(request, company):
 
 
 @login_required
+def check_bill_status(request, company):
+    """
+        check if the bill has been paid and return the status
+    """
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JSON_error(_("Company does not exist"))
+
+    # there should be bill_id in request.POST
+    try:
+        bill_id = int(JSON_parse(request.POST.get('data')).get('bill_id'))
+        bill = Bill.objects.get(company=c, id=bill_id)
+    except (Bill.DoesNotExist, ValueError, TypeError):
+        return JSON_error(_("Bill does not exist or data is invalid"))
+
+    if bill.status == 'Paid':
+        return JSON_ok(extra={'paid': True})
+    else:
+        return JSON_ok(extra={'paid': False})
+
+
+@login_required
 def finish_bill(request, company):
     """
         find the bill, update its status and set payment type and reference
@@ -446,25 +482,30 @@ def finish_bill(request, company):
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JSON_error(_("You have no permission to edit bills"))
 
-    # data must contain: bill_id, payment_type, payment_reference
+    # data must contain: bill_id, status, payment_type, payment_reference
     d = JSON_parse(request.POST.get('data'))
 
     if not d or not d.get('bill_id'):
         return JSON_error(_("No data in request"))
 
-    # check payment type
-    if d.get('payment_type') not in [x[0] for x in g.PAYMENT_TYPES]:
-        return JSON_error(_("Payment type does not exist"))
-
-    # get that bill and update it
+    # bill...
     try:
         bill = Bill.objects.get(company=c, id=int(d.get('bill_id')))
     except (ValueError, TypeError, Bill.DoesNotExist):
         return JSON_error(_("No bill found"))
 
-    bill.status = 'Paid'
-    bill.payment_type = d.get('payment_type')
-    bill.payment_reference = d.get('payment_reference')
+    # check status: if 'Paid', set payment type and reference;
+    # if 'Canceled', just update status
+    if d.get('status') == 'Paid':
+        # check payment type
+        if d.get('payment_type') not in [x[0] for x in g.PAYMENT_TYPES]:
+            return JSON_error(_("Payment type does not exist"))
+
+        bill.status = 'Paid'
+        bill.payment_type = d.get('payment_type')
+        bill.payment_reference = d.get('payment_reference')
+    else:
+        bill.status = 'Canceled'
 
     bill.save()
 

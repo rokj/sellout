@@ -406,8 +406,8 @@ function parseInt_zero(s){
     else return r;
 }
 
-function enable_element(element, enabled){
-    // a common function to enable all kinds of elements
+function toggle_element(element, enabled){
+    // a common function to toggle all kinds of elements
     if(enabled){
         // enable the element:
         // add hoverable class if the element had one before it was disabled

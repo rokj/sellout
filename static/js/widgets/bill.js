@@ -155,8 +155,23 @@ Bill = function(g){
             p.items.push(new Item(p, product));
         }
 
-        // contact
-        p.contact = data.contact;
+        // contact: if the bill is retrieved from the server, the contact is id only,
+        // otherwise it's a contact object (saved from js)
+        if(typeof(data.contact) == 'number'){
+            // search contacts by id and select the right one
+            for(i = 0; i < p.g.data.contacts.length; i++){
+                if(p.g.data.contacts[i].id == data.contact){
+                    data.contact = p.g.data.contacts[i].id;
+                    break;
+                }
+            }
+        }
+        else{
+            // just assign the data
+            p.contact = data.contact;
+        }
+
+        p.data = data;
 
         p.bill.saved = true;
         p.update_summary();
@@ -164,8 +179,13 @@ Bill = function(g){
 
     p.get_data = function(){
         // returns bill and item data for saving/sending
-        var i;
+        var i, id;
+
+        if(p.data && !isNaN(p.data.id)) id = p.data.id;
+        else id = -1;
+
         var r = {
+            id: id,
             items: [],
             total: dn(p.update_summary(), p.g),
             till_id: p.g.objects.terminal.register.id,
@@ -343,8 +363,8 @@ Item = function(bill, product) {
         p.items.total.text(dn(p.data.total, p.g));
 
         // out of stock class
-        if(p.data.quantity.cmp(p.product.data.stock) >= 0) p.item_row.addClass("out-of-stock");
-        else p.item_row.removeClass("out-of-stock");
+        //if(p.data.quantity.cmp(p.product.data.stock) >= 0) p.item_row.addClass("out-of-stock");
+        //else p.item_row.removeClass("out-of-stock");
 
         // also update bill
         p.bill.update_summary();
@@ -364,10 +384,11 @@ Item = function(bill, product) {
         }
         else{
             n = p.data.quantity.plus(Big(1));
-            if(n.cmp(p.data.stock) <= 0){ // do not add more items than there are in stock
+            // disabled at the moment
+            // if(n.cmp(p.data.stock) <= 0){ // do not add more items than there are in stock
                 q = n;
                 update = true;
-            }
+            //}
         }
 
         // update prices
@@ -391,10 +412,11 @@ Item = function(bill, product) {
         q = q.round(p.g.config.decimal_places);
 
         // check if there's enough of it in stock
-        if(q.cmp(p.data.stock) > 0){
-            error_message(title, gettext("There's not enough items in stock"));
-            q = p.data.stock;
-        }
+        // this has been disabled
+        // if(q.cmp(p.data.stock) > 0){
+        //     error_message(title, gettext("There's not enough items in stock"));
+        //     q = p.data.stock;
+        // }
 
         // check if it's not negative or 0
         if(q.cmp(Big(0)) <= 0){
@@ -986,7 +1008,7 @@ ItemDetails = function(item){
 
     // explode button: if quantity is 1, hide it
     if(p.item.data.quantity.cmp(Big(1)) > 0){
-        enable_element(p.items.explode, true);
+        toggle_element(p.items.explode, true);
 
         p.items.explode.unbind().click(function(){
             // if anything has been changed, ask the user to save or cancel
@@ -1013,7 +1035,7 @@ ItemDetails = function(item){
 
     }
     else{
-        enable_element(p.items.explode, false);
+        toggle_element(p.items.explode, false);
     }
 
     // when any part of the shadow is clicked, close the details

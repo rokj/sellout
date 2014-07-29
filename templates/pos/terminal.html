@@ -67,6 +67,7 @@ $(window).load(function(){
               create_bill: "{% url 'pos:create_bill' company.url_name %}",
               get_unpaid_bill: "{% url 'pos:get_unpaid_bill' company.url_name %}",
               finish_bill: "{% url 'pos:finish_bill' company.url_name %}",
+              check_bill_status: "{% url 'pos:check_bill_status' company.url_name %}",
               // management: registers (a link is needed for choosing current register)
               manage_registers: "{% url 'pos:list_registers' company.url_name %}",
               // save last used register
@@ -430,8 +431,8 @@ $(window).load(function(){
 
         <div id="payment_details">
             <div class="bill-total-container">
-                <div class="bill-total-text label"> {% trans 'Total' %} </div>
-                <div class="bill-total-number"> </div>
+                <div class="label"> {% trans 'Total' %} {{ currency }} </div>
+                <div class="bill-total"> </div>
             </div>
 
             <div class="payment-details cash hidden">
@@ -452,8 +453,19 @@ $(window).load(function(){
             </div>
 
             <div class="payment-details bitcoin hidden">
-                som ditejls abaut bitkojn
+                <div class="btc-qrcode">
+                    {# this is temporary #}
+                    <img src="{% static 'images/qrcode.png' %}" alt="temp qrcode" title="sample" />
+                </div>
+                <div class="btc-amount-container">
+                    <div class="label">{% trans 'Total BTC' %}</div>
+                    <div class="btc-amount">0.38649587</div>
+                </div>
 
+                <div class="btc-address-container">
+                    <div class="label">{% trans 'Send bitcoins to this address' %}</div>
+                    <input class="btc-address" readonly value="1CpJVDqSvGmjVBjnyde6XGXVEYRvjzpfmz" />
+                </div>
             </div>
         </div>
 

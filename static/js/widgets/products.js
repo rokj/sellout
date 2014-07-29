@@ -161,11 +161,11 @@ Product = function(list, data){
         p.items.container.unbind();
 
         // if the product is out of stock,, add a special class
-        if(p.data.stock.cmp(Big(0)) <= 0){
-            // this product cannot be clicked
-            p.items.container.addClass("out-of-stock");
-        }
-        else{
+        // this has been removed
+        // if(p.data.stock.cmp(Big(0)) <= 0){
+        //     p.items.container.addClass("out-of-stock");
+        // }
+        // else{
             p.items.container.on("click", null, null, function(){
                 // if the bill has the 'no-click' class, do nothing
                 // (it is being dragged)
@@ -173,18 +173,18 @@ Product = function(list, data){
 
                 p.add_to_bill();
             });
-        }
-
+        // }
     };
 
     p.update = function(){
         // if the product is out of stock...
-        if(p.data.stock.cmp(Big(0)) <= 0){
-            p.items.container.addClass("out-of-stock");
-        }
-        else{
-            p.items.container.removeClass("out-of-stock");
-        }
+        // (disabled)
+        // if(p.data.stock.cmp(Big(0)) <= 0){
+        //     p.items.container.addClass("out-of-stock");
+        // }
+        // else{
+        //     p.items.container.removeClass("out-of-stock");
+        // }
     };
 
     //
@@ -242,8 +242,9 @@ Product = function(list, data){
     p.items.shortcut.appendTo(p.items.text); */
 
     // out of stock
-    p.items.out_of_stock = $("<div>", {"class": "stock-container"});
-    p.items.out_of_stock.appendTo(p.items.container);
+    // (ignored at the moment)
+    // p.items.out_of_stock = $("<div>", {"class": "stock-container"});
+    // p.items.out_of_stock.appendTo(p.items.container);
 
     // add id to access this object via document tree, not javascript
     p.items.container.data({id: p.data.id});

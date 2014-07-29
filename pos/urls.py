@@ -98,6 +98,7 @@ urlpatterns = patterns('',
     url(r_company + '/quick-contact/$', contact.quick_contacts, name='quick_contacts'),
     url(r_company + '/get-unpaid-bill/$', bill.get_unpaid_bill, name='get_unpaid_bill'),
     url(r_company + '/finish-bill/$', bill.finish_bill, name='finish_bill'),
+    url(r_company + '/check-bill-status/$', bill.check_bill_status, name='check_bill_status'),
 
     # views for bill
     url(r_company + '/bill/save/$', bill.create_bill, name='create_bill'),  # adds an item to bill

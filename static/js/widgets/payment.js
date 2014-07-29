@@ -8,11 +8,14 @@ Payment = function(g, bill){
     p.bill = bill;
     p.data = p.bill.data;
 
+    p.bitcoin_interval = null; // a reference to timer for bitcoin queries on server
+
     p.dialog = $("#payment");
     p.items = {
         cash:{
              button: $(".payment-type.cash", p.dialog),
              section: $(".payment-details.cash", p.dialog),
+
              paid_box: $(".cash .customer-paid", p.dialog),
              return_box: $(".cash .return-change", p.dialog)
         },
@@ -25,10 +28,11 @@ Payment = function(g, bill){
             section: $(".payment-details.bitcoin", p.dialog)
         },
 
-        total: $(".bill-total-number", p.dialog), // common to all sections (payment types)
+        total: $(".bill-total", p.dialog), // common to all sections (payment types)
         shadow: $("#fullscreen_shadow"),
 
-        print_button: $(".print", p.dialog)
+        print_button: $(".print", p.dialog),
+        cancel_button: $(".cancel", p.dialog)
     };
 
     //
@@ -37,21 +41,14 @@ Payment = function(g, bill){
     p.switch_section = function(section){
         // the last section is stored in g.settings
 
-        // first, hide the last section
-        switch(p.g.settings.last_payment_type){
-            case "cash":
-                p.items.cash.button.removeClass("active");
-                p.items.cash.section.hide();
-                break;
-            case "credit-card":
-                p.items.credit_card.button.removeClass("active");
-                p.items.credit_card.section.hide();
-                break;
-            case "bitcoin":
-                p.items.bitcoin.button.removeClass("active");
-                p.items.bitcoin.section.hide();
-                break;
-        }
+        // first, hide sections
+        p.items.cash.button.removeClass("active");
+        p.items.cash.section.hide();
+
+        p.items.credit_card.button.removeClass("active");
+        p.items.credit_card.section.hide();
+
+        p.toggle_bitcoin_section(false);
 
         // now display the required section
         p.g.settings.last_payment_type = section;
@@ -71,9 +68,50 @@ Payment = function(g, bill){
                 p.items.credit_card.section.show();
                 break;
             case "bitcoin":
-                p.items.bitcoin.button.addClass("active");
-                p.items.bitcoin.section.show();
+                p.toggle_bitcoin_section(true);
+
                 break;
+        }
+    };
+
+    p.toggle_bitcoin_section = function(show){
+        if(show){
+            p.items.bitcoin.button.addClass("active");
+            p.items.bitcoin.section.show();
+
+            if(p.bitcoin_interval) clearInterval(p.bitcoin_interval);
+
+            // disable the print button on the dialog
+            toggle_element(p.items.print_button, false);
+
+            // set up a timer that will check if the bill has been paid
+            p.bitcoin_interval = setInterval(function(){
+                send_data(p.g.urls.check_bill_status, {bill_id: p.data.id}, p.g.csrf_token, function(response){
+                    if(response.status != 'ok'){
+                        // something went wrong
+                        alert(response.message);
+                    }
+                    else{
+                        if(response.data.paid){
+                            // paid, finish the thing
+                            alert("paid");
+                            // TODO
+
+                            clearInterval(p.bitcoin_interval);
+                        }
+                        else{
+                            // not paid yet, continue polling
+
+                        }
+                    }
+                });
+            }, 2000);
+        }
+        else{
+            p.items.bitcoin.button.removeClass("active");
+            p.items.bitcoin.section.hide();
+
+            // enable the print button
         }
     };
 
@@ -118,11 +156,43 @@ Payment = function(g, bill){
         }
     };
 
+    p.cancel = function(){
+        confirmation_dialog(
+            gettext("Confirm cancellation"),
+            gettext("Are you sure you want to cancel this bill?"),
+            function(){
+                // yes, the user is 'sure';
+                // send an update with status='Canceled' to the server
+                var data = {
+                    bill_id: p.data.id,
+                    status: 'Canceled'
+                };
+
+                send_data(p.g.urls.finish_bill, data, p.g.csrf_token, function(response){
+                    if(response.status != 'ok'){
+                        error_message(
+                            gettext("Could not update bill status"),
+                            response.message
+                        );
+                    }
+                    else{
+                        // create a new bill and close this dialog
+                        p.g.objects.bill.reset();
+                        p.toggle_dialog(false);
+                    }
+                });
+            },
+            function(){
+                // the dumb user is not sure.
+            }
+        );
+    };
 
     p.finish = function(){
         // send an update of the bill to the server and print the bill
         var data = {
             bill_id: p.data.id,
+            status: 'Paid',
             payment_type: p.g.settings.last_payment_type
         };
 
@@ -167,10 +237,6 @@ Payment = function(g, bill){
     p.items.credit_card.button.unbind().click(function(){ p.switch_section("credit-card"); });
     p.items.bitcoin.button.unbind().click(function(){ p.switch_section("bitcoin"); });
 
-    // show the details
-    if(!p.g.settings.last_payment_type) p.g.settings.last_payment_type = "cash";
-    p.switch_section(p.g.settings.last_payment_type);
-
     // set total text
     p.items.total.text(p.data.total);
 
@@ -193,6 +259,13 @@ Payment = function(g, bill){
     // the print ( = finish) button
     p.items.print_button.unbind().click(p.finish);
 
+    // cancel button
+    p.items.cancel_button.unbind().click(p.cancel);
+
     // show the dialog
     p.toggle_dialog(true);
+
+    // show the details
+    if(!p.g.settings.last_payment_type) p.g.settings.last_payment_type = "cash";
+    p.switch_section(p.g.settings.last_payment_type);
 };
