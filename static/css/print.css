@@ -11,12 +11,12 @@
     font-size: 12px;
     margin: 0;
     
-    /* TODO: remove
+    /* TODO: remove*/
     position: absolute;
     z-index: 100;
     right: 0;
     bottom: 0;
-    background-color: white;*/
+    background-color: white;
 }
 
 .receipt-80mm *{
@@ -28,32 +28,25 @@
     text-align: center;
 }
 
-.receipt-80mm .issuing.company-details-name{
+.receipt-80mm .company .name{
     text-align: center;
     /*font-weight: bold;*/
     font-size: 12pt;
 }
 
-.receipt-80mm .issuing.company-details-1{
-    text-align: center;
-}
-.receipt-80mm .issuing.company-details-2{
-    text-align: center;
-}
-.receipt-80mm .issuing.company-details-3{
+.receipt-80mm .company .details{
     text-align: center;
 }
 
-.receipt-80mm .issuing-company{
+.receipt-80mm .company{
     overflow: hidden;
 }
 
-.receipt-80mm .client-company .client.company-details-name,
-.receipt-80mm .client-individual .client.individual-details-name{
+.receipt-80mm .client .name{
     font-weight: bold;
 }
 
-.receipt-80mm .client-company *{
+.receipt-80mm .client *{
     margin-left: 5mm;
 }
 
@@ -231,7 +224,24 @@
     border-top: 0.5mm dotted black;
 }
 
-.horse-picture{
+.receipt-80mm .horse-picture{
     width: 60%;
     margin: 0 auto;
 }
+
+/* the full-page receipt */
+.receipt-fullpage{
+    padding-top: 20mm;
+    padding-bottom: 20mm;
+
+    font-size: 12px;
+    margin: 0;
+
+    /* TODO: remove */
+    position: absolute;
+    z-index: 100;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+}
+

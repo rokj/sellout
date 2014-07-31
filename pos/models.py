@@ -37,7 +37,7 @@ class Company(SkeletonU):
     email = models.CharField(_("E-mail address"), max_length=256, null=False, blank=False)
     website = models.CharField(_("Website"), max_length=256, null=True, blank=True)
     phone = models.CharField(_("Phone number"), max_length=30, null=True, blank=True)
-    vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=True, blank=True)
+    vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=False, blank=False)
     notes = models.TextField(_("Notes"), blank=True, null=True)
 
     def __unicode__(self):

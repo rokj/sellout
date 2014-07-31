@@ -129,6 +129,8 @@ Payment = function(g, bill){
     p.print = function(){
         // decide what to do depending on user's print settings
 
+        var receipt;
+
         // printer driver:
         switch(p.g.objects.terminal.register.printer_driver){
             case 'System':
@@ -136,17 +138,23 @@ Payment = function(g, bill){
                 if(p.g.objects.terminal.register.receipt_format == 'Thermal'){
                     // use the default printer;
                     // create a HTML receipt and issue javascript print() method and that's it
-                    var receipt = format_small_receipt(p.g, p.bill);
+                    receipt = format_receipt(p.g, p.bill, 'small');
 
                     // TODO: temporary
-                    //receipt.appendTo("body").show();
+                    receipt.appendTo("body").show();
                     // TODO: permanent
-                    receipt.printThis();
-
-                    receipt.remove();
+                    //receipt.printThis();
+                    //receipt.remove();
                 }
                 else{
-                    alert("printing on A4");
+                    // large receipt
+                    receipt = format_receipt(p.g, p.bill, 'large');
+
+                    // TODO: temporary
+                    receipt.appendTo("body").show();
+                    // TODO: permanent
+                    //receipt.printThis();
+                    //receipt.remove();
                 }
                 break;
             default:

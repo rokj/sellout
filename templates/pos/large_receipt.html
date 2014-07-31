@@ -1,0 +1,103 @@
+{% load i18n %}
+{% load static %}
+
+<div class="receipt-fullpage">
+    <table class="receipt-header">
+        <tr class="issuing-company">
+            {# logo #}
+            <td rowspan="2" class="receipt-logo"></td>
+            <td class="company">
+                {# company #}
+                <div class="company name"></div>
+                <div class="company details"></div>
+            </td>
+            <td class="client">
+                {# client #}
+                <div class="name"></div>
+                <div class="details"></div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                {# cashier #}
+                <div class="receipt-cashier">
+                    {% comment %} the last row: cashier's name and date-time {% endcomment %}
+                    <div class="receipt-cashier-text">{% trans 'Cashier' %}:&nbsp;</div>
+                    <div class="receipt-cashier-name"></div>
+                    <div class="receipt-datetime"></div>
+                </div>
+            </td>
+            <td>
+                {# register and location #}
+                <div class="register-location"></div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="bill-serial">
+        {% trans 'Bill No.' %}:&nbsp;
+        <span class="bill-serial-content"></span>
+    </div>
+</div>
+
+
+{% comment %}
+    <div class="receipt-items">
+        <div class="items-header">
+            <div class="receipt-row first">
+                <div class="item-name"></div>
+            </div>
+            <div class="receipt-row second">
+                <div class="item-price">{% trans 'Price' %}</div>
+                <div class="item-quantity">{% trans 'Qty' %}</div>
+                <div class="item-unit">&nbsp;{# unit has no label #}</div>
+                <div class="item-discount">{% trans 'Discount' %}</div>
+                <div class="item-amount">{% trans 'Amount' %}</div>
+            </div>
+        </div>
+
+        <div class="items-body"></div>
+
+        <div class="items-footer">
+            <div class="receipt-total-text">{% trans 'Total' context 'Receipt footer text' %}</div>
+            <div class="receipt-currency">{# currency goes here #}</div>
+            <div class="receipt-total">{# grand_total goes here #}</div>
+        </div>
+    </div>
+
+    {# a collection of tax rates #}
+    <div class="tax-rates">
+        <div class="tax-row header">
+            <div class="tax-id">&nbsp;</div>
+            <div class="tax-percent">{% trans 'Rate' %}</div>
+            <div class="tax-net">{% trans 'Subtotal' %}</div>
+            <div class="tax-absolute">{% trans 'Tax' %}</div>
+            <div class="tax-gross">{% trans 'Total' %}</div>
+        </div>
+
+        <div class="tax-body">
+            <div class="tax-row">
+
+            </div>
+        </div>
+
+        <div class="tax-row footer">
+            <div class="tax-id">{% trans 'Sum' context 'Tax rates table footer' %}</div>
+            <div class="tax-percent">&nbsp;</div>
+            <div class="tax-net"></div>
+            <div class="tax-absolute"></div>
+            <div class="tax-gross"></div>
+        </div>
+    </div>
+
+    <div class="receipt-cashier">
+            <div class="receipt-cashier-text">{% trans 'Cashier' %}:&nbsp;</div>
+            <div class="receipt-cashier-name"></div>
+            <div class="receipt-datetime"></div>
+    </div>
+
+    <div class="receipt-footer">
+        <img src="{% static 'images/bill_horse.jpg' %}" alt="" class="horse-picture" />
+    </div>
+
+    {% endcomment %}
