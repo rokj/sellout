@@ -107,7 +107,7 @@ def mobile_add_category(request, company):
     #     else: # delete the old image
     #         category.image.delete()
 
-    return JSON_ok(extra=get_all_categories_structured(c, category, android=True))
+    return JSON_ok(extra=category_to_dict(category, android=True))
 
 
 @api_view(['POST', 'GET'])
@@ -181,7 +181,7 @@ def edit_category(request, company):
         else: # delete the old image
             category.image.delete()
     category.save()
-    return JSON_ok(extra=get_all_categories_structured(c, category, android=True))
+    return JSON_ok(extra=category_to_dict(category, android=True))
 
 
 @api_view(['POST', 'GET'])

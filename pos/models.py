@@ -106,6 +106,16 @@ class Category(SkeletonU):
     def product_count(self):
         return Product.objects.filter(company=self.company, category=self).count()
 
+    @property
+    def category_level(self):
+        i = 1
+        cur_category = self
+        while cur_category.parent is not None:
+            i += 1
+            cur_category = cur_category.parent
+        return i
+
+
 
 # not in use at the moment
 #class CategoryAttribute(SkeletonU):

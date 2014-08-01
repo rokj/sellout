@@ -278,37 +278,38 @@ def search_products(request, company, android=False):
         #filter_by_discount = False
 
     # general filter: search all fields that have not been searched yet 
-    general_filter = criteria['general_filter'].split(' ')
+    general_filter = criteria.get('general_filter')
     #g_products = Product.objects.none()
+    if general_filter:
+        general_filter = general_filter.split(' ')
+        for w in general_filter:
+            if w == '':
+                continue
 
-    for w in general_filter:
-        if w == '':
-            continue
-        
-        # search categories, product_code, shortcut, name, description, notes,
-        # but only if it wasn't entered in the "advanced" filter
-        # assemble the Q() filter
-        f = Q()
-        if not filter_by_name:
-            f = f | Q(name__icontains=w)
-        if not filter_by_product_code:
-            f = f | Q(code__icontains=w)
-        if not filter_by_shortcut:
-            f = f | Q(shortcut__icontains=w)
-        if not filter_by_notes:
-            f = f | Q(private_notes__icontains=w)
-        if not filter_by_description:
-            f = f | Q(description__icontains=w)
-        if not filter_by_category:
-            # get the categories that match this string and search by their subcategories also
-            tmpcat = Category.objects.filter(name__icontains=w)
-            for t in tmpcat:
-                f = f | Q(category__id__in=get_subcategories(t.id, data=[]))
+            # search categories, product_code, shortcut, name, description, notes,
+            # but only if it wasn't entered in the "advanced" filter
+            # assemble the Q() filter
+            f = Q()
+            if not filter_by_name:
+                f = f | Q(name__icontains=w)
+            if not filter_by_product_code:
+                f = f | Q(code__icontains=w)
+            if not filter_by_shortcut:
+                f = f | Q(shortcut__icontains=w)
+            if not filter_by_notes:
+                f = f | Q(private_notes__icontains=w)
+            if not filter_by_description:
+                f = f | Q(description__icontains=w)
+            if not filter_by_category:
+                # get the categories that match this string and search by their subcategories also
+                tmpcat = Category.objects.filter(name__icontains=w)
+                for t in tmpcat:
+                    f = f | Q(category__id__in=get_subcategories(t.id, data=[]))
 
-        if f:
-            products = products.filter(f)
+            if f:
+                products = products.filter(f)
 
-        # omit search by tax, price, discount
+            # omit search by tax, price, discount
 
     products = products.distinct().order_by('name')[:g.SEARCH_RESULTS['products']]
     

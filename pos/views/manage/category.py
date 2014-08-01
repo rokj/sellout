@@ -40,6 +40,7 @@ def category_to_dict(c, android=False):
         r['edit_url'] = reverse('pos:edit_category', kwargs={'company': c.company.url_name, 'category_id': c.id})
     else:
         r['product_cunt'] = c.product_count
+        r['level'] = c.category_level
 
     return r
 
