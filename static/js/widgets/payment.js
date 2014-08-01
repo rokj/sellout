@@ -141,20 +141,20 @@ Payment = function(g, bill){
                     receipt = format_receipt(p.g, p.bill, 'small');
 
                     // TODO: temporary
-                    receipt.appendTo("body").show();
+                    //receipt.appendTo("body").show();
                     // TODO: permanent
-                    //receipt.printThis();
-                    //receipt.remove();
+                    receipt.printThis();
+                    receipt.remove();
                 }
                 else{
                     // large receipt
                     receipt = format_receipt(p.g, p.bill, 'large');
 
                     // TODO: temporary
-                    receipt.appendTo("body").show();
+                    //receipt.appendTo("body").show();
                     // TODO: permanent
-                    //receipt.printThis();
-                    //receipt.remove();
+                    receipt.printThis();
+                    receipt.remove();
                 }
                 break;
             default:

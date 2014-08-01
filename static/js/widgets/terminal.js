@@ -324,7 +324,7 @@ Terminal = function(g){
     p.items.controls_options_button.simpleMenu(p.items.controls_options_menu);
 
     // controls menu items
-    p.items.controls_change_register.click(function(){
+    p.items.controls_change_register.unbind().click(function(){
         // clear register settings from memory and local storage so that the dialog will be shown
         p.register = null;
         clear_local('register_id');

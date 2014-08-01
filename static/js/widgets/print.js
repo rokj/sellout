@@ -60,11 +60,9 @@ function format_receipt(g, bill, type){
     var company_details = $(".company .details", receipt);
     company_details.html(company_address(g.data.company));
 
-    if(type != 'small'){
+    if(type != 'small' && g.data.company.phone){
         // add special info about company: phone, website
-        company_details.append(
-            join([g.data.company.phone, "<br/>",
-            g.data.company.website], false));
+        company_details.append(gettext("Phone") + ": " + g.data.company.phone);
     }
 
     // the same for client company (if selected)
@@ -108,9 +106,8 @@ function format_receipt(g, bill, type){
 
     // bill items:
     var items_list = $(".items-body", receipt);
-    var item_template_1 = $(".receipt-row.first", receipt);
-    var item_template_2 = $(".receipt-row.second", receipt);
-    var io1, io2;
+    var item_template = $(".receipt-row", receipt);
+    var io;
 
     for(i = 0; i < bill.data.items.length; i++){
         // get item data
@@ -137,29 +134,29 @@ function format_receipt(g, bill, type){
         }
 
         // clone the two rows
-        io1 = item_template_1.clone();
-        io2 = item_template_2.clone();
+        io = item_template.clone().show();
 
         // name
-        $(".item-name", io1).text(item.name);
-
+        $(".item-name", io).text(item.name);
+        // item notes (if any)
+        $(".item-notes", io).text(item.bill_notes);
         // quantity and unit type
-        if(item.unit_type == 'Piece') $(".item-unit", io2).html('&nbsp;');
-        else $(".item-unit", io2).text(item.unit_type);
-
-
-        $(".item-quantity", io2).text(item.quantity);
-
+        if(item.unit_type == 'Piece') $(".item-unit", io).html('&nbsp;');
+        else $(".item-unit", io).text(item.unit_type);
+        // quantity
+        $(".item-quantity", io).text(item.quantity);
         // amount
-        $(".item-amount", io2).text(item.total + " " + tax_rates[t].letter);
-
-        $(".item-price", io2).text(item.base_price);
-        $(".item-tax", io2).text(item.tax_percent + "%");
-        $(".item-discount", io2).text(item.discount_absolute);
+        $(".item-amount", io).text(item.total);
+        // tax
+        $(".item-tax", io).text(tax_rates[t].letter);
+        // price
+        $(".item-price", io).text(item.base_price);
+        // discount
+        $(".item-discount", io).text(item.discount_absolute);
 
         // append to items_list
-        items_list.append(io1);
-        items_list.append(io2);
+        items_list.append(io);
+        items_list.append(io);
     }
 
     // tax rates

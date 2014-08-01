@@ -36,19 +36,19 @@
     position: relative;
     overflow: hidden;
     text-overflow: ellipsis;
-    
+
     min-width: 120px;
     text-align: center;
-    
+
     padding-left: 10px;
     padding-right: 10px;
-    
+
     margin-right: 20px;
-    
+
     border-radius: 5px;
 
     cursor: pointer;
-    
+
 }
 
 .no-breadcrumbs #category_button_favorites,
@@ -71,14 +71,14 @@
 .no-breadcrumbs #category_button_back{
     width: 60px;
     background-color: #b0b0b0;
-    
+
 }
 
 .no-breadcrumbs #category_button_back > img{
     height: 32px;
     vertical-align: top;
     position: relative;
-    top: 12px;    
+    top: 12px;
 }
 
 .no-breadcrumbs #category_button_back.disabled{
@@ -105,6 +105,7 @@
     padding-left: 10px;
     text-transform: uppercase;
     color: #969696;
+    padding-right: 10px;
 }
 
 .no-breadcrumbs #products_title{

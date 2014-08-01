@@ -102,7 +102,7 @@ $(document).ready(function(){
             // add criteria from the advanced div
             $(".filter").each(function(){
                 if($(this).val()){
-                    search_criteria[$(this).attr("id")] = $(this).val(); 
+                    search_criteria[$(this).attr("id")] = $(this).val();
                 }
             });
 
@@ -507,26 +507,8 @@ $(document).ready(function(){
         // listbox with taxes
         sel_obj = $("#edit_product_tax", edit_obj).empty();
 
-        for(i=0; i < tax_rates.length; i++){
-            opt_obj = $("<option>")
-                .attr("value", tax_rates[i].id)
-                .append(escape(tax_rates[i].name) + " (" + tax_rates[i].amount + "%)");
-            
-            if(product.tax){ // use product's tax if editing
-                if(tax_rates[i].id == product.tax_id){
-                    // select the chosen tax
-                    opt_obj.attr("selected", "selected");
-                }
-            }
-            else{ // set default tax if adding new products
-                if(tax_rates[i].id == {{default_tax_id}}){
-                    // select the chosen tax
-                    opt_obj.attr("selected", "selected");
-                }
-            }
-            sel_obj.append(opt_obj);
-        }
-        
+        create_tax_select(sel_obj, product, false);
+
         // autocomplete with categories
         sel_obj = $("#edit_product_category", edit_obj).empty();
         sel_obj.autocomplete({source: categories_list });
@@ -926,7 +908,42 @@ $(document).ready(function(){
             $(this).text(ut_display);
         });
     }
-    
+
+    function create_tax_select(sel_obj, product, select_none){
+        var opt_obj;
+
+        for(i=0; i < tax_rates.length; i++){
+            opt_obj = $("<option>")
+                .attr("value", tax_rates[i].id)
+                .text(escape(tax_rates[i].name) + " (" + tax_rates[i].amount + "%)");
+
+            if(product && product.tax){ // use product's tax if editing
+                if(tax_rates[i].id == product.tax_id){
+                    // select the chosen tax
+                    opt_obj.attr("selected", "selected");
+                }
+            }
+            else{ // set default tax if adding new products
+                if(tax_rates[i].id == {{default_tax_id}}){
+                    // select the chosen tax
+                    opt_obj.attr("selected", "selected");
+                }
+            }
+            sel_obj.append(opt_obj);
+        }
+
+        if(select_none){
+            opt_obj = $("<option>")
+                    .attr("value", null)
+                    .text("---");
+
+            sel_obj.append(opt_obj);
+
+            if(!product) opt_obj.attr("selected", "selected");
+        }
+
+    }
+
     ////////////////////
     // data retrieval
     ////////////////////
@@ -1025,6 +1042,9 @@ $(document).ready(function(){
         cat_inp_obj.autocomplete("search", "");
     });
 
+    // tax rates select
+    create_tax_select($("#tax_filter"), null, true);
+
     // update products on button click
     $("#update_results").click(function(){
         update_products();
@@ -1052,7 +1072,7 @@ $(document).ready(function(){
     else{
         $("#add_product").prop("disabled", true);
     }
-    
+
     gf_obj.focus();
 
     // matching urls:
@@ -1091,12 +1111,7 @@ $(document).ready(function(){
                     cat_input.data({id: catid});
 
                     // find the category with this id and enter the name in category box
-                    for(var i = 0; i < categories.length; i++){
-                        if(categories[i].value == catid){
-                            cat_input.val(categories[i].label);
-                            break;
-                        }
-                    }
+                    cat_input.val(categories_by_id[catid]);
 
                     // do a search in this category
                     update_products();
@@ -1160,7 +1175,7 @@ $(document).ready(function(){
                 <input type="text" id="notes_filter" class="filter" />
 
                 <label for="tax_filter">{% trans 'Tax' %}:</label>
-                <input type="text" id="tax_filter" class="filter" />
+                <select id="tax_filter" class="filter" ></select>
 
                 <label for="price_filter">{% trans 'Price' %}:</label>
                 <input type="text" id="price_filter" class="filter" />
