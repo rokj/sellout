@@ -21,6 +21,9 @@
     background-color: #000000;
 }
 
+#tax_filter{
+    width: 100%;
+}
 
 .negative-profit{
     color:white;
@@ -108,12 +111,12 @@ input#edit_product_save, input#edit_product_cancel{
     position: absolute;
     left: 50%;
     top: 50px;
-    
-    
+
+
     z-index: 7;
     width: 900px;
     margin-left: -480px;
-    
+
     background-color: #ebebeb;
     padding-top: 40px;
     padding-left: 40px;

@@ -1,81 +1,97 @@
-function join(text1, text2, separator){
-    if(text1){
-        // text1, text2
-        if(text2) return escape(text1) + separator + " " + escape(text2);
-        // text1
-        else return escape(text1);
+function join(text, newline){
+    // joins text with separators and leaves out separators if there's no text
+    // text/separators is an array of strings
+    var r = "";
+    var i, l = text.length;
+    var t;
+
+    if(text.length % 2 != 1){
+        console.error("Length of text must be an odd number");
+        return "!Error!";
     }
-    else{
-        // text2
-        if(text2) return escape(text2);
-        // no texts at all
-        else return "";
+
+    text.push(""); // to simplify for loop
+
+    for(i = 0; i < l; i += 2){
+        if(typeof text[i] != 'string') continue;
+
+        t = text[i].trim();
+        if(t.length > 0){
+            r += escape(t) + text[i+1];
+        }
     }
+
+    if(newline && r.trim()) r += "<br />";
+
+    return r;
 }
 
-function format_small_receipt(g, bill){
+function individual_address(contact){
+    // returns 'formatted' individual address:
+    return join([contact.street_address, ", ", contact.postcode, ", ", contact.city], true) +
+        join([contact.state, ", ", contact.country_name], false);
+}
+
+function company_address(contact){
+    // see individual_address
+    var vat;
+
+    if(contact.vat) vat = gettext("VAT") + ": " + contact.vat;
+    else vat = '';
+
+    return join([contact.street_address || contact.street, ", ", contact.postcode, " ", contact.city], true) +
+        join([contact.state, ", ", contact.country_name], true) +
+        join([vat, "<br/>", contact.website], true);
+}
+
+function format_receipt(g, bill, type){
     // g: terminal globals
     // bill: Bill() objects
-    var receipt = g.items.small_receipt_template.clone().removeAttr("id");
+    var receipt;
+
+    if(type == 'small') receipt = g.items.small_receipt_template;
+    else receipt = g.items.large_receipt_template;
+
+    receipt = receipt.clone().removeAttr("id");
 
     // company details:
-    // logo:
-    if(g.objects.terminal.register.print_logo && g.items.company_monochrome_logo){
-        // if company's logo exists, append
-        $(".receipt-logo", receipt).append(g.items.company_monochrome_logo);
+    $(".company .name", receipt).text(g.data.company.name);
+
+    var company_details = $(".company .details", receipt);
+    company_details.html(company_address(g.data.company));
+
+    if(type != 'small' && g.data.company.phone){
+        // add special info about company: phone, website
+        company_details.append(gettext("Phone") + ": " + g.data.company.phone);
     }
-
-    // issuing company details: create some
-    $(".issuing.company-details-name", receipt).text(g.data.company.name);
-
-    $(".issuing.company-details-1", receipt).text(
-        join(g.data.company.street, join(g.data.company.postcode, g.data.company.city, ""), ",")
-    );
-    $(".issuing.company-details-2", receipt).text(
-        join(g.data.company.state, g.data.company.country_name, ",")
-    );
-
-    $(".issuing.company-details-3", receipt).html(
-        join(gettext("VAT") + ": " + g.data.company.vat_no, g.data.company.website, "<br />")
-    );
 
     // the same for client company (if selected)
     if(bill.contact){
         if(bill.contact.type == 'Individual'){
-            // individual layout
-            $(".client-company", receipt).hide();
-            $(".client-individual", receipt).show();
-
-            $(".client.individual-details-name", receipt).text(bill.contact.first_name + " " + bill.contact.last_name);
-            $(".client.individual-details-1", receipt).text(
-                join(bill.contact.street_address,
-                    join(bill.contact.postcode, bill.contact.city, ","),
-                    ", ")
-            );
-            $(".client.individual-details-2", receipt).text(
-                join(bill.contact.state, bill.contact.country_name, ", ")
-            );
+            $(".client .name", receipt).html(join([bill.contact.first_name, " ", bill.contact.last_name], false));
+            $(".client .details", receipt).html(individual_address(bill.contact));
         }
         else{
-            // company layout
-            $(".client-individual", receipt).hide();
-            $(".client-company", receipt).show();
-
-            $(".client.company-details-name", receipt).text(bill.contact.company_name);
-            $(".client.company-details-1", receipt).text(
-                join(bill.contact.street_address,
-                    join(bill.contact.postcode, bill.contact.city, ""),
-                    ", "
-                )
-            );
-            $(".client.company-details-2", receipt).text(
-                    join(bill.contact.state, bill.contact.country_name, ", ")
-            );
-            $(".client.company-details-3", receipt).text(join(gettext("VAT") + ": " + bill.contact.vat, "", ""));
+            $(".client .name", receipt).text(bill.contact.company_name);
+            $(".client .details", receipt).html(company_address(bill.contact));
         }
     }
 
-    // register location (if selected in register settings)
+    // logo
+    if(type == 'small'){
+        if(g.objects.terminal.register.print_logo && g.items.company_monochrome_logo){
+            // if company's logo exists, append
+            $(".receipt-logo", receipt).append(g.items.company_monochrome_logo);
+        }
+    }
+    else{
+        if(g.items.company_color_logo){
+            // if company's logo exists, append
+            $(".receipt-logo", receipt).append(g.items.company_color_logo);
+        }
+    }
+
+    // location and register location (if selected in register settings)
     if(g.objects.terminal.register.print_location && g.objects.terminal.register.location){
         $(".register-location", receipt).text(g.objects.terminal.register.location);
     }
@@ -90,9 +106,8 @@ function format_small_receipt(g, bill){
 
     // bill items:
     var items_list = $(".items-body", receipt);
-    var item_template_1 = $(".receipt-row.first", receipt);
-    var item_template_2 = $(".receipt-row.second", receipt);
-    var io1, io2;
+    var item_template = $(".receipt-row", receipt);
+    var io;
 
     for(i = 0; i < bill.data.items.length; i++){
         // get item data
@@ -119,29 +134,29 @@ function format_small_receipt(g, bill){
         }
 
         // clone the two rows
-        io1 = item_template_1.clone();
-        io2 = item_template_2.clone();
+        io = item_template.clone().show();
 
         // name
-        $(".item-name", io1).text(item.name);
-
+        $(".item-name", io).text(item.name);
+        // item notes (if any)
+        $(".item-notes", io).text(item.bill_notes);
         // quantity and unit type
-        if(item.unit_type == 'Piece') $(".item-unit", io2).html('&nbsp;');
-        else $(".item-unit", io2).text(item.unit_type);
-
-
-        $(".item-quantity", io2).text(item.quantity);
-
+        if(item.unit_type == 'Piece') $(".item-unit", io).html('&nbsp;');
+        else $(".item-unit", io).text(item.unit_type);
+        // quantity
+        $(".item-quantity", io).text(item.quantity);
         // amount
-        $(".item-amount", io2).text(item.total + " " + tax_rates[t].letter);
-
-        $(".item-price", io2).text(item.base_price);
-        $(".item-tax", io2).text(item.tax_percent + "%");
-        $(".item-discount", io2).text(item.discount_absolute);
+        $(".item-amount", io).text(item.total);
+        // tax
+        $(".item-tax", io).text(tax_rates[t].letter);
+        // price
+        $(".item-price", io).text(item.base_price);
+        // discount
+        $(".item-discount", io).text(item.discount_absolute);
 
         // append to items_list
-        items_list.append(io1);
-        items_list.append(io2);
+        items_list.append(io);
+        items_list.append(io);
     }
 
     // tax rates

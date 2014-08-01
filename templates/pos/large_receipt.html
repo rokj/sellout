@@ -1,0 +1,132 @@
+{% load i18n %}
+{% load static %}
+
+<div class="receipt-fullpage">
+    <table class="receipt-header">
+        <tr class="issuing-company">
+            {# logo #}
+            <td rowspan="2" class="receipt-logo"></td>
+            <td class="company">
+                {# company #}
+                <div class="company name"></div>
+                <div class="company details"></div>
+            </td>
+            <td class="client">
+                {# client #}
+                <div class="name"></div>
+                <div class="details"></div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                {# cashier #}
+                <div class="receipt-cashier">
+                    {% comment %} the last row: cashier's name and date-time {% endcomment %}
+                    <div class="receipt-cashier-text">{% trans 'Cashier' %}:&nbsp;</div>
+                    <div class="receipt-cashier-name"></div>
+                    <div class="receipt-datetime"></div>
+                </div>
+            </td>
+            <td>
+                {# register and location #}
+                <div class="receipt-location-text">{% trans 'Location' %}:</div>
+                <div class="register-location"></div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="bill-serial">
+        {% trans 'Bill No.' %}:&nbsp;
+        <span class="bill-serial-content"></span>
+    </div>
+
+    <table class="receipt-items">
+        <thead>
+            <tr class="items-header">
+                <td class="name">{% trans 'Name' %}</td>
+                <td class="price">{% trans 'Price' %}</td>
+                <td class="discount">{% trans 'Discount' %}</td>
+                <td class="quantity">{% trans 'Quantity' %}</td>
+                <td class="unit">&nbsp;</td>
+                <td class="amount">{% trans 'Amount' %}</td>
+            </tr>
+        </thead>
+
+        <tfoot class="items-footer">
+            <tr>
+                <td colspan="6"></td> {# a dummy spacer #}
+            </tr>
+            <tr>
+                <td colspan="3"></td>
+                <td class="">
+                    <div>{% trans 'Total' %}:</div>
+                </td>
+                <td colspan="2" class="total-container">
+                    <div class="tax-margin">
+                        <div class="receipt-currency"></div>
+                        <div class="receipt-total"></div>
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+
+        <tbody class="items-body">
+            <tr class="receipt-row hidden">
+                <td class="name">
+                    {# name and bill notes #}
+                    <div class="item-name"></div>
+                    <div class="item-notes"></div>
+                </td>
+                <td class="price">
+                    <div class="item-price"></div>
+                </td>
+                <td class="discount">
+                    <div class="item-discount"></div>
+                </td>
+                <td class="quantity">
+                    <div class="item-quantity"></div>
+                </td>
+                <td class="unit">
+                    <div class="item-unit"></div>
+                </td>
+                <td class="amount">
+                    <div class="item-amount"></div>
+                    <div class="item-tax"></div>
+                </td>
+            </tr>
+        </tbody>
+
+
+    </table>
+
+    {# tax rates #}
+    <table class="tax-rates">
+        <thead>
+            <tr class="tax-row header">
+                <td class="tax-id">&nbsp;</td>
+                <td class="tax-percent">{% trans 'Rate' %}</td>
+                <td class="tax-net">{% trans 'Subtotal' %}</td>
+                <td class="tax-absolute">{% trans 'Tax' %}</td>
+                <td class="tax-gross">{% trans 'Total' %}</td>
+            </tr>
+        </thead>
+
+        <tfoot>
+            <tr class="tax-row footer">
+                <td class="tax-id">{% trans 'Sum' context 'Tax rates table footer' %}</td>
+                <td class="tax-percent">&nbsp;</td>
+                <td class="tax-net"></td>
+                <td class="tax-absolute"></td>
+                <td class="tax-gross"></td>
+            </tr>
+        </tfoot>
+
+        <tbody class="tax-body">
+        </tbody>
+    </table>
+
+    <div class="receipt-footer">
+        To je drobni tisk. Jebite se vsi. Ha. Haha. Hahahahahaha.
+        Ja. Ta račun je narejen s spletno aplikacijo POSSY, katere lastnik je Cocklogic. #YOLO
+    </div>
+</div>

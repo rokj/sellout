@@ -11,8 +11,8 @@
     font-size: 12px;
     margin: 0;
     
-    /* TODO: remove
-    position: absolute;
+    /* TODO: remove*/
+    /*position: absolute;
     z-index: 100;
     right: 0;
     bottom: 0;
@@ -28,32 +28,25 @@
     text-align: center;
 }
 
-.receipt-80mm .issuing.company-details-name{
+.receipt-80mm .company .name{
     text-align: center;
     /*font-weight: bold;*/
     font-size: 12pt;
 }
 
-.receipt-80mm .issuing.company-details-1{
-    text-align: center;
-}
-.receipt-80mm .issuing.company-details-2{
-    text-align: center;
-}
-.receipt-80mm .issuing.company-details-3{
+.receipt-80mm .company .details{
     text-align: center;
 }
 
-.receipt-80mm .issuing-company{
+.receipt-80mm .company{
     overflow: hidden;
 }
 
-.receipt-80mm .client-company .client.company-details-name,
-.receipt-80mm .client-individual .client.individual-details-name{
+.receipt-80mm .client .name{
     font-weight: bold;
 }
 
-.receipt-80mm .client-company *{
+.receipt-80mm .client *{
     margin-left: 5mm;
 }
 
@@ -90,14 +83,13 @@
     border-top: 0.5mm solid black;
     border-bottom: 0.5mm solid black;
     overflow: hidden;
+    width: 100%;
 }
 
 .receipt-80mm .receipt-items .receipt-row{
+    width: 100%;
     clear: both;
     overflow: hidden;
-}
-
-.receipt-80mm .receipt-items .receipt-row.second{
     margin-bottom: 1mm;
 }
 
@@ -106,6 +98,14 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.receipt-80mm .first-row{
+    width: 100%;
+    
+}
+.receipt-80mm .second-row{
+    width: 100%;
 }
 
 /* cells */
@@ -138,9 +138,13 @@
 }
 
 .receipt-80mm .receipt-items .item-amount{
-    width: 30%;
+    width: 25%;
     text-align: right;
-    
+}
+
+.receipt-80mm .receipt-items .item-tax{
+    width: 5%;
+    text-align: right;
 }
 
 .receipt-80mm .receipt-items .items-footer{
@@ -172,6 +176,7 @@
 .receipt-80mm .receipt-items .items-footer .receipt-total{
     text-align: right;
     font-weight: bold;
+    margin-right: 5%; /* the width of .item-tax column */
 }
 
 .receipt-80mm .receipt-cashier{
@@ -231,7 +236,191 @@
     border-top: 0.5mm dotted black;
 }
 
-.horse-picture{
+.receipt-80mm .horse-picture{
     width: 60%;
     margin: 0 auto;
+}
+
+/* the full-page receipt */
+.receipt-fullpage{
+    position: relative;
+
+    padding-top: 15mm;
+    margin-left: 10mm;
+    margin-right: 10mm;
+
+    /* TODO: remove */
+    /*position: absolute;
+    z-index: 100;
+    right: 0;
+    bottom: 0;
+    background-color: white;*/
+}
+
+.receipt-fullpage * {
+    font-size: 13px;
+    background-color: #ffffff;
+}
+
+/* header */
+.receipt-fullpage .receipt-header{
+    width: 100%;
+}
+
+.receipt-fullpage .receipt-header td{
+    vertical-align: top;
+    padding-bottom: 5mm;
+}
+
+.receipt-fullpage .receipt-header .receipt-logo{
+    width: 25%;
+    text-align: right;
+}
+
+.receipt-fullpage .receipt-header .receipt-logo img{
+    width: 80%;
+    margin-top: 5mm;
+    margin-right: 10%;
+}
+
+.receipt-fullpage .company .name,
+.receipt-fullpage .client .name,
+.receipt-fullpage .receipt-cashier-text,
+.receipt-fullpage .receipt-location-text{
+    font-weight: bold;
+}
+
+/* bill items */
+.receipt-fullpage .bill-serial{
+    position: relative;
+    width: 100%;
+
+    padding-bottom: 1mm;
+    margin-top: 10mm;
+
+    border-bottom: 1mm solid #646464;
+}
+
+.receipt-fullpage .bill-serial,
+.receipt-fullpage .bill-serial-content{
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 14px;
+}
+
+.receipt-fullpage .bill-serial-content{
+    background: none;
+}
+
+.receipt-fullpage table{
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.receipt-fullpage .receipt-items .items-header td{
+    text-transform: uppercase;
+    font-weight: bold;
+    
+    padding-top: 2mm;
+    border-bottom: 0.5mm solid #000000;
+}
+
+/* each item's classes */
+.receipt-fullpage .items-body tr td{
+    border-bottom: 0.3mm dotted #000000;
+    padding-top: 2mm;
+    padding-bottom: 2mm;
+}
+
+.receipt-fullpage .receipt-items .name{
+    width: 35%;
+}
+
+.receipt-fullpage .receipt-items .item-notes{
+    font-size: 11px;
+}
+
+.receipt-fullpage .receipt-items .price{
+    text-align: right;
+}
+
+.receipt-fullpage .receipt-items .discount{
+    text-align: right;
+    width: 15%;
+}
+
+.receipt-fullpage .receipt-items .quantity{
+    text-align: right;
+}
+
+.receipt-fullpage .receipt-items .amount{
+    text-align: right;
+}
+
+.receipt-fullpage .receipt-items .amount .item-amount{
+    display: inline-block;
+}
+
+.receipt-fullpage .receipt-items .amount .item-tax{
+    display: inline-block;
+    width: 4mm;
+}
+
+.receipt-fullpage .items-footer tr td{
+    padding-top: 2mm;
+    padding-bottom: 2mm;
+}
+
+.receipt-fullpage .items-footer tr:last-child td:not(:first-child){
+    border-top: 0.5mm solid #000000;
+    border-bottom: 0.5mm solid #000000;
+}
+
+.receipt-fullpage .items-footer .total-container{
+    text-align: right;
+}
+
+.receipt-fullpage .items-footer .receipt-currency{
+    display: inline;
+}
+.receipt-fullpage .items-footer .receipt-total{
+    display: inline;
+}
+
+.receipt-fullpage .items-footer .tax-margin{
+    padding-right: 4mm; /* the same as .item-tax width */
+}
+
+.receipt-fullpage table.tax-rates{
+    width: 50%;
+    margin-top: 10mm;
+}
+
+.receipt-fullpage table.tax-rates tr td:not(:first-child){
+    text-align: right;
+}
+
+.receipt-fullpage table.tax-rates thead td{
+    border-bottom: 0.5mm solid #000000;
+}
+.receipt-fullpage table.tax-rates tfoot td{
+    border-top: 0.5mm solid #000000;
+}
+
+.receipt-fullpage table.tax-rates tbody tr:not(:last-child) td{
+    border-bottom: 0.3mm dotted #646464;
+}
+
+.receipt-fullpage .receipt-footer{
+
+    border-top: 0.3mm dotted #646464;
+    padding-top: 1mm;
+    margin-top: 6mm;
+
+    width: 100%;
+
+    font-size: 9px;
+    text-align: center;
+
+    color: #646464;
 }

@@ -247,9 +247,9 @@ def search_products(request, company, android=False):
         filter_by_category = False
         
     # tax_filter
-    if criteria.get('tax_filter'):
+    if criteria.get('tax_filter') and criteria.get('tax_filter').isdigit():
         #filter_by_tax = True
-        products = products.filter(tax=decimal.Decimal(criteria.get('tax_filter')))
+        products = products.filter(tax_id=int(criteria.get('tax_filter')))
     else:
         pass
         #filter_by_tax = False
@@ -448,11 +448,11 @@ def validate_product(user, company, data):
         except Product.DoesNotExist:
             pass # there is no product with this code, everything is ok
     
-    # shop code: if exists, must be unique
+    # shortcut: if exists, must be unique
     data['shortcut'] = data['shortcut'].strip()
     if data['shortcut']:
         if len(data['shortcut']) > max_field_length(Product, 'shortcut'):
-            return r(False, _("Shop code too long"))
+            return r(False, _("Shortcut too long"))
         
         try:
             p = Product.objects.get(company=company, shortcut=data['shortcut'])

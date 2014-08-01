@@ -161,6 +161,21 @@
                                                 p.button.remove();
                                                 g.toolbox.hide();
 
+                                                // delete the object from parent's list
+                                                if(p.parent){
+                                                    var c = p.parent.children;
+                                                    for(var i = 0; i < c.length; i++){
+                                                        if(c[i].data.id == p.data.id){
+                                                            remove_from_array(c, i);
+                                                            break;
+                                                        }
+                                                    }
+
+                                                    // if this was the last category, 'click' the parent
+                                                    if(c.length == 0){
+                                                        p.parent.button.click();
+                                                    }
+                                                }
                                                 dlg.dialog("destroy");
                                             }
                                         });

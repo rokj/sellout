@@ -249,7 +249,7 @@ Contacts = function(g){
 
             if(c.type == 'Individual'){
                 p.items.bill_contact.text(
-                    join(c.first_name, c.last_name, " ") // the function comes from print.js
+                    join([c.first_name, " ", c.last_name], false) // the function comes from print.js
                 );
             }
             else{
