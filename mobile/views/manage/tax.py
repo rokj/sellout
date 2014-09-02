@@ -1,7 +1,8 @@
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework.permissions import IsAuthenticated
 from pos.models import Company
-from pos.views.manage.tax import list_taxes, get_all_taxes, edit_tax, delete_tax  #, get_taxes, save_taxes
+from pos.views.manage.tax import list_taxes, get_all_taxes, edit_tax, delete_tax, \
+    set_default_tax  #, get_taxes, save_taxes
 from pos.views.util import JSON_error, JSON_ok
 from django.utils.translation import ugettext as _
 
@@ -32,6 +33,10 @@ def mobile_delete_tax(request, company):
     return delete_tax(request, company)
 
 
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_save_default_tax(request, company):
+    return set_default_tax(request, company)
 
 #@api_view(['GET', 'POST'])
 #@permission_classes((IsAuthenticated,))

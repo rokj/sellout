@@ -163,14 +163,14 @@ TIME_FORMATS = {
             'android': "hh:mm:ss",
             'js': "hh:mm:ss",
             },
-    '12:59 AM/PM': {  # 12-hour clock with AM/PM
+    '11:59 AM/PM': {  # 12-hour clock with AM/PM
             'regex': "^[0-2][0-4]:[0-5][0-9] (AM|PM)$",
             'python': "%I:%M %p",
             'django': "",
             'android': "",
             'js': "hh:mm AMPM",
             },
-    '12:59:59 AM/PM': {  # 12-hour clock with AM/PM
+    '11:59:59 AM/PM': {  # 12-hour clock with AM/PM
              'regex': "^[0-2][0-4]:[0-5][0-9]:[0-5][0-9] (AM|PM)$",
              'python': "%r",
              'django': "",

@@ -80,7 +80,7 @@ def mobile_add_contact(request, company):
         country=data.get('country'),
         email=data.get('email'),
         phone=data.get('phone'),
-        # vat = data['vat']
+        vat=data.get('vat')
     )
     contact.save()
 
@@ -130,7 +130,7 @@ def mobile_edit_contact(request, company):
     contact.country = data.get('country')
     contact.email = data.get('email')
     contact.phone = data.get('phone')
-    # contact.vat = data['vat']
+    contact.vat = data['vat']
 
     contact.save()
 

@@ -216,4 +216,4 @@ def set_default_tax(request, company):
     new_default.default = True
     new_default.save()
 
-    return JSON_ok()
+    return JSON_ok(extra=tax_to_dict(request.user, c, new_default))

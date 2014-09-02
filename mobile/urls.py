@@ -4,7 +4,7 @@ from django.utils.translation import ugettext as _
 from common import globals as g
 from mobile.views.manage.company import get_company, edit_company
 from mobile.views.manage.till import mobile_get_all_registers
-from mobile.views.views import mobile_get_cut, mobile_get_units, get_mobile_config
+from mobile.views.views import mobile_get_cut, mobile_get_units
 
 from mobile.views import login
 from mobile.views import bill
@@ -13,11 +13,13 @@ from mobile.views.manage import product
 from mobile.views.manage import discount
 from mobile.views.manage import tax
 from mobile.views.manage import contact
+from mobile.views.manage import configuration
 
 
 ### common URL prefixes: ###
 # company's site: /pos/blocklogic
 # readable pattern: (?P<company>[\w-]{1,30})
+
 r_company = r'^(?P<company>[\w-]{1,' + str(g.MISC['company_url_length']) + '})'
 # system pages (registration, login, logout, ...: /pos/app/register-company
 r_manage = g.MISC['management_url'] + '/'
@@ -55,6 +57,7 @@ urlpatterns = patterns('',
     # taxes
     url(r_company + r'/manage/json/taxes/?$', tax.mobile_list_taxes, name='get_taxes'), # get all taxes in a json list
     url(r_company + r'/manage/json/taxes/edit/?$', tax.mobile_edit_tax, name='edit_tax'),
+    url(r_company + r'/manage/json/taxes/save-default/?$', tax.mobile_save_default_tax, name='edit_tax'),
     url(r_company + r'/manage/json/taxes/delete/?$', tax.mobile_delete_tax, name='delete_tax'),
     # products
     url(r_company + r'/manage/json/products/?$', product.mobile_get_products, name='get_products'),
@@ -73,9 +76,11 @@ urlpatterns = patterns('',
 
     # Mr. Bill
     url(r_company + r'/manage/json/bill/add/?$', bill.mobile_create_bill, name='mobile_add_bill'),
+    url(r_company + r'/manage/json/bill/finish/?$', bill.mobile_finish_bill, name='mobile_add_bill'),
 
     # configuration
-    url(r_company + r'/manage/json/config/?$', get_mobile_config, name='mobile_get_config'),
+    url(r_company + r'/manage/json/config/?$', configuration.get_mobile_config, name='mobile_get_config'),
+    url(r_company + r'/manage/json/config/edit?$', configuration.save_company_config, name='mobile_get_config'),
 
     # company
     url(r_company + r'/manage/json/company/get', get_company, name='mobile_get_company'),

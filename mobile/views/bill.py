@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Bill, BillItem, Product
-from pos.views.bill import create_bill
+from pos.views.bill import create_bill, finish_bill
 from pos.views.util import has_permission, JSON_response, JSON_parse, JSON_error, \
     format_number, parse_decimal, format_date, format_time
 from config.functions import get_company_value
@@ -217,116 +217,9 @@ def get_active_bill(request, company):
     return JSON_response({'status': 'ok', 'bill': bill})
 
 
-@DeprecationWarning
-@login_required
-def edit_item(request, company):
-    """ add an item to bill:
-         - received data: {item_id, bill_id, 'product_id':<id>, 'qty':<qty>, 'notes':<notes>}
-         - calculate all item's fields (tax, discount, total, ...)
-         - add to bill object
-         - return item_to_dict
-    """
-    try:
-        c = Company.objects.get(url_name=company)
-    except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
 
-    # permissions
-    if not has_permission(request.user, c, 'bill', 'edit'):
-        return JSON_error(_("You have no permission to edit bills"))
-    
-    # data
-    try:
-        data = JSON_parse(request.POST.get('data'))
-    except:
-        return JSON_error(_("No data in POST"))
-    
-    # get bill
-    if not data.get('bill_id'):
-        return JSON_error(_("No bill specified"))
-        
-    try:
-        bill = Bill.objects.get(company=c, id=int(data.get('bill_id')))
-    except Bill.DoesNotExist:
-        return JSON_error(_("This bill does not exist"))
-    
-    # get product
-    try:
-        product = Product.objects.get(company=c, id=int(data.get('product_id')))
-    except Product.DoesNotExist:
-        return JSON_error(_("Product with this id does not exist"))
-
-    # parse quantity    
-    r = parse_decimal(request.user, data.get('quantity'), g.DECIMAL['quantity_digits'])
-    if not r['success']:
-        return JSON_error(_("Invalid quantity value"))
-    else:
-        if r['number'] <= Decimal('0'):
-            return JSON_error(_("Cannot add an item with zero or negative quantity"))
-    quantity = r['number']
-    
-    # check if there's enough items left in stock (must be at least zero =D)
-    if product.stock < quantity:
-        print 'wtf'
-        return JSON_error(_("Cannot sell more items than there are in stock"))
-            
-    # calculate and set all stuff for this new item:
-    discounts = product.get_discounts()
-    prices = item_prices(request.user, c, product.get_price(), product.tax.amount, quantity, discounts)
-
-    # notes, if any    
-    bill_notes = data.get('notes')
-
-    # TODO: subtract quantity from stock (if there's enough left)
-
-    # create a bill item and save it to database, then return JSON with its data
-    item = BillItem(
-        created_by=request.user,
-        # copy ProductAbstract's values:
-        code=product.code,
-        shortcut=product.shortcut,
-        name=product.name,
-        description=product.description,
-        private_notes=product.private_notes,
-        unit_type=product.get_unit_type_display(),  # ! display, not the 'code'
-        stock=product.stock,
-        # billItem's fields
-        bill=bill,
-        product_id=product.id,
-        quantity=quantity,
-        base_price=prices['base'],
-        tax_percent=product.tax.amount,
-        tax_absolute=prices['tax_absolute'],
-        discount_absolute=prices['discount_absolute'],
-        single_total=prices['single_total'],
-        total=prices['total'],
-        bill_notes=bill_notes
-    )
-    item.save()
-
-    # return the item in JSON
-    return JSON_response({'item': bill_item_to_dict(request.user, company, item), 'status': 'ok'})
-
-
-@ login_required
-def remove_item(request, company):
-    try:
-        c = Company.objects.get(url_name=company)
-    except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
-
-    # data contains only id:<item_id>
-    try:
-        data = JSON_parse(request.POST.get('data'))
-    except:
-        return JSON_error(_("No data in POST"))
-        
-    # get item and remove it
-    try:
-        item = BillItem.objects.get(id=int(data.get('id')))
-        # save Item id for later
-        id = item.id
-        item.delete()
-        return JSON_response({'status':'ok', 'item_id':id})
-    except:
-        return JSON_error(_("Could not delete the item"))
+@api_view(['POST', 'GET'])
+@permission_classes((IsAuthenticated,))
+def mobile_finish_bill(request, company):
+    return finish_bill(request, company)
+    # return JSON_ok()

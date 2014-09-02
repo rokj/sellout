@@ -1,3 +1,5 @@
+from mobile.views.manage.configuration import get_company_config
+from pos.models import Company
 from pos.views.util import JSON_error, JSON_response
 
 from rest_framework import parsers, renderers
@@ -52,6 +54,7 @@ class ObtainAuthToken(APIView):
         return JSON_response({'token': token.key,
                          'user': user_credentials,
                          'last_group': group,
+                         'config': get_company_config(user, Company.objects.get(url_name=group)),
                          'status': "ok"})
 
         #return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
