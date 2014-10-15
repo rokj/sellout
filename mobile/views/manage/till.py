@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Register, Company
 from pos.views.manage.till import get_all_registers
-from pos.views.util import has_permission, no_permission_view, manage_delete_object, JSON_response, JSON_ok
+from pos.views.util import has_permission, no_permission_view, manage_delete_object, JsonOk
 
 from common import globals as g
 from config.functions import get_date_format, get_user_value, get_company_value
@@ -21,7 +21,7 @@ def mobile_get_all_registers(request, company):
 
     c = Company.objects.get(url_name=company)
 
-    return JSON_ok(extra=get_all_registers(c, user))
+    return JsonOk(extra=get_all_registers(c, user))
 
 """
 @api_view(['GET', 'POST'])

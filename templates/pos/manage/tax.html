@@ -297,16 +297,13 @@ $(document).ready(function(){
 
         <tbody id="tax_table">
             <tr id="tax_template" class="tax hidden">
-                <td class="amount">
-                    <span class="read"></span>
-                    <input type="text"
-                           class="edit hidden" />
-                </td>
                 <td class="name">
                     <span class="read"></span>
-                    <input type="text"
-                           maxlength="{{ max_name_length }}"
-                           class="edit hidden" />
+                    <input type="text" maxlength="{{ max_name_length }}" class="edit hidden"/>
+                </td>
+                <td class="amount">
+                    <span class="read"></span>
+                    <input type="text" class="edit hidden"/>
                 </td>
                 <td class="controls">
                     {% comment %} edit, delete, save and cancel buttons {% endcomment %}

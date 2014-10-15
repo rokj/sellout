@@ -2,14 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from pos.models import Company, Discount
-from pos.views.util import error, JSON_response, JSON_error, \
+from pos.views.util import JsonError, \
                            has_permission, no_permission_view, \
                            format_number, format_date, parse_date, parse_decimal, \
-                           max_field_length, JSON_parse, JSON_ok, manage_delete_object
+                           max_field_length, manage_delete_object
 from common import globals as g
 from config.functions import get_date_format, get_user_value, get_company_value
 
@@ -42,13 +42,13 @@ def JSON_discounts(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # permissions
     if not has_permission(request.user, c, 'discount', 'view'):
-        return JSON_error(_("You have no permission to view discounts"))
+        return JsonError(_("You have no permission to view discounts"))
 
-    return JSON_response(get_all_discounts(request.user, c))
+    return JsonResponse(get_all_discounts(request.user, c))
 
 
 def get_all_discounts(user, company, android=False):
@@ -70,7 +70,7 @@ def validate_discount(data, user, company):
         data is a dictionary with keys equal to model fields
         returns a dictionary: {
         'success': True if all data is valid, else False
-        'message': None if data is valid, else a message for ValidationError or JSON_error
+        'message': None if data is valid, else a message for ValidationError or JsonError
         'data':'cleaned' data if data is valid, else None
     """
     

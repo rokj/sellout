@@ -12,7 +12,7 @@ from pos.views.manage.product import get_all_products
 from pos.views.manage.tax import get_all_taxes
 from pos.views.manage.till import get_all_registers
 
-from pos.views.util import has_permission, no_permission_view, JSON_ok, JSON_parse, JSON_stringify, error, JSON_error
+from pos.views.util import has_permission, no_permission_view, JsonOk, JsonParse, JsonStringify, error, JsonError
 from config.functions import get_user_value, set_user_value, get_date_format, get_time_format, get_company_value
 from config.countries import country_choices
 import common.globals as g
@@ -42,7 +42,6 @@ def terminal(request, company):
         # interface parameters
         'date_format': get_date_format(request.user, c, 'js'),
         'time_format': get_time_format(request.user, c, 'js'),
-        'interface': get_user_value(request.user, 'pos_interface'),
         'product_button_size': g.PRODUCT_BUTTON_DIMENSIONS[get_user_value(request.user, 'pos_product_button_size')],
         'bill_width': get_user_value(request.user, 'pos_interface_bill_width'),
         'display_breadcrumbs': False, # get_user_value(request.user, 'pos_display_breadcrumbs'), (currently hardcodedly disabled)
@@ -80,8 +79,8 @@ def terminal(request, company):
         'countries': country_choices,
 
         # user config
-        'config': JSON_stringify(config, True),
-        'data': JSON_stringify(data, True),
+        'config': JsonStringify(config, True),
+        'data': JsonStringify(data, True),
         'registers': data['registers'],
     }
 
@@ -92,14 +91,14 @@ def terminal(request, company):
 def save(request, company):
     """ terminal settings on change """
     try:
-        width = int(JSON_parse(request.POST.get('data')).get('bill_width'))
+        width = int(JsonParse(request.POST.get('data')).get('bill_width'))
     except (ValueError, TypeError):
-        return JSON_error(_("Data error"))
+        return JsonError(_("Data error"))
 
     set_user_value(request.user, 'pos_interface_bill_width', width)
 
     # save stuff from data to config
-    return JSON_ok()
+    return JsonOk()
 
 
 @login_required
@@ -107,16 +106,16 @@ def set_register(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist."))
+        return JsonError(_("Company does not exist."))
 
     # the user must have view permissions for terminal
     if not has_permission(request.user, c, 'terminal', 'view'):
-        return JSON_error(_("Permission denied"))
+        return JsonError(_("Permission denied"))
 
     # get the number and
     try:
-        id = int(JSON_parse(request.POST.get('data')).get('register_id'))
+        id = int(JsonParse(request.POST.get('data')).get('register_id'))
     except (ValueError, TypeError):
-        return JSON_error("Data error")
+        return JsonError("Data error")
 
-    return JSON_ok()
+    return JsonOk()

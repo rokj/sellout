@@ -8,7 +8,7 @@ from pos.views.manage.category import get_all_categories
 from pos.views.manage.configuration import ConfigForm
 from pos.views.manage.discount import get_all_discounts
 from pos.views.manage.tax import tax_to_dict
-from pos.views.util import JSON_error, has_permission, JSON_response, JSON_ok, no_permission_view, JSON_parse
+from pos.views.util import JsonError, has_permission, JsonOk, no_permission_view, JsonParse
 from django.utils.translation import ugettext as _
 
 
@@ -18,11 +18,11 @@ def mobile_get_units(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     units = UNITS
     result = {'units': units}
-    return JSON_response(result)
+    return JsonResponse(result)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
@@ -30,10 +30,10 @@ def mobile_get_cut(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     if not has_permission(request.user, c, 'tax', 'view'):
-        return JSON_error(_("You have no permission to view taxes"))
+        return JsonError(_("You have no permission to view taxes"))
 
     taxes = Tax.objects.filter(company=c)
     result = {}
@@ -52,4 +52,4 @@ def mobile_get_cut(request, company):
     result['discounts'] = discounts
 
 
-    return JSON_response(result)
+    return JsonResponse(result)

@@ -1060,10 +1060,10 @@ $(document).ready(function(){
             // empty product
             var product = {
                 "id":-1,// new product's id = -1 until the server assigns an id
-                "discounts":[] // no discounts so far
+                "discounts": [] // no discounts so far
             };
             // save it to a dummy div
-            var parent = $("#new_product_dummy");
+            var parent = $("#new_product_dummy").empty();
             parent.data(product);
             
             show_product_edit_dialog(parent);

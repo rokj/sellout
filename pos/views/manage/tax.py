@@ -6,11 +6,11 @@ from django.utils.translation import ugettext as _
 from pos.models import Company, Tax, Product
 from common import globals as g
 from config.functions import get_company_value
-from pos.views.util import JSON_response, JSON_parse, JSON_error, JSON_ok, \
+from pos.views.util import JsonParse, JsonError, JsonOk, \
                             has_permission, no_permission_view, \
                             format_number, \
                             max_field_length, \
-                            parse_decimal, JSON_stringify
+                            parse_decimal, JsonStringify
 
 
 def tax_to_dict(user, company, tax):
@@ -93,7 +93,7 @@ def list_taxes(request, company):
     
     context = {
         'company': c,
-        'taxes': JSON_stringify(get_all_taxes(request.user, c)),
+        'taxes': JsonStringify(get_all_taxes(request.user, c)),
         'edit_permission': edit_permission,
         'max_name_length': max_field_length(Tax, 'name'),
         'title': _("Manage Tax Rates"),
@@ -111,22 +111,22 @@ def edit_tax(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # permission
     if not has_permission(request.user, c, 'tax', 'edit'):
-        return JSON_error(_("You have no permission to edit taxes"))
+        return JsonError(_("You have no permission to edit taxes"))
 
     # the data
-    data = JSON_parse(request.POST.get('data'))
+    data = JsonParse(request.POST.get('data'))
 
     if not data:
-        return JSON_error(_("No data sent"))
+        return JsonError(_("No data sent"))
 
     # validate
     valid = validate_tax(request.user, c, data)
     if not valid['success']:
-        return JSON_error(valid['message'])
+        return JsonError(valid['message'])
     data = valid['data']
     if data['id'] != -1:
         # it's an existing tax, fetch it and update
@@ -134,7 +134,7 @@ def edit_tax(request, company):
         try:
             tax = Tax.objects.get(company=c, id=data['id'])
         except Tax.DoesNotExist:
-            return JSON_error(_("Tax does not exist"))
+            return JsonError(_("Tax does not exist"))
 
         tax.amount = data['amount']
         tax.name = data['name']
@@ -150,9 +150,9 @@ def edit_tax(request, company):
     try:
         tax.save()
     except IntegrityError as e:
-        return JSON_error(_("Could not save tax; ") + e.message)
+        return JsonError(_("Could not save tax; ") + e.message)
 
-    return JSON_ok(extra=tax_to_dict(request.user, c, tax))
+    return JsonOk(extra=tax_to_dict(request.user, c, tax))
 
 
 @login_required
@@ -161,30 +161,30 @@ def delete_tax(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # permissions
     if not has_permission(request.user, c, 'tax', 'edit'):
-        return JSON_error(_("You have no permission to edit taxes"))
+        return JsonError(_("You have no permission to edit taxes"))
 
     # the data
-    data = JSON_parse(request.POST.get('data'))
+    data = JsonParse(request.POST.get('data'))
     if not data:
-        return JSON_error(_("No data sent"))
+        return JsonError(_("No data sent"))
 
     # get the tax
     tax = Tax.objects.get(company=c, id=data['id'])
 
     # if there's a product that uses this tax, it cannot be deleted
     if Product.objects.filter(company=c, tax=tax).exists():
-        return JSON_error(_("A product is using this tax - it cannot be deleted"))
+        return JsonError(_("A product is using this tax - it cannot be deleted"))
 
     try:
         tax.delete()
     except IntegrityError as e:
-        return JSON_error(_("Could not save tax; ") + e.message)
+        return JsonError(_("Could not save tax; ") + e.message)
 
-    return JSON_ok(extra=tax_to_dict(request.user, c, tax))
+    return JsonOk(extra=tax_to_dict(request.user, c, tax))
 
 
 @login_required
@@ -192,22 +192,22 @@ def set_default_tax(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # permissions
     if not has_permission(request.user, c, 'tax', 'edit'):
-        return JSON_error(_("You have no permission to edit taxes"))
+        return JsonError(_("You have no permission to edit taxes"))
 
     try:
-        new_id = int(JSON_parse(request.POST.get('data')).get('id'))
+        new_id = int(JsonParse(request.POST.get('data')).get('id'))
     except (ValueError, KeyError):
-        return JSON_error(_("No tax specified"))
+        return JsonError(_("No tax specified"))
 
     # get the new default tax
     try:
         new_default = Tax.objects.get(id=new_id, company=c)
     except Tax.DoesNotExist:
-        return JSON_error(_("Tax does not exist"))
+        return JsonError(_("Tax does not exist"))
 
     # remove default tax
     Tax.objects.filter(company=c, default=True).update(default=False)
@@ -216,4 +216,4 @@ def set_default_tax(request, company):
     new_default.default = True
     new_default.save()
 
-    return JSON_ok(extra=tax_to_dict(request.user, c, new_default))
+    return JsonOk(extra=tax_to_dict(request.user, c, new_default))

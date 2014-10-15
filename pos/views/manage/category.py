@@ -3,13 +3,13 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Category, Product
-from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok,  \
-    max_field_length, has_permission, no_permission_view, JSON_stringify
+from pos.views.util import JsonError, JsonParse, JsonOk,  \
+    max_field_length, has_permission, no_permission_view, JsonStringify
 
 from common import globals as g
 
@@ -235,14 +235,14 @@ def JSON_categories(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # permissions
     if not has_permission(request.user, c, 'category', 'view'):
-        return JSON_error("no permission")
+        return JsonError("no permission")
 
     # return all categories' data in JSON format
-    return JSON_response(get_all_categories(c, sort='name', data=[], json=True))
+    return JsonResponse(get_all_categories(c, sort='name', data=[], json=True))
 
 
 class CategoryForm(forms.ModelForm):
@@ -269,7 +269,7 @@ def list_categories(request, company):
     context = {
         'box_dimensions': g.IMAGE_DIMENSIONS['category'],
         'company': c,
-        'categories': JSON_stringify(get_all_categories_structured(c), True),
+        'categories': JsonStringify(get_all_categories_structured(c), True),
         'title': _("Categories"),
         'site_title': g.MISC['site_title'],
     }
@@ -309,7 +309,7 @@ def add_category(request, company, parent_id=-1):
         'company': c,
         'parent': parent,
         'add': True,
-        'colors': JSON_stringify(g.CATEGORY_COLORS),
+        'colors': JsonStringify(g.CATEGORY_COLORS),
         'title': _("Add category"),
         'site_title': g.MISC['site_title']
     }
@@ -387,7 +387,7 @@ def edit_category(request, company, category_id):
     context['form'] = form
     context['company'] = c
     context['category'] = category
-    context['colors'] = JSON_stringify(g.CATEGORY_COLORS)
+    context['colors'] = JsonStringify(g.CATEGORY_COLORS)
     context['title'] = _("Edit category")
     context['site_title'] = g.MISC['site_title']
 
@@ -400,45 +400,45 @@ def delete_category(request, company):
     
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'category', 'edit'):
-        return JSON_error(_("You have no permission to delete categories"))
+        return JsonError(_("You have no permission to delete categories"))
     
     # get category
     try:
-        category_id = int(JSON_parse(request.POST.get('data')).get('category_id'))
+        category_id = int(JsonParse(request.POST.get('data')).get('category_id'))
         category = Category.objects.get(id=category_id)
         # check if category actually belongs to the given company
         if category.company != c:
-            return JSON_error(_("You have no permission to delete this category"))
+            return JsonError(_("You have no permission to delete this category"))
     except:
-        return JSON_error(_("No category specified"))
+        return JsonError(_("No category specified"))
 
     if Category.objects.filter(parent=category).count() > 0:
-        return JSON_error(_("Cannot delete category with subcategories"))
+        return JsonError(_("Cannot delete category with subcategories"))
 
     # do not delete a category with products
     if Product.objects.filter(category=category).exists():
-        return JSON_error(_("There are products in this category, it cannot be deleted"))
+        return JsonError(_("There are products in this category, it cannot be deleted"))
 
     # delete the category and return to management page
     try:
         category.delete()
     except:
-        return JSON_error(_("Category could not be deleted"))
+        return JsonError(_("Category could not be deleted"))
     
-    return JSON_ok()
+    return JsonOk()
 
 
 def get_category(request, company, category_id):
     try:
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
     
     # permissions: needs to be guest to view products
     if not has_permission(request.user, c, 'product', 'view'):
-        return JSON_error(_("You have no permission to view products"))
+        return JsonError(_("You have no permission to view products"))
     
     category = get_object_or_404(Category, id=category_id, company=c)
     
-    return JSON_response(category_to_dict(category))
+    return JsonResponse(category_to_dict(category))
 

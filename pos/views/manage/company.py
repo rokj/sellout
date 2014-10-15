@@ -3,6 +3,7 @@ from StringIO import StringIO
 import base64
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -12,7 +13,7 @@ from common.images import image_from_base64, resize_image, image_dimensions
 
 from pos.models import Company
 
-from pos.views.util import JSON_response, JSON_parse, has_permission, no_permission_view, JSON_ok, JSON_error, \
+from pos.views.util import JsonParse, has_permission, no_permission_view, JsonOk, JsonError, \
     max_field_length
 
 from common import globals as g
@@ -79,9 +80,9 @@ def url_name_suggestions(request):
     suggestions = []
     
     try:  # get name from sent data
-        name = JSON_parse(request.POST.get('data'))['name']
+        name = JsonParse(request.POST.get('data'))['name']
     except:
-        return JSON_response({'suggestions':[]})
+        return JsonResponse({'suggestions':[]})
     
     # 0. "lowercaseize"
     name = name.lower()
@@ -141,7 +142,7 @@ def url_name_suggestions(request):
     suggestions.append(unique_url_name(get_random_string(length=5).lower()))
     
     # pass on to the page
-    return JSON_response({'suggestions':suggestions})
+    return JsonResponse({'suggestions':suggestions})
 
 
 ###############
@@ -234,19 +235,27 @@ def company_to_dict(company, android=False):
     c['website'] = company.website
     c['notes'] = company.notes
 
-    if android:
-        with open(company.color_logo.path, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        c['color_logo'] = encoded_string
+    if company.color_logo:
+        if android:
+            with open(company.color_logo.path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
+            c['color_logo'] = encoded_string
+        else:
+            c['color_logo_url'] = company.color_logo.url
     else:
-        c['color_logo_url'] = company.color_logo.url
+        c['color_logo'] = None
+        c['color_logo_url'] = None
 
-    if android:
-        with open(company.monochrome_logo.path, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        c['monochrome_logo'] = encoded_string
+    if company.monochrome_logo:
+        if android:
+            with open(company.monochrome_logo.path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
+            c['monochrome_logo'] = encoded_string
+        else:
+            c['monochrome_logo_url'] = company.monochrome_logo.url
     else:
-        c['monochrome_logo_url'] = company.monochrome_logo.url
+        c['monochrome_logo_url'] = None
+        c['monochrome_logo'] = None
 
     return c
 
@@ -332,7 +341,7 @@ def upload_color_logo(request, company):
     # Kudos: https://snipt.net/danfreak/generate-thumbnails-in-django-with-pil/
     c = Company.objects.get(url_name=company)
 
-    data = JSON_parse(request.POST.get('data'))
+    data = JsonParse(request.POST.get('data'))
 
     return save_color_image(c, data)
 
@@ -343,7 +352,7 @@ def save_color_image(c, data):
         image_file = image_from_base64(data.get('image'))
 
         if not image_file:
-            return JSON_error(_("No file sent"))
+            return JsonError(_("No file sent"))
 
         resize = False
 
@@ -389,7 +398,7 @@ def save_color_image(c, data):
         c.color_logo.save(suf.name + '.png', suf, save=False)
         c.save()
 
-        return JSON_response({'status': 'ok', 'logo_url': c.color_logo.url})
+        return JsonResponse({'status': 'ok', 'logo_url': c.color_logo.url})
     else:
         # there is no image, remove the existing one
         try:
@@ -399,14 +408,14 @@ def save_color_image(c, data):
         except (OSError, ValueError):
             pass
 
-        return JSON_ok()
+        return JsonOk()
 
 
 @login_required
 def upload_monochrome_logo(request, company):
     c = Company.objects.get(url_name=company)
 
-    data = JSON_parse(request.POST.get('data'))
+    data = JsonParse(request.POST.get('data'))
 
     return save_monochrome_image(c, data)
 
@@ -417,7 +426,7 @@ def save_monochrome_image(c, data):
         image_file = image_from_base64(data.get('image'))
 
         if not image_file:
-            return JSON_error(_("No file sent"))
+            return JsonError(_("No file sent"))
 
         resize = False
 
@@ -457,7 +466,7 @@ def save_monochrome_image(c, data):
         c.monochrome_logo.save(suf.name + '.png', suf, save=False)
         c.save()
 
-        return JSON_response({'status': 'ok', 'logo_url': c.monochrome_logo.url})
+        return JsonResponse({'status': 'ok', 'logo_url': c.monochrome_logo.url})
     else:
         # there is no image, remove the existing one
         try:
@@ -467,14 +476,14 @@ def save_monochrome_image(c, data):
         except (OSError, ValueError):
             pass
 
-        return JSON_ok()
+        return JsonOk()
 
 @login_required
 def create_monochrome_logo(request, company):
     c = Company.objects.get(url_name=company)
 
     if not c.color_logo:
-        return JSON_error(_("Color logo does not exist"))
+        return JsonError(_("Color logo does not exist"))
 
     # get company's color logo
     color_logo = Image.open(c.color_logo.path)
@@ -495,4 +504,4 @@ def create_monochrome_logo(request, company):
     django_file.close()
 
     # return an url to the new logo
-    return JSON_response({'status': 'ok', 'logo_url': c.monochrome_logo.url})
+    return JsonResponse({'status': 'ok', 'logo_url': c.monochrome_logo.url})

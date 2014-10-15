@@ -2,7 +2,7 @@ from django.db.backends.dummy.base import IntegrityError
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.core.cache import cache
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 from common import globals as g
 from config.functions import get_date_format, get_time_format, get_company_value
@@ -27,7 +27,7 @@ def error(request, company, message):
     return render(request, 'pos/error.html', context)
 
 
-def JSON_stringify(data, for_javascript=False):
+def JsonStringify(data, for_javascript=False):
     s = json.dumps(data)
 
     if for_javascript:
@@ -40,23 +40,19 @@ def JSON_stringify(data, for_javascript=False):
         return s
 
 
-def JSON_response(data):
-    return HttpResponse(JSON_stringify(data), mimetype="application/json")
+def JsonError(message):
+    return JsonResponse({'status': 'error', 'message': message})
 
 
-def JSON_error(message):
-    return JSON_response({'status': 'error', 'message': message})
-
-
-def JSON_ok(extra=None):
+def JsonOk(extra=None):
     data = {'status': 'ok'}
     if extra:
         data['data'] = extra
 
-    return JSON_response(data)
+    return JsonResponse(data)
 
 
-def JSON_parse(string_data):
+def JsonParse(string_data):
     try:
         return json.loads(string_data)
     except:
@@ -201,20 +197,20 @@ def manage_delete_object(request, company_url_name, model, messages):
     try:
         c = Company.objects.get(url_name=company_url_name)
     except Company.DoesNotExist:
-        return JSON_error(_("Company not found"))
+        return JsonError(_("Company not found"))
 
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, model.__name__.lower(), 'edit'):
-        return JSON_error(messages[0])
+        return JsonError(messages[0])
 
     # discount id is in request.POST in JSON format
-    id = JSON_parse(request.POST.get('data')).get('id')
+    id = JsonParse(request.POST.get('data')).get('id')
     if not id:
-        return JSON_error(_("No id specified."))
+        return JsonError(_("No id specified."))
 
     try:
         model.objects.get(id=id, company=c).delete()
     except (model.DoesNotExist, IntegrityError) as e:
-        return JSON_error(messages[1] + "; " + e.message)
+        return JsonError(messages[1] + "; " + e.message)
 
-    return JSON_ok()
+    return JsonOk()

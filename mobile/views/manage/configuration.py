@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from config.functions import get_company_value, set_company_value
 from pos.models import Company, Tax
-from pos.views.util import JSON_error, has_permission, JSON_ok, no_permission_view, JSON_parse
+from pos.views.util import JsonError, has_permission, JsonOk, no_permission_view, JsonParse
 from django.utils.translation import ugettext as _
 
 
@@ -14,13 +14,13 @@ def get_mobile_config(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # permissions
     if not has_permission(request.user, c, 'config', 'edit'):
         return no_permission_view(request, c, _("You have no permission to edit system configuration."))
 
-    return JSON_ok(extra=get_company_config(request.user, Company.objects.get(url_name=company)))
+    return JsonOk(extra=get_company_config(request.user, Company.objects.get(url_name=company)))
 
 
 def get_company_config(user, company):
@@ -42,13 +42,13 @@ def save_company_config(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # permissions
     if not has_permission(request.user, c, 'config', 'edit'):
         return no_permission_view(request, c, _("You have no permission to edit system configuration."))
 
-    data = JSON_parse(request.POST['data'])
+    data = JsonParse(request.POST['data'])
 
     # get config: specify initial data manually (also for security reasons,
     # to not accidentally include secret data in request.POST or whatever)
@@ -68,4 +68,4 @@ def save_company_config(request, company):
     for key in data:
         set_company_value(request.user, c, key, data[key])
 
-    return JSON_ok(extra=get_company_config(request.user, Company.objects.get(url_name=company)))
+    return JsonOk(extra=get_company_config(request.user, Company.objects.get(url_name=company)))

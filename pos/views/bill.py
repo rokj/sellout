@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 
 from pos.models import Company, Bill, BillItem, Product, Discount, BillItemDiscount, Register
-from pos.views.util import has_permission, JSON_response, JSON_ok, JSON_parse, JSON_error, \
+from pos.views.util import has_permission, JsonOk, JsonParse, JsonError, \
     format_number, parse_decimal, format_date, format_time
 from config.functions import get_company_value
 import common.globals as g
@@ -187,22 +187,22 @@ def create_bill(request, company):
     """ there's bill and items in request.POST['data'], create a new bill, and check all items and all """
 
     def item_error(message, product):
-        return JSON_error(message + " " + _("(Item" + ": ") + product.name + ")")
+        return JsonError(message + " " + _("(Item" + ": ") + product.name + ")")
 
     # get company
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # check permissions
     if not has_permission(request.user, c, 'bill', 'edit'):
-        return JSON_error(_("You have no permission to create bills"))
+        return JsonError(_("You have no permission to create bills"))
 
     # get data
-    data = JSON_parse(request.POST.get('data'))
+    data = JsonParse(request.POST.get('data'))
     if not data:
-        return JSON_error(_("No data received"))
+        return JsonError(_("No data received"))
 
     # if there's an id in data and it's not -1, we're updating an existing unpaid bill,
     # loaded to terminal and edited; delete the old one first
@@ -218,7 +218,7 @@ def create_bill(request, company):
     # check bill properties
     r = parse_decimal(request.user, c, data.get('total'))
     if not r['success'] or r['number'] <= Decimal('0'):
-        return JSON_error(_("Invalid grand total value"))
+        return JsonError(_("Invalid grand total value"))
     else:
         # this number came from javascript
         total_js = r['number']
@@ -227,7 +227,7 @@ def create_bill(request, company):
         print
         till = Register.objects.get(id=int(data.get('till_id')), company=c)
     except (TypeError, ValueError, Register.DoesNotExist):
-        return JSON_error(_("Invalid register specified."))
+        return JsonError(_("Invalid register specified."))
 
     # this number will be calculated below;
     # both grand totals must match or... ???
@@ -251,7 +251,7 @@ def create_bill(request, company):
         try:
             product = Product.objects.get(company=c, id=int(i.get('product_id')))
         except Product.DoesNotExist:
-            return JSON_error(
+            return JsonError(
                 _("Product with this id does not exist") +
                 " (id=" + i.get('product_id') + ")")
 
@@ -358,7 +358,7 @@ def create_bill(request, company):
 
     # in the end, check grand totals against each others
     if total_js != total_py:
-        return JSON_error(_("Total prices do not match"))
+        return JsonError(_("Total prices do not match"))
 
     # at this point, everything is fine, insert into database
 
@@ -413,7 +413,7 @@ def create_bill(request, company):
             db_discount.save()
 
     d = {'bill': bill_to_dict(request.user, c, db_bill)}
-    return JSON_ok(extra=d)
+    return JsonOk(extra=d)
 
 
 @login_required
@@ -422,17 +422,17 @@ def get_unpaid_bill(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # permissions
     if not has_permission(request.user, c, 'bill', 'view'):
-        return JSON_error(_("You have no permission to view bills"))
+        return JsonError(_("You have no permission to view bills"))
 
     # get register from data
     try:
-        register_id = int(JSON_parse(request.POST.get('data')).get('register_id'))
+        register_id = int(JsonParse(request.POST.get('data')).get('register_id'))
     except (ValueError, TypeError):
-        return JSON_error(_("No valid register specified"))
+        return JsonError(_("No valid register specified"))
 
     # return bill, if there's any
     unfinished_bills = Bill.objects\
@@ -440,9 +440,9 @@ def get_unpaid_bill(request, company):
         .order_by('-timestamp')
 
     if len(unfinished_bills) > 0:
-        return JSON_ok(extra=bill_to_dict(request.user, c, unfinished_bills[0]))
+        return JsonOk(extra=bill_to_dict(request.user, c, unfinished_bills[0]))
     else:
-        return JSON_ok()
+        return JsonOk()
 
 
 @login_required
@@ -453,19 +453,19 @@ def check_bill_status(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # there should be bill_id in request.POST
     try:
-        bill_id = int(JSON_parse(request.POST.get('data')).get('bill_id'))
+        bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
         bill = Bill.objects.get(company=c, id=bill_id)
     except (Bill.DoesNotExist, ValueError, TypeError):
-        return JSON_error(_("Bill does not exist or data is invalid"))
+        return JsonError(_("Bill does not exist or data is invalid"))
 
     if bill.status == 'Paid':
-        return JSON_ok(extra={'paid': True})
+        return JsonOk(extra={'paid': True})
     else:
-        return JSON_ok(extra={'paid': False})
+        return JsonOk(extra={'paid': False})
 
 
 @login_required
@@ -476,30 +476,30 @@ def finish_bill(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # permissions
     if not has_permission(request.user, c, 'bill', 'edit'):
-        return JSON_error(_("You have no permission to edit bills"))
+        return JsonError(_("You have no permission to edit bills"))
 
     # data must contain: bill_id, status, payment_type, payment_reference
-    d = JSON_parse(request.POST.get('data'))
+    d = JsonParse(request.POST.get('data'))
 
     if not d or not d.get('bill_id'):
-        return JSON_error(_("No data in request"))
+        return JsonError(_("No data in request"))
 
     # bill...
     try:
         bill = Bill.objects.get(company=c, id=int(d.get('bill_id')))
     except (ValueError, TypeError, Bill.DoesNotExist):
-        return JSON_error(_("No bill found"))
+        return JsonError(_("No bill found"))
 
     # check status: if 'Paid', set payment type and reference;
     # if 'Canceled', just update status
     if d.get('status') == 'Paid':
         # check payment type
         if d.get('payment_type') not in [x[0] for x in g.PAYMENT_TYPES]:
-            return JSON_error(_("Payment type does not exist"))
+            return JsonError(_("Payment type does not exist"))
 
         bill.status = 'Paid'
         bill.payment_type = d.get('payment_type')
@@ -509,4 +509,4 @@ def finish_bill(request, company):
 
     bill.save()
 
-    return JSON_ok()
+    return JsonOk()
