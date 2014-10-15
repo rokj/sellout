@@ -178,10 +178,10 @@ def get_product(request, company):
     try:
         product_id = int(request.GET.get('product_id'))
     except (ValueError, TypeError):
-        return JsonResponse(_("No product specified"))
+        return JsonError(_("No product specified"))
 
     if product_id == -1:
-        return JsonOk()  # ?
+        return JsonError(_("No product specified"))
 
     product = Product.objects.get(company=c, id=product_id)
     
@@ -382,7 +382,7 @@ def validate_product(user, company, data):
     data['name'] = data['name'].strip()
     
     # category: must be present and must exist
-    if not data['category_id']:
+    if not data.get('category_id'):
         return r(False, _("No category assigned"))
     else:
         try:
