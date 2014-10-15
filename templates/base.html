@@ -82,7 +82,9 @@ blocks:
 
             <ul id="user_menu" class="drop-down">
                 {# store-related stuff #}
-                <li class="store separator"><a href="{% url 'pos:user_settings' company.url_name %}">{% trans 'User Settings' %}</a></li>
+                {% if company %}
+                    <li class="store separator"><a href="{% url 'pos:user_settings' company.url_name %}">{% trans 'User Settings' %}</a></li>
+                {% endif %}
                 <li class="store"><a href="#">{% trans 'Switch User' %}</a> </li>
                 <li class="store"><a href="#">{% trans 'Log Out' %}</a> </li>
             </ul>
@@ -94,20 +96,22 @@ blocks:
             {# will be replaced by manage menu in management #}
             <a href="#" class="button-text">{% trans 'Management' %}</a>
 
-            <ul id="management_menu" class="drop-down">
-                {# store-related stuff #}
-                <li class="store separator"><a href="{% url 'pos:list_categories' company.url_name %}">{% trans 'Categories' %}</a></li>
-                <li class="store"><a href="{% url 'pos:products' company.url_name %}">{% trans 'Products' %}</a></li>
-                <li class="store"><a href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Discounts' %}</a></li>
-                <li class="store"><a href="{% url 'pos:list_taxes' company.url_name %}">{% trans 'Taxes' %}</a></li>
-                <li class="store"><a href="{% url 'pos:list_registers' company.url_name %}">{% trans 'Cash Registers' %}</a></li>
-                <li class="store"><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
-                <li class="store"><a href="">{% trans 'Bills' %}</a></li>
-                {# company-related stuff #}
-                <li class="company separator"><a href="{% url 'pos:company_settings' company.url_name %}">{% trans 'Configuration' %}</a></li>
-                <li class="company"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
-                <li class="company"><a href="#">{% trans 'Users' %}</a></li>
-            </ul>
+            {% if company %} {# company does not exist when registering #}
+                <ul id="management_menu" class="drop-down">
+                    {# store-related stuff #}
+                    <li class="store separator"><a href="{% url 'pos:list_categories' company.url_name %}">{% trans 'Categories' %}</a></li>
+                    <li class="store"><a href="{% url 'pos:products' company.url_name %}">{% trans 'Products' %}</a></li>
+                    <li class="store"><a href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Discounts' %}</a></li>
+                    <li class="store"><a href="{% url 'pos:list_taxes' company.url_name %}">{% trans 'Taxes' %}</a></li>
+                    <li class="store"><a href="{% url 'pos:list_registers' company.url_name %}">{% trans 'Cash Registers' %}</a></li>
+                    <li class="store"><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
+                    <li class="store"><a href="">{% trans 'Bills' %}</a></li>
+                    {# company-related stuff #}
+                    <li class="company separator"><a href="{% url 'pos:company_settings' company.url_name %}">{% trans 'Configuration' %}</a></li>
+                    <li class="company"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
+                    <li class="company"><a href="#">{% trans 'Users' %}</a></li>
+                </ul>
+            {% endif %}
         </div>
 
         <div id="management_extra_button" class="button-container {% block extra_button_class %}{% endblock %}">

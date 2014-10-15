@@ -1,10 +1,11 @@
+from django.http import JsonResponse
 from django.utils.translation import ugettext as _
 from django.db.models import Q
 
 from pos.models import Company, Category, Discount, Product, ProductDiscount, Price, PurchasePrice, Tax
 from pos.views.manage.product import JSON_units, get_product, search_products, create_product, edit_product, \
     delete_product, product_to_dict, toggle_favorite
-from pos.views.util import JSON_response, JSON_error, \
+from pos.views.util import JsonError, \
                             has_permission
 from rest_framework.decorators import api_view, permission_classes,\
     authentication_classes
@@ -56,10 +57,10 @@ def mobile_get_products(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     if not has_permission(request.user, c, 'tax', 'view'):
-        return JSON_error(_("You have no permission to view taxes"))
+        return JsonError(_("You have no permission to view taxes"))
 
     products = Product.objects.filter(company=c)
 
@@ -67,7 +68,7 @@ def mobile_get_products(request, company):
     for p in products:
         r.append(product_to_dict(request.user, c,  p, android=True))
 
-    return JSON_response(r)
+    return JsonResponse(r)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
@@ -75,10 +76,10 @@ def mobile_get_product_discounts(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     if not has_permission(request.user, c, 'tax', 'list'):
-        return JSON_error(_("You have no permission to view taxes"))
+        return JsonError(_("You have no permission to view taxes"))
 
     products = Product.objects.filter(company=c)
 
@@ -86,7 +87,7 @@ def mobile_get_product_discounts(request, company):
     for p in products:
         r.append(product_to_dict(request.user, p, android=True))
 
-    return JSON_response(r)
+    return JsonResponse(r)
 
 
 @api_view(['GET', 'POST'])

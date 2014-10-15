@@ -179,6 +179,12 @@ Bill = function(g){
 
     p.get_data = function(){
         // returns bill and item data for saving/sending
+
+        // if no registers are defined, there's no point in doing anything
+        // (the script redirects to register management anyway, this is just
+        // to prevent errors)
+        if(!p.g.objects.terminal.register) return null;
+
         var i, id;
 
         if(p.data && !isNaN(p.data.id)) id = p.data.id;

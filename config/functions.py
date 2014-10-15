@@ -35,7 +35,6 @@ company_defaults = {
 }
 
 user_defaults = {
-    # interface
     'pos_product_button_size': 'medium',  # keys for PRODUCT_BUTTON_DIMENSIONS in globals
     'pos_interface_bill_width': 370,  # width of the bill area in terminal (in pixels)
     'pos_product_display': 'box',

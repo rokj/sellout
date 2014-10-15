@@ -1,5 +1,6 @@
 import base64
 from django.core.urlresolvers import reverse
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -7,10 +8,10 @@ from django.db.models import Q
 from common.images import image_dimensions, image_from_base64
 
 from pos.models import Company, Category, Product, Price, PurchasePrice, Tax
-from pos.views.util import JSON_response, JSON_parse, JSON_error, JSON_ok, \
+from pos.views.util import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
-                           max_field_length, error, JSON_stringify
+                           max_field_length, error, JsonStringify
 from pos.views.manage.discount import discount_to_dict, get_all_discounts
 from pos.views.manage.category import get_subcategories, get_all_categories
 from pos.views.manage.tax import get_default_tax, get_all_taxes
@@ -36,7 +37,7 @@ def mobile_JSON_units(request, company):
 def JSON_units(request, company):
     # at the moment, company is not needed
     # also, no permission checking is required
-    return JSON_response(g.UNITS)  # G units!
+    return JsonResponse(g.UNITS)  # G units!
 
 
 def product_to_dict(user, company, product, android=False):
@@ -138,10 +139,10 @@ def products(request, company):
         'title': _("Products"),
         'site_title': g.MISC['site_title'],
         # lists
-        'taxes': JSON_stringify(get_all_taxes(request.user, c)),
-        'categories': JSON_stringify(get_all_categories(c, json=True)),
-        'units': JSON_stringify(g.UNITS),
-        'discounts': JSON_stringify(get_all_discounts(request.user, c)),
+        'taxes': JsonStringify(get_all_taxes(request.user, c)),
+        'categories': JsonStringify(get_all_categories(c, json=True)),
+        'units': JsonStringify(g.UNITS),
+        'discounts': JsonStringify(get_all_discounts(request.user, c)),
         # urls for ajax calls
         'add_url': reverse('pos:create_product', args=[c.url_name]),
         # config variables
@@ -168,23 +169,23 @@ def get_product(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
     
     # permissions
     if not has_permission(request.user, c, 'product', 'view'):
-        return JSON_error(_("You have no permission to view products"))
+        return JsonError(_("You have no permission to view products"))
 
     try:
-        product_id = request.GET.get('product_id')
-    except ValueError:
-        return JSON_response(_("No product specified"))
+        product_id = int(request.GET.get('product_id'))
+    except (ValueError, TypeError):
+        return JsonResponse(_("No product specified"))
 
     if product_id == -1:
-        return JSON_ok()  # ?
+        return JsonOk()  # ?
 
     product = Product.objects.get(company=c, id=product_id)
     
-    return JSON_response(product_to_dict(request.user, c, product))
+    return JsonResponse(product_to_dict(request.user, c, product))
 
 
 @login_required
@@ -192,16 +193,16 @@ def search_products(request, company, android=False):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
     
     # permissions: needs to be guest
     if not has_permission(request.user, c, 'product', 'view'):
-        return JSON_error(_("You have no permission to view products"))
+        return JsonError(_("You have no permission to view products"))
     
     # get all products from this company and filter them by entered criteria
     products = Product.objects.filter(company=c)
     
-    criteria = JSON_parse(request.POST['data'])
+    criteria = JsonParse(request.POST['data'])
     
     # filter by: ("advanced" values in criteria dict)
     # name_filter
@@ -318,7 +319,7 @@ def search_products(request, company, android=False):
     for p in products:
         ps.append(product_to_dict(request.user, c, p, android=android))
 
-    return JSON_response(ps)
+    return JsonResponse(ps, safe=False)
 
 
 def validate_product(user, company, data):
@@ -499,18 +500,18 @@ def create_product(request, company, android=False):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
     
     # sellers can add product
     if not has_permission(request.user, c, 'product', 'edit'):
-        return JSON_error(_("You have no permission to add products"))
+        return JsonError(_("You have no permission to add products"))
 
-    data = JSON_parse(request.POST['data'])
+    data = JsonParse(request.POST['data'])
     
     # validate data
     valid = validate_product(request.user, c, data)
     if not valid['status']:
-        return JSON_error(valid['message'])
+        return JsonError(valid['message'])
     data = valid['data']
     
     # save product:
@@ -535,13 +536,13 @@ def create_product(request, company, android=False):
     price = product.update_price(Price, request.user, data['price']) # purchase price
     if not price:
         product.delete()
-        return JSON_error(_("Error while setting purchase price"))
+        return JsonError(_("Error while setting purchase price"))
 
     if data.get('purchase_price'):
         price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
         if not price:
             product.delete()
-            return JSON_error(_("Error while setting sell price"))
+            return JsonError(_("Error while setting sell price"))
     
     # add image, if it's there
     if data['change_image']:
@@ -549,7 +550,7 @@ def create_product(request, company, android=False):
             product.image = data['image']
             product.save()
     
-    return JSON_ok(extra=product_to_dict(request.user, c, product, android))
+    return JsonOk(extra=product_to_dict(request.user, c, product, android))
 
 @login_required
 def edit_product(request, company, android=False):
@@ -557,25 +558,25 @@ def edit_product(request, company, android=False):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
     
     # sellers can edit product
     if not has_permission(request.user, c, 'product', 'edit'):
-        return JSON_error(_("You have no permission to edit products"))
+        return JsonError(_("You have no permission to edit products"))
 
-    data = JSON_parse(request.POST['data'])
+    data = JsonParse(request.POST['data'])
 
     # see if product exists in database
     product_id = data['id']
     try:
         product = Product.objects.get(id=product_id)
     except:
-        return JSON_error(_("Product does not exist"))
+        return JsonError(_("Product does not exist"))
     
     # validate data
     valid = validate_product(request.user, c, data)
     if not valid['status']:
-        return JSON_error(valid['message'])
+        return JsonError(valid['message'])
     data = valid['data']
     
     # update product:
@@ -614,30 +615,30 @@ def edit_product(request, company, android=False):
     product.updated_by = request.user
     product.save()
 
-    return JSON_ok(extra=product_to_dict(request.user, c, product, android))
+    return JsonOk(extra=product_to_dict(request.user, c, product, android))
 
 @login_required
 def delete_product(request, company):
     try:
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
     
     # sellers can delete products
     if not has_permission(request.user, c, 'product', 'edit'):
-        return JSON_error(_("You have no permission to delete products"))
+        return JsonError(_("You have no permission to delete products"))
 
-    data = JSON_parse(request.POST['data'])
+    data = JsonParse(request.POST['data'])
     product_id = data['id']
 
     try:
         product = Product.objects.get(id=product_id)
     except Product.DoesNotExist:
-        return JSON_error(_("Product does not exist"))
+        return JsonError(_("Product does not exist"))
     
     product.delete()
     
-    return JSON_ok(extra=product_to_dict(request.user, c, product))
+    return JsonOk(extra=product_to_dict(request.user, c, product))
 
 
 def get_all_products(user, company):
@@ -656,26 +657,26 @@ def toggle_favorite(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # permissions
     if not has_permission(request.user, c, 'product', 'edit'):
-        return JSON_error(_("You have no permission to edit products"))
+        return JsonError(_("You have no permission to edit products"))
 
     # data in POST request: product
     try:
-        product_id = int(JSON_parse(request.POST.get('data')).get('product_id'))
+        product_id = int(JsonParse(request.POST.get('data')).get('product_id'))
     except ValueError:
-        return JSON_error(_("Invalid data"))
+        return JsonError(_("Invalid data"))
 
     # get the product
     try:
         product = Product.objects.get(id=product_id, company=c)
     except Product.DoesNotExist:
-        return JSON_error(_("Product does not exist"))
+        return JsonError(_("Product does not exist"))
 
     # if product is already a favorite, remove it
     product.favorite = not product.favorite
     product.save()
 
-    return JSON_response({'status': 'ok', 'favorite': product.favorite})
+    return JsonResponse({'status': 'ok', 'favorite': product.favorite})

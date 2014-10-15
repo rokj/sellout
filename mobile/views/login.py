@@ -1,6 +1,6 @@
 from mobile.views.manage.configuration import get_company_config
 from pos.models import Company
-from pos.views.util import JSON_error, JSON_response
+from pos.views.util import JsonError
 
 from rest_framework import parsers, renderers
 from rest_framework.authentication import OAuth2Authentication
@@ -35,11 +35,11 @@ class ObtainAuthToken(APIView):
             if serializer.is_valid():
                 user = serializer.object['user']
             else:
-                return JSON_error(status="error", message="wrong credentials")
+                return JsonError(message="wrong credentials")
 
 
         else:
-            return JSON_error("error", "wrong login")
+            return JsonError(message="wrong login")
 
         token, created = Token.objects.get_or_create(user=user)
         if user:
@@ -49,9 +49,9 @@ class ObtainAuthToken(APIView):
                 group = user.homegroup
 
         else:
-            return JSON_error("error", "this should not happen")
+            return JsonError("this should not happen")
 
-        return JSON_response({'token': token.key,
+        return JsonResponse({'token': token.key,
                          'user': user_credentials,
                          'last_group': group,
                          'config': get_company_config(user, Company.objects.get(url_name=group)),

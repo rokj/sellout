@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.utils.translation import ugettext as _
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -5,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from pos.models import Company, Category
 from pos.views.manage.category import get_category, validate_category, \
     get_all_categories_structured, category_to_dict, validate_parent
-from pos.views.util import JSON_response, JSON_error, JSON_parse, JSON_ok, \
+from pos.views.util import JsonError, JsonParse, JsonOk, \
     has_permission
 from common import globals as g
 
@@ -21,14 +22,14 @@ def mobile_JSON_categories_strucutred(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # permissions
     if not has_permission(request.user, c, 'category', 'view'):
-        return JSON_error("no permission")
+        return JsonError("no permission")
 
     # return all categories' data in JSON format
-    return JSON_response(get_all_categories_structured(c, sort='name', android=True))
+    return JsonResponse(get_all_categories_structured(c, sort='name', android=True))
 
 
 @api_view(['POST', 'GET'])
@@ -37,11 +38,11 @@ def mobile_JSON_categories(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # permissions
     if not has_permission(request.user, c, 'category', 'view'):
-        return JSON_error("no permission")
+        return JsonError("no permission")
     data = []
     category = Category.objects.filter(company=c)
 
@@ -49,7 +50,7 @@ def mobile_JSON_categories(request, company):
         data.append(category_to_dict(c, android=True))
 
     # return all categories' data in JSON format
-    return JSON_response(data)
+    return JsonResponse(data)
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
@@ -57,18 +58,18 @@ def mobile_add_category(request, company):
     try:
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     # sellers can add category
     if not has_permission(request.user, c, 'category', 'edit'):
-        return JSON_error(_("You have no permission to add products"))
+        return JsonError(_("You have no permission to add products"))
 
-    data = JSON_parse(request.POST['data'])
+    data = JsonParse(request.POST['data'])
 
     # validate data
     valid = validate_category(request.user, c, data)
     if not valid['status']:
-        return JSON_error(valid['message'])
+        return JsonError(valid['message'])
     data = valid['data']
 
     parent_id = data['parent_id']
@@ -107,7 +108,7 @@ def mobile_add_category(request, company):
     #     else: # delete the old image
     #         category.image.delete()
 
-    return JSON_ok(extra=category_to_dict(category, android=True))
+    return JsonOk(extra=category_to_dict(category, android=True))
 
 
 @api_view(['POST', 'GET'])
@@ -120,13 +121,13 @@ def edit_category(request, company):
     try:
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
     
     # sellers can edit product
     if not has_permission(request.user, c, 'category', 'edit'):
-        return JSON_error(_("You have no permission to edit products"))
+        return JsonError(_("You have no permission to edit products"))
 
-    data = JSON_parse(request.POST['data'])
+    data = JsonParse(request.POST['data'])
 
     category_id = data['id']
 
@@ -134,13 +135,13 @@ def edit_category(request, company):
     try:
         category = Category.objects.get(id=category_id)
     except:
-        return JSON_error(_("Product does not exist"))
+        return JsonError(_("Product does not exist"))
     
     # validate data
     valid = validate_category(request.user, c, data)
     
     if not valid['status']:
-        return JSON_error(valid['message'])
+        return JsonError(valid['message'])
     data = valid['data']
     
     # update category:
@@ -154,16 +155,16 @@ def edit_category(request, company):
         try:
             p = Category.objects.get(id=parent_id, company=c)
         except Category.DoesNotExist:
-            return JSON_error(_("Cannot edit product: parent id does not exist"))
+            return JsonError(_("Cannot edit product: parent id does not exist"))
 
         #if p.company != c or not has_permission(request.user, company, 'product', 'edit'):
-        #    return JSON_error(_("You have no permission to edit this product"))
+        #    return JsonError(_("You have no permission to edit this product"))
 
         if not validate_parent(category, parent_id):
-            return JSON_error(_("Cannot set child as parent"))
+            return JsonError(_("Cannot set child as parent"))
 
         if c.id == parent_id:
-            return JSON_error(_("Category cannot be parent of it self"))
+            return JsonError(_("Category cannot be parent of it self"))
 
         category.parent = p
     else:
@@ -181,7 +182,7 @@ def edit_category(request, company):
         else: # delete the old image
             category.image.delete()
     category.save()
-    return JSON_ok(extra=category_to_dict(category, android=True))
+    return JsonOk(extra=category_to_dict(category, android=True))
 
 
 @api_view(['POST', 'GET'])
@@ -190,23 +191,23 @@ def mobile_delete_category(request, company):
     try:
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
-    data = JSON_parse(request.POST['data'])
+    data = JsonParse(request.POST['data'])
 
     category_id = data['id']
     # check permissions: needs to be at least manager
     try:
         category = Category.objects.get(id=category_id)
     except Category.DoesNotExist:
-        return JSON_error(_("Category does not exist"))
+        return JsonError(_("Category does not exist"))
 
     # check if category actually belongs to the given company
     if category.company != c:
-        return JSON_error("Error") # this category does not exist for the current user
+        return JsonError("Error") # this category does not exist for the current user
 
     if Category.objects.filter(parent=category).count() > 0:
-        return JSON_error("Cannot delete category with subcategories")
+        return JsonError("Cannot delete category with subcategories")
 
     # delete the category and return to management page
     try:
@@ -214,7 +215,7 @@ def mobile_delete_category(request, company):
     except:
         pass
 
-    return JSON_ok(extra=category_to_dict(category, android=True))
+    return JsonOk(extra=category_to_dict(category, android=True))
 
 
 @api_view(['POST', 'GET'])
@@ -227,7 +228,7 @@ def mobile_JSON_dump_categories(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     cat = Category.objects.filter(company__id=c.id)
-    return JSON_ok(extra="")
+    return JsonOk(extra="")

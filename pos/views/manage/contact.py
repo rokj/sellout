@@ -2,14 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _, get_language
 from django import forms
-from django.http import Http404
+from django.http import Http404, JsonResponse
 
 from pos.models import Company, Contact
 from common import globals as g
 from config.functions import get_date_format
 from config.countries import country_choices, country_by_code
-from pos.views.util import JSON_response, JSON_error, has_permission, no_permission_view, format_date, \
-    max_field_length, parse_date, manage_delete_object, JSON_parse, JSON_ok
+from pos.views.util import JsonError, has_permission, no_permission_view, format_date, \
+    max_field_length, parse_date, manage_delete_object, JsonParse, JsonOk
 
 import re
 
@@ -308,15 +308,15 @@ def get_contact(request, company, contact_id):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
     
     # permissions: needs to be guest to view contacts
     if not has_permission(request.user, c, 'contact', 'view'):
-        return JSON_error(_("You have no permission to view products"))
+        return JsonError(_("You have no permission to view products"))
    
     contact = get_object_or_404(Contact, id=contact_id, company=c)
    
-    return JSON_response(contact_to_dict(request.user, c, contact))
+    return JsonResponse(contact_to_dict(request.user, c, contact))
    
 
 @login_required
@@ -455,20 +455,20 @@ def quick_contacts(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist."))
+        return JsonError(_("Company does not exist."))
 
     # permissions
     if not has_permission(request.user, c, 'contact', 'edit'):
-        return JSON_error(_("You have no permission to add contacts"))
+        return JsonError(_("You have no permission to add contacts"))
 
-    contact = JSON_parse(request.POST.get('data'))
+    contact = JsonParse(request.POST.get('data'))
 
     if not contact:
-        return JSON_error(_("No data in request"))
+        return JsonError(_("No data in request"))
 
     r = validate_contact(request.user, c, contact)
     if not r['status']:
-        return JSON_error(r['message'])
+        return JsonError(r['message'])
 
     contact = r['data']
 
@@ -499,7 +499,7 @@ def quick_contacts(request, company):
 
             obj.save()
         except Exception, e:
-            return JSON_response(_("Saving contact failed") + ": " + str(e))
+            return JsonResponse(_("Saving contact failed") + ": " + str(e))
 
     else:
         print 'editing existing contact'
@@ -524,6 +524,6 @@ def quick_contacts(request, company):
             obj.save()
 
         except Exception, e:
-            return JSON_response(_("Saving contact failed") + ": " + str(e))
+            return JsonResponse(_("Saving contact failed") + ": " + str(e))
 
-    return JSON_ok(extra=contact_to_dict(request.user, c, obj))
+    return JsonOk(extra=contact_to_dict(request.user, c, obj))

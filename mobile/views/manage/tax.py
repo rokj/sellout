@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from pos.models import Company
 from pos.views.manage.tax import list_taxes, get_all_taxes, edit_tax, delete_tax, \
     set_default_tax  #, get_taxes, save_taxes
-from pos.views.util import JSON_error, JSON_ok
+from pos.views.util import JsonError, JsonOk
 from django.utils.translation import ugettext as _
 
 
@@ -13,11 +13,11 @@ def mobile_list_taxes(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
 
     taxes = get_all_taxes(request.user, c)
 
-    return JSON_ok(extra=taxes)
+    return JsonOk(extra=taxes)
 
 
 @api_view(['GET', 'POST'])

@@ -9,7 +9,7 @@ from django import forms
 from django.http import Http404
 
 from pos.models import Company, Category
-from pos.views.util import error, JSON_response, resize_image, validate_image, \
+from pos.views.util import error, resize_image, validate_image, \
                            has_permission, no_permission_view
 from common import globals as g"""
 

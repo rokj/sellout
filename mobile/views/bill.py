@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Bill, BillItem, Product
 from pos.views.bill import create_bill, finish_bill
-from pos.views.util import has_permission, JSON_response, JSON_parse, JSON_error, \
+from pos.views.util import has_permission, JsonResponse, JsonParse, JsonError, \
     format_number, parse_decimal, format_date, format_time
 from config.functions import get_company_value
 import common.globals as g
@@ -188,7 +188,7 @@ def validate_bill_item(data):
 @permission_classes((IsAuthenticated,))
 def mobile_create_bill(request, company):
     return create_bill(request, company)
-    # return JSON_ok()
+    # return JsonOk()
 
 
 @login_required
@@ -197,24 +197,24 @@ def get_active_bill(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JSON_error(_("Company does not exist"))
+        return JsonError(_("Company does not exist"))
     
     # check permissions
     if not has_permission(request.user, c, 'bill', 'list'):
-        return JSON_error(_("You have no permission to view bills"))
+        return JsonError(_("You have no permission to view bills"))
     
     try:
         bill = Bill.objects.get(company=c, user=request.user, status="Active")
     except Bill.DoesNotExist:
         # if there's no active bill, start a new one
-        return JSON_response(new_bill(request.user, c))
+        return JsonResponse(new_bill(request.user, c))
     except Bill.MultipleObjectsReturned:
         # two active bills (that shouldn't happen at all)
-        return JSON_error(_("Multiple active bills found"))
+        return JsonError(_("Multiple active bills found"))
         
     # serialize the fetched bill and return it
     bill = bill_to_dict(request.user, c, bill)
-    return JSON_response({'status': 'ok', 'bill': bill})
+    return JsonResponse({'status': 'ok', 'bill': bill})
 
 
 
@@ -222,4 +222,4 @@ def get_active_bill(request, company):
 @permission_classes((IsAuthenticated,))
 def mobile_finish_bill(request, company):
     return finish_bill(request, company)
-    # return JSON_ok()
+    # return JsonOk()
