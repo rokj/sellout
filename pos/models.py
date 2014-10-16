@@ -486,6 +486,8 @@ class Register(SkeletonU):
     location = models.TextField(_("Location of this register"), max_length=120, null=True, blank=True)
     print_location = models.BooleanField(_("Print location of register"), blank=False, default=True)
 
+    #print_settings = models.TextField(_("Printer settings"), null=True, blank=True)
+
 
 ### bills ###
 class Bill(SkeletonU):
@@ -540,8 +542,11 @@ def set_serial(instance, created, **kwargs):
         return
 
     try:
-        # get the second bill (because the last is this bill without serial)
-        last_bill = Bill.objects.only('serial').filter(company=instance.company).order_by('-serial')[1]
+        # get the second last bill (because the last is this bill without serial)
+        last_bill = Bill.objects.only('serial') \
+                        .filter(company=instance.company) \
+                        .exclude(serial=None) \
+                        .order_by('-serial')[0]
         instance.serial = last_bill.serial + 1
     except:
         instance.serial = 1

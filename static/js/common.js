@@ -62,15 +62,6 @@ function escape(text){
     });
 }
 
-function remove_from_array(array, index){
-    // kudos: http://stackoverflow.com/questions/5767325/remove-specific-element-from-an-array
-    if(index > -1) {
-        array.splice(index, 1); // original array is modified
-        return true;
-    }
-    else return false;
-}
-
 function get_size(element){ // get computed element size before it's inserted into document
     element.hide();
     $("body").append(element); // add to DOM, in order to read the CSS property
@@ -136,6 +127,15 @@ function get_url_hash() {
 // data is an array of objects, each object has the 'id' property
 // (and other properties as well)
 //
+function remove_from_array(array, index){
+    // kudos: http://stackoverflow.com/questions/5767325/remove-specific-element-from-an-array
+    if(index > -1) {
+        array.splice(index, 1); // original array is modified
+        return true;
+    }
+    else return false;
+}
+
 function get_ids(data){
     // data is an array of objects with an 'id' field;
     // return only an array of ids

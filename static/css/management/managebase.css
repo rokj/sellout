@@ -141,6 +141,8 @@ a.button.cancel, input.cancel{ background-color: #aa0000; }
 
     border: none;
     cursor: pointer;
+
+    z-index: 3;
 }
 
 div.bottom input{

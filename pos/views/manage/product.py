@@ -202,7 +202,7 @@ def search_products(request, company, android=False):
     # get all products from this company and filter them by entered criteria
     products = Product.objects.filter(company=c)
     
-    criteria = JsonParse(request.POST['data'])
+    criteria = JsonParse(request.POST.get('data'))
     
     # filter by: ("advanced" values in criteria dict)
     # name_filter
@@ -419,7 +419,7 @@ def validate_product(user, company, data):
         
     # image:
     if data['change_image'] == True:
-        if 'image' in data and data['image']: # new image has been uploaded
+        if 'image' in data and data['image']:  # a new image has been uploaded
             data['image'] = image_from_base64(data['image'])
             if not data['image']:
                 # something has gone wrong during conversion
