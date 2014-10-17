@@ -65,7 +65,7 @@
         var categories_list = []; // list of category names (source for the autocomplete)
         var categories_by_breadcrumbs = {}; // dictionary path:category_id for saving
         var categories_by_id = {}; // dictionary id:path for loading
-        var last_chosen_category = ""; // remember the category of last added product and show it in new dialog
+        var last_chosen_category = null; // remember the category of last added product and show it in new dialog
 
         // units
         var units_data = {% autoescape off %}{{ units }}{% endautoescape %};
@@ -267,6 +267,8 @@
 
             p.data = data;
 
+            parse_product_data(data);
+
             p.parent = $("#products_list");
             p.items = {};
 
@@ -424,6 +426,8 @@
 
             p.data = data;
 
+            parse_product_data(data);
+
             p.container = $("#edit_dialog");
             p.items = {
                 title: $("#edit_dialog_title", p.container),
@@ -463,9 +467,18 @@
                 p.items.shadow
                     .fadeIn("fast", function(){
                             p.container.show();
+                            p.items.name.focus();
                     })
                     .unbind()
-                    .click(p.cancel_editing);
+                    .click(p.cancel_button_action);
+            };
+
+            p.cancel_button_action = function(){
+                confirmation_dialog(
+                    "{% trans 'Cancel editing' %}",
+                    "{% trans 'All changes you made to this product will be lost. Continue?' %}",
+                    p.close_dialog,
+                    function(){});
             };
 
             p.close_dialog = function(){
@@ -725,7 +738,7 @@
                             else{
                                 // re-do the current search and close the dialog
                                 search.update_products();
-                                p.close();
+                                p.close_dialog();
                             }
                         }
                     );
@@ -809,12 +822,6 @@
                 p.update_prices();
             };
 
-            p.cancel_editing = function(){
-                alert("cancel editing");
-
-                p.close_dialog();
-            };
-
             //
             // init
             //
@@ -836,7 +843,19 @@
             tax_select(p.items.tax_sel, p.data.tax_id, false);
 
             // category
-            categories_autocomplete(p.items.category, p.data.category_id);
+            if(p.data.id == -1){
+                // a new product: use last category
+                categories_autocomplete(p.items.category, null);
+
+                if(last_chosen_category != null)
+                    p.items.category.val(categories_by_id[last_chosen_category]);
+            }
+            else{
+                // editing an existing product, use its category
+                categories_autocomplete(p.items.category, p.data.category_id);
+            }
+
+
 
             // stock
             p.items.stock.val(p.data.stock);
@@ -941,7 +960,7 @@
             });
 
             // cancel button
-            p.items.cancel_button.unbind().click(p.cancel_editing);
+            p.items.cancel_button.unbind().click(p.cancel_button_action);
 
             // last updates
             p.show_dialog();
@@ -1047,7 +1066,34 @@
             $("div.product-details").height(max_height);
         }
 
+        function parse_product_data(product){
+            // convert all text numbers in product to Big() numbers
+            // price, purchase_price, stock, tax, discounts[amount]
+            if(typeof product.price == "string")
+                product.price = get_number(product.price, "{{ separator }}");
+
+            if(typeof product.purchase_price == "string")
+                product.purchase_price = get_number(product.purchase_price, "{{ separator }}");
+
+            if(typeof product.stock== "string")
+                product.stock = get_number(product.stock, "{{ separator }}");
+
+            if(typeof product.tax == "string")
+                product.tax = get_number(product.tax, "{{ separator }}");
+
+            for(var i = 0; i < product.discounts.length; i++){
+                if(typeof product.discounts[i].amount == "string")
+                    product.discounts[i].amount =
+                            get_number(product.discounts[i].amount, "{{ separator }}");
+            }
+
+            return product;
+        }
+
+        /////////////////////////////////////////////////////
+        //
         // data from template... make it useful
+        //
         var i;
 
         for(i = 0; i < category_data.length; i++){
@@ -1075,7 +1121,26 @@
         var products = []; // a list of Product() objects
         var product_details = null; // ProductDetails() object
 
+        var add_product_button = $("#add_product");
 
+        if({{ can_edit | lower }}){
+            add_product_button.unbind().click(function(){
+                var new_product = {
+                    id: -1,
+                    discounts: [],
+                    tax_id: {{ default_tax_id }}
+                };
+
+                if(product_details) product_details.close_dialog();
+                product_details = new ProductDetails(new_product);
+
+            });
+        }
+        else{
+            add_product_button
+                    .unbind()
+                    .prop("disabled", true);
+        }
     });
     </script>
 {% endblock %}

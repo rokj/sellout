@@ -1,7 +1,9 @@
+from StringIO import StringIO
 import ImageOps
 from django.core.files.base import ContentFile
 import Image
 import re
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 import common.globals as g
 
@@ -70,4 +72,82 @@ def image_from_base64(data):
 
     image_data = data[len(header)-1:].decode("base64")
 
-    return ContentFile(image_data, "fakename." + filetype) # name will be replaced when saving to ImageField
+    return ContentFile(image_data, "fakename." + filetype)  # name will be replaced when saving to ImageField
+
+
+def import_color_image(base64_data, dimensions, fit_mode):
+    image_file = image_from_base64(base64_data)
+
+    if not image_file:
+        return None
+
+    resize = False
+
+    # resize and convert image if necessary
+    color_logo = Image.open(image_file)
+
+    if color_logo.mode not in ('L', 'RGB'):
+        # Kudos: http://stackoverflow.com/questions/9166400/convert-rgba-png-to-rgb-with-pil
+        # create a white image the same size as color_logo
+        color_logo = color_logo.convert('RGBA')
+
+        background = Image.new("RGB", color_logo.size, (255, 255, 255))
+        background.paste(color_logo, mask=color_logo.split()[3])  # 3 is the alpha channel
+
+        color_logo = background
+        color_logo = color_logo.convert('RGB')
+
+    if color_logo.size != dimensions:
+        # the logo has wrong dimensions
+        resize = True
+
+    if color_logo.format != g.MISC['image_format']:
+        # the logo is not in the correct format
+        resize = True
+
+    if resize:
+        color_logo = resize_image(color_logo, dimensions, fit_mode)
+
+    return color_logo
+
+
+def import_monochrome_image(base64_data, dimensions, fit_mode):
+    image_file = image_from_base64(base64_data)
+
+    if not image_file:
+        return None
+
+    resize = False
+
+    # resize and convert image if necessary
+    monochrome_logo = Image.open(image_file)
+
+    if monochrome_logo.size != g.IMAGE_DIMENSIONS['monochrome_logo']:
+        # the logo has wrong dimensions
+        resize = True
+
+    if monochrome_logo.format != g.MISC['image_format']:
+        # the logo is not in the correct format
+        resize = True
+
+    # resize first
+    if resize:
+        monochrome_logo = resize_image(monochrome_logo, dimensions, fit_mode)
+
+    # then convert to monochrome
+    if monochrome_logo.mode != '1':
+        monochrome_logo = monochrome_logo.convert('1')
+
+    return monochrome_logo
+
+
+def create_file_from_image(image):
+    temp_handle = StringIO()
+
+    image.save(temp_handle, g.MISC['image_format'])
+    temp_handle.seek(0)
+
+    # Save to the thumbnail field
+    suf = SimpleUploadedFile('temp', temp_handle.read(), ('image/' + g.MISC['image_format']).lower())
+
+    return {'file': suf, 'name': suf.name + '.' + g.MISC['image_format']}
