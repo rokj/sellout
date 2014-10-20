@@ -29,7 +29,7 @@ def mobile_JSON_categories_strucutred(request, company):
         return JsonError("no permission")
 
     # return all categories' data in JSON format
-    return JsonResponse(get_all_categories_structured(c, sort='name', android=True))
+    return JsonResponse(get_all_categories_structured(c, sort='name', android=True), safe=False)
 
 
 @api_view(['POST', 'GET'])
@@ -50,7 +50,7 @@ def mobile_JSON_categories(request, company):
         data.append(category_to_dict(c, android=True))
 
     # return all categories' data in JSON format
-    return JsonResponse(data)
+    return JsonResponse(data, safe=False)
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
