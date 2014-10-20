@@ -259,15 +259,16 @@ $(window).load(function(){
 
                     <div class="till-button-container terminal-menu" id="bill_options">
                         <button class="open-menu">
-                            {% trans 'Options' context 'bill options button text' %}
+                            {% trans 'Bill...' context 'bill options button text' %}
                             <img src="{% static 'icons/arrow_white_up.png' %}" alt="" />
                         </button>
 
                         <div id="bill_options_menu" class="terminal-menu-items">
+                            <button class="terminal-menu-item options">{% trans 'Options' %}</button>
                             <button class="terminal-menu-item save">{% trans 'Save' %}</button>
                             <button class="terminal-menu-item select-client">{% trans 'Select client' %}</button>
-                            <button class="terminal-menu-item clear">{% trans 'Clear bill' %}</button>
-                            <button class="terminal-menu-item print">{% trans 'Print...' %}</button>
+                            <button class="terminal-menu-item clear">{% trans 'Clear' %}</button>
+                            <button class="terminal-menu-item print">{% trans 'Print options' %}</button>
                         </div>
                     </div>
                 </div>
@@ -473,6 +474,31 @@ $(window).load(function(){
             <button class="cancel">{% trans 'Cancel' %}</button>
 
             <button class="print"> {% trans 'Print' %} </button>
+        </div>
+    </div>
+
+    {% comment %} the bill options dialog - bill notes and discount on total price {% endcomment %}
+    <div id="bill_options_dialog" class="hidden">
+        <div id="bill_discount_container">
+            <div>
+                {% blocktrans %} Discount (applied to bill's total) {% endblocktrans %}:
+            </div>
+            <div id="bill_discount_container">
+                <input type="text" id="bill_discount_amount" />
+                <select id="bill_discount_type">
+                    <option value="percent" selected>%</option>
+                    <option value="absolute">{{ currency }}</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="bill_notes_container">
+            <textarea id="bill_notes" placeholder="{% trans 'Notes on this bill' %}"></textarea>
+        </div>
+
+        <div class="dialog-footer">
+            <button class="cancel">{% trans 'Cancel' %}</button>
+            <button class="save">{% trans 'Save' %}</button>
         </div>
     </div>
 

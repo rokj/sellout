@@ -1,5 +1,4 @@
 import Image
-from StringIO import StringIO
 import base64
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -8,8 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from sorl.thumbnail import get_thumbnail
-from common.images import image_from_base64, resize_image, image_dimensions
+from common.images import import_color_image, import_monochrome_image, resize_image, create_file_from_image
 
 from pos.models import Company
 
@@ -349,37 +347,10 @@ def upload_color_logo(request, company):
 def save_color_image(c, data):
     if 'image' in data:
         # read the new image and upload it
-        image_file = image_from_base64(data.get('image'))
+        color_logo = import_color_image(data.get('image'), g.IMAGE_DIMENSIONS['color_logo'], 'aspect')
 
-        if not image_file:
+        if not color_logo:
             return JsonError(_("No file sent"))
-
-        resize = False
-
-        # resize and convert image if necessary
-        color_logo = Image.open(image_file)
-
-        if color_logo.mode not in ('L', 'RGB'):
-            # Kudos: http://stackoverflow.com/questions/9166400/convert-rgba-png-to-rgb-with-pil
-            # create a white image the same size as color_logo
-            color_logo = color_logo.convert('RGBA')
-
-            background = Image.new("RGB", color_logo.size, (255, 255, 255))
-            background.paste(color_logo, mask=color_logo.split()[3])  # 3 is the alpha channel
-
-            color_logo = background
-            color_logo = color_logo.convert('RGB')
-
-        if color_logo.size != g.IMAGE_DIMENSIONS['color_logo']:
-            # the logo has wrong dimensions
-            resize = True
-
-        if color_logo.format != g.MISC['image_format']:
-            # the logo is not in the correct format
-            resize = True
-
-        if resize:
-            color_logo = resize_image(color_logo, g.IMAGE_DIMENSIONS['color_logo'], 'aspect')
 
         if c.color_logo.name:
             # the logo exists already, delete it
@@ -388,14 +359,9 @@ def save_color_image(c, data):
             except (OSError, ValueError):
                 pass
 
-        temp_handle = StringIO()
-        color_logo.save(temp_handle, 'png')
-        temp_handle.seek(0)
+        f = create_file_from_image(color_logo)
 
-        # Save to the thumbnail field
-        suf = SimpleUploadedFile('temp', temp_handle.read(), ('image/'+g.MISC['image_format']).lower())
-
-        c.color_logo.save(suf.name + '.png', suf, save=False)
+        c.color_logo.save(f['name'], f['file'], save=False)
         c.save()
 
         return JsonResponse({'status': 'ok', 'logo_url': c.color_logo.url})
@@ -423,31 +389,10 @@ def upload_monochrome_logo(request, company):
 def save_monochrome_image(c, data):
     if 'image' in data:
         # read the new image and upload it
-        image_file = image_from_base64(data.get('image'))
+        monochrome_logo = import_monochrome_image(data.get('image'), g.IMAGE_DIMENSIONS['monochrome_logo'], 'fit')
 
-        if not image_file:
+        if not monochrome_logo:
             return JsonError(_("No file sent"))
-
-        resize = False
-
-        # resize and convert image if necessary
-        monochrome_logo = Image.open(image_file)
-
-        if monochrome_logo.size != g.IMAGE_DIMENSIONS['monochrome_logo']:
-            # the logo has wrong dimensions
-            resize = True
-
-        if monochrome_logo.format != g.MISC['image_format']:
-            # the logo is not in the correct format
-            resize = True
-
-        # resize first
-        if resize:
-            monochrome_logo = resize_image(monochrome_logo, g.IMAGE_DIMENSIONS['monochrome_logo'], 'fit')
-
-        # then convert to monochrome
-        if monochrome_logo.mode != '1':
-            monochrome_logo = monochrome_logo.convert('1')
 
         if c.monochrome_logo.name:
             # the logo exists already, delete it
@@ -456,14 +401,9 @@ def save_monochrome_image(c, data):
             except (OSError, ValueError):
                 pass
 
-        temp_handle = StringIO()
-        monochrome_logo.save(temp_handle, 'png')
-        temp_handle.seek(0)
+        f = create_file_from_image(monochrome_logo)
 
-        # Save to the thumbnail field
-        suf = SimpleUploadedFile('temp', temp_handle.read(), ('image/' + g.MISC['image_format']).lower())
-
-        c.monochrome_logo.save(suf.name + '.png', suf, save=False)
+        c.monochrome_logo.save(f['name'], f['file'], save=False)
         c.save()
 
         return JsonResponse({'status': 'ok', 'logo_url': c.monochrome_logo.url})

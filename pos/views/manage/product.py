@@ -1,11 +1,12 @@
 import base64
+from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
-from common.images import image_dimensions, image_from_base64
+from common.images import image_dimensions, image_from_base64, import_color_image, create_file_from_image
 
 from pos.models import Company, Category, Product, Price, PurchasePrice, Tax
 from pos.views.util import JsonParse, JsonError, JsonOk, \
@@ -202,7 +203,7 @@ def search_products(request, company, android=False):
     # get all products from this company and filter them by entered criteria
     products = Product.objects.filter(company=c)
     
-    criteria = JsonParse(request.POST['data'])
+    criteria = JsonParse(request.POST.get('data'))
     
     # filter by: ("advanced" values in criteria dict)
     # name_filter
@@ -419,8 +420,8 @@ def validate_product(user, company, data):
         
     # image:
     if data['change_image'] == True:
-        if 'image' in data and data['image']: # new image has been uploaded
-            data['image'] = image_from_base64(data['image'])
+        if 'image' in data and data['image']:  # a new image has been uploaded
+            data['image'] = import_color_image(data['image'], g.IMAGE_DIMENSIONS['product'], 'fill')
             if not data['image']:
                 # something has gone wrong during conversion
                 return r(False, _("Image upload failed"))
@@ -547,7 +548,8 @@ def create_product(request, company, android=False):
     # add image, if it's there
     if data['change_image']:
         if 'image' in data:
-            product.image = data['image']
+            f = create_file_from_image(data['image'])
+            product.image = f['file']
             product.save()
     
     return JsonOk(extra=product_to_dict(request.user, c, product, android))
@@ -594,13 +596,14 @@ def edit_product(request, company, android=False):
     
     # image
     if data['change_image'] == True:
-        if data.get('image'): # new image is uploaded
+        if data.get('image'):  # new image is uploaded
             # create a file from the base64 data and save it to product.image
             if product.image:
                 product.image.delete()
-            # save a new image
-            product.image = data['image'] # conversion from base64 is done in validate_product
-        else: # delete the old image
+            # save a new image (conversion is done in validate_product)
+            f = create_file_from_image(data['image'])
+            product.image = f['file']
+        else:  # delete the old image
             product.image.delete()
     
     # category

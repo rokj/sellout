@@ -159,8 +159,9 @@ Terminal = function(g){
                 }
                 else{
                     // there's no bill on the server, check local storage (it may noy be finished at all)
-                   if(localStorage.bill){
+                    if(localStorage.bill){
                         var data = load_local('bill');
+                        console.log(data)
 
                         if(data){
                             // if bill is not loaded yet, wait for it

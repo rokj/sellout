@@ -3,1142 +3,1146 @@
 {% load i18n %}
 
 {% block section_head %}
-<script type="text/javascript" src="{% static 'js/jquery.customfileinput.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.customfileinput.js' %}"></script>
 
-<style type="text/css">
-#edit_product_image{ /* some data directly from view */
-    width:{{ image_dimensions.0 }}px;
-    height:{{ image_dimensions.1 }}px;
-    background-size: cover;
-    background-position: center center;
-}
-
-.image-buttons{
-    position: relative;
-    height: {{ image_dimensions.1 }}px;
-    float: right;
-}
-
-.delete-image-button{
-    background-image: url("{% static 'icons/delete_active.png' %}");
-}
-
-/* button backgrounds: other styling is in management/products.css */
-.product-edit-button{ background-image: url('{% static 'icons/edit_black.png' %}'); }
-.product-delete-button{ background-image: url('{% static 'icons/delete_black.png' %}'); }
-.product-favorite-button{ background-image: url('{% static 'icons/favorite_black.png' %}'); }
-
-.dark .product-edit-button{ background-image: url('{% static 'icons/edit_white.png' %}'); }
-.dark .product-delete-button{ background-image: url('{% static 'icons/delete_white.png' %}'); }
-.dark .product-favorite-button{ background-image: url('{% static 'icons/favorite_white.png' %}'); }
-
-.product-favorite-button.active{ background-image: url('{% static 'icons/favorite_active.png' %}'); }
-
-</style>
-<link type="text/css" rel="stylesheet" href="{% static 'css/management/products.css' %}" />
-
-{% comment %}
-javascript:
-    1. get from server:
-        - list of categories
-        - list of units
-        - list of available discounts (all_discounts)
-        - list of tax rates (tax_rates)
-    2. if search criteria has changed, get results from server:
-        on change or 'update' button press: update_products() >
-         > after data is received: show_products > for each product: render_product()
-    3. show product:
-        - render_product(product) > show all product data in a cloned product_details div >
-         > edit button: show_product_edit_dialog(), delete button > delete_product()
-    4. editing product:
-        - show_product_edit_dialog() > clear edit_dialog div and add all product's data to edit boxes etc.
-        - adding/deleting discounts > add_discount(): adds a list Item to discounts' ul >
-         > refresh() discounts: clears ul and re-adds all selected products > discounts that are available to add are in all_discounts
-        - save: save_product(): if it's a new product, id = -1, send to server > update_products();
-           if it's an existing product, send to server > redraw the existing product in its parent div > render_product()
-        - delete: ask for confirmation > send to server
-        
-product's data:
-    show_products() assigns a new parent_div to product > parent_div.data({product:product}) holds all info on this product
-     > gets overwritten on save, is untouched on cancel
-
-reference to a product is its parent div (that contains product's .data()).
-
-{% endcomment %}
-<script type="text/javascript">
-var category_data = {% autoescape off %}{{ categories }}{% endautoescape %};
-var categories_list = []; // list of category names (source for the autocomplete)
-var categories_by_breadcrumbs = {}; // dictionary path:category_id for saving
-var categories_by_id = {}; // dictionary id:path for loading
-
-var units_data = {% autoescape off %}{{ units }}{% endautoescape %};
-var units = [];
-
-var all_discounts = {% autoescape off %}{{ discounts }}{% endautoescape %};
-
-var tax_rates = {% autoescape off %}{{ taxes }}{% endautoescape %};
-
-var last_value;
-var update_timeout;
-var last_offset = 0;
-var advanced_shown = false;
-
-var check_interval_duration = 500;
-var update_timeout_duration = 1500;
-
-// remember the category of last added product and show it in new dialog
-var last_chosen_category = null;
-
-$(document).ready(function(){
-    // functions:
-    function update_products(){
-        // update products when search criteria has changed (gets called on timeout or on click)
-        // assemble a JSON object with all search criteria and pass it to the view
-        var search_criteria = {
-            general_filter:$("#general_filter").val()
-        };
-        
-        if(advanced_shown){
-            // add criteria from the advanced div
-            $(".filter").each(function(){
-                if($(this).val()){
-                    search_criteria[$(this).attr("id")] = $(this).val();
-                }
-            });
-
-            // add the category id (stored in .data())
-            var cat_filter_id = "category_filter";
-            var category = $("#" + cat_filter_id);
-            var cat_val = category.val().trim();
-
-            if(cat_val != ""){
-                if(cat_val in categories_by_breadcrumbs){
-                    search_criteria[cat_filter_id] = categories_by_breadcrumbs[cat_val];
-                }
-            }
-        }
-        
-        // send to the view
-        send_data("{% url 'pos:search_products' company.url_name %}",
-            search_criteria, "{{ csrf_token }}", function(recv_data){
-                show_products(recv_data);
-        });
-        return false;
-    }
-    
-    function show_products(data){
-        // show products that search returned
-        // clear products div
-        var products_div = $("#products_list");
-        products_div.empty();
-        
-        if(data.length == 0){
-            products_div.append("{% trans 'No products found' %}");
-        }
-        
-        var i;
-        var max_height = 0;
-        for(i = 0; i < data.length; i++){
-            parse_product(data[i]);
-
-            // make a div for each product
-            var parent_div = $("<div>", {"class":"product-details"});
-            products_div.append(parent_div);
-            
-            // save product to .data()
-            parent_div.data(data[i]);
-            render_product(parent_div);
-
-            // get product container's height
-            max_height = Math.max(parent_div.height(), max_height);
+    <style type="text/css">
+        #edit_product_image {
+            /* some data directly from view */
+            width: {{ image_dimensions.0 }}px;
+            height: {{ image_dimensions.1 }}px;
+            background-size: cover;
+            background-position: center center;
         }
 
-        // in the end, make all products equally high
-        $("div.product-details").height(max_height);
-    }
-
-    function render_product(div_obj/*parent*/){
-        // shows a product box (search result), not edit dialog
-        var tmp_obj, i;
-
-        // update this div
-        var product = div_obj.data();
-        
-        // empty parent and copy all stuff from #product_details_template to it
-        div_obj.empty();
-        div_obj.append($("div.title, div.product-details-image, table.details", "#product_details_template").clone());
-        
-        // add product data to data()
-        div_obj.data(product);
-
-        // name
-        var title_row_obj = $(".title", div_obj);
-        var name_obj = $(".product-name", div_obj);
-
-        name_obj.append(escape(product.name));
-
-        title_row_obj.css("background-color", "#" + product.color);
-
-        if(is_dark(product.color)) title_row_obj.addClass("dark");
-        else title_row_obj.removeClass("dark");
-
-        // price
-        tmp_obj = $(".product-price", div_obj);
-        tmp_obj.append(product.price);
-
-        // image
-        show_image(product, $(".product-image", div_obj));
-
-        // category
-        $(".product-category", div_obj).append(escape(product.category));
-        // tax
-        $(".product-tax", div_obj).append(product.tax + "%");
-        // description
-        //$(".product-description", div_obj).append(escape(product.description));
-        // discount list
-        /* not shown at the moment
-        tmp_obj = $(".product-discounts", div_obj);
-        if(product.discounts.length > 0){
-            var li_obj;
-            for(i = 0; i < product.discounts.length; i++){
-                li_obj = $("<li>", {title:""});
-                li_obj.append(product.discounts[i].code + " " +
-                    discount_amount(product.discounts[i]));
-
-                // tooltip:
-                discount_tooltip(product.discounts[i], li_obj);
-                tmp_obj.append(li_obj);
-            }
-        }
-        else{
-            tmp_obj.text("/");
-        }*/
-
-        // private notes
-        //$(".product-private-notes", div_obj).append(escape(product.private_notes));
-        // stock
-        /*if(product.stock){
-            $(".product-stock", div_obj).append(product.stock + " " + 
-                product.unit_type_display + " {% trans 'left in stock' %}");
-        }*/
-        
-        // shortcut
-        $(".product-shortcut", div_obj).append(escape(product.shortcut));
-        // code
-        $(".product-code", div_obj).append(escape(product.code));
-        
-        var edit_button = $("button.product-edit-button", div_obj);
-        var delete_button = $("button.product-delete-button", div_obj);
-        var favorite_button = $("button.product-favorite-button", div_obj);
-
-        // if a user has no permission to edit/delete, don't show buttons
-        if({{can_edit|lower}}){
-            // enable and add functionality to:
-            // edit button
-            edit_button.prop('disabled', false);
-            edit_button.click(function(){
-                show_product_edit_dialog(div_obj);
-            });
-            // delete button
-            delete_button.prop('disabled', false);
-            delete_button.click(function(){
-                delete_product(div_obj);
-            });
-            // favorite button
-            favorite_button.prop('disabled', false);
-            favorite_button.click(function(){
-                toggle_favorite(favorite_button, product);
-            });
-        }
-        else{
-            // just disable
-            edit_button.prop('disabled', true);
-            delete_button.prop('disabled', true);
-            favorite_button.prop('disabled', true);
+        .image-buttons {
+            position: relative;
+            height: {{ image_dimensions.1 }}px;
+            float: right;
         }
 
-        style_favorite_button(favorite_button, product.favorite);
-        
-        div_obj.show();
-    }
+        .delete-image-button {
+            background-image: url("{% static 'icons/delete_active.png' %}");
+        }
 
-    function style_favorite_button(button_obj, favorited){
-        if(favorited) button_obj.addClass("active");
-        else button_obj.removeClass("active");
-    }
+        /* button backgrounds: other styling is in management/products.css */
+        .product-edit-button {
+            background-image: url('{% static 'icons/edit_black.png' %}');
+        }
 
-    function toggle_favorite(button_obj, product){
-        send_data("{% url 'pos:toggle_favorite' company.url_name %}", {product_id:product.id}, "{{ csrf_token }}",
-            function(response){
-                if(response.status != 'ok'){
-                    error_message(
-                        "{% trans 'Favorite could not be set' %}",
-                        response.message);
+        .product-delete-button {
+            background-image: url('{% static 'icons/delete_black.png' %}');
+        }
+
+        .product-favorite-button {
+            background-image: url('{% static 'icons/favorite_black.png' %}');
+        }
+
+        .dark .product-edit-button {
+            background-image: url('{% static 'icons/edit_white.png' %}');
+        }
+
+        .dark .product-delete-button {
+            background-image: url('{% static 'icons/delete_white.png' %}');
+        }
+
+        .dark .product-favorite-button {
+            background-image: url('{% static 'icons/favorite_white.png' %}');
+        }
+
+        .product-favorite-button.active {
+            background-image: url('{% static 'icons/favorite_active.png' %}');
+        }
+
+    </style>
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/products.css' %}"/>
+
+    <script type="text/javascript">
+    $(document).ready(function(){
+        // all data (from template)
+
+        // categories
+        var category_data = {% autoescape off %}{{ categories }}{% endautoescape %};
+        var categories_list = []; // list of category names (source for the autocomplete)
+        var categories_by_breadcrumbs = {}; // dictionary path:category_id for saving
+        var categories_by_id = {}; // dictionary id:path for loading
+        var last_chosen_category = null; // remember the category of last added product and show it in new dialog
+
+        // units
+        var units_data = {% autoescape off %}{{ units }}{% endautoescape %};
+        var units = [];
+
+        // discounts
+        var all_discounts = {% autoescape off %}{{ discounts }}{% endautoescape %};
+
+        // taxes
+        var tax_rates = {% autoescape off %}{{ taxes }}{% endautoescape %};
+
+
+        Search = function(){
+            var p = this;
+
+            p.advanced_shown = null;
+            p.last_search_value = null;
+            p.search_timeout = null;
+            p.search_timeout_duration = 1000; // update search n[ms] after last change has been made
+
+            p.url_separator = ':';
+
+            p.items = {
+                general_filter: $("#general_filter"),
+
+                advanced_toggle_button: $("#advanced_search_toggle"),
+                advanced_div: $("#advanced_search"),
+
+                category_filter: $("#category_filter"),
+                product_code_filter: $("#product_code_filter"),
+                shortcut_filter: $("#shortcut_filter"),
+                name_filter: $("#name_filter"),
+                description_filter: $("#description_filter"),
+                notes_filter: $("#notes_filter"),
+                tax_filter: $("#tax_filter"),
+                price_filter: $("#price_filter"),
+                discount_filter: $("#discount_filter"),
+
+                search_button: $("#update_results")
+            };
+
+            // methods
+            p.toggle_advanced = function(show){
+                if(show){
+                    p.items.advanced_div.show();
+
+                    // these show and hide up/down arrows
+                    $(".basic", p.items.advanced_toggle_button).hide();
+                    $(".advanced", p.items.advanced_toggle_button).show();
                 }
                 else{
-                    // update product and the button
-                    product.favorite = response.favorite;
-                    style_favorite_button(button_obj, product.favorite);
+                    p.items.advanced_div.hide();
+                    $(".basic", p.items.advanced_toggle_button).show();
+                    $(".advanced", p.items.advanced_toggle_button).hide();
                 }
-            });
-    }
-    
-    function discount_amount(discount){
-        if(discount.type == 'Percent')
-            return " (" + display_number(discount.amount, "{{ separator }}", {{ decimal_places }}) + "%)";
-        else
-            return " ({{currency|escapejs}} " + display_number(discount.amount, "{{ separator }}", {{ decimal_places }}) + ")";
-    }
 
-    function discount_tooltip(discount, li_obj){
-        // tooltip - discount details
-        var tooltip = "";
-        
-        // tooltip = discount.code + "<br />" // discount code (already in the li)
-        tooltip += escape(discount.description) + "<br />"; // description
-        
-        // if no dates are set, show 'no date limit', otherwise 'from ... to ...'
-        if(!discount.start_date && !discount.end_date){
-            tooltip += "{% trans 'No date limits' %}"
-        }
-        else{
-            if(discount.start_date) tooltip += "{% trans 'from' %} " + escape(discount.start_date); 
-            if(discount.end_date) tooltip += " {% trans 'to' %} " + escape(discount.end_date);
-        }
-        
-        // TODO: set style for inactive discount
-        if(!discount.active) tooltip += "<br/>{% trans 'inactive' %}"; // active
-        
-        li_obj.tooltip({content:tooltip});
-    }
-    
-    function find_discount_by_id(discounts, id){
-        for(var i = 0; i < discounts.length; i++){
-            if(discounts[i].id == id) return i;
-        }
-        
-        // discount not found
-        return null;
-    }
-    
-    function add_discount(ul_obj, product, id){ // i - index in product.discounts
-        // add a list Item and a delete button to product edit dialog
-        // add a discount from all_discounts to product
-        var i = find_discount_by_id(product.discounts, id);
-        var discount = product.discounts[i];
-        
-        var li_obj = $("<li>", {title:""});
-        li_obj.data(discount); // store id in data() for later retrieval
+                p.advanced_shown = show;
+            };
 
-        discount_tooltip(discount, li_obj);
-        
-        // delete button
-        var btn_obj = $("<img>", {"class":"delete-discount hoverable", src: "{% static 'icons/cancel.png' %}"});
-        btn_obj.click(function(){
-            // delete this list Item
-            $(this).parent().remove();
-            // delete this id from product.discounts
-            product.discounts.splice(i, 1);
-            // redraw discounts
-            refresh_discounts(product);
-        });
-        
-        li_obj.append(discount.code + " " + discount_amount(discount));
-        li_obj.append(btn_obj);
-        ul_obj.append(li_obj);
-    }
-    
-    function refresh_discounts(product){
-        // clear everything discount-related and redraw
-        var ul_obj = $("#edit_discounts", "#edit_dialog");
-        ul_obj.empty();
-        
-        // add discounts currently in product
-        var i;
-        for(i = 0; i < product.discounts.length; i++){
-            add_discount(ul_obj, product, product.discounts[i].id);
-        }
-        
-        // add another Item, this time with all available discounts
-        // in a listbox and an 'add' button
-        var li_obj = $("<li>");
-        var sel_obj = $("<select>", {id:"edit_discount_list"});
-        li_obj.append(sel_obj);
-        li_obj.data({id:false}); // don't store or send this Item
-        ul_obj.append(li_obj);
-        
-        // add discounts NOT in product to add listbox
-        var added = 0;
+            p.clear = function(){
+                // clear all search data
+                $(".filter", p.items.advanced_div).val("");
+                p.items.general_filter.val("");
+            };
 
-        for(i = 0; i < all_discounts.length; i++){
-            // ignore discounts that are already in product
-            if(find_discount_by_id(product.discounts, all_discounts[i].id) != null){
-                continue;
-            }
-            
-            var opt_obj = $("<option>")
-                .attr("value", all_discounts[i].id)
-                .append(all_discounts[i].code + " " + discount_amount(all_discounts[i]));
-            
-            sel_obj.append(opt_obj);
-            added++;
-        }
-        // only add the listbox if there's anything to add
-        if(added > 0){
-            // unselect the first Item in listbox to avoid confusion
-            sel_obj.prop("selectedIndex", -1);
-            
-            sel_obj.unbind().change(function(){ // no add buttons
-                var d_i = $(":selected", sel_obj).val(); // currently selected discount's list index
-                
-                // add data to product
-                product.discounts.push(all_discounts[find_discount_by_id(all_discounts, d_i)]);
-                refresh_discounts(product);
-            });
-        }
-        else{
-            // remove the last, 'add' entry
-            li_obj.remove();
-        }
-        
-        // make the list sortable, but exclude the last Item
-        if(added > 0) ul_obj.sortable({items:"li:not(:last)", stop:get_total_price}); // also update price when sorting stops
-        else ul_obj.sortable({items:"li"});
+            p.match_url = function(){
+                // returns true if there was valid data in url, false otherwise
+                var s = get_url_hash();
+                var args = s.split(p.url_separator);
 
-        // update total price
-        get_total_price();        
-    }
-    
-    function upload_image_status(status, save_obj, del_obj, upl_obj, img_obj){
-        return;
-        // no showing and hiding at the moment
-        /*var show, hide;
+                // must be two in length
+                if(args.length == 2){
+                    var type = args[0];
+                    var query = args[1];
 
-        upl_obj = upl_obj.parent();
+                    switch(type){
+                        case "category":
+                            // show advanced search
+                            p.toggle_advanced(true);
+                            p.clear();
 
-        switch(status){
-           case 'image':
-               // product has image and it is not being edited
-               show = [save_obj, del_obj, img_obj];
-               hide = [upl_obj];
-               break;
-           case 'no_image':
-               // product has no image and it is not being edited
-               show = [save_obj, img_obj];
-               hide = [del_obj];
-               break;
-           case 'uploading':
-               // image is uploading
-               show = [img_obj];
-               hide = [save_obj, del_obj, upl_obj];
-               break;
-        }
+                            // select category id in search box
+                            var catid = parseInt(query, 10);
 
-        var i;
-        for(i = 0; i < show.length; i++) show[i].show();
-        for(i = 0; i < hide.length; i++) hide[i].hide();*/
-    }
-        
-    function show_image(product, obj){
-        if(!product.image){
-            // show 'placeholder' image
-            obj.css("background-image", "url('{% static 'images/product_placeholder.png' %}')");
-            obj.attr("alt", "{% trans 'No image' %}");
-        }
-        else{
-            // show the real image
-            obj.css("background-image", "url('" + product.image + "')");
-            obj.attr("alt", escape(product.name));
-        }
-    }
-    
-    function show_product_edit_dialog(parent){
-        var i, sel_obj;
-        
-        var product = parent.data();
-        
-        var edit_obj = $("#edit_dialog");
-        
-        // save button (unbind previously bound objects)
-        var save_btn_obj = $("#edit_product_save", edit_obj);
-        save_btn_obj.unbind().click(function(){
-            save_product(parent);
-        });
-        
-        // cancel button
-        $("#edit_product_cancel", edit_obj).unbind().click(function(){
-            // reload the product
-            get_product(parent);
-            // destroy the dialog (content will be deleted when it opens again)
-            $("#edit_dialog").hide();
-            $("#dialog_shadow").fadeOut("fast");
-        });
-        
-        // init all fields
-        $("#edit_product_name", edit_obj).val(product.name).focus();
-        
-        // always show price excluding tax first
-        sel_obj = $("#edit_product_price_without_tax", edit_obj);
-        sel_obj.val(product.price);
+                            if(isNaN(catid)) return;
 
-        // purchase price
-        sel_obj = $("#edit_product_purchase_price");
-        sel_obj.val(product.purchase_price);
+                            p.items.category_filter.val(categories_by_id[catid]);
 
-        // ... per unit (listbox with unit types)
-        sel_obj = $("#edit_product_unit_type", edit_obj).empty();
+                            // do a search in this category
+                            p.update_products();
 
-        for(i=0; i<units.length;i++){
-            opt_obj = $("<option>")
-                .attr("value", units[i].value)
-                .text(units[i].name);
-            
-            if(units[i].value == product.unit_type){
-                opt_obj.attr("selected", "selected");
-            }
-            sel_obj.append(opt_obj);
-        }
-        // when changed, update units
-        sel_obj.change(update_unit_types);        
+                            break;
+                        case "product":
+                            // show advanced search
+                            p.toggle_advanced(true);
+                            p.clear();
 
-        // update with default
-        update_unit_types();
-        
-        // listbox with taxes
-        sel_obj = $("#edit_product_tax", edit_obj).empty();
+                            // fill in the product code
+                            p.items.product_code_filter.val(query);
 
-        create_tax_select(sel_obj, product, false);
-
-        // autocomplete with categories
-        sel_obj = $("#edit_product_category", edit_obj).empty();
-        sel_obj.autocomplete({source: categories_list });
-        if(!isNaN(product.category_id)) sel_obj.val(categories_by_id[product.category_id]);
-        else sel_obj.val("");
-
-        // product image
-        var del_obj = $("#edit_product_delete_image", edit_obj);
-        var upl_obj = $("#edit_product_image_upload", edit_obj);
-        var img_obj = $("#edit_product_image", edit_obj);
-
-        // reset the upload control (.val() doesn't work for security reasons)
-        //$("#edit_product_image_input_form").get(0).reset();
-
-        // show product image, if it exists
-        show_image(product, img_obj);
-
-        product.change_image = false;
-        
-        // upload <input>: preview image on upload and store base64 data for sending to server
-        upl_obj.unbind().change(function(){
-            // get image (base64) and store it to .data()
-            var obj = upl_obj.get(0);
-
-            // filetype filter
-            var rFilter = /^image\/(?:{{ image_upload_formats|escapejs }})$/i; {% comment %} file formats from globals {% endcomment %}
-
-            var f = obj.files[0];
-            if(obj.files && f){ // check for browser compatibility
-                var reader = new FileReader();
-                // read the file
-                reader.onload = function(e){
-                    // check file type
-                    if (!rFilter.test(f.type)){
-                        error_message(
-                            "{% trans 'Error while uploading image' %}",
-                            "{% trans 'Wrong file type for the uploaded image!' %}"
-                        );
-                        upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
-                        return false;
+                            // run a search
+                            p.update_products();
+                            break;
+                        default:
+                            return;
                     }
-                    if(f.size > {{ max_upload_size_bytes|escapejs }}){
-                        error_message(
-                            "{% trans 'Error while uploading image' %}",
-                            "{% trans 'File too large, maximum size for upload is' %} {{ max_upload_size|escapejs }} MB"
-                        );
-                        upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
-                        return false;
-                    }
-                    
-                    // store the file in output
-                    product.image_data = e.target.result;
-                    
-                    // preview image
-                    // show_image() cannot be used here because we're showing image from data:, no from url
-                    img_obj.css("background-image", "url('" + product.image_data + "')");
-                    img_obj.attr("alt", product.name);
-                    
-                    // update dialog
-                    upload_image_status('image', save_btn_obj, del_obj, upl_obj, img_obj);
-                    return true;
+                }
+            };
+
+            p.update_products = function(){
+                // update products when search criteria has changed (gets called on timeout or on click)
+                // assemble a JSON object with all search criteria and pass it to the view
+                var search_criteria = {
+                    general_filter: $("#general_filter").val()
                 };
-                reader.readAsDataURL(obj.files[0]);
-                // disable the save() button until everything is uploaded
-                upload_image_status('uploading', save_btn_obj, del_obj, upl_obj, img_obj);
-                // image will have to be uploaded
-                product.change_image = true;
-            }
 
-            // not showing/hiding at the moment
-            //del_obj.show();
-            //upl_obj.hide();
-        });
-
-        // set dialog title: if there's no name, it's for adding new product
-        sel_obj = $("#edit_dialog_title");
-        if(product.name)
-            sel_obj.text("{% trans 'Edit product' %}");
-        else
-            sel_obj.text("{% trans 'Add product' %}");
-
-        
-        del_obj.unbind().click(function(){
-            // show/hide controls
-            upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
-            
-            // image was changed
-            product.change_image = true;
-            // nothing to upload
-            product.image_data = null;
-            // and also nothing to show
-            product.image = null;
-            // delete image source and name
-            show_image(product, img_obj);
-        });
-        
-        if(product.image){
-            // product already has an image: show it
-            show_image(product, img_obj);
-            upload_image_status('image', save_btn_obj, del_obj, upl_obj, img_obj);
-        }
-        else{
-            upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
-        }
-        
-        $("#edit_product_description", edit_obj).val(product.description);
-        $("#edit_product_price", edit_obj).val(product.price);
-        
-        // discounts
-        // add to list
-        var ul_obj = $("#edit_discounts", edit_obj);
-        ul_obj.empty();
-
-        // for the first time
-        refresh_discounts(product);
-        
-        $("#edit_product_private_notes", edit_obj).val(product.private_notes);
-        $("#edit_product_stock", edit_obj).val(product.stock);
-        $("#edit_product_shortcut", edit_obj).val(product.shortcut);
-        $("#edit_product_code", edit_obj).val(product.code);
-
-        var base_price_obj = $("#edit_product_price_without_tax").val(product.price);
-        var tax_price_obj = $("#edit_product_price_with_tax").val(""); // will be updated with base_price_obj.change()
-
-        // update total price when tax, price or discounts change
-        $("#edit_product_tax, " +
-            "#edit_product_price_with_tax, " +
-            "#edit_product_price_without_tax, " +
-            "#edit_product_purchase_price", edit_obj).unbind().change(get_total_price);
-
-        // update price with or without tax
-        base_price_obj.change(function(){
-            var base_price = get_number($(this).val(), "{{ separator }}");
-            // update price with tax
-            var tax = get_number(get_tax($("#edit_product_tax").val()).amount, "{{ separator }}");
-
-            if(!base_price) return;
-            if(!tax) return;
-
-            tax_price_obj.val(display_number(base_price.times(Big(1).plus(tax.div(Big(100)))), "{{ separator }}", {{ decimal_places }}));
-
-            get_total_price();
-        }).change();
-
-        tax_price_obj.change(function(){
-            var tax_price = get_number($(this).val(), "{{ separator }}");
-            // update price with tax
-            var tax = get_number(get_tax($("#edit_product_tax").val()).amount, "{{ separator }}");
-
-            if(!tax_price) return;
-            if(!tax) return;
-
-            base_price_obj.val(display_number(tax_price.div(Big(1).plus(tax.div(Big(100)))), "{{ separator }}", {{ decimal_places }}));
-
-            get_total_price();
-        });
-
-        get_total_price();
-
-        // initial 'change'
-        base_price_obj.change();
-
-        // show the edit 'dialog'
-        open_edit_dialog();
-
-        // custom 'widgets'
-        $("#edit_product_image_upload").customFileInput("{% trans 'Choose...' %}");
-
-        // cosmetics:
-        // upload image button width: resize the buttons according to column and image width
-        $("div.image-buttons").width(
-            $(".management-column").first().width() - {{ image_dimensions.0 }}
-        );
-
-        // focus on product price, instead of 'remove image' button
-        base_price_obj.focus();
-    }
-
-    function parse_product(product){
-        // convert all text numbers in product to Big() numbers
-        // price, purchase_price, stock, tax, discounts[amount]
-        product.price = get_number(product.price, "{{ separator }}");
-        product.purchase_price = get_number(product.purchase_price, "{{ separator }}");
-        product.stock = get_number(product.stock, "{{ separator }}");
-        product.tax = get_number(product.tax, "{{ separator }}");
-
-        for(var i = 0; i < product.discounts.length; i++){
-            product.discounts[i].amount = get_number(product.discounts[i].amount, "{{ separator }}");
-        }
-
-        return product;
-    }
-    
-    function get_product(parent){
-        // get product's data from the server and put
-        // it where it was before (product.parent)
-        var url = "{% url 'pos:get_product' company.url_name %}" + '?' + $.param({product_id: parent.data().id});
-
-        get_data(url, function(data){
-            parent.data(parse_product(data));
-            render_product(parent);
-        });
-    }
-    
-    function get_product_discounts(ul_obj){
-        // discounts: get all <li> items and put them into an array
-        var discounts = [];
-        
-        ul_obj.children().each(function(){
-            var id = $(this).data().id;
-            if(id){
-                discounts.push($(this).data()); // the last entry is the listbox and button, don't add that
-            }
-        });        
-        
-        return discounts;
-    }
-    
-    function get_total_price(){
-        // tax
-        var t = get_number(get_tax($("#edit_product_tax").val()).amount, "{{ separator }}");
-        if(!t) return; // don't change anything if something is wrong (or not yet entered)
-            
-        // price: always get price without tax
-        var price = get_number($("#edit_product_price_without_tax").val(), "{{ separator }}");
-        if(!price) return;
-        
-        // gather all discounts
-        var discounts = get_product_discounts($("ul#edit_discounts"));
-            
-        // total_price(tax_first, base_price, tax, discounts, quantity, decimal_places){
-        var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), {{decimal_places}});
-
-        $("#total_price").text(display_number(result.total, "{{separator}}", {{ decimal_places }}));
-        
-        // price without tax
-        $("#price_without_tax").text(display_number(result.total_tax_exc, "{{separator}}", {{ decimal_places }}));
-                
-        // calculate profit and if it's lower than zero, use a different style
-        // get the purchase price, if entered
-        var purchase_price = get_number($("input#edit_product_purchase_price").val(), "{{separator}}");
-        var profit_obj = $("#profit");
-        if(purchase_price){
-            var profit = result.total_tax_exc.minus(purchase_price);
-            profit_obj.text(display_number(profit, "{{separator}}", {{ decimal_places }}));
-            
-            if(profit.cmp(Big(0)) < 0){ // use alternate style
-                profit_obj.addClass("negative-profit");
-            }
-            else{
-                profit_obj.removeClass("negative-profit");
-            }
-        }
-        else{
-            profit_obj.text("");
-        }
-    }
-    
-    function save_product(parent){
-        // get product's data from the dialog and send
-        // id
-        // price - numeric value
-        // unit type
-        // discounts - list of discount ids
-        // image_changed
-        // image
-        // category - id
-        // code
-        // shortcut
-        // description
-        // private notes
-        // tax
-        // stock
-        var product = parent.data();
-        
-        var dlg_obj = $("#edit_dialog");
-        
-        var data = {};
-        data['id'] = product.id;
-        data['name'] = $("#edit_product_name", dlg_obj).val();
-        data['unit_type'] = $("#edit_product_unit_type", dlg_obj).val();
-        // image: if changed, encode uploaded image to base64
-        data['change_image'] = product.change_image;
-        if(product.change_image) data['image'] = product.image_data;
-        
-        data['category_id'] = categories_by_breadcrumbs[$("#edit_product_category", dlg_obj).val()];
-        last_chosen_category = data['category_id']; // remember the last used
-        data['tax_id'] = $("#edit_product_tax", dlg_obj).val();
-        data['description'] = $("#edit_product_description", dlg_obj).val();
-        // discounts: strip off everything but ids
-        var discounts = get_product_discounts($("ul#edit_discounts", dlg_obj));
-        for(var i = 0; i < discounts.length; i++){
-            discounts[i] = discounts[i].id;
-        }
-        data['discount_ids'] = discounts;
-        data['private_notes'] = $("#edit_product_private_notes", dlg_obj).val();
-        data['stock'] = $("#edit_product_stock", dlg_obj).val();
-        data['shortcut'] = $("#edit_product_shortcut", dlg_obj).val();
-        data['code'] = $("#edit_product_code", dlg_obj).val();
-        // price: always use base price (without tax)
-        data['price'] = $("#edit_product_price_without_tax", dlg_obj).val();
-
-        if(!data['price']){
-            error_message(
-                "{% trans 'Invalid data' %}",
-                "{% trans 'Please check product price' %}"
-            );
-        }
-
-        // purchase price
-        data['purchase_price'] = $("#edit_product_purchase_price", dlg_obj).val();
-        
-        if(data['id'] == "-1"){
-            // it's a new product
-            // refresh search criteria
-            send_data("{{ add_url|escapejs }}", data, "{{csrf_token}}",
-                function(response){
-                    if(response.status != 'ok')
-                        error_message("{% trans 'Error saving product' %}", response.message);
-                    else{
-                        // save the new product data
-                        parent.data(response.data);
-                        // re-do the current search and close the dialog
-                        update_products();
-                        close_edit_dialog();
-                    }
-                }
-            );
-        }
-        else{
-            // the product's been edited
-            // send data to server and update the div with the retrieved 'cleaned' data
-            send_data("{% url 'pos:edit_product' company.url_name %}", data, "{{csrf_token}}",
-                function(response){
-                    if(response.status != 'ok')
-                        error_message("{% trans 'Error saving product' %}", response.message);
-                    else{
-                        get_product(parent);
-                        close_edit_dialog();
-                    }
-                }
-            );
-        }
-    }
-
-    function open_edit_dialog(){
-        var shadow = $("#dialog_shadow");
-
-        shadow.fadeIn("fast", function(){
-            $("#edit_dialog").show();
-        });
-        shadow.unbind().click(close_edit_dialog);
-    }
-
-    function close_edit_dialog(){
-        $("#edit_dialog").hide();
-        $("#dialog_shadow").fadeOut("fast");
-    }
-    
-    function delete_product(parent){
-        var product = parent.data();
-        var data = {};
-        data['id'] = product.id;
-        // confirm deletion
-        confirmation_dialog(
-            "{% trans 'Are you sure?' context 'confirmation dialog title' %}",
-            "{% trans 'Delete product ' %} '" + product.name + "'?",
-                function(){
-                    send_data("{% url 'pos:delete_product' company.url_name %}", data, "{{ csrf_token }}",
-                        function(data){
-                            if(data.status != 'ok') error_message("{% trans 'Error deleting product' %}", data.message);
-                            else{
-                            // remove the product's div and delete the variable
-                            parent.remove();
+                if(p.advanced_shown){
+                    // add criteria from the advanced div
+                    $(".filter").each(function(){
+                        if($(this).val()){
+                            search_criteria[$(this).attr("id")] = $(this).val();
                         }
                     });
-                },
-                function(){}
-        );
-    }
 
-    function update_unit_types(){
-        // when the unit types edit changes, update all static labels with the changed units
-        var ut = $("#edit_product_unit_type").val();
+                    var cat_filter_id = p.items.category_filter.attr("id");
+                    var cat_val = p.items.category_filter.val();
 
-        var ut_display = ut;
+                    if(cat_val != ""){
+                        if(cat_val in categories_by_breadcrumbs){
+                            search_criteria[cat_filter_id] = categories_by_breadcrumbs[cat_val];
+                        }
+                    }
+                }
 
-        // try to find a better name (the actual display unit instead of m^2)
-        for(var i = 0; i < units.length; i++){
-            if(units[i].value == ut){
-                ut_display = units[i].name;
-                break;
+                // send to the view
+                send_data("{% url 'pos:search_products' company.url_name %}",
+                    search_criteria, "{{ csrf_token }}",
+                    function(response){
+                        if(response.status && response.status == 'error'){
+                            error_message(
+                                "{% trans 'Search failed' %}",
+                                response.message);
+                        }
+                        else{
+                            show_products(response);
+                        }
+                    });
+                return false;
+            };
+
+            //
+            // init
+            //
+
+            // bind events:
+            // advanced search
+            p.items.advanced_toggle_button.unbind().click(function(){
+                p.toggle_advanced(!p.advanced_shown);
+            });
+
+            // general search: search automatically after change
+            p.items.general_filter.unbind().keyup(function(){
+                var this_val = p.items.general_filter.val();
+                if(this_val.length < 3) return;
+
+                if(p.last_search_value != this_val){
+                    p.last_search_value = this_val;
+
+                    if(p.search_timeout) clearTimeout(p.search_timeout);
+                    p.search_timeout = setTimeout(function(){
+                        p.update_products();
+                    }, p.search_timeout_duration);
+                }
+            });
+
+            p.items.general_filter.keypress(function(e){
+                if(e.which == 13) p.update_products();
+            });
+
+            // categories autocomplete list
+            categories_autocomplete(p.items.category_filter, null);
+
+            // tax rates select
+            tax_select(p.items.tax_filter, null, true);
+
+            // search button:
+            p.items.search_button.unbind().click(p.update_products);
+
+            // match url: if there's anything in it, fill the search criteria
+            p.match_url();
+
+            $(window).on("hashchange", p.match_url);
+        };
+
+
+        Product = function(data){
+            // shows a search result box for this product
+            var p = this;
+
+            p.data = data;
+
+            parse_product_data(data);
+
+            p.parent = $("#products_list");
+            p.items = {};
+
+            p.details = null; // the details box
+
+            //
+            // methods
+            //
+            p.get_height = function(){
+                return p.items.container.height();
+            };
+
+            p.update_favorite_button = function(){
+                if(p.data.favorite) p.items.favorite_button.addClass("active");
+                else p.items.favorite_button.removeClass("active");
+            };
+
+            p.toggle_favorite = function(){
+                send_data(
+                    "{% url 'pos:toggle_favorite' company.url_name %}",
+                    {product_id: p.data.id},
+                    "{{ csrf_token }}",
+                    function(response){
+                        if(response.status != 'ok'){
+                            error_message(
+                                "{% trans 'Favorite could not be set' %}",
+                                response.message);
+                        }
+                        else{
+                            // update product and the button
+                            p.data.favorite = response.favorite;
+                            p.update_favorite_button();
+                        }
+                    });
+            };
+
+            p.delete_product = function(){
+                var data = { id: p.data.id };
+
+                // confirm deletion
+                confirmation_dialog(
+                    "{% trans 'Are you sure?' context 'confirmation dialog title' %}",
+                    "{% trans 'Delete product ' %} '" + p.data.name + "'?",
+                        function(){
+                            send_data("{% url 'pos:delete_product' company.url_name %}", data, "{{ csrf_token }}",
+                                function(response){
+                                    if(response.status != 'ok')
+                                        error_message(
+                                                "{% trans 'Error deleting product' %}",
+                                                response.message);
+                                    else{
+                                        // remove the parent
+                                        p.items.container.remove();
+
+                                        // remove the product from the product list
+                                        for(var i = 0; i < products.length; i++){
+                                            if(products[i].data.id == p.data.id){
+                                                remove_from_array(products, i);
+                                                break;
+                                            }
+                                        }
+                                }
+                            });
+                        },
+                        function(){}
+                );
+            };
+
+
+            //
+            // init
+            //
+            // create all the stuff
+
+            p.items.container = $("<div>", {"class":"product-details"});
+
+            // empty parent and copy all stuff from #product_details_template to it
+            p.items.container.empty();
+            p.items.container.append($("div.title, div.product-details-image, table.details", "#product_details_template").clone());
+
+            // title (only the row, does not include text)
+            p.items.title = $(".title", p.items.container);
+            p.items.title.css("background-color", "#" + p.data.color);
+
+            if(is_dark(p.data.color)) p.items.title.addClass("dark");
+            else p.items.title.removeClass("dark");
+
+
+            p.items.name = $(".product-name", p.items.container);
+            p.items.name.text(p.data.name);
+
+            p.items.image = $(".product-image", p.items.container);
+            show_image(p.items.image, p.data.image, p.data.name);
+
+            p.items.price = $(".product-price", p.items.container);
+            p.items.price.text(p.data.price);
+
+            p.items.category = $(".product-category", p.items.container);
+            p.items.category.text(p.data.category);
+
+            p.items.tax = $(".product-tax", p.items.container);
+            p.items.tax.text(p.data.tax);
+
+            // currently not showing
+            //p.items.description = $(".product-description", p.items.container);
+            //p.items.discounts = $(".product-discounts", p.items.container);
+            //p.items.notes = $(".product-private-notes", p.items.container);
+
+
+            p.items.shortcut = $(".product-shortcut", p.items.container);
+            p.items.shortcut.text(p.data.shortcut);
+
+            p.items.code = $(".product-code", p.items.container);
+            p.items.code.text(p.data.code);
+
+
+            // bind buttons
+            p.items.edit_button = $(".product-edit-button", p.items.container);
+            p.items.delete_button = $(".product-delete-button", p.items.container);
+            p.items.favorite_button = $(".product-favorite-button", p.items.container);
+
+            if({{can_edit|lower}}){
+                // enable and add functionality to:
+                // edit button
+                p.items.edit_button.prop('disabled', false);
+                p.items.edit_button.unbind().click(function(){
+                    p.details = new ProductDetails(p.data);
+                });
+
+                // delete button
+                p.items.delete_button.prop('disabled', false);
+                p.items.delete_button.unbind().click(function(){
+                    p.delete_product();
+                });
+
+                // favorite button
+                p.items.favorite_button.prop('disabled', false);
+                p.items.favorite_button.unbind().click(p.toggle_favorite);
+            }
+            else{
+                // just disable everything
+                p.items.edit_button.prop('disabled', true);
+                p.items.delete_button.prop('disabled', true);
+                p.items.favorite_button.prop('disabled', true);
+            }
+
+            p.update_favorite_button();
+
+            p.items.container.appendTo(p.parent).show();
+
+        };
+
+        ProductDetails = function(data){
+            var p = this;
+
+            p.data = data;
+
+            parse_product_data(data);
+
+            p.container = $("#edit_dialog");
+            p.items = {
+                title: $("#edit_dialog_title", p.container),
+                name: $("#edit_product_name", p.container),
+                description: $("#edit_product_description", p.container),
+                code: $("#edit_product_code", p.container),
+                tax_sel: $("#edit_product_tax", p.container),
+                category: $("#edit_product_category", p.container),
+                stock: $("#edit_product_stock", p.container),
+                unit_sel: $("#edit_product_unit_type", p.container),
+                purchase_price: $("#edit_product_purchase_price", p.container),
+                base_price: $("#edit_product_price_without_tax", p.container),
+                tax_price: $("#edit_product_price_with_tax", p.container),
+                shortcut: $("#edit_product_shortcut", p.container),
+                discounts: $("#edit_discounts", p.container),
+                total_price: $("#total_price", p.container),
+                profit: $("#profit", p.container),
+                notes: $("#edit_product_private_notes", p.container),
+
+                image: $("#edit_product_image", p.container),
+                upload_image: $("#edit_product_image_upload", p.container),
+                delete_image: $("#edit_product_delete_image", p.container),
+
+                save_button: $("#edit_product_save", p.container),
+                cancel_button: $("#edit_product_cancel", p.container),
+
+                shadow: $("#dialog_shadow")
+
+            };
+
+            var i, o;
+
+            //
+            // methods
+            //
+            p.show_dialog = function(){
+                p.items.shadow
+                    .fadeIn("fast", function(){
+                            p.container.show();
+                            p.items.name.focus();
+                    })
+                    .unbind()
+                    .click(p.cancel_button_action);
+            };
+
+            p.cancel_button_action = function(){
+                confirmation_dialog(
+                    "{% trans 'Cancel editing' %}",
+                    "{% trans 'All changes you made to this product will be lost. Continue?' %}",
+                    p.close_dialog,
+                    function(){});
+            };
+
+            p.close_dialog = function(){
+                p.container.hide();
+                p.items.shadow.fadeOut("fast");
+            };
+
+            p.update_unit_types = function(){
+                // when the unit types edit changes, update all static labels with the changed units
+                var ut = p.items.unit_sel.val();
+
+                var ut_display = ut;
+
+                // try to find a better name (the actual display unit instead of m^2)
+                for(var i = 0; i < units.length; i++){
+                    if(units[i].value == ut){
+                        ut_display = units[i].name;
+                        break;
+                    }
+                }
+
+                $(".unit-readonly", p.container).each(function(){
+                    $(this).text(ut_display);
+                });
+            };
+
+            p.get_discounts = function(){
+                // discounts: get all <li> items and put them into an array
+                var discounts = [];
+
+                p.items.discounts.children().each(function(){
+                    var id = $(this).data().id;
+                    if(id){
+                        discounts.push($(this).data()); // the last entry is the listbox and button, don't add that
+                    }
+                });
+
+                return discounts;
+            };
+
+            p.update_prices = function(){
+                // tax
+                var t = get_number(get_tax(p.items.tax_sel.val()).amount, "{{ separator }}");
+                if(!t) return; // don't change anything if something is wrong (or not yet entered)
+
+                // price: always get price without tax
+                var price = get_number(p.items.base_price.val(), "{{ separator }}");
+                if(!price) return;
+
+                // gather all discounts
+                var discounts = p.get_discounts();
+
+                // function total_price(tax_first, base_price, tax, discounts, quantity, decimal_places){
+                var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), {{decimal_places}});
+
+                // price without tax
+                p.items.base_price.text(display_number(result.base, "{{separator}}", {{ decimal_places }}));
+
+                // price with tax
+                p.items.tax_price.text(display_number(result.total, "{{separator}}", {{ decimal_places }}));
+
+                // total price
+                p.items.total_price.text(display_number(result.total, "{{separator}}", {{ decimal_places }}));
+
+                // calculate profit and if it's lower than zero, use a different style
+                // get the purchase price, if entered
+                var purchase_price = get_number(p.items.purchase_price.val(), "{{separator}}");
+
+                if(purchase_price){
+                    var profit = result.total_tax_exc.minus(purchase_price);
+                    p.items.profit.text(display_number(profit, "{{separator}}", {{ decimal_places }}));
+
+                    if(profit.cmp(Big(0)) < 0){ // use alternate style
+                        p.items.profit.addClass("negative-profit");
+                    }
+                    else{
+                        p.items.profit.removeClass("negative-profit");
+                    }
+                }
+                else{
+                    p.items.profit.text("");
+                }
+            };
+
+            p.change_image = function(){
+                // get image (base64) and store it to .data()
+                var obj = p.items.upload_image.get(0);
+
+                // filetype filter
+                var rFilter = /^image\/(?:{{ image_upload_formats|escapejs }})$/i; {% comment %} file formats from globals {% endcomment %}
+
+                var f = obj.files[0];
+                if(obj.files && f){ // check for browser compatibility
+                    var reader = new FileReader();
+                    // read the file
+                    reader.onload = function(e){
+                        // check file type
+                        if (!rFilter.test(f.type)){
+                            error_message(
+                                "{% trans 'Error while uploading image' %}",
+                                "{% trans 'Wrong file type for the uploaded image!' %}"
+                            );
+                            //upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
+                            return false;
+                        }
+                        if(f.size > {{ max_upload_size_bytes|escapejs }}){
+                            error_message(
+                                "{% trans 'Error while uploading image' %}",
+                                "{% trans 'File too large, maximum size for upload is' %} {{ max_upload_size|escapejs }} MB"
+                            );
+                            //upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
+                            return false;
+                        }
+
+                        // store the file in output
+                        p.data.image_data = e.target.result;
+
+                        // preview image
+                        // show_image() cannot be used here because we're showing image from data:, no from url
+                        p.items.image.css("background-image", "url('" + p.data.image_data + "')");
+                        p.items.image.attr("alt", p.data.name);
+
+                        // update dialog
+                        //upload_image_status('image', save_btn_obj, del_obj, upl_obj, img_obj);
+                        return true;
+                    };
+                    reader.readAsDataURL(obj.files[0]);
+                    // disable the save() button until everything is uploaded
+                    //upload_image_status('uploading', save_btn_obj, del_obj, upl_obj, img_obj);
+                    // image will have to be uploaded
+                    p.data.change_image = true;
+                }
+
+                // not showing/hiding at the moment
+                //del_obj.show();
+                //upl_obj.hide();
+            };
+
+            p.discount_amount = function(discount){
+                if(discount.type == 'Percent')
+                    return " (" + display_number(discount.amount, "{{ separator }}", {{ decimal_places }}) + "%)";
+                else
+                    return " ({{currency|escapejs}} " + display_number(discount.amount, "{{ separator }}", {{ decimal_places }}) + ")";
+            };
+
+            p.discount_tooltip = function(element, discount){
+                // tooltip - discount details
+                var tooltip = "";
+
+                // tooltip = discount.code + "<br />" // discount code (already in the li)
+                tooltip += escape(discount.description) + "<br />"; // description
+
+                // if no dates are set, show 'no date limit', otherwise 'from ... to ...'
+                if(!discount.start_date && !discount.end_date){
+                    tooltip += "{% trans 'No date limits' %}"
+                }
+                else{
+                    if(discount.start_date) tooltip += "{% trans 'from' %} " + escape(discount.start_date);
+                    if(discount.end_date) tooltip += " {% trans 'to' %} " + escape(discount.end_date);
+                }
+
+                // TODO: set style for inactive discount
+                if(!discount.active) tooltip += "<br/>{% trans 'inactive' %}"; // active
+
+                element.tooltip({content:tooltip});
+            };
+
+            p.add_discount = function(discount){
+                // add a list Item and a delete button to product edit dialog
+                // add a discount from all_discounts to product
+                var li_obj = $("<li>", {title:""});
+                li_obj.data(discount); // store id in data() for later retrieval
+
+                p.discount_tooltip(li_obj, discount);
+
+                // delete button
+                var btn_obj = $("<img>", {"class":"delete-discount hoverable", src: "{% static 'icons/cancel.png' %}"});
+                btn_obj.click(function(){
+                    // delete this list Item
+                    $(this).parent().remove();
+
+                    // delete this id from data.discounts
+                    var i = get_index(p.data.discounts, discount.id);
+
+                    if(i != null){
+                        remove_from_array(p.data.discounts, i);
+                    }
+
+                    // redraw discounts
+                    p.refresh_discounts();
+                });
+
+                li_obj.append(discount.code + " " + p.discount_amount(discount));
+                li_obj.append(btn_obj);
+
+                p.items.discounts.append(li_obj);
+            };
+
+            p.save_product = function(){
+                // get product's data from the dialog and send
+                // id
+                // price - numeric value
+                // unit type
+                // discounts - list of discount ids
+                // image_changed
+                // image
+                // category - id
+                // code
+                // shortcut
+                // description
+                // private notes
+                // tax
+                // stock
+                var data = {};
+                data['id'] = p.data.id;
+                data['name'] = p.items.name.val();
+                data['unit_type'] = p.items.unit_sel.val();
+                // image: if changed, encode uploaded image to base64
+                data['change_image'] = p.data.change_image;
+                if(p.data.change_image) data['image'] = p.data.image_data;
+
+                data['category_id'] = categories_by_breadcrumbs[p.items.category.val()];
+                last_chosen_category = data['category_id']; // remember the last used
+                data['tax_id'] = p.items.tax_sel.val();
+                data['description'] = p.items.description.val();
+                // discounts: strip off everything but ids
+
+                var discounts = p.get_discounts();
+                for(var i = 0; i < discounts.length; i++){
+                    discounts[i] = discounts[i].id;
+                }
+                data['discount_ids'] = discounts;
+                data['private_notes'] = p.items.notes.val();
+                data['stock'] = p.items.stock.val();
+                data['shortcut'] = p.items.shortcut.val();
+                data['code'] = p.items.code.val();
+                // price: always use base price (without tax)
+                data['price'] = p.items.base_price.val();
+
+                if(!data['price']){
+                    error_message(
+                        "{% trans 'Invalid data' %}",
+                        "{% trans 'Please check product price' %}"
+                    );
+                }
+
+                // purchase price
+                data['purchase_price'] = p.items.purchase_price.val();
+
+                if(data['id'] == "-1"){
+                    // it's a new product
+                    // refresh search criteria
+                    send_data("{{ add_url|escapejs }}", data, "{{csrf_token}}",
+                        function(response){
+                            if(response.status != 'ok')
+                                error_message("{% trans 'Error saving product' %}", response.message);
+                            else{
+                                // re-do the current search and close the dialog
+                                search.update_products();
+                                p.close_dialog();
+                            }
+                        }
+                    );
+                }
+                else{
+                    // the product's been edited
+                    // send data to server and update the div with the retrieved 'cleaned' data
+                    send_data("{% url 'pos:edit_product' company.url_name %}", data, "{{csrf_token}}",
+                        function(response){
+                            if(response.status != 'ok')
+                                error_message("{% trans 'Error saving product' %}", response.message);
+                            else{
+                                p.close_dialog();
+
+                                search.update_products();
+                            }
+                        }
+                    );
+                }
+            };
+
+
+            p.refresh_discounts = function(){
+                // clear everything discount-related and redraw
+                p.items.discounts.empty();
+
+                // add discounts currently in product
+                var i;
+                for(i = 0; i < p.data.discounts.length; i++){
+                    p.add_discount(p.data.discounts[i]);
+                }
+
+                // add another Item, this time with all available discounts
+                // in a listbox and an 'add' button
+                var li_obj = $("<li>");
+                var sel_obj = $("<select>", {id:"edit_discount_list"});
+
+                li_obj.append(sel_obj);
+                li_obj.data({id:false}); // don't store or send this Item
+                p.items.discounts.append(li_obj);
+
+                // add discounts NOT in product to add listbox
+                var added = 0;
+
+                for(i = 0; i < all_discounts.length; i++){
+                    // ignore discounts that are already in product
+                    if(get_index(p.data.discounts, all_discounts[i].id) != null){
+                        continue;
+                    }
+
+                    var opt_obj = $("<option>")
+                        .attr("value", all_discounts[i].id)
+                        .append(all_discounts[i].code + " " + p.discount_amount(all_discounts[i]));
+
+                    sel_obj.append(opt_obj);
+                    added++;
+                }
+                // only add the listbox if there's anything to add
+                if(added > 0){
+                    // unselect the first Item in listbox to avoid confusion
+                    sel_obj.prop("selectedIndex", -1);
+
+                    sel_obj.unbind().change(function(){ // no add buttons
+                        var d_i = parseInt($(":selected", sel_obj).val()); // currently selected discount's list index
+
+                        // add data to product
+                        p.data.discounts.push(all_discounts[get_index(all_discounts, d_i)]);
+                        p.refresh_discounts();
+                    });
+                }
+                else{
+                    // remove the last, 'add' entry
+                    li_obj.remove();
+                }
+
+                // make the list sortable, but exclude the last Item
+                if(added > 0) p.items.discounts.sortable({items:"li:not(:last)", stop: p.update_prices}); // also update price when sorting stops
+                else p.items.discounts.sortable({items:"li"});
+
+                // update total price
+                p.update_prices();
+            };
+
+            //
+            // init
+            //
+
+            // dialog title
+            if(p.data.name) p.items.title.text("{% trans 'Edit product' %}");
+            else p.items.title.text("{% trans 'Add product'  %}");
+
+            // name
+            p.items.name.val(p.data.name);
+
+            // description
+            p.items.description.val(p.data.description);
+
+            // code
+            p.items.code.val(p.data.code);
+
+            // tax
+            tax_select(p.items.tax_sel, p.data.tax_id, false);
+
+            // category
+            if(p.data.id == -1){
+                // a new product: use last category
+                categories_autocomplete(p.items.category, null);
+
+                if(last_chosen_category != null)
+                    p.items.category.val(categories_by_id[last_chosen_category]);
+            }
+            else{
+                // editing an existing product, use its category
+                categories_autocomplete(p.items.category, p.data.category_id);
+            }
+
+
+
+            // stock
+            p.items.stock.val(p.data.stock);
+
+            // ... per unit (listbox with unit types)
+            p.items.unit_sel.empty();
+
+            for(i = 0; i < units.length; i++){
+                o = $("<option>")
+                    .attr("value", units[i].value)
+                    .text(units[i].name);
+
+                p.items.unit_sel.append(o);
+            }
+            p.items.unit_sel.unbind().change(p.update_unit_types);
+
+            // purchase price
+            p.items.purchase_price.val(p.data.purchase_price);
+
+            // base price (excluding tax
+            p.items.base_price.val(p.data.price);
+
+            // price without tax
+            p.items.tax_price.val("");
+
+            // when units change
+            p.items.unit_sel.unbind().change(p.update_unit_types);
+            p.update_unit_types();
+
+            // when prices change
+            $()
+                .add(p.items.tax_sel)
+                .add(p.items.base_price)
+                .add(p.items.purchase_price)
+                .add(p.items.tax_price)
+                .unbind()
+                .change(p.update_prices);
+
+            p.items.base_price.change(function(){
+                var base_price = get_number($(this).val(), "{{ separator }}");
+                // update price with tax
+                var tax = get_number(get_tax(p.items.tax_sel.val()).amount, "{{ separator }}");
+
+                if(!base_price) return;
+                if(!tax) return;
+
+                p.items.tax_price.val(display_number(
+                        base_price.times(Big(1).plus(tax.div(Big(100)))),
+                        "{{ separator }}", {{ decimal_places }}));
+
+                p.update_prices();
+            });
+
+            p.items.tax_price.change(function(){
+                var tax_price = get_number($(this).val(), "{{ separator }}");
+                // update price with tax
+                var tax = get_number(get_tax($("#edit_product_tax").val()).amount, "{{ separator }}");
+
+                if(!tax_price) return;
+                if(!tax) return;
+
+                p.items.base_price.val(display_number(
+                        tax_price.div(Big(1).plus(tax.div(Big(100)))),
+                        "{{ separator }}", {{ decimal_places }}));
+
+                p.update_prices();
+            });
+
+            p.update_prices();
+            p.items.base_price.change();
+
+            // shortcut
+            p.items.shortcut.val(p.data.shortcut);
+
+            // discounts
+            p.items.discounts.empty();
+            p.refresh_discounts();
+
+            // private notes
+            p.items.notes.val(p.data.private_notes);
+
+            // image
+            show_image(p.items.image, p.data.image, p.data.name);
+
+            p.data.change_image = false;
+            p.items.upload_image.unbind().change(p.change_image);
+
+            // delete image button
+            p.items.delete_image.unbind().click(function(){
+                // upload_image_status(); // not used at the moment
+
+                p.data.change_image = true;
+                p.data.image_data = null;
+                p.data.image = null;
+
+                show_image(p.items.image, null, "");
+            });
+
+            // save and cancel buttons
+            p.items.save_button.unbind().click(function(){
+                p.save_product();
+            });
+
+            // cancel button
+            p.items.cancel_button.unbind().click(p.cancel_button_action);
+
+            // last updates
+            p.show_dialog();
+
+            // cosmetics:
+            // upload image button width: resize the buttons according to column and image width
+            $(".image-buttons", p.container).width(
+                $(".management-column", p.container).first().width() - {{ image_dimensions.0 }}
+            );
+
+            p.items.upload_image.customFileInput("{% trans 'Choose...' %}");
+        };
+
+
+        // functions
+        function show_image(element, url, name){
+            if(!url){
+                // show 'placeholder' image
+                element.css("background-image", "url('{% static 'images/product_placeholder.png' %}')");
+                element.attr("alt", "{% trans 'No image' %}");
+            }
+            else{
+                // show the real image
+                element.css("background-image", "url('" + url + "')");
+                element.attr("alt", escape(name));
             }
         }
 
-        $("span.unit-readonly").each(function(){
-            $(this).text(ut_display);
-        });
-    }
+        function tax_select(element, preselected_id, select_none){
+            element.empty(); // select element
 
-    function create_tax_select(sel_obj, product, select_none){
-        var opt_obj;
+            var opt_obj;
 
-        for(i=0; i < tax_rates.length; i++){
-            opt_obj = $("<option>")
-                .attr("value", tax_rates[i].id)
-                .text(escape(tax_rates[i].name) + " (" + tax_rates[i].amount + "%)");
+            for(var i = 0; i < tax_rates.length; i++){
+                opt_obj = $("<option>")
+                        .attr("value", tax_rates[i].id)
+                        .text(escape(tax_rates[i].name) + " (" + tax_rates[i].amount + "%)");
 
-            if(product && product.tax){ // use product's tax if editing
-                if(tax_rates[i].id == product.tax_id){
+                if(preselected_id == tax_rates[i].id){
                     // select the chosen tax
                     opt_obj.attr("selected", "selected");
                 }
+                element.append(opt_obj);
             }
-            else{ // set default tax if adding new products
-                if(tax_rates[i].id == {{default_tax_id}}){
-                    // select the chosen tax
-                    opt_obj.attr("selected", "selected");
-                }
+
+            if(preselected_id == null || select_none){
+                opt_obj = $("<option>")
+                        .attr("value", null)
+                        .text("---");
+
+                element.append(opt_obj);
+
+                if(!preselected_id) opt_obj.attr("selected", "selected");
             }
-            sel_obj.append(opt_obj);
         }
 
-        if(select_none){
-            opt_obj = $("<option>")
-                    .attr("value", null)
-                    .text("---");
-
-            sel_obj.append(opt_obj);
-
-            if(!product) opt_obj.attr("selected", "selected");
+        function get_tax(id){
+            // returns the tax object with the given id
+            for(var i = 0; i < tax_rates.length; i++){
+                if(tax_rates[i].id == id) return tax_rates[i];
+            }
+            return null;
         }
 
-    }
+        function categories_autocomplete(element, preselected_id){
+            if(element.data('ui-autocomplete')){
+                element.autocomplete("destroy");
+            }
 
-    ////////////////////
-    // data retrieval
-    ////////////////////
-    // categories list
-    var i;
-    categories_list = [];
-    categories_by_breadcrumbs = {};
-    categories_by_id = {};
+            element.autocomplete({
+                source: categories_list,
+                minLength: 0,
+                delay: 500
+            });
 
-    for(i = 0; i < category_data.length; i++){
-        categories_list.push(category_data[i].breadcrumbs);
-        categories_by_breadcrumbs[category_data[i].breadcrumbs] = category_data[i].id;
-        categories_by_id[category_data[i].id] = category_data[i].breadcrumbs;
-    }
-
-    // unit types
-    units = [];
-    for(i=0; i < units_data.length; i++){
-        units.push({"value":units_data[i][0], "name":units_data[i][1]});
-    }
-
-    // discounts
-    // convert all amounts to Big() numbers
-    for(i = 0; i < all_discounts.length; i++){
-        all_discounts[i].amount = get_number(all_discounts[i].amount, "{{ separator }}");
-    }
-
-    // tax rates
-    function get_tax(id){
-        // returns the tax object with the given id
-        for(var i = 0; i < tax_rates.length; i++){
-            if(tax_rates[i].id == id) return tax_rates[i];
+            if(preselected_id != null || preselected_id != -1){
+                element.val(categories_by_id[preselected_id]);
+            }
         }
-        return null;
-    }
-    
-    ////////////////////
-    // searching
-    ////////////////////
-    var gf_obj = $("#general_filter");
-    gf_obj.keypress(function(e){
-        if(e.which == 13){ // enter pressed
-            update_products();
-        }
-    });
-    
-    // hide the template
-    $("div#product_details_template").hide();
-    
-    // general products search box timers
-    setInterval(function(){ // check for change
-        var new_value = gf_obj.val();
-        if(last_value != new_value){
-            if(new_value.length < 2) return;
-            last_value = new_value; // changed, update products
-            clearTimeout(update_timeout);
-            update_timeout = setTimeout(update_products, update_timeout_duration);
-        }
-    }, check_interval_duration);
-        
-    // advanced search div
-    var adv_div_obj = $("#advanced_search");
-    adv_div_obj.hide();
-    
-    var adv_chk_obj = $("#advanced_search_toggle");
 
-    function toggle_search(show){
-        if(show){
-           adv_div_obj.show();
-           $(".basic", adv_chk_obj).hide();
-           $(".advanced", adv_chk_obj).show();
+        function show_products(data){
+            // empty the products div
+            var products_div = $("#products_list");
+
+            products_div.empty();
+            products = [];
+
+            if(data.length == 0){
+                products_div.append("{% trans 'No products found' %}");
+            }
+
+            var i, product;
+            var max_height = 0;
+            for(i = 0; i < data.length; i++){
+                product = new Product(data[i]);
+                products.push(product);
+
+                // get product container's height
+                max_height = Math.max(max_height, product.get_height());
+            }
+
+            // in the end, make all products equally high
+            $("div.product-details").height(max_height);
+        }
+
+        function parse_product_data(product){
+            // convert all text numbers in product to Big() numbers
+            // price, purchase_price, stock, tax, discounts[amount]
+            if(typeof product.price == "string")
+                product.price = get_number(product.price, "{{ separator }}");
+
+            if(typeof product.purchase_price == "string")
+                product.purchase_price = get_number(product.purchase_price, "{{ separator }}");
+
+            if(typeof product.stock== "string")
+                product.stock = get_number(product.stock, "{{ separator }}");
+
+            if(typeof product.tax == "string")
+                product.tax = get_number(product.tax, "{{ separator }}");
+
+            for(var i = 0; i < product.discounts.length; i++){
+                if(typeof product.discounts[i].amount == "string")
+                    product.discounts[i].amount =
+                            get_number(product.discounts[i].amount, "{{ separator }}");
+            }
+
+            return product;
+        }
+
+        /////////////////////////////////////////////////////
+        //
+        // data from template... make it useful
+        //
+        var i;
+
+        for(i = 0; i < category_data.length; i++){
+            categories_list.push(category_data[i].breadcrumbs);
+            categories_by_breadcrumbs[category_data[i].breadcrumbs] = category_data[i].id;
+            categories_by_id[category_data[i].id] = category_data[i].breadcrumbs;
+        }
+
+        // unit types
+        units = [];
+        for(i = 0; i < units_data.length; i++){
+            units.push({"value": units_data[i][0], "name": units_data[i][1]});
+        }
+
+        // discounts
+        // convert all amounts to Big() numbers
+        for(i = 0; i < all_discounts.length; i++){
+            all_discounts[i].amount = get_number(all_discounts[i].amount, "{{ separator }}");
+        }
+
+        //
+        // objects:
+        //
+        var search = new Search();
+        var products = []; // a list of Product() objects
+        var product_details = null; // ProductDetails() object
+
+        var add_product_button = $("#add_product");
+
+        if({{ can_edit | lower }}){
+            add_product_button.unbind().click(function(){
+                var new_product = {
+                    id: -1,
+                    discounts: [],
+                    tax_id: {{ default_tax_id }}
+                };
+
+                if(product_details) product_details.close_dialog();
+                product_details = new ProductDetails(new_product);
+
+            });
         }
         else{
-           adv_div_obj.hide();
-           $(".basic", adv_chk_obj).show();
-           $(".advanced", adv_chk_obj).hide();
+            add_product_button
+                    .unbind()
+                    .prop("disabled", true);
         }
-
-        advanced_shown = show;
-    }
-    
-    adv_chk_obj.click(function(){
-        toggle_search(!advanced_shown);
-        return false;
     });
-    
-    // categories autocomplete list
-    var cat_inp_obj = $("#category_filter");
-    cat_inp_obj.autocomplete({
-        source: categories_list,
-        minLength: 0,
-        delay: check_interval_duration
-    });
-
-    cat_inp_obj.focus(function(){
-        cat_inp_obj.autocomplete("search", "");
-    });
-
-    // tax rates select
-    create_tax_select($("#tax_filter"), null, true);
-
-    // update products on button click
-    $("#update_results").click(function(){
-        update_products();
-    });
-
-    ///////////////////////////
-    // creating new products
-    ///////////////////////////
-    if({{can_edit|lower}}){ {% comment %} |lower because: python: True, javascript: true {% endcomment %}
-        $("#add_product").click(function(){
-            // show the edit dialog with nothing but default values
-            
-            // empty product
-            var product = {
-                "id":-1,// new product's id = -1 until the server assigns an id
-                "discounts": [] // no discounts so far
-            };
-            // save it to a dummy div
-            var parent = $("#new_product_dummy").empty();
-            parent.data(product);
-            
-            show_product_edit_dialog(parent);
-        });
-    }
-    else{
-        $("#add_product").prop("disabled", true);
-    }
-
-    gf_obj.focus();
-
-    // matching urls:
-    // supporting two searches:
-    //   - products from category: #category:'category-id'
-    //   - basic search: #query:'search-query'
-    var url_separator = ':';
-
-    function clear_search(){
-        $(".filter", "#advanced_search").val("");
-    }
-
-    function match_url(){
-        // returns true if there was valid data in url, false otherwise
-        var s = get_url_hash();
-        var args = s.split(url_separator);
-
-        // must be two in length
-        if(args.length == 2){
-            var type = args[0];
-            var query = args[1];
-
-            switch(type){
-                case "category":
-                    // show advanced search
-                    toggle_search(true);
-                    clear_search();
-
-                    // select category id in search box
-                    var catid = parseInt(query, 10);
-
-                    if(isNaN(catid)) return;
-
-                    var cat_input = $("#category_filter");
-
-                    cat_input.data({id: catid});
-
-                    // find the category with this id and enter the name in category box
-                    cat_input.val(categories_by_id[catid]);
-
-                    // do a search in this category
-                    update_products();
-
-                    break;
-                case "product":
-                    // show advanced search
-                    toggle_search(true);
-                    clear_search();
-
-                    // fill in the product code
-                    $("#product_code_filter").val(query);
-
-                    // run a search
-                    update_products();
-                    break;
-                default: return;
-            }
-
-        }
-    }
-    match_url();
-
-    $(window).on("hashchange", match_url);
-});
-
-</script>
+    </script>
 {% endblock %}
 
 {% block status_bar_title %}{% trans 'Products' %}{% endblock %}
@@ -1147,41 +1151,43 @@ $(document).ready(function(){
 
 
 {% block manage_content %}
-{% comment %} filters {% endcomment %}
+    {% comment %} filters {% endcomment %}
     <div class="left-column">
         <div id="filter_form" class="fake-form">
             <h2>{% trans 'Search' context 'form title' %}</h2>
             <input id="general_filter"
                    class="search-filter"
-                   type="text" placeholder="{% trans 'Enter query' context 'search products' %}" />
+                   type="text" placeholder="{% trans 'Enter query' context 'search products' %}"/>
 
             <div id="advanced_search" class="hidden">
                 <label for="category_filter">{% trans 'Category' %}:</label>
-                <input id="category_filter" type="text" class="filter" /><div id="category_list_select"></div>
+                <input id="category_filter" type="text" class="filter"/>
+
+                <div id="category_list_select"></div>
 
                 <label for="product_code_filter">{% trans 'Product code' %}:</label>
-                <input type="text" id="product_code_filter" class="filter" />
+                <input type="text" id="product_code_filter" class="filter"/>
 
                 <label for="shortcut_filter">{% trans 'Shortcut' %}:</label>
-                <input type="text" id="shortcut_filter" class="filter" />
+                <input type="text" id="shortcut_filter" class="filter"/>
 
                 <label for="name_filter">{% trans 'Name' %}:</label>
-                <input type="text" id="name_filter" class="filter" />
+                <input type="text" id="name_filter" class="filter"/>
 
                 <label for="description_filter">{% trans 'Description' %}:</label>
-                <input type="text" id="description_filter" class="filter" />
+                <input type="text" id="description_filter" class="filter"/>
 
                 <label for="notes_filter">{% trans 'Notes' %}:</label>
-                <input type="text" id="notes_filter" class="filter" />
+                <input type="text" id="notes_filter" class="filter"/>
 
                 <label for="tax_filter">{% trans 'Tax' %}:</label>
-                <select id="tax_filter" class="filter" ></select>
+                <select id="tax_filter" class="filter"></select>
 
                 <label for="price_filter">{% trans 'Price' %}:</label>
-                <input type="text" id="price_filter" class="filter" />
+                <input type="text" id="price_filter" class="filter"/>
 
                 <label for="discount_filter">{% trans 'Discount code' %}:</label>
-                <input type="text" id="discount_filter" class="filter" />
+                <input type="text" id="discount_filter" class="filter"/>
             </div>
 
             <div id="filter_form_controls">
@@ -1189,11 +1195,11 @@ $(document).ready(function(){
                     <button id="advanced_search_toggle" class="hoverable">
                         <span class="basic">
                             {% trans 'Advanced' %}
-                            <img src="{% static 'icons/arrow_white_down.png' %}" alt="" />
+                            <img src="{% static 'icons/arrow_white_down.png' %}" alt=""/>
                         </span>
                         <span class="advanced hidden">
                             {% trans 'Basic' %}
-                            <img src="{% static 'icons/arrow_white_up.png' %}" alt="" />
+                            <img src="{% static 'icons/arrow_white_up.png' %}" alt=""/>
                         </span>
                     </button>
                 </div>
@@ -1201,7 +1207,7 @@ $(document).ready(function(){
                 <div class="split-cell last">
                     <input type="button" id="update_results"
                            class="ok hoverable"
-                           value="{% trans 'Search' context 'submit button label' %}" />
+                           value="{% trans 'Search' context 'submit button label' %}"/>
                 </div>
 
                 <div class="cleared"></div>
@@ -1216,6 +1222,7 @@ $(document).ready(function(){
         <div id="dialog_shadow"></div>
         <div id="edit_dialog" class="hidden">
             <h2 id="edit_dialog_title">{# content by js #}</h2>
+
             <div class="management-column narrow">
                 <div class="images">
                     <div class="image-buttons">
@@ -1226,7 +1233,7 @@ $(document).ready(function(){
                                         title="{% trans 'Remove image' %}"></button>
 
                                 <form id="edit_product_image_input_form" class="custom-file-input">
-                                    <input type="file" id="edit_product_image_upload" />
+                                    <input type="file" id="edit_product_image_upload"/>
                                 </form>
                             </div>
                         </div>
@@ -1237,7 +1244,7 @@ $(document).ready(function(){
 
                 <div class="form-field clear-floats">
                     <label for="edit_product_name">{% trans 'Name' %}</label>
-                    <input type="text" id="edit_product_name" maxlength="{{field_lengths.name}}" />
+                    <input type="text" id="edit_product_name" maxlength="{{ field_lengths.name }}"/>
                 </div>
 
                 <div class="form-field">
@@ -1248,7 +1255,7 @@ $(document).ready(function(){
 
                 <div class="form-field">
                     <label for="edit_product_code">{% trans 'Product code' %}</label>
-                    <input type="text" id="edit_product_code" maxlength="{{ field_lengths.code }}" />
+                    <input type="text" id="edit_product_code" maxlength="{{ field_lengths.code }}"/>
                 </div>
 
             </div>
@@ -1257,19 +1264,19 @@ $(document).ready(function(){
                 <div class="form-field">
                     {% comment %} list of tax rates {% endcomment %}
                     <label for="edit_product_tax">{% trans 'Tax' %}</label>
-                        <select id="edit_product_tax" name="edit_product_tax"></select>
+                    <select id="edit_product_tax" name="edit_product_tax"></select>
                 </div>
 
                 <div class="form-field">
                     {% comment %} list of categories {% endcomment %}
                     <label for="edit_product_category">{% trans 'Category' %}</label>
-                    <input type="text" id="edit_product_category" name="edit_product_category" />
+                    <input type="text" id="edit_product_category" name="edit_product_category"/>
                 </div>
 
                 <div class="form-field">
                     <div class="split-cell first">
                         <label for="edit_product_stock">{% trans 'Stock' %}:</label>
-                        <input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}" />
+                        <input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}"/>
                     </div>
 
                     <div class="split-cell last">
@@ -1283,7 +1290,8 @@ $(document).ready(function(){
                 <div class="form-field">
                     <div class="split-cell first">
                         <label for="edit_product_purchase_price">{% trans 'Purchase price' %}: </label>
-                        <input type="text" id="edit_product_purchase_price" maxlength="{{ field_lengths.purchase_price}}" />
+                        <input type="text" id="edit_product_purchase_price"
+                               maxlength="{{ field_lengths.purchase_price }}"/>
                     </div>
                     <div class="split-cell last read-only-field">
                         {{ currency }} {% trans 'per' %} <span class="unit-readonly">?</span>
@@ -1307,14 +1315,14 @@ $(document).ready(function(){
 
                 <div class="form-field">
                     <label for="edit_product_shortcut">{% trans 'Shortcut' %}</label>
-                    <input type="text" id="edit_product_shortcut" maxlength="{{ field_lengths.shortcut }}" />
+                    <input type="text" id="edit_product_shortcut" maxlength="{{ field_lengths.shortcut }}"/>
                 </div>
 
             </div>
             <div class="management-column narrow hand-margin-3">
 
                 <div class="form-field">
-                {% comment %} discounts {% endcomment %}
+                    {% comment %} discounts {% endcomment %}
                     <div class="custom-label">{% trans 'Discounts' %}</div>
                     <p class="custom-label description">{% blocktrans %}
                         Drag to reorder. Total discount will be calculated in the same order as shown here.
@@ -1326,11 +1334,11 @@ $(document).ready(function(){
                 <div class="form-field">
                     {% comment %} total price and profit {% endcomment %}
                     <div class="split-cell first read-only-field">
-                        <div class="custom-label">{% trans 'Total price' %}: </div>
+                        <div class="custom-label">{% trans 'Total price' %}:</div>
                         <div id="total_price">&nbsp;</div>
                     </div>
                     <div class="split-cell last read-only-field">
-                        <div class="custom-label"> {% trans 'Profit' %}: </div>
+                        <div class="custom-label"> {% trans 'Profit' %}:</div>
                         <div id="profit">&nbsp;</div>
                     </div>
 
@@ -1345,10 +1353,11 @@ $(document).ready(function(){
                 <div class="form-field">
                     {% comment %} save/cancel buttons {% endcomment %}
                     <div class="split-cell first">
-                        <input type="button" id="edit_product_save" value="{% trans 'Save' %}" class="ok hoverable" />
+                        <input type="button" id="edit_product_save" value="{% trans 'Save' %}" class="ok hoverable"/>
                     </div>
                     <div class="split-cell last">
-                        <input type="button" id="edit_product_cancel" value="{% trans 'Cancel' %}" class="cancel hoverable" />
+                        <input type="button" id="edit_product_cancel" value="{% trans 'Cancel' %}"
+                               class="cancel hoverable"/>
                     </div>
 
                     <div class="cleared"></div>
@@ -1367,7 +1376,7 @@ $(document).ready(function(){
                 </div>
 
                 <p class="product-name"></p>
-                <input type="hidden" class="product-id" />
+                <input type="hidden" class="product-id"/>
             </div>
 
             <table class="details">
@@ -1375,10 +1384,12 @@ $(document).ready(function(){
                 <tr>
                     <td colspan="2" class="padded"> {# category #}
                         <p class="product-category"></p>
+
                         <p class="details-label">{% trans 'Category' %}</p>
                     </td>
                     <td class="padded"> {# tax #}
                         <p class="product-tax"></p>
+
                         <p class="details-label">{% trans 'Tax' %}</p>
                     </td>
                     <td rowspan="2" class="product-image">
@@ -1388,14 +1399,17 @@ $(document).ready(function(){
                 <tr>
                     <td class="padded"> {# price #}
                         <p class="product-price"></p>
+
                         <p class="details-label">{% trans 'Price' %}</p>
                     </td>
                     <td class="padded"> {# code #}
                         <p class="product-code"></p>
+
                         <p class="details-label">{% trans 'Code' %}</p>
                     </td>
                     <td class="padded"> {# shortcut #}
                         <p class="product-shortcut"></p>
+
                         <p class="details-label">{% trans 'Shortcut' %}</p>
                     </td>
                 </tr>
@@ -1404,7 +1418,7 @@ $(document).ready(function(){
 
     </div>
 
-{% comment %} a dummy div for creating new products {% endcomment %}
-<div id="new_product_dummy"></div>
+    {% comment %} a dummy div for creating new products {% endcomment %}
+    <div id="new_product_dummy"></div>
 {% endblock %}
 
