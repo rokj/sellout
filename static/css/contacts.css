@@ -26,25 +26,6 @@
     margin-top: 10px;
 }
 
-#contacts .dialog-footer{
-    clear: both;
-    text-align: right;
-}
-
-#contacts .dialog-footer input{
-    width: 150px;
-    margin-top: 30px;
-    margin-left: 10px;
-}
-
-#contacts .dialog-footer input.cancel{
-    background-color: red;
-}
-
-#contacts .dialog-footer input.save{
-    background-color: green;
-}
-
 #contacts .ui-autocomplete{
     z-index: 16 !important;
 }

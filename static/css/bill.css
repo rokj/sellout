@@ -452,3 +452,26 @@ button.more{
 #finish_the_fukin_bill button{ background-color: fuchsia; }
 
 #bill_options{ right: 0; }
+
+/* bill options dialog */
+#bill_options_dialog{
+    background-color: #f7f7f7;
+}
+
+#bill_discount_container div:nth-child(2){
+    margin-top: 10px;
+}
+
+#bill_discount_type{
+    width: 100px;
+}
+
+#bill_discount_amount{
+    width:200px;
+    margin-right: 20px;
+}
+
+textarea#bill_notes{
+    width: 100%;
+    margin-top: 20px;
+}

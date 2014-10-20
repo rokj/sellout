@@ -73,7 +73,9 @@ def bill_to_dict(user, company, bill):
     b['contact'] = bill.contact
     b['note'] = bill.note
     b['sub_total'] = format_number(user, company, bill.sub_total)
+
     b['discount'] = format_number(user, company, bill.discount)
+    b['discount_type'] = bill.discount_type
     b['tax'] = format_number(user, company, bill.tax)
     b['total'] = format_number(user, company, bill.total)
     b['timestamp'] = format_date(user, company, bill.timestamp) + " " + format_time(user, company, bill.timestamp)
@@ -215,7 +217,18 @@ def create_bill(request, company):
                 # whatever
                 pass
 
-    # check bill properties
+    # check bill properties:
+
+    # discount on total:
+    r = parse_decimal(request.user, c, data.get('discount_amount'))
+    if not r['success']:
+        return JsonError(_("Invalid discount value"))
+    else:
+        bill_discount_amount = r['number']
+
+    # discount type:
+    bill_discount_type = data.get('discount_type')
+
     r = parse_decimal(request.user, c, data.get('total'))
     if not r['success'] or r['number'] <= Decimal('0'):
         return JsonError(_("Invalid grand total value"))
@@ -239,6 +252,7 @@ def create_bill(request, company):
         'company': c,
         'user': request.user,
         'till': till,
+        ''
         'timestamp': dtm.now(),
         'type': "Normal",
         'status': "Unpaid",  # the bill is awaiting payment, a second request on the server will confirm it
@@ -356,7 +370,11 @@ def create_bill(request, company):
         item['single_total'] = prices['single_total']
         item['total'] = prices['total']
 
-    # in the end, check grand totals against each others
+    # in the end, check grand totals against each others:
+
+    # subtract the discount
+    #if bill_discount_type
+
     if total_js != total_py:
         return JsonError(_("Total prices do not match"))
 

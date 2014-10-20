@@ -1,6 +1,6 @@
 /* terminal-specific */
 * {
-    /* disable selection on any item */
+    /* disble selection on any item */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -161,6 +161,7 @@ div#selector{
 }
 
 .terminal-menu > button.open-menu{
+    position: relative;
     background-color: cyan;
     white-space: nowrap;
     text-align: center;
@@ -169,10 +170,12 @@ div#selector{
 }
 
 .terminal-menu > button > img{
-    position: relative;
-    top: 0;
-    margin-left: 4px;
+    position: absolute;
+    top: 50%;
+    right: 16px;
     display: inline-block;
+    height: 14px;
+    margin-top: -7px;
 }
 
 .terminal-menu button.terminal-menu-item{
@@ -199,4 +202,28 @@ div#selector{
     margin-right: 10px;
     
     color: #969696;
+}
+
+/* dialogs */
+
+.dialog-footer{
+    clear: both;
+    text-align: right;
+}
+
+.dialog-footer input,
+.dialog-footer button{
+    width: 150px;
+    margin-top: 30px;
+    margin-left: 10px;
+}
+
+.dialog-footer input.cancel,
+.dialog-footer button.cancel{
+    background-color: red;
+}
+
+.dialog-footer input.save,
+.dialog-footer button.save{
+    background-color: green;
 }

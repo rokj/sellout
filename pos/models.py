@@ -6,7 +6,7 @@ from django.dispatch import receiver
 from sorl import thumbnail
 
 from common.models import SkeletonU
-from common.functions import get_image_path
+from common.functions import ImagePath
 import common.globals as g
 
 from config.countries import country_choices, country_by_code
@@ -22,11 +22,11 @@ class Company(SkeletonU):
                                 max_length=g.MISC['company_url_length'],
                                 null=False, blank=False, db_index=True)
     color_logo = thumbnail.ImageField(_("Logo"),
-                                   upload_to=get_image_path(g.DIRS['color_logo_dir'],
-                                                            "pos_company", "color_logo"),
+                                   upload_to=ImagePath(g.DIRS['color_logo_dir'],
+                                                       "pos_company", "color_logo"),
                                    null=True, blank=True)
     monochrome_logo = thumbnail.ImageField(_("Receipt logo"),
-                                        upload_to=get_image_path(g.DIRS['monochrome_logo_dir'],
+                                        upload_to=ImagePath(g.DIRS['monochrome_logo_dir'],
                                                                  "pos_company", "monochrome_logo"),
                                         null=True, blank=True)
     street = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
@@ -227,7 +227,7 @@ class Product(ProductAbstract):
     category = models.ForeignKey(Category, null=True, blank=True)
     # images = models.ManyToManyField(ProductImage, null=True, blank=True) # one image per product is enough
     image = thumbnail.ImageField(_("Icon"),
-         upload_to=get_image_path(g.DIRS['product_icon_dir'], "pos_product"),
+         upload_to=ImagePath(g.DIRS['product_icon_dir'], "pos_product"),
          null=True, blank=True)
     tax = models.ForeignKey(Tax, null=False, blank=False)
     favorite = models.BooleanField(null=False, default=False)
@@ -503,10 +503,17 @@ class Bill(SkeletonU):
                                     max_digits=g.DECIMAL['currency_digits'],
                                     decimal_places=g.DECIMAL['currency_decimal_places'],
                                     null=True, blank=True)
-    discount = models.DecimalField(_("Discount on the whole bill, in percentage"), 
-                                   max_digits=g.DECIMAL['percentage_decimal_places']+3,
-                                   decimal_places=g.DECIMAL['percentage_decimal_places'],
+
+    # discount on the whole bill
+    discount = models.DecimalField(_("Discount on the whole bill (absolute or percent)"),
+                                   max_digits=g.DECIMAL['currency_digits'],
+                                   decimal_places=g.DECIMAL['currency_decimal_places'],
                                    null=True, blank=True)
+    discount_type = models.CharField(_("Type of discount"),
+                                     max_length=16,
+                                     choices=g.DISCOUNT_TYPES,
+                                     null=True, blank=True)
+
     tax = models.DecimalField(_("Tax amount, absolute value, derived from products"), 
                               max_digits=g.DECIMAL['currency_digits'],
                               decimal_places=g.DECIMAL['currency_decimal_places'],

@@ -41,6 +41,10 @@ Bill = function(g){
     p.option_contacts = $(".select-client", p.options_menu);
     p.option_clear = $(".clear", p.options_menu);
     p.option_print = $(".print", p.options_menu);
+    p.option_options = $(".options", p.options_menu);
+
+    // the options dialog
+    p.bill_options = null; // (initialized later)
 
     // save item template for items and remove it from the document
     p.item_template = $("#bill_item_template").detach().removeAttr("id");
@@ -134,6 +138,17 @@ Bill = function(g){
             total = total.plus(p.items[i].data.total);
         }
 
+        // if there's discount on the bill...
+        if(p.data && p.data.discount_amount){
+            if(p.data.discount_type == 'absolute'){
+                total = total - p.data.discount_amount;
+            }
+            else{
+                // total = total*(1-amount/100)
+                total = total.times(Big(1).minus(p.data.discount_amount.div(Big(100))));
+            }
+        }
+
         p.summary_total.text(dn(total, p.g));
 
         return total;
@@ -171,7 +186,11 @@ Bill = function(g){
             p.contact = data.contact;
         }
 
+        // other bill data
         p.data = data;
+        p.data.discount_amount = get_number(p.data.discount_amount, p.g.config.separator);
+
+        p.bill_options = new BillOptions(p);
 
         p.bill.saved = true;
         p.update_summary();
@@ -190,12 +209,25 @@ Bill = function(g){
         if(p.data && !isNaN(p.data.id)) id = p.data.id;
         else id = -1;
 
+        if(!p.data){
+            // some stuff must be entered
+            p.data = {
+                notes: '',
+                discount_amount: Big(0),
+                discount_type: "percent"
+            }
+        }
+
         var r = {
             id: id,
             items: [],
             total: dn(p.update_summary(), p.g),
             till_id: p.g.objects.terminal.register.id,
-            contact: p.contact
+            contact: p.contact,
+            // stuff that applies to whole bill
+            notes: p.data.notes,
+            discount_amount: dn(p.data.discount_amount, p.g),
+            discount_type: p.data.discount_type
         };
 
         // get all items
@@ -254,6 +286,10 @@ Bill = function(g){
         p.temp_discounts = [];
     };
 
+    p.toggle_bill_options = function(show){
+        p.bill_options.toggle_dialog(show)
+    };
+
     //
     // init
     //
@@ -266,7 +302,6 @@ Bill = function(g){
     });
 
     // bill options
-    //p.toggle_options(false);
     p.options_button.simpleMenu(p.options_menu);
 
     p.option_contacts.click(function(){
@@ -283,6 +318,10 @@ Bill = function(g){
             p.clear,
             function(){}
         );
+    });
+
+    p.option_options.click(function(){
+        p.toggle_bill_options(true);
     });
 };
 
@@ -1009,7 +1048,6 @@ ItemDetails = function(item){
 
     // bind button actions
     p.items.cancel.click(function(){ p.cancel_button_action();});
-
     p.items.save.click(function(){ p.save_button_action(); });
 
     // explode button: if quantity is 1, hide it
@@ -1052,4 +1090,79 @@ ItemDetails = function(item){
         .click(function(){
             p.cancel_button_action();
         });
+};
+
+BillOptions = function(bill){
+    var p = this;
+
+    p.bill = bill;
+    p.g = p.bill.g;
+
+    p.dialog = $("#bill_options_dialog");
+    p.items = {
+        discount_amount: $("#bill_discount_amount"),
+        discount_type: $("#bill_discount_type"),
+        notes: $("#bill_notes"),
+
+        cancel_button: $(".dialog-footer .cancel", p.dialog),
+        save_button: $(".dialog-footer .save", p.dialog)
+    };
+
+    //
+    // methods
+    //
+    p.toggle_dialog = function(show){
+        if(show){
+            // set all data to what's on the bill
+            p.items.discount_amount.val(dn(p.bill.data.discount_amount, p.g));
+            p.items.discount_type.val(p.bill.data.discount_type);
+            p.items.notes.val(p.bill.data.notes);
+
+            p.dialog.dialog({
+                width: 500, // use the dialog's width
+                modal: true,
+                title: gettext("Bill options")
+            });
+        }
+        else{
+            p.dialog.dialog("destroy");
+        }
+    };
+
+    p.save_action = function(){
+        // check discount format
+        var amount = get_number(p.items.discount_amount.val(), p.g.config.separator);
+
+        if(!amount){
+            error_message(
+                gettext("Wrong number format"),
+                gettext("Please check discount amount"));
+
+            return;
+        }
+
+        // save stuff to data
+        p.bill.data.discount_amount = amount;
+        p.bill.data.discount_type = p.items.discount_type.val();
+        p.bill.data.notes = p.items.notes.val();
+
+        p.close_dialog();
+    };
+
+    p.cancel_action = function(){
+
+        p.close_dialog();
+    };
+
+    p.close_dialog = function(){
+        p.bill.update_summary();
+        p.toggle_dialog(false);
+    };
+
+    //
+    // init
+    //
+
+    p.items.save_button.unbind().click(p.save_action);
+    p.items.cancel_button.unbind().click(p.cancel_action);
 };
