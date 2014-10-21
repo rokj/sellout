@@ -373,7 +373,10 @@ def create_bill(request, company):
     # in the end, check grand totals against each others:
 
     # subtract the discount
-    #if bill_discount_type
+    if bill_discount_type == 'absolute':
+        total_py -= bill_discount_amount
+    else:
+        total_py *= (Decimal(1) - bill_discount_amount/Decimal(100))
 
     if total_js != total_py:
         return JsonError(_("Total prices do not match"))

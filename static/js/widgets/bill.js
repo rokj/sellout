@@ -10,6 +10,7 @@ Bill = function(g){
     p.g = g;
 
     p.data = null;
+
     p.items = [];
 
     // bill properties
@@ -141,11 +142,11 @@ Bill = function(g){
         // if there's discount on the bill...
         if(p.data && p.data.discount_amount){
             if(p.data.discount_type == 'absolute'){
-                total = total - p.data.discount_amount;
+                total = total - Big(p.data.discount_amount);
             }
             else{
                 // total = total*(1-amount/100)
-                total = total.times(Big(1).minus(p.data.discount_amount.div(Big(100))));
+                total = total.times(Big(1).minus(Big(p.data.discount_amount).div(Big(100))));
             }
         }
 

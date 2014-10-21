@@ -286,13 +286,13 @@ $(window).load(function(){
     <div id="selector">
         <div id="categories">
             <div id="parents_scroll_outer">
-                <div id="category_button_favorites">
+                <div id="category_button_favorites" class="hoverable">
                     <img src="{% static 'icons/home.png' %}"
                          alt="{% trans 'Home' %}"
                          title="{% trans 'Home (show favorites)' %}" />
                 </div>
 
-                <div id="category_button_back">
+                <div id="category_button_back" class="hoverable">
                     <img src="{% static 'icons/back_black.png' %}"
                          alt="{% trans 'Back' %}"
                          title="{% trans 'Back to parent category' %}" />
