@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from mobile.views.manage.configuration import get_company_config
 from pos.models import Company
 from pos.views.util import JsonError

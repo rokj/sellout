@@ -68,7 +68,7 @@ def mobile_get_products(request, company):
     for p in products:
         r.append(product_to_dict(request.user, c,  p, android=True))
 
-    return JsonResponse(r)
+    return JsonResponse(r, safe=False)
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))

@@ -6,7 +6,12 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webpos.settings")
+
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webpos.settings_local")
+    import django
+
+    django.setup()
 
     from django.core.management import execute_from_command_line
 
