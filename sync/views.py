@@ -1,6 +1,5 @@
 
 from django.http import JsonResponse
-
 # Create your views here.
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -29,7 +28,7 @@ def mobile_sync_db(request, company):
     seq = data['database_version']
 
     sync_objects = Sync.objects.only('seq')\
-        .filter(company=company).order_by('seq')
+        .filter(company=company).order_by('-seq')
 
     last_key = 0
 
@@ -79,14 +78,14 @@ def mobile_sync_db(request, company):
         pr = []
         for product in products:
             pr.append(product_to_dict(request.user, company, product, android=True))
-        
+
         ret['products'] = pr
 
     elif seq < last_key:
 
         ret['updated'] = False
         ret['drop'] = False
-        seq_list = Sync.objects.filter(company=company, seq__gt=last_key).order_by('seq')
+        seq_list = Sync.objects.filter(company=company, seq__lte=last_key).order_by('seq')
 
         items = []
 
@@ -95,25 +94,26 @@ def mobile_sync_db(request, company):
                         'model':  seq_item.model,
                         'object_id': seq_item.object_id}
 
-            if seq_item.model == Category.__class__.__name__:
-                c = Category.objects.get(id=seq_item.object_id)
-                item_ret['item'] = category_to_dict(c, android=True)
+            if seq_item.action == 'save':
+                if seq_item.model == 'Category':
+                    c = Category.objects.get(id=seq_item.object_id)
+                    item_ret['item'] = category_to_dict(c, android=True)
 
-            elif seq_item.model == Product.__class__.__name__:
-                p = Product.objects.get(id=seq_item.object_id)
-                item_ret['item'] = product_to_dict(request.user, company, p, android=True)
+                elif seq_item.model == 'Product':
+                    p = Product.objects.get(id=seq_item.object_id)
+                    item_ret['item'] = product_to_dict(request.user, company, p, android=True)
 
-            elif seq_item.model == Tax.__class__.__name__:
-                t = Tax.objects.get(id=seq_item.object_id)
-                item_ret['item'] = tax_to_dict(request.user, company, t)
+                elif seq_item.model == 'Tax':
+                    t = Tax.objects.get(id=seq_item.object_id)
+                    item_ret['item'] = tax_to_dict(request.user, company, t)
 
-            elif seq_item.model == Discount.__class__.__name__:
-                d = Discount.objects.get(id=seq_item.object_id)
-                item_ret['item'] = discount_to_dict(request.user, company, d, android=True)
+                elif seq_item.model == 'Discount':
+                    d = Discount.objects.get(id=seq_item.object_id)
+                    item_ret['item'] = discount_to_dict(request.user, company, d, android=True)
 
-            elif seq_item.model == Category.__class__.__name__:
-                con = Contact.objects.get(id=seq_item.object_id)
-                item_ret['item'] = category_to_dict(con, android=True)
+                elif seq_item.model == 'Contact':
+                    con = Contact.objects.get(id=seq_item.object_id)
+                    item_ret['item'] = category_to_dict(con, android=True)
 
             items.append(item_ret)
 
