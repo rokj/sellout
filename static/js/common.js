@@ -1,3 +1,5 @@
+
+
 function upload_image(input, url, token, max_size, callback){
     // max_size: size of file in Bytes
     if(input.files && input.files[0]) {
@@ -70,6 +72,43 @@ function get_size(element){ // get computed element size before it's inserted in
     } finally {
         element.remove(); // and remove from DOM
     }
+}
+
+function custom_dialog(title, content, width){
+    var container = $("<div>", {'class': 'custom-dialog-container'});
+    var title_container = $("<div>", {'class': 'custom-dialog-title'});
+    var dialog = $("<div>", {'class': 'custom-dialog-content'});
+    var shadow = $("<div>", {'class': 'fullscreen-shadow'});
+    var close_button = $("<div>", {'class': 'custom-dialog-close-button hoverable'});
+
+    var body = $("body");
+
+    if(!width) width = 500; // a 'reasonable' default
+
+    title_container.text(title);
+    title_container.append(close_button);
+    container.append(title_container);
+    container.append(dialog);
+    dialog.append(content.show());
+    dialog.width(width);
+
+    shadow.hide().appendTo(body).fadeIn(function(){
+        container.appendTo(body);
+    });
+
+    // add a function to the
+    content.close_dialog = function(){
+        shadow.fadeOut("fast", function(){
+            shadow.remove();
+        });
+
+        content.hide().detach(); // content will stay in parent's variable
+        container.remove();
+    };
+
+    close_button.unbind().click(function(){
+        content.close_dialog();
+    });
 }
 
 function error_message(title, message){

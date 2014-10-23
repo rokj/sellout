@@ -1,28 +1,29 @@
 #contacts{
     background-color: #f7f7f7;
-    width: 640px;
-    padding: 30px !important; /* override jqueryui dialog's styles */
+    /* width: 640px; */
+    /* padding: 30px !important; */ /* override jqueryui dialog's styles */
 }
 
+#contacts .contact-type{ margin-bottom: 20px; }
 #contacts .contact-type .company-switch.active{ background-color: red; }
 #contacts .contact-type .individual-switch.active{ background-color: blue; }
 
 #contacts .contact-form .left-column{
     float: left;
-    width: 270px;
+    width: 255px;
     overflow: hidden;
 }
 
 #contacts .contact-form .right-column{
     float: right;
-    width: 270px;
+    width: 255px;
     overflow: hidden;
 }
 
 
 #contacts .contact-form select, 
 #contacts .contact-form input{
-    width: 270px;
+    width: 100%;
     margin-top: 10px;
 }
 

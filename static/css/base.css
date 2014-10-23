@@ -110,3 +110,58 @@ select{
 .contain-floats{
     overflow: hidden; /* the div will expand so that floats inside don't overflow */
 }
+
+/* custom dialogs */
+.fullscreen-shadow{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: #000000;
+    opacity: 0.4;
+    z-index: 5001;
+
+}
+
+.custom-dialog-container {
+    z-index: 5002;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    transform: translateX(-50%) translateY(-50%);
+    -ms-transform: translateX(-50%) translateY(-50%);
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+
+    background-color: #f7f7f7;
+}
+
+.custom-dialog-title{
+    position: relative;
+    /* padding: 30px; */
+}
+
+.custom-dialog-container{
+    padding: 30px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+
+.custom-dialog-container .custom-dialog-content{
+    margin-top: 30px;
+}
+
+.custom-dialog-container .custom-dialog-close-button{
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    width: 24px;
+    height: 24px;
+
+    /* background-image is set in base.html */
+    background-repeat: no-repeat;
+    background-position: center center;
+}

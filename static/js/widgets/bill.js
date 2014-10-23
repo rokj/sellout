@@ -1119,14 +1119,16 @@ BillOptions = function(bill){
             p.items.discount_type.val(p.bill.data.discount_type);
             p.items.notes.val(p.bill.data.notes);
 
-            p.dialog.dialog({
+            /*p.dialog.dialog({
                 width: 500, // use the dialog's width
                 modal: true,
-                title: gettext("Bill options")
-            });
+                title:
+            });*/
+            custom_dialog(gettext("Bill options"), p.dialog, 500);
         }
         else{
-            p.dialog.dialog("destroy");
+            //p.dialog.dialog("destroy");
+            p.dialog.close_dialog();
         }
     };
 

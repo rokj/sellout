@@ -1,12 +1,13 @@
-#filter_form input[type='text']{
+#filter_form input[type='text'],
+#filter_form select{
     width: 100%; /* the padding, defined in managebase.css */
-    margin-top: 5px;
     margin-bottom: 15px;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
 }
 
-#filter-form label{
+#filter_form label{
+    margin-bottom: 5px;
     display: block;
 }
 
@@ -40,10 +41,9 @@ div.product-details{
     background-color: #f7f7f7;
     float: left;
     width: 400px;
-    margin-left: 20px;
+    margin: 0 20px 20px;
     position: relative;
     padding-top: 2.5em;
-    margin-bottom: 20px;
 }
 
 div.product-details table{
@@ -171,3 +171,59 @@ img.delete-discount{
     position: relative;
     top: 3px;
 }
+
+/* mass edit */
+h3, #results_info{
+    margin-top: 20px;
+    margin-bottom: 20px;
+    line-height: 20px;
+}
+
+#results_info {
+    /* initially not visible (but still has to take up space) */
+    visibility: hidden;
+    margin-left: 20px;
+    font-size: 14px;
+}
+
+#results_count{
+    display: inline-block;
+}
+
+#mass_edit_container{
+    margin-left: 20px;
+    display: inline-block;
+}
+
+#mass_edit_container .mass-edit {
+    margin-right: 20px;
+}
+
+/* mass edit dialogs */
+.mass-dialog select,
+.mass-dialog input{
+    width: 100%;
+    margin-top: 30px;
+}
+
+#mass_discount_edit_dialog .clear-discounts-container{
+    margin-top: 20px;
+    border-top: 2px solid #ffffff;
+    text-align: center;
+    padding-top: 10px;
+}
+
+#mass_discount_edit_dialog .clear-discounts-container img{
+    display: inline-block;
+    height: 18px;
+    margin-right: 5px;
+    position: relative;
+    top: 2px;
+
+}
+
+#mass_discount_edit_dialog .clear-discounts-container a{
+    color: #ff5a6e;
+    font-size: 13px;
+}
+

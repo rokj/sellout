@@ -56,9 +56,6 @@ Contacts = function(g){
 
     };
 
-    p.dialog_width = parseInt(p.dialog.css("width")); // only works for the first time,
-                                                      // then the div is hidden and
-                                                      // its width is zero
     //
     // methods
     //
@@ -118,11 +115,13 @@ Contacts = function(g){
 
     p.choose_contact = function(){
         // return contact id or null if nothing has been chosen
-        p.dialog.dialog({
+        /*p.dialog.dialog({
             width: p.dialog_width, // use the dialog's width
             modal: true,
             title: gettext("Select contact")
-        });
+        });*/
+        custom_dialog(gettext("Select contact"),
+            p.dialog, 550);
 
         p.data_changed = false;
 

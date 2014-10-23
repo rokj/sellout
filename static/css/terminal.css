@@ -215,7 +215,7 @@ div#selector{
 .dialog-footer button{
     width: 150px;
     margin-top: 30px;
-    margin-left: 10px;
+    /* margin-left: 10px; */
 }
 
 .dialog-footer input.cancel,

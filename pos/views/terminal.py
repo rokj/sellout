@@ -79,8 +79,8 @@ def terminal(request, company):
         'countries': country_choices,
 
         # user config
-        'config': JsonStringify(config, True),
-        'data': JsonStringify(data, True),
+        'config': JsonStringify(config),
+        'data': JsonStringify(data),
         'registers': data['registers'],
     }
 

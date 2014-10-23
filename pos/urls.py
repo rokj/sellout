@@ -79,6 +79,7 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + '/json/products/get/$', product.get_product, name='get_product'),  # product list (search) - json
     url(r_company + '/' + r_manage + '/json/products/edit/$', product.edit_product, name='edit_product'),  # edit (save) product - json
     url(r_company + '/' + r_manage + '/json/products/delete/$', product.delete_product, name='delete_product'),  # edit (save) product - json
+    url(r_company + '/' + r_manage + '/json/products/mass-edit/$', product.mass_edit, name='mass_edit'),  # edit (save) product - json
 
     # user
     url(r_company + '/' + r_manage + _('/user-settings') + '/$', configuration.user_settings, name='user_settings'),  # user settings

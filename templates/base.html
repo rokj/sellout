@@ -47,6 +47,13 @@ blocks:
 
     <title>{% block title %}{{title}} - {{site_title}}{% endblock %}</title>
 
+    {% comment %} to avoid hardcoding urls in css files, here are some styles {% endcomment %}
+    <style type="text/css">
+        .custom-dialog-container .custom-dialog-close-button {
+            background-image: url("{% static 'icons/close-thin.png' %}");
+        }
+    </style>
+
     <script type="text/javascript">
         $(window).load(function(){
             {# common to management #}

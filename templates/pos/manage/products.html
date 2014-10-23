@@ -61,23 +61,172 @@
         // all data (from template)
 
         // categories
-        var category_data = {% autoescape off %}{{ categories }}{% endautoescape %};
+        var category_data = {{ categories|safe }};
         var categories_list = []; // list of category names (source for the autocomplete)
         var categories_by_breadcrumbs = {}; // dictionary path:category_id for saving
         var categories_by_id = {}; // dictionary id:path for loading
         var last_chosen_category = null; // remember the category of last added product and show it in new dialog
 
         // units
-        var units_data = {% autoescape off %}{{ units }}{% endautoescape %};
+        var units_data = {{ units|safe }};
         var units = [];
 
         // discounts
-        var all_discounts = {% autoescape off %}{{ discounts }}{% endautoescape %};
+        var all_discounts = {{ discounts|safe }};
 
         // taxes
-        var tax_rates = {% autoescape off %}{{ taxes }}{% endautoescape %};
+        var tax_rates = {{ taxes|safe }};
 
+        //
+        // functions
+        //
+        // functions
+        function show_image(element, url, name){
+            if(!url){
+                // show 'placeholder' image
+                element.css("background-image", "url('{% static 'images/product_placeholder.png' %}')");
+                element.attr("alt", "{% trans 'No image' %}");
+            }
+            else{
+                // show the real image
+                element.css("background-image", "url('" + url + "')");
+                element.attr("alt", escape(name));
+            }
+        }
 
+        function tax_select(element, preselected_id, select_none){
+            element.empty(); // select element
+
+            var opt_obj;
+
+            for(var i = 0; i < tax_rates.length; i++){
+                opt_obj = $("<option>")
+                        .attr("value", tax_rates[i].id)
+                        .text(escape(tax_rates[i].name) + " (" + tax_rates[i].amount + "%)");
+
+                if(preselected_id == tax_rates[i].id){
+                    // select the chosen tax
+                    opt_obj.attr("selected", "selected");
+                }
+                element.append(opt_obj);
+            }
+
+            if(preselected_id == null || select_none){
+                opt_obj = $("<option>")
+                        .attr("value", null)
+                        .text("---");
+
+                element.append(opt_obj);
+
+                if(!preselected_id) opt_obj.attr("selected", "selected");
+            }
+        }
+
+        function get_tax(id){
+            // returns the tax object with the given id
+            for(var i = 0; i < tax_rates.length; i++){
+                if(tax_rates[i].id == id) return tax_rates[i];
+            }
+            return null;
+        }
+
+        function categories_autocomplete(element, preselected_id){
+            if(element.data('ui-autocomplete')){
+                element.autocomplete("destroy");
+            }
+
+            element.autocomplete({
+                source: categories_list,
+                minLength: 0,
+                delay: 500
+            });
+
+            if(preselected_id != null || preselected_id != -1){
+                element.val(categories_by_id[preselected_id]);
+            }
+        }
+
+        function discount_amount (discount){
+                if(discount.type == 'Percent')
+                    return " (" + display_number(discount.amount, "{{ separator }}", {{ decimal_places }}) + "%)";
+                else
+                    return " ({{currency|escapejs}} " + display_number(discount.amount, "{{ separator }}", {{ decimal_places }}) + ")";
+            }
+
+        function discount_tooltip(element, discount){
+            // tooltip - discount details
+            var tooltip = "";
+
+            // tooltip = discount.code + "<br />" // discount code (already in the li)
+            tooltip += escape(discount.description) + "<br />"; // description
+
+            // if no dates are set, show 'no date limit', otherwise 'from ... to ...'
+            if(!discount.start_date && !discount.end_date){
+                tooltip += "{% trans 'No date limits' %}"
+            }
+            else{
+                if(discount.start_date) tooltip += "{% trans 'from' %} " + escape(discount.start_date);
+                if(discount.end_date) tooltip += " {% trans 'to' %} " + escape(discount.end_date);
+            }
+
+            // TODO: set style for inactive discount
+            if(!discount.active) tooltip += "<br/>{% trans 'inactive' %}"; // active
+
+            element.tooltip({content:tooltip});
+        }
+
+        function show_products(data){
+            // empty the products div
+            var products_div = $("#products_list");
+
+            products_div.empty();
+            products = [];
+
+            if(data.length == 0){
+                products_div.append("{% trans 'No products found' %}");
+            }
+
+            var i, product;
+            var max_height = 0;
+            for(i = 0; i < data.length; i++){
+                product = new Product(data[i]);
+                products.push(product);
+
+                // get product container's height
+                max_height = Math.max(max_height, product.get_height());
+            }
+
+            // in the end, make all products equally high
+            $("div.product-details").height(max_height);
+        }
+
+        function parse_product_data(product){
+            // convert all text numbers in product to Big() numbers
+            // price, purchase_price, stock, tax, discounts[amount]
+            if(typeof product.price == "string")
+                product.price = get_number(product.price, "{{ separator }}");
+
+            if(typeof product.purchase_price == "string")
+                product.purchase_price = get_number(product.purchase_price, "{{ separator }}");
+
+            if(typeof product.stock== "string")
+                product.stock = get_number(product.stock, "{{ separator }}");
+
+            if(typeof product.tax == "string")
+                product.tax = get_number(product.tax, "{{ separator }}");
+
+            for(var i = 0; i < product.discounts.length; i++){
+                if(typeof product.discounts[i].amount == "string")
+                    product.discounts[i].amount =
+                            get_number(product.discounts[i].amount, "{{ separator }}");
+            }
+
+            return product;
+        }
+
+        //
+        // objects
+        //
         Search = function(){
             var p = this;
 
@@ -104,7 +253,14 @@
                 price_filter: $("#price_filter"),
                 discount_filter: $("#discount_filter"),
 
-                search_button: $("#update_results")
+                search_button: $("#update_results"),
+
+                results_info: $("#results_info"),
+                results_count: $("#results_count"),
+                edit_container: $("#mass_edit_container"),
+                edit_title: $("#mass_edit_title"),
+                edit_taxes: $("#mass_edit_tax"),
+                edit_discounts: $("#mass_edit_discount")
             };
 
             // methods
@@ -175,6 +331,18 @@
                 }
             };
 
+            p.update_label = function(count){
+                if(count == 0){
+                    p.items.results_count.text("{% trans 'No results found' %}");
+                    p.items.results_info.css("visibility", "hidden");
+                }
+                else{
+                    p.items.results_count.text("{% trans 'Results found' %}: " + count);
+                    p.items.results_info.css("visibility", "visible");
+
+                }
+            };
+
             p.update_products = function(){
                 // update products when search criteria has changed (gets called on timeout or on click)
                 // assemble a JSON object with all search criteria and pass it to the view
@@ -210,6 +378,7 @@
                                 response.message);
                         }
                         else{
+                            p.update_label(response.length);
                             show_products(response);
                         }
                     });
@@ -258,6 +427,32 @@
             p.match_url();
 
             $(window).on("hashchange", p.match_url);
+
+            // mass edit events
+            p.items.edit_container.unbind()
+                .mouseover(function(){
+                    p.items.edit_title.hide();
+                    p.items.edit_taxes.show();
+                    p.items.edit_discounts.show();
+                })
+                .mouseout(function(){
+                    p.items.edit_title.show();
+                    p.items.edit_taxes.hide();
+                    p.items.edit_discounts.hide();
+                });
+
+            // prevent any fake links from doing anything
+            $("a.fake").click(function(e){
+                e.preventDefault();
+            });
+
+            p.items.edit_taxes.unbind().click(function(){
+                mass_tax.toggle_dialog(true);
+            });
+
+            p.items.edit_discounts.unbind().click(function(){
+                mass_discount.toggle_dialog(true);
+            });
         };
 
 
@@ -377,7 +572,6 @@
             //p.items.discounts = $(".product-discounts", p.items.container);
             //p.items.notes = $(".product-private-notes", p.items.container);
 
-
             p.items.shortcut = $(".product-shortcut", p.items.container);
             p.items.shortcut.text(p.data.shortcut);
 
@@ -474,11 +668,12 @@
             };
 
             p.cancel_button_action = function(){
-                confirmation_dialog(
+                /*confirmation_dialog(  // this is really annoying. TODO: check if anything has changed
                     "{% trans 'Cancel editing' %}",
                     "{% trans 'All changes you made to this product will be lost. Continue?' %}",
                     p.close_dialog,
-                    function(){});
+                    function(){});*/
+                p.close_dialog();
             };
 
             p.close_dialog = function(){
@@ -617,42 +812,13 @@
                 //upl_obj.hide();
             };
 
-            p.discount_amount = function(discount){
-                if(discount.type == 'Percent')
-                    return " (" + display_number(discount.amount, "{{ separator }}", {{ decimal_places }}) + "%)";
-                else
-                    return " ({{currency|escapejs}} " + display_number(discount.amount, "{{ separator }}", {{ decimal_places }}) + ")";
-            };
-
-            p.discount_tooltip = function(element, discount){
-                // tooltip - discount details
-                var tooltip = "";
-
-                // tooltip = discount.code + "<br />" // discount code (already in the li)
-                tooltip += escape(discount.description) + "<br />"; // description
-
-                // if no dates are set, show 'no date limit', otherwise 'from ... to ...'
-                if(!discount.start_date && !discount.end_date){
-                    tooltip += "{% trans 'No date limits' %}"
-                }
-                else{
-                    if(discount.start_date) tooltip += "{% trans 'from' %} " + escape(discount.start_date);
-                    if(discount.end_date) tooltip += " {% trans 'to' %} " + escape(discount.end_date);
-                }
-
-                // TODO: set style for inactive discount
-                if(!discount.active) tooltip += "<br/>{% trans 'inactive' %}"; // active
-
-                element.tooltip({content:tooltip});
-            };
-
             p.add_discount = function(discount){
                 // add a list Item and a delete button to product edit dialog
                 // add a discount from all_discounts to product
                 var li_obj = $("<li>", {title:""});
                 li_obj.data(discount); // store id in data() for later retrieval
 
-                p.discount_tooltip(li_obj, discount);
+                discount_tooltip(li_obj, discount);
 
                 // delete button
                 var btn_obj = $("<img>", {"class":"delete-discount hoverable", src: "{% static 'icons/cancel.png' %}"});
@@ -671,7 +837,7 @@
                     p.refresh_discounts();
                 });
 
-                li_obj.append(discount.code + " " + p.discount_amount(discount));
+                li_obj.append(discount.code + " " + discount_amount(discount));
                 li_obj.append(btn_obj);
 
                 p.items.discounts.append(li_obj);
@@ -791,7 +957,7 @@
 
                     var opt_obj = $("<option>")
                         .attr("value", all_discounts[i].id)
-                        .append(all_discounts[i].code + " " + p.discount_amount(all_discounts[i]));
+                        .append(all_discounts[i].code + " " + discount_amount(all_discounts[i]));
 
                     sel_obj.append(opt_obj);
                     added++;
@@ -974,121 +1140,191 @@
             p.items.upload_image.customFileInput("{% trans 'Choose...' %}");
         };
 
+        MassTaxes = function(){
+            var p = this;
 
-        // functions
-        function show_image(element, url, name){
-            if(!url){
-                // show 'placeholder' image
-                element.css("background-image", "url('{% static 'images/product_placeholder.png' %}')");
-                element.attr("alt", "{% trans 'No image' %}");
-            }
-            else{
-                // show the real image
-                element.css("background-image", "url('" + url + "')");
-                element.attr("alt", escape(name));
-            }
-        }
+            p.dialog = $("#mass_tax_edit_dialog");
+            p.items = {
+                taxes: $("select", p.dialog),
+                apply_button: $(".ok", p.dialog)
+            };
 
-        function tax_select(element, preselected_id, select_none){
-            element.empty(); // select element
-
-            var opt_obj;
-
-            for(var i = 0; i < tax_rates.length; i++){
-                opt_obj = $("<option>")
-                        .attr("value", tax_rates[i].id)
-                        .text(escape(tax_rates[i].name) + " (" + tax_rates[i].amount + "%)");
-
-                if(preselected_id == tax_rates[i].id){
-                    // select the chosen tax
-                    opt_obj.attr("selected", "selected");
+            //
+            // methods
+            //
+            p.toggle_dialog = function(show){
+                if(show){
+                    custom_dialog("{% trans 'Taxes' %}", p.dialog, 300);
                 }
-                element.append(opt_obj);
-            }
+                else{
+                    p.dialog.close_dialog();
+                }
+            };
 
-            if(preselected_id == null || select_none){
-                opt_obj = $("<option>")
-                        .attr("value", null)
-                        .text("---");
+            p.update_taxes = function(){
+                // get all ids of products in search results
+                var ids = [];
 
-                element.append(opt_obj);
+                if(products.length == 0) return;
 
-                if(!preselected_id) opt_obj.attr("selected", "selected");
-            }
-        }
+                for(var i = 0; i < products.length; i++){
+                    ids.push(products[i].data.id);
+                }
 
-        function get_tax(id){
-            // returns the tax object with the given id
-            for(var i = 0; i < tax_rates.length; i++){
-                if(tax_rates[i].id == id) return tax_rates[i];
-            }
-            return null;
-        }
+                // get the tax that these products should have
+                var tax = parseInt(p.items.taxes.val());
 
-        function categories_autocomplete(element, preselected_id){
-            if(element.data('ui-autocomplete')){
-                element.autocomplete("destroy");
-            }
+                if(isNaN(tax)){
+                    error_message(
+                        "{% trans 'Error while setting tax' %}",
+                        "{% trans 'Please select a valid tax for your products' %}");
+                    return;
+                }
 
-            element.autocomplete({
-                source: categories_list,
-                minLength: 0,
-                delay: 500
+                // send everything to server
+                var data = {
+                    products: ids,
+                    action: 'set-tax',
+                    id: tax
+                };
+
+                send_data("{% url 'pos:mass_edit' company.url_name %}",
+                    data, "{{ csrf_token }}", function(response){
+                        if(response.status != 'ok'){
+                            error_message(
+                                "{% trans 'Setting tax failed' %}",
+                                response.message);
+                        }
+                        else{
+                            // close this window and repeat search
+                            p.toggle_dialog(false);
+                            search.update_products();
+                        }
+                    });
+            };
+
+            //
+            // init
+            //
+            // fill the tax list
+            tax_select(p.items.taxes, null, false);
+
+            p.items.apply_button.unbind().click(function(){
+                p.update_taxes();
             });
 
-            if(preselected_id != null || preselected_id != -1){
-                element.val(categories_by_id[preselected_id]);
-            }
-        }
+        };
 
-        function show_products(data){
-            // empty the products div
-            var products_div = $("#products_list");
+        MassDiscounts = function(){
+            var p = this;
 
-            products_div.empty();
-            products = [];
+            p.dialog = $("#mass_discount_edit_dialog");
+            p.items = {
+                discounts: $(".discounts", p.dialog),
+                add_button: $(".add-discount", p.dialog),
+                remove_button: $(".remove-discount", p.dialog),
+                clear_button: $(".clear-discounts", p.dialog)
+            };
 
-            if(data.length == 0){
-                products_div.append("{% trans 'No products found' %}");
-            }
+            //
+            // methods
+            //
+            p.toggle_dialog = function(show){
+                if(show){
+                    custom_dialog("{% trans 'Discounts' %}", p.dialog, 300);
+                }
+                else{
+                    p.dialog.close_dialog();
+                }
+            };
 
-            var i, product;
-            var max_height = 0;
-            for(i = 0; i < data.length; i++){
-                product = new Product(data[i]);
-                products.push(product);
+            //
+            // init
+            //
 
-                // get product container's height
-                max_height = Math.max(max_height, product.get_height());
-            }
+            // fill the discounts select box
+            var i, o, d;
 
-            // in the end, make all products equally high
-            $("div.product-details").height(max_height);
-        }
+            for(i = 0; i < all_discounts.length; i++){
+                d = all_discounts[i];
 
-        function parse_product_data(product){
-            // convert all text numbers in product to Big() numbers
-            // price, purchase_price, stock, tax, discounts[amount]
-            if(typeof product.price == "string")
-                product.price = get_number(product.price, "{{ separator }}");
+                o = $("<option>", {value: d.id});
+                o.text(d.code + discount_amount(d));
+                o.attr("title", discount_tooltip(o, d));
 
-            if(typeof product.purchase_price == "string")
-                product.purchase_price = get_number(product.purchase_price, "{{ separator }}");
-
-            if(typeof product.stock== "string")
-                product.stock = get_number(product.stock, "{{ separator }}");
-
-            if(typeof product.tax == "string")
-                product.tax = get_number(product.tax, "{{ separator }}");
-
-            for(var i = 0; i < product.discounts.length; i++){
-                if(typeof product.discounts[i].amount == "string")
-                    product.discounts[i].amount =
-                            get_number(product.discounts[i].amount, "{{ separator }}");
+                p.items.discounts.append(o);
             }
 
-            return product;
-        }
+            p.get_products = function(){
+                var ids = [];
+
+                if(products.length == 0) return null;
+
+                for(var i = 0; i < products.length; i++){
+                    ids.push(products[i].data.id);
+                }
+
+                return ids;
+            };
+
+            p.send_action = function(action, object_id){
+                var ids = p.get_products();
+                if(!ids) return;
+
+
+                var data = {
+                    products: ids,
+                    action: action,
+                    id: object_id
+                };
+
+                send_data("{% url 'pos:mass_edit' company.url_name %}", data,
+                    "{{ csrf_token }}", function(response){
+                        if(response.status != 'ok'){
+                            error_message(
+                                "{% trans 'Error while setting discount' %}",
+                                response.message);
+                        }
+                        else{
+                            // search again
+                            search.update_products();
+                            p.toggle_dialog(false);
+                        }
+                    });
+            };
+
+            p.get_discount_id = function(){
+                var id = parseInt(p.items.discounts.val());
+                if(isNaN(id)){
+                    console.error("No selected discount: " + id);
+                    return null;
+                }
+
+                return id;
+            };
+
+            // bind events on buttons:
+            // add discount
+            p.items.add_button.unbind().click(function(){
+                var id = p.get_discount_id();
+                if(id == null) return;
+
+                p.send_action('add-discount', id);
+            });
+
+            // remove discount
+            p.items.remove_button.unbind().click(function(){
+                var id = p.get_discount_id();
+                if(id == null) return;
+
+                p.send_action('remove-discount', id);
+            });
+
+            p.items.clear_button.unbind().click(function(){
+                // no id required here, remove all
+                p.send_action('clear-discounts', null);
+            });
+        };
 
         /////////////////////////////////////////////////////
         //
@@ -1120,6 +1356,8 @@
         var search = new Search();
         var products = []; // a list of Product() objects
         var product_details = null; // ProductDetails() object
+        var mass_tax = new MassTaxes();
+        var mass_discount = new MassDiscounts();
 
         var add_product_button = $("#add_product");
 
@@ -1154,7 +1392,7 @@
     {% comment %} filters {% endcomment %}
     <div class="left-column">
         <div id="filter_form" class="fake-form">
-            <h2>{% trans 'Search' context 'form title' %}</h2>
+            <h3>{% trans 'Search' context 'form title' %}</h3>
             <input id="general_filter"
                    class="search-filter"
                    type="text" placeholder="{% trans 'Enter query' context 'search products' %}"/>
@@ -1216,6 +1454,21 @@
     </div>
 
     <div class="content">
+        <div id="results_info">
+            <div id="results_count"></div>
+
+            <div id="mass_edit_container">
+                <a href="#" id="mass_edit_title" class="fake mass-edit hoverable">{% trans 'Edit all results' %}</a>
+
+                <a href="#" id="mass_edit_tax" class="fake mass-edit tax hoverable hidden">
+                    {% trans 'Taxes' %}
+                </a>
+                <a href="#" id="mass_edit_discount" class="fake mass-edit discount hoverable hidden">
+                    {% trans 'Discounts' %}
+                </a>
+            </div>
+        </div>
+
         <div id="products_list"></div>
 
         {% comment %} a template for editing/adding product (dialog) {% endcomment %}
@@ -1420,5 +1673,47 @@
 
     {% comment %} a dummy div for creating new products {% endcomment %}
     <div id="new_product_dummy"></div>
+
+    {% comment %} dialogs for mass editing taxes and discounts {% endcomment %}
+    <div id="mass_tax_edit_dialog" class="mass-dialog hidden">
+        <div>
+            <select class="taxes"></select>
+        </div>
+
+        <div>
+            <input type="button"
+                   class="ok hoverable"
+                   title="{% blocktrans %}Change all products's tax in current search results to selected{% endblocktrans %}"
+                   value="{% trans 'Apply to all' %}" />
+        </div>
+    </div>
+
+    <div id="mass_discount_edit_dialog" class="mass-dialog hidden">
+        <div>
+            <select class="discounts"></select>
+        </div>
+
+        <div>
+            <input type="button"
+                   class="add-discount ok hoverable"
+                   title="{% blocktrans %}Add this discount to all current search results{% endblocktrans %}"
+                   value="{% trans 'Add to current results' %}" />
+        </div>
+
+        <div>
+            <input type="button"
+                   class="remove-discount cancel hoverable"
+                   title="{% blocktrans %}Remove this discount from all current search results{% endblocktrans %}"
+                   value="{% trans 'Remove from all' %}" />
+        </div>
+
+        <div class="clear-discounts-container">
+            <a class="clear-discounts fake" href="#"
+               title="{% blocktrans %}Remove all discounts from all products in current search results{% endblocktrans %}">
+                <img src="{% static 'icons/delete_red.png' %}" alt="" />
+                {% trans 'Clear all discounts' %}
+            </a>
+        </div>
+    </div>
 {% endblock %}
 

@@ -27,17 +27,16 @@ def error(request, company, message):
     return render(request, 'pos/error.html', context)
 
 
-def JsonStringify(data, for_javascript=False):
+def JsonStringify(data):
+    # the data will be put into template with |safe filter or
+    # within {% autoescape off %},
+    # so make sure there's no harmful stuff inside
     s = json.dumps(data)
+    s = s.replace('<', '\u003c')
+    s = s.replace('>', '\u003e')
+    s = s.replace('&', '\u0026')
 
-    if for_javascript:
-        # this data will be thrown directly into javascript;
-        # prevent things like </script> being written into the code
-        s = s.replace('/', '\/')
-
-        return s
-    else:
-        return s
+    return s
 
 
 def JsonError(message):

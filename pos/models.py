@@ -346,6 +346,30 @@ class Product(ProductAbstract):
 
             i += 1
 
+    def add_discount(self, user, discount):
+        # add a discount to the end of the list in m2m field;
+        seq_no = ProductDiscount.objects.filter(product=self).only('seq_no').order_by('-seq_no')[:0]
+
+        if seq_no:
+            seq_no += 1
+        else:
+            seq_no = 1
+
+        new_discount = ProductDiscount(
+            created_by=user,
+            product=self,
+            discount=discount,
+            seq_no=seq_no
+        )
+        new_discount.save()
+
+    def remove_discount(self, discount):
+        try:
+            ProductDiscount.objects.get(product=self, discount=discount).delete()
+        except ProductDiscount.DoesNotExist:
+            return
+
+
     @property
     def color(self):
         if self.category:

@@ -1,14 +1,13 @@
 import base64
-from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
-from common.images import image_dimensions, image_from_base64, import_color_image, create_file_from_image
+from common.images import image_dimensions, import_color_image, create_file_from_image
 
-from pos.models import Company, Category, Product, Price, PurchasePrice, Tax
+from pos.models import Company, Category, Product, Price, PurchasePrice, Tax, Discount, ProductDiscount
 from pos.views.util import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
@@ -134,7 +133,7 @@ def products(request, company):
         tax_first = True
     else:
         tax_first = False
-    
+
     context = {
         'company': c,
         'title': _("Products"),
@@ -274,7 +273,7 @@ def search_products(request, company, android=False):
     # discount
     if criteria.get('discount_filter'):
         #filter_by_discount = True
-        products = products.filter(discount__code=criteria.get('discount_filter'))
+        products = products.filter(discounts__code=criteria.get('discount_filter'))
     else:
         pass
         #filter_by_discount = False
@@ -338,8 +337,7 @@ def validate_product(user, company, data):
     # private notes
     # tax*
     # stock*
-    
-    
+
     def r(status, msg):
         return {'status':status,
             'data':data,
@@ -495,6 +493,7 @@ def validate_product(user, company, data):
         
     return {'status': True, 'data': data}
 
+
 @login_required
 def create_product(request, company, android=False):
     # create new product
@@ -553,6 +552,7 @@ def create_product(request, company, android=False):
             product.save()
     
     return JsonOk(extra=product_to_dict(request.user, c, product, android))
+
 
 @login_required
 def edit_product(request, company, android=False):
@@ -620,6 +620,7 @@ def edit_product(request, company, android=False):
 
     return JsonOk(extra=product_to_dict(request.user, c, product, android))
 
+
 @login_required
 def delete_product(request, company):
     try:
@@ -683,3 +684,74 @@ def toggle_favorite(request, company):
     product.save()
 
     return JsonResponse({'status': 'ok', 'favorite': product.favorite})
+
+
+@login_required
+def mass_edit(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+    # there must be stuff in request.POST
+    data = JsonParse(request.POST.get('data'))
+
+    if not data:
+        return JsonError(_("No data in request"))
+
+    # get product ids from data
+    if len(data.get('products')) == 0:
+        return JsonError(_("No products selected"))
+
+    products = Product.objects.filter(company=c, id__in=data.get('products'))
+    action = data.get('action')
+
+    # decide what to do for each action
+    if action == 'set-tax':
+        # get the tax with given id and put it on all products
+        try:
+            tax = Tax.objects.get(company=c, id=data.get('id'))
+        except (Tax.DoesNotExist, ValueError, TypeError):
+            return JsonError(_("Tax does not exist"))
+
+        for p in products:
+            p.tax = tax
+            p.save()
+
+        return JsonOk()
+
+    elif action == 'add-discount':
+        # go through each product and add a discount
+        try:
+            discount = Discount.objects.get(company=c, id=data.get('id'))
+        except (Discount.DoesNotExist, ValueError, TypeError):
+            return JsonError(_("Discount does not exist or is not valid"))
+
+        # add this discount to all products in list
+        for p in products:
+            p.add_discount(request.user, discount)
+
+        return JsonOk()
+
+    elif action == 'remove-discount':
+        try:
+            discount = Discount.objects.get(company=c, id=data.get('id'))
+        except (Discount.DoesNotExist, ValueError, TypeError):
+            return JsonError(_("Discount does not exist or is not valid"))
+
+        # remove this discount from all products in list
+        for p in products:
+            p.remove_discount(discount)
+
+        return JsonOk()
+
+    elif action == 'clear-discounts':
+        # there is no discounts, just remove all discounts from all products in the list
+        for p in products:
+            ProductDiscount.objects.filter(product=p).delete()
+
+        return JsonOk()
+
+    else:
+        return JsonError(_("Unsupported mass edit action"))
+

@@ -7,7 +7,7 @@
     <script type="text/javascript">
         $(document).ready(function(){
             var g = {
-                data: {% autoescape off %}{{ categories }}{% endautoescape %},
+                data: {{ categories|safe }},
                 delete_url: "{% url 'pos:delete_category' company.url_name %}",
                 container: $("#category_tree"),
                 toolbox: $("#tools"),

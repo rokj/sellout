@@ -269,7 +269,7 @@ def list_categories(request, company):
     context = {
         'box_dimensions': g.IMAGE_DIMENSIONS['category'],
         'company': c,
-        'categories': JsonStringify(get_all_categories_structured(c), True),
+        'categories': JsonStringify(get_all_categories_structured(c)),
         'title': _("Categories"),
         'site_title': g.MISC['site_title'],
     }
