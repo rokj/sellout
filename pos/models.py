@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext as _
-from django.db.models.signals import pre_save, pre_delete, post_save
+from django.db.models.signals import pre_save, pre_delete, post_save, post_delete
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from sorl import thumbnail
@@ -679,3 +679,52 @@ def copy_bill_to_history(bill_id):
                           bill=b, data=serialized_data)
     history.save()
     return True
+
+
+
+
+@receiver(post_delete, sender=Category)
+@receiver(post_delete, sender=Product)
+@receiver(post_delete, sender=Contact)
+@receiver(post_delete, sender=Tax)
+@receiver(post_delete, sender=Discount)
+def set_serial_delete(instance, **kwargs):
+    signal_change(instance, False, action='delete', **kwargs)
+# author: Android lord
+
+
+def signal_change(instance, created, action, **kwargs):
+    from sync.models import Sync
+
+    if not instance.company:
+        return
+
+    sync_objects = Sync.objects.only('seq')\
+        .filter(company=instance.company).order_by('-seq')
+
+    last_key = 0
+
+    if len(sync_objects) > 0:
+        last_key = sync_objects[0].seq
+
+    try:
+        object = Sync.objects.get(company=instance.company, object_id=instance.id, model=instance.__class__.__name__)
+        object.seq = last_key+1
+        object.action = action
+        object.save()
+    except Sync.DoesNotExist:
+        sync = Sync(company=instance.company,
+                    action=action,
+                    model=instance.__class__.__name__,
+                    object_id=instance.id,
+                    seq=last_key+1)
+        sync.save()
+
+@receiver(post_save, sender=Category)
+@receiver(post_save, sender=Product)
+@receiver(post_save, sender=Contact)
+@receiver(post_save, sender=Tax)
+@receiver(post_save, sender=Discount)
+def set_serial_save(instance, created, **kwargs):
+    signal_change(instance, created, action='save', **kwargs)
+
