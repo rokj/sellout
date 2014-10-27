@@ -11,9 +11,9 @@
     font-weight: bold;
 }
 
-#contacts_index a:hover{ color: #aa0000; }
+#contacts_index a:hover{ color: #ff5a6e; }
 #contacts_index .current-letter{
-    background-color: #aa0000;
+    background-color: #ff5a6e;
     color: white;
 }
 

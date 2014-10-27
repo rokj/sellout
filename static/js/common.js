@@ -1,4 +1,100 @@
+function custom_dialog(title, content, width, buttons){
+    var container = $("<div>", {'class': 'custom-dialog-container'});
+    var title_container = $("<div>", {'class': 'custom-dialog-title'});
+    var dialog = $("<div>", {'class': 'custom-dialog-content'});
+    var shadow = $("<div>", {'class': 'fullscreen-shadow'});
+    var close_button = $("<div>", {'class': 'custom-dialog-close-button hoverable'});
 
+    var body = $("body");
+
+    if(!width) width = 500; // a 'reasonable' default
+
+    title_container.text(title);
+    title_container.append(close_button);
+    container.append(title_container);
+    container.append(dialog);
+
+    // content can be a jquery object or just some text
+    if(!(content instanceof jQuery)) content = $("<div>").text(content);
+
+    content.show();
+    dialog.append(content);
+
+    dialog.width(width);
+
+    shadow.hide().appendTo(body).fadeIn(function(){
+        container.appendTo(body);
+    });
+
+    // add a function to the
+    content.close_dialog = function(){
+        shadow.fadeOut("fast", function(){
+            shadow.remove();
+        });
+
+        content.hide().detach(); // content will stay in parent's variable
+        container.remove();
+    };
+
+    close_button.unbind().click(function(){
+        content.close_dialog();
+    });
+
+    // buttons is an object that can contain the following:
+    // ok: <ok button text>
+    // ok button closes the dialog by default and does nothing
+    // yes: <yes button text>
+    // yes_action: <function that is executed when yes is clicked>
+    // no: <no button text>
+    // no_action: <function that is executed when no button is clicked>
+    if(buttons){
+        var footer = $("<div>", {'class': 'custom-dialog-footer'});
+        var button_attrs = {type: 'button', 'class': 'hoverable'};
+
+        container.append(footer);
+
+        if(buttons.ok){
+            var ok_button = $("<input>", button_attrs);
+            ok_button.addClass("ok");
+            ok_button.attr('value', buttons.ok);
+            footer.append(ok_button);
+
+            ok_button.unbind().click(content.close_dialog);
+        }
+        else if(buttons.yes && buttons.no){
+            var yes_button = $("<input>", button_attrs);
+            yes_button.addClass("ok");
+            yes_button.attr("value", buttons.yes);
+
+            yes_button.click(function(){
+                if(buttons.yes_action) buttons.yes_action();
+                content.close_dialog();
+            });
+
+            var no_button = $("<input>", button_attrs);
+            no_button.addClass("cancel");
+            no_button.attr("value", buttons.no);
+
+            no_button.click(function(){
+                if(buttons.no_action) buttons.no_action();
+                content.close_dialog();
+            });
+
+            footer.append(no_button);
+            footer.append(yes_button);
+        }
+    }
+}
+
+function error_message(title, message){
+    return custom_dialog(title, message, 300, {ok: gettext("OK") });
+}
+
+function confirmation_dialog(title, text, yes_action, no_action){
+    return custom_dialog(title, text, 500,
+        {yes: gettext("Yes"), yes_action: yes_action,
+         no: gettext("No"), no_action: no_action});
+}
 
 function upload_image(input, url, token, max_size, callback){
     // max_size: size of file in Bytes
@@ -72,89 +168,6 @@ function get_size(element){ // get computed element size before it's inserted in
     } finally {
         element.remove(); // and remove from DOM
     }
-}
-
-function custom_dialog(title, content, width){
-    var container = $("<div>", {'class': 'custom-dialog-container'});
-    var title_container = $("<div>", {'class': 'custom-dialog-title'});
-    var dialog = $("<div>", {'class': 'custom-dialog-content'});
-    var shadow = $("<div>", {'class': 'fullscreen-shadow'});
-    var close_button = $("<div>", {'class': 'custom-dialog-close-button hoverable'});
-
-    var body = $("body");
-
-    if(!width) width = 500; // a 'reasonable' default
-
-    title_container.text(title);
-    title_container.append(close_button);
-    container.append(title_container);
-    container.append(dialog);
-    dialog.append(content.show());
-    dialog.width(width);
-
-    shadow.hide().appendTo(body).fadeIn(function(){
-        container.appendTo(body);
-    });
-
-    // add a function to the
-    content.close_dialog = function(){
-        shadow.fadeOut("fast", function(){
-            shadow.remove();
-        });
-
-        content.hide().detach(); // content will stay in parent's variable
-        container.remove();
-    };
-
-    close_button.unbind().click(function(){
-        content.close_dialog();
-    });
-}
-
-function error_message(title, message){
-    // create a div for error dialog
-    var dlg_obj = $("<div>");
-    var msg_obj = $("<p>", {"class": "error-message"});
-
-    if(!title) title = gettext("Error");
-
-    msg_obj.text(message);
-
-    dlg_obj.append(msg_obj);
-
-    dlg_obj.dialog({
-        modal: true,
-        width: 350,
-        title: title,
-        buttons:[ {text: gettext("OK"), click: function(){ $(this).dialog("close"); }} ]
-    });
-}
-
-function confirmation_dialog(title, text, yes_action, no_action){
-    // returns "true" if the user clicked 'yes' or false otherwise
-    var dlg = $("<div>");
-
-        dlg.text(text);
-
-        dlg.dialog({
-            modal: true,
-            width: 430,
-            draggable: false,
-            title: title,
-            buttons: [
-                { text: gettext("Yes"), click: function(){
-                    if(yes_action) yes_action.call();
-
-                    dlg.dialog("destroy");
-                }},
-                { text: gettext("No"), click: function(){
-                    if(no_action) no_action.call();
-
-                    dlg.dialog("destroy");
-                }} ]
-        });
-
-    return dlg;
 }
 
 function get_url_hash() {

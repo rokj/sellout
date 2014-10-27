@@ -84,7 +84,7 @@
                 if(is_dark(p.data.color)) p.button.addClass("dark");
 
                 // tools
-                p.tools = $("<img>", {src: "{% static 'graphics/gear.png' %}", "class":"toolbox"});
+                p.tools = $("<div>", {"class":"toolbox"}).text("...");
                 p.tools.appendTo(p.button);
 
                 p.hide_tools = function(){
@@ -145,7 +145,7 @@
 
                             // delete category: send ajax request to server, if everything OK, delete this object
                             $("input.delete", g.toolbox).unbind().click(function(){
-                                var dlg = confirmation_dialog(
+                                confirmation_dialog(
                                     "{% trans 'Delete category' context 'confirmation dialog title' %}",
                                     "{% trans 'Are you sure you want to delete category' %} " + p.data.name + "?",
                                     function(){
@@ -176,14 +176,10 @@
                                                         p.parent.button.click();
                                                     }
                                                 }
-                                                dlg.dialog("destroy");
                                             }
                                         });
                                     },
-                                    function(){
-                                        // do nothing
-                                        dlg.dialog("destroy");
-                                    }
+                                    function(){ }
                                 );
                             });
 

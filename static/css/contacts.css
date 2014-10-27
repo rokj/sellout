@@ -1,12 +1,18 @@
 #contacts{
-    background-color: #f7f7f7;
+    /* background-color: #f7f7f7; */
     /* width: 640px; */
     /* padding: 30px !important; */ /* override jqueryui dialog's styles */
 }
 
 #contacts .contact-type{ margin-bottom: 20px; }
-#contacts .contact-type .company-switch.active{ background-color: red; }
-#contacts .contact-type .individual-switch.active{ background-color: blue; }
+#contacts .contact-type .company-switch.active{ background-color: #ff6464; }
+#contacts .contact-type .individual-switch.active{ background-color: #00bbda; }
+
+#contacts .contact-form{
+    overflow: hidden;
+    margin-bottom: 20px;
+    display: block;
+}
 
 #contacts .contact-form .left-column{
     float: left;

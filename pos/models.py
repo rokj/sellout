@@ -457,7 +457,7 @@ class Contact(SkeletonU):
     vat = models.CharField(_("VAT identification number"), max_length=30, null=True, blank=True)
     
     def __unicode__(self):
-        if type == "Individual":
+        if self.type == "Individual":
             return "Individual: " + self.first_name + " " + self.last_name
         else:
             return "Company: " + str(self.company_name)
@@ -556,7 +556,7 @@ class Bill(SkeletonU):
     status = models.CharField(_("Bill status"), max_length=20, choices=g.BILL_STATUS, default=g.BILL_STATUS[0][0])
     
     def __unicode__(self):
-        return self.company.name + ": " + str(self.sub_total)
+        return self.company.name + ": " + str(self.serial)
     
     #def save(self):
     #    super(Bill, self).save()

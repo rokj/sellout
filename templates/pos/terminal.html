@@ -413,7 +413,7 @@ $(window).load(function(){
             </div>
         </div>
 
-        <div class="dialog-footer">
+        <div class="custom-dialog-footer">
             {# clear: remove contact from the bill #}
             <input type="button" class="clear" value="{% trans 'Clear' %}" />
             {# save and cancel buttons #}
@@ -494,11 +494,6 @@ $(window).load(function(){
 
         <div id="bill_notes_container">
             <textarea id="bill_notes" placeholder="{% trans 'Notes on this bill' %}"></textarea>
-        </div>
-
-        <div class="dialog-footer">
-            <button class="cancel">{% trans 'Cancel' %}</button>
-            <button class="save">{% trans 'Save' %}</button>
         </div>
     </div>
 

@@ -69,7 +69,7 @@ div#selector{
 
 #search_products_submit{
     width: 40px;
-    background-color: #00aa00;
+    background-color: #22e693;
 }
 
 #controls_more{
@@ -202,28 +202,4 @@ div#selector{
     margin-right: 10px;
     
     color: #969696;
-}
-
-/* dialogs */
-
-.dialog-footer{
-    clear: both;
-    text-align: right;
-}
-
-.dialog-footer input,
-.dialog-footer button{
-    width: 150px;
-    margin-top: 30px;
-    /* margin-left: 10px; */
-}
-
-.dialog-footer input.cancel,
-.dialog-footer button.cancel{
-    background-color: red;
-}
-
-.dialog-footer input.save,
-.dialog-footer button.save{
-    background-color: green;
 }

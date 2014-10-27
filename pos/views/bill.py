@@ -9,7 +9,8 @@
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 
-from pos.models import Company, Bill, BillItem, Product, Discount, BillItemDiscount, Register
+from pos.models import Company, Bill, BillItem, Product, Discount, BillItemDiscount, Register, Contact
+from pos.views.manage.contact import contact_to_dict
 from pos.views.util import has_permission, JsonOk, JsonParse, JsonError, \
     format_number, parse_decimal, format_date, format_time
 from config.functions import get_company_value
@@ -70,7 +71,12 @@ def bill_to_dict(user, company, bill):
     b['serial'] = bill.serial
     b['till_id'] = bill.till.id
     b['type'] = bill.type
-    b['contact'] = bill.contact
+
+    if bill.contact:
+        b['contact'] = contact_to_dict(user, company, bill.contact)
+    else:
+        b['contact'] = None
+
     b['note'] = bill.note
     b['sub_total'] = format_number(user, company, bill.sub_total)
 
@@ -81,6 +87,9 @@ def bill_to_dict(user, company, bill):
     b['timestamp'] = format_date(user, company, bill.timestamp) + " " + format_time(user, company, bill.timestamp)
     b['due_date'] = format_date(user, company, bill.due_date)
     b['status'] = bill.status
+
+    b['user'] = str(bill.user)
+    b['user_id'] = str(bill.user.id)
     
     # items:
     items = BillItem.objects.filter(bill=bill)
@@ -236,11 +245,21 @@ def create_bill(request, company):
         # this number came from javascript
         total_js = r['number']
 
+    # register
     try:
         print
         till = Register.objects.get(id=int(data.get('till_id')), company=c)
     except (TypeError, ValueError, Register.DoesNotExist):
         return JsonError(_("Invalid register specified."))
+
+    # contact
+    if data.get('contact'):
+        try:
+            contact = Contact.objects.get(company=c, id=int(data.get('contact').get('id')))
+        except (Contact.DoesNotExist, ValueError, TypeError):
+            return JsonError(_("Invalid contact"))
+    else:
+        contact = None
 
     # this number will be calculated below;
     # both grand totals must match or... ???
@@ -252,7 +271,7 @@ def create_bill(request, company):
         'company': c,
         'user': request.user,
         'till': till,
-        ''
+        'contact': contact,
         'timestamp': dtm.now(),
         'type': "Normal",
         'status': "Unpaid",  # the bill is awaiting payment, a second request on the server will confirm it
@@ -388,6 +407,7 @@ def create_bill(request, company):
         company=c,
         user=bill['user'],  # this can change
         till=till,
+        contact=bill['contact'],
         created_by=bill['user'],  # this will never change
         type=bill['type'],
         timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),

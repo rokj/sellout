@@ -224,12 +224,6 @@ def get_all_categories_structured(company, category=None, data=None, sort='name'
 #############
 ### views ###
 #############
-@api_view(['POST', 'GET'])
-@permission_classes((IsAuthenticated,))
-def mobile_JSON_categories(request, company):
-    return JSON_categories(request, company)
-
-
 @login_required
 def JSON_categories(request, company):
     try:

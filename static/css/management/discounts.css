@@ -3,8 +3,8 @@ input[type='submit']{
 }
 
 span.discount-active, span.discount-inactive{ text-transform: uppercase; }
-span.discount-active{ color: #00aa00; }
-span.discount-inactive { color: #aa0000; }
+span.discount-active{ color: #22e693; }
+span.discount-inactive { color: #ff5a6e; }
 
 #id_description{
     height: 80px;

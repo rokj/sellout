@@ -205,11 +205,22 @@ def contact_to_dict(user, company, c, send_to="python"):
     # email
     # phone
     # vat
-    ret = {}
 
-    ret['id'] = c.id
-    ret['type'] = c.type
-    
+    ret = {
+        'id': c.id,
+        'type': c.type
+    }
+
+    # a human-readable and quickly-accessible contact name
+    ret['name'] = ''
+    if c.company_name:
+        ret['name'] = c.company_name
+    else:
+        if c.first_name:
+            ret['name'] = c.first_name + ' '
+        if c.last_name:
+            ret['name'] += c.last_name
+
     if c.company_name:
         ret['company_name'] = c.company_name
     if c.first_name:
