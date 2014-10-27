@@ -1,8 +1,12 @@
+import logging
+from django.db.models.signals import post_save, post_delete
 from django.db import models
 from django.contrib.auth.models import User
+from django.dispatch import receiver
 from django.utils.translation import ugettext as _
-
 from django.utils.timezone import now
+
+
 
 
 # a custom object manager:
@@ -61,6 +65,14 @@ class SkeletonU(Skeleton):
 
     class Meta:
         abstract = True
+
+class SkeletonUV(SkeletonU):
+
+    class Meta:
+        abstract = True
+
+
+
 
 
 class Settings(SkeletonU):

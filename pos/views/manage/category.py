@@ -114,8 +114,8 @@ def validate_category(user, company, data):
             p = Category.objects.filter(company=company,name=data['name'])
             if p.count() > 0:
                 return r(False,
-                    _("There is already a product with that name") +
-                    " (" + _("code") + ": " + p[0].code + ")")
+                    _("There is already a category with that name") +
+                    " (" + _("code") + ": " + p[0].name + ")")
     data['name'] = data['name'].strip()
 
     # description, notes - anything can be entered

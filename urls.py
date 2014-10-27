@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     
     # MOBILE
     url(r'^pos/mobile/', include('mobile.urls', namespace='mobile_pos')),
+    url(r'^pos/sync/', include('sync.urls', namespace='sync')),
 )
 
 # TODO: remove from production

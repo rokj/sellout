@@ -190,7 +190,7 @@ def get_all_contacts(user, company):
     return r
 
 
-def contact_to_dict(user, company, c, send_to="python"):
+def contact_to_dict(user, company, c):
     # returns all relevant contact's data
     # id
     # type

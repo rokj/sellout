@@ -28,7 +28,7 @@ def mobile_list_contacts(request, company):
     criteria = JsonParse(request.POST['data'])
     cs = []
     for contact in contacts:
-        cs.append(contact_to_dict(request.user, c, contact, "android"))
+        cs.append(contact_to_dict(request.user, c, contact))
 
     return JsonResponse(cs, safe=False)
 
@@ -85,7 +85,7 @@ def mobile_add_contact(request, company):
     )
     contact.save()
 
-    return JsonOk(extra=contact_to_dict(request.user, c, contact, send_to="android"))
+    return JsonOk(extra=contact_to_dict(request.user, c, contact))
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
