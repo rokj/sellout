@@ -395,13 +395,20 @@ def edit_category(request, company, category_id):
 
 
 @login_required
-def delete_category(request, company):
+def web_delete_category(request, company):
+    return delete_category(request, company)
+
+
+
+
+
+def delete_category(request, company, android=False):
     c = Company.objects.get(url_name=company)
-    
+
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'category', 'edit'):
         return JsonError(_("You have no permission to delete categories"))
-    
+
     # get category
     try:
         category_id = int(JsonParse(request.POST.get('data')).get('category_id'))
@@ -424,7 +431,7 @@ def delete_category(request, company):
         category.delete()
     except:
         return JsonError(_("Category could not be deleted"))
-    
+
     return JsonOk()
 
 
