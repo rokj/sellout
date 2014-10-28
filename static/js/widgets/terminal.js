@@ -161,7 +161,6 @@ Terminal = function(g){
                     // there's no bill on the server, check local storage (it may noy be finished at all)
                     if(localStorage.bill){
                         var data = load_local('bill');
-                        console.log(data)
 
                         if(data){
                             // if bill is not loaded yet, wait for it
@@ -239,7 +238,7 @@ Terminal = function(g){
                 p.get_register(id);
 
                 // close the dialog
-                p.items.registers_dialog.dialog("destroy");
+                p.items.registers_dialog.close_dialog();
             });
 
             // fill the registers

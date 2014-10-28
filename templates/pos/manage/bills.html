@@ -1,0 +1,110 @@
+{% extends "pos/manage/manage.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block section_head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/bills.css' %}"/>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // append datepickers
+            $("#id_issued_from, #id_issued_to").datepicker({
+                dateFormat: "{{ date_format_js|escapejs }}"
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block status_bar_title %}
+    {% trans 'Bills' %}
+{% endblock %}
+
+{% block manage_content %}
+    <div class="left-column">
+        <h2>{% trans 'Search' context 'form title' %}</h2>
+
+        <form method="post" action="{% url 'pos:list_bills' company.url_name %}">
+            {% csrf_token %}
+
+            <div class="error">{{ filter_form.non_field_errors }}</div>
+
+            <div class="form-field">
+                <div class="split-cell first bottom-space">
+                    <div class="error">{{ filter_form.issued_from.errors }}</div>
+                    <label for="id_issued_from">{% trans 'Bill issue date: from' %}</label>
+                    {{ filter_form.issued_from }}
+                </div>
+
+                <div class="split-cell last">
+                    <div class="error">{{ filter_form.issued_to.errors }}</div>
+                    <label for="id_issued_to">{% trans 'To:' %}</label>
+                    {{ filter_form.issued_to }}
+                </div>
+            </div>
+
+            <div class="form-field">
+                <div class="error">{{ filter_form.item_code.errors }}</div>
+                {{ filter_form.item_code.label_tag }}
+                {{ filter_form.item_code }}
+            </div>
+
+            <div class="form-field">
+                <div class="error">{{ filter_form.contact.errors }}</div>
+                {{ filter_form.contact.label_tag }}
+                {{ filter_form.contact }}
+            </div>
+
+            <div class="form-field">
+                <div class="error">{{ filter_form.id.errors }}</div>
+                <label for="id_id">{% trans 'Bill no.' context 'bill search form' %}</label>
+                {{ filter_form.id }}
+            </div>
+
+            <div class="form-field">
+                <div class="split-cell first">
+                    &nbsp;
+                </div>
+
+                <div class="split-cell last">
+                    <input type="submit" value="{% trans 'Search' context 'submit button label' %}" class="hoverable"/>
+
+                    {#  only display if search results are being displayed (it's just a link back to 'discounts') #}
+                    <div class="clear-results">
+                        {% if results_display %}
+                            <a href="{% url 'pos:list_bills' company.url_name %}">
+                                {% trans 'Clear results' %}</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="cleared"></div>
+            </div>
+        </form>
+    </div>
+
+    <div id="content">
+        <div id="bills_container">
+            <div class="bill-list header">
+                <div class="column serial">{% trans 'No.' context 'bill management' %}</div>
+                <div class="column user">{% trans 'User' context 'bill management' %}</div>
+                <div class="column date">{% trans 'Issue date' context 'bill management' %}</div>
+                <div class="column contact">{% trans 'Contact name' context 'bill management' %}</div>
+                <div class="column total">{% trans 'Total' context 'bill management' %}</div>
+                <div class="column count">{% trans 'No. of items' context 'bill management' %}</div>
+                <div class="column status">{% trans 'Status' context 'bill management' %}</div>
+            </div>
+
+            {% for bill in bills %}
+                <div class="bill-list item">
+                    <div class="column serial">{{ bill.serial }}</div>
+                    <div class="column user">{{ bill.user.name }}</div>
+                    <div class="column date">{{ bill.timestamp }}</div>
+                    <div class="column contact">{{ bill.contact.name }}</div>
+                    <div class="column total">{{ bill.total }}</div>
+                    <div class="column count">{{ bill.items|length }}</div>
+                    <div class="column status">{{ bill.status }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

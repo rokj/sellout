@@ -28,6 +28,7 @@ form.custom-file-input input{
 
 div.form-field{
     margin-top: 15px;
+    overflow: hidden;
 }
 
 div.form-field.no-label{
@@ -120,8 +121,8 @@ a.button{
     margin-top: 5px; /* this is defined for all inputs */
 }
 
-a.button.ok, input.ok { background-color: #00aa00; }
-a.button.cancel, input.cancel{ background-color: #aa0000; }
+a.button.ok, input.ok { background-color: #22e693; }
+a.button.cancel, input.cancel{ background-color: #ff5a6e; }
 
 .delete-image-button{
     display: block;

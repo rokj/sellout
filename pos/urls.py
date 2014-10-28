@@ -15,8 +15,9 @@ from pos.views.manage import discount
 from pos.views.manage import tax
 from pos.views.manage import configuration
 from pos.views.manage import till
+from pos.views.manage import bill
 
-from pos.views import bill
+from pos.views import bill as terminal_bill
 
 ### common URL prefixes: ###
 # company's site: /pos/blocklogic
@@ -81,6 +82,9 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + '/json/products/delete/$', product.delete_product, name='delete_product'),  # edit (save) product - json
     url(r_company + '/' + r_manage + '/json/products/mass-edit/$', product.mass_edit, name='mass_edit'),  # edit (save) product - json
 
+    # bill management
+    url(r_company + '/' + r_manage + _('/bills') + '/$', bill.list_bills, name='list_bills'),
+
     # user
     url(r_company + '/' + r_manage + _('/user-settings') + '/$', configuration.user_settings, name='user_settings'),  # user settings
 
@@ -97,12 +101,12 @@ urlpatterns = patterns('',
     url(r_company + '/save/$', terminal.save, name='save_terminal'),
     url(r_company + '/set-register/$', terminal.set_register, name='set_register'),
     url(r_company + '/quick-contact/$', contact.quick_contacts, name='quick_contacts'),
-    url(r_company + '/get-unpaid-bill/$', bill.get_unpaid_bill, name='get_unpaid_bill'),
-    url(r_company + '/finish-bill/$', bill.finish_bill, name='finish_bill'),
-    url(r_company + '/check-bill-status/$', bill.check_bill_status, name='check_bill_status'),
+    url(r_company + '/get-unpaid-bill/$', terminal_bill.get_unpaid_bill, name='get_unpaid_bill'),
+    url(r_company + '/finish-bill/$', terminal_bill.finish_bill, name='finish_bill'),
+    url(r_company + '/check-bill-status/$', terminal_bill.check_bill_status, name='check_bill_status'),
 
     # views for bill
-    url(r_company + '/bill/save/$', bill.create_bill, name='create_bill'),  # adds an item to bill
+    url(r_company + '/bill/save/$', terminal_bill.create_bill, name='create_bill'),  # adds an item to bill
     #url(r_company + '/bill/get-active/$', bill.get_active_bill, name='get_active_bill'),
     #url(r_company + '/bill/item/remove/$', bill.remove_item, name='remove_bill_item'), # removes Item from bill
 

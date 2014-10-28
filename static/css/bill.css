@@ -247,11 +247,11 @@ button.more{
 }
 
 .item-val.quantity .qty-plus{
-    background-color: #00aa00; 
+    background-color: #22e693;
     top: 10px;
 }
 .item-val.quantity .qty-minus{
-    background-color: #aa0000;
+    background-color: #ff5a6e;
     bottom: 10px;
 }
 
@@ -361,11 +361,11 @@ button.more{
 }
 
 .details-box input.cancel{
-    background-color: #aa0000;
+    background-color: #ff5a6e;
 }
 
 .details-box input.ok{
-    background-color: #00aa00;
+    background-color: #22e693;
 }
 
 .details-box .item-arrow{
@@ -409,7 +409,7 @@ button.more{
     width: 30px;
     height: 30px;
     font-size: 20px;
-    background-color: #00aa00;
+    background-color: #22e693;
     line-height: 20px;
 }
 

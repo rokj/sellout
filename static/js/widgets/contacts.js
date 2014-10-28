@@ -115,11 +115,6 @@ Contacts = function(g){
 
     p.choose_contact = function(){
         // return contact id or null if nothing has been chosen
-        /*p.dialog.dialog({
-            width: p.dialog_width, // use the dialog's width
-            modal: true,
-            title: gettext("Select contact")
-        });*/
         custom_dialog(gettext("Select contact"),
             p.dialog, 550);
 
@@ -335,7 +330,7 @@ Contacts = function(g){
     };
 
     p.close_action = function(){
-        p.dialog.dialog("close");
+        p.dialog.close_dialog();
         p.update_labels();
     };
 

@@ -1103,10 +1103,7 @@ BillOptions = function(bill){
     p.items = {
         discount_amount: $("#bill_discount_amount"),
         discount_type: $("#bill_discount_type"),
-        notes: $("#bill_notes"),
-
-        cancel_button: $(".dialog-footer .cancel", p.dialog),
-        save_button: $(".dialog-footer .save", p.dialog)
+        notes: $("#bill_notes")
     };
 
     //
@@ -1119,15 +1116,11 @@ BillOptions = function(bill){
             p.items.discount_type.val(p.bill.data.discount_type);
             p.items.notes.val(p.bill.data.notes);
 
-            /*p.dialog.dialog({
-                width: 500, // use the dialog's width
-                modal: true,
-                title:
-            });*/
-            custom_dialog(gettext("Bill options"), p.dialog, 500);
+            custom_dialog(gettext("Bill options"), p.dialog, 500,
+                {yes: gettext("Save"), yes_action: p.save_action,
+                 no: gettext("Cancel"), no_action: p.cancel_action});
         }
         else{
-            //p.dialog.dialog("destroy");
             p.dialog.close_dialog();
         }
     };
@@ -1166,6 +1159,5 @@ BillOptions = function(bill){
     // init
     //
 
-    p.items.save_button.unbind().click(p.save_action);
-    p.items.cancel_button.unbind().click(p.cancel_action);
+    // [nothing at all.]
 };

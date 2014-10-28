@@ -1,0 +1,38 @@
+#content{
+    margin-left: 340px; /* that is 300 + margin from search sidebar */
+}
+
+#bills_container{
+    margin-right: 40px;
+}
+
+.bill-list{
+    display: block;
+    
+    overflow: hidden;
+}
+
+.bill-list.header {
+    background-color: #cccccc;
+    color: #ffffff;
+}
+
+.bill-list.item {
+    border-bottom: 1px solid black;
+}
+
+.bill-list.item:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+.bill-list .column {
+    display: block;
+    float: left;
+    width: 13%;
+    height: 40px;
+    line-height: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-left: 1%;
+}
