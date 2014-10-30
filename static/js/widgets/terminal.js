@@ -251,14 +251,8 @@ Terminal = function(g){
             }
 
             // show the registers dialog
-            p.items.registers_dialog.dialog({
-                title: gettext("Choose a register"),
-                closeOnEscape: false,
-                modal: true,
-                // the dialog can only close on 'select' button
-                beforeClose: function(){ return false; },
-                dialogClass: "no-close"
-            });
+            custom_dialog(gettext("Choose a register"),
+                p.items.registers_dialog, 400, null);
         }
     };
 

@@ -1,16 +1,18 @@
+import json
+from decimal import Decimal
+from datetime import datetime
+
 from django.db.backends.dummy.base import IntegrityError
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.core.cache import cache
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
+from django.forms.models import model_to_dict
 
 from common import globals as g
 from config.functions import get_date_format, get_time_format, get_company_value
 from pos.models import Permission, Company
-
-import json
-from decimal import Decimal
-from datetime import datetime
+from common.models import SkeletonU
 
 
 # requests and responses
@@ -213,3 +215,62 @@ def manage_delete_object(request, company_url_name, model, messages):
         return JsonError(messages[1] + "; " + e.message)
 
     return JsonOk()
+
+
+###
+### stuff for working on similar models
+###
+# (like Contact - BillContact: almost all fields on both models are inherited from ContactAbstract)
+def get_common_keys(dict1, dict2):
+    """ returns a list common keys in two dictionaries """
+    return list(set(dict1.keys()) & set(dict2.keys()))
+
+
+def remove_skeleton_fields(fields):
+    """
+        exclude names of all fields from SkeletonU: created_by, updated_by, timestamps etc...
+        but no hardcoding, Mr. Beaufort!
+    """
+    skeleton_fields = SkeletonU._meta.get_all_field_names() + ['id']  # id must be assigned by database
+
+    for field in skeleton_fields:
+        if field in fields:
+            fields.remove(field)
+
+    return fields
+
+
+def compare_objects(obj1, obj2):
+    """
+        comparation of two different models with the same data
+        (used for checking if Company has changed so that it needs a new BillCompany entry)
+        (applies to other models as well - BillContact, BillRegister)
+    """
+    d1 = model_to_dict(obj1)
+    d2 = model_to_dict(obj2)
+
+    common_fields = remove_skeleton_fields(get_common_keys(d1, d2))
+
+    # if any of the fields mismatch, the models are not equal.
+    for key in common_fields:
+        if d1[key] != d2[key]:
+            return False
+
+    # the models are equal.
+    return True
+
+
+def copy_data(from_obj, to_obj):
+    """
+        copy data from fields in obj1 to fields in obj2.
+        only do this for fields that are on both objects;
+        those are fields from the same abstract
+    """
+    from_d = from_obj.__dict__
+    to_d = to_obj.__dict__
+
+    common_fields = remove_skeleton_fields(get_common_keys(from_d, to_d))
+
+    # copy all common fields' values from obj1 to obj2
+    for field in common_fields:
+        to_d[field] = from_d[field]

@@ -18,7 +18,7 @@
 }
 
 .bill-list.item {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid #646464;
 }
 
 .bill-list.item:nth-child(odd) {
@@ -28,11 +28,21 @@
 .bill-list .column {
     display: block;
     float: left;
-    width: 13%;
+    width: 10%;
     height: 40px;
     line-height: 40px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     padding-left: 1%;
+}
+
+.bill-list .column.total {
+    text-align: right;
+}
+
+.bill-list .column.view img{
+    height: 20px;
+    position: relative;
+    top: 3px;
 }

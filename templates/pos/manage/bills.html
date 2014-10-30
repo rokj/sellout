@@ -11,6 +11,25 @@
             $("#id_issued_from, #id_issued_to").datepicker({
                 dateFormat: "{{ date_format_js|escapejs }}"
             });
+
+            // create 'fake' so that format_receipt() will get what's needed
+            var items = {
+                company_color_logo: {% if company.color_logo %}$("<img>", {src: "{{ company.color_logo.url }}"}){% else %}null{% endif %},
+                company_monochrome_logo: {% if company.monochrome_logo %}$("<img>", {src: "{{ company.monochrome_logo.url }}"}){% else %}null{% endif %}
+            };
+
+            var company = {{ company_json|safe }};
+            var config = {
+                currency: "{{ currency }}",
+                separator: "{{ decimal_separator }}",
+                decimal_places: "{{ decimal_places }}",
+                date_format:  "{{ date_format_js }}"
+            };
+
+
+            function show_bill(){
+
+            }
         });
     </script>
 {% endblock %}
@@ -20,6 +39,18 @@
 {% endblock %}
 
 {% block manage_content %}
+    <div class="hidden">
+        <div id="small_receipt_template">
+            {% include 'pos/small_receipt.html' %}
+        </div>
+
+        <div id="large_receipt_template">
+            {% include 'pos/large_receipt.html' %}
+        </div>
+
+        <img src=""/>
+    </div>
+
     <div class="left-column">
         <h2>{% trans 'Search' context 'form title' %}</h2>
 
@@ -92,6 +123,7 @@
                 <div class="column total">{% trans 'Total' context 'bill management' %}</div>
                 <div class="column count">{% trans 'No. of items' context 'bill management' %}</div>
                 <div class="column status">{% trans 'Status' context 'bill management' %}</div>
+                <div class="column view">&nbsp;</div>
             </div>
 
             {% for bill in bills %}
@@ -103,6 +135,12 @@
                     <div class="column total">{{ bill.total }}</div>
                     <div class="column count">{{ bill.items|length }}</div>
                     <div class="column status">{{ bill.status }}</div>
+                    <div class="column view">
+                        <img src="{% static 'icons/print_black.png' %}"
+                             class="hoverable"
+                             alt="{% trans 'Print' %}"
+                             title="{% trans 'Print' %}" />
+                    </div>
                 </div>
             {% endfor %}
         </div>

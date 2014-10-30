@@ -48,7 +48,6 @@ def terminal(request, company):
         'product_display': get_user_value(request.user, 'pos_product_display'),
         # registers and printers
         #'printer_port': get_value(request.user, 'pos_printer_port'),
-        'receipt_size': 'small',
         'printer_driver': 'system',
     }
 

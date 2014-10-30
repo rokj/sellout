@@ -84,6 +84,10 @@ function custom_dialog(title, content, width, buttons){
             footer.append(yes_button);
         }
     }
+    else{
+        // if buttons is null, hide all buttons on this dialog, even the close button
+        close_button.hide();
+    }
 }
 
 function error_message(title, message){

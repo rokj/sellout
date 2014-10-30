@@ -79,18 +79,13 @@ DISCOUNT_CALCULATION = (
 CONTACT_TYPES = (
     ("Individual", _("Individual")),
     ("Company", _("Company")),
+    ("None", _("None"))  # used when saving bill that has no contact selected
 )
 
 SEXES = (
     ("M", _("Male")),
     ("F", _("Female")),
     ("U", _("Undisclosed")),
-)
-
-# bills
-BILL_TYPES = (
-    ("Normal", _("Normal")),
-    # TODO add type for company
 )
 
 BILL_STATUS = (

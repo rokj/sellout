@@ -79,8 +79,7 @@ $(window).load(function(){
         // config (data comes directly from view)
         config: {% autoescape off %}{{ config }}{% endautoescape %},
 
-        // other data (directly from view)
-        // includes: categories,
+        // pos data (directly from view) (categories, products, taxes)
         data: {% autoescape off %}{{ data }}{% endautoescape %},
 
         // javascript objects (initialized later)

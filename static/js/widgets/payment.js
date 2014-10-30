@@ -138,7 +138,7 @@ Payment = function(g, bill){
                 if(p.g.objects.terminal.register.receipt_format == 'Thermal'){
                     // use the default printer;
                     // create a HTML receipt and issue javascript print() method and that's it
-                    receipt = format_receipt(p.g, p.bill, 'small');
+                    receipt = format_receipt(p.g, p.bill.data, 'small');
 
                     // TODO: temporary
                     //receipt.appendTo("body").show();
@@ -148,7 +148,7 @@ Payment = function(g, bill){
                 }
                 else{
                     // large receipt
-                    receipt = format_receipt(p.g, p.bill, 'large');
+                    receipt = format_receipt(p.g, p.bill.data, 'large');
 
                     // TODO: temporary
                     //receipt.appendTo("body").show();

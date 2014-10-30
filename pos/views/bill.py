@@ -1,18 +1,10 @@
-#
-# Bill
-#   ajax views:
-#     get_active_bill: finds an unfinished bill and returns it (returns a new bill if none was found)
-#     add_item: adds an item to bill
-#     edit_item: edits an existing item
-#     delete_item
-#
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 
-from pos.models import Company, Bill, BillItem, Product, Discount, BillItemDiscount, Register, Contact
-from pos.views.manage.contact import contact_to_dict
+from pos.models import Company, Product, Discount, Register, Contact, \
+    Bill, BillCompany, BillContact, BillRegister, BillItem, BillItemDiscount
 from pos.views.util import has_permission, JsonOk, JsonParse, JsonError, \
-    format_number, parse_decimal, format_date, format_time
+    format_number, parse_decimal, format_date, format_time, compare_objects, copy_data
 from config.functions import get_company_value
 import common.globals as g
 
@@ -72,11 +64,6 @@ def bill_to_dict(user, company, bill):
     b['till_id'] = bill.till.id
     b['type'] = bill.type
 
-    if bill.contact:
-        b['contact'] = contact_to_dict(user, company, bill.contact)
-    else:
-        b['contact'] = None
-
     b['note'] = bill.note
     b['sub_total'] = format_number(user, company, bill.sub_total)
 
@@ -90,7 +77,7 @@ def bill_to_dict(user, company, bill):
 
     b['user'] = str(bill.user)
     b['user_id'] = str(bill.user.id)
-    
+
     # items:
     items = BillItem.objects.filter(bill=bill)
     i = []
@@ -100,11 +87,6 @@ def bill_to_dict(user, company, bill):
     b['items'] = i
 
     return b
-
-
-def validate_prices():
-
-    pass
 
 
 def item_prices(user, company, base_price, tax_percent, quantity, discounts):
@@ -215,55 +197,23 @@ def create_bill(request, company):
     if not data:
         return JsonError(_("No data received"))
 
-    # if there's an id in data and it's not -1, we're updating an existing unpaid bill,
-    # loaded to terminal and edited; delete the old one first
-    if 'id' in data:
-        existing_id = int(data['id'])
-        if existing_id != -1:
-            try:
-                Bill.objects.get(id=existing_id, company=c).delete()
-            except Bill.DoesNotExist:
-                # whatever
-                pass
+    # company: save a FK to BillCompany; the last company is the current one
+    company = BillCompany.objects.filter(company=c).order_by('-datetime_created')[0]
 
-    # check bill properties:
-
-    # discount on total:
-    r = parse_decimal(request.user, c, data.get('discount_amount'))
-    if not r['success']:
-        return JsonError(_("Invalid discount value"))
-    else:
-        bill_discount_amount = r['number']
-
-    # discount type:
-    bill_discount_type = data.get('discount_type')
-
-    r = parse_decimal(request.user, c, data.get('total'))
-    if not r['success'] or r['number'] <= Decimal('0'):
-        return JsonError(_("Invalid grand total value"))
-    else:
-        # this number came from javascript
-        total_js = r['number']
-
-    # register
+    # register: get BillRegister with the same id as current one
     try:
-        print
-        till = Register.objects.get(id=int(data.get('till_id')), company=c)
+        till = BillRegister.objects.get(register__id=int(data.get('till_id')), company=c)
     except (TypeError, ValueError, Register.DoesNotExist):
         return JsonError(_("Invalid register specified."))
 
-    # contact
+    # contact: get BillContact with the same id as the requested contact
     if data.get('contact'):
         try:
-            contact = Contact.objects.get(company=c, id=int(data.get('contact').get('id')))
+            contact = BillContact.objects.get(contact__id=int(data.get('contact').get('id')))
         except (Contact.DoesNotExist, ValueError, TypeError):
             return JsonError(_("Invalid contact"))
     else:
         contact = None
-
-    # this number will be calculated below;
-    # both grand totals must match or... ???
-    total_py = Decimal('0')
 
     # save all validated stuff in bill to a dictionary and insert into database at the end
     # prepare data for insert
@@ -277,6 +227,14 @@ def create_bill(request, company):
         'status': "Unpaid",  # the bill is awaiting payment, a second request on the server will confirm it
         'items': [],
     }
+
+    r = parse_decimal(request.user, c, data.get('total'))
+    if not r['success'] or r['number'] <= Decimal('0'):
+        return JsonError(_("Invalid grand total value"))
+    else:
+        # this number came from javascript
+        total_js = r['number']
+    total_py = Decimal(0)
 
     # validate items
     for i in data.get('items'):
@@ -297,11 +255,7 @@ def create_bill(request, company):
                 return item_error(_("Cannot add an item with zero or negative quantity"), product)
         quantity = r['number']
 
-        # this has been disabled until it is enabled (you don't say!).
-        # check if there's enough items left in stock (must be at least zero)
-        # if product.stock < quantity:
-        #     return item_error(_("Cannot sell more items than there are in stock"), product)
-
+        # remove from stock; TODO: check negative quantities (?)
         product.stock = product.stock - quantity
         product.save()
 
@@ -392,10 +346,10 @@ def create_bill(request, company):
     # in the end, check grand totals against each others:
 
     # subtract the discount
-    if bill_discount_type == 'absolute':
-        total_py -= bill_discount_amount
-    else:
-        total_py *= (Decimal(1) - bill_discount_amount/Decimal(100))
+    # if bill_discount_type == 'absolute':
+    #     total_py -= bill_discount_amount
+    # else:
+    #     total_py *= (Decimal(1) - bill_discount_amount/Decimal(100))
 
     if total_js != total_py:
         return JsonError(_("Total prices do not match"))

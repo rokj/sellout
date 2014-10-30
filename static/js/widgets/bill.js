@@ -205,7 +205,9 @@ Bill = function(g){
         // to prevent errors)
         if(!p.g.objects.terminal.register) return null;
 
-        var i, id;
+        var i, id, register;
+
+        register = p.g.objects.terminal.register;
 
         if(p.data && !isNaN(p.data.id)) id = p.data.id;
         else id = -1;
