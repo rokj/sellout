@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Category
 from pos.views.manage.category import get_category, validate_category, \
-    get_all_categories_structured, category_to_dict, validate_parent
+    get_all_categories_structured, category_to_dict, validate_parent, delete_category
 from pos.views.util import JsonError, JsonParse, JsonOk, \
     has_permission
 from common import globals as g
@@ -181,41 +181,16 @@ def edit_category(request, company):
 
         else: # delete the old image
             category.image.delete()
+
     category.save()
+
     return JsonOk(extra=category_to_dict(category, android=True))
 
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_delete_category(request, company):
-    try:
-        c = Company.objects.get(url_name = company)
-    except Company.DoesNotExist:
-        return JsonError(_("Company does not exist"))
-
-    data = JsonParse(request.POST['data'])
-
-    category_id = data['id']
-    # check permissions: needs to be at least manager
-    try:
-        category = Category.objects.get(id=category_id)
-    except Category.DoesNotExist:
-        return JsonError(_("Category does not exist"))
-
-    # check if category actually belongs to the given company
-    if category.company != c:
-        return JsonError("Error") # this category does not exist for the current user
-
-    if Category.objects.filter(parent=category).count() > 0:
-        return JsonError("Cannot delete category with subcategories")
-
-    # delete the category and return to management page
-    try:
-        category.delete()
-    except:
-        pass
-
-    return JsonOk(extra=category_to_dict(category, android=True))
+    return delete_category(request, company)
 
 
 @api_view(['POST', 'GET'])
