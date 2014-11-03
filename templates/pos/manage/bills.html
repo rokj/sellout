@@ -12,24 +12,17 @@
                 dateFormat: "{{ date_format_js|escapejs }}"
             });
 
-            // create 'fake' so that format_receipt() will get what's needed
-            var items = {
-                company_color_logo: {% if company.color_logo %}$("<img>", {src: "{{ company.color_logo.url }}"}){% else %}null{% endif %},
-                company_monochrome_logo: {% if company.monochrome_logo %}$("<img>", {src: "{{ company.monochrome_logo.url }}"}){% else %}null{% endif %}
-            };
+            $(".print-bill").click(function(){
+                var id = parseInt($(this).attr("data-id"));
 
-            var company = {{ company_json|safe }};
-            var config = {
-                currency: "{{ currency }}",
-                separator: "{{ decimal_separator }}",
-                decimal_places: "{{ decimal_places }}",
-                date_format:  "{{ date_format_js }}"
-            };
+                if(isNaN(id)){
+                    console.log("Invalid bill id");
+                    return;
+                }
 
+                // fetch json with bill data from the server and print
+            });
 
-            function show_bill(){
-
-            }
         });
     </script>
 {% endblock %}
@@ -137,9 +130,10 @@
                     <div class="column status">{{ bill.status }}</div>
                     <div class="column view">
                         <img src="{% static 'icons/print_black.png' %}"
-                             class="hoverable"
+                             class="print-bill hoverable"
                              alt="{% trans 'Print' %}"
-                             title="{% trans 'Print' %}" />
+                             title="{% trans 'Print' %}"
+                             data-id="{{ bill.id }}" />
                     </div>
                 </div>
             {% endfor %}

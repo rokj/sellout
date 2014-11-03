@@ -1,4 +1,3 @@
-from django.core.exceptions import FieldError
 from django.db import models
 from django.utils.translation import ugettext as _
 from django.db.models.signals import pre_save, pre_delete, post_save, post_delete
@@ -32,6 +31,10 @@ class CompanyAbstract(models.Model):
     class Meta:
         abstract = True
 
+    @property
+    def country_name(self):
+        return country_by_code.get(self.country)
+
 
 class Company(SkeletonU, CompanyAbstract):
     url_name = models.SlugField(_("Company name, used in URL address"),
@@ -49,10 +52,6 @@ class Company(SkeletonU, CompanyAbstract):
 
     def __unicode__(self):
         return self.name
-
-    @property
-    def country_name(self):
-        return country_by_code.get(self.country)
 
     class Meta:
         verbose_name_plural = _("Companies")
@@ -502,8 +501,12 @@ class Bill(SkeletonU, RegisterAbstract):
 
     # every time a bill is created, copy the data that has changed since the last bill was saved to history.
     issuer = models.ForeignKey(BillCompany)  # when company data hasn't changed, this is equal to Bill.company
-    contact = models.ForeignKey(BillContact, null=False)
+    contact = models.ForeignKey(BillContact, null=True)
     register = models.ForeignKey(BillRegister, null=False)
+
+    # save user's id as an integer (not as a foreign key) and user name as well in case that user gets deleted
+    user_id = models.IntegerField(null=False)
+    user_name = models.CharField(max_length=64, null=False)
 
     serial = models.IntegerField(_("Bill number, unique over all company's bills"), null=True)  # will be updated in post_save signal
     sub_total = models.DecimalField(_("Sub total"),
@@ -540,10 +543,10 @@ class Bill(SkeletonU, RegisterAbstract):
     timestamp = models.DateTimeField(_("Date and time of bill creation"), null=False)
     due_date = models.DateTimeField(_("Due date"), null=True)
     status = models.CharField(_("Bill status"), max_length=20, choices=g.BILL_STATUS, default=g.BILL_STATUS[0][0])
-    
+
     def __unicode__(self):
         return self.company.name + ": " + str(self.serial)
-    
+
 
 # post-save signal: set bill's serial number
 @receiver(post_save, sender=Bill)
@@ -576,7 +579,7 @@ class BillItem(SkeletonU, ProductAbstract): # include all data from Product
     base_price = models.DecimalField(_("Base price"), # hard-coded price from current Price table
                                      max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
                                      null=False, blank=False)
-    tax_percent = models.DecimalField(_("Tax in percent, copied from product's tax rate"), 
+    tax_percent = models.DecimalField(_("Tax in percent, copied from product's tax rate"),
                                       max_digits = g.DECIMAL['percentage_decimal_places']+3, decimal_places=g.DECIMAL['percentage_decimal_places'],
                                       null=True, blank=True)
     tax_absolute = models.DecimalField(_("Tax amount (absolute value)"), # hard-coded price from current Price table
@@ -591,10 +594,10 @@ class BillItem(SkeletonU, ProductAbstract): # include all data from Product
     total = models.DecimalField(_("Total price"),
                                 max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
                                 null=False, blank=False)
-    
+
     bill_notes = models.CharField(_("Bill notes"), max_length=1000, null=True, blank=True,
                                   help_text=_("Notes for this item, shown on bill (like expiration date or serial number)"))
-    
+
     def __unicode__(self):
         return str(self.bill.id) + ": " + self.name
 
@@ -636,7 +639,7 @@ def company_updated(instance, **kwargs):
 def register_updated(instance, **kwargs):  # see comments for company_updated
     from pos.views.util import compare_objects, copy_data
 
-    last_object = BillRegister.objects.filter(company=instance.company).order_by('-datetime_updated')[:1]
+    last_object = BillRegister.objects.filter(register=instance).order_by('-datetime_updated')[:1]
 
     if len(last_object) > 0:
         last_object = last_object[0]
@@ -645,7 +648,7 @@ def register_updated(instance, **kwargs):  # see comments for company_updated
 
     bill_register = BillRegister(
         created_by=instance.created_by,
-        company=instance.company
+        register=instance
     )
     copy_data(instance, bill_register)
     bill_register.save()

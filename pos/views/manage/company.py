@@ -2,6 +2,7 @@ import Image
 import base64
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -217,43 +218,48 @@ def validate_company(user, company, data):
 
 # for json etc.
 def company_to_dict(company, android=False):
-    c = {}
+    c = {
+        'name': company.name,
+        'email': company.email,
+        'street': company.street,
+        'postcode': company.postcode,
+        'city': company.city,
+        'state': company.state,
+        'country': company.country,
+        'country_name': company.country_name,
+        'phone': company.phone,
+        'vat_no': company.vat_no,
+        'website': company.website,
+    }
 
-    c['name'] = company.name
-    c['url_name'] = company.url_name
-    c['email'] = company.email
-    c['street'] = company.street
-    c['postcode'] = company.postcode
-    c['city'] = company.city
-    c['state'] = company.state
-    c['country'] = company.country
-    c['country_name'] = company.country_name
-    c['phone'] = company.phone
-    c['vat_no'] = company.vat_no
-    c['website'] = company.website
-    c['notes'] = company.notes
+    try:
+        c['url_name'] = company.url_name
+        c['notes'] = company.notes
 
-    if company.color_logo:
-        if android:
-            with open(company.color_logo.path, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read())
-            c['color_logo'] = encoded_string
+        if company.color_logo:
+            if android:
+                with open(company.color_logo.path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read())
+                c['color_logo'] = encoded_string
+            else:
+                c['color_logo_url'] = company.color_logo.url
         else:
-            c['color_logo_url'] = company.color_logo.url
-    else:
-        c['color_logo'] = None
-        c['color_logo_url'] = None
+            c['color_logo'] = None
+            c['color_logo_url'] = None
 
-    if company.monochrome_logo:
-        if android:
-            with open(company.monochrome_logo.path, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read())
-            c['monochrome_logo'] = encoded_string
+        if company.monochrome_logo:
+            if android:
+                with open(company.monochrome_logo.path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read())
+                c['monochrome_logo'] = encoded_string
+            else:
+                c['monochrome_logo_url'] = company.monochrome_logo.url
         else:
-            c['monochrome_logo_url'] = company.monochrome_logo.url
-    else:
-        c['monochrome_logo_url'] = None
-        c['monochrome_logo'] = None
+            c['monochrome_logo_url'] = None
+            c['monochrome_logo'] = None
+    except (FieldDoesNotExist, AttributeError):
+        # in case company is a BillCompany object, it has no url_name and *logo fields, but that's ok
+        pass
 
     return c
 

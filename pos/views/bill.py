@@ -3,6 +3,9 @@ from django.utils.translation import ugettext as _
 
 from pos.models import Company, Product, Discount, Register, Contact, \
     Bill, BillCompany, BillContact, BillRegister, BillItem, BillItemDiscount
+from pos.views.manage.company import company_to_dict
+from pos.views.manage.contact import contact_to_dict
+from pos.views.manage.till import register_to_dict
 from pos.views.util import has_permission, JsonOk, JsonParse, JsonError, \
     format_number, parse_decimal, format_date, format_time, compare_objects, copy_data
 from config.functions import get_company_value
@@ -58,29 +61,32 @@ def bill_to_dict(user, company, bill):
     # tax       |
     # timestamp
     # status > choices in g.BILL_STATUS
-    b = {}
-    b['id'] = bill.id
-    b['serial'] = bill.serial
-    b['till_id'] = bill.till.id
-    b['type'] = bill.type
+    b = {
+        'id': bill.id,
+        'serial': bill.serial,
+        'note': bill.note,
+        'sub_total': format_number(user, company, bill.sub_total),
+        'discount': format_number(user, company, bill.discount),
+        'discount_type': bill.discount_type,
+        'tax': format_number(user, company, bill.tax),
+        'total': format_number(user, company, bill.total),
+        'timestamp': format_date(user, company, bill.timestamp) + " " + format_time(user, company, bill.timestamp),
+        'due_date': format_date(user, company, bill.due_date),
+        'status': bill.status,
 
-    b['note'] = bill.note
-    b['sub_total'] = format_number(user, company, bill.sub_total)
+        'user_name': str(bill.user_name),
+        'user_id': str(bill.user_id),
 
-    b['discount'] = format_number(user, company, bill.discount)
-    b['discount_type'] = bill.discount_type
-    b['tax'] = format_number(user, company, bill.tax)
-    b['total'] = format_number(user, company, bill.total)
-    b['timestamp'] = format_date(user, company, bill.timestamp) + " " + format_time(user, company, bill.timestamp)
-    b['due_date'] = format_date(user, company, bill.due_date)
-    b['status'] = bill.status
+        'issuer': company_to_dict(bill.issuer),
+        'register': register_to_dict(company, user, bill.register),
+    }
 
-    b['user'] = str(bill.user)
-    b['user_id'] = str(bill.user.id)
+    if bill.contact:
+        b['contact'] = contact_to_dict(user, company, bill.contact)
 
     # items:
-    items = BillItem.objects.filter(bill=bill)
     i = []
+    items = BillItem.objects.filter(bill=bill)
     for item in items:
         i.append(bill_item_to_dict(user, company, item))
         
@@ -197,31 +203,35 @@ def create_bill(request, company):
     if not data:
         return JsonError(_("No data received"))
 
-    # company: save a FK to BillCompany; the last company is the current one
-    company = BillCompany.objects.filter(company=c).order_by('-datetime_created')[0]
+    # current company (that will be fixed on this bill forever):
+    # save a FK to BillCompany; the last company is the current one
+    bill_company = BillCompany.objects.filter(company=c).order_by('-datetime_created')[0]
 
-    # register: get BillRegister with the same id as current one
+    # current register: get BillRegister with the same id as current one
     try:
-        till = BillRegister.objects.get(register__id=int(data.get('till_id')), company=c)
+        bill_register = BillRegister.objects.get(register__id=int(data.get('till_id')))
     except (TypeError, ValueError, Register.DoesNotExist):
         return JsonError(_("Invalid register specified."))
 
-    # contact: get BillContact with the same id as the requested contact
+    # current contact: get BillContact with the same id as the requested contact
     if data.get('contact'):
         try:
-            contact = BillContact.objects.get(contact__id=int(data.get('contact').get('id')))
+            bill_contact = BillContact.objects.get(contact__id=int(data.get('contact').get('id')))
         except (Contact.DoesNotExist, ValueError, TypeError):
             return JsonError(_("Invalid contact"))
     else:
-        contact = None
+        bill_contact = None
 
     # save all validated stuff in bill to a dictionary and insert into database at the end
     # prepare data for insert
     bill = {
         'company': c,
-        'user': request.user,
-        'till': till,
-        'contact': contact,
+        'issuer': bill_company,
+        'register': bill_register,
+        'contact': bill_contact,
+        'user_id': request.user.id,
+        'user_name': str(request.user),
+
         'timestamp': dtm.now(),
         'type': "Normal",
         'status': "Unpaid",  # the bill is awaiting payment, a second request on the server will confirm it
@@ -358,12 +368,14 @@ def create_bill(request, company):
 
     # create a new bill
     db_bill = Bill(
-        company=c,
-        user=bill['user'],  # this can change
-        till=till,
-        contact=bill['contact'],
-        created_by=bill['user'],  # this will never change
-        type=bill['type'],
+        created_by=request.user,
+        company=c,  # current company, FK to Company object
+        issuer=bill['issuer'],  # fixed company details at this moment, FK to BillCompany object
+        user_id=bill['user_id'],  # id of user that created this bill, just an integer, not a FK
+        user_name=bill['user_name'],  # copied user name in case that user gets 'fired'
+        register=bill['register'],  # current settings of the register this bill was created on
+        contact=bill['contact'],  # FK on BillContact, copy of the Contact object
+
         timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
         status=bill['status'],
         total=total_py
@@ -431,7 +443,7 @@ def get_unpaid_bill(request, company):
 
     # return bill, if there's any
     unfinished_bills = Bill.objects\
-        .filter(company=c, till_id=register_id, status='Unfinished')\
+        .filter(company=c, register_id=register_id, status='Unfinished')\
         .order_by('-timestamp')
 
     if len(unfinished_bills) > 0:

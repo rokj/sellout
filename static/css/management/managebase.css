@@ -128,12 +128,6 @@ a.button.cancel, input.cancel{ background-color: #ff5a6e; }
     display: block;
     position: absolute;
 
-    left: 100%;
-    top: 50%;
-
-    margin-top: -10px;
-    margin-left: 5px;
-
     width: 20px;
     height: 20px;
 
@@ -144,6 +138,11 @@ a.button.cancel, input.cancel{ background-color: #ff5a6e; }
     cursor: pointer;
 
     z-index: 3;
+
+    left: 0; /* must be modified in html styles by template variable (specific image width) */
+    bottom: 0;
+
+    margin-left: 10px;
 }
 
 div.bottom input{

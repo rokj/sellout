@@ -1,6 +1,8 @@
 #auto_create{
     background-color: #00bbda;
-    margin-bottom: 15px;
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 div.error{
