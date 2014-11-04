@@ -233,6 +233,7 @@ def company_to_dict(company, android=False):
     }
 
     try:
+        # when using company_to_dict on BillCompany model, some properties are missing
         c['url_name'] = company.url_name
         c['notes'] = company.notes
 

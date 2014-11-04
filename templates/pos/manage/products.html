@@ -731,7 +731,7 @@
                 var discounts = p.get_discounts();
 
                 // function total_price(tax_first, base_price, tax, discounts, quantity, decimal_places){
-                var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), {{decimal_places}});
+                var result = total_price(price, t, discounts, Big(1), {{decimal_places}});
 
                 // price without tax
                 p.items.base_price.text(display_number(result.base, "{{separator}}", {{ decimal_places }}));

@@ -1,47 +1,66 @@
+{% extends 'pos/receipt_template.html' %}
 {% load i18n %}
 {% load static %}
 
-<div class="receipt-fullpage">
-    <table class="receipt-header">
-        <tr class="issuing-company">
-            {# logo #}
-            <td rowspan="2" class="receipt-logo"></td>
-            <td class="company">
-                {# company #}
-                <div class="company name"></div>
-                <div class="company details"></div>
-            </td>
-            <td class="client">
-                {# client #}
-                <div class="name"></div>
-                <div class="details"></div>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                {# cashier #}
-                <div class="receipt-cashier">
-                    {% comment %} the last row: cashier's name and date-time {% endcomment %}
-                    <div class="receipt-cashier-text">{% trans 'Cashier' %}:&nbsp;</div>
-                    <div class="receipt-cashier-name"></div>
-                    <div class="receipt-datetime"></div>
-                </div>
-            </td>
-            <td>
-                {# register and location #}
-                <div class="receipt-location-text">{% trans 'Location' %}:</div>
-                <div class="register-location"></div>
-            </td>
-        </tr>
-    </table>
+{% block content %}
+    <div class="receipt-fullpage">
+        <table class="receipt-header">
+            <tr class="issuing-company">
+                {# logo #}
+                <td rowspan="2" class="receipt-logo">
+                    {% if logo %}
+                        <img src="{{ logo }}" alt=""/>
+                    {% endif %}
+                </td>
+                <td class="company">
+                    {# company #}
+                    <div class="company name">{{ bill.issuer.name }}</div>
+                    <div class="company details">
+                        {{ bill.issuer.street }} {{ bill.issuer.street }} {{ bill.issuer.city }}<br/>
+                        {{ bill.issuer.state }} {{ bill.issuer.country }} <br/>
+                        {% trans 'VAT' %}: {{ bill.issuer.vat_no }}
+                        {{ bill.issuer.website }}
+                    </div>
+                </td>
+                <td class="client">
+                    {# client #}
+                    {% if bill.contact %}
+                        <div class="name">{{ bill.contact.name }}</div>
+                        <div class="details">
+                            {{ bill.contact.street }} {{ bill.contact.postcode }} {{ bill.contact.city }}<br/>
+                            {{ bill.contact.state }} {{ bill.contact.country }}<br/>
+                            {% trans 'VAT' %}: {{ bill.contact.vat }}
+                        </div>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    {# cashier #}
+                    <div class="receipt-cashier">
+                        {% comment %} the last row: cashier's name and date-time {% endcomment %}
+                        <div class="receipt-cashier-text">{% trans 'Cashier' %}:&nbsp;</div>
+                        <div class="receipt-cashier-name">{{ bill.user_name }}</div>
+                        <div class="receipt-datetime">{{ bill.timestamp }}</div>
+                    </div>
+                </td>
+                <td>
+                    {# register and location #}
+                    <div class="receipt-location-text">{% trans 'Location' %}:</div>
+                    <div class="register-location">{{ bill.register.location }}</div>
+                </td>
+            </tr>
+        </table>
 
-    <div class="bill-serial">
-        {% trans 'Bill No.' %}:&nbsp;
-        <span class="bill-serial-content"></span>
-    </div>
+        <div class="bill-serial">
+            {% trans 'Bill No.' %}:&nbsp;
+        <span class="bill-serial-content">
+            {{ bill.serial }}
+        </span>
+        </div>
 
-    <table class="receipt-items">
-        <thead>
+        <table class="receipt-items">
+            <thead>
             <tr class="items-header">
                 <td class="name">{% trans 'Name' %}</td>
                 <td class="price">{% trans 'Price' %}</td>
@@ -50,11 +69,12 @@
                 <td class="unit">&nbsp;</td>
                 <td class="amount">{% trans 'Amount' %}</td>
             </tr>
-        </thead>
+            </thead>
 
-        <tfoot class="items-footer">
+            <tfoot class="items-footer">
             <tr>
-                <td colspan="6"></td> {# a dummy spacer #}
+                <td colspan="6"></td>
+                {# a dummy spacer #}
             </tr>
             <tr>
                 <td colspan="3"></td>
@@ -63,45 +83,46 @@
                 </td>
                 <td colspan="2" class="total-container">
                     <div class="tax-margin">
-                        <div class="receipt-currency"></div>
-                        <div class="receipt-total"></div>
+                        <div class="receipt-currency">{{ currency }}</div>
+                        <div class="receipt-total">{{ bill.total }}</div>
                     </div>
                 </td>
             </tr>
-        </tfoot>
+            </tfoot>
 
-        <tbody class="items-body">
-            <tr class="receipt-row hidden">
-                <td class="name">
-                    {# name and bill notes #}
-                    <div class="item-name"></div>
-                    <div class="item-notes"></div>
-                </td>
-                <td class="price">
-                    <div class="item-price"></div>
-                </td>
-                <td class="discount">
-                    <div class="item-discount"></div>
-                </td>
-                <td class="quantity">
-                    <div class="item-quantity"></div>
-                </td>
-                <td class="unit">
-                    <div class="item-unit"></div>
-                </td>
-                <td class="amount">
-                    <div class="item-amount"></div>
-                    <div class="item-tax"></div>
-                </td>
-            </tr>
-        </tbody>
+            <tbody class="items-body">
+            {% for item in bill.items %}
+                <tr class="receipt-row">
+                    <td class="name">
+                        {# name and bill notes #}
+                        <div class="item-name">{{ item.name }}</div>
+                        <div class="item-notes">{{ item.notes }}</div>
+                    </td>
+                    <td class="price">
+                        <div class="item-price">{{ item.base_price }}</div>
+                    </td>
+                    <td class="quantity">
+                        <div class="item-quantity">{{ item.quantity }}</div>
+                    </td>
+                    <td class="discount">
+                        <div class="item-discount">{{ item.discount_absolute }}</div>
+                    </td>
+                    <td class="unit">
+                        <div class="item-unit">{{ item.unit_type }}</div>
+                    </td>
+                    <td class="amount">
+                        <div class="item-amount">{{ item.total }}</div>
+                        <div class="item-tax">{{ item.tax_rate_id }}</div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
 
+        </table>
 
-    </table>
-
-    {# tax rates #}
-    <table class="tax-rates">
-        <thead>
+        {# tax rates #}
+        <table class="tax-rates">
+            <thead>
             <tr class="tax-row header">
                 <td class="tax-id">&nbsp;</td>
                 <td class="tax-percent">{% trans 'Rate' %}</td>
@@ -109,24 +130,34 @@
                 <td class="tax-absolute">{% trans 'Tax' %}</td>
                 <td class="tax-gross">{% trans 'Total' %}</td>
             </tr>
-        </thead>
+            </thead>
 
-        <tfoot>
+            <tfoot>
             <tr class="tax-row footer">
                 <td class="tax-id">{% trans 'Sum' context 'Tax rates table footer' %}</td>
                 <td class="tax-percent">&nbsp;</td>
-                <td class="tax-net"></td>
-                <td class="tax-absolute"></td>
-                <td class="tax-gross"></td>
+                <td class="tax-net">{{ bill.tax_sums.net_sum }}</td>
+                <td class="tax-absolute">{{ bill.tax_sums.tax_sum }}</td>
+                <td class="tax-gross">{{ bill.tax_sums.gross_sum }}</td>
             </tr>
-        </tfoot>
+            </tfoot>
 
-        <tbody class="tax-body">
-        </tbody>
-    </table>
+            <tbody class="tax-body">
+            {% for rate in bill.tax_rates %}
+                <tr class="tax-row header">
+                    <td class="tax-id">{{ rate.id }}</td>
+                    <td class="tax-percent">{{ rate.amount }}</td>
+                    <td class="tax-net">{{ rate.net_sum }}</td>
+                    <td class="tax-absolute">{{ rate.tax_sum }}</td>
+                    <td class="tax-gross">{{ rate.gross_sum }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
 
-    <div class="receipt-footer">
-        To je drobni tisk. Jebite se vsi. Ha. Haha. Hahahahahaha.
-        Ja. Ta račun je narejen s spletno aplikacijo POSSY, katere lastnik je Cocklogic. #YOLO
+        <div class="receipt-footer">
+            To je drobni tisk. Jebite se vsi. Ha. Haha. Hahahahahaha.
+            Ja. Ta račun je narejen s spletno aplikacijo POSSY, katere lastnik je Cocklogic. #YOLO
+        </div>
     </div>
-</div>
+{% endblock %}

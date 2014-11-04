@@ -58,6 +58,11 @@ def bill_item_to_dict(user, company, item):
 
 
 def group_tax_rates(items):
+    # check if items is a list:
+    # if it's not
+    if not isinstance(items, type([])):
+        raise TypeError("Items is not a list, convert with list(items) in calling function")
+
     rate_id = 'A'  # tax rate id
 
     rates = {}  # rate: {letter, tax_sum, gross_sum}
@@ -146,15 +151,10 @@ def bill_to_dict(user, company, bill):
     if bill.contact:
         b['contact'] = contact_to_dict(user, company, bill.contact)
 
-    # items
-    items = BillItem.objects.filter(bill=bill)
-    i = []
-    for item in items:
-        i.append(bill_item_to_dict(user, company, item))
-        
-    b['items'] = i
+    # get items
+    items = list(BillItem.objects.filter(bill=bill))
 
-    # tax rates: get the numbers and format them
+    # gather tax rates for all items
     grouped_taxes = group_tax_rates(items)
     tax_rates = grouped_taxes['rates']
     tax_sums = grouped_taxes['sums']
@@ -171,6 +171,13 @@ def bill_to_dict(user, company, bill):
 
     b['tax_rates'] = tax_rates
     b['tax_sums'] = tax_sums
+
+    # format all items
+    i = []
+    for item in items:
+        i.append(bill_item_to_dict(user, company, item))
+        
+    b['items'] = i
 
     return b
 
@@ -204,36 +211,21 @@ def item_prices(user, company, base_price, tax_percent, quantity, discounts):
 
     r = {}  # return values
 
-    if get_company_value(user, company, 'pos_discount_calculation') == 'Tax first':
-        # price without tax and discounts
-        r['base_price'] = base_price
-        # price including tax
-        r['tax_price'] = base_price*(Decimal('1') + (tax_percent/Decimal('100')))
-        # absolute tax value
-        r['tax_absolute'] = r['tax_price'] - r['base_price']
-        # absolute discounts value
-        dd = get_discount(r['tax_price'])
-        r['discount_absolute'] = dd['discount']
-        # total, including tax and discounts
-        r['total'] = dd['final']
-        # total excluding tax
-        r['total_tax_exc'] = r['total'] - r['tax_absolute']
-    else:
-        # base price
-        r['base_price'] = base_price
-        # subtract discounts from base
-        dd = get_discount(r['tax_price'])
-        r['discount'] = dd['discount']
-        # price including discounts
-        r['discount_price'] = dd['final']
-        # add tax
-        r['tax_price'] = r['discount_price']*(Decimal('1') + (tax_percent/Decimal('100')))
-        # get absolute tax value
-        r['tax_absolute'] = r['tax_price'] - r['discount_price']
-        # total
-        r['total'] = r['tax_price']
-        # total without tax
-        r['total_tax_exc'] = r['discount_price']
+    # base price
+    r['base_price'] = base_price
+    # subtract discounts from base
+    dd = get_discount(r['tax_price'])
+    r['discount'] = dd['discount']
+    # price including discounts
+    r['discount_price'] = dd['final']
+    # add tax
+    r['tax_price'] = r['discount_price']*(Decimal('1') + (tax_percent/Decimal('100')))
+    # get absolute tax value
+    r['tax_absolute'] = r['tax_price'] - r['discount_price']
+    # total
+    r['total'] = r['tax_price']
+    # total without tax
+    r['total_tax_exc'] = r['discount_price']
 
     # multiply by quantity
     r['base_price'] = r['base_price']*quantity  # without tax and discounts

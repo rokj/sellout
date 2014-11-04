@@ -111,19 +111,17 @@
                 <div class="column contact">{% trans 'Contact name' context 'bill management' %}</div>
                 <div class="column total">{% trans 'Total' context 'bill management' %}</div>
                 <div class="column count">{% trans 'No. of items' context 'bill management' %}</div>
-                <div class="column status">{% trans 'Status' context 'bill management' %}</div>
                 <div class="column view">&nbsp;</div>
             </div>
 
             {% for bill in bills %}
                 <div class="bill-list item">
                     <div class="column serial">{{ bill.serial }}</div>
-                    <div class="column user">{{ bill.user.name }}</div>
+                    <div class="column user">{{ bill.user_name }}</div>
                     <div class="column date">{{ bill.timestamp }}</div>
                     <div class="column contact">{{ bill.contact.name }}</div>
                     <div class="column total">{{ bill.total }}</div>
                     <div class="column count">{{ bill.items|length }}</div>
-                    <div class="column status">{{ bill.status }}</div>
                     <div class="column view">
                         <img src="{% static 'icons/print_black.png' %}"
                              class="print-bill hoverable"

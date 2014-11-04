@@ -54,7 +54,7 @@ def list_bills(request, company):
         form = BillSearchForm(request.POST)
 
         if form.is_valid():
-            bills = Bill.objects.filter(company=c)
+            bills = Bill.objects.filter(company=c, status='Paid').order_by('-timestamp')
 
             # filter by whatever is in the form:
             # issue date: from

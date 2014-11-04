@@ -379,7 +379,6 @@ Item = function(bill, product) {
 
         // prices:
         var r = total_price(
-            p.g.config.tax_first,
             p.data.base_price,
             p.data.tax_percent,
             p.data.discounts,
@@ -819,7 +818,7 @@ ItemDetails = function(item){
     };
 
     p.update_prices = function(){
-        var r = total_price(p.g.config.tax_first,
+        var r = total_price(
             p.item.data.base_price,
             p.item.data.tax_percent,
             p.temp_discounts,

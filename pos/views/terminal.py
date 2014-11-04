@@ -27,18 +27,11 @@ def terminal(request, company):
     if not has_permission(request.user, c, 'terminal', 'view'):
         return no_permission_view(request, c, _("You have no permission to use terminal."))
 
-    # terminal settings and other data in JSON (will be put into javascript globals)
-    if get_company_value(request.user, c, 'pos_discount_calculation') == 'Tax first':
-        tax_first = True
-    else:
-        tax_first = False
-
     config = {
         # user's data
         'currency': get_company_value(request.user, c, 'pos_currency'),
         'separator': get_company_value(request.user, c, 'pos_decimal_separator'),
         'decimal_places': get_company_value(request.user, c, 'pos_decimal_places'),
-        'tax_first': tax_first,
         # interface parameters
         'date_format': get_date_format(request.user, c, 'js'),
         'time_format': get_time_format(request.user, c, 'js'),

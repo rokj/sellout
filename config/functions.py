@@ -30,7 +30,6 @@ company_defaults = {
     'pos_currency': "$",
     'pos_decimal_separator': '.',
     # billing and calculation defaults
-    'pos_discount_calculation': "Tax first",  # DISCOUNT_CALCULATION in globals
     'pos_decimal_places': 2,  # default decimal places for display
 }
 

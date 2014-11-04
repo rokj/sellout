@@ -241,7 +241,9 @@
     margin: 0 auto;
 }
 
+/*                       */
 /* the full-page receipt */
+/*                       */
 .receipt-fullpage{
     position: relative;
 
@@ -270,6 +272,10 @@
 .receipt-fullpage .receipt-header td{
     vertical-align: top;
     padding-bottom: 5mm;
+}
+
+.receipt-fullpage .receipt-header .company{
+    width: 35%;
 }
 
 .receipt-fullpage .receipt-header .receipt-logo{
