@@ -126,42 +126,34 @@ Payment = function(g, bill){
         }
     };
 
-    p.print = function(){
+    p.print = function(html){
         // decide what to do depending on user's print settings
 
-        var receipt;
+        // create a new element, and append it to body
+        var receipt = $("<div>");
+
+        // cut off all HTML yada yada that's already on this page
+        var cutoff_to = "<!-- JS CUTOFF TO -->";
+        var cutoff_from = "<!-- JS CUTOFF FROM -->";
+
+        html = html.split(cutoff_to).pop(); // cut everything up to _to
+        html = html.split(cutoff_from)[0]; // cut everyhing from _from on
 
         // printer driver:
         switch(p.g.objects.terminal.register.printer_driver){
             case 'System':
-                // create a fine html graphics, just check the receipt format first
-                if(p.g.objects.terminal.register.receipt_format == 'Thermal'){
-                    // use the default printer;
-                    // create a HTML receipt and issue javascript print() method and that's it
-                    receipt = format_receipt(p.g, p.bill.data, 'small');
-
-                    // TODO: temporary
-                    //receipt.appendTo("body").show();
-                    // TODO: permanent
-                    receipt.printThis();
-                    receipt.remove();
-                }
-                else{
-                    // large receipt
-                    receipt = format_receipt(p.g, p.bill.data, 'large');
-
-                    // TODO: temporary
-                    //receipt.appendTo("body").show();
-                    // TODO: permanent
-                    receipt.printThis();
-                    receipt.remove();
-                }
+                // create some fine html graphics
+                // create a HTML receipt and issue javascript print() method and that's it
+                receipt.html(html);
+                receipt.printThis();
                 break;
             default:
                 alert("Printer driver not implemented: " +
                     p.g.objects.terminal.register.printer_driver);
                 break;
         }
+
+        receipt.remove();
     };
 
     p.cancel = function(){
@@ -201,7 +193,10 @@ Payment = function(g, bill){
         var data = {
             bill_id: p.data.id,
             status: 'Paid',
-            payment_type: p.g.settings.last_payment_type
+            payment_type: p.g.settings.last_payment_type,
+
+            print: true,
+            bill_format: p.g.objects.terminal.register.receipt_format
         };
 
         switch(data.payment_type){
@@ -225,7 +220,7 @@ Payment = function(g, bill){
             }
             else{
                 // everything is OK, print the thing
-                p.print();
+                p.print(response.bill);
 
                 // the deal is finished. clear all stuff and create a new bill
                 p.g.objects.bill.reset();

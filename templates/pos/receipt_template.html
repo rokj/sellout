@@ -1,0 +1,29 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{% trans 'Bill No.' context 'Bill viewing page title' %}</title>
+
+    <link type="text/css" rel="stylesheet" href="{% static 'css/print.css' %}" />
+    <link type="text/css" rel="stylesheet" href="{% static 'css/base.css' %}"/>
+    <link type="text/css" rel="stylesheet" href="{% static 'css/fonts/fonts.css' %}"/>
+
+    <style type="text/css">
+        html, body {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    {% comment %} for printing from javascript, cut off everything up to this line {% endcomment %}
+    <!-- JS CUTOFF TO -->
+    {% block content %}
+
+    {% endblock %}
+    {% comment %} for printing from javascript, cut off everything from this line on {% endcomment %}
+    <!-- JS CUTOFF FROM -->
+</body>
+</html>

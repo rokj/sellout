@@ -104,6 +104,7 @@ urlpatterns = patterns('',
     url(r_company + '/get-unpaid-bill/$', terminal_bill.get_unpaid_bill, name='get_unpaid_bill'),
     url(r_company + '/finish-bill/$', terminal_bill.finish_bill, name='finish_bill'),
     url(r_company + '/check-bill-status/$', terminal_bill.check_bill_status, name='check_bill_status'),
+    url(r_company + '/view-bill/$', terminal_bill.view_bill, name='view_bill'),
 
     # views for bill
     url(r_company + '/bill/save/$', terminal_bill.create_bill, name='create_bill'),  # adds an item to bill

@@ -1,4 +1,7 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models import FieldDoesNotExist
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 
 from pos.models import Company, Product, Discount, Register, Contact, \
@@ -7,7 +10,7 @@ from pos.views.manage.company import company_to_dict
 from pos.views.manage.contact import contact_to_dict
 from pos.views.manage.till import register_to_dict
 from pos.views.util import has_permission, JsonOk, JsonParse, JsonError, \
-    format_number, parse_decimal, format_date, format_time, compare_objects, copy_data
+    format_number, parse_decimal, format_date, format_time
 from config.functions import get_company_value
 import common.globals as g
 
@@ -36,18 +39,76 @@ def bill_item_to_dict(user, company, item):
     i['bill_notes'] = item.bill_notes
 
     i['quantity'] = format_number(user, company, item.quantity)
-
-    # these values are for one unit (not multiplied by quantity)
     i['base_price'] = format_number(user, company, item.base_price)
     i['tax_percent'] = format_number(user, company, item.tax_percent)
-    i['single_total'] = format_number(user, company, item.single_total)
-
     i['tax_absolute'] = format_number(user, company, item.tax_absolute)
     i['discount_absolute'] = format_number(user, company, item.discount_absolute)
     i['total'] = format_number(user, company, item.total)
+
     i['total_without_tax'] = format_number(user, company, item.total - item.tax_absolute)
 
+    # if group_tax_rates was called on a list with this item in it,
+    # there should be tax_rate_id property on the item. if it's not, f**k it
+    try:
+        i['tax_rate_id'] = item.tax_rate_id
+    except (AttributeError, FieldDoesNotExist):
+        pass
+
     return i
+
+
+def group_tax_rates(items):
+    rate_id = 'A'  # tax rate id
+
+    rates = {}  # rate: {letter, tax_sum, gross_sum}
+    sums = {  # total of all items
+        'net_sum': Decimal(0),
+        'tax_sum': Decimal(0),
+        'gross_sum': Decimal(0),
+    }
+
+    for item in items:
+        t = item.tax_percent
+
+        # a shortcut
+        net = item.total - item.tax_absolute
+
+        # totals
+        sums['net_sum'] += net
+        sums['tax_sum'] += item.tax_absolute
+        sums['gross_sum'] += item.total
+
+        # by each tax rate
+        if t not in rates:
+            # create a new entry in the list of taxes
+            rates[t] = {
+                'id': rate_id,
+                'amount':  item.tax_percent,
+                'tax_sum':  item.tax_absolute,
+                'net_sum':  net,
+                'gross_sum':  item.total,
+            }
+
+            # save to the item object for later use
+            item.tax_rate_id = rate_id
+
+            # get the next id
+            rate_id = chr(ord(rate_id) + 1)
+        else:
+            # add a new tax rate to the list (dictionary, actually)
+            rates[t]['tax_sum'] += item.tax_absolute
+            rates[t]['net_sum'] += net
+            rates[t]['gross_sum'] += item.total
+
+            # save to the item object for later use
+            item.tax_rate_id = rate_id
+
+    # convert rates to list and order by id
+    rates = sorted(rates.iteritems())
+    rates = [i[1] for i in rates]  # we're only interested in content, keys are already there
+
+    # that's it
+    return {'rates': rates, 'sums': sums}
 
 
 def bill_to_dict(user, company, bill):
@@ -70,6 +131,7 @@ def bill_to_dict(user, company, bill):
         'discount_type': bill.discount_type,
         'tax': format_number(user, company, bill.tax),
         'total': format_number(user, company, bill.total),
+
         'timestamp': format_date(user, company, bill.timestamp) + " " + format_time(user, company, bill.timestamp),
         'due_date': format_date(user, company, bill.due_date),
         'status': bill.status,
@@ -84,13 +146,31 @@ def bill_to_dict(user, company, bill):
     if bill.contact:
         b['contact'] = contact_to_dict(user, company, bill.contact)
 
-    # items:
-    i = []
+    # items
     items = BillItem.objects.filter(bill=bill)
+    i = []
     for item in items:
         i.append(bill_item_to_dict(user, company, item))
         
     b['items'] = i
+
+    # tax rates: get the numbers and format them
+    grouped_taxes = group_tax_rates(items)
+    tax_rates = grouped_taxes['rates']
+    tax_sums = grouped_taxes['sums']
+
+    for rate in tax_rates:
+        rate['amount'] = format_number(user, company, rate['amount'])
+        rate['tax_sum'] = format_number(user, company, rate['tax_sum'])
+        rate['net_sum'] = format_number(user, company, rate['net_sum'])
+        rate['gross_sum'] = format_number(user, company, rate['gross_sum'])
+
+    tax_sums['tax_sum'] = format_number(user, company, tax_sums['tax_sum'])
+    tax_sums['net_sum'] = format_number(user, company, tax_sums['net_sum'])
+    tax_sums['gross_sum'] = format_number(user, company, tax_sums['gross_sum'])
+
+    b['tax_rates'] = tax_rates
+    b['tax_sums'] = tax_sums
 
     return b
 
@@ -176,6 +256,37 @@ def item_prices(user, company, base_price, tax_percent, quantity, discounts):
     r['total'] = r['total'].quantize(precision)
 
     return r
+
+
+def create_bill_html(user, company, bill):
+    # get the template and some other details
+    logo = None
+
+    if bill.register.receipt_format == 'Page':
+        t = 'pos/large_receipt.html'
+
+        if company.color_logo:
+            logo = company.color_logo.url
+
+    elif bill.register.receipt_format == 'Thermal':
+        t = 'pos/small_receipt.html'
+
+        if company.monochrome_logo:
+            logo = company.monochrome_logo.url
+
+    else:
+        return _("Unsupported bill format") + ": " + str(bill.register.receipt_format)
+
+    # get the data
+    bill_data = bill_to_dict(user, company, bill)
+
+    context = {
+        'bill': bill_data,
+        'logo': logo,
+        'currency': get_company_value(user, company, 'pos_currency')
+    }
+
+    return render_to_string(t, context)
 
 
 #########
@@ -400,7 +511,6 @@ def create_bill(request, company):
             tax_percent=item['tax_percent'],
             tax_absolute=item['tax_absolute'],
             discount_absolute=item['discount_absolute'],
-            single_total=item['single_total'],
             total=item['total'],
             bill_notes=item['bill_notes']
         )
@@ -516,4 +626,34 @@ def finish_bill(request, company):
 
     bill.save()
 
+    # if print is requested, return html, otherwise the 'ok' response
+    if d.get('print'):
+        return JsonResponse({'status': 'ok',
+                             'bill': create_bill_html(request.user, c, bill)})
+
     return JsonOk()
+
+
+@login_required
+def view_bill(request, company):
+    """ returns html-formatted bill """
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+    # expect the following in request.GET:
+    # bill_id: id of Bill object
+    # format: receipt_format setting from register
+    try:
+        bill_id = int(request.GET.get('bill_id'))
+    except (ValueError, TypeError):
+        return JsonError(_("Missing required data"))
+
+    # get the bill
+    try:
+        bill = Bill.objects.get(company=c, id=bill_id)
+    except Bill.DoesNotExist:
+        return JsonError(_("Bill does not exist"))
+
+    return HttpResponse(create_bill_html(request.user, c, bill))

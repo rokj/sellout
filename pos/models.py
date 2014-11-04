@@ -573,30 +573,41 @@ def set_serial(instance, created, **kwargs):
 class BillItem(SkeletonU, ProductAbstract): # include all data from Product
     bill = models.ForeignKey(Bill)
     product_id = models.BigIntegerField(null=False)  # store reference to product (used by UI/jQuery/stats/...)
-    quantity = models.DecimalField(_("Quantity"), max_digits = g.DECIMAL['quantity_digits'],
-                                  decimal_places = g.DECIMAL['quantity_decimal_places'],
-                                  null=False, blank=False)
-    base_price = models.DecimalField(_("Base price"), # hard-coded price from current Price table
-                                     max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                                     null=False, blank=False)
-    tax_percent = models.DecimalField(_("Tax in percent, copied from product's tax rate"),
-                                      max_digits = g.DECIMAL['percentage_decimal_places']+3, decimal_places=g.DECIMAL['percentage_decimal_places'],
-                                      null=True, blank=True)
-    tax_absolute = models.DecimalField(_("Tax amount (absolute value)"), # hard-coded price from current Price table
-                                       max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                                       null=False, blank=False)
-    discount_absolute = models.DecimalField(_("Discount, absolute value, sum of all valid discounts on this item"),
-                                            max_digits = g.DECIMAL['currency_digits'],
-                                            decimal_places=g.DECIMAL['currency_decimal_places'], null=True, blank=True)
-    single_total = models.DecimalField(_("Total price for a single item"),
-                                       max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                                       null=False, blank=False)
-    total = models.DecimalField(_("Total price"),
-                                max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                                null=False, blank=False)
+                                                     # (not a FK, in case the product gets deleted)
 
-    bill_notes = models.CharField(_("Bill notes"), max_length=1000, null=True, blank=True,
-                                  help_text=_("Notes for this item, shown on bill (like expiration date or serial number)"))
+    quantity = models.DecimalField(_("Quantity"),
+        max_digits=g.DECIMAL['quantity_digits'],
+        decimal_places=g.DECIMAL['quantity_decimal_places'],
+        null=False, blank=False)
+
+    # achtung: all prices are already multiplied by quantity
+    base_price = models.DecimalField(_("Base price, without tax and discounts"),
+        max_digits=g.DECIMAL['currency_digits'],
+        decimal_places=g.DECIMAL['currency_decimal_places'],
+        null=False, blank=False)
+
+    tax_percent = models.DecimalField(_("Tax in percent, copied from product's tax rate"),
+        max_digits=g.DECIMAL['percentage_decimal_places']+3,
+        decimal_places=g.DECIMAL['percentage_decimal_places'],
+        null=True, blank=True)
+
+    tax_absolute = models.DecimalField(_("Tax amount, absolute value"),
+        max_digits=g.DECIMAL['currency_digits'],
+        decimal_places=g.DECIMAL['currency_decimal_places'],
+        null=False, blank=False)
+
+    discount_absolute = models.DecimalField(_("Discount, absolute value, sum of all valid discounts on this item"),
+        max_digits=g.DECIMAL['currency_digits'],
+        decimal_places=g.DECIMAL['currency_decimal_places'],
+        null=True, blank=True)
+
+    total = models.DecimalField(_("Total price, including taxes, discounts and multiplied by quantity"),
+        max_digits=g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
+        null=False, blank=False)
+
+    bill_notes = models.CharField(_("Bill notes"),
+        help_text=_("Notes for this item, shown on bill (like expiration date or serial number)"),
+        max_length=1000, null=True, blank=True)
 
     def __unicode__(self):
         return str(self.bill.id) + ": " + self.name

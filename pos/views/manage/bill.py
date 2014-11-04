@@ -42,8 +42,8 @@ def list_bills(request, company):
     c = get_object_or_404(Company, url_name=company)
 
     # check permissions: needs to be guest
-    if not has_permission(request.user, c, 'discount', 'view'):
-        return no_permission_view(request, c, _("You have no permission to view discounts."))
+    if not has_permission(request.user, c, 'bill', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view bills."))
 
     # if no search was made, display last N bills (below)
     N = 10
@@ -89,7 +89,10 @@ def list_bills(request, company):
         form = BillSearchForm()
         bills = Bill.objects.filter(company=c).order_by('-timestamp')[:N]
 
-    # show discounts
+    # format all bills manually
+    bills = [bill_to_dict(request.user, c, b) for b in bills]
+
+    # paginate stuff
     # paginator = Paginator(discounts, g.MISC['discounts_per_page'])
     #
     # page = request.GET.get('page')
@@ -99,9 +102,6 @@ def list_bills(request, company):
     #     discounts = paginator.page(1)
     # except EmptyPage:
     #     discounts = paginator.page(paginator.num_pages)
-
-    # format all bills manually here
-    bills = [bill_to_dict(request.user, c, b) for b in bills]
 
     context = {
         'company': c,

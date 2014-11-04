@@ -21,6 +21,14 @@
                 }
 
                 // fetch json with bill data from the server and print
+                var url = "{% url 'pos:view_bill' company.url_name %}";
+                url += '?' + $.param({bill_id: id});
+
+                window.open(url, // window url
+                        "{% trans 'Viewing Bill No.:' %}" + " " + id.toString(), // window title
+                        "menubar=yes, toolbar=no", // formatters etc.
+                        true // replace previous window when opening a new one
+                );
             });
 
         });
@@ -32,18 +40,6 @@
 {% endblock %}
 
 {% block manage_content %}
-    <div class="hidden">
-        <div id="small_receipt_template">
-            {% include 'pos/small_receipt.html' %}
-        </div>
-
-        <div id="large_receipt_template">
-            {% include 'pos/large_receipt.html' %}
-        </div>
-
-        <img src=""/>
-    </div>
-
     <div class="left-column">
         <h2>{% trans 'Search' context 'form title' %}</h2>
 

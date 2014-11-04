@@ -21,11 +21,11 @@ ATTR_LEN = {
 
 # number of digits for decimal database field
 DECIMAL = {
-    'currency_digits': 16,  # number of digits for money values (big money) (INCLUDING DECIMAL PLACES)
-    'currency_decimal_places': 4,  # number of decimal places for money values
-    'percentage_decimal_places': 4,  # number of decimal places for percentage values
-    'quantity_digits': 16,
-    'quantity_decimal_places': 4,
+    'currency_digits': 24,  # number of digits for money values (big money) (INCLUDING DECIMAL PLACES)
+    'currency_decimal_places': 8,  # number of decimal places for money values
+    'percentage_decimal_places': 8,  # number of decimal places for percentage values
+    'quantity_digits': 24,
+    'quantity_decimal_places': 8,
 }
 
 # unit types
