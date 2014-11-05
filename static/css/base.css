@@ -42,7 +42,7 @@ div.clear-floats{
     color: #ffffff;
 }
 
-*:disabled{
+*:disabled, .disabled, .disabled img{
     opacity: 0.3;
     cursor: default;
 }

@@ -166,13 +166,12 @@ def list_discounts(request, company):
         return no_permission_view(request, c, _("You have no permission to view discounts."))
     
     discounts = Discount.objects.filter(company__id=c.id)
-
-    results_display = False
+    searched = False
 
     # show the filter form
     if request.method == 'POST':
         form = DiscountFilterForm(request.POST)
-        
+
         if form.is_valid():
             # filter by whatever is in the form: description
             if form.cleaned_data.get('search'):
@@ -196,31 +195,24 @@ def list_discounts(request, company):
             if form.cleaned_data.get('enabled') is not None:
                 discounts = discounts.filter(active=form.cleaned_data['enabled'])
                 
-            results_display = True  # search results are being displayed
+            searched = True  # search results are being displayed
     else:
         form = DiscountFilterForm()
 
-    # show discounts
-    paginator = Paginator(discounts, g.MISC['discounts_per_page'])
-
-    page = request.GET.get('page')
-    try:
-        discounts = paginator.page(page)
-    except PageNotAnInteger:
-        discounts = paginator.page(1)
-    except EmptyPage:
-        discounts = paginator.page(paginator.num_pages)
-
     context = {
         'company': c,
+
         'discounts': discounts,
-        'paginator': paginator,
+        'results_count': results_count,
+        'searched': searched,
+        'max_count': max_count,
+
         'filter_form': form,
+
         'title': _("Discounts"),
         'site_title': g.MISC['site_title'],
         'date_format_django': get_date_format(request.user, c, 'django'),
         'date_format_js': get_date_format(request.user, c, 'js'),
-        'results_display': results_display,
         'currency': get_company_value(request.user, c, 'pos_currency'),
     }
 

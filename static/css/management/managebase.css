@@ -7,6 +7,12 @@
     overflow: hidden;
 }
 
+h2{
+    font-size: 24px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 .menu-hidden{
     /* simpleMenus should not be hidden with display: none, but
        height: 0 to keep the necessary horizontal space occupied */
@@ -179,4 +185,26 @@ div.clear-results{
 div.clear-results a{
     color: #969696;
     font-size: 12px;
+}
+
+.results-header{
+    /* must match the first input box of filter form, if there's any */
+    padding-top: 28px;
+    color: #646464;
+    height: 30px;
+}
+
+.results-header .pagination{
+    display: inline;
+    margin-left: 20px;
+}
+
+.results-header .paginator img{
+    display: inline;
+    vertical-align: text-top;
+    position: relative;
+    top: 0;
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 20px;
 }

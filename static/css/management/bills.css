@@ -2,43 +2,33 @@
     margin-left: 340px; /* that is 300 + margin from search sidebar */
 }
 
+#container{
+    position: relative;
+    padding-right: 30px;
+}
+
 #bills_container{
     margin-right: 40px;
+    margin-top: 26px;
+    width: 100%;
+    
 }
 
 .bill-list{
-    display: block;
     
-    overflow: hidden;
 }
 
 .bill-list.header {
-    background-color: #cccccc;
-    color: #ffffff;
+    color: #646464;
 }
 
-.bill-list.item {
-    border-bottom: 1px solid #646464;
+.bill-list td{
+    border-bottom: 1px solid #ffffff;
+    height: 40px;
 }
 
 .bill-list.item:nth-child(odd) {
-    background-color: #ffffff;
-}
-
-.bill-list .column {
-    display: block;
-    float: left;
-    width: 10%;
-    height: 40px;
-    line-height: 40px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding-left: 1%;
-}
-
-.bill-list .column.total {
-    text-align: right;
+    
 }
 
 .bill-list .column.view img{
@@ -46,3 +36,10 @@
     position: relative;
     top: 3px;
 }
+
+/* columns: width and text align */
+.bill-list .column.user{ padding-left: 20px;}
+
+.bill-list .column.total{ text-align: right; padding-right: 20px;}
+.bill-list .column.count{ width: 50px; text-align: right; }
+.bill-list .column.view{ width: 40px; text-align: right; }

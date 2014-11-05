@@ -188,6 +188,7 @@ MISC = {
     'image_format': 'png',  # all images will be saved in this format
     'image_upload_formats': 'jpg|jpeg|gif|png|bmp|tiff',  # supported image formats (as regex "options")
     'discounts_per_page': 2,
+    'bills_per_page': 25,
 }
 
 IMAGE_DIMENSIONS = {

@@ -12,6 +12,7 @@
                 dateFormat: "{{ date_format_js|escapejs }}"
             });
 
+            // printing function
             $(".print-bill").click(function(){
                 var id = parseInt($(this).attr("data-id"));
 
@@ -31,6 +32,30 @@
                 );
             });
 
+            // intercept back and forward links for paginator; update the form and submit it
+            $("a.fake.paginator").unbind().click(function(e){
+                e.preventDefault();
+
+                var page_obj = $("#id_page");
+                var page = parseInt(page_obj.val());
+
+                if(isNaN(page)){
+                    page = 1;
+                }
+                else{
+                    if($(this).attr("data-action") == "next") page += 1;
+                    else page -= 1;
+                }
+
+                page_obj.val(page);
+                $("#filter_form").submit();
+            });
+
+            // when any of search parameters change, reset the page back to 1
+            $("input", "#filter_form").change(function(){
+                $("#id_page").val(1);
+            });
+
         });
     </script>
 {% endblock %}
@@ -43,20 +68,19 @@
     <div class="left-column">
         <h2>{% trans 'Search' context 'form title' %}</h2>
 
-        <form method="post" action="{% url 'pos:list_bills' company.url_name %}">
-            {% csrf_token %}
-
+        <form method="get" action="{% url 'pos:list_bills' company.url_name %}" id="filter_form">
             <div class="error">{{ filter_form.non_field_errors }}</div>
 
             <div class="form-field">
+                <div class="error">{{ filter_form.issued_from.errors }}</div>
+                <div class="error">{{ filter_form.issued_to.errors }}</div>
+
                 <div class="split-cell first bottom-space">
-                    <div class="error">{{ filter_form.issued_from.errors }}</div>
                     <label for="id_issued_from">{% trans 'Bill issue date: from' %}</label>
                     {{ filter_form.issued_from }}
                 </div>
 
                 <div class="split-cell last">
-                    <div class="error">{{ filter_form.issued_to.errors }}</div>
                     <label for="id_issued_to">{% trans 'To:' %}</label>
                     {{ filter_form.issued_to }}
                 </div>
@@ -81,20 +105,53 @@
             </div>
 
             <div class="form-field">
-                <div class="split-cell first">
-                    &nbsp;
+                <div class="error">{{ filter_form.amount_from.errors }}</div>
+                <div class="error">{{ filter_form.amount_to.errors }}</div>
+
+                <div class="split-cell first bottom-space">
+                    <label for="id_amount_from">{% trans 'Amount: from' %}</label>
+                    {{ filter_form.amount_from }}
                 </div>
 
                 <div class="split-cell last">
-                    <input type="submit" value="{% trans 'Search' context 'submit button label' %}" class="hoverable"/>
+                    <label for="id_amount_to">{% trans 'To:' %}</label>
+                    {{ filter_form.amount_to}}
+                </div>
+            </div>
 
+            <div class="form-field">
+                <div class="error">{{ filter_form.user_name.errors }}</div>
+                {{ filter_form.user_name.label_tag }}
+                {{ filter_form.user_name}}
+            </div>
+
+            <div class="form-field">
+                <div class="split-cell first bottom-space">
+                    {{ filter_form.sort_by.label_tag }}
+                    {{ filter_form.sort_by }}
+                </div>
+
+                <div class="split-cell last">
+                    {{ filter_form.sort_order.label_tag }}
+                    {{ filter_form.sort_order }}
+                </div>
+            </div>
+
+            {{ filter_form.page }}
+
+            <div class="form-field">
+                <div class="split-cell first">
                     {#  only display if search results are being displayed (it's just a link back to 'discounts') #}
                     <div class="clear-results">
-                        {% if results_display %}
+                        {% if searched %}
                             <a href="{% url 'pos:list_bills' company.url_name %}">
                                 {% trans 'Clear results' %}</a>
                         {% endif %}
                     </div>
+                </div>
+
+                <div class="split-cell last">
+                    <input type="submit" value="{% trans 'Search' context 'submit button label' %}" class="hoverable"/>
                 </div>
 
                 <div class="cleared"></div>
@@ -103,34 +160,71 @@
     </div>
 
     <div id="content">
-        <div id="bills_container">
-            <div class="bill-list header">
-                <div class="column serial">{% trans 'No.' context 'bill management' %}</div>
-                <div class="column user">{% trans 'User' context 'bill management' %}</div>
-                <div class="column date">{% trans 'Issue date' context 'bill management' %}</div>
-                <div class="column contact">{% trans 'Contact name' context 'bill management' %}</div>
-                <div class="column total">{% trans 'Total' context 'bill management' %}</div>
-                <div class="column count">{% trans 'No. of items' context 'bill management' %}</div>
-                <div class="column view">&nbsp;</div>
+        <div id="container">
+            <div class="results-header">
+                {% if searched %}
+                    {% trans 'Results found: ' %}{{ bills.paginator.count }}
+
+                    <div class="pagination">
+                        <a href="#"
+                           class="fake paginator {% if not bills.has_previous %}disabled{% endif %}"
+                           data-action="previous">
+                            <img src="{% static 'icons/back_black.png' %}"
+                                 class="hoverable"
+                                 alt="{% trans 'Back' context 'Paginator page button' %}"
+                                 title="{% trans 'Back' context 'Paginator page button' %}"/>
+                        </a>
+
+                        {% trans 'Page' %} {{ bills.number }} {% trans 'of' %} {{ bills.paginator.num_pages }}
+
+                        <a href="#"
+                           class="fake paginator {% if not bills.has_next %}disabled{% endif %}"
+                           data-action="next">
+                            <img src="{% static 'icons/forward_black.png' %}"
+                                 class="hoverable"
+                                 alt="{% trans 'Forward' context 'Paginator page button' %}"
+                                 title="{% trans 'Forward' context 'Paginator page button' %}"/>
+                        </a>
+                    </div>
+                {% else %}
+                    {# only display last few bills #}
+                    {% trans 'Recent bills' %}
+                {% endif %}
             </div>
 
-            {% for bill in bills %}
-                <div class="bill-list item">
-                    <div class="column serial">{{ bill.serial }}</div>
-                    <div class="column user">{{ bill.user_name }}</div>
-                    <div class="column date">{{ bill.timestamp }}</div>
-                    <div class="column contact">{{ bill.contact.name }}</div>
-                    <div class="column total">{{ bill.total }}</div>
-                    <div class="column count">{{ bill.items|length }}</div>
-                    <div class="column view">
-                        <img src="{% static 'icons/print_black.png' %}"
-                             class="print-bill hoverable"
-                             alt="{% trans 'Print' %}"
-                             title="{% trans 'Print' %}"
-                             data-id="{{ bill.id }}" />
-                    </div>
-                </div>
-            {% endfor %}
+            <table id="bills_container">
+                <thead class="bill-list header">
+                    <tr>
+                        <td class="column serial">{% trans 'No.' context 'bill management' %}</td>
+                        <td class="column user">{% trans 'User' context 'bill management' %}</td>
+                        <td class="column date">{% trans 'Issue date' context 'bill management' %}</td>
+                        <td class="column contact">{% trans 'Contact name' context 'bill management' %}</td>
+                        <td class="column total">{% trans 'Total' context 'bill management' %}</td>
+                        <td class="column count">{% trans 'Items' context 'bill management' %}</td>
+                        <td class="column view">&nbsp;</td>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for bill in bills %}
+                        <tr class="bill-list item">
+                            <td class="column serial">{{ bill.serial }}</td>
+                            <td class="column user">{{ bill.user_name }}</td>
+                            <td class="column date">{{ bill.timestamp }}</td>
+                            <td class="column contact">{{ bill.contact.name }}</td>
+                            <td class="column total">{{ bill.total }}</td>
+                            <td class="column count">{{ bill.items|length }}</td>
+                            <td class="column view">
+                                <img src="{% static 'icons/print_black.png' %}"
+                                     class="print-bill hoverable"
+                                     alt="{% trans 'Print' %}"
+                                     title="{% trans 'Print' %}"
+                                     data-id="{{ bill.id }}" />
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 {% endblock %}
