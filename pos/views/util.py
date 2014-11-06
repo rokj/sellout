@@ -1,8 +1,10 @@
 import json
 from decimal import Decimal
 from datetime import datetime
+from xdg.Exceptions import ValidationError
 
 from django.db.backends.dummy.base import IntegrityError
+from django import forms
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.core.cache import cache
@@ -274,3 +276,64 @@ def copy_data(from_obj, to_obj):
     # copy all common fields' values from obj1 to obj2
     for field in common_fields:
         to_d[field] = from_d[field]
+
+
+# custom forms and fields...
+class CompanyUserForm(forms.Form):
+    def __init__(self, user=None, company=None, *args, **kwargs):
+        super(CompanyUserForm, self).__init__(*args, **kwargs)
+
+        assert user
+        assert company
+
+        self.user = user
+        self.company = company
+
+        # set user and company to all fields in this form
+        for f in getattr(self, 'fields', None):
+            self.fields[f].user = self.user
+            self.fields[f].company = self.company
+
+
+class CustomDateField(forms.CharField):
+    def __init__(self, *args, **kwargs):
+        super(CustomDateField, self).__init__(*args, **kwargs)
+
+        # these will be set by CompanyUserForm;
+        self.user = None
+        self.company = None
+
+    def clean(self, date):
+        if not date:
+            return None
+
+        assert self.user is not None
+        assert self.company is not None
+
+        r = parse_date(self.user, self.company, date)
+        if not r['success']:
+            raise ValidationError(_("Invalid date format"), None)
+        else:
+            return r['date']
+
+
+class CustomDecimalField(forms.CharField):
+    def __init__(self, *args, **kwargs):
+        super(CustomDecimalField, self).__init__(*args, **kwargs)
+
+        # these will be set by CompanyUserForm;
+        self.user = None
+        self.company = None
+
+    def clean(self, number):
+        if not number:
+            return None
+
+        assert self.user is not None
+        assert self.company is not None
+
+        r = parse_decimal(self.user, self.company, number)
+        if not r['success']:
+            raise ValidationError(_("Invalid number format"), None)
+        else:
+            return r['number']

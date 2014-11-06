@@ -1,69 +1,34 @@
-from pandas.core.reshape import wide_to_long
 from django.core.exceptions import ValidationError
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.core.urlresolvers import reverse
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from django.http import Http404, HttpResponseRedirect, JsonResponse
 from config.functions import get_date_format, get_company_value
 
-from pos.models import Company, Category, Product, Contact, Bill, BillItem
+from pos.models import Company, Product, Bill, BillItem
 from pos.views.bill import bill_to_dict
-from pos.views.util import JsonError, JsonParse, JsonOk,  \
-    max_field_length, has_permission, no_permission_view, JsonStringify, parse_date, parse_decimal
+from pos.views.util import max_field_length, has_permission, no_permission_view, \
+    CompanyUserForm, CustomDateField, CustomDecimalField
 
 from common import globals as g
 
 
-class BillSearchForm(forms.Form):
+class BillSearchForm(CompanyUserForm):
     # search bill by:
-    issued_from = forms.CharField(max_length=10, required=False)
-    issued_to = forms.CharField(max_length=20, required=False)
+    issued_from = CustomDateField(max_length=10, required=False)
+    issued_to = CustomDateField(max_length=20, required=False)
     item_code = forms.CharField(max_length=max_field_length(Product, 'code'), required=False)
     contact = forms.CharField(max_length=128, required=False)
     id = forms.IntegerField(min_value=1, required=False)
-    amount_from = forms.CharField(max_length=g.DECIMAL['currency_digits'], required=False)
-    amount_to = forms.CharField(max_length=g.DECIMAL['currency_digits'], required=False)
+    amount_from = CustomDecimalField(max_length=g.DECIMAL['currency_digits'], required=False)
+    amount_to = CustomDecimalField(max_length=g.DECIMAL['currency_digits'], required=False)
     user_name = forms.CharField(max_length=128, required=False)
 
     sort_by = forms.ChoiceField(choices=(("id", _("Number")), ("date", _("Date")), ("amount", _("Amount")),))
     sort_order = forms.ChoiceField(choices=(("desc", _("Descending")), ("asc", _("Ascending")),))
 
     page = forms.IntegerField(required=False, widget=forms.HiddenInput)
-
-    def clean_decimal(self, number, error_message):
-        if not number:
-            return None
-
-        r = parse_decimal(self.user, self.company, number)
-        if not r['success']:
-            raise ValidationError(error_message)
-        else:
-            return r['number']
-
-    def clean_date(self, date, error_message):
-        if not date:
-            return None
-
-        r = parse_date(self.user, self.company, date)
-        if not r['success']:
-            raise ValidationError(error_message)
-        else:
-            return r['date']
-
-    def clean_amount_from(self):
-        return self.clean_decimal(self.cleaned_data['amount_from'], _("Check numbers (from)"))
-
-    def clean_amount_to(self):
-        return self.clean_decimal(self.cleaned_data['amount_to'], _("Check numbers (to)"))
-
-    def clean_issued_from(self):
-        return self.clean_date(self.cleaned_data['issued_from'], _("Check dates (from)"))
-
-    def clean_issued_to(self):
-        return self.clean_date(self.cleaned_data['issued_to'], _("Check dates (to)"))
 
 
 ###
@@ -82,9 +47,7 @@ def list_bills(request, company):
 
     # use GET for everything: there's little parameters and when using POST, paginator gets
     # in the way with GET requests
-    form = BillSearchForm(request.GET)
-    form.user = request.user  # used for parsing numbers/dates
-    form.company = c
+    form = BillSearchForm(data=request.GET, user=request.user, company=c)
 
     if form.is_valid():
         # decide which way to order the results
@@ -126,6 +89,12 @@ def list_bills(request, company):
                     bills.filter(contact__last_name__icontains=t) | \
                     bills.filter(contact__company_name__icontains=t)
 
+
+        # bill number
+        t = form.cleaned_data.get('id')
+        if t:
+            bills = bills.filter(serial=t)
+
         # amount: from
         t = form.cleaned_data.get('amount_from')
         if t:
@@ -144,9 +113,7 @@ def list_bills(request, company):
         page = form.cleaned_data.get('page')
         searched = True
     else:
-        form = BillSearchForm()
-        form.user = request.user
-        form.company = c
+        form = BillSearchForm(data=None, user=request.user, company=c)
         page = 1
 
         bills = Bill.objects.filter(company=c).order_by('-timestamp')[:N]

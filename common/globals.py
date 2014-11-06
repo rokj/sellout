@@ -187,7 +187,7 @@ MISC = {
     'max_upload_image_size': 1*2**20,  # 2 megabytes
     'image_format': 'png',  # all images will be saved in this format
     'image_upload_formats': 'jpg|jpeg|gif|png|bmp|tiff',  # supported image formats (as regex "options")
-    'discounts_per_page': 2,
+    'discounts_per_page': 12,
     'bills_per_page': 25,
 }
 

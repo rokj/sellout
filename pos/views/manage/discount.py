@@ -1,17 +1,18 @@
+from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
 from django.http import Http404, JsonResponse
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+from django.core.paginator import Paginator
 from pos.models import Company, Discount
 from pos.views.util import JsonError, \
                            has_permission, no_permission_view, \
-                           format_number, format_date, parse_date, parse_decimal, \
-                           max_field_length, manage_delete_object
+                           format_number, format_date, \
+                           max_field_length, manage_delete_object, CompanyUserForm, CustomDateField, CustomDecimalField
 from common import globals as g
-from config.functions import get_date_format, get_user_value, get_company_value
+import datetime as dtm
+from config.functions import get_date_format, get_company_value
 
 
 def discount_to_dict(user, company, d, android=False):
@@ -66,95 +67,38 @@ def get_all_discounts(user, company, android=False):
 
 
 def validate_discount(data, user, company):
-    """ validates data for discount
-        data is a dictionary with keys equal to model fields
-        returns a dictionary: {
-        'success': True if all data is valid, else False
-        'message': None if data is valid, else a message for ValidationError or JsonError
-        'data':'cleaned' data if data is valid, else None
-    """
-    
-    def err(message):
-        return {'success': False, 'message': message, 'data': None}
-    
-    # description: just trim length
-    if 'description' in data:
-        data['description'] = data['description'][:max_field_length(Discount, 'description')]
-    
-    # code: it must exist and must not be too long
-    if 'code' not in data:
-        return err(_("Code is required"))
-    elif len(data['code']) > max_field_length(Discount, 'code'):
-        return err(_("Code is too long (maximum length is %s)" % max_field_length(Discount, 'code')))
-    
-    # type: see if it's in g.DISCOUNT_TYPES (search the first fields of tuples)
-    if data['type'] not in [x[0] for x in g.DISCOUNT_TYPES]:
-        return err(_("Wrong discount type"))
-        
-    # amount: parse number
-    if 'amount' not in data:
-        return err(_("Amount is required"))
-    else:
-        r = parse_decimal(user, company, data['amount'])
-        if r['success']:
-            data['amount'] = r['number']
-        else:
-            return err(_("Wrong number format for amount"))
-    
-    # start_date and end_date: parse date (none of them is mandatory)
-    if len(data['start_date']) > 0: # date fields are never empty (None)
-        r = parse_date(user, company, data['start_date'])
-        if r['success']:
-            data['start_date'] = r['date']
-        else:
-            return err(_("Wrong format for start date"))
-    else:
-        del data['start_date']
+    # validate for mobile, use forms
+    form = DiscountForm(data=data, user=user, company=company)
 
-    if len(data['end_date']) > 0:
-        r = parse_date(user, company, data['end_date'])
-        if r['success']:
-            data['end_date'] = r['date']
-        else:
-            return err(_("Wrong format for end date"))
-    else:
-        del data['end_date']
-            
-    # enabled: doesn't matter
-    
-    # ok
-    return {'success': True, 'message': None, 'data': data}
+    try:
+        return {'success': False, 'message': None, 'data': form.cleaned_data}
+    except ValidationError as e:
+        return {'success': False, 'message': e.msg, 'data': None}
 
 
 #############
 ### views ###
 #############
-class DiscountForm(forms.Form):
+class DiscountForm(CompanyUserForm):
     description = forms.CharField(required=False, widget=forms.Textarea, max_length=max_field_length(Discount, 'description'))
     code = forms.CharField(required=True, max_length=max_field_length(Discount, 'code'))
     type = forms.ChoiceField(choices=g.DISCOUNT_TYPES, required=True)
     # this should be decimal, but we're formatting it our way
-    amount = forms.CharField(max_length=g.DECIMAL['percentage_decimal_places'] + 4, required=True)
+    amount = CustomDecimalField(required=True)
     # this should be date...
-    start_date = forms.CharField(g.DATE['max_date_length'], required=False)
-    end_date = forms.CharField(g.DATE['max_date_length'], required=False)
+    start_date = CustomDateField(required=False)
+    end_date = CustomDateField(required=False)
     enabled = forms.BooleanField(required=False,
                                  widget=forms.Select(choices=((True, _("Yes")), (False, _("No")))))
     
-    def clean(self):
-        # use the same clean method as JSON
-        r = validate_discount(self.cleaned_data, self.user, self.company)
-        if not r['success']:
-            raise forms.ValidationError(r['message'])
-        else:
-            return r['data']
 
-
-class DiscountFilterForm(forms.Form):
+class DiscountFilterForm(CompanyUserForm):
     search = forms.CharField(label=_("Search text"), required=False)
-    start_date = forms.CharField(required=False, max_length=g.DATE['max_date_length'])
-    end_date = forms.CharField(required=False, max_length=g.DATE['max_date_length'])
+    start_date = CustomDateField(required=False, max_length=g.DATE['max_date_length'])
+    end_date = CustomDateField(required=False, max_length=g.DATE['max_date_length'])
     enabled = forms.NullBooleanField(required=False)
+
+    page = forms.IntegerField(widget=forms.HiddenInput, initial=1)
 
 
 @login_required
@@ -165,47 +109,53 @@ def list_discounts(request, company):
     if not has_permission(request.user, c, 'discount', 'view'):
         return no_permission_view(request, c, _("You have no permission to view discounts."))
     
-    discounts = Discount.objects.filter(company__id=c.id)
+    N = 6
     searched = False
 
     # show the filter form
-    if request.method == 'POST':
-        form = DiscountFilterForm(request.POST)
+    form = DiscountFilterForm(data=request.GET, user=request.user, company=c)
 
-        if form.is_valid():
-            # filter by whatever is in the form: description
-            if form.cleaned_data.get('search'):
-                discounts = discounts.filter(description__icontains=form.cleaned_data['search']) | \
-                            discounts.filter(code__icontains=form.cleaned_data['search'])
-            
-            # start_date
-            if form.cleaned_data.get('start_date'):
-                # parse date first
-                r = parse_date(request.user, c, form.cleaned_data.get('start_date'))
-                if r['success']:
-                    discounts = discounts.filter(start_date__gte=r['date'])
-            
-            # end_date
-            if form.cleaned_data.get('end_date'):
-                r = parse_date(request.user, c, form.cleaned_data.get('end_date'))
-                if r['success']:
-                    discounts = discounts.filter(start_date__gte=r['date'])
-            
-            # enabled
-            if form.cleaned_data.get('enabled') is not None:
-                discounts = discounts.filter(active=form.cleaned_data['enabled'])
-                
-            searched = True  # search results are being displayed
+    if form.is_valid():
+        discounts = Discount.objects.filter(company__id=c.id)
+
+        # filter by whatever is in the form: description
+        if form.cleaned_data.get('search'):
+            discounts = discounts.filter(description__icontains=form.cleaned_data['search']) | \
+                        discounts.filter(code__icontains=form.cleaned_data['search'])
+
+        # start_date
+        t = form.cleaned_data.get('start_date')
+        if t:
+            discounts = discounts.filter(start_date__gte=t)
+
+        # end_date
+        t = form.cleaned_data.get('end_date')
+        if t:
+            discounts = discounts.filter(start_date__gte=t)
+
+        # enabled
+        t = form.cleaned_data.get('enabled')
+        if t is not None:
+            discounts = discounts.filter(active=t)
+
+        page = form.cleaned_data.get('page')
+        searched = True  # search results are being displayed
     else:
-        form = DiscountFilterForm()
+        form = DiscountFilterForm(user=request.user, company=c)
+        discounts = Discount.objects.filter(company=c)[:N]
+        page = 1
+
+    paginator = Paginator(discounts, g.MISC['discounts_per_page'])
+    if page:
+        discounts = paginator.page(page)
+    else:
+        discounts = paginator.page(1)
 
     context = {
         'company': c,
 
         'discounts': discounts,
-        'results_count': results_count,
         'searched': searched,
-        'max_count': max_count,
 
         'filter_form': form,
 
@@ -217,6 +167,7 @@ def list_discounts(request, company):
     }
 
     return render(request, 'pos/manage/discounts.html', context) 
+
 
 @login_required
 def add_discount(request, company):
@@ -239,10 +190,8 @@ def add_discount(request, company):
 
     if request.method == 'POST':
         # submit data
-        form = DiscountForm(request.POST)
-        form.company = c
-        form.user = request.user
-        
+        form = DiscountForm(data=request.POST, user=request.user, company=c)
+
         if form.is_valid():
             # save the new discount and redirect back to discounts
             d = Discount(
@@ -261,15 +210,14 @@ def add_discount(request, company):
             
             return redirect('pos:list_discounts', company=c.url_name)
     else:
-        form = DiscountForm()
-        form.company = c
-        form.user = request.user
-        
+        form = DiscountForm(user=request.user, company=c)
+
     context['form'] = form
     context['company'] = c
     context['add'] = True
     
     return render(request, 'pos/manage/discount.html', context)
+
 
 @login_required
 def edit_discount(request, company, discount_id):
@@ -300,10 +248,10 @@ def edit_discount(request, company, discount_id):
 
     if request.method == 'POST':
         # submit data
-        form = DiscountForm(request.POST, initial=discount_to_dict(request.user, c, discount))
-        form.company = c
-        form.user = request.user
-        
+        form = DiscountForm(data=request.POST,
+                            initial=discount_to_dict(request.user, c, discount),
+                            company=c, user=request.user)
+
         if form.is_valid():
             discount.description = form.cleaned_data.get('description')
             discount.code = form.cleaned_data.get('code')
@@ -316,13 +264,12 @@ def edit_discount(request, company, discount_id):
             
             return redirect('pos:list_discounts', company=c.url_name)
     else:
-        form = DiscountForm(initial=discount_to_dict(request.user, c, discount))
-        form.company = c
-        form.user = request.user
-        
+        form = DiscountForm(initial=discount_to_dict(request.user, c, discount), user=request.user, company=c)
+
     context['form'] = form
     
     return render(request, 'pos/manage/discount.html', context)
+
 
 @login_required
 def delete_discount(request, company):

@@ -10,6 +10,8 @@
             $("#id_start_date, #id_end_date").datepicker({
                 dateFormat: "{{ date_format_js|escapejs }}"
             });
+
+            {% include 'pos/manage/pagination.js' %}
         });
     </script>
 {% endblock %}
@@ -28,8 +30,8 @@
     <div class="left-column">
         <h2>{% trans 'Search' context 'form title' %}</h2>
 
-        <form method="post" action="{% url 'pos:list_discounts' company.url_name %}">
-            {% csrf_token %}
+        <form method="get" action="{% url 'pos:list_discounts' company.url_name %}" id="filter_form">
+            {{ filter_form.page }}
 
             <div class="error">{{ filter_form.non_field_errors }}</div>
 
@@ -80,31 +82,36 @@
     </div>
 
     <div class="content">
-        {% comment %}
-        pagination was removed because it can't be done on the same page as POST search form
-        <div id="back_link">
-            {% if discounts.has_previous %}
-                <a href="?page={{ discounts.previous_page_number }}">
-                    <img src="{% static 'icons/back_black.png' %}"
-                         class="hoverable"
-                         alt="{% trans 'Back' context 'Paginator page button' %}"
-                         title="{% trans 'Back' context 'Paginator page button' %}"/>
-                </a>
-            {% endif %}
-        </div>
-        {% endcomment %}
-
         <div class="results-header">
-            {% if searched %}
-                <div class="search-results-header">{% trans 'Discounts found: ' %}{{ results_count }}.
-                    {% if results_count > max_count %}
-                        {% trans 'Showing only first ' context 'Discount search results text' %}
-                        {{ max_count }};
-                        {% trans 'narrow your search by adjusting search criteria.' context 'Discount search results text' %}
-                    {% endif %}
-                </div>
-            {% endif %}
-        </div>
+                {% if searched %}
+                    {% trans 'Results found: ' %}{{ discounts.paginator.count }}
+
+                    <div class="pagination">
+                        <a href="#"
+                           class="fake paginator {% if not discounts.has_previous %}disabled{% endif %}"
+                           data-action="previous">
+                            <img src="{% static 'icons/back_black.png' %}"
+                                 class="hoverable"
+                                 alt="{% trans 'Back' context 'Paginator page button' %}"
+                                 title="{% trans 'Back' context 'Paginator page button' %}"/>
+                        </a>
+
+                        {% trans 'Page' %} {{ discounts.number }} {% trans 'of' %} {{ discounts.paginator.num_pages }}
+
+                        <a href="#"
+                           class="fake paginator {% if not discounts.has_next %}disabled{% endif %}"
+                           data-action="next">
+                            <img src="{% static 'icons/forward_black.png' %}"
+                                 class="hoverable"
+                                 alt="{% trans 'Forward' context 'Paginator page button' %}"
+                                 title="{% trans 'Forward' context 'Paginator page button' %}"/>
+                        </a>
+                    </div>
+                {% else %}
+                    {# only display last few #}
+                    {% trans 'Recent discounts' %}
+                {% endif %}
+            </div>
 
         <div id="list">
             {% if discounts %}
