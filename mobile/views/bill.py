@@ -108,6 +108,58 @@ def validate_prices():
     pass
 
 
+def item_prices(user, company, base_price, tax_percent, quantity, discounts):
+    """ calculates prices and stuff and return the data
+        passing parameters instead of Item object because Item may not exist yet
+    """
+    def get_discount(p):
+        """
+            accumulates discounts on price p and returns final price and discounts
+        """
+
+        discount = Decimal('0') # cumulative discounts
+        final = p # the final price
+
+        for di in discounts:
+            if di.type == 'Absolute':
+                final = final - di.amount
+                discount = discount + di.amount
+            else:
+                this_discount = final*(di.amount/100)
+                discount += this_discount
+                final -= this_discount
+
+        return {'discount': discount, 'final': final}
+
+    r = {}  # return values
+
+    # base price
+    r['base'] = base_price
+    # subtract discounts from base
+    dd = get_discount(r['tax_price'])
+    r['discount'] = dd['discount']
+    # price including discounts
+    r['discount_price'] = dd['final']
+    # add tax
+    r['tax_price'] = r['discount_price']*(Decimal('1') + (tax_percent/Decimal('100')))
+    # get absolute tax value
+    r['tax_absolute'] = r['tax_price'] - r['discount_price']
+    # total
+    r['total'] = r['tax_price']
+    # total without tax
+    r['total_tax_exc'] = r['discount_price']
+
+    # multiply everything by quantity
+    r['base'] = r['base']*quantity  # without tax and discounts
+    r['tax_absolute'] = r['tax_absolute']*quantity  # tax, absolute
+    r['discount_absolute'] = r['discount_absolute']*quantity  # discounts, absolute
+    r['total_tax_exc'] = r['total_tax_exc']*quantity  # total without tax
+    # save single total
+    r['single_total'] = r['total']
+    r['total'] = r['total']*quantity  # total total total
+
+    return r
+
 
 def validate_bill_item(data):
     """ TODO: finds bill and item in database and """

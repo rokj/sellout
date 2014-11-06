@@ -208,7 +208,7 @@ def contact_to_dict(user, company, c):
 
     ret = {
         'id': c.id,
-        'type': c.type
+        'type': c.type,
     }
 
     # a human-readable and quickly-accessible contact name
@@ -230,7 +230,7 @@ def contact_to_dict(user, company, c):
     if c.sex:
         ret['sex'] = c.sex
     if c.date_of_birth:
-        ret['date_of_birth'] = format_date(user, company, c.date_of_birth, send_to=send_to)
+        ret['date_of_birth'] = format_date(user, company, c.date_of_birth)
     if c.street_address:
         ret['street_address'] = c.street_address
     if c.postcode:

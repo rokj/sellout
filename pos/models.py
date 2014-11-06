@@ -12,12 +12,31 @@ import common.globals as g
 from config.countries import country_choices, country_by_code
 
 import datetime as dtm
-import json
 
 
 ### company ###
-class Company(SkeletonU):
+class CompanyAbstract(models.Model):
+    # abstract: used in  for Company and BillCompany
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
+    street = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
+    postcode = models.CharField(_("Postal code"), max_length=20, null=True, blank=True)
+    city = models.CharField(_("City"), max_length=50, null=True, blank=True)
+    state = models.CharField(_("State"), max_length=50, null=True, blank=True)
+    country = models.CharField(max_length=2, choices=country_choices, null=True, blank=True)
+    email = models.CharField(_("E-mail address"), max_length=256, null=False, blank=False)
+    website = models.CharField(_("Website"), max_length=256, null=True, blank=True)
+    phone = models.CharField(_("Phone number"), max_length=30, null=True, blank=True)
+    vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=False, blank=False)
+
+    class Meta:
+        abstract = True
+
+    @property
+    def country_name(self):
+        return country_by_code.get(self.country)
+
+
+class Company(SkeletonU, CompanyAbstract):
     url_name = models.SlugField(_("Company name, used in URL address"),
                                 max_length=g.MISC['company_url_length'],
                                 null=False, blank=False, db_index=True)
@@ -29,36 +48,13 @@ class Company(SkeletonU):
                                         upload_to=ImagePath(g.DIRS['monochrome_logo_dir'],
                                                                  "pos_company", "monochrome_logo"),
                                         null=True, blank=True)
-    street = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
-    postcode = models.CharField(_("Postal code"), max_length=20, null=True, blank=True)
-    city = models.CharField(_("City"), max_length=50, null=True, blank=True)
-    state = models.CharField(_("State"), max_length=50, null=True, blank=True)
-    country = models.CharField(max_length=2,  choices=country_choices, null=True, blank=True)
-    email = models.CharField(_("E-mail address"), max_length=256, null=False, blank=False)
-    website = models.CharField(_("Website"), max_length=256, null=True, blank=True)
-    phone = models.CharField(_("Phone number"), max_length=30, null=True, blank=True)
-    vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=False, blank=False)
     notes = models.TextField(_("Notes"), blank=True, null=True)
 
     def __unicode__(self):
         return self.name
 
-    @property
-    def country_name(self):
-        return country_by_code.get(self.country)
-
     class Meta:
         verbose_name_plural = _("Companies")
-
-
-# not in use at the moment
-#class CompanyAttribute(SkeletonU):
-#    company = models.ForeignKey(Company)
-#    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
-#    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
-#    
-#    def __unicode__(self):
-#        return self.company.name + ": " + self.attribute_name + " = " + self.attribute_value
 
 
 ### category ###
@@ -116,19 +112,9 @@ class Category(SkeletonU):
         return i
 
 
-
-# not in use at the moment
-#class CategoryAttribute(SkeletonU):
-#    category = models.ForeignKey(Category)
-#    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
-#    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
-#    
-#    def __unicode(self):
-#        return self.category.name + ": " + self.attribute_name + " = " + self.attribute_value
-
-
 ### discounts ###
-class DiscountAbstract(SkeletonU):
+class DiscountAbstract(models.Model):
+    # used on Discount and BillItemDiscount
     description = models.TextField(_("Discount description"), null=True, blank=True)
     code = models.CharField(_("Code"), max_length=50, null=True, blank=True)
     type = models.CharField(_("Discount type"), max_length=30, choices=g.DISCOUNT_TYPES, null=False, blank=False,
@@ -142,7 +128,7 @@ class DiscountAbstract(SkeletonU):
         abstract = True
 
 
-class Discount(DiscountAbstract):
+class Discount(SkeletonU, DiscountAbstract):
     company = models.ForeignKey(Company)
 
     start_date = models.DateField(_("Start date"), null=True, blank=True)
@@ -193,16 +179,9 @@ class Tax(SkeletonU):
     def __unicode__(self):
         return self.company.name + ": " + self.name
 
-### product ###
-# for now, one image per product is enough (web pos != web store)
-#class ProductImage(SkeletonU):
-#    description = models.TextField(_('Image description'), blank=True, null=True)
-#    image = models.ImageField(upload_to=get_image_path(g.DIRS['product_image_dir'], "pos_productimage"), null=False)
-#    original_filename = models.CharField(_('Original filename'), max_length=255, blank=True, null=True)
 
-
-class ProductAbstract(SkeletonU):
-    """ all these fields will be copied to BillItem """
+class ProductAbstract(models.Model):
+    # used on Product and BillItem
     code = models.CharField(_("Product code"), max_length=30, blank=False, null=False)
     shortcut = models.CharField(_("Store's internal product number"), max_length=5, blank=False, null=True)
     name = models.CharField(_("Product name"), max_length=50, blank=False, null=False)
@@ -220,7 +199,7 @@ class ProductAbstract(SkeletonU):
         abstract = True
 
 
-class Product(ProductAbstract):
+class Product(SkeletonU, ProductAbstract):
     """ these fields will not be copied to BillItem """
     company = models.ForeignKey(Company, null=False, blank=False)
     discounts = models.ManyToManyField(Discount, null=True, blank=True, through='ProductDiscount')
@@ -380,13 +359,6 @@ class Product(ProductAbstract):
     class Meta:
         abstract = False
 
-# not in use at the moment
-#class ProductAttribute(SkeletonU): # currently not in plan
-#    product = models.ForeignKey(Product, null=False, blank=False)
-#    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
-#    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
-
-
 class ProductDiscount(SkeletonU):
     """ custom many-to-many field for products' discounts: order is important so it must be saved """
     product = models.ForeignKey(Product)
@@ -401,13 +373,10 @@ class ProductDiscount(SkeletonU):
         
 
 ### prices ###
-class Price(SkeletonU):
+class PriceAbstract(models.Model):
+    # used in Price and PurchasePrice
     product = models.ForeignKey(Product)
-    unit_price = models.DecimalField(_("Price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],
-                                     decimal_places=g.DECIMAL['currency_decimal_places'], blank=False, null=False)
-    # use Skeleton.datetime_updated() instead of this: (the same functionality)
-    # date_updated = models.DateTimeField(blank=True, null=True) # determines whether that's the current price for product (if this field is empty)
-    
+
     def __unicode__(self):
         ret = self.product.name + ": " + str(self.unit_price)
 
@@ -415,33 +384,28 @@ class Price(SkeletonU):
             ret += " (inactive)"
 
         return ret
-    
+
     class Meta:
         unique_together = (('product', 'unit_price', 'datetime_updated'),)
+        abstract = True
+
+class Price(SkeletonU, PriceAbstract):
+    # used for tracking product's price as it changes, but only the last one is displayed
+    unit_price = models.DecimalField(_("Price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],
+                                     decimal_places=g.DECIMAL['currency_decimal_places'], blank=False, null=False)
 
 
 ### purchase prices ###
-class PurchasePrice(SkeletonU):
-    product = models.ForeignKey(Product)
+class PurchasePrice(SkeletonU, PriceAbstract):
     unit_price = models.DecimalField(_("Purchase price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],
                                      decimal_places=g.DECIMAL['currency_decimal_places'], blank=False, null=False)
-    
-    def __unicode__(self):
-        ret = self.product.name + ": " + str(self.unit_price)
-
-        if self.datetime_updated:
-            ret += " (inactive)"
-
-        return ret
-    
-    class Meta:
-        unique_together = (('product', 'unit_price', 'datetime_updated'),)
 
 
 ### contacts ###
-class Contact(SkeletonU):
-    company = models.ForeignKey(Company)
-    type = models.CharField(_("Type of contact"), max_length=20, choices=g.CONTACT_TYPES, null=False, blank=False, default=g.CONTACT_TYPES[0][0])
+class ContactAbstract(models.Model):
+    # used for Contact and BillContact
+    type = models.CharField(_("Type of contact"), max_length=20, choices=g.CONTACT_TYPES,
+                            null=False, blank=False, default=g.CONTACT_TYPES[0][0])
     company_name = models.CharField(_("Company name"), max_length=50, null=True, blank=True)
     first_name = models.CharField(_("First name"), max_length=50, null=True, blank=True)
     last_name = models.CharField(_("Last name"), max_length=50, null=True, blank=True)
@@ -455,7 +419,14 @@ class Contact(SkeletonU):
     email = models.CharField(_("E-mail address"), max_length=255, blank=True, null=True)
     phone = models.CharField(_("Telephone number"), max_length=30, blank=True, null=True)
     vat = models.CharField(_("VAT identification number"), max_length=30, null=True, blank=True)
-    
+
+    class Meta:
+        abstract = True
+
+
+class Contact(SkeletonU, ContactAbstract):
+    company = models.ForeignKey(Company)
+
     def __unicode__(self):
         if self.type == "Individual":
             return "Individual: " + self.first_name + " " + self.last_name
@@ -465,15 +436,6 @@ class Contact(SkeletonU):
     @property
     def country_name(self):
         return country_by_code.get(self.country)
-
-# not in use at the moment   
-#class ContactAttribute(SkeletonU):
-#    contact = models.ForeignKey(Contact)
-#    attribute_name = models.CharField(_("Attribute name"), max_length=g.ATTR_LEN['name'], null=False, blank=False)
-#    attribute_value = models.CharField(_("Attribute value"), max_length=g.ATTR_LEN['value'], null=False, blank=False)
-#    
-#    def __unicode__(self):
-#        return str(self.contact) + ": " + self.attribute_name + " = " + self.attribute_value
 
 
 ### permissions
@@ -498,31 +460,55 @@ def delete_permission_cache(**kwargs):
 
 
 ### register (till) ###
-class Register(SkeletonU):
-    company = models.ForeignKey(Company, null=False, blank=False)
-    # each company must have at least one register; each register carries the following settings
+class RegisterAbstract(models.Model):
     name = models.CharField(_("Name of cash register"), max_length=50, null=False, blank=False)
-    printer_driver = models.CharField(_("Printer driver"), max_length=50, null=False, choices=g.PRINTER_DRIVERS)
-    receipt_format = models.CharField(_("Receipt format"), max_length=32, choices=g.RECEIPT_FORMATS, null=False, blank=False)
+    receipt_format = models.CharField(_("Receipt format"), max_length=32, choices=g.RECEIPT_FORMATS, null=False,
+                                      blank=False)
     receipt_type = models.CharField(_("Receipt type"), max_length=32, choices=g.RECEIPT_TYPES, null=False)
     print_logo = models.BooleanField(_("Print logo on thermal receipts"), blank=False, default=True)
-
     location = models.TextField(_("Location of this register"), max_length=120, null=True, blank=True)
     print_location = models.BooleanField(_("Print location of register"), blank=False, default=True)
 
-    #print_settings = models.TextField(_("Printer settings"), null=True, blank=True)
+    class Meta:
+        abstract = True
 
 
-### bills ###
-class Bill(SkeletonU):
+class Register(SkeletonU, RegisterAbstract):
+    company = models.ForeignKey(Company, null=False, blank=False)
+    printer_driver = models.CharField(_("Printer driver"), max_length=50, null=False, choices=g.PRINTER_DRIVERS)
+
+
+### bill details ###
+class BillCompany(SkeletonU, CompanyAbstract):
+    # details about the company that issued <this> bill;
+    # this is obviously the current company the user's working in
+    company = models.ForeignKey(Company, null=False, blank=False)
+
+
+class BillContact(SkeletonU, ContactAbstract):
+    # stuff from  contact: inherited from ContactAbstract
+    contact = models.ForeignKey(Contact, null=False, blank=False)
+
+
+class BillRegister(SkeletonU, RegisterAbstract):
+    # stuff from the register that <this> bill was 'printed' on: inherit from RegisterAbstract
+    register = models.ForeignKey(Register, null=False, blank=False)
+
+
+class Bill(SkeletonU, RegisterAbstract):
+    # inherited fields from: RegisterAbstract, ContactAbstract,
     company = models.ForeignKey(Company, null=False, blank=False)  # also an issuer of the bill
-    user = models.ForeignKey(User, null=False)
-    till = models.ForeignKey(Register, null=False, blank=False)
-    serial = models.IntegerField(_("Bill number, unique over all company's bills"), null=True)  # will be updated in post_save signal
 
-    type = models.CharField(_("Bill type"), max_length=20, choices=g.BILL_TYPES, null=False, blank=False, default=g.BILL_TYPES[0][0])
-    contact = models.ForeignKey(Contact, null=True, blank=True, related_name='bill_recipient_company')
-    note = models.CharField(_("Notes"), max_length=1000, null=True, blank=True)
+    # every time a bill is created, copy the data that has changed since the last bill was saved to history.
+    issuer = models.ForeignKey(BillCompany)  # when company data hasn't changed, this is equal to Bill.company
+    contact = models.ForeignKey(BillContact, null=True)
+    register = models.ForeignKey(BillRegister, null=False)
+
+    # save user's id as an integer (not as a foreign key) and user name as well in case that user gets deleted
+    user_id = models.IntegerField(null=False)
+    user_name = models.CharField(max_length=64, null=False)
+
+    serial = models.IntegerField(_("Bill number, unique over all company's bills"), null=True)  # will be updated in post_save signal
     sub_total = models.DecimalField(_("Sub total"),
                                     max_digits=g.DECIMAL['currency_digits'],
                                     decimal_places=g.DECIMAL['currency_decimal_places'],
@@ -538,14 +524,17 @@ class Bill(SkeletonU):
                                      choices=g.DISCOUNT_TYPES,
                                      null=True, blank=True)
 
-    tax = models.DecimalField(_("Tax amount, absolute value, derived from products"), 
+    # sum of all absolute taxes from items
+    tax = models.DecimalField(_("Tax amount, absolute value, derived from products"),
                               max_digits=g.DECIMAL['currency_digits'],
                               decimal_places=g.DECIMAL['currency_decimal_places'],
                               null=True, blank=True)
-    total = models.DecimalField(_("Total amount to be paid"), 
+    total = models.DecimalField(_("Total amount to be paid"),
                                 max_digits=g.DECIMAL['currency_digits'],
                                 decimal_places=g.DECIMAL['currency_decimal_places'],
                                 null=True, blank=True)
+
+    note = models.CharField(_("Notes"), max_length=1000, null=True, blank=True)
 
     # payment type and reference: this will be updated after the bill is saved
     payment_type = models.CharField(_("Payment type"), max_length=32, choices=g.PAYMENT_TYPES, null=True, blank=True)
@@ -554,13 +543,9 @@ class Bill(SkeletonU):
     timestamp = models.DateTimeField(_("Date and time of bill creation"), null=False)
     due_date = models.DateTimeField(_("Due date"), null=True)
     status = models.CharField(_("Bill status"), max_length=20, choices=g.BILL_STATUS, default=g.BILL_STATUS[0][0])
-    
+
     def __unicode__(self):
         return self.company.name + ": " + str(self.serial)
-    
-    #def save(self):
-    #    super(Bill, self).save()
-    #    copy_bill_to_history(self.id) # always put a copy in history
 
 
 # post-save signal: set bill's serial number
@@ -585,141 +570,124 @@ def set_serial(instance, created, **kwargs):
     instance.save()
 
 
-class BillItem(ProductAbstract): # include all data from Product
+class BillItem(SkeletonU, ProductAbstract): # include all data from Product
     bill = models.ForeignKey(Bill)
-    product_id = models.BigIntegerField(null=False) # store reference to product (used by UI/jQuery/...)
-    quantity = models.DecimalField(_("Quantity"), max_digits = g.DECIMAL['quantity_digits'],
-                                  decimal_places = g.DECIMAL['quantity_decimal_places'],
-                                  null=False, blank=False)
-    base_price = models.DecimalField(_("Base price"), # hard-coded price from current Price table
-                                     max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                                     null=False, blank=False)
-    tax_percent = models.DecimalField(_("Tax in percent, copied from product's tax rate"), 
-                                      max_digits = g.DECIMAL['percentage_decimal_places']+3, decimal_places=g.DECIMAL['percentage_decimal_places'],
-                                      null=True, blank=True)
-    tax_absolute = models.DecimalField(_("Tax amount (absolute value)"), # hard-coded price from current Price table
-                                       max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                                       null=False, blank=False)
-    discount_absolute = models.DecimalField(_("Discount, absolute value, sum of all valid discounts on this product"), 
-                                            max_digits = g.DECIMAL['currency_digits'],
-                                            decimal_places=g.DECIMAL['currency_decimal_places'], null=True, blank=True)
-    single_total = models.DecimalField(_("Total price for a single item"),
-                                       max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                                       null=False, blank=False)
-    total = models.DecimalField(_("Total price"),
-                                max_digits = g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
-                                null=False, blank=False)
-    
-    bill_notes = models.CharField(_("Bill notes"), max_length=1000, null=True, blank=True,
-                                  help_text=_("Notes for this item, shown on bill (like expiration date or serial number)"))
-    
+    product_id = models.BigIntegerField(null=False)  # store reference to product (used by UI/jQuery/stats/...)
+                                                     # (not a FK, in case the product gets deleted)
+
+    quantity = models.DecimalField(_("Quantity"),
+        max_digits=g.DECIMAL['quantity_digits'],
+        decimal_places=g.DECIMAL['quantity_decimal_places'],
+        null=False, blank=False)
+
+    # achtung: all prices are already multiplied by quantity
+    base_price = models.DecimalField(_("Base price, without tax and discounts"),
+        max_digits=g.DECIMAL['currency_digits'],
+        decimal_places=g.DECIMAL['currency_decimal_places'],
+        null=False, blank=False)
+
+    tax_percent = models.DecimalField(_("Tax in percent, copied from product's tax rate"),
+        max_digits=g.DECIMAL['percentage_decimal_places']+3,
+        decimal_places=g.DECIMAL['percentage_decimal_places'],
+        null=True, blank=True)
+
+    tax_absolute = models.DecimalField(_("Tax amount, absolute value"),
+        max_digits=g.DECIMAL['currency_digits'],
+        decimal_places=g.DECIMAL['currency_decimal_places'],
+        null=False, blank=False)
+
+    discount_absolute = models.DecimalField(_("Discount, absolute value, sum of all valid discounts on this item"),
+        max_digits=g.DECIMAL['currency_digits'],
+        decimal_places=g.DECIMAL['currency_decimal_places'],
+        null=True, blank=True)
+
+    total = models.DecimalField(_("Total price, including taxes, discounts and multiplied by quantity"),
+        max_digits=g.DECIMAL['currency_digits'], decimal_places=g.DECIMAL['currency_decimal_places'],
+        null=False, blank=False)
+
+    bill_notes = models.CharField(_("Bill notes"),
+        help_text=_("Notes for this item, shown on bill (like expiration date or serial number)"),
+        max_length=1000, null=True, blank=True)
+
     def __unicode__(self):
         return str(self.bill.id) + ": " + self.name
-    
-    #def save(self):
-    #    super(BillItem, self).save()
-    #    copy_bill_to_history(self.bill.id) # always put a copy in history
 
 
 ### item's discounts
-class BillItemDiscount(DiscountAbstract):
+class BillItemDiscount(SkeletonU, DiscountAbstract):
     # inherits everything from DiscountAbstract
     bill_item = models.ForeignKey(BillItem)
 
 
-### history
-class BillHistory(SkeletonU):
-    bill = models.ForeignKey(Bill)
-    data = models.TextField(_("Serialized Bill history"), null=False)
-    
-    class Meta:
-        verbose_name_plural = _("Bill history")
+### track changes:
+# company
+@receiver(post_save, sender=Company)
+def company_updated(instance, **kwargs):
+    from pos.views.util import compare_objects, copy_data
+
+    # get the last saved object from that table and see if anything has changed
+    last_object = BillCompany.objects.filter(company=instance).order_by('-datetime_created')[:1]
+
+    if len(last_object) > 0:
+        last_object = last_object[0]
+        if compare_objects(last_object, instance) is True:
+            # there are no changes, there's nothing to be done
+            return
+
+    # something has changed, create a new copy of instance in model
+    # create a new BillCompany
+    bill_company = BillCompany(
+        created_by=instance.created_by,
+        company=instance
+    )
+
+    copy_data(instance, bill_company)
+    bill_company.save()
 
 
-def model_to_dict(obj, ignore=None, exclude=None):
-    """ converts django model object to dictionary.
-        ignores data that is in ignore list.
-        includes data from foreign key objects, if it's not in exclude[] list.
-        ignore takes precedence over exclude. """
-    if not obj:
-        return ''
+# register
+@receiver(post_save, sender=Register)
+def register_updated(instance, **kwargs):  # see comments for company_updated
+    from pos.views.util import compare_objects, copy_data
 
-    if ignore is None:
-        ignore = []
-    if exclude is None:
-        exclude = []
-    
-    data = {}
-    
-    # put all fields' values in a dictionary
-    for field in obj._meta.fields:
-        if field.name in ignore: # don't touch
-            continue
-        
-        if field.rel: # if this is a foreign key, write down the whole object
-            sub_obj = getattr(obj, str(field.name))
-            if str(field.name) not in exclude: # if include, then copy FK data
-                data[str(field.name)] = model_to_dict(sub_obj, ignore=ignore, exclude=exclude)
-            else: # otherwise, just use the __unicode__ method, defined in the model
-                data[str(field.name)] = unicode(sub_obj)
-        else:
-            key = str(field.name)
-            value = getattr(obj, str(field.name))
-            # for taking care of specific fields
-            #datatype = field.get_internal_type()
-            if not value:
-                value = ''
-            
-            data[key] = unicode(value)
+    last_object = BillRegister.objects.filter(register=instance).order_by('-datetime_updated')[:1]
 
-    return data
+    if len(last_object) > 0:
+        last_object = last_object[0]
+        if compare_objects(last_object, instance) is True:
+            return
+
+    bill_register = BillRegister(
+        created_by=instance.created_by,
+        register=instance
+    )
+    copy_data(instance, bill_register)
+    bill_register.save()
 
 
-def copy_bill_to_history(bill_id):
-    """ serializes Bill, BillItem and all foreign-keyed tables,
-        puts them in JSON format and saves to BillHistory. """
-    
-    data = {}
-    
-    ignore_list = ['image']
-    exclude_list = ['created_by', 'updated_by']
-    b = Bill.objects.get(id=bill_id)
-    
-    # about the bill
-    data['bill'] = model_to_dict(b, ignore=ignore_list, exclude=exclude_list)
-    
-    # about the items
-    data['items'] = []
-    
-    i = BillItem.objects.filter(bill__id=bill_id)
-    exclude_list.append('bill') # bill is already in "bill"
-    
-    for item in i:
-        data['items'].append(model_to_dict(item, ignore=ignore_list, exclude=exclude_list))
-    
-    serialized_data = json.dumps(data)
-    
-    history = BillHistory(created_by=b.created_by,
-                          bill=b, data=serialized_data)
-    history.save()
-    return True
+# contact
+@receiver(post_save, sender=Contact)
+def contact_updated(instance, **kwargs):
+    from pos.views.util import compare_objects, copy_data
+
+    last_object = BillContact.objects.filter(contact=instance).order_by('-datetime_updated')[:1]
+
+    if len(last_object) > 0:
+        last_object = last_object[0]
+        if compare_objects(last_object, instance) is True:
+            return
+
+    bill_contact = BillContact(
+        contact=instance,
+        created_by=instance.created_by
+    )
+    copy_data(instance, bill_contact)
+    bill_contact.save()
 
 
-
-
-@receiver(post_delete, sender=Category)
-@receiver(post_delete, sender=Product)
-@receiver(post_delete, sender=Contact)
-@receiver(post_delete, sender=Tax)
-@receiver(post_delete, sender=Discount)
-def set_serial_delete(instance, **kwargs):
-    signal_change(instance, False, action='delete', **kwargs)
-# author: Android lord
-
-
+### synchonization
 def signal_change(instance, created, action, **kwargs):
     from sync.models import Sync
-
     if not instance.company:
         return
 
@@ -743,6 +711,16 @@ def signal_change(instance, created, action, **kwargs):
                     object_id=instance.id,
                     seq=last_key+1)
         sync.save()
+
+
+@receiver(post_delete, sender=Category)
+@receiver(post_delete, sender=Product)
+@receiver(post_delete, sender=Contact)
+@receiver(post_delete, sender=Tax)
+@receiver(post_delete, sender=Discount)
+def set_serial_delete(instance, **kwargs):
+    signal_change(instance, False, action='delete', **kwargs)
+
 
 @receiver(post_save, sender=Category)
 @receiver(post_save, sender=Product)

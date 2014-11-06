@@ -149,13 +149,13 @@ input#edit_product_save, input#edit_product_cancel{
 #edit_product_description,
 #edit_product_private_notes{
     /* must match all paddings, margins, height of all junk inside div.form-field */
-    height: 114px;
+    height: 102px;
 }
 
 /* minor details etc. */
 div.management-column.hand-margin-2{
     /* margins for second column */
-    margin-top: 5px;
+    margin-top: 18px;
 }
 
 div.management-column.hand-margin-3{
@@ -226,4 +226,3 @@ h3, #results_info{
     color: #ff5a6e;
     font-size: 13px;
 }
-

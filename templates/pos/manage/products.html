@@ -17,11 +17,11 @@
         .image-buttons {
             position: relative;
             height: {{ image_dimensions.1 }}px;
-            float: right;
         }
 
         .delete-image-button {
             background-image: url("{% static 'icons/delete_active.png' %}");
+            left:  {{ image_dimensions.0 }}px;
         }
 
         /* button backgrounds: other styling is in management/products.css */
@@ -673,6 +673,10 @@
                     "{% trans 'All changes you made to this product will be lost. Continue?' %}",
                     p.close_dialog,
                     function(){});*/
+
+                // delete image: not in context anymore
+                delete p.data.delete_image;
+
                 p.close_dialog();
             };
 
@@ -727,7 +731,7 @@
                 var discounts = p.get_discounts();
 
                 // function total_price(tax_first, base_price, tax, discounts, quantity, decimal_places){
-                var result = total_price({{tax_first|lower}}, price, t, discounts, Big(1), {{decimal_places}});
+                var result = total_price(price, t, discounts, Big(1), {{decimal_places}});
 
                 // price without tax
                 p.items.base_price.text(display_number(result.base, "{{separator}}", {{ decimal_places }}));
@@ -758,6 +762,17 @@
                 }
             };
 
+            p.update_image_delete_button = function(){
+                // show the button if there's image or if it hasn't been deleted
+                if(p.data.delete_image){
+                    p.items.delete_image.hide();
+                    return;
+                }
+
+                if(p.data.image_data || p.data.image) p.items.delete_image.show();
+                else p.items.delete_image.hide();
+            };
+
             p.change_image = function(){
                 // get image (base64) and store it to .data()
                 var obj = p.items.upload_image.get(0);
@@ -776,7 +791,9 @@
                                 "{% trans 'Error while uploading image' %}",
                                 "{% trans 'Wrong file type for the uploaded image!' %}"
                             );
-                            //upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
+
+                            p.update_image_delete_button();
+
                             return false;
                         }
                         if(f.size > {{ max_upload_size_bytes|escapejs }}){
@@ -784,7 +801,9 @@
                                 "{% trans 'Error while uploading image' %}",
                                 "{% trans 'File too large, maximum size for upload is' %} {{ max_upload_size|escapejs }} MB"
                             );
-                            //upload_image_status('no_image', save_btn_obj, del_obj, upl_obj, img_obj);
+
+                            p.update_image_delete_button();
+
                             return false;
                         }
 
@@ -796,20 +815,16 @@
                         p.items.image.css("background-image", "url('" + p.data.image_data + "')");
                         p.items.image.attr("alt", p.data.name);
 
+                        p.update_image_delete_button();
+
                         // update dialog
-                        //upload_image_status('image', save_btn_obj, del_obj, upl_obj, img_obj);
                         return true;
                     };
+
                     reader.readAsDataURL(obj.files[0]);
-                    // disable the save() button until everything is uploaded
-                    //upload_image_status('uploading', save_btn_obj, del_obj, upl_obj, img_obj);
                     // image will have to be uploaded
                     p.data.change_image = true;
                 }
-
-                // not showing/hiding at the moment
-                //del_obj.show();
-                //upl_obj.hide();
             };
 
             p.add_discount = function(discount){
@@ -862,6 +877,13 @@
                 data['id'] = p.data.id;
                 data['name'] = p.items.name.val();
                 data['unit_type'] = p.items.unit_sel.val();
+
+                if(p.data.delete_image){
+                    p.data.change_image = true;
+                    p.data.image_data = null;
+                    p.data.image = null;
+                }
+
                 // image: if changed, encode uploaded image to base64
                 data['change_image'] = p.data.change_image;
                 if(p.data.change_image) data['image'] = p.data.image_data;
@@ -927,7 +949,6 @@
                     );
                 }
             };
-
 
             p.refresh_discounts = function(){
                 // clear everything discount-related and redraw
@@ -1023,8 +1044,6 @@
                 categories_autocomplete(p.items.category, p.data.category_id);
             }
 
-
-
             // stock
             p.items.stock.val(p.data.stock);
 
@@ -1113,13 +1132,11 @@
 
             // delete image button
             p.items.delete_image.unbind().click(function(){
-                // upload_image_status(); // not used at the moment
-
-                p.data.change_image = true;
-                p.data.image_data = null;
-                p.data.image = null;
+                p.data.delete_image = true;
 
                 show_image(p.items.image, null, "");
+
+                p.update_image_delete_button();
             });
 
             // save and cancel buttons
@@ -1135,11 +1152,12 @@
 
             // cosmetics:
             // upload image button width: resize the buttons according to column and image width
-            $(".image-buttons", p.container).width(
-                $(".management-column", p.container).first().width() - {{ image_dimensions.0 }}
-            );
+            // $(".image-buttons", p.container).width(
+            //     $(".management-column", p.container).first().width() - {{ image_dimensions.0 }}
+            // );
 
-            p.items.upload_image.customFileInput("{% trans 'Choose...' %}");
+            p.items.upload_image.customFileInput(p.items.image);
+            p.update_image_delete_button();
         };
 
         MassTaxes = function(){
@@ -1479,20 +1497,14 @@
             <h2 id="edit_dialog_title">{# content by js #}</h2>
 
             <div class="management-column narrow">
-                <div class="images">
-                    <div class="image-buttons">
-                        <div class="bottom">
-                            <div>
-                                <button id="edit_product_delete_image"
-                                        class="delete-image-button no-shadow hoverable"
-                                        title="{% trans 'Remove image' %}"></button>
+                <div class="image-buttons">
+                    <button id="edit_product_delete_image"
+                            class="delete-image-button no-shadow hoverable"
+                            title="{% trans 'Remove image' %}"></button>
 
-                                <form id="edit_product_image_input_form" class="custom-file-input">
-                                    <input type="file" id="edit_product_image_upload"/>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    <form id="edit_product_image_input_form">
+                        <input type="file" id="edit_product_image_upload" class="hoverable"/>
+                    </form>
 
                     <div id="edit_product_image"></div>
                 </div>

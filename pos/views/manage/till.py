@@ -1,4 +1,5 @@
 # this file should be named register.py, but would be confused with user registration, so here's a synonym
+from django.db.models import FieldDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -13,15 +14,12 @@ from config.functions import get_date_format, get_user_value, get_company_value
 
 def register_to_dict(company, user, register):
     """ company and user are not needed at the moment (maybe for displaying dates/times in the future) """
-    return {
+    r = {
         'id': register.id,
         'name': register.name,
 
         'receipt_format_display': register.get_receipt_format_display(),
         'receipt_format': register.receipt_format,
-
-        'printer_driver_display': register.get_printer_driver_display(),
-        'printer_driver': register.printer_driver,
 
         'receipt_type_display': register.get_receipt_type_display(),
         'receipt_type': register.receipt_type,
@@ -31,6 +29,14 @@ def register_to_dict(company, user, register):
         'location': register.location,
         'print_location': register.print_location,
     }
+
+    try:  # fields that are not common to Register and BillRegister
+        r['printer_driver'] = register.printer_driver
+        r['printer_driver_display'] = register.get_printer_driver_display()
+    except (FieldDoesNotExist, AttributeError):
+        pass
+
+    return r
 
 
 def get_all_registers(company, user):

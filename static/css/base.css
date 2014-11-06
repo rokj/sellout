@@ -1,10 +1,12 @@
+html{
+    font-family: "Roboto", Arial, Helvetica, sans-serif;
+}
+
 body{
     margin: 0;
     padding: 0;
     background-color: #ebebeb;
 }
-
-*{ font-family: "Roboto", Arial, Helvetica, sans-serif; }
 
 h1{
     text-transform: uppercase;
@@ -40,7 +42,7 @@ div.clear-floats{
     color: #ffffff;
 }
 
-*:disabled{
+*:disabled, .disabled, .disabled img{
     opacity: 0.3;
     cursor: default;
 }

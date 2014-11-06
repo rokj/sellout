@@ -7,6 +7,12 @@
     overflow: hidden;
 }
 
+h2{
+    font-size: 24px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 .menu-hidden{
     /* simpleMenus should not be hidden with display: none, but
        height: 0 to keep the necessary horizontal space occupied */
@@ -128,12 +134,6 @@ a.button.cancel, input.cancel{ background-color: #ff5a6e; }
     display: block;
     position: absolute;
 
-    left: 100%;
-    top: 50%;
-
-    margin-top: -10px;
-    margin-left: 5px;
-
     width: 20px;
     height: 20px;
 
@@ -144,6 +144,11 @@ a.button.cancel, input.cancel{ background-color: #ff5a6e; }
     cursor: pointer;
 
     z-index: 3;
+
+    left: 0; /* must be modified in html styles by template variable (specific image width) */
+    bottom: 0;
+
+    margin-left: 10px;
 }
 
 div.bottom input{
@@ -180,4 +185,26 @@ div.clear-results{
 div.clear-results a{
     color: #969696;
     font-size: 12px;
+}
+
+.results-header{
+    /* must match the first input box of filter form, if there's any */
+    padding-top: 28px;
+    color: #646464;
+    height: 30px;
+}
+
+.results-header .pagination{
+    display: inline;
+    margin-left: 20px;
+}
+
+.results-header .paginator img{
+    display: inline;
+    vertical-align: text-top;
+    position: relative;
+    top: 0;
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 20px;
 }

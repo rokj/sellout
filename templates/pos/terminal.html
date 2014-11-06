@@ -41,7 +41,6 @@
 <script src="{% static 'js/widgets/contacts.js' %}"></script> {% comment %} selecting clients (for bills) {% endcomment %}
 <script src="{% static 'js/widgets/bill.js' %}"></script> {% comment %} bill and its items {% endcomment %}
 <script src="{% static 'js/widgets/payment.js' %}"></script> {% comment %} formatting and printing receipts {% endcomment %}
-<script src="{% static 'js/widgets/print.js' %}"></script> {% comment %} formatting and printing receipts {% endcomment %}
 
 {% comment %} 'embedded' javascript {% endcomment %}
 <script type="text/javascript">
@@ -79,8 +78,7 @@ $(window).load(function(){
         // config (data comes directly from view)
         config: {% autoescape off %}{{ config }}{% endautoescape %},
 
-        // other data (directly from view)
-        // includes: categories,
+        // pos data (directly from view) (categories, products, taxes)
         data: {% autoescape off %}{{ data }}{% endautoescape %},
 
         // javascript objects (initialized later)
@@ -498,13 +496,6 @@ $(window).load(function(){
     </div>
 
     <div id="templates" class="hidden">
-        <div id="small_receipt_template">
-            {% include 'pos/small_receipt.html' %}
-        </div>
-        <div id="large_receipt_template">
-            {% include 'pos/large_receipt.html' %}
-        </div>
-
         <div class="details-box hidden" id="details_box_template">
             {# the arrow that should point to bill item #}
             <div class="item-arrow"></div>

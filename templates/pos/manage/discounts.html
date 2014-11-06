@@ -10,6 +10,8 @@
             $("#id_start_date, #id_end_date").datepicker({
                 dateFormat: "{{ date_format_js|escapejs }}"
             });
+
+            {% include 'pos/manage/pagination.js' %}
         });
     </script>
 {% endblock %}
@@ -28,8 +30,8 @@
     <div class="left-column">
         <h2>{% trans 'Search' context 'form title' %}</h2>
 
-        <form method="post" action="{% url 'pos:list_discounts' company.url_name %}">
-            {% csrf_token %}
+        <form method="get" action="{% url 'pos:list_discounts' company.url_name %}" id="filter_form">
+            {{ filter_form.page }}
 
             <div class="error">{{ filter_form.non_field_errors }}</div>
 
@@ -80,16 +82,36 @@
     </div>
 
     <div class="content">
-        <div id="back_link">
-            {% if discounts.has_previous %}
-                <a href="?page={{ discounts.previous_page_number }}">
-                    <img src="{% static 'icons/back_black.png' %}"
-                         class="hoverable"
-                         alt="{% trans 'Back' context 'Paginator page button' %}"
-                         title="{% trans 'Back' context 'Paginator page button' %}"/>
-                </a>
-            {% endif %}
-        </div>
+        <div class="results-header">
+                {% if searched %}
+                    {% trans 'Results found: ' %}{{ discounts.paginator.count }}
+
+                    <div class="pagination">
+                        <a href="#"
+                           class="fake paginator {% if not discounts.has_previous %}disabled{% endif %}"
+                           data-action="previous">
+                            <img src="{% static 'icons/back_black.png' %}"
+                                 class="hoverable"
+                                 alt="{% trans 'Back' context 'Paginator page button' %}"
+                                 title="{% trans 'Back' context 'Paginator page button' %}"/>
+                        </a>
+
+                        {% trans 'Page' %} {{ discounts.number }} {% trans 'of' %} {{ discounts.paginator.num_pages }}
+
+                        <a href="#"
+                           class="fake paginator {% if not discounts.has_next %}disabled{% endif %}"
+                           data-action="next">
+                            <img src="{% static 'icons/forward_black.png' %}"
+                                 class="hoverable"
+                                 alt="{% trans 'Forward' context 'Paginator page button' %}"
+                                 title="{% trans 'Forward' context 'Paginator page button' %}"/>
+                        </a>
+                    </div>
+                {% else %}
+                    {# only display last few #}
+                    {% trans 'Recent discounts' %}
+                {% endif %}
+            </div>
 
         <div id="list">
             {% if discounts %}
@@ -151,17 +173,6 @@
                 {% endfor %}
             {% else %}
                 <span class="no-results">{% trans 'No discounts found.' %}</span>
-            {% endif %}
-        </div>
-
-        <div id="forward_link">
-            {% if discounts.has_next %}
-                <a href="?page={{ discounts.next_page_number }}">
-                    <img src="{% static 'icons/forward_black.png' %}"
-                         class="hoverable"
-                         alt="{% trans 'Next' context 'Paginator page button' %}"
-                         title="{% trans 'Next' context 'Paginator page button' %}"/>
-                </a>
             {% endif %}
         </div>
     </div>

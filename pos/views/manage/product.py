@@ -129,11 +129,6 @@ def products(request, company):
         'tax': g.DECIMAL['percentage_decimal_places'] + 4,  # up to '100.' + 'decimal_digits'
     }
     
-    if get_company_value(request.user, c, 'pos_discount_calculation') == 'Tax first':
-        tax_first = True
-    else:
-        tax_first = False
-
     context = {
         'company': c,
         'title': _("Products"),
@@ -159,7 +154,6 @@ def products(request, company):
         # numbers etc
         'default_tax_id': get_default_tax(request.user, c)['id'],
         'decimal_places': get_company_value(request.user, c, 'pos_decimal_places')*2,  # ACHTUNG: rounding comes at the end
-        'tax_first': tax_first,
     }
     return render(request, 'pos/manage/products.html', context)
 

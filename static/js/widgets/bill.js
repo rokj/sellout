@@ -205,7 +205,9 @@ Bill = function(g){
         // to prevent errors)
         if(!p.g.objects.terminal.register) return null;
 
-        var i, id;
+        var i, id, register;
+
+        register = p.g.objects.terminal.register;
 
         if(p.data && !isNaN(p.data.id)) id = p.data.id;
         else id = -1;
@@ -377,7 +379,6 @@ Item = function(bill, product) {
 
         // prices:
         var r = total_price(
-            p.g.config.tax_first,
             p.data.base_price,
             p.data.tax_percent,
             p.data.discounts,
@@ -817,7 +818,7 @@ ItemDetails = function(item){
     };
 
     p.update_prices = function(){
-        var r = total_price(p.g.config.tax_first,
+        var r = total_price(
             p.item.data.base_price,
             p.item.data.tax_percent,
             p.temp_discounts,

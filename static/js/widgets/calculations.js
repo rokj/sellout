@@ -57,10 +57,9 @@ function do_tax(p_incl, p_excl, tax){
     }
 }
 
-function total_price(tax_first, base_price, tax, discounts, quantity, decimal_places){
+function total_price(base_price, tax, discounts, quantity, decimal_places){
     // calculates total price
     // parameters:
-    // tax_first: if true, first tax is added and then discounts, else v.v.
     // base: base price, Big()
     // tax: tax in percent, Big()
     // discounts: list of discounts (from py's discount_to_dict())
@@ -90,53 +89,28 @@ function total_price(tax_first, base_price, tax, discounts, quantity, decimal_pl
     var r = {};
     var t;
 
-    if(tax_first){
-        // base price
-        r.base = base_price;
+    // subtract discounts from base
+    t = discounts_total(base_price, discounts);
 
-        // price including tax
-        r.tax_price = do_tax(null, base_price, tax);
-        if(!r.tax_price) return null;
+    r.discount = t.discount;
+    if(!r.discount) return null;
 
-        // absolute tax value
-        r.tax = r.tax_price.minus(base_price);
-        if(!r.tax) return null;
+    // price including discounts
+    r.discount_price = t.final;
+    if(!r.discount_price) return null;
 
-        // absolute discounts value
-        t = discounts_total(r.tax_price, discounts);
-        r.discount = t.discount;
-        if(!r.discount) return null;
+    // add tax
+    r.tax_price = do_tax(null, r.discount_price, tax);
+    if(!r.tax_price) return null;
 
-        // total, with tax and discounts
-        r.total = t.final;
+    // get absolute tax value
+    r.tax = r.tax_price.minus(r.discount_price);
+    if(!r.tax_price) return null;
 
-        // total without tax
-        r.total_tax_exc = r.total.minus(r.tax);
-    }
-    else{
-        // subtract discounts from base
-        t = discounts_total(base_price, discounts);
+    r.total = r.tax_price;
 
-        r.discount = t.discount;
-        if(!r.discount) return null;
-
-        // price including discounts
-        r.discount_price = t.final;
-        if(!r.discount_price) return null;
-
-        // add tax
-        r.tax_price = do_tax(null, r.discount_price, tax);
-        if(!r.tax_price) return null;
-
-        // get absolute tax value
-        r.tax = r.tax_price.minus(r.discount_price);
-        if(!r.tax_price) return null;
-
-        r.total = r.tax_price;
-
-        // total without tax
-        r.total_tax_exc = r.discount_price;
-    }
+    // total without tax
+    r.total_tax_exc = r.discount_price;
 
     // multiply everything by quantity
     //

@@ -1,38 +1,21 @@
 (function($){
-    $.fn.customFileInput = function(label){
+    $.fn.customFileInput = function(image_obj){
         return this.each(function(){
-            var parent = $(this).parent();
+            // $(this): the input button
+            // image_obj: the image that should do the same as the file input
 
-            // delete the input[type='button'] from parent
-            $("input[type='button']", parent).remove();
-            //$(this).detach();
-            //parent.empty();
-
-            parent.css("position", "relative");
-            parent.height($(this).height());
-
-            // append a style-able browse button
-            var browse_button = $("<input>", {
-                type: 'button',
-                "class": "custom-file-input",
-                value: label
-            });
-            parent
-                .addClass("custom-file-input")
-                .append($(this))
-                .append(browse_button);
-
-            // make the original input transparent and float it above the parent
+            // make the original input transparent and float it above the image
             $(this).css("opacity", 0);
             $(this).css("position", "absolute");
             $(this).css("z-index", "2");
 
-            // move it over the browse button
-            $(this).css("left", "0");
-
+            // image position
             // make the whole thing as wide as the button
-            $(this).width(browse_button.outerWidth());
-            $(this).height(browse_button.outerHeight());
+            $(this).css("left", 0);
+            $(this).css("top", 0);
+
+            $(this).width(image_obj.width());
+            $(this).height(image_obj.height());
         });
     };
 }(jQuery));

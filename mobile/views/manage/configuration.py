@@ -28,7 +28,6 @@ def get_company_config(user, company):
         'company_id': company.id,
         'pos_decimal_separator': get_company_value(user, company, 'pos_decimal_separator'),
         'pos_decimal_places': get_company_value(user, company, 'pos_decimal_places'),
-        'pos_discount_calculation': get_company_value(user, company, 'pos_discount_calculation'),
         'pos_time_format': get_company_value(user, company, 'pos_time_format'),
         'pos_date_format': get_company_value(user, company, 'pos_date_format'),
         'pos_timezone': get_company_value(user, company, 'pos_timezone'),
@@ -62,7 +61,6 @@ def save_company_config(request, company):
         'currency': get_company_value(request.user, c, 'pos_currency'),
         'decimal_separator': get_company_value(request.user, c, 'pos_decimal_separator'),
         'decimal_places': get_company_value(request.user, c, 'pos_decimal_places'),
-        'discount_calculation': get_company_value(request.user, c, 'pos_discount_calculation'),
     }
 
     for key in data:

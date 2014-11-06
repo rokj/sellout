@@ -8,8 +8,19 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/company.css' %}" />
 
 <style type="text/css">
-#default_color_logo{
-    background-image: url("{% static 'images/company_placeholder_color.png' %}"); /* the default background image */
+
+/* logos and containers and stuff */
+/* color logo */
+#default_color_logo, #color_logo_container{
+    width: {{ color_logo_dimensions.0 }}px;
+    height: {{ color_logo_dimensions.1 }}px;
+}
+
+#color_logo_container { position: absolute; }
+#default_color_logo { background-image: url("{% static 'images/company_placeholder_color.png' %}"); /* the default background image */ }
+
+#remove_color_logo, #remove_monochrome_logo{
+    left: {{ color_logo_dimensions.0 }}px;
 }
 
 #default_monochrome_logo{
@@ -19,14 +30,9 @@
 .image-buttons{
     position: relative;
     height: {{ color_logo_dimensions.1 }}px;
-    float: right;
 }
 
-#color_logo_container{
-    width:{{ color_logo_dimensions.0 }}px;
-    height:{{ color_logo_dimensions.1 }}px;
-}
-
+/* monochrome logo */
 #monochrome_passepartout{
     width:{{ color_logo_dimensions.0 }}px;
     height:{{ color_logo_dimensions.1 }}px;
@@ -59,7 +65,7 @@ $(document).ready(function(){
 
     // resize the buttons according to column and image width
     $("div.image-buttons").width(
-        $(".management-column").first().width() - {{ color_logo_dimensions.0 }}
+        /*$(".management-column").first().width() - {{ color_logo_dimensions.0 }}*/
     );
 
     // set the monochrome logo 'passepartout'
@@ -83,7 +89,7 @@ $(document).ready(function(){
     // logo upload controls
     function logo_input(input, container, url){
         input
-            .customFileInput("{% trans 'Choose file...' %}")
+            .customFileInput(container)
             .change(function(){
                 upload_image(input.get(0), url, "{{ csrf_token }}", {{ max_upload_size }}, function(response){
                         if(response.status != 'ok'){
@@ -123,7 +129,7 @@ $(document).ready(function(){
                     // do nothing else
                 }
                 else{
-                    // everything ok, clear the logo from
+                    // everything ok, clear the logo from container
                     set_background(container, null);
                 }
             });
@@ -188,21 +194,15 @@ $(document).ready(function(){
 
             <div class="image-buttons">
                 {% comment %} <div class="error">{{ form.color_logo.errors }}</div> {% endcomment %}
+                <button id="remove_color_logo"
+                        class="delete-image-button no-shadow hoverable"
+                        title="{% trans 'Remove image' %}"></button>
 
-                <div class="bottom">
-                    <div>
-                        <button id="remove_color_logo"
-                                class="delete-image-button no-shadow"
-                                title="{% trans 'Remove image' %}"></button>
-
-                        <input type="file" id="id_color_logo" />
-                    </div>
-                </div>
+                <div id="default_color_logo" class="hoverable"></div>
+                <div id="color_logo_container" class="hoverable"></div>
+                <input type="file" id="id_color_logo" class="hoverable" />
             </div>
 
-            <div id="color_logo_container">
-                <div id="default_color_logo"></div>
-            </div>
         </div>
 
         {# monochrome logo: image, auto-create button and browse button #}
@@ -210,30 +210,22 @@ $(document).ready(function(){
             <h2 class="custom-label">{% trans 'Monochrome logo' %}</h2>
             <p class="custom-label">{% trans 'For thermal printers' %}</p>
 
+            {# do not show it if there's no color logo #}
             <div class="image-buttons">
-                <div class="error">{{ form.monochrome_logo.errors }}</div>
+                {% comment %}<div class="error">{{ form.monochrome_logo.errors }}</div>{% endcomment %}
+                <input type="button" class="hoverable"
+                   value="{% trans 'Auto-create' context 'monochrome logo button' %}"
+                   id="auto_create"/>
 
-                <div class="bottom">
-                    <div>{# keep this button in its own block #}
-                        {# do not show it if there's no color logo #}
-                        <input type="button" class="hoverable"
-                               value="{% trans 'Auto-create' context 'monochrome logo button' %}"
-                               id="auto_create"/>
-                    </div>
+                <button id="remove_monochrome_logo"
+                        class="delete-image-button hoverable no-shadow"
+                        title="{% trans 'Remove image' %}"></button>
 
-                    <div>
-                        <button id="remove_monochrome_logo"
-                                class="delete-image-button hoverable no-shadow"
-                                title="{% trans 'Remove image' %}"></button>
+                <input type="file" id="id_monochrome_logo" />
 
-                        <input type="file" id="id_monochrome_logo" />
-                    </div>
-                </div>
-            </div>
-
-            <div id="monochrome_passepartout">
-                <div id="monochrome_logo_container">
-                    <div id="default_monochrome_logo"></div>
+                <div id="monochrome_passepartout">
+                    <div id="default_monochrome_logo" class="hoverable"></div>
+                    <div id="monochrome_logo_container" class="hoverable"></div>
                 </div>
             </div>
         </div>

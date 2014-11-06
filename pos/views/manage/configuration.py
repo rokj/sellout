@@ -55,7 +55,6 @@ class ConfigForm(forms.Form):
     currency = forms.CharField(max_length=4, required=True)
     decimal_separator = forms.CharField(max_length=1, required=True)
     decimal_places = forms.ChoiceField(choices=decimal_places_choices, required=True)
-    discount_calculation = forms.ChoiceField(g.DISCOUNT_CALCULATION, required=True)
 
     def clean_decimal_places(self):
         data = self.cleaned_data['decimal_places']
@@ -95,7 +94,6 @@ def company_settings(request, company):
         'currency': get_company_value(request.user, c, 'pos_currency'),
         'decimal_separator': get_company_value(request.user, c, 'pos_decimal_separator'),
         'decimal_places': get_company_value(request.user, c, 'pos_decimal_places'),
-        'discount_calculation': get_company_value(request.user, c, 'pos_discount_calculation'),
     }
 
     if request.method == 'POST':

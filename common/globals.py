@@ -21,11 +21,11 @@ ATTR_LEN = {
 
 # number of digits for decimal database field
 DECIMAL = {
-    'currency_digits': 16,  # number of digits for money values (big money) (INCLUDING DECIMAL PLACES)
-    'currency_decimal_places': 4,  # number of decimal places for money values
-    'percentage_decimal_places': 4,  # number of decimal places for percentage values
-    'quantity_digits': 16,
-    'quantity_decimal_places': 4,
+    'currency_digits': 24,  # number of digits for money values (big money) (INCLUDING DECIMAL PLACES)
+    'currency_decimal_places': 8,  # number of decimal places for money values
+    'percentage_decimal_places': 8,  # number of decimal places for percentage values
+    'quantity_digits': 24,
+    'quantity_decimal_places': 8,
 }
 
 # unit types
@@ -70,27 +70,17 @@ DISCOUNT_TYPES = (
     ("Absolute", _("Absolute value")),
 )
 
-DISCOUNT_CALCULATION = (
-    ("Tax first", _("Add tax, then subtract discount")),
-    ("Discount first", _("Subtract discount, then add tax")),
-)
-
 # contacts
 CONTACT_TYPES = (
     ("Individual", _("Individual")),
     ("Company", _("Company")),
+    ("None", _("None"))  # used when saving bill that has no contact selected
 )
 
 SEXES = (
     ("M", _("Male")),
     ("F", _("Female")),
     ("U", _("Undisclosed")),
-)
-
-# bills
-BILL_TYPES = (
-    ("Normal", _("Normal")),
-    # TODO add type for company
 )
 
 BILL_STATUS = (
@@ -197,7 +187,8 @@ MISC = {
     'max_upload_image_size': 1*2**20,  # 2 megabytes
     'image_format': 'png',  # all images will be saved in this format
     'image_upload_formats': 'jpg|jpeg|gif|png|bmp|tiff',  # supported image formats (as regex "options")
-    'discounts_per_page': 2,
+    'discounts_per_page': 12,
+    'bills_per_page': 25,
 }
 
 IMAGE_DIMENSIONS = {
