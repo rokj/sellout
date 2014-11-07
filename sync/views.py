@@ -113,7 +113,7 @@ def mobile_sync_db(request, company):
 
                 elif seq_item.model == 'Contact':
                     con = Contact.objects.get(id=seq_item.object_id)
-                    item_ret['item'] = category_to_dict(con, android=True)
+                    item_ret['item'] = contact_to_dict(request.user, company, con)
 
             items.append(item_ret)
 
