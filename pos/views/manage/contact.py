@@ -19,7 +19,8 @@ import re
 ################
 class ContactForm(forms.Form):
     # do not use forms.ModelForm - we're formatting numbers and dates in our way
-    type = forms.ChoiceField(required=True, choices=g.CONTACT_TYPES)  # thid field will be hidden in the form
+    # TODO: convert to CompanyUserForm, if/when needed
+    type = forms.ChoiceField(required=True, choices=g.CONTACT_TYPES)  # this field will be hidden in the form
     # none of the fields are required (the form doesn't know for the company/individual whatchamacallit -
     # stuff will be checked in validate_contact)
     company_name = forms.CharField(required=False, max_length=max_field_length(Contact, 'company_name'))

@@ -223,7 +223,34 @@ function get_by_id(data, id){
     return null;
 }
 
-// date and time formatting
+// numbers, date and time formatting
+function get_number(string, separator){
+    // receives a string with number with decimal separator <separator> and returns BigNumber
+    // bignumber: https://github.com/MikeMcl/bignumber.js/
+    try{
+        return Big(string.replace(separator, "."));
+    }
+    catch(error){
+        return null;
+    }
+}
+
+function display_number(number, separator, decimal_places){
+    // receives a BigNumber as a parameter and returns a string with user specified decimal separator
+    if(number) return number.toFixed(decimal_places).replace('.', separator);
+    else return '';
+}
+
+// a few number shortcuts
+function dn(number, g){
+    return display_number(number, g.config.separator, g.config.decimal_places);
+}
+
+function display_currency(number, g){
+    // receives a BigNumber as a parameter and returns a string with user specified decimal separator
+    return dn(number, g) + " " + g.config.currency;
+}
+
 function check_date(d, m, y){
     if(isNaN(d)) return false;
     if(isNaN(m)) return false;

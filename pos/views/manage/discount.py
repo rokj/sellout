@@ -1,4 +1,4 @@
-from decimal import Decimal
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -73,7 +73,7 @@ def validate_discount(data, user, company):
     try:
         return {'success': False, 'message': None, 'data': form.cleaned_data}
     except ValidationError as e:
-        return {'success': False, 'message': e.msg, 'data': None}
+        return {'success': False, 'message': e.message, 'data': None}
 
 
 #############

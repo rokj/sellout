@@ -11,13 +11,48 @@
     <link type="text/css" rel="stylesheet" href="{% static 'css/base.css' %}"/>
     <link type="text/css" rel="stylesheet" href="{% static 'css/fonts/fonts.css' %}"/>
 
+    <script language="javascript" src="{% static 'jquery-ui-1.10.3/jquery-1.9.1.js' %}"></script>
+
     <style type="text/css">
         html, body {
             background-color: #ffffff;
         }
+
+        #print{
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            opacity: 0.2;
+        }
+
+        #print:hover {
+            opacity: 1;
+        }
+
+        @media print{ /* hide the print button when printing */
+            #print{
+                display: none;
+            }
+        }
     </style>
+
+    <script language="javascript">
+        $(document).ready(function(){
+            $("#print").click(function(){
+                window.print();
+            });
+        });
+
+    </script>
 </head>
 <body class="receipt-view">
+    {# the print shortcut #}
+    <img src="{% static 'icons/print_black.png' %}"
+         alt="{% trans 'Print' %}"
+         title="{% trans 'Print' %}"
+         id="print" />
+
     {% comment %} for printing from javascript, cut off everything up to this line {% endcomment %}
     <!-- JS CUTOFF TO -->
     {% block content %}

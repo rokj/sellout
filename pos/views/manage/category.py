@@ -1,19 +1,19 @@
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
 from django.http import Http404, HttpResponseRedirect, JsonResponse
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Category, Product
 from pos.views.util import JsonError, JsonParse, JsonOk,  \
-    max_field_length, has_permission, no_permission_view, JsonStringify
+    has_permission, no_permission_view, JsonStringify
 
 from common import globals as g
 
 import random
+
 
 ########################
 ### helper functions ###
@@ -46,91 +46,25 @@ def category_to_dict(c, android=False):
 
 
 def validate_category(user, company, data):
-    # data format (*-validation needed):
-    # id
-    # name*
-    # description
-
-    def r(status, msg):
-        return {'status': status,
-            'data': data,
-            'message': msg}
-
-    # return:
-    # {status:true/false - if cleaning succeeded
-    #  data:cleaned_data - empty dict if status = false
-    #  message:error_message - empty if status = true
+    """ return:
+    {status:true/false - if cleaning succeeded
+     data:cleaned_data - empty dict if status = false
+     message:error_message - empty if status = true """
 
     try:
-        data['id'] = int(data['id'])
-    except:
-        # this shouldn't happen
-        return r(False, _("Wrong product id"))
-
-    if data['id'] != -1:
-        # check if product belongs to this company and if he has the required permissions
-        try:
-            p = Category.objects.get(id=data['id'], company=company)
-        except Category.DoesNotExist:
-            return r(False, _("Cannot edit product: it does not exist"))
-
-        if p.company != company or not has_permission(user, company, 'product', 'edit'):
-            return r(False, _("You have no permission to edit this product"))
-
-    # parent
-    parent_id = data['parent_id']
-    if parent_id != -1:
-        # check if product belongs to this company and if he has the required permissions
-        try:
-            p = Category.objects.get(id=parent_id, company=company)
-        except Category.DoesNotExist:
-            return r(False, _("Cannot edit product: parent id does not exist"))
-
-        if p.company != company or not has_permission(user, company, 'product', 'edit'):
-            return r(False, _("You have no permission to edit this product"))
-
-        # don't allow adding children as parent when editing
-        if data['id'] != -1:
-            c = Category.objects.get(id=data['id'])
-
-            if c.id == parent_id:
-                return r(False, _("Category cannot be parent of it self"))
-
-            if not validate_parent(c, parent_id):
-                return r(False, _("Cannot set child as parent"))
+        form = CategoryForm(data=data)
+        return {'status': True, 'data': form.cleaned_data, 'message': None}
+    except ValidationError as e:
+        return {'status': False, 'data': None, 'message': e.message}
 
 
-
-
-
-    # name
-    if not data['name']:
-        return r(False, _("No name entered"))
-    elif len(data['name']) > max_field_length(Category, 'name'):
-        return r(False, _("Name too long"))
-    else:
-        if data['id'] == -1: # when adding new products:
-            # check if a product with that name exists
-            p = Category.objects.filter(company=company,name=data['name'])
-            if p.count() > 0:
-                return r(False,
-                    _("There is already a category with that name") +
-                    " (" + _("code") + ": " + p[0].name + ")")
-    data['name'] = data['name'].strip()
-
-    # description, notes - anything can be entered
-    data['description'] = data['description'].strip()
-
-    return {'status': True, 'data': data}
-
-
-def validate_parent(category, parent_id):
+def validate_parent(category, parent):
     categories = Category.objects.filter(parent=category)
     for c in categories:
-        if c.id == parent_id:
+        if c.id == parent.id:
             return False
         else:
-            validate_parent(c, parent_id)
+            validate_parent(c, parent)
     return True
 
 
@@ -250,6 +184,13 @@ class CategoryForm(forms.ModelForm):
         widgets = {
             'color': forms.HiddenInput
         }
+
+    def clean_parent(self):
+        if not validate_parent(self.instance, self.cleaned_data['parent']):
+            raise ValidationError(_("A category cannot be its own child"), code='parent')
+        else:
+            return self.cleaned_data['parent']
+
 
 
 @login_required

@@ -1,7 +1,7 @@
 /*
 
-Bill: handles everything regarding billing and bill items, contains items
-  Item: data about items, editing, etc.
+    Bill: handles everything regarding billing and bill items, contains items
+      Item: data about items, editing, etc.
 
  */
 Bill = function(g){
@@ -11,17 +11,16 @@ Bill = function(g){
 
     p.data = null;
 
-    p.items = [];
-
     // bill properties
-    p.serial = 0; // a number that will be assigned to every item
-                   // (like an unique id - has nothing to do with id on server)
+    p.serial = 0; // a number that will be assigned to every item (has nothing to do with id on server)
+    p.items = []; // a list of Item objects
+    p.items_by_serial = {}; // pairs item_number:Item object for quick access
+    p.items_by_id = {}; // pairs product_id:Item
+
     p.contact = null; // reference to contact (object with details) (if chosen)
     p.saved = false; // true if the bill in this state is saved on the server
 
     p.payment = null; // will hold the Payment() object
-
-    p.temp_discounts = [];
 
     // items
     p.bill = $("#bill");
@@ -56,44 +55,45 @@ Bill = function(g){
     //
     // item manipulation
     p.get_item = function(serial){
-        // do a linear search for an item with given id
-        for(var i = 0; i < p.items.length; i++){
-            if(p.items[i].serial == serial){
-                return i;
-            }
-        }
-        // nothing was found
-        return null;
+        return p.items_by_serial[serial];
     };
 
     p.get_product = function(product_id){
-        // returns an index of an item from specified product id
+        // returns an Item object given a product id
+        return p.items_by_id[product_id];
+    };
 
-        for(var i = 0; i < p.items.length; i++){
-            if(p.items[i].data.product_id == product_id){
-                return i;
-            }
-        }
+    p.add_item = function(product){
+        // create a new item
+        var item = new Item(p, product);
 
-        return null;
+        // save it to the list of items
+        p.items.push(item);
+
+        // save references for quick access:
+        // by serial number on this bill
+        p.items_by_serial[item.serial] = item;
+        // by product id
+        p.items_by_id[product.id] = item;
     };
 
     p.add_product = function(product, to_existing){
         // see if this product is already in the bill;
 
         if(to_existing == false){
-            p.items.push(new Item(p, product));
+            p.add_item(product);
         }
         else{
-            var item_index = p.get_product(product.data.id);
+            // see if this item is already on the bill
+            var existing_item = p.get_item(product.id);
 
-            if(item_index == null){
-                // if not, add a new item
-                p.items.push(new Item(p, product));
+            if(!existing_item){
+                // it's not there yet, add a new item
+                p.add_item(product);
             }
             else{
                 // if it is, just update quantity
-                p.items[item_index].add_quantity(true);
+                existing_item.add_quantity(true);
             }
         }
 
@@ -104,16 +104,23 @@ Bill = function(g){
     };
 
     p.remove_item = function(item){
-        // item is an actual Item() object
-        var i = p.get_item(item.serial);
+        // item is an actual Item() object;
+        // to remove the item from list, one has to do the vanilla linear search...
+        for(var i = 0; i < p.items.length; i++){
+            if(p.items[i] == item){
+                break;
+            }
+        }
 
         item.item_row.remove();
         remove_from_array(p.items, i);
+        delete p.items_by_serial[item.serial];
+        delete p.items_by_id(item.product.id);
 
         item = null;
 
         // updated bill
-        p.bill.saved = saved = false;
+        p.bill.saved = false;
 
         p.update_summary();
     };
@@ -123,7 +130,10 @@ Bill = function(g){
         for(var i = 0; i < p.items.length; i++){
             p.items[i].item_row.remove();
         }
+
         p.items = [];
+        p.items_by_serial = {};
+        p.items_by_id = {};
 
         // the bill is empty, saving is not needed
         p.bill.saved = true;
@@ -132,23 +142,15 @@ Bill = function(g){
     };
 
     p.update_summary = function(){
-        // traverse items and sum totals
-        var total = Big(0);
+        // get the numbers from all items in one place:
+        // items and their discounts
+        var items = [];
 
-        for(var i = 0; i < p.items.length; i++){
-            total = total.plus(p.items[i].data.total);
-        }
+        // bill discounts
 
-        // if there's discount on the bill...
-        if(p.data && p.data.discount_amount){
-            if(p.data.discount_type == 'absolute'){
-                total = total - Big(p.data.discount_amount);
-            }
-            else{
-                // total = total*(1-amount/100)
-                total = total.times(Big(1).minus(Big(p.data.discount_amount).div(Big(100))));
-            }
-        }
+        //
+
+
 
         p.summary_total.text(dn(total, p.g));
 
@@ -157,6 +159,9 @@ Bill = function(g){
 
     // bill manipulation
     p.load = function(data){
+        console.log("LOAD BILL: re-do");
+        return;
+
         // load bill from data (loaded from the server or localStorage)
         p.clear();
 
@@ -225,7 +230,7 @@ Bill = function(g){
             id: id,
             items: [],
             total: dn(p.update_summary(), p.g),
-            till_id: p.g.objects.terminal.register.id,
+            till_id: register.id,
             contact: p.contact,
             // stuff that applies to whole bill
             notes: p.data.notes,
@@ -286,7 +291,6 @@ Bill = function(g){
         p.contact = null;
         p.saved = false;
         p.payment = null; // will hold the Payment() object
-        p.temp_discounts = [];
     };
 
     p.toggle_bill_options = function(show){
@@ -328,7 +332,6 @@ Bill = function(g){
     });
 };
 
-/* Item 'class' */
 Item = function(bill, product) {
     // Item properties:
     // saved - this Item has been sent to server already
@@ -376,23 +379,6 @@ Item = function(bill, product) {
         // the 'usual' item data
         p.items.name.text(p.data.name);
         p.items.code.text(p.data.code);
-
-        // prices:
-        var r = total_price(
-            p.data.base_price,
-            p.data.tax_percent,
-            p.data.discounts,
-            p.data.quantity,
-            p.g.config.decimal_places);
-
-        // save calculated numbers
-        p.data.tax_absolute = r.tax;
-
-        // discounts
-        p.data.discount_absolute = r.discount;
-
-        // total
-        p.data.total = r.total;
 
         // quantity
         p.items.qty.val(dn(p.data.quantity, p.g));
