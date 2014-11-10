@@ -3,6 +3,11 @@
     Bill: handles everything regarding billing and bill items, contains items
       Item: data about items, editing, etc.
 
+
+    Messages sent to the document:
+     - bill.item-changed : update bill summary
+
+
  */
 Bill = function(g){
     var p = this;
@@ -69,12 +74,6 @@ Bill = function(g){
 
         // save it to the list of items
         p.items.push(item);
-
-        // save references for quick access:
-        // by serial number on this bill
-        p.items_by_serial[item.serial] = item;
-        // by product id
-        p.items_by_id[product.id] = item;
     };
 
     p.add_product = function(product, to_existing){
@@ -85,7 +84,7 @@ Bill = function(g){
         }
         else{
             // see if this item is already on the bill
-            var existing_item = p.get_item(product.id);
+            var existing_item = p.get_product(product.data.id);
 
             if(!existing_item){
                 // it's not there yet, add a new item
@@ -100,7 +99,7 @@ Bill = function(g){
         // bill has been changed and it must be saved
         p.bill.saved = false;
 
-        p.update_summary();
+        p.update();
     };
 
     p.remove_item = function(item){
@@ -115,14 +114,24 @@ Bill = function(g){
         item.item_row.remove();
         remove_from_array(p.items, i);
         delete p.items_by_serial[item.serial];
-        delete p.items_by_id(item.product.id);
+        delete p.items_by_id[item.product.id];
 
         item = null;
 
         // updated bill
         p.bill.saved = false;
+    };
 
-        p.update_summary();
+    p.get_discount = function(){
+        // get the discount from bill data;
+        // return {type: and amount:};
+        // if there's not data, the amount is 0
+        if(p.data && p.data.discount_amount != null){
+            return {type: p.data.discount_type, amount: p.data.discount_amount}
+        }
+        else{
+            return {type: 'Percent', amount: Big(0)};
+        }
     };
 
     p.clear = function(){
@@ -138,30 +147,68 @@ Bill = function(g){
         // the bill is empty, saving is not needed
         p.bill.saved = true;
 
-        p.update_summary();
+        p.data = null;
+        p.serial = 0;
+        p.contact = null;
+        p.saved = false;
+        p.payment = null; // will hold the Payment() object
     };
 
-    p.update_summary = function(){
-        // get the numbers from all items in one place:
+    p.update = function(){
+        // get the numbers from all items in one place and send it to calculation
+
         // items and their discounts
-        var items = [];
+        var i, j, item, discount;
+        var c_items = [], c_item;
+
+        for(i = 0; i < p.items.length; i++){
+            item = p.items[i];
+
+            c_item = {
+                serial: item.serial,
+                quantity: item.data.quantity,
+                base: item.data.base, // price without discounts and without tax
+                tax_rate: item.data.tax_rate, // price in percentage
+                discounts: [] // a list of discount objects
+            };
+
+            // discount format for calculation:
+            // { amount: Big(), type: 'absolute'/'percent' }
+            for(j = 0; j < item.data.discounts.length; j++){
+                discount = item.data.discounts[j];
+                c_item.discounts.push({
+                    amount: discount.amount,
+                    type: discount.type
+                });
+            }
+
+            c_items.push(c_item);
+        }
 
         // bill discounts
+        var bill_discount = p.get_discount();
 
-        //
+        var prices = calculate(c_items, bill_discount.amount, bill_discount.type);
 
+        // update all items' data and refresh them
+        for(i = 0; i < prices.items.length; i++){
+            item = p.items_by_serial[prices.items[i].serial];
 
+            item.data.tax_absolute = prices.items[i].tax;
+            item.data.discount_absolute = prices.items[i].discount;
+            item.data.total = prices.items[i].total;
 
-        p.summary_total.text(dn(total, p.g));
+            item.update();
+        }
 
-        return total;
+        // update bill's amounts
+        p.summary_total.text(dn(prices.total, p.g));
+
+        return prices.total;
     };
 
     // bill manipulation
     p.load = function(data){
-        console.log("LOAD BILL: re-do");
-        return;
-
         // load bill from data (loaded from the server or localStorage)
         p.clear();
 
@@ -199,7 +246,8 @@ Bill = function(g){
         p.bill_options = new BillOptions(p);
 
         p.bill.saved = true;
-        p.update_summary();
+
+        p.update();
     };
 
     p.get_data = function(){
@@ -229,10 +277,11 @@ Bill = function(g){
         var r = {
             id: id,
             items: [],
-            total: dn(p.update_summary(), p.g),
+            total: Big(0), // TODO: update
             till_id: register.id,
             contact: p.contact,
-            // stuff that applies to whole bill
+
+            // stuff that applies to the whole bill
             notes: p.data.notes,
             discount_amount: dn(p.data.discount_amount, p.g),
             discount_type: p.data.discount_type
@@ -279,18 +328,6 @@ Bill = function(g){
     p.show_item = function(item){
         // scrolls the bill so that the current item is shown
         vertical_scroll_into_view(item.item_row);
-    };
-
-    p.reset = function(){
-        p.clear();
-
-        // used when the bill is finished and a new one is to be created
-        p.data = null;
-        p.items = [];
-        p.serial = 0;
-        p.contact = null;
-        p.saved = false;
-        p.payment = null; // will hold the Payment() object
     };
 
     p.toggle_bill_options = function(show){
@@ -383,14 +420,14 @@ Item = function(bill, product) {
         // quantity
         p.items.qty.val(dn(p.data.quantity, p.g));
 
-        // base price
-        p.items.price.text(dn(p.data.base_price, p.g));
+        // batch price
+        p.items.price.text(dn(p.data.batch, p.g));
 
         // tax (only absolute value)
-        p.items.tax_absolute.text(dn(p.data.tax_absolute, p.g));
+        p.items.tax_absolute.text(dn(p.data.tax, p.g));
 
         // discounts
-        p.items.discount.text(dn(p.data.discount_absolute, p.g));
+        p.items.discount.text(dn(p.data.discount, p.g));
 
         // total
         p.items.total.text(dn(p.data.total, p.g));
@@ -398,9 +435,6 @@ Item = function(bill, product) {
         // out of stock class
         //if(p.data.quantity.cmp(p.product.data.stock) >= 0) p.item_row.addClass("out-of-stock");
         //else p.item_row.removeClass("out-of-stock");
-
-        // also update bill
-        p.bill.update_summary();
     };
 
     p.add_quantity = function(add){
@@ -483,14 +517,19 @@ Item = function(bill, product) {
             name: p.data.name,
             product_id: p.data.product_id,
             stock: dn(p.data.stock, p.g),
+            bill_notes: p.data.bill_notes,
+
+            base: dn(p.data.base, p.g),
             quantity: dn(p.data.quantity, p.g),
-            base_price: dn(p.data.base_price, p.g),
-            tax_percent: dn(p.data.tax_percent, p.g),
-            discounts: discounts,
-            single_total: dn(p.data.single_total, p.g),
-            discount_absolute: dn(p.data.discount_absolute, p.g),
+            tax_rate: dn(p.data.tax_rate, p.g),
+
+            batch: dn(p.data.batch, p.g),
+            discount: dn(p.data.discount, p.g),
+            net: dn(p.data.net, p.g),
+            tax: dn(p.data.tax, p.g),
             total: dn(p.data.total, p.g),
-            bill_notes: p.data.bill_notes
+
+            discounts: discounts
         };
     };
 
@@ -522,24 +561,25 @@ Item = function(bill, product) {
         product_id: p.product.data.id,
         name: p.product.data.name,
         code: p.product.data.code,
-        quantity: Big(1),
         unit_type: p.product.data.unit_type_display,
-        base_price: p.product.data.price,
-        tax_percent: p.product.data.tax,
-        tax_absolute: null, // will be calculated later
-        discounts: [], // see below
+        bill_notes: '',
         stock: p.product.data.stock,
-        discount_absolute: null, // calculated later
-        total_price: null, // calculated later
-        bill_notes: ''
+
+        quantity: Big(1),
+        base: p.product.data.price,
+        tax_rate: p.product.data.tax,
+
+        batch: null,
+        discount: null,
+        net: null,
+        tax: null, // will be calculated later
+        total: null, // calculated later
+        discounts: [] // see below
     };
 
     // discounts: copy discounts from product
     for(var i = 0; i < p.product.data.discounts.length; i++)
         p.data.discounts.push(p.product.data.discounts[i]);
-
-    // then update it
-    p.update();
 
     // bind events
     // click on an item
@@ -608,8 +648,18 @@ Item = function(bill, product) {
             if(e.keyCode == 13) p.items.qty.blur();
         });
 
+
+    // save references for quick access:
+    // by serial number on this bill
+    p.bill.items_by_serial[p.serial] = p;
+    // by product id
+    p.bill.items_by_id[p.data.product_id] = p;
+
     // when the item is added, scroll the bill to show it
     p.bill.show_item(p);
+
+    // show the numbers
+    p.update();
 };
 
 ItemDetails = function(item){
@@ -804,30 +854,7 @@ ItemDetails = function(item){
     };
 
     p.update_prices = function(){
-        var r = total_price(
-            p.item.data.base_price,
-            p.item.data.tax_percent,
-            p.temp_discounts,
-            p.item.data.quantity,
-            p.g.config.decimal_places
-        );
-
-        // update only text fields, not item's data;
-        // if the user cancels this dialog, nothing must be saved
-
-        // fields:
-        // tax in item and details
-        p.item.items.tax_absolute.text(dn(r.tax, p.g));
-        p.items.tax_absolute.text(display_currency(r.tax, p.g));
-
-        // discount sum in item and details
-        p.item.items.discount.text(dn(r.discount, p.g));
-        // total in item
-        p.item.items.total.text(dn(r.total, p.g));
-
-        // show update prices when:
-        //  - quantity changes
-        //  - discounts are added or reordered
+        alert("update prices called");
     };
 
     p.cleanup = function(){
@@ -1138,7 +1165,7 @@ BillOptions = function(bill){
     };
 
     p.close_dialog = function(){
-        p.bill.update_summary();
+        p.bill.update();
         p.toggle_dialog(false);
     };
 

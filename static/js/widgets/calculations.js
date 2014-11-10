@@ -1,65 +1,38 @@
 // Big() setup
 Big.RM = 1; // ROUND_HALF_UP, away from zero (must match settings in python)
 
-var r_discount = {
-    amount: Big(20),
-    type: 'percent'
-};
+/*
 
-var a_discount = {
-    amount: Big(1),
-    type: 'absolute'
-};
+    the calculate() function expects items and discounts in this format:
 
-var items = [
-    {
-        // these never change, they are defined in database
-        quantity: Big(2),
-        base: Big(10), // this is without discounts and without tax
-        tax_rate: Big(20), // price in percentage
-        discounts: [r_discount, a_discount], // a list of discount objects
+    var r_discount = {
+        amount: Big(20),
+        type: 'Percent'
+    };
 
-        // this is what we want to know
-        /*base */ // does not change
-        discount: Big(0), // absolute amount od all discounts combined
-        net: null, // base minus discounts, without tax
-        tax: null, // absolute amount of tax
-        total: null // total.
-    },
-    {
-        quantity: Big(1),
-        base: Big(100),
-        tax_rate: Big(9.5),
-        discounts: [a_discount],
+    var a_discount = {
+        amount: Big(1),
+        type: 'Absolute'
+    };
 
-        discount: Big(0),
-        net: null,
-        tax: null,
-        total: null
-    },
-    {
-        quantity: Big(5),
-        base: Big(25),
-        tax_rate: Big(0),
-        discounts: [r_discount],
+    var items = [
+        {
+            // these never change, they are defined in database
+            serial: <serial>,
+            quantity: Big(2),
+            base: Big(10), // this is without discounts and without tax
+            tax_rate: Big(20), // price in percentage
+            discounts: [r_discount, a_discount], // a list of discount objects
 
-        discount: Big(0),
-        net: null,
-        tax: null,
-        total: null
-    },
-    {
-        quantity: Big(2),
-        base: Big(10),
-        tax_rate: Big(0),
-        discounts: [],
-
-        discount: Big(0),
-        net: null,
-        tax: null,
-        total: null
-    }
-];
+            // this is what we want to know
+            // does not change
+            discount: Big(0), // absolute amount od all discounts combined
+            net: null, // base minus discounts, without tax
+            tax: null, // absolute amount of tax
+            total: null // total.
+        }
+    ];
+*/
 
 function get_tax(price, tax){
     return price.times(tax.div(Big(100)));
@@ -80,6 +53,9 @@ function calculate(items, bill_discount_amount, bill_discount_type){
         item = items[i];
 
         item.net = item.base.times(item.quantity);
+        item.tax = Big(0);
+        item.total = Big(0);
+        item.discount = Big(0);
 
         // subtract all discounts from this item's current base
         for(j = 0; j < item.discounts.length; j++){
@@ -172,10 +148,6 @@ function calculate(items, bill_discount_amount, bill_discount_type){
     };
 }
 
-p = calculate(items, Big(0), 'relative');
-console.log(p);
-console.log(p.total.toString());
-
 ////////////////////////////////////////////////////////////
 ////////////////////                    ////////////////////
 //////////////////// useless junk below ////////////////////
@@ -184,9 +156,9 @@ console.log(p.total.toString());
 
 // utilities for calculation of prices etc.
 function do_tax(p_incl, p_excl, tax){
-
+    alert("do_tax called, deprecated");
 }
 
 function total_price(base_price, tax, discounts, quantity, decimal_places){
-
+    alert("total_price called, deprecated");
 }

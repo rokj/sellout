@@ -117,15 +117,23 @@ def parse_decimal(user, company, string, max_digits=None):
     if max_digits:
         if string.find('.') == -1: # it's an integer, it has no 'decimal point'
             if len(string) > max_digits:
-                return {'success':False, 'number':None}
+                return {'success': False, 'number': None}
         if string.find('.') > max_digits: # it's a float, the integer part shouldn't be longer than max_digits
-            return {'success':False, 'number':None}
+            return {'success': False, 'number': None}
     
     try:
         number = Decimal(string)
-        return {'success':True, 'number':number}
+        return {'success': True, 'number': number}
     except:
-        return {'success':False, 'number':None}
+        return {'success': False, 'number': None}
+
+
+def parse_decimal_exc(user, company, string, max_digits=None, message=_("Invalid number format")):
+    r = parse_decimal(user, company, string, max_digits)
+    if not r['success']:
+        raise ValueError(message)
+    else:
+        return r['number']
 
 
 def parse_date(user, company, string):

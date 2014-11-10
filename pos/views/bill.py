@@ -10,7 +10,7 @@ from pos.views.manage.company import company_to_dict
 from pos.views.manage.contact import contact_to_dict
 from pos.views.manage.till import register_to_dict
 from pos.views.util import has_permission, JsonOk, JsonParse, JsonError, \
-    format_number, parse_decimal, format_date, format_time
+    format_number, parse_decimal, format_date, format_time, parse_decimal_exc
 from config.functions import get_company_value
 import common.globals as g
 
@@ -38,17 +38,19 @@ def bill_item_to_dict(user, company, item):
     i['bill_id'] = item.bill.id
     i['bill_notes'] = item.bill_notes
 
+    i['base'] = format_number(user, company, item.base)
     i['quantity'] = format_number(user, company, item.quantity)
-    i['base_price'] = format_number(user, company, item.base_price)
-    i['tax_percent'] = format_number(user, company, item.tax_percent)
-    i['tax_absolute'] = format_number(user, company, item.tax_absolute)
-    i['discount_absolute'] = format_number(user, company, item.discount_absolute)
+    i['tax_rate'] = format_number(user, company, item.tax_rate)
+
+    i['batch'] = format_number(user, company, item.batch)
+    i['discount'] = format_number(user, company, item.discount)
+    i['net'] = format_number(user, company, item.net)
+    i['tax'] = format_number(user, company, item.tax)
     i['total'] = format_number(user, company, item.total)
 
-    i['total_without_tax'] = format_number(user, company, item.total - item.tax_absolute)
-
-    # if group_tax_rates was called on a list with this item in it,
-    # there should be tax_rate_id property on the item. if it's not, f**k it
+    # if group_tax_rates() was called on a list with this item in it,
+    # there should be tax_rate_id property on the item. if it's not, f**k it,
+    # the calling function won't use it anyway
     try:
         i['tax_rate_id'] = item.tax_rate_id
     except (AttributeError, FieldDoesNotExist):
@@ -129,11 +131,23 @@ def bill_to_dict(user, company, bill):
     # status > choices in g.BILL_STATUS
     b = {
         'id': bill.id,
+
+        'issuer': company_to_dict(bill.issuer),
+        'register': register_to_dict(company, user, bill.register),
+
+        'user_id': str(bill.user_id),
+        'user_name': str(bill.user_name),
+
         'serial': bill.serial,
         'note': bill.note,
-        'sub_total': format_number(user, company, bill.sub_total),
+
+
+        'discount_amount': format_number(user, company, bill.discount_amount),
+        'discount_type': format_number(user, company, bill.discount_type),
+
+        # prices
+        'base': format_number(user, company, bill.base),
         'discount': format_number(user, company, bill.discount),
-        'discount_type': bill.discount_type,
         'tax': format_number(user, company, bill.tax),
         'total': format_number(user, company, bill.total),
 
@@ -141,11 +155,6 @@ def bill_to_dict(user, company, bill):
         'due_date': format_date(user, company, bill.due_date),
         'status': bill.status,
 
-        'user_name': str(bill.user_name),
-        'user_id': str(bill.user_id),
-
-        'issuer': company_to_dict(bill.issuer),
-        'register': register_to_dict(company, user, bill.register),
     }
 
     if bill.contact:
@@ -180,74 +189,6 @@ def bill_to_dict(user, company, bill):
     b['items'] = i
 
     return b
-
-
-def item_prices(user, company, base_price, tax_percent, quantity, discounts):
-    """ calculates prices and stuff and return the data
-        passing parameters instead of Item object because Item may not exist yet
-        discount is a list of dictionaries (not Discount objects!)
-    """
-    def get_discount(p):
-        """
-            accumulates discounts on price p and returns final price and discounts
-        """
-
-        discount = Decimal('0')  # cumulative discounts
-        final = p  # the final price
-
-        for di in discounts:
-            if di['type'] == 'Absolute':
-                final = final - di['amount']
-                discount = discount + di['amount']
-            else:
-                this_discount = final*(di['amount']/100)
-                discount += this_discount
-                final -= this_discount
-
-        return {'discount': discount, 'final': final}
-
-    # round up:
-    getcontext().rounding = ROUND_HALF_UP
-
-    r = {}  # return values
-
-    # base price
-    r['base_price'] = base_price
-    # subtract discounts from base
-    dd = get_discount(r['tax_price'])
-    r['discount'] = dd['discount']
-    # price including discounts
-    r['discount_price'] = dd['final']
-    # add tax
-    r['tax_price'] = r['discount_price']*(Decimal('1') + (tax_percent/Decimal('100')))
-    # get absolute tax value
-    r['tax_absolute'] = r['tax_price'] - r['discount_price']
-    # total
-    r['total'] = r['tax_price']
-    # total without tax
-    r['total_tax_exc'] = r['discount_price']
-
-    # multiply by quantity
-    r['base_price'] = r['base_price']*quantity  # without tax and discounts
-    r['tax_absolute'] = r['tax_absolute']*quantity  # tax, absolute
-    r['discount_absolute'] = r['discount_absolute']*quantity  # discounts, absolute
-    r['total_tax_exc'] = r['total_tax_exc']*quantity  # total without tax
-    # save single total
-    r['single_total'] = r['total']
-    r['total'] = r['total']*quantity  # total total total
-
-    # and round to current decimal places
-    # https://docs.python.org/2/library/decimal.html#decimal-faq
-    precision = Decimal(10) ** -int(get_company_value(user, company, 'pos_decimal_places'))
-
-    r['base_price'] = r['base_price'].quantize(precision)
-    r['tax_absolute'] = r['tax_absolute'].quantize(precision)
-    r['discount_absolute'] = r['discount_absolute'].quantize(precision)
-    r['total_tax_exc'] = r['total_tax_exc'].quantize(precision)
-    r['single_total'] = r['single_total'].quantize(precision)
-    r['total'] = r['total'].quantize(precision)
-
-    return r
 
 
 def create_bill_html(user, company, bill):
@@ -383,16 +324,19 @@ def create_bill(request, company):
             'stock': product.stock,
             # 'bill':  not now, after bill is saved
             'product_id': product.id,
-            'quantity': quantity,
-            'tax_percent': product.tax.amount,
             'bill_notes': i.get('bill_notes'),
-            'discounts': [],  # validated discounts
+
+            'discounts': [],  # validated discounts (FK in database)
+
             # prices: will be calculated after discounts are ready
-            'base_price': i.get('base_price'),
-            'tax_absolute': i.get('tax_absolute'),
-            'discount_absolute': i.get('discount_absolute'),
-            'single_total': i.get('single_total'),
-            'total': i.get('total'),
+            'base': None,
+            'quantity': None,
+            'tax_rate': None,
+            'batch': None,
+            'discount': None,
+            'net': None,
+            'tax': None,
+            'total': None,
         }
 
         bill['items'].append(item)
@@ -435,37 +379,18 @@ def create_bill(request, company):
             }
             item['discounts'].append(discount)
 
-        # calculate this item's price
-        prices = item_prices(request.user, c, product.get_price(), product.tax.amount, item['quantity'], item['discounts'])
-
-        # check prices against price from javascript
-        r = parse_decimal(request.user, c, i.get('total'))
-        if not r['success']:
-            return item_error(_("Item price is in wrong format"), product)
-        else:
-            if prices['total'] != r['number']:
-                return item_error(_("Item prices do not match"), product)
-            else:
-                # add this price to grand total
-                total_py += r['number']
-
         # save this item's prices to item's dictionary (will go into database later)
-        item['base_price'] = prices['base_price']
-        item['tax_absolute'] = prices['tax_absolute']
-        item['discount_absolute'] = prices['discount_absolute']
-        item['single_total'] = prices['single_total']
-        item['total'] = prices['total']
-
-    # in the end, check grand totals against each others:
-
-    # subtract the discount
-    # if bill_discount_type == 'absolute':
-    #     total_py -= bill_discount_amount
-    # else:
-    #     total_py *= (Decimal(1) - bill_discount_amount/Decimal(100))
-
-    if total_js != total_py:
-        return JsonError(_("Total prices do not match"))
+        try:
+            item[''] = parse_decimal_exc(request.user, c, i.get('base'), message=_("Invalid base price"))
+            item[''] = parse_decimal_exc(request.user, c, i.get('quantity'), message=_("Invalid quantity"))
+            item[''] = parse_decimal_exc(request.user, c, i.get('tax_rate'), message=_("Invalid tax rate"))
+            item[''] = parse_decimal_exc(request.user, c, i.get('batch'), message=_("Invalid batch price"))
+            item[''] = parse_decimal_exc(request.user, c, i.get('discount'), message=_("Invalid discount amount"))
+            item[''] = parse_decimal_exc(request.user, c, i.get('net'), message=_("Invalid net price"))
+            item[''] = parse_decimal_exc(request.user, c, i.get('tax'), message=_("Invalid tax amount"))
+            item[''] = parse_decimal_exc(request.user, c, i.get('total'), message=_("Invalid total"))
+        except ValueError as e:
+            return item_error(e.message)
 
     # at this point, everything is fine, insert into database
 
@@ -497,14 +422,18 @@ def create_bill(request, company):
             unit_type=item['unit_type'],
             stock=item['stock'],
             bill=db_bill,
+            bill_notes=item['bill_notes'],
             product_id=item['product_id'],
+
             quantity=item['quantity'],
-            base_price=item['base_price'],
-            tax_percent=item['tax_percent'],
-            tax_absolute=item['tax_absolute'],
-            discount_absolute=item['discount_absolute'],
+            base=item['base'],
+            tax_rate=item['tax_rate'],
+
+            batch=item['batch'],
+            discount=item['discount'],
+            net=item['net'],
+            tax=item['tax'],
             total=item['total'],
-            bill_notes=item['bill_notes']
         )
         db_item.save()
 
