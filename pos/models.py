@@ -56,6 +56,17 @@ class Company(SkeletonU, CompanyAbstract):
     class Meta:
         verbose_name_plural = _("Companies")
 
+class CompanyUserRole(SkeletonU):
+    company = models.ForeignKey(Group)
+    user = models.ForeignKey(BlocklogicUser)
+    homegroup = models.BooleanField(default=False, blank=False, null=False)
+
+    role = models.CharField(default=MEMBER, max_length=30, blank=False, null=False)
+
+    class Meta:
+        unique_together = ('group', 'user',)
+
+
 
 ### category ###
 class Category(SkeletonU):

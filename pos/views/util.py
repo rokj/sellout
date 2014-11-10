@@ -153,7 +153,7 @@ def has_permission(user, company, model, task):
         
         model is a string
         
-        task can be: 'list' or 'edit' (edit includes add, edit, delete)
+        task can be: 'view' or 'edit' (edit includes add, edit, delete)
     """
 
     # get permission from memcache... 

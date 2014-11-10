@@ -1,0 +1,632 @@
+{% extends 'web/homebase.html' %}
+{% load staticfiles %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block head_jquery %}
+    // setting inputs, elements
+    var keyboard = new Keyboard();
+    var editing = false;
+
+    var si = {
+        profile: $(".settings #profile"),
+        profile_edit: $(".settings #profile_edit"),
+        profile_last_name: $(".settings #profile p.first-last-name span.text"),
+        profile_country_text: $(".settings #profile p.country span.text"),
+        profile_country_edit: $(".settings #profile_edit #id_country"),
+        profile_gender_text: $(".settings #profile p.gender span.text"),
+
+        company: $(".settings #company"),
+        company_edit: $(".settings #company_edit"),
+
+        company_name: $(".settings #company p.company-name"),
+        company_address: $(".settings #company p.company-address"),
+        company_postcode: $(".settings #company p.company-postcode"),
+        company_city: $(".settings #company p.company-city"),
+        company_country: $(".settings #company p.company-country"),
+        company_tax_id: $(".settings #company p.company-tax-id"),
+        company_tax_payer: $(".settings #company p.company-tax-payer"),
+        company_website: $(".settings #company p.company-website"),
+
+        company_name_edit: $("#id_company_name"),
+        company_address_edit: $("#id_company_address"),
+        company_postcode_edit: $("#id_company_postcode"),
+        company_city_edit: $("#id_company_city"),
+        company_country_edit: $("#id_company_country"),
+        company_tax_id_edit: $("#id_company_tax_id"),
+        company_tax_payer_edit: $("#id_company_tax_payer"),
+        company_website_edit: $("#id_company_website"),
+
+        personal_edit: $("span#edit"),
+        personal_cancel_update: $("td#cancel_update"),
+
+        cancel_edit: $('.settings #cancel'),
+
+        new_password: $(".settings .password .new-password"),
+        update_password: $(".settings .password .update-password"),
+        change_password: $(".settings .password .change-password"),
+        cancel_update_password: $(".settings .password #cancel_update_password"),
+
+        current_password: $('.password #current_password'),
+        password1: $('.password #password1'),
+        password2: $('.password #password2'),
+
+        current_password_error: $('li.new-password span.current-password-error'),
+        new_password_error: $('li.new-password span.new-password-error'),
+        password_changed_successfully: $('.settings .password .password-changed-successfully')
+    }
+
+    function hide_password_messages() {
+        si.current_password_error.hide();
+        si.new_password_error.hide();
+        si.password_changed_successfully.hide();
+    }
+
+    function save_user_settings(data) {
+        send_data('{% url "save-user-settings" %}', data, "{{ csrf_token }}",
+            function(response) {
+                if (response.status == "ok") {
+                    // if language was changed, reload the page
+                    if("language" in data) window.location.reload();
+
+                    if ("location_in_task_times" in data) {
+                        if (data["location_in_task_times"] == true) {
+                            $("button#location_no").removeClass("active");
+                            $("button#location_yes").addClass("active");
+                        } else {
+                            $("button#location_yes").removeClass("active");
+                            $("button#location_no").addClass("active");
+                        }
+                    }
+
+                    if ("saving_user_profile" in data) {
+                        // replacing text in user profile
+                        si.profile_last_name.text(data["last_name"]);
+                        si.profile_country_text.text(si.profile_country_edit.find('option:selected').text());
+                        gender = $("span.male .active").length == 1 ? gettext("Male") : gettext("Female");
+                        si.profile_gender_text.text(gender);
+
+                        // replacing text in company profile
+                        si.company_name.text(data["company_name"]);
+                        si.company_address.text(data["company_address"]);
+                        si.company_postcode.text(data["company_postcode"]);
+                        si.company_city.text(data["company_city"]);
+                        if (si.company_name.text().trim() != "") {
+                            si.company_country.text(si.company_country_edit.find('option:selected').text());
+                        } else {
+                            si.company_country.text("");
+                        }
+
+                        si.company_tax_id.text(data["company_tax_id"]);
+
+                        var tax_payer_text = gettext("I am a taxpayer");
+                        if (data["company_tax_payer"] == "not_tax_payer") {
+                            tax_payer_text = gettext("I am not a taxpayer");
+                        }
+                        si.company_tax_payer.text(tax_payer_text);
+
+                        si.company_website.text(data["company_website"]);
+
+                        g.user_menu_button.children("span").text(first_name + " " + data["last_name"]);
+
+                        show_hide_company_text();
+                    }
+
+                    si.cancel_edit.click();
+                } else {
+                    error_message(p.g, "{% trans "Something went wrong, contact support." %}", response.message)
+                }
+    }
+        );
+    }
+
+    function update_user_password(data) {
+        send_data('{% url "update-password" %}', data, "{{ csrf_token }}",
+            function(response) {
+                hide_password_messages();
+
+                if (response.status == "ok") {
+                    si.new_password.hide();
+                    si.update_password.hide();
+                    si.change_password.show();
+                    si.password_changed_successfully.show();
+                } else {
+                    if (response.status == 'wrong_current_password') {
+                        show_current_password_error("{% trans "Wrong current password." %}");
+                    } else if (response.status == 'new_password_mismatch') {
+                        show_new_password_error("{% trans "New passwords should match each other." %}");
+                    } else if (response.status == 'min_pass_requirement_failed') {
+                        show_new_password_error("{% trans "Password should be at least 6 characters long and can contain digits, letters and following @#$%^&+=" %}");
+                    } else {
+                        // TODO: nice alert message
+                        alert("{% trans "Something went wrong, contact support." %}");
+                    }
+                }
+            }
+        );
+    }
+
+    function show_hide_personal_input(show) {
+        if (show == true) {
+            si.profile.hide();
+            si.profile_edit.show();
+
+            si.company.hide();
+            si.company_edit.show();
+
+            si.personal_edit.hide();
+            si.personal_cancel_update.show();
+        } else {
+            si.profile.show();
+            si.profile_edit.hide();
+
+            si.company.show();
+            si.company_edit.hide();
+
+            si.personal_edit.show();
+            si.personal_cancel_update.hide();
+        }
+    }
+
+    function show_current_password_error(text) {
+        si.current_password_error.text(text);
+        si.current_password_error.show();
+    }
+
+    function show_new_password_error(text) {
+        si.new_password_error.text(text);
+        si.new_password_error.show();
+    }
+
+    $("button#location_yes").click(function() {
+        var data = { location_in_task_times: true };
+
+        save_user_settings(data);
+    });
+
+    $("button#location_no").click(function() {
+        var data = { location_in_task_times: false };
+
+        save_user_settings(data);
+    });
+
+    $("#language").on("change", function() {
+        var data = { language: $(this).val() };
+        save_user_settings(data);
+    });
+    $("#date_format").on("change", function(){
+        save_user_settings({date_format: $(this).val() });
+    });
+    $("#first_day_of_week").on("change", function(){
+        save_user_settings({first_day_of_week: $(this).val() });
+    });
+
+    $('.settings #edit').click(function() {
+        show_hide_personal_input(true);
+        editing = true;
+
+        keyboard.add("on-showing-personal-info", 'escape', function () {
+            si.cancel_edit.click();
+        });
+    });
+
+    si.cancel_edit.click(function() {
+        show_hide_personal_input(false);
+        editing = false;
+
+        keyboard.remove('on-showing-personal-info', 'escape');
+    });
+
+    $('.settings #update').click(function() {
+        var data = {
+            saving_user_profile: true,
+            last_name: $("#id_last_name").val(),
+            country: $("#id_country").val(),
+            sex: $("span.male .active").length == 1 ? "male" : "female",
+            company_name: si.company_name_edit.val() == gettext("company name") ? "" : si.company_name_edit.val(),
+            company_address: si.company_address_edit.val() == gettext("company address") ? "" : si.company_address_edit.val(),
+            company_postcode: si.company_postcode_edit.val() == gettext("company postcode") ? "" : si.company_postcode_edit.val(),
+            company_city: si.company_city_edit.val() == gettext("company city") ? "" : si.company_city_edit.val(),
+            company_country: si.company_country_edit.val() == gettext("company country") ? "" : si.company_country_edit.val(),
+            company_tax_id: si.company_tax_id_edit.val() == gettext("tax id number") ? "" : si.company_tax_id_edit.val(),
+            company_tax_payer: si.company_tax_payer_edit.val(),
+            company_website: si.company_website_edit.val() == gettext("company website") ? "" : si.company_website_edit.val()
+        };
+
+        console.log(data);
+
+        save_user_settings(data);
+    });
+
+    $("input#id_company_name").focus(function() {
+        if ($(this).val() == gettext("company name")) {
+            $(this).val("");
+        }
+    }).focusout(function() {
+        if ($(this).val() == "") {
+            $(this).val(gettext("company name"));
+        }
+    });
+
+    $("input#id_company_address").focus(function() {
+        if ($(this).val() == gettext("company address")) {
+            $(this).val("");
+        }
+    }).focusout(function() {
+        if ($(this).val() == "") {
+            $(this).val(gettext("company address"));
+        }
+    });
+
+    $("input#id_company_postcode").focus(function() {
+        if ($(this).val() == gettext("company postcode")) {
+            $(this).val("");
+        }
+    }).focusout(function() {
+        if ($(this).val() == "") {
+            $(this).val(gettext("company postcode"));
+        }
+    });
+
+    $("input#id_company_city").focus(function() {
+        if ($(this).val() == gettext("company city")) {
+            $(this).val("");
+        }
+    }).focusout(function() {
+        if ($(this).val() == "") {
+            $(this).val(gettext("company city"));
+        }
+    });
+
+    $("input#id_company_tax_id").focus(function() {
+        if ($(this).val() == gettext("tax id number")) {
+            $(this).val("");
+        }
+    }).focusout(function() {
+        if ($(this).val() == "") {
+            $(this).val(gettext("tax id number"));
+        }
+    });
+
+    $("input#id_company_website").focus(function() {
+        if ($(this).val() == gettext("company website")) {
+            $(this).val("");
+        }
+    }).focusout(function() {
+        if ($(this).val() == "") {
+            $(this).val(gettext("company website"));
+        }
+    });
+
+    $(".settings .personal span.edit span.male").click(function() {
+        $(".settings .personal span.edit span.female span").remove();
+        $(this).append('<span class="active"></span>');
+    });
+
+    $(".settings .personal span.edit span.female").click(function() {
+        $(".settings .personal span.edit span.male span").remove();
+        $(this).append('<span class="active"></span>');
+    });
+
+    $(".settings .password span#change_password").click(function() {
+        $(".settings .password .new-password").show();
+        $(this).parent().hide();
+        $(".settings .password .update-password").show();
+
+        keyboard.add("on-showing-change-password", 'escape', function () {
+            si.cancel_update_password.click();
+        });
+    });
+
+    $('.password #update_password').click(function() {
+        var error = false;
+
+        var data = {
+            current_password: si.current_password.val(),
+            password1: si.password1.val(),
+            password2: si.password2.val()
+        };
+
+        hide_password_messages();
+
+        if (data["current_password"] == "") {
+            show_current_password_error(gettext("Current password is not empty!"));
+
+            error = true;
+        }
+
+        if (data["password1"] != data["password2"]) {
+            show_new_password_error(gettext("New passwords should match. Now, they do not."));
+
+            error = true;
+        }
+
+        if (error == true) {
+            return false;
+        }
+
+        update_user_password(data);
+    });
+
+    si.cancel_update_password.click(function () {
+        si.new_password.hide();
+        si.update_password.hide();
+        si.change_password.show();
+
+        keyboard.remove('on-showing-change-password', 'escape');
+    });
+
+    $(document).on('click', '.change-photo', function() {
+        $(".settings #image").click();
+
+        return false;
+    });
+
+    $('.settings #image').on('change', function() {
+        var data = new FormData();
+        data.append("image", $("#image").get(0).files[0]);
+
+        $("#progress").fadeIn("fast");
+
+        upload_file('{% url "change-photo" %}', data, "{{ csrf_token }}",
+            // on response
+            function(response) {
+                if (response.status == "ok") {
+                    $('.change-photo img.avatar').attr("src", "/media/" + response.user_image_photo_url);
+                    $('#user_menu_button img.avatar-small').attr("src", "/media/" + response.user_image_menu_url);
+                } else {
+                }
+
+                $("#progress").fadeOut("fast");
+            },
+            // progress
+            function(e) {
+                if (e.lengthComputable) {
+                    var progress = (Math.floor((e.loaded / e.total) * 100));
+                    progress = progress + "%";
+                    $('#progress span#bar').css('width', progress);
+                    // $('#progress span#percent').text(progress);
+                }
+            }
+        );
+    });
+
+    function show_hide_company_text() {
+        if (si.company_address.text().trim() == "") {
+            si.company_address.hide();
+        } else {
+            si.company_address.show();
+        }
+
+        if (si.company_postcode.text().trim() == "") {
+            si.company_postcode.hide();
+        } else {
+            si.company_postcode.show();
+        }
+
+        if (si.company_city.text().trim() == "") {
+            si.company_city.hide();
+        } else {
+            si.company_city.show();
+        }
+
+        if (si.company_website.text().trim() == "") {
+            si.company_website.hide();
+        } else {
+            si.company_website.show();
+        }
+    }
+
+    show_hide_company_text();
+
+    $("tr.location-in-task-times").mouseenter(function() {
+        $("tr.location-in-task-times td:nth-child(3) div.show-location").fadeIn("fast");
+    }).mouseleave(function() {
+        $("tr.location-in-task-times td:nth-child(3) div.show-location").fadeOut();
+    });
+
+    {# for some fucking reason company country is not selected by saved data, so we have to do this #}
+    var company_country = "{{ user_profile.company_country.two_letter_code }}";
+    var first_name = "{{ bluser.first_name }}";
+    si.company_country_edit.val(company_country);
+{% endblock %}
+
+{% block page %}
+<div class="settings">
+    <div class="header">
+        <h2 class="normal">
+            <a href="{% url 'settings' %}">{% trans "Profile" %}</a>
+        </h2>
+    </div>
+
+    <div class="wrapper">
+        <div class="personal">
+            <table>
+                <tr>
+                    <td>
+                        <div class="change-photo">
+                            <img class="avatar" src="{% if bluser.images.all.count > 0 %}/media/{% thumbnail bluser.images.all.0.image 150x120 %}{% else %}{% static 'icons/unknown-person.png' %}{% endif %}" alt="{{ bluser.first_name }} {{ bluser.last_name }}" />
+                            <span>{% trans "Change photo" %}</span>
+
+                            <span id="progress">
+                                <span id="bar"></span>
+                            </span>
+                        </div>
+                    </td>
+
+                    <td id="profile" {% if not user_profile and not user_profile.company_name %}colspan="2"{% endif %}>
+                        <p class="header">{% trans "you" %}</p>
+                        <p class="first-last-name">{{ bluser.first_name }} <span class="text">{{ bluser.last_name }}</span></p>
+                        <p class="email">
+                            <span class="text">{{ bluser.email }}{% if bluser.type == "google" %}<br />{% trans "You are signed with google account." %}{% endif %}</span>
+                        </p>
+                        {% if bluser.type == "google" %}
+                            <p>&nbsp;</p>
+                        {% endif %}
+                        <p class="country">
+                            <span class="text">{% if bluser.country %}{{ bluser.country }}{% else %}&nbsp;{% endif %}</span>
+                        </p>
+                        <p class="gender">
+                            <span class="text">{% if bluser.sex == "male" %}{% trans "Male" %}{% else %}{% trans "Female" %}{% endif %}</span>
+                        </p>
+                    </td>
+
+                    <td id="profile_edit">
+                        <p class="header">{% trans "you" %}</p>
+                        <p class="first-last-name">{{ bluser.first_name }} {{ user_form.last_name }}</p>
+                        <p class="country">
+                            {{ user_form.country }}
+                        </p>
+                        <p class="gender">
+                            <span class="edit">
+                                <span class="male"><span class="active"></span></span>{% trans "Male" %}
+                                <span class="female"></span>{% trans "Female" %}
+                            </span>
+                        </p>
+                    </td>
+
+                    <td id="company">
+                        <p class="header">{% trans "your company" %}</p>
+                        <p class="company-name">{% if user_profile.company_name %}{{ user_profile.company_name }}{% else %}&nbsp;{% endif %}</p>
+                        <p class="company-address">{% if user_profile.company_address %}{{ user_profile.company_address }}{% else %}&nbsp;{% endif %}</p>
+                        <p class="company-postcode">{% if user_profile.company_postcode %}{{ user_profile.company_postcode }}{% else %}&nbsp;{% endif %}</p>
+                        <p class="company-city">{% if user_profile.company_city %}{{ user_profile.company_city }}{% else %}&nbsp;{% endif %}</p>
+                        <p class="company-country">{% if user_profile.company_name and user_profile.company_country %}{{ user_profile.company_country }}{% else %}&nbsp;{% endif %}</p>
+                        <p class="company-tax-id">{% if user_profile.company_tax_id %}{{ user_profile.company_tax_id }}{% else %}&nbsp;{% endif %}</p>
+                        <p class="company-tax-payer">{% if user_profile.company_tax_payer %}{% if user_profile.company_tax_payer == "tax_payer"%}{% trans "I am a taxpayer" %}{% else %}{% trans "I am not a taxpayer" %}{% endif %}{% endif %}</p>
+                        <p class="company-website">{% if user_profile.company_website %}{{ user_profile.company_website }}{% else %}&nbsp;{% endif %}</p>
+                    </td>
+
+                    <td id="company_edit">
+                        <p class="header">{% trans "your company" %}</p>
+                        <p class="company-name"><span>{% trans "Company name" %}</span>{{ user_profile_form.company_name }}</p>
+                        <p class="company-address little-margin"><span>{% trans "Company address" %}</span>{{ user_profile_form.company_address }}</p>
+                        <p class="company-postcode little-margin"><span>{% trans "Company postcode" %}</span>{{ user_profile_form.company_postcode }}</p>
+                        <p class="company-city little-margin"><span>{% trans "Company city" %}</span>{{ user_profile_form.company_city }}</p>
+                        <p class="company-country little-margin"><span>{% trans "Company country" %}</span>{{ user_profile_form.company_country }}</p>
+                        <p class="company-tax-id little-margin"><span>{% trans "Tax ID number" %}</span>{{ user_profile_form.company_tax_id }}</p>
+                        <p class="company-tax-payer little-margin"><span>{% trans "Taxpayer" %}</span>{{ user_profile_form.company_tax_payer }}</p>
+                        <p class="company-website little-margin"><span>{% trans "Company website" %}</span>{{ user_profile_form.company_website }}</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td><span id="edit">{% trans "Edit" %}</span></td>
+                    <td id="cancel_update"><span id="cancel">{% trans "Cancel" %}</span><span id="update">{% trans "Update" %}</span></td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="white-separator"></div>
+
+        {% if bluser and bluser.type == "normal" %}
+            <div class="password">
+                <h3>{% trans "Password" %}</h3>
+                <ul>
+                    <li class="new-password">
+                        <span>{% trans "Current password" %}</span>
+                        <input type="password" id="current_password" value="" />
+                        <span class="current-password-error"></span>
+                    </li>
+                    <li class="new-password">
+                        <span>{% trans "New password" %}</span>
+                        <input type="password" id="password1" value="" />
+                        <span class="new-password-error"></span>
+                    </li>
+                    <li class="new-password">
+                        <span>{% trans "New password one more time" %}</span>
+                        <input type="password" id="password2" value="" />
+                        <span class="new-password-error"></span>
+                    </li>
+                    <li class="change-password">
+                        <span id="change_password">{% trans "Change password" %}</span>
+                    </li>
+                    <li class="update-password">
+                        <span id="cancel_update_password">{% trans "Cancel" %}</span>
+                        <span id="update_password">{% trans "Update" %}</span>
+                    </li>
+                    <li class="password-changed-successfully">
+                        {% trans "Password changed successfully!" %}
+                    </li>
+                </ul>
+            </div>
+
+            <div class="white-separator"></div>
+        {% endif %}
+
+        <div class="website">
+            <h3>{% trans "Website" %}</h3>
+            <table>
+                <!--
+                <tr>
+                    <td>{% trans "Prefered language" %}</td>
+                    <td>
+                        <select id="language">
+                        {% for l in languages %}
+                            <option value="{{ l.0 }}" {% if l.0 == language %}selected{% endif %}>
+                                {{ l.1 }}
+                            </option>
+                        {% endfor %}
+                        </select>
+                    </td>
+                    <td>&nbsp;</td>
+                </tr>
+                -->
+                <tr>
+                    <td>{% trans "Date format" %}</td>
+                    <td>
+                        <select id="date_format">
+                        {% for f in date_formats %}
+                            <option value="{{ f }}" {% if f == date_format %}selected{% endif %}>
+                                {{ f }}
+                            </option>
+                        {% endfor %}
+                        </select>
+                    </td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>{% trans "First day of week" %}</td>
+                    <td>
+                        <select id="first_day_of_week">
+                            <option value="sunday" {% if first_day_of_week == 'sunday' %}selected{% endif %}>
+                                {% trans 'Sunday' %}
+                            </option>
+                            <option value="monday" {% if first_day_of_week == 'monday' %}selected{% endif %}>
+                                {% trans 'Monday' %}
+                            </option>
+                        </select>
+                    </td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr class="location-in-task-times">
+                    <td>{% trans "Location also in task time" %}</td>
+                    <td>
+                        <button id="location_yes" class="location{% if location_in_task_times %} active{% endif %}">
+                            <span>{% trans "Yes" %}</span>
+                        </button>
+                        <button id="location_no" class="location{% if not location_in_task_times %} active{% endif %}">
+                            <span>{% trans "No" %}</span>
+                        </button>
+                    </td>
+                    <td>
+                        <div class="show-location">
+                            <img class="show-location-icon imglink transparent large hoverable" src="{% static 'icons/location.png' %}" alt="{% trans 'Location' %}" title="{% trans 'Location' %}" />
+                            <span>{% trans "This icon will appear in task details and task times if you say yes here." %}</span>
+                        </div>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <form id="form" action="{% url 'change-photo' %}" method="post" enctype="multipart/form-data">
+        <input type="file" id="image" value="{% trans "Upload" %}">
+    </form>
+</div>
+
+{% endblock %}

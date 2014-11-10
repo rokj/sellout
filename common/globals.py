@@ -252,3 +252,29 @@ CATEGORY_COLORS = [  # choices for category.color
     'ffc864',
     '5ad2fa',
 ]
+
+ACCEPTED = "accepted"
+DECLINED = "declined"
+WAITING = "waiting"
+CANCELED = "canceled"
+SEEN = "seen"
+
+ACTION_STATUS = (
+    (WAITING, _("Waiting")),
+    (SEEN, _("Seen")),
+    (CANCELED, _("Canceled")),
+    (ACCEPTED, _("Accepted")),
+    (DECLINED, _("Declined")),
+)
+
+BL_USERS = "bl_users"
+BL_MAIL = "bl_mail"
+NORMAL = "normal"
+GOOGLE = "google"
+
+LOGIN_TYPES = (
+    (BL_USERS, _("Master BL users table")),
+    (BL_MAIL, _("Blocklogic mail")),
+    (NORMAL, _("Normal")),
+    (GOOGLE, _("Google"))
+)

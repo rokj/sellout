@@ -1,5 +1,7 @@
 from django.conf.urls import patterns, include, url
 
+from blusers import views as blusers_views
+
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 
@@ -8,6 +10,9 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # admin
     url(r'^admin/', include(admin.site.urls)),
+
+    # main
+    url(r'^logout/$', blusers_views.logout, name="logout"), # registration
 
     # POS
     url(r'^pos/', include('pos.urls', namespace='pos')),

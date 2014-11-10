@@ -1,0 +1,223 @@
+{% extends 'web/homebase.html' %}
+{% load staticfiles %}
+{% load thumbnail %}
+{% load i18n %}
+
+{% block head_jquery %}
+$(document).ready(function() {
+    $("p input").focus(function () {
+        if ($(this).nextAll("span.errors:first").is(':visible')) {
+            $(this).nextAll("span.errors:first").fadeOut("fast");
+        }
+
+        $(this).next("span.helptext").fadeIn("slow");
+    }).focusout(function() {
+        $(this).next("span.helptext").fadeOut("slow");
+    });
+
+    $("form.user_profile input#id_first_name").focus(function () {
+        if ($(this).val() == "{% trans "First" %}") {
+            $(this).val("");
+        }
+    }).focusout(function() {
+        if ($(this).val() == "") {
+            $(this).val("{% trans "First" %}");
+        }
+    });
+
+    $("form.user_profile input#id_last_name").focus(function () {
+        if ($(this).val() == "{% trans "Last" %}") {
+            $(this).val("");
+        }
+    }).focusout(function() {
+        if ($(this).val() == "") {
+            $(this).val("{% trans "Last" %}");
+        }
+    });
+
+    $("input#submit").click(function() {
+        var valid = true;
+        var update_password = false;
+
+        $("span.errors").remove();
+        $("span.captcha-error").remove();
+
+        if ($("div.passwords").is(":visible")) {
+            update_password = true;
+        }
+
+        if ($("#id_first_name").val() == "{% trans "First" %}") {
+            $("#id_first_name").after('<span class="errors">{% trans "First and last name are required." %}</span>');
+            valid = false;
+        }
+
+        if (($("#id_first_name").val() != "{% trans "First" %}") && ($("#id_last_name").val() == "{% trans "Last" %}")) {
+            $("#id_last_name").after('<span class="errors">{% trans "First and last name are required." %}</span>');
+            valid = false;
+        }
+
+        if (($("#id_first_name").val() != "{% trans "First" %}") && (! $("#id_first_name").valid("only_letters"))) {
+            $("#id_first_name").after('<span class="errors">{% trans "Only letters allowed." %}</span>');
+            valid = false;
+        }
+
+        if (($("#id_last_name").val() != "{% trans "Last" %}") && (! $("#id_last_name").valid("only_letters"))) {
+            $("#id_last_name").after('<span class="errors">{% trans "Only letters allowed." %}</span>');
+            valid = false;
+        }
+
+        if (update_password) {
+            if (! $("#id_old_password").valid("password")) {
+                $("#id_old_password").after('<span class="old-password errors">{% trans "Password must be at least 4 letters long. Also use some digits or special characters so really bad person would not steal your account." %}</span>');
+                valid = false;
+            }
+
+            if (! $("#id_password1").valid("password")) {
+                $("#id_password1").after('<span class="password1 errors">{% trans "Password must be at least 4 letters long. Also use some digits or special characters so really bad person would not steal your account." %}</span>');
+                valid = false;
+            }
+
+            if ($("span.password1.errors").length == 0 && ($("#id_password1").val() != $("#id_password2").val()))  {
+                $("#id_password2").after('<span class="password2 errors">{% trans "Password should be the same as in the previous field." %}</span>');
+                valid = false;
+            }
+        }
+
+        if ($("#id_company_address").val() != "") {
+            if (! $("#id_company_address").valid("only_lds")) {
+                $("#id_company_address").after('<span class="errors">{% trans "Only letters, digits and space allowed." %}</span>');
+                valid = false;
+            }
+        }
+
+        if ($("#id_company_postcode").val() != "") {
+            if (! $("#id_company_postcode").valid("only_lds")) {
+                $("#id_company_postcode").after('<span class="errors">{% trans "Only letters, digits and space allowed." %}</span>');
+                valid = false;
+            }
+        }
+
+        if ($("#id_company_website").val() != "") {
+            if (! $("#id_company_website").valid("url")) {
+                $("#id_company_website").after('<span class="errors">{% trans "Only letters, digits and space allowed." %}</span>');
+                valid = false;
+            }
+        }
+
+        return valid;
+    });
+
+    $("p.update-password a.password").click(function() {
+        if ($("div.passwords").is(":visible")) {
+            $("div.passwords").fadeOut("fast");
+            $("#update_password").val("no");
+        } else {
+            $("div.passwords").fadeIn("fast");
+            $("#update_password").val("yes");
+        }
+    });
+
+	$("a#remove_photo").click(function() {
+        var data = { image_id : $("#user_profile_image_id").val() }
+        send_data("{% url 'remove_photo' %}", data, "{{ csrf_token }}",
+            function(response) {
+                if (response.status == "ok"){
+					$("div.iw img.avatar").attr("src", "{% static 'icons/unknown-person-140.png' %}");
+					$("a#remove_photo").remove();
+
+                    $("h3").remove();
+                    $("form.user-profile div").first().prepend('<h3 class="success">{% trans "Photo removed successfully!" %}</h3>')
+				}
+            }
+        );
+	});
+});
+{% endblock %}
+
+{% block page_style %}class="user-profile"{% endblock %}
+
+{% block page %}
+
+<div class="header">
+    <h2 class="normal">
+        <a class="active" href="{% url 'settings' %}">{% trans "Profile" %}</a>
+        <a href="{% url 'manage-groups' %}">{% trans "Groups" %}</a>
+        <a href="{% url 'subscription:subscriptions' %}">{% trans "Subscriptions" %}</a>
+    </h2>
+</div>
+
+
+<div id="user_profile_form">
+    <div>
+        <form action="{% url 'user_profile' group.id %}" method="post" class="user-profile" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" id="update_password" name="update_password" value="{% if update_password and user_form.errors %}yes{% else %}no{% endif %}" />
+
+            <div><!-- the validator wants a 'containing element' -->
+                {% if messages %}
+                    {% for code, message in messages.items %}
+                        <h3 class="{{ code }}">{{ message }}</h3>
+                    {% endfor %}
+                {% endif %}
+
+                <p><label for="id_email">{% trans 'E-mail' %}</label></p>
+                <p class="second"><input class="readonly-email" type="text" maxlength="75" readonly="readonly" value="{{ user_form.email.value }}"></p>
+
+                <p><label for="id_name">{% trans 'Name' %}</label></p>
+                <p class="second">{{ user_form.first_name }} {{ user_form.last_name }} <span class="helptext">{% trans "This field is required. 30 characters or less. Only letters and numbers allowed." %}</span> {% if user_form.last_name.errors %}<span class="errors">{% for error in user_form.last_name.errors %}{{ error }} {% endfor %}</span>{% endif %} {% if user_form.last_name.errors %}<span class="errors">{% for error in user_form.last_name.errors %}{{ error }} {% endfor %}</span>{% endif %}</p>
+
+                <p><label for="id_country">{% trans 'Country' %}</label></p>
+                <p class="second">{{ user_form.country }} <span class="helptext">{% trans "This field is required." %}</span> {% if user_form.country.errors %}<span class="email errors">{% for error in user_form.country.errors %}{{ error }} {% endfor %}</span>{% endif %}</p>
+
+                <p><label for="id_sex">{% trans 'Sex' %}</label></p>
+                <p class="second">{{ user_form.sex }} {% if user_form.sex.errors %}<span class="errors">{% for error in user_form.sex.errors %}{{ error }}{% endfor %}</span>{% endif %}</p>
+
+                <p class="update-password">{% trans 'You can update also' %} <a class="password">{% trans "password" %}</a></p>
+
+                <div class="passwords" {% if update_password and user_form.errors %}style="display: block;"{% endif %}>
+                    <p><label for="id_password">{% trans 'Old password' %}</label></p>
+                    <p class="second">{{ user_form.old_password }} <span class="helptext">{% trans "This field is required." %}</span>{% if user_form.old_password.errors %}<span class="password1 errors">{% for error in user_form.old_password.errors %}{{ error }} {% endfor %}</span>{% endif %}</p>
+
+                    <p><label for="id_password1">{% trans 'Password' %}</label></p>
+                    <p class="second">{{ user_form.password1 }} <span class="helptext">{% trans "This field is required." %}</span>{% if user_form.password1.errors %}<span class="password1 errors">{% for error in user_form.password1.errors %}{{ error }} {% endfor %}</span>{% endif %}</p>
+
+                    <p><label for="id_password2">{% trans 'Password one more time' %}</label></p>
+                    <p class="second">{{ user_form.password2 }} <span class="helptext">{% trans "Password should be the same as in the previous field." %}</span>{% if user_form.password2.errors %}<span class="errors">{% for error in user_form.password2.errors %}{{ error }}{% endfor %}</span>{% endif %}</p>
+                </div>
+
+                <p class="line"></p>
+
+                <p class="optional-text">** {% trans 'Following fields are optional' %} **</p>
+
+                <p><label for="id_company_address">{% trans 'Company address' %}</label></p>
+                <p class="second">{{ user_profile_form.company_address }}<span class="helptext">{% trans "This field is optional. Only letters and numbers allowed." %}</span> {% if user_profile_form.company_address.errors %}<span class="errors">{% for error in user_profile_form.company_address.errors %}{{ error }} {% endfor %}</span>{% endif %}</p>
+
+                <p><label for="id_company_postcode">{% trans 'Company postcode' %}</label></p>
+                <p class="second">{{ user_profile_form.company_postcode }}<span class="helptext">{% trans "This field is optional. Only letters and numbers allowed." %}</span> {% if user_profile_form.company_postcode.errors %}<span class="errors">{% for error in user_profile_form.company_postcode.errors %}{{ error }} {% endfor %}</span>{% endif %}</p>
+
+                <p><label for="id_company_country">{% trans 'Country of residence of the company' %}</label></p>
+                <p class="second">{{ user_profile_form.company_country }}<span class="helptext">{% trans "This field is optional." %}</span> {% if user_profile_form.company_country.errors %}<span class="errors">{% for error in user_profile_form.company_country.errors %}{{ error }} {% endfor %}</span>{% endif %}</p>
+
+                <p><label for="id_company_website">{% trans 'Company website' %}</label></p>
+                <p class="second">{{ user_profile_form.company_website }}<span class="helptext">{% trans "This field is optional." %}</span> {% if user_profile_form.company_website.errors %}<span class="errors">{% for error in user_profile_form.company_website.errors %}{{ error }} {% endfor %}</span>{% endif %}</p>
+
+                <input type="submit" id="submit" name="submit" value="{% trans "Update profile" %}" />
+            </div>
+
+            <div class="user-image">
+                <div class="img-wrapper">
+                    <p><label>{% trans "Photo" %}</label></p>
+                    <div class="iw">
+                        {% if bluser.images.all.count > 0 %}<a id="remove_photo" title="{% trans "Remove photo" %}"><img src="{% static 'icons/delete-1.png' %}" alt="{% trans "Remove photo" %}" /></a>{% endif %}
+                        <img class="avatar" src="{% if bluser.images.all.count > 0 %}{% thumbnail bluser.images.all.0.image 140x140 %}{% else %}{% static 'icons/unknown-person-140.png' %}{% endif %}" alt="{{ bluser.first_name }} {{ bluser.last_name }}" />
+                        <input type="hidden" id="user_profile_image_id" name="user_profile_image_id" value="{{ bluser.images.all.0.pk }}" />
+                    </div>
+
+                    {{ user_form.images }}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
