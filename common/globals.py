@@ -1,5 +1,5 @@
 # coding=UTF-8
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ugettext
 
 # Common stuff to be used anywhere throughout the site
 
@@ -278,3 +278,40 @@ LOGIN_TYPES = (
     (NORMAL, _("Normal")),
     (GOOGLE, _("Google"))
 )
+
+FIRST_TIME = "first_time"
+PAID = "paid"
+FREE = "free"
+
+SUBSCRIPTION_STATUS = (
+    (WAITING, _("Waiting")),
+    (CANCELED, _("Canceled")),
+)
+
+MALE = "male"
+FEMALE = "female"
+SEX = (
+    (MALE, _("Male")),
+    (FEMALE, _("Female")),
+)
+
+MEMBER = "member"
+ADMIN = "admin"
+REMOVED = "removed"
+USER_ROLE = (
+    (MEMBER, _("Member")),
+    (ADMIN, _("Admin")),
+    (REMOVED, _("Removed")),
+)
+
+TAX_PAYER_CHOICES=[('tax_payer', ugettext(u"Yes")), ('not_tax_payer', ugettext("No"))]
+
+PAID = "paid" # when there >= 3 confirmations and bitcoin client
+ALMOST_PAID = "almost_paid" # when we are checking just transactions on network
+APPROVED = "approved"
+CANCELED = "canceled"
+NO_MONEY_ARRIVED = "no_money_arrived"
+NOT_ENOUGH_MONEY_ARRIVED = "not_enough_money_arrived"
+SEEN = "seen"
+HIDDEN = "hidden"
+RUNNING = "running"

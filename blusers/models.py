@@ -1,23 +1,23 @@
 import os
-import datetime
-from dateutil.relativedelta import relativedelta
 from django.db import models
 from django.db import connections
 from django.db import transaction
 
+from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
-from django.db.models import Q
-from django.forms import forms
 from django.utils.translation import ugettext_lazy as _
-from common.globals import MALE, SEX, ADMIN, MEMBER, NORMAL, LOGIN_TYPES, TAX_PAYER_CHOICES
+from common.globals import MALE, SEX, TAX_PAYER_CHOICES, NORMAL, LOGIN_TYPES
 
 from common.models import SkeletonU, Skeleton
 
 from easy_thumbnails.models import Source, Thumbnail
+from config.functions import get_user_value
 import settings
 
 
 class BlocklogicUser(AbstractUser, Skeleton):
+    User._meta.get_field("username").max_length = 75
+
     # must be set upon registration ('normal' for normal registration, 'google' for google)
     type = models.CharField(max_length=32, blank=False, null=False, default=NORMAL, choices=LOGIN_TYPES)
     sex = models.CharField(_("Male or female"), max_length=6, default=MALE, choices=SEX, blank=False, null=False)
@@ -72,29 +72,22 @@ class BlocklogicUser(AbstractUser, Skeleton):
 
         super(BlocklogicUser, self).save(*args, **kwargs)
 
-    def get_homecompany(self):
-        from pos.models import Company, CompanyUserRole
+    def get_selected_company(self):
+        selected_company = ""
 
         try:
-            group_user_role = GroupUserRole.objects.get(user=self, role=ADMIN, created_by=self, homegroup=True)
-        except GroupUserRole.DoesNotExist:
-            # we create his group
-            group = Group(created_by=self)
-            group.save()
+            selected_company = get_user_value(self, "selectedcompany")
+        except KeyError, Exception:
+            pass
 
-            group_user_role = GroupUserRole(group=group, user=self, role=ADMIN, created_by=self, homegroup=True)
-            group_user_role.save()
+        return selected_company
 
-            return group
-
-        return group_user_role.group
-
-    homecompany q = property(get_homegroup)
+    selected_company = property(get_selected_company)
 
     def get_user_groups(self):
-        from group.models import GroupUserRole
+        from pos.models import Permission
 
-        return [g.group for g in GroupUserRole.objects.filter(Q(role__exact=MEMBER) | Q(role__exact=ADMIN), user=self).order_by('group__name')]
+        return Permission.objects.filter(user=self)
 
     user_groups = property(get_user_groups)
 

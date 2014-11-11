@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 
     # main
+    url(r'^' + settings.URL_PREFIX + '$', index, name='index'),
     url(r'^logout/$', blusers_views.logout, name="logout"), # registration
 
     # POS

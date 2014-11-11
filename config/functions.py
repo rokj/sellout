@@ -16,7 +16,9 @@
   cache is loaded on load_config and deleted on save_config (and reloaded)
 """
 
-from models import UserConfig, CompanyConfig
+from config.models import UserConfig
+from config.models import CompanyConfig
+
 from common import globals as g
 from django.core.cache import cache
 import json

@@ -6,7 +6,7 @@ from django.dispatch import receiver
 from sorl import thumbnail
 
 from common.models import SkeletonU
-from common.functions import ImagePath
+# from common.functions import ImagePath
 import common.globals as g
 
 from config.countries import country_choices, country_by_code
@@ -40,6 +40,7 @@ class Company(SkeletonU, CompanyAbstract):
     url_name = models.SlugField(_("Company name, used in URL address"),
                                 max_length=g.MISC['company_url_length'],
                                 null=False, blank=False, db_index=True)
+    """
     color_logo = thumbnail.ImageField(_("Logo"),
                                    upload_to=ImagePath(g.DIRS['color_logo_dir'],
                                                        "pos_company", "color_logo"),
@@ -48,6 +49,7 @@ class Company(SkeletonU, CompanyAbstract):
                                         upload_to=ImagePath(g.DIRS['monochrome_logo_dir'],
                                                                  "pos_company", "monochrome_logo"),
                                         null=True, blank=True)
+    """
     notes = models.TextField(_("Notes"), blank=True, null=True)
 
     def __unicode__(self):
@@ -55,18 +57,6 @@ class Company(SkeletonU, CompanyAbstract):
 
     class Meta:
         verbose_name_plural = _("Companies")
-
-class CompanyUserRole(SkeletonU):
-    company = models.ForeignKey(Group)
-    user = models.ForeignKey(BlocklogicUser)
-    homegroup = models.BooleanField(default=False, blank=False, null=False)
-
-    role = models.CharField(default=MEMBER, max_length=30, blank=False, null=False)
-
-    class Meta:
-        unique_together = ('group', 'user',)
-
-
 
 ### category ###
 class Category(SkeletonU):

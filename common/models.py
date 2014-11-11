@@ -44,3 +44,13 @@ class Country(models.Model):
 
     class Meta:
         verbose_name_plural = _("Countries")
+
+class Currency(models.Model):
+    code = models.CharField(max_length=3, null=False, primary_key=True)
+    name = models.CharField(max_length=64, null=False)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = _("Currencies")
