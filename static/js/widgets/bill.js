@@ -188,7 +188,7 @@ Bill = function(g){
         // bill discounts
         var bill_discount = p.get_discount();
 
-        var prices = calculate_bill(c_items, bill_discount.amount, bill_discount.type);
+        var prices = calculate_bill(c_items, bill_discount.amount, bill_discount.type, p.g.config.decimal_places);
 
         // update all items' data and refresh them
         for(i = 0; i < prices.items.length; i++){
@@ -274,6 +274,9 @@ Bill = function(g){
                 discount_type: "Relative"
             }
         }
+
+        // recalculate everything
+        prices = TODO
 
         var r = {
             id: id,
@@ -495,7 +498,7 @@ Item = function(bill, product) {
         // set the new quantity and update everything
         p.data.quantity = q;
 
-        p.update();
+        p.bill.update();
     };
 
     p.format = function(){
@@ -641,13 +644,7 @@ Item = function(bill, product) {
     p.items.qty
         .unbind()
         .click(function(e){ e.stopPropagation(); })
-        .blur(function(e){ // there is a bug in chrome that sends change() event twice;
-                           // as a workaround, use blur and keyup(enter)
-            p.check_quantity();
-        })
-        .keyup(function(e){
-            if(e.keyCode == 13) p.items.qty.blur();
-        });
+        .change(p.check_quantity);
 
 
     // save references for quick access:

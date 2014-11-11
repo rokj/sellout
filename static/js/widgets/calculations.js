@@ -38,7 +38,7 @@ function get_tax(price, tax){
     return price.times(tax.div(Big(100)));
 }
 
-function calculate_item(item){
+function calculate_item(item, decimal_places){
     var i;
     var item_discount, new_discount, new_total, new_net;
 
@@ -83,17 +83,17 @@ function calculate_item(item){
     // in real life, one would first multiply by quantity and then calculate with 4 decimal
     // places instead of 2 (depending on config), but we have Big() that uses 'infinite'
     // amount of decimal places for exact calculation
-    item.batch = item.base.times(item.quantity);
-    item.discount = item.discount.times(item.quantity);
-    item.tax = get_tax(item.net, item.tax_rate).times(item.quantity);
-    item.net = item.net.times(item.quantity);
+    item.batch = item.base.times(item.quantity).round(decimal_places);
+    item.discount = item.discount.times(item.quantity).round(decimal_places);
+    item.tax = get_tax(item.net, item.tax_rate).times(item.quantity).round(decimal_places);
+    item.net = item.net.times(item.quantity).round(decimal_places);
 
-    item.total = item.batch.minus(item.discount).plus(item.tax);
+    item.total = item.batch.minus(item.discount).plus(item.tax).round(decimal_places);
 
     return item;
 }
 
-function calculate_bill(items, bill_discount_amount, bill_discount_type){
+function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal_places){
     // 1. calculate all items's prices
     var i, item;
 
@@ -101,7 +101,7 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type){
     var base, discount, tax, total;
 
     for(i = 0; i < items.length; i++){
-        items[i] = calculate_item(items[i]);
+        items[i] = calculate_item(items[i], decimal_places);
     }
 
     // 2. calculate bill's total
@@ -142,10 +142,10 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type){
             // discount amount:
             new_discount = item.net.times(bill_discount_amount);
 
-            item.discount = item.discount.plus(new_discount);
-            item.net = item.net.minus(new_discount);
-            item.tax = item.net.times(item.tax_rate.div(100));
-            item.total = item.net.plus(item.tax);
+            item.discount = item.discount.plus(new_discount).round(decimal_places);
+            item.net = item.net.minus(new_discount).round(decimal_places);
+            item.tax = item.net.times(item.tax_rate.div(100)).round(decimal_places);
+            item.total = item.net.plus(item.tax).round(decimal_places);
         }
     }
 

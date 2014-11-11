@@ -118,7 +118,6 @@ def edit_category(request, company):
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
     
-    # sellers can edit product
     if not has_permission(request.user, c, 'category', 'edit'):
         return JsonError(_("You have no permission to edit products"))
 

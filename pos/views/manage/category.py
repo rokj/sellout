@@ -199,7 +199,6 @@ class CategoryForm(forms.ModelForm):
             return self.cleaned_data['parent']
 
 
-
 @login_required
 def list_categories(request, company):
     c = get_object_or_404(Company, url_name=company)
@@ -241,6 +240,7 @@ def add_category(request, company, parent_id=-1):
             # check if not adding to some other company's category
             if parent.company != c:
                 return no_permission_view(request, c, _("You have no permission to add to this category."))
+
     except Category.DoesNotExist:
         raise Http404
     except:
@@ -258,7 +258,7 @@ def add_category(request, company, parent_id=-1):
 
     if request.method == 'POST':
         # submit data
-        form = CategoryForm(request.POST, request.FILES)  # instance = None
+        form = CategoryForm(request.POST)  # instance = None
 
         if form.is_valid():
             # created_by and company_id (only when creatine a new category)
@@ -293,28 +293,17 @@ def edit_category(request, company, category_id):
         return no_permission_view(request, c, _("You have no permission to edit categories."))
 
     try:
-        category = Category.objects.get(id=category_id)
+        category = Category.objects.get(id=category_id, company=c)
     except Category.DoesNotExist:
-        raise Http404
-
-    # check if category actually belongs to the given company
-    if category.company != c:  # "you have no permission to edit this category"
         raise Http404
 
     context = {'company': c, 'category_id': category_id}
 
     if request.method == 'POST':
         # submit data
-        form = CategoryForm(request.POST, request.FILES, instance=category)
+        form = CategoryForm(request.POST, instance=category)
 
         if form.is_valid():
-            # created_by and company_id (only when creating a new category)
-            category = form.save(False)
-            if 'created_by' not in form.cleaned_data:
-                category.created_by = request.user
-            if 'company_id' not in form.cleaned_data:
-                category.company_id = c.id
-
             form.save()
 
             # return to categories and select the just added category
@@ -341,10 +330,7 @@ def web_delete_category(request, company):
     return delete_category(request, company)
 
 
-
-
-
-def delete_category(request, company, android=False):
+def delete_category(request, company):
     c = Company.objects.get(url_name=company)
 
     # check permissions: needs to be at least manager
@@ -379,15 +365,16 @@ def delete_category(request, company, android=False):
 
 def get_category(request, company, category_id):
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
     
     # permissions: needs to be guest to view products
     if not has_permission(request.user, c, 'product', 'view'):
         return JsonError(_("You have no permission to view products"))
-    
-    category = get_object_or_404(Category, id=category_id, company=c)
-    
-    return JsonResponse(category_to_dict(category))
+
+    try:
+        return JsonResponse(category_to_dict(Category.objects.get(id=category_id, company=c)))
+    except Category.DoesNotExist:
+        return JsonError(_("Category does not exist"))
 
