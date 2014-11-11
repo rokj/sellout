@@ -111,7 +111,7 @@ def mobile_edit_discount(request, company):
         d.amount = Decimal(data.get('amount'))
         d.start_date = start
         d.end_date = end
-        d.active = data.get('active')
+        d.enabled = data.get('enabled')
         d.save()
 
     return JsonOk(extra=discount_to_dict(request.user, c, d, android=True))
