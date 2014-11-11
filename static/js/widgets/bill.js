@@ -462,7 +462,7 @@ Item = function(bill, product) {
         // update prices
         if(update){
             p.data.quantity = q;
-            p.update();
+            p.bill.update();
         }
     };
 
