@@ -69,6 +69,9 @@ def validate_category(user, company, data):
 
 
 def validate_parent(category, parent):
+    if not parent:
+        return True  # topmost categories don't need this
+
     categories = Category.objects.filter(parent=category)
     for c in categories:
         if c.id == parent.id:
