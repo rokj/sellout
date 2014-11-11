@@ -109,38 +109,24 @@ def mobile_add_category(request, company):
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_edit_category(request, company):
-    return edit_category(request, company)
 
-
-def edit_category(request, company):
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
-    
+
     if not has_permission(request.user, c, 'category', 'edit'):
         return JsonError(_("You have no permission to edit products"))
 
     data = JsonParse(request.POST['data'])
 
-    category_id = data['id']
-
-    # see if product exists in database
-    try:
-        category = Category.objects.get(id=category_id)
-    except:
-        return JsonError(_("Product does not exist"))
-    
-    # validate data
     valid = validate_category(request.user, c, data)
-    
+
     if not valid['status']:
         return JsonError(valid['message'])
+
     form = valid['form']
-
-    if form.is_valid():
-        form.save()
-
+    category = form.save()
 
     return JsonOk(extra=category_to_dict(category, android=True))
 
