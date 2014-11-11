@@ -130,7 +130,7 @@ Bill = function(g){
             return {type: p.data.discount_type, amount: p.data.discount_amount}
         }
         else{
-            return {type: 'Percent', amount: Big(0)};
+            return {type: 'Relative', amount: Big(0)};
         }
     };
 
@@ -188,14 +188,15 @@ Bill = function(g){
         // bill discounts
         var bill_discount = p.get_discount();
 
-        var prices = calculate(c_items, bill_discount.amount, bill_discount.type);
+        var prices = calculate_bill(c_items, bill_discount.amount, bill_discount.type);
 
         // update all items' data and refresh them
         for(i = 0; i < prices.items.length; i++){
             item = p.items_by_serial[prices.items[i].serial];
 
-            item.data.tax_absolute = prices.items[i].tax;
-            item.data.discount_absolute = prices.items[i].discount;
+            item.data.batch = prices.items[i].batch;
+            item.data.tax = prices.items[i].tax;
+            item.data.discount = prices.items[i].discount;
             item.data.total = prices.items[i].total;
 
             item.update();
@@ -270,7 +271,7 @@ Bill = function(g){
             p.data = {
                 notes: '',
                 discount_amount: Big(0),
-                discount_type: "percent"
+                discount_type: "Relative"
             }
         }
 
@@ -717,7 +718,7 @@ ItemDetails = function(item){
             // if editable == true, it includes a 'remove' button, otherwise not
             var li = $(element, {title: discount.description, 'class': 'inserted'});
 
-            if(discount.type == "Percent"){
+            if(discount.type == "Relative"){
                 // example: ND10 (10 %)
                 li.text(discount.code + " (" + dn(discount.amount, p.g) + " %)");
             }
@@ -914,7 +915,7 @@ ItemDetails = function(item){
 
         if(!a) return false;
 
-        return !(p.items.unique_discount_type.val() == 'Percent' && a.cmp(Big(100)) > 0);
+        return !(p.items.unique_discount_type.val() == 'Relative' && a.cmp(Big(100)) > 0);
     };
 
     p.create_shadows = function(){

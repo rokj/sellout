@@ -366,7 +366,7 @@ def create_bill(request, company):
                 return item_error(_("Invalid discount amount"), product)
             else:
                 d_amount = r['number']
-                if d_amount < Decimal('0') or (d.get('type') == 'Percentage' and d_amount > Decimal('100')):
+                if d_amount < Decimal('0') or (d.get('type') == 'Relative' and d_amount > Decimal('100')):
                     return item_error(_("Invalid discount amount"), product)
 
             # save data to bill

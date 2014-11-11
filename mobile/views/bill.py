@@ -133,21 +133,36 @@ def item_prices(user, company, base_price, tax_percent, quantity, discounts):
 
     r = {}  # return values
 
-    # base price
-    r['base'] = base_price
-    # subtract discounts from base
-    dd = get_discount(r['tax_price'])
-    r['discount'] = dd['discount']
-    # price including discounts
-    r['discount_price'] = dd['final']
-    # add tax
-    r['tax_price'] = r['discount_price']*(Decimal('1') + (tax_percent/Decimal('100')))
-    # get absolute tax value
-    r['tax_absolute'] = r['tax_price'] - r['discount_price']
-    # total
-    r['total'] = r['tax_price']
-    # total without tax
-    r['total_tax_exc'] = r['discount_price']
+    if get_company_value(user, company, 'pos_discount_calculation') == 'Tax first':
+        # price without tax and discounts
+        r['base'] = base_price
+        # price including tax
+        r['tax_price'] = base_price*(Decimal('1') + (tax_percent/Decimal('100')))
+        # absolute tax value
+        r['tax_absolute'] = r['tax_price'] - r['base']
+        # absolute discounts value
+        dd = get_discount(r['tax_price'])
+        r['discount_absolute'] = dd['discount']
+        # total, including tax and discounts
+        r['total'] = dd['final']
+        # total excluding tax
+        r['total_tax_exc'] = r['total'] - r['tax_absolute']
+    else:
+        # base price
+        r['base'] = base_price
+        # subtract discounts from base
+        dd = get_discount(r['tax_price'])
+        r['discount'] = dd['discount']
+        # price including discounts
+        r['discount_price'] = dd['final']
+        # add tax
+        r['tax_price'] = r['discount_price']*(Decimal('1') + (tax_percent/Decimal('100')))
+        # get absolute tax value
+        r['tax_absolute'] = r['tax_price'] - r['discount_price']
+        # total
+        r['total'] = r['tax_price']
+        # total without tax
+        r['total_tax_exc'] = r['discount_price']
 
     # multiply everything by quantity
     r['base'] = r['base']*quantity  # without tax and discounts

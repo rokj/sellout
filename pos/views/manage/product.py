@@ -384,23 +384,28 @@ def validate_product(user, company, data):
         except Category.DoesNotExist:
             return r(False, _("Selected category does not exist"))
     
+    
     # price
     if len(data['price']) > g.DECIMAL['currency_digits']+1:
         return r(False, _("Price too long"))
-
-    try:
-        data['price'] = parse_decimal(user, company, data['price'], g.DECIMAL['currency_digits'])
-    except ValueError:
+    
+    ret = parse_decimal(user, company, data['price'], g.DECIMAL['currency_digits'])
+    if not ret['success']:
         return r(False, _("Check price notation"))
-
+    data['price'] = ret['number']
+    
     # purchase price
     if 'purchase_price' in data:
         if len(data['purchase_price']) > g.DECIMAL['currency_digits']+1:
             return r(False, _("Purchase price too long"))
     
         if len(data['purchase_price']) > 1:  # purchase price is not mandatory, so don't whine if it's not entered
-            data['purchase_price'] = parse_decimal(user, company, data['purchase_price'], g.DECIMAL['currency_digits'])
-
+            ret = parse_decimal(user, company, data['purchase_price'], g.DECIMAL['currency_digits'])
+            if not ret['success']:
+                return r(False, _("Check purchase price notation"))
+            data['purchase_price'] = ret['number']
+    
+    
     # unit type (probably doesn't need checking
     if not data['unit_type'] in dict(g.UNITS):
         return r(False, _("Invalid unit type"))
@@ -461,19 +466,24 @@ def validate_product(user, company, data):
     except:
         return r(False, _("Invalid tax rate"))
     
+    
+    
     del data['tax_id']
     data['tax'] = tax
     
     # stock
     if len(data['stock']) > g.DECIMAL['quantity_digits']:
         return r(False, _("Stock number too big"))
-
-    data['stock'] = parse_decimal(user, company, data['stock'],
+    
+    ret = parse_decimal(user, company, data['stock'],
         g.DECIMAL['quantity_digits']-g.DECIMAL['quantity_decimal_places']-1)
-
-    # it cannot be negative
-    if data['stock'] < decimal.Decimal('0'):
-        return r(False, _("Stock cannot be negative"))
+    if not ret['success']:
+        return r(False, _("Check stock notation"))
+    else:
+        data['stock'] = ret['number']
+        # it cannot be negative
+        if data['stock'] < decimal.Decimal('0'):
+            return r(False, _("Stock cannot be negative"))
         
     return {'status': True, 'data': data}
 

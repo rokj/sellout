@@ -66,7 +66,7 @@ SEARCH_RESULTS = {
 
 # discounts
 DISCOUNT_TYPES = (
-    ("Percent", _("Percentage")),
+    ("Relative", _("Percentage")),
     ("Absolute", _("Absolute value")),
 )
 

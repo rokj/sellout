@@ -38,60 +38,74 @@ function get_tax(price, tax){
     return price.times(tax.div(Big(100)));
 }
 
-function calculate(items, bill_discount_amount, bill_discount_type){
+function calculate_item(item){
+    var i;
+    var item_discount, new_discount, new_total, new_net;
+
+    // single item numbers:
+    item.net = item.base;
+
+    // what is going to be calculated
+    item.discount = Big(0);
+    item.tax = Big(0);
+    item.total = Big(0);
+
+    // subtract all discounts from this item's current base
+    for(i = 0; i < item.discounts.length; i++){
+        item_discount = item.discounts[i];
+
+        if(item_discount.type == 'Relative'){
+            // relative discount: get amount according to item's current base
+            new_discount = item.net.times(item_discount.amount.div(100));
+
+            // the new discount and net
+            item.discount = item.discount.plus(new_discount);
+            item.net = item.net.minus(new_discount);
+        }
+        else{
+            // absolute discount:
+            // do it so that the new price INCLUDING tax will be lower
+            // by the amount of this discount
+
+            // get current total and subtract discount from it
+            new_total = item.net.plus(get_tax(item.net, item.tax_rate))
+                .minus(item_discount.amount);
+
+            // get the new price without tax
+            new_net = new_total.div(item.tax_rate.div(100).plus(1));
+            item.discount = item.discount.plus(item.net.minus(new_net));
+            item.net = new_net;
+        }
+    }
+
+    // discounts are subtracted, get the item's shit together;
+    // multiply everything by quantity and round to desired decimal places;
+    // in real life, one would first multiply by quantity and then calculate with 4 decimal
+    // places instead of 2 (depending on config), but we have Big() that uses 'infinite'
+    // amount of decimal places for exact calculation
+    item.total = item.net.plus(item.tax);
+
+    item.batch = item.base.times(item.quantity);
+    item.discount = item.discount.times(item.quantity);
+    item.net = item.net.times(item.quantity);
+    item.tax = item.tax.times(item.quantity);
+
+
+    return item;
+}
+
+function calculate_bill(items, bill_discount_amount, bill_discount_type){
     // 1. calculate all items's prices
-    var i, j;
+    var i;
 
     // current item and temp stuff
-    var item, item_discount;
-    var new_item_base, new_item_discount, new_item_total;
+    var item, new_item_discount;
 
     // whole bill
     var base, discount, tax, total;
 
     for(i = 0; i < items.length; i++){
-        item = items[i];
-
-        item.net = item.base.times(item.quantity);
-        item.tax = Big(0);
-        item.total = Big(0);
-        item.discount = Big(0);
-
-        // subtract all discounts from this item's current base
-        for(j = 0; j < item.discounts.length; j++){
-            item_discount = item.discounts[j];
-
-            if(item_discount.type == 'percent'){
-                // relative discount: get amount according to item's current base
-                new_item_discount = item.net.times(item_discount.amount.div(100));
-
-                // subtract from item's current base
-                item.net = item.net.minus(new_item_discount);
-
-                // the new discount
-                item.discount = item.discount.plus(new_item_discount);
-            }
-            else{
-                // absolute discount:
-                // do it so that the new price INCLUDING tax will be lower
-                // by the amount of this discount
-
-                // get current total price and subtract discount from it
-                new_item_total = item.net.plus(get_tax(item.net, item.tax_rate))
-                    .minus(item_discount.amount.times(item.quantity));
-
-                // get the new base
-                new_item_base = new_item_total.div(item.tax_rate.div(100).plus(1));
-
-                // get the new discount according to the new base
-                item.discount = item.discount.plus(new_item_total.minus(new_item_base));
-            }
-        }
-
-        // discounts are subtracted, get the item's shit together
-        // item.discount // already there
-        item.net = item.base.minus(item.discount);
-        item.tax = get_tax(item.net, item.tax_rate);
+        items[i] = calculate_item(items[i]);
     }
 
     // 2. calculate bill's total
@@ -103,9 +117,8 @@ function calculate(items, bill_discount_amount, bill_discount_type){
 
         for(i = 0; i < items.length; i++){
             item = items[i];
-            item.total = item.net.plus(item.tax);
 
-            base = base.plus(item.net);
+            base = base.plus(item.batch);
             discount = discount.plus(item.discount);
             tax = tax.plus(item.tax);
             total = total.plus(item.total);

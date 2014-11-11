@@ -36,10 +36,6 @@ function custom_dialog(title, content, width, buttons){
         container.remove();
     };
 
-    close_button.unbind().click(function(){
-        content.close_dialog();
-    });
-
     // buttons is an object that can contain the following:
     // ok: <ok button text>
     // ok button closes the dialog by default and does nothing
@@ -52,6 +48,10 @@ function custom_dialog(title, content, width, buttons){
         var button_attrs = {type: 'button', 'class': 'hoverable'};
 
         container.append(footer);
+
+        // close button and shadow close the dialog
+        close_button.unbind().click(content.close_dialog);
+        shadow.unbind().click(content.close_dialog);
 
         if(buttons.ok){
             var ok_button = $("<input>", button_attrs);
@@ -87,6 +87,7 @@ function custom_dialog(title, content, width, buttons){
     else{
         // if buttons is null, hide all buttons on this dialog, even the close button
         close_button.hide();
+        shadow.unbind();
     }
 }
 
