@@ -50,8 +50,11 @@ def validate_category(user, company, data):
     {status:true/false - if cleaning succeeded
      data:cleaned_data - empty dict if status = false
      message:error_message - empty if status = true """
-
-    form = CategoryForm(data=data)
+    if 'id' in data and int(data['id'] > 0):
+        category = Category.objects.get(id=int(data['id']), company=company)
+        form = CategoryForm(data=data, instance=category)
+    else:
+        form = CategoryForm(data=data)
     if form.is_valid():
         try:
             parent_category = Category.objects.get(id=int(data['parent_id']), company=company)
@@ -59,8 +62,6 @@ def validate_category(user, company, data):
             parent_category = None
 
         form.cleaned_data['parent'] = parent_category
-        form.cleaned_data['company_id'] = company.id
-        form.company = company
         form.parent = parent_category
 
         return {'status': True, 'message': None, 'form': form}
@@ -368,19 +369,4 @@ def delete_category(request, company):
 
     return JsonOk()
 
-
-def get_category(request, company, category_id):
-    try:
-        c = Company.objects.get(url_name=company)
-    except Company.DoesNotExist:
-        return JsonError(_("Company does not exist"))
-    
-    # permissions: needs to be guest to view products
-    if not has_permission(request.user, c, 'product', 'view'):
-        return JsonError(_("You have no permission to view products"))
-
-    try:
-        return JsonResponse(category_to_dict(Category.objects.get(id=category_id, company=c)))
-    except Category.DoesNotExist:
-        return JsonError(_("Category does not exist"))
 

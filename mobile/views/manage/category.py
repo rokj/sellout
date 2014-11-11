@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Category
-from pos.views.manage.category import get_category, validate_category, \
+from pos.views.manage.category import validate_category, \
     get_all_categories_structured, category_to_dict, validate_parent, delete_category
 from pos.views.util import JsonError, JsonParse, JsonOk, \
     has_permission
@@ -52,56 +52,34 @@ def mobile_JSON_categories(request, company):
     # return all categories' data in JSON format
     return JsonResponse(data, safe=False)
 
+
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_add_category(request, company):
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
-    # sellers can add category
     if not has_permission(request.user, c, 'category', 'edit'):
-        return JsonError(_("You have no permission to add products"))
+        return JsonError(_("You have no permission to edit products"))
 
     data = JsonParse(request.POST['data'])
-
-    # validate data
+    # data['company'] = c
     valid = validate_category(request.user, c, data)
-    if not valid['status']:
+
+    if not valid.get('status'):
         return JsonError(valid['message'])
-    data = valid['data']
 
-    parent = data['parent']
+    form = valid['form']
+    category = form.save(False)
 
-    color = data.get('color')
-    if not color:
-        color = g.CATEGORY_COLORS[0]
+    if 'created_by' not in form.cleaned_data:
+        category.created_by = request.user
+    if 'company_id' not in form.cleaned_data:
+        category.company_id = c.id
 
-    # save category:
-    category = Category(
-        company=c,
-        parent=parent,
-        name=data['name'],
-        description=data['description'],
-        color=color,
-        created_by=request.user,
-    )
-    category.save()
-
-    # add image, if it's there
-
-    #if data.get('change_image') == True:
-    #    if data['image']: # new image is uploade
-
-    #        if category.image:
-    #            category.image.delete()
-    #        # save a new image
-    #
-    #         category.image = data['image']
-    #
-    #     else: # delete the old image
-    #         category.image.delete()
+    category = form.save()
 
     return JsonOk(extra=category_to_dict(category, android=True))
 
@@ -119,17 +97,14 @@ def mobile_edit_category(request, company):
         return JsonError(_("You have no permission to edit products"))
 
     data = JsonParse(request.POST['data'])
-
+    # data['company'] = c
     valid = validate_category(request.user, c, data)
 
-    if not valid['status']:
+    if not valid.get('status'):
         return JsonError(valid['message'])
 
     form = valid['form']
-    category = form.save(False)
-
-    category.company = c
-
+    category = form.save()
 
     return JsonOk(extra=category_to_dict(category, android=True))
 
@@ -138,12 +113,6 @@ def mobile_edit_category(request, company):
 @permission_classes((IsAuthenticated,))
 def mobile_delete_category(request, company):
     return delete_category(request, company)
-
-
-@api_view(['POST', 'GET'])
-@permission_classes((IsAuthenticated,))
-def mobile_get_category(request, company, category_id):
-    return get_category(request, company, category_id)
 
 
 def mobile_JSON_dump_categories(request, company):

@@ -30,7 +30,6 @@ urlpatterns = patterns('',
     url(r'^mobile-login/(?P<backend>[\w-]+)$', login.obtain_auth_token),
 
     # categories
-    url(r_company + r'/manage/json/category/get/(?P<category_id>\d+)/?$', category.mobile_get_category, name='get_category'),
     url(r_company + r'/manage/json/category/add/?$', category.mobile_add_category, name='add_category'),
     url(r_company + r'/manage/json/category/edit/?$', category.mobile_edit_category, name='edit_category'), # edit
     url(r_company + r'/manage/json/category/delete/?$', category.mobile_delete_category, name='delete_category'), # delete
