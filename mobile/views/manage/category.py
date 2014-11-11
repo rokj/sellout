@@ -72,12 +72,7 @@ def mobile_add_category(request, company):
         return JsonError(valid['message'])
     data = valid['data']
 
-    parent_id = data['parent_id']
-
-    if int(parent_id) == -1:
-        parent = None
-    else:
-        parent = Category.objects.get(id=parent_id)
+    parent = data['parent']
 
     color = data.get('color')
     if not color:
