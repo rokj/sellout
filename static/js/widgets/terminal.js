@@ -10,7 +10,7 @@ Terminal = function(g){
         left_column: $("#left_column"),
         bill_container: $("#bill_container"),
 
-        till: $("#till"),
+        register: $("#register"),
         bill_header: $("#bill_header"),
 
         splitter: $("#splitter"),
@@ -30,7 +30,7 @@ Terminal = function(g){
         select_register: $("#select_register"),
 
         /* terminal status */
-        current_till: $("#current_till"),
+        current_register: $("#current_register"),
         current_date: $("#current_date"),
         current_time: $("#current_time")
     };
@@ -81,7 +81,7 @@ Terminal = function(g){
 
         // bill container
         p.items.bill_container.css("top", p.items.bill_header.outerHeight() + "px");
-        p.items.bill_container.css("bottom", p.items.till.outerHeight() + "px");
+        p.items.bill_container.css("bottom", p.items.register.outerHeight() + "px");
 
         // controls
         var controls_height = p.items.controls.height();
@@ -144,7 +144,7 @@ Terminal = function(g){
         p.register = r;
 
         // show the current register in terminal
-        p.items.current_till.text(p.register.name);
+        p.items.current_register.text(p.register.name);
 
         // save the register to localStorage
         save_local('register_id', r.id);
@@ -166,8 +166,15 @@ Terminal = function(g){
                             // if bill is not loaded yet, wait for it
                             var i = setInterval(function(){
                                 if(p.g.objects.bill){
-                                    p.g.objects.bill.load(data);
-                                    clearInterval(i);
+                                    try{
+                                        p.g.objects.bill.load(data);
+                                        clearInterval(i);
+                                    }
+                                    catch(e){
+                                        // if something goes wrong
+                                        // (mostly during development... )
+                                        clear_local('bill');
+                                    }
                                 }
                             }, 500);
                         }

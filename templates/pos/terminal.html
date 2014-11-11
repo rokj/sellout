@@ -239,8 +239,8 @@ $(window).load(function(){
                 </div>
             </div>
 
-            {% comment %} bill summary and till: fixed {% endcomment %}
-            <div id="till">
+            {% comment %} bill summary and register: fixed {% endcomment %}
+            <div id="register">
                 {% comment %} bill summary: discounts total and tax total {% endcomment %}
                 <div id="bill_summary">
                     <div class="total bill-border-top bill-border-bottom">
@@ -251,11 +251,11 @@ $(window).load(function(){
 
                 {% comment %} buttons etc. {% endcomment %}
                 <div id="bill_actions">
-                    <div class="till-button-container" id="finish_the_fukin_bill">
+                    <div class="register-button-container" id="finish_the_fukin_bill">
                         <button>{% trans 'Finish' context 'Create bill button text' %}</button>
                     </div>
 
-                    <div class="till-button-container terminal-menu" id="bill_options">
+                    <div class="register-button-container terminal-menu" id="bill_options">
                         <button class="open-menu">
                             {% trans 'Bill...' context 'bill options button text' %}
                             <img src="{% static 'icons/arrow_white_up.png' %}" alt="" />
@@ -350,7 +350,7 @@ $(window).load(function(){
                 <div id="terminal_status">
                     <div id="current_date" class=""></div>
                     <div id="current_time" class=""></div>
-                    <div id="current_till" class=""></div>
+                    <div id="current_register" class=""></div>
                 </div>
             </div>
         </div>

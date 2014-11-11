@@ -8,15 +8,15 @@ from pos.models import Company, Product, Discount, Register, Contact, \
     Bill, BillCompany, BillContact, BillRegister, BillItem, BillItemDiscount
 from pos.views.manage.company import company_to_dict
 from pos.views.manage.contact import contact_to_dict
-from pos.views.manage.till import register_to_dict
+from pos.views.manage.register import register_to_dict
 from pos.views.util import has_permission, JsonOk, JsonParse, JsonError, \
-    format_number, parse_decimal, format_date, format_time, parse_decimal_exc
+    format_number, parse_decimal, format_date, format_time, parse_decimal_exc, max_field_length
 from config.functions import get_company_value
 import common.globals as g
 
 from pytz import timezone
 from datetime import datetime as dtm
-from decimal import Decimal, getcontext, ROUND_HALF_UP
+from decimal import Decimal
 
 
 def bill_item_to_dict(user, company, item):
@@ -75,14 +75,11 @@ def group_tax_rates(items):
     }
 
     for item in items:
-        t = item.tax_percent
-
-        # a shortcut
-        net = item.total - item.tax_absolute
+        t = item.tax_rate
 
         # totals
-        sums['net_sum'] += net
-        sums['tax_sum'] += item.tax_absolute
+        sums['net_sum'] += item.net
+        sums['tax_sum'] += item.tax
         sums['gross_sum'] += item.total
 
         # by each tax rate
@@ -90,9 +87,9 @@ def group_tax_rates(items):
             # create a new entry in the list of taxes
             rates[t] = {
                 'id': rate_id,
-                'amount':  item.tax_percent,
-                'tax_sum':  item.tax_absolute,
-                'net_sum':  net,
+                'amount':  item.tax_rate,
+                'tax_sum':  item.tax,
+                'net_sum':  item.net,
                 'gross_sum':  item.total,
             }
 
@@ -103,8 +100,8 @@ def group_tax_rates(items):
             rate_id = chr(ord(rate_id) + 1)
         else:
             # add a new tax rate to the list (dictionary, actually)
-            rates[t]['tax_sum'] += item.tax_absolute
-            rates[t]['net_sum'] += net
+            rates[t]['tax_sum'] += item.tax
+            rates[t]['net_sum'] += item.net
             rates[t]['gross_sum'] += item.total
 
             # save to the item object for later use
@@ -139,7 +136,7 @@ def bill_to_dict(user, company, bill):
         'user_name': str(bill.user_name),
 
         'serial': bill.serial,
-        'note': bill.note,
+        'notes': bill.notes,
 
 
         'discount_amount': format_number(user, company, bill.discount_amount),
@@ -152,7 +149,6 @@ def bill_to_dict(user, company, bill):
         'total': format_number(user, company, bill.total),
 
         'timestamp': format_date(user, company, bill.timestamp) + " " + format_time(user, company, bill.timestamp),
-        'due_date': format_date(user, company, bill.due_date),
         'status': bill.status,
 
     }
@@ -253,7 +249,7 @@ def create_bill(request, company):
 
     # current register: get BillRegister with the same id as current one
     try:
-        bill_register = BillRegister.objects.get(register__id=int(data.get('till_id')))
+        bill_register = BillRegister.objects.get(register__id=int(data.get('register_id')))
     except (TypeError, ValueError, Register.DoesNotExist):
         return JsonError(_("Invalid register specified."))
 
@@ -275,6 +271,7 @@ def create_bill(request, company):
         'contact': bill_contact,
         'user_id': request.user.id,
         'user_name': str(request.user),
+        'notes': data.get('notes')[:max_field_length(Bill, 'notes')],
 
         'timestamp': dtm.now(),
         'type': "Normal",
@@ -286,9 +283,7 @@ def create_bill(request, company):
     if not r['success'] or r['number'] <= Decimal('0'):
         return JsonError(_("Invalid grand total value"))
     else:
-        # this number came from javascript
-        total_js = r['number']
-    total_py = Decimal(0)
+        grand_total = r['number']
 
     # validate items
     for i in data.get('items'):
@@ -296,9 +291,7 @@ def create_bill(request, company):
         try:
             product = Product.objects.get(company=c, id=int(i.get('product_id')))
         except Product.DoesNotExist:
-            return JsonError(
-                _("Product with this id does not exist") +
-                " (id=" + i.get('product_id') + ")")
+            return JsonError(_("Product with this id does not exist") + " (id=" + i.get('product_id') + ")")
 
         # parse quantity
         r = parse_decimal(request.user, c, i.get('quantity'), g.DECIMAL['quantity_digits'])
@@ -366,7 +359,7 @@ def create_bill(request, company):
                 return item_error(_("Invalid discount amount"), product)
             else:
                 d_amount = r['number']
-                if d_amount < Decimal('0') or (d.get('type') == 'Relative' and d_amount > Decimal('100')):
+                if d_amount < Decimal(0) or (d.get('type') == 'Relative' and d_amount > Decimal(100)):
                     return item_error(_("Invalid discount amount"), product)
 
             # save data to bill
@@ -381,16 +374,16 @@ def create_bill(request, company):
 
         # save this item's prices to item's dictionary (will go into database later)
         try:
-            item[''] = parse_decimal_exc(request.user, c, i.get('base'), message=_("Invalid base price"))
-            item[''] = parse_decimal_exc(request.user, c, i.get('quantity'), message=_("Invalid quantity"))
-            item[''] = parse_decimal_exc(request.user, c, i.get('tax_rate'), message=_("Invalid tax rate"))
-            item[''] = parse_decimal_exc(request.user, c, i.get('batch'), message=_("Invalid batch price"))
-            item[''] = parse_decimal_exc(request.user, c, i.get('discount'), message=_("Invalid discount amount"))
-            item[''] = parse_decimal_exc(request.user, c, i.get('net'), message=_("Invalid net price"))
-            item[''] = parse_decimal_exc(request.user, c, i.get('tax'), message=_("Invalid tax amount"))
-            item[''] = parse_decimal_exc(request.user, c, i.get('total'), message=_("Invalid total"))
+            item['base'] = parse_decimal_exc(request.user, c, i.get('base'), message=_("Invalid base price"))
+            item['quantity'] = parse_decimal_exc(request.user, c, i.get('quantity'), message=_("Invalid quantity"))
+            item['tax_rate'] = parse_decimal_exc(request.user, c, i.get('tax_rate'), message=_("Invalid tax rate"))
+            item['batch'] = parse_decimal_exc(request.user, c, i.get('batch'), message=_("Invalid batch price"))
+            item['discount'] = parse_decimal_exc(request.user, c, i.get('discount'), message=_("Invalid discount amount"))
+            item['net'] = parse_decimal_exc(request.user, c, i.get('net'), message=_("Invalid net price"))
+            item['tax'] = parse_decimal_exc(request.user, c, i.get('tax'), message=_("Invalid tax amount"))
+            item['total'] = parse_decimal_exc(request.user, c, i.get('total'), message=_("Invalid total"))
         except ValueError as e:
-            return item_error(e.message)
+            return item_error(e.message, product)
 
     # at this point, everything is fine, insert into database
 
@@ -403,10 +396,11 @@ def create_bill(request, company):
         user_name=bill['user_name'],  # copied user name in case that user gets 'fired'
         register=bill['register'],  # current settings of the register this bill was created on
         contact=bill['contact'],  # FK on BillContact, copy of the Contact object
+        notes=bill['notes'],
 
         timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
         status=bill['status'],
-        total=total_py
+        total=grand_total
     )
     db_bill.save()
 

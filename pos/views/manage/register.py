@@ -1,37 +1,80 @@
 # this file should be named register.py, but would be confused with user registration, so here's a synonym
+from django.db.models import FieldDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Register, Company
-from pos.views.manage.till import get_all_registers
-from pos.views.util import has_permission, no_permission_view, manage_delete_object, JsonOk
+from pos.views.util import has_permission, no_permission_view, manage_delete_object
 
 from common import globals as g
 from config.functions import get_date_format, get_user_value, get_company_value
 
 
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_get_all_registers(request, company):
-    user = request.user
+def register_to_dict(company, user, register):
+    """ company and user are not needed at the moment (maybe for displaying dates/times in the future) """
+    r = {
+        'id': register.id,
+        'name': register.name,
 
-    c = Company.objects.get(url_name=company)
+        'receipt_format_display': register.get_receipt_format_display(),
+        'receipt_format': register.receipt_format,
 
-    return JsonOk(extra=get_all_registers(c, user))
+        'receipt_type_display': register.get_receipt_type_display(),
+        'receipt_type': register.receipt_type,
 
-"""
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
+        'print_logo': register.print_logo,
+
+        'location': register.location,
+        'print_location': register.print_location,
+    }
+
+    try:  # fields that are not common to Register and BillRegister
+        r['printer_driver'] = register.printer_driver
+        r['printer_driver_display'] = register.get_printer_driver_display()
+    except (FieldDoesNotExist, AttributeError):
+        pass
+
+    return r
+
+
+def get_all_registers(company, user):
+    all_registers = Register.objects.filter(company=company)
+
+    r = []
+
+    for register in all_registers:
+        r.append(register_to_dict(company, user, register))
+
+    return r
+
+
+#############
+### views ###
+#############
+class RegisterForm(forms.ModelForm):
+    class Meta:
+        model = Register
+        # unused fields (will be added within view)
+        exclude = [
+            'created_by',
+            'updated_by',
+            'company']
+
+        widgets = {
+            'print_logo': forms.Select(choices=((True, _("Yes")), (False, _("No")))),
+            'print_location': forms.Select(choices=((True, _("Yes")), (False, _("No")))),
+        }
+
+
+@login_required
 def list_registers(request, company):
     c = get_object_or_404(Company, url_name=company)
 
     # check permissions: needs to be guest
-    if not has_permission(request.user, c, 'register', 'list'):
-        return no_permission_view(request, c, _("view registers"))
+    if not has_permission(request.user, c, 'register', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view registers."))
     
     context = {
         'company': c,
@@ -43,18 +86,17 @@ def list_registers(request, company):
         'currency': get_company_value(request.user, c, 'pos_currency'),
     }
 
-    return render(request, 'pos/manage/tills.html', context)
+    return render(request, 'pos/manage/registers.html', context)
 
 
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
+@login_required
 def add_register(request, company):
     # add a new register
     c = get_object_or_404(Company, url_name=company)
 
     # check permissions: needs to be manager
     if not has_permission(request.user, c, 'register', 'edit'):
-        return no_permission_view(request, c, _("add registers"))
+        return no_permission_view(request, c, _("You have no permission to add registers."))
 
     context = {
         'add': True,
@@ -76,6 +118,7 @@ def add_register(request, company):
                 name=form.cleaned_data.get('name'),
                 receipt_format=form.cleaned_data.get('receipt_format'),
                 receipt_type=form.cleaned_data.get('receipt_type'),
+                printer_driver=form.cleaned_data.get('printer_driver'),
                 print_logo=form.cleaned_data.get('print_logo'),
                 location=form.cleaned_data.get('location'),
                 print_location=form.cleaned_data.get('print_location'),
@@ -93,7 +136,7 @@ def add_register(request, company):
 
     context['form'] = form
 
-    return render(request, 'pos/manage/till.html', context)
+    return render(request, 'pos/manage/register.html', context)
 
 
 def edit_register(request, company, register_id):
@@ -102,7 +145,7 @@ def edit_register(request, company, register_id):
 
     # check permissions: needs to be guest
     if not has_permission(request.user, c, 'register', 'edit'):
-        return no_permission_view(request, c, _("edit registers"))
+        return no_permission_view(request, c, _("You have no permission to edit registers."))
 
     context = {
         'company': c,
@@ -125,6 +168,7 @@ def edit_register(request, company, register_id):
             register.name= form.cleaned_data.get('name')
             register.receipt_format = form.cleaned_data.get('receipt_format')
             register.receipt_type = form.cleaned_data.get('receipt_type')
+            register.printer_driver = form.cleaned_data.get('printer_driver')
             register.print_logo = form.cleaned_data.get('print_logo')
             register.location = form.cleaned_data.get('location')
             register.print_location = form.cleaned_data.get('print_location')
@@ -140,12 +184,10 @@ def edit_register(request, company, register_id):
 
     context['form'] = form
 
-    return render(request, 'pos/manage/till.html', context)
+    return render(request, 'pos/manage/register.html', context)
 
 
 @login_required
 def delete_register(request, company):
     return manage_delete_object(request, company, Register,
                                 (_("You have no permission to delete registers"), _("Could not delete register")))
-
-"""

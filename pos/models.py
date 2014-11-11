@@ -544,14 +544,13 @@ class Bill(SkeletonU, RegisterAbstract):
         decimal_places=g.DECIMAL['currency_decimal_places'],
         null=True, blank=True)
 
-    note = models.CharField(_("Notes"), max_length=1000, null=True, blank=True)
+    notes = models.CharField(_("Notes"), max_length=1000, null=True, blank=True)
 
     # payment type and reference: this will be updated after the bill is saved
     payment_type = models.CharField(_("Payment type"), max_length=32, choices=g.PAYMENT_TYPES, null=True, blank=True)
     payment_reference = models.TextField(_("Payment reference"), null=True, blank=True)
 
     timestamp = models.DateTimeField(_("Date and time of bill creation"), null=False)
-    due_date = models.DateTimeField(_("Due date"), null=True)
     status = models.CharField(_("Bill status"), max_length=20, choices=g.BILL_STATUS, default=g.BILL_STATUS[0][0])
 
     def __unicode__(self):

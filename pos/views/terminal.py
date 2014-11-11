@@ -10,7 +10,7 @@ from pos.views.manage.contact import get_all_contacts
 from pos.views.manage.discount import get_all_discounts
 from pos.views.manage.product import get_all_products
 from pos.views.manage.tax import get_all_taxes
-from pos.views.manage.till import get_all_registers
+from pos.views.manage.register import get_all_registers
 
 from pos.views.util import has_permission, no_permission_view, JsonOk, JsonParse, JsonStringify, error, JsonError
 from config.functions import get_user_value, set_user_value, get_date_format, get_time_format, get_company_value

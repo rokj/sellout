@@ -14,7 +14,7 @@ from pos.views.manage import contact
 from pos.views.manage import discount
 from pos.views.manage import tax
 from pos.views.manage import configuration
-from pos.views.manage import till
+from pos.views.manage import register
 from pos.views.manage import bill
 
 from pos.views import bill as terminal_bill
@@ -66,13 +66,12 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + '/json/tax/edit/?$', tax.edit_tax, name='edit_tax'),  # get all taxes in a json list
     url(r_company + '/' + r_manage + '/json/taxes/delete/?$', tax.delete_tax, name='delete_tax'),  # get all taxes in a json list
     url(r_company + '/' + r_manage + '/json/taxes/set-default/?$', tax.set_default_tax, name='set_default_tax'),  # get all taxes in a json list
-    # cash registers (the module is named 'till' to avoid confusion with registration)
-    url(r_company + '/' + r_manage + _('/registers') + '/$', till.list_registers, name='list_registers'),
-    url(r_company + '/' + r_manage + _('/register/add') + '/$', till.add_register, name='add_register'),
-    url(r_company + '/' + r_manage + _('/register/edit') + '/(?P<register_id>\d+)/$', till.edit_register, name='edit_register'),
-    url(r_company + '/' + r_manage + _('/register/delete') + '/$', till.delete_register, name='delete_register'),
+    # cash registers
+    url(r_company + '/' + r_manage + _('/registers') + '/$', register.list_registers, name='list_registers'),
+    url(r_company + '/' + r_manage + _('/register/add') + '/$', register.add_register, name='add_register'),
+    url(r_company + '/' + r_manage + _('/register/edit') + '/(?P<register_id>\d+)/$', register.edit_register, name='edit_register'),
+    url(r_company + '/' + r_manage + _('/register/delete') + '/$', register.delete_register, name='delete_register'),
 
-    #url(r_company + _('/manage/taxes/edit') + '/$', manage.misc.edit_taxes, name='edit_taxes'),
     # products
     url(r_company + '/' + r_manage + _('/products') + '/$', product.products, name='products'),  # static (template) page
     url(r_company + '/' + r_manage + '/json/products/search/$', product.search_products, name='search_products'),  # product list (search) - json

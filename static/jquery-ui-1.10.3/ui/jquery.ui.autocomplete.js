@@ -110,7 +110,7 @@ $.widget( "ui.autocomplete", {
 				case keyCode.NUMPAD_ENTER:
 					// when menu is open and has focus
 					if ( this.menu.active ) {
-						// #6055 - Opera still allows the keypress to occur
+						// #6055 - Opera sregister allows the keypress to occur
 						// which causes forms to submit
 						suppressKeyPress = true;
 						event.preventDefault();
@@ -260,7 +260,7 @@ $.widget( "ui.autocomplete", {
 					// menu is navigated, causing screen readers to notice a change and
 					// announce the Item. Since the focus event was canceled, this doesn't
 					// happen, so we update the live region so that screen readers can
-					// still notice the change and announce it.
+					registertill notice the change and announce it.
 					this.liveRegion.text( item.value );
 				}
 			},
@@ -579,7 +579,7 @@ $.extend( $.ui.autocomplete, {
 
 
 // live region extension, adding a `messages` option
-// NOTE: This is an experimental API. We are still investigating
+// NOTE: This is an experimental API. registerre still investigating
 // a full solution for string manipulation and internationalization.
 $.widget( "ui.autocomplete", $.ui.autocomplete, {
 	options: {

@@ -14,7 +14,11 @@ Bill = function(g){
 
     p.g = g;
 
-    p.data = null;
+    p.data = {
+        discount_amount: Big(0),
+        discount_type: 'Relative',
+        notes: ''
+    };
 
     // bill properties
     p.serial = 0; // a number that will be assigned to every item (has nothing to do with id on server)
@@ -195,6 +199,7 @@ Bill = function(g){
             item = p.items_by_serial[prices.items[i].serial];
 
             item.data.batch = prices.items[i].batch;
+            item.data.net = prices.items[i].net;
             item.data.tax = prices.items[i].tax;
             item.data.discount = prices.items[i].discount;
             item.data.total = prices.items[i].total;
@@ -205,7 +210,7 @@ Bill = function(g){
         // update bill's amounts
         p.summary_total.text(dn(prices.total, p.g));
 
-        return prices.total;
+        return prices;
     };
 
     // bill manipulation
@@ -259,45 +264,68 @@ Bill = function(g){
         // to prevent errors)
         if(!p.g.objects.terminal.register) return null;
 
-        var i, id, register;
+        // data
 
-        register = p.g.objects.terminal.register;
+        // id: if saving existing bill
+        var id;
 
         if(p.data && !isNaN(p.data.id)) id = p.data.id;
         else id = -1;
 
-        if(!p.data){
-            // some stuff must be entered
-            p.data = {
-                notes: '',
-                discount_amount: Big(0),
-                discount_type: "Relative"
-            }
+        // issuer: the current company, in view
+
+        // contact:
+        var contact = p.contact;
+
+        // register:
+        var register_id = p.g.objects.terminal.register.id;
+
+        // user and user_id: from request
+        // serial: will be set on the server
+
+        // discount amount and type:
+        var discount_amount = p.data.discount_amount;
+        var discount_type = p.data.discount_type;
+
+        // prices: recalculate everything
+        var prices = p.update();
+
+        // base price:
+        var base = prices.base;
+        var discount = prices.discount;
+        var tax = prices.tax;
+        var total = prices.total;
+
+        // note:
+        var notes = p.data.notes;
+
+        // prepare items:
+        var i, item, items = [];
+
+        for(i = 0; i < prices.items.length; i++){
+            item = p.get_item(prices.items[i].serial);
+
+            items.push(item.format());
         }
 
-        // recalculate everything
-        prices = TODO
-
-        var r = {
+        // put everything in a neat object
+        return {
             id: id,
-            items: [],
-            total: Big(0), // TODO: update
-            till_id: register.id,
-            contact: p.contact,
+            contact: contact,
+            register_id: register_id,
 
-            // stuff that applies to the whole bill
-            notes: p.data.notes,
-            discount_amount: dn(p.data.discount_amount, p.g),
-            discount_type: p.data.discount_type
-        };
+            discount_amount: dn(discount_amount, p.g),
+            discount_type: discount_type,
 
-        // get all items
-        for(i = 0; i < p.items.length; i++){
-            p.items[i].update();
-            r.items.push(p.items[i].format());
+            base: dn(base, p.g),
+            discount: dn(discount, p.g),
+            tax: dn(tax, p.g),
+            total: dn(total, p.g),
+
+            notes: notes,
+
+            items: items
         }
-
-        return r;
     };
 
     p.pay = function(){

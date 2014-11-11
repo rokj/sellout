@@ -21,7 +21,7 @@ test( "enable/disable", function() {
 	// event does nothing
 	element.find( ".ui-accordion-header" ).eq( 1 ).trigger( "click" );
 	state( element, 1, 0, 0 );
-	// option still works
+	// option sregister works
 	element.accordion( "option", "active", 1 );
 	state( element, 0, 1, 0 );
 	element.accordion( "enable" );

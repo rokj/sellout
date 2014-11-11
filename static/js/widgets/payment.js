@@ -177,7 +177,7 @@ Payment = function(g, bill){
                     }
                     else{
                         // create a new bill and close this dialog
-                        p.g.objects.bill.reset();
+                        p.g.objects.bill.clear();
                         p.toggle_dialog(false);
                     }
                 });
@@ -223,7 +223,7 @@ Payment = function(g, bill){
                 p.print(response.bill);
 
                 // the deal is finished. clear all stuff and create a new bill
-                p.g.objects.bill.reset();
+                p.g.objects.bill.clear();
 
                 // close the dialog
                 p.toggle_dialog(false);
