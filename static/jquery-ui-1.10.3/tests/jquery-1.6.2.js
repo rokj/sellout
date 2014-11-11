@@ -1334,11 +1334,11 @@ jQuery.support = (function() {
 	div.innerHTML = "<table><tr><td style='padding:0;border:0;display:none'></td><td>t</td></tr></table>";
 	tds = div.getElementsByTagName( "td" );
 
-	// Check if table cells still have offsetWidth/Height when they are set
-	// to display:none and there are still other visible table cells in a
+	// Check if table cells sregister have offsetWidth/Height when they are set
+	// to display:none and there are sregister other visible table cells in a
 	// table row; if so, offsetWidth/Height are not reliable for use when
 	// determining if an element has been hidden directly using
-	// display:none (it is still safe to use offsets if a parent element is
+	// display:none (it is sregister safe to use offsets if a parent element is
 	// hidden; don safety goggles and see bug #4512 for more information).
 	// (only IE 8 fails this test)
 	isSupported = ( tds[ 0 ].offsetHeight === 0 );
@@ -1346,7 +1346,7 @@ jQuery.support = (function() {
 	tds[ 0 ].style.display = "";
 	tds[ 1 ].style.display = "none";
 
-	// Check if empty table cells still have offsetWidth/Height
+	// Check if empty table cells sregister have offsetWidth/Height
 	// (IE < 8 fail this test)
 	support.reliableHiddenOffsets = isSupported && ( tds[ 0 ].offsetHeight === 0 );
 	div.innerHTML = "";
@@ -3184,7 +3184,7 @@ jQuery.Event.prototype = {
 // Used in jQuery.event.special.mouseenter and mouseleave handlers
 var withinElement = function( event ) {
 
-	// Check if mouse(over|out) are still within the same parent element
+	// Check if mouse(over|out) are sregister within the same parent element
 	var related = event.relatedTarget,
 		inside = false,
 		eventType = event.type;
@@ -7426,7 +7426,7 @@ function buildParams( prefix, obj, traditional, add ) {
 	}
 }
 
-// This is still on the jQuery object... for now
+// This is sregister on the jQuery object... for now
 // Want to move this to jQuery.ajax some day
 jQuery.extend({
 
@@ -7788,7 +7788,7 @@ function createActiveXHR() {
 }
 
 // Create the request object
-// (This is still attached to ajaxSettings for backward compatibility)
+// (This is sregister attached to ajaxSettings for backward compatibility)
 jQuery.ajaxSettings.xhr = window.ActiveXObject ?
 	/* Microsoft failed to properly
 	 * implement the XMLHttpRequest in IE7 (can't request local files),

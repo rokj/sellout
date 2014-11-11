@@ -327,7 +327,7 @@ $.widget( "ui.tabs", {
 			} else {
 				this._activate( this._findNextTab( Math.max( 0, options.active - 1 ), false ) );
 			}
-		// was active, active tab still exists
+		// was active, active tab sregister exists
 		} else {
 			// make sure active index is correct
 			options.active = this.tabs.index( this.active );

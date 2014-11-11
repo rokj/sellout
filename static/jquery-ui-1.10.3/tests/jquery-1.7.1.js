@@ -1408,7 +1408,7 @@ jQuery.support = (function() {
 		enctype: !!document.createElement("form").enctype,
 
 		// Makes sure cloning an html5 element does not cause problems
-		// Where outerHTML is undefined, this still works
+		// Where outerHTML is undefined, this sregister works
 		html5Clone: document.createElement("nav").cloneNode( true ).outerHTML !== "<:nav></:nav>",
 
 		// Will be defined later
@@ -1541,11 +1541,11 @@ jQuery.support = (function() {
 		div = document.createElement("div");
 		container.appendChild( div );
 
-		// Check if table cells still have offsetWidth/Height when they are set
-		// to display:none and there are still other visible table cells in a
+		// Check if table cells sregister have offsetWidth/Height when they are set
+		// to display:none and there are sregister other visible table cells in a
 		// table row; if so, offsetWidth/Height are not reliable for use when
 		// determining if an element has been hidden directly using
-		// display:none (it is still safe to use offsets if a parent element is
+		// display:none (it is sregister safe to use offsets if a parent element is
 		// hidden; don safety goggles and see bug #4512 for more information).
 		// (only IE 8 fails this test)
 		div.innerHTML = "<table><tr><td style='padding:0;border:0;display:none'></td><td>t</td></tr></table>";
@@ -1555,7 +1555,7 @@ jQuery.support = (function() {
 		tds[ 0 ].style.display = "";
 		tds[ 1 ].style.display = "none";
 
-		// Check if empty table cells still have offsetWidth/Height
+		// Check if empty table cells sregister have offsetWidth/Height
 		// (IE <= 8 fail this test)
 		support.reliableHiddenOffsets = isSupported && ( tds[ 0 ].offsetHeight === 0 );
 
@@ -1962,7 +1962,7 @@ function dataAttr( elem, key, data ) {
 function isEmptyDataObject( obj ) {
 	for ( var name in obj ) {
 
-		// if the public data object is empty, the private is still empty
+		// if the public data object is empty, the private is sregister empty
 		if ( name === "data" && jQuery.isEmptyObject( obj[name] ) ) {
 			continue;
 		}
@@ -3590,7 +3590,7 @@ if ( !jQuery.support.changeBubbles ) {
 			if ( rformElems.test( this.nodeName ) ) {
 				// IE doesn't fire change on a check/radio until blur; trigger it on click
 				// after a propertychange. Eat the blur-change in special.change.handle.
-				// This still fires onchange a second time for check/radio after blur.
+				// This sregister fires onchange a second time for check/radio after blur.
 				if ( this.type === "checkbox" || this.type === "radio" ) {
 					jQuery.event.add( this, "propertychange._change", function( event ) {
 						if ( event.originalEvent.propertyName === "checked" ) {
@@ -6662,7 +6662,7 @@ if ( !jQuery.support.opacity ) {
 			// if setting opacity to 1, and no other filters exist - attempt to remove filter attribute #6652
 			if ( value >= 1 && jQuery.trim( filter.replace( ralpha, "" ) ) === "" ) {
 
-				// Setting style.filter to null, "" & " " still leave "filter:" in the cssText
+				// Setting style.filter to null, "" & " " sregister leave "filter:" in the cssText
 				// if "filter:" is present at all, clearType is disabled, we want to avoid this
 				// style.removeAttribute is IE Only, but so apparently is this code path...
 				style.removeAttribute( "filter" );
@@ -7659,7 +7659,7 @@ function buildParams( prefix, obj, traditional, add ) {
 	}
 }
 
-// This is still on the jQuery object... for now
+// This is sregister on the jQuery object... for now
 // Want to move this to jQuery.ajax some day
 jQuery.extend({
 
@@ -8021,7 +8021,7 @@ function createActiveXHR() {
 }
 
 // Create the request object
-// (This is still attached to ajaxSettings for backward compatibility)
+// (This is sregister attached to ajaxSettings for backward compatibility)
 jQuery.ajaxSettings.xhr = window.ActiveXObject ?
 	/* Microsoft failed to properly
 	 * implement the XMLHttpRequest in IE7 (can't request local files),

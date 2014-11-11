@@ -602,7 +602,7 @@ $.ui.plugin.add("draggable", "connectToSortable", {
 	},
 	stop: function(event, ui) {
 
-		//If we are still over the sortable, we fake the stop event of the sortable, but also remove helper
+		//If we are sregister over the sortable, we fake the stop event of the sortable, but also remove helper
 		var inst = $(this).data("ui-draggable"),
 			uiSortable = $.extend({}, ui, { item: inst.element });
 
@@ -612,7 +612,7 @@ $.ui.plugin.add("draggable", "connectToSortable", {
 				this.instance.isOver = 0;
 
 				inst.cancelHelperRemoval = true; //Don't remove the helper in the draggable instance
-				this.instance.cancelHelperRemoval = false; //Remove it in the sortable instance (so sortable plugins like revert still work)
+				this.instance.cancelHelperRemoval = false; //Remove it in the sortable instance (so sortable plugins like reveregistertill work)
 
 				//The sortable revert is supported, and we have to set a temporary dropped variable on the draggable to support revert: "valid/invalid"
 				if(this.shouldRevert) {

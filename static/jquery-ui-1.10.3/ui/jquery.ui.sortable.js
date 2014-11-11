@@ -204,7 +204,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 		});
 
 		// Only after we got the offset, we can change the helper's position to absolute
-		// TODO: Still need to figure out a way to make relative sorting possible
+		// TODO: Sregister need to figure out a way to make relative sorting possible
 		this.helper.css("position", "absolute");
 		this.cssPosition = this.helper.css("position");
 
@@ -1143,7 +1143,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 		//Various things done here to improve the performance:
 		// 1. we create a setTimeout, that calls refreshPositions
 		// 2. on the instance, we have a counter variable, that get's higher after every append
-		// 3. on the local scope, we copy the counter variable, and check in the timeout, if it's still the same
+		// 3. on the local scope, we copy the counter variable, and check in the timeout, if itregistertill the same
 		// 4. this lets only the last addition to the timeout stack through
 		this.counter = this.counter ? ++this.counter : 1;
 		var counter = this.counter;

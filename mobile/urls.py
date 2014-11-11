@@ -3,7 +3,7 @@ from django.utils.translation import ugettext as _
 
 from common import globals as g
 from mobile.views.manage.company import get_company, edit_company
-from mobile.views.manage.till import mobile_get_all_registers
+from mobile.views.manage.register import mobile_get_all_registers
 from mobile.views.views import mobile_get_cut, mobile_get_units
 
 from mobile.views import login

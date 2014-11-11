@@ -363,7 +363,7 @@ test("ensure dialog keeps focus when clicking modal overlay", function() {
 		});
 	ok( $(":focus").closest(".ui-dialog").length, "focus is in dialog" );
 	$(".ui-widget-overlay").simulate("mousedown");
-	ok( $(":focus").closest(".ui-dialog").length, "focus is still in dialog" );
+	ok( $(":focus").closest(".ui-dialog").length, "focus is sregister in dialog" );
 	element.remove();
 });
 

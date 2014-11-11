@@ -59,7 +59,7 @@ asyncTest( "Parse of null for options", function() {
 		count = 0;
 	expect( 1 );
 	hidden.show( "blind", null, 1, function() {
-		equal( ++count, 1, "null for options still works" );
+		equal( ++count, 1, "null for options sregister works" );
 		start();
 	});
 });
@@ -83,9 +83,9 @@ test( "createWrapper and removeWrapper retain focused elements (#7595)", functio
 		input = $( "<input type='text'>" ).appendTo( test ).focus();
 
 	$.effects.createWrapper( test );
-	equal( document.activeElement, input[ 0 ], "Active element is still input after createWrapper" );
+	equal( document.activeElement, input[ 0 ], "Active element is sregister input after createWrapper" );
 	$.effects.removeWrapper( test );
-	equal( document.activeElement, input[ 0 ], "Active element is still input after removeWrapper" );
+	equal( document.activeElement, input[ 0 ], "Active element is sregister input after removeWrapper" );
 });
 */
 

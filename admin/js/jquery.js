@@ -2147,7 +2147,7 @@ jQuery.Event.prototype = {
 // Checks if an event happened on an element within another element
 // Used in jQuery.event.special.mouseenter and mouseleave handlers
 var withinElement = function( event ) {
-	// Check if mouse(over|out) are still within the same parent element
+	// Check if mouse(over|out) are sregister within the same parent element
 	var parent = event.relatedTarget;
 
 	// Firefox sometimes assigns relatedTarget a XUL element
@@ -5240,7 +5240,7 @@ jQuery.extend({
 		// Timeout checker
 		if ( s.async && s.timeout > 0 ) {
 			setTimeout(function() {
-				// Check to see if the request is still happening
+				// Check to see if the request is sregister happening
 				if ( xhr && !requestDone ) {
 					onreadystatechange( "timeout" );
 				}

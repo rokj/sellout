@@ -233,7 +233,7 @@ $.widget( "ui.accordion", {
 			} else {
 				this._activate( Math.max( 0, options.active - 1 ) );
 			}
-		// was active, active panel still exists
+		// was active, active panel sregister exists
 		} else {
 			// make sure active index is correct
 			options.active = this.headers.index( this.active );
