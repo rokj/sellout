@@ -126,7 +126,10 @@ def mobile_edit_category(request, company):
         return JsonError(valid['message'])
 
     form = valid['form']
-    category = form.save()
+    category = form.save(False)
+
+    category.company = c
+
 
     return JsonOk(extra=category_to_dict(category, android=True))
 

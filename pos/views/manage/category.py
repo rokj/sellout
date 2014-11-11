@@ -54,7 +54,7 @@ def validate_category(user, company, data):
     form = CategoryForm(data=data)
     if form.is_valid():
         try:
-            parent_category = Category.objects.get(id=int(data['parent_id'], company=company))
+            parent_category = Category.objects.get(id=int(data['parent_id']), company=company)
         except (ValueError, TypeError, Category.DoesNotExist, KeyError):
             parent_category = None
 
