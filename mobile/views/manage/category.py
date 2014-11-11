@@ -117,8 +117,7 @@ def edit_category(request, company):
         c = Company.objects.get(url_name = company)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
-
-    # sellers can edit product
+    
     if not has_permission(request.user, c, 'category', 'edit'):
         return JsonError(_("You have no permission to edit products"))
 
@@ -131,9 +130,10 @@ def edit_category(request, company):
         category = Category.objects.get(id=category_id)
     except:
         return JsonError(_("Product does not exist"))
-
+    
     # validate data
     valid = validate_category(request.user, c, data)
+    
     if not valid['status']:
         return JsonError(valid['message'])
     form = valid['form']

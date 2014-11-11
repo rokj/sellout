@@ -745,7 +745,7 @@
                 };
 
                 // function total_price(tax_first, base, tax, discounts, quantity, decimal_places){
-                var result = calculate_item(fake_item);
+                var result = calculate_item(fake_item, {{ decimal_places }});
 
                 // price without tax and discounts
                 p.items.base.text(display_number(result.base, "{{separator}}", {{ decimal_places }}));
