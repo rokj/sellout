@@ -147,7 +147,7 @@
         }
 
         function discount_amount (discount){
-                if(discount.type == 'Percent')
+                if(discount.type == 'Relative')
                     return " (" + display_number(discount.amount, "{{ separator }}", {{ decimal_places }}) + "%)";
                 else
                     return " ({{currency|escapejs}} " + display_number(discount.amount, "{{ separator }}", {{ decimal_places }}) + ")";
@@ -633,7 +633,7 @@
                 stock: $("#edit_product_stock", p.container),
                 unit_sel: $("#edit_product_unit_type", p.container),
                 purchase_price: $("#edit_product_purchase_price", p.container),
-                base_price: $("#edit_product_price_without_tax", p.container),
+                base: $("#edit_product_price_without_tax", p.container),
                 tax_price: $("#edit_product_price_with_tax", p.container),
                 shortcut: $("#edit_product_shortcut", p.container),
                 discounts: $("#edit_discounts", p.container),
@@ -724,20 +724,34 @@
                 if(!t) return; // don't change anything if something is wrong (or not yet entered)
 
                 // price: always get price without tax
-                var price = get_number(p.items.base_price.val(), "{{ separator }}");
+                var price = get_number(p.items.base.val(), "{{ separator }}");
                 if(!price) return;
 
                 // gather all discounts
-                var discounts = p.get_discounts();
 
-                // function total_price(tax_first, base_price, tax, discounts, quantity, decimal_places){
-                var result = total_price(price, t, discounts, Big(1), {{decimal_places}});
+                // create a 'fake' item and feed it to the calculation:
+                // these never change, they are defined in database
+                fake_item = {
+                    quantity: Big(1),
+                    base: price,
+                    tax_rate: t,
+                    discounts: p.get_discounts(),
 
-                // price without tax
-                p.items.base_price.text(display_number(result.base, "{{separator}}", {{ decimal_places }}));
+                    // calculation will return this
+                    discount: null,
+                    net: null,
+                    tax: null,
+                    total: null
+                };
+
+                // function total_price(tax_first, base, tax, discounts, quantity, decimal_places){
+                var result = calculate_item(fake_item);
+
+                // price without tax and discounts
+                p.items.base.text(display_number(result.base, "{{separator}}", {{ decimal_places }}));
 
                 // price with tax
-                p.items.tax_price.text(display_number(result.total, "{{separator}}", {{ decimal_places }}));
+                p.items.tax_price.text(display_number(result.base.plus(result.tax), "{{separator}}", {{ decimal_places }}));
 
                 // total price
                 p.items.total_price.text(display_number(result.total, "{{separator}}", {{ decimal_places }}));
@@ -747,7 +761,7 @@
                 var purchase_price = get_number(p.items.purchase_price.val(), "{{separator}}");
 
                 if(purchase_price){
-                    var profit = result.total_tax_exc.minus(purchase_price);
+                    var profit = result.net.minus(purchase_price);
                     p.items.profit.text(display_number(profit, "{{separator}}", {{ decimal_places }}));
 
                     if(profit.cmp(Big(0)) < 0){ // use alternate style
@@ -904,7 +918,7 @@
                 data['shortcut'] = p.items.shortcut.val();
                 data['code'] = p.items.code.val();
                 // price: always use base price (without tax)
-                data['price'] = p.items.base_price.val();
+                data['price'] = p.items.base.val();
 
                 if(!data['price']){
                     error_message(
@@ -1063,7 +1077,7 @@
             p.items.purchase_price.val(p.data.purchase_price);
 
             // base price (excluding tax
-            p.items.base_price.val(p.data.price);
+            p.items.base.val(p.data.price);
 
             // price without tax
             p.items.tax_price.val("");
@@ -1075,22 +1089,22 @@
             // when prices change
             $()
                 .add(p.items.tax_sel)
-                .add(p.items.base_price)
+                .add(p.items.base)
                 .add(p.items.purchase_price)
                 .add(p.items.tax_price)
                 .unbind()
                 .change(p.update_prices);
 
-            p.items.base_price.change(function(){
-                var base_price = get_number($(this).val(), "{{ separator }}");
+            p.items.base.change(function(){
+                var base = get_number($(this).val(), "{{ separator }}");
                 // update price with tax
                 var tax = get_number(get_tax(p.items.tax_sel.val()).amount, "{{ separator }}");
 
-                if(!base_price) return;
+                if(!base) return;
                 if(!tax) return;
 
                 p.items.tax_price.val(display_number(
-                        base_price.times(Big(1).plus(tax.div(Big(100)))),
+                        base.times(Big(1).plus(tax.div(Big(100)))),
                         "{{ separator }}", {{ decimal_places }}));
 
                 p.update_prices();
@@ -1104,7 +1118,7 @@
                 if(!tax_price) return;
                 if(!tax) return;
 
-                p.items.base_price.val(display_number(
+                p.items.base.val(display_number(
                         tax_price.div(Big(1).plus(tax.div(Big(100)))),
                         "{{ separator }}", {{ decimal_places }}));
 
@@ -1112,7 +1126,7 @@
             });
 
             p.update_prices();
-            p.items.base_price.change();
+            p.items.base.change();
 
             // shortcut
             p.items.shortcut.val(p.data.shortcut);
@@ -1174,7 +1188,7 @@
             //
             p.toggle_dialog = function(show){
                 if(show){
-                    custom_dialog("{% trans 'Taxes' %}", p.dialog, 300);
+                    custom_dialog("{% trans 'Taxes' %}", p.dialog, 300, {/* show close button */});
                 }
                 else{
                     p.dialog.close_dialog();
@@ -1251,7 +1265,7 @@
             //
             p.toggle_dialog = function(show){
                 if(show){
-                    custom_dialog("{% trans 'Discounts' %}", p.dialog, 300);
+                    custom_dialog("{% trans 'Discounts' %}", p.dialog, 300, { /* show close button */ });
                 }
                 else{
                     p.dialog.close_dialog();

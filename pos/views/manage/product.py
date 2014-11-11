@@ -344,7 +344,7 @@ def validate_product(user, company, data):
     
     try:
         data['id'] = int(data['id'])
-    except:
+    except (ValueError, TypeError):
         # this shouldn't happen
         return r(False, _("Wrong product id"))
     
