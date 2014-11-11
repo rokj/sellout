@@ -51,11 +51,18 @@ def validate_category(user, company, data):
      data:cleaned_data - empty dict if status = false
      message:error_message - empty if status = true """
 
-    try:
-        form = CategoryForm(data=data)
+    form = CategoryForm(data=data)
+    if form.is_valid():
+        try:
+            parent_category = Category.objects.get(id=int(data['parent_id']))
+        except (ValueError, TypeError, Category.DoesNotExist, KeyError):
+            parent_category = None
+
+        form.cleaned_data['parent'] = parent_category
+
         return {'status': True, 'data': form.cleaned_data, 'message': None}
-    except ValidationError as e:
-        return {'status': False, 'data': None, 'message': e.message}
+    else:
+        return {'status': False, 'data': None, 'message': _("Category is not valid")}
 
 
 def validate_parent(category, parent):

@@ -100,7 +100,7 @@ def validate_contact(user, company, data):
             return err(_("Wrong sex"))
         
         # date of birth: parse date
-        if 'date_if_birth' in data and len(data['date_of_birth']) > 0:
+        if 'date_of_birth' in data and len(data['date_of_birth']) > 0:
             r = parse_date(user, company, data['date_of_birth'])
             if not r['success']:
                 return err(_("Wrong format of date of birth"))
