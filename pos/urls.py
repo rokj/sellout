@@ -100,9 +100,10 @@ urlpatterns = patterns('',
     url(r_company + '/save/$', terminal.save, name='save_terminal'),
     url(r_company + '/set-register/$', terminal.set_register, name='set_register'),
     url(r_company + '/quick-contact/$', contact.quick_contacts, name='quick_contacts'),
-    url(r_company + '/get-unpaid-bill/$', terminal_bill.get_unpaid_bill, name='get_unpaid_bill'),
     url(r_company + '/finish-bill/$', terminal_bill.finish_bill, name='finish_bill'),
     url(r_company + '/check-bill-status/$', terminal_bill.check_bill_status, name='check_bill_status'),
+    url(r_company + '/get-unpaid-bills/$', terminal_bill.get_unpaid_bills, name='get_unpaid_bills'),
+    url(r_company + '/delete-unpaid-bill/$', terminal_bill.delete_unpaid_bill, name='delete_unpaid_bill'),
     url(r_company + '/view-bill/$', terminal_bill.view_bill, name='view_bill'),
 
     # views for bill

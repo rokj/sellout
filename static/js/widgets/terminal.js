@@ -149,44 +149,26 @@ Terminal = function(g){
         // save the register to localStorage
         save_local('register_id', r.id);
 
-        // load any possible unfinished/saved bills from this register
-        send_data(p.g.urls.get_unpaid_bill, { register_id: r.id }, p.g.csrf_token, function(response){
-            if(response.status == 'ok'){
-                // there may be or may not be an unfinished bill on the server
-                if(response.data){
-                    // there's an unpaid bill on the server, load that
-                    p.g.unfinished_bill = response.data;
-                }
-                else{
-                    // there's no bill on the server, check local storage (it may noy be finished at all)
-                    if(localStorage.bill){
-                        var data = load_local('bill');
-
-                        if(data){
-                            // if bill is not loaded yet, wait for it
-                            var i = setInterval(function(){
-                                if(p.g.objects.bill){
-                                    try{
-                                        p.g.objects.bill.load(data);
-                                        clearInterval(i);
-                                    }
-                                    catch(e){
-                                        // if something goes wrong
-                                        // (mostly during development... )
-                                        clear_local('bill');
-                                    }
-                                }
-                            }, 500);
+        // load any possible unfinished/saved bills from this device
+        if(localStorage.bill){
+            var data = load_local('bill');
+                if(data){
+                    // if bill is not loaded yet, wait for it
+                    var i = setInterval(function(){
+                        if(p.g.objects.bill){
+                            try{
+                                p.g.objects.bill.load(data);
+                                clearInterval(i);
+                            }
+                            catch(e){
+                                // if something goes wrong
+                                // (mostly during development... )
+                                clear_local('bill');
+                            }
                         }
-                    }
+                    }, 500);
                 }
-            }
-            else{
-                // do nothing at the moment, just don't load the bill.
-                // TODO: something went wrong, is there anything to do?
-            }
-
-        });
+        }
     };
 
     p.get_register = function(id){

@@ -19,6 +19,8 @@ from datetime import datetime as dtm
 from decimal import Decimal
 
 
+from django.db.models import Q
+
 def bill_item_to_dict(user, company, item):
     i = {}
     
@@ -243,6 +245,17 @@ def create_bill(request, company):
     if not data:
         return JsonError(_("No data received"))
 
+    # see if we're updating an existing bill
+    existing_bill = None
+    try:
+        existing_bill = Bill.objects.get(company=c, id=int(data.get('id')))
+        if existing_bill.status == 'Paid':
+            return JsonError(_("This bill has already been paid, editing is not possible"))
+    except (ValueError, TypeError):
+        pass
+    except Bill.DoesNotExist:
+        pass
+
     # current company (that will be fixed on this bill forever):
     # save a FK to BillCompany; the last company is the current one
     bill_company = BillCompany.objects.filter(company=c).order_by('-datetime_created')[0]
@@ -383,6 +396,9 @@ def create_bill(request, company):
 
     # at this point, everything is fine, insert into database
 
+    if existing_bill:
+        existing_bill.delete()
+
     # create a new bill
     db_bill = Bill(
         created_by=request.user,
@@ -445,8 +461,8 @@ def create_bill(request, company):
 
 
 @login_required
-def get_unpaid_bill(request, company):
-    """ returns unpaid bill for specified company and register, if there's any """
+def get_unpaid_bills(request, company):
+    """ returns unpaid bill for the company, if there's any """
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
@@ -456,21 +472,43 @@ def get_unpaid_bill(request, company):
     if not has_permission(request.user, c, 'bill', 'view'):
         return JsonError(_("You have no permission to view bills"))
 
-    # get register from data
+    # return a list of bills
+    unfinished_bills = Bill.objects.filter(company=c).exclude(status='Unfinished').order_by('-timestamp')
+
+    bills = []
+    for b in unfinished_bills:
+        bills.append(bill_to_dict(request.user, c, b))
+
+    return JsonOk(extra=bills)
+
+
+@login_required
+def delete_unpaid_bill(request, company):
     try:
-        register_id = int(JsonParse(request.POST.get('data')).get('register_id'))
-    except (ValueError, TypeError):
-        return JsonError(_("No valid register specified"))
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
 
-    # return bill, if there's any
-    unfinished_bills = Bill.objects\
-        .filter(company=c, register_id=register_id, status='Unfinished')\
-        .order_by('-timestamp')
+    # bill_id is required in request.POST
+    try:
+        bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
+        bill = Bill.objects.get(company=c, id=bill_id)
+    except (TypeError, ValueError):
+        return JsonError(_("Invalid bill id"))
+    except Bill.DoesNotExist:
+        return JsonError(_("Bill does not exist"))
 
-    if len(unfinished_bills) > 0:
-        return JsonOk(extra=bill_to_dict(request.user, c, unfinished_bills[0]))
-    else:
-        return JsonOk()
+    # check if this user has permission to edit bills
+    if not has_permission(request.user, c, 'bill', 'edit'):
+        return JsonError(_("You have no permission to edit bills"))
+
+    # check if this bill is really unpaid
+    if not bill.status == 'Unpaid':
+        return JsonError(_("This bill is not unpaid, deleting is not possible"))
+
+    # if everything is ok, delete it and send an OK message
+    bill.delete()
+    return JsonOk()
 
 
 @login_required

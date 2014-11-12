@@ -171,4 +171,8 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
 
         items: items
     };
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 2b10dda2f66439429830e568182014d76fca3c60

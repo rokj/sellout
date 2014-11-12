@@ -99,10 +99,7 @@ Payment = function(g, bill){
 
                             clearInterval(p.bitcoin_interval);
                         }
-                        else{
-                            // not paid yet, continue polling
-
-                        }
+                        else{ /* not paid yet, continue polling */ }
                     }
                 });
             }, 2000);
