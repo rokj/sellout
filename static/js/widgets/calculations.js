@@ -125,7 +125,7 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
 
     // 3. bill discount:
     if(bill_discount_amount.cmp(Big(0)) != 0){
-        if(bill_discount_type == 'absolute'){
+        if(bill_discount_type == 'Absolute'){
             // convert absolute discount to relative using current total
             bill_discount_amount = bill_discount_amount.div(total);
         }
@@ -167,12 +167,3 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
 //////////////////// useless junk below ////////////////////
 ////////////////////                    ////////////////////
 ////////////////////////////////////////////////////////////
-
-// utilities for calculation of prices etc.
-function do_tax(p_incl, p_excl, tax){
-    alert("do_tax called, deprecated");
-}
-
-function total_price(base_price, tax, discounts, quantity, decimal_places){
-    alert("total_price called, deprecated");
-}
