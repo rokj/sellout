@@ -162,7 +162,7 @@ Bill = function(g){
         };
         p.serial = 0;
         p.contact = null;
-        p.saved = false;
+        p.saved = true; // there's nothing to be saved
         p.payment = null; // will hold the Payment() object
 
         // update texts:
@@ -267,8 +267,7 @@ Bill = function(g){
         p.data.discount_amount = get_number(p.data.discount_amount, p.g.config.separator);
 
         p.bill_options = new BillOptions(p);
-
-        p.bill.saved = true;
+        p.bill.saved = true; // the bill just 'arrived' from the server
 
         p.update();
     };
@@ -438,8 +437,8 @@ Bill = function(g){
                     var bill_list = response.data;
                     // jquery objects
                     var dialog, list, template, list_item;
-                    // temp objects
-                    var i, bill;
+                    // temp stuff
+                    var i , bill;
 
                     // open the dialog and list bills
                     dialog = $("#load_bill_dialog");
@@ -466,8 +465,8 @@ Bill = function(g){
                             confirmation_dialog(gettext("Delete this bill?"), "",
                                 function(){
                                     // send a delete request to server
-                                    send_data(p.g.urls.delete_unpaid_bill, p.g.csrf_token,
-                                        { bill_id: p.data.id }, function(response){
+                                    send_data(p.g.urls.delete_unpaid_bill, { bill_id: bill.id },
+                                        p.g.csrf_token, function(response){
                                             if(response.status != 'ok'){
                                                 error_message(gettext("Deleting bill failed"),
                                                     response.message);
@@ -517,6 +516,9 @@ Bill = function(g){
                         do_load();
                     }
                 });
+        }
+        else{
+            do_load();
         }
     };
 

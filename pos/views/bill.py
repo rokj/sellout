@@ -491,6 +491,8 @@ def delete_unpaid_bill(request, company):
 
     # bill_id is required in request.POST
     try:
+        print request.POST.get('data')
+        print JsonParse(request.POST.get('data'))
         bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
         bill = Bill.objects.get(company=c, id=bill_id)
     except (TypeError, ValueError):
