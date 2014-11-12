@@ -87,7 +87,8 @@ $(window).load(function(){
             categories: null,
             products: null,
             search: null,
-            bill: null // current bill (will be loaded with ajax)
+            bill: null, // current bill (will be loaded with ajax)
+            contacts: null
         },
 
         // static ui settings
@@ -262,11 +263,12 @@ $(window).load(function(){
                         </button>
 
                         <div id="bill_options_menu" class="terminal-menu-items">
-                            <button class="terminal-menu-item options">{% trans 'Options' %}</button>
-                            <button class="terminal-menu-item save">{% trans 'Save' %}</button>
                             <button class="terminal-menu-item select-client">{% trans 'Select client' %}</button>
+                            <button class="terminal-menu-item options">{% trans 'Discount' %}</button>
+                            <button class="terminal-menu-item save">{% trans 'Save' %}</button>
+                            <button class="terminal-menu-item load">{% trans 'Load' %}</button>
                             <button class="terminal-menu-item clear">{% trans 'Clear' %}</button>
-                            <button class="terminal-menu-item print">{% trans 'Print options' %}</button>
+                            <button class="terminal-menu-item print">{% trans 'Print...' %}</button>
                         </div>
                     </div>
                 </div>
@@ -418,6 +420,18 @@ $(window).load(function(){
             <input type="button" class="cancel" value="{% trans 'Cancel' %}" />
             <input type="button" class="save" value="{% trans 'Save' %}" />
         </div>
+    </div>
+
+    {% comment %} the dialog for saving bills (just asks for optional notes) {% endcomment %}
+    <div id="save_bill_dialog">
+        <label for="save_bill_notes">{% trans 'Add a note to this bill (optional)' %}:</label>
+        <input type="text" id="save_bill_notes" />
+    </div>
+
+
+    {% comment %} the dialog for loading unpaid bills {% endcomment %}
+    <div id="load_bill_dialog" class="hidden">
+
     </div>
 
     {% comment %} the payment dialog {% endcomment %}

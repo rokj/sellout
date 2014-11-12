@@ -14,7 +14,7 @@ Bill = function(g){
 
     p.g = g;
 
-    p.data = {
+    p.data = { // BillOptions will need this
         discount_amount: Big(0),
         discount_type: 'Relative',
         notes: ''
@@ -46,14 +46,19 @@ Bill = function(g){
     p.options_button = $("button.open-menu", "#bill_options");
     p.options_menu = $("#bill_options_menu");
 
-    p.option_save = $(".save", p.options_menu);
     p.option_contacts = $(".select-client", p.options_menu);
+    p.option_options = $(".options", p.options_menu);
+    p.option_save = $(".save", p.options_menu);
+    p.option_load = $(".load", p.options_menu);
     p.option_clear = $(".clear", p.options_menu);
     p.option_print = $(".print", p.options_menu);
-    p.option_options = $(".options", p.options_menu);
 
     // the options dialog
-    p.bill_options = null; // (initialized later)
+    p.bill_options = null; // BillOptions object, (initialized later)
+
+    // the dialogs for loading/saving unpaid bills
+    p.save_bill_dialog = $("#save_bill_dialog");
+    p.load_bill_dialog = $("#load_bill_dialog");
 
     // save item template for items and remove it from the document
     p.item_template = $("#bill_item_template").detach().removeAttr("id");
@@ -156,6 +161,14 @@ Bill = function(g){
         p.contact = null;
         p.saved = false;
         p.payment = null; // will hold the Payment() object
+
+        // update texts:
+        // contact
+        p.g.objects.contacts.update_labels();
+
+        // total
+        p.summary_total.text(dn(Big(0), p.g));
+
     };
 
     p.update = function(){
@@ -366,6 +379,41 @@ Bill = function(g){
         p.bill_options.toggle_dialog(show)
     };
 
+    p.save_unpaid = function(){
+        var notes = $("#save_bill_notes");
+
+        notes.val("");
+
+        // open the dialog
+        custom_dialog(
+            gettext("Save Bill"), // title
+            p.save_bill_dialog, // content
+            400, // width
+            { // buttons: 'save' and 'cancel'
+                yes: gettext("Save"),
+                yes_action: function(){
+                    // put the notes to p.data
+                    p.data.notes = notes.val();
+
+                    // send it to server
+
+                    // clear local storage - the bill's on the server anyway
+
+                    // create a new, empty bill
+                },
+
+                no: gettext("Cancal"),
+                no_action: function(){
+                    // do absolutely nothing apart from closing the dialog
+                }
+            }
+        );
+    };
+
+    p.load_unpaid = function(){
+
+    };
+
     //
     // init
     //
@@ -377,16 +425,28 @@ Bill = function(g){
         p.pay();
     });
 
-    // bill options
-    p.options_button.simpleMenu(p.options_menu);
+    // bill options:
+    // the menu
+    p.options_button.unbind().simpleMenu(p.options_menu);
 
-    p.option_contacts.click(function(){
-        // show the contacts dialog (is handled by Contacts class)
-        p.g.objects.contacts.choose_contact();
+    // contacts
+    p.option_contacts.unbind().click(p.g.objects.contacts.choose_contact);
+
+    // discounts and notes (the bill options menu)
+    p.option_options.unbind().click(function(){
+        p.toggle_bill_options(true);
     });
 
-    p.option_print.click(function(){  });
-    p.option_clear.click(function(){
+    // save bill
+    p.option_save.unbind().click(p.save());
+
+    // load bill
+
+    // print options
+    p.option_print.unbind().click(function(){ /* nothing so far */ });
+
+    // clear bill
+    p.option_clear.unbind().click(function(){
         // a confirmation is required
         confirmation_dialog(
             gettext("Confirm bill clear"),
@@ -396,9 +456,6 @@ Bill = function(g){
         );
     });
 
-    p.option_options.click(function(){
-        p.toggle_bill_options(true);
-    });
 };
 
 Item = function(bill, product) {

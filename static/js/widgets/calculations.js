@@ -62,7 +62,7 @@ function calculate_item(item, decimal_places){
             item.discount = item.discount.plus(new_discount);
             item.net = item.net.minus(new_discount);
         }
-        else{
+        else if(item_discount.type == 'Absolute'){
             // absolute discount:
             // do it so that the new price INCLUDING tax will be lower
             // by the amount of this discount
@@ -75,6 +75,10 @@ function calculate_item(item, decimal_places){
             new_net = new_total.div(item.tax_rate.div(100).plus(1));
             item.discount = item.discount.plus(item.net.minus(new_net));
             item.net = new_net;
+        }
+        else{
+            // it's the 'bill' discount, remove it for now
+            remove_from_array(item.discounts, i);
         }
     }
 
@@ -125,7 +129,7 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
 
     // 3. bill discount:
     if(bill_discount_amount.cmp(Big(0)) != 0){
-        if(bill_discount_type == 'absolute'){
+        if(bill_discount_type == 'Absolute'){
             // convert absolute discount to relative using current total
             bill_discount_amount = bill_discount_amount.div(total);
         }
@@ -141,6 +145,13 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
 
             // discount amount:
             new_discount = item.net.times(bill_discount_amount);
+
+            // create a new discount and add it to item's list discount
+            item.discounts.push({
+                id: -1,
+                type: 'Bill',
+                amount: new_discount
+            });
 
             item.discount = item.discount.plus(new_discount).round(decimal_places);
             item.net = item.net.minus(new_discount).round(decimal_places);
@@ -160,19 +171,4 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
 
         items: items
     };
-}
-
-////////////////////////////////////////////////////////////
-////////////////////                    ////////////////////
-//////////////////// useless junk below ////////////////////
-////////////////////                    ////////////////////
-////////////////////////////////////////////////////////////
-
-// utilities for calculation of prices etc.
-function do_tax(p_incl, p_excl, tax){
-    alert("do_tax called, deprecated");
-}
-
-function total_price(base_price, tax, discounts, quantity, decimal_places){
-    alert("total_price called, deprecated");
 }
