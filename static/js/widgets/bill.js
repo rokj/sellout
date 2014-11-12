@@ -152,14 +152,15 @@ Bill = function(g){
         p.items_by_serial = {};
         p.items_by_id = {};
 
-        // the bill is empty, saving is not needed
-        p.bill.saved = true;
+        p.data = { // Data that should be here at all times
+            items: [],
+            contact: null,
 
-        p.data = { // BillOptions will need this
             discount_amount: Big(0),
             discount_type: 'Relative',
             notes: ''
         };
+
         p.serial = 0;
         p.contact = null;
         p.saved = true; // there's nothing to be saved
@@ -232,14 +233,21 @@ Bill = function(g){
 
     // bill manipulation
     p.load = function(data){
-        // load bill from data (loaded from the server or localStorage)
-        p.clear();
+        // loads bill from data;
+        // from the server or local storage;
+        // if data is null, init a new bill
+        if(data == null){
+            p.clear();
+            return;
+        }
+
+        p.data = data;
 
         // bill items
         var i, product;
-        for(i = 0; i < data.items.length; i++){
+        for(i = 0; i < p.data.items.length; i++){
             // get products from items' ids and create new items
-            product = p.g.objects.products.products_by_id[data.items[i].product_id];
+            product = p.g.objects.products.products_by_id[p.data.items[i].product_id];
 
             if(!product) continue;
 
@@ -248,22 +256,21 @@ Bill = function(g){
 
         // contact: if the bill is retrieved from the server, the contact is id only,
         // otherwise it's a contact object (saved from js)
-        if(typeof(data.contact) == 'number'){
+        if(typeof(p.data.contact) == 'number'){
             // search contacts by id and select the right one
             for(i = 0; i < p.g.data.contacts.length; i++){
                 if(p.g.data.contacts[i].id == data.contact){
-                    data.contact = p.g.data.contacts[i].id;
+                    p.data.contact = p.g.data.contacts[i].id;
                     break;
                 }
             }
         }
         else{
             // just assign the data
-            p.contact = data.contact;
+            p.contact = p.data.contact;
         }
 
         // other bill data
-        p.data = data;
         p.data.discount_amount = get_number(p.data.discount_amount, p.g.config.separator);
 
         p.bill_options = new BillOptions(p);
@@ -379,7 +386,7 @@ Bill = function(g){
     };
 
     p.toggle_bill_options = function(show){
-        p.bill_options.toggle_dialog(show)
+        p.bill_options.toggle_dialog(show);
     };
 
     p.save_unpaid = function(post_save_callback){
@@ -435,62 +442,61 @@ Bill = function(g){
                 else{
                     // data
                     var bill_list = response.data;
-                    // jquery objects
-                    var dialog, list, template, list_item;
-                    // temp stuff
-                    var i , bill;
 
                     // open the dialog and list bills
-                    dialog = $("#load_bill_dialog");
-                    list = $("#load_bill_list");
+                    var dialog_obj = $("#load_bill_dialog").clone().removeAttr("id");
+                    var list_obj = $("#load_bill_list");
                     template = $("thead tr", list).clone();
                     list = $("tbody", list);
                     list.empty();
 
                     // fill the table with bills
-                    for(i = 0; i < bill_list.length; i++){
-                        bill = bill_list[i];
+                    for(var i = 0; i < bill_list.length; i++){
+                        // wrap everything in a new function to prevent
+                        // 'access mutable variable from closure' problem
+                        (function(i){
+                            var bill = bill_list[i];
 
-                        list_item = template.clone();
-                        list_item.data({bill:bill_list[i]});
+                            var list_item = template.clone();
+                            list_item.data({bill: bill_list[i]});
 
-                        $(".time", list_item).text(bill.timestamp);
-                        $(".items", list_item).text(bill.items.length);
-                        $(".notes", list_item).text(bill.notes);
+                            $(".time", list_item).text(bill.timestamp);
+                            $(".items", list_item).text(bill.items.length);
+                            $(".notes", list_item).text(bill.notes);
 
-                        // the buttons:
-                        // delete
-                        $(".delete-button", list_item).show().unbind().click(function(){
-                            // ask if the user is  S U R E 'cuz dis is veri imparrtent
-                            confirmation_dialog(gettext("Delete this bill?"), "",
-                                function(){
-                                    // send a delete request to server
-                                    send_data(p.g.urls.delete_unpaid_bill, { bill_id: bill.id },
-                                        p.g.csrf_token, function(response){
-                                            if(response.status != 'ok'){
-                                                error_message(gettext("Deleting bill failed"),
-                                                    response.message);
-                                            }
-                                            else{
-                                                // the bill has been deleted, delete the list item as well
-                                                // $(this) is the button, parent() is the cell, its parent() is the row
-                                                $(this).parent().parent().remove();
-                                            }
-                                        });
-                                },
-                                function(){}
-                            );
-                        });
+                            // the buttons:
+                            // delete
+                            $(".delete-button", list_item).show().unbind().click(function(){
+                                // ask if the user is  S U R E 'cuz dis is veri imparrtent
+                                confirmation_dialog(gettext("Delete this bill?"), "",
+                                    function(){
+                                        // send a delete request to server
+                                        send_data(p.g.urls.delete_unpaid_bill, { bill_id: bill.id },
+                                            p.g.csrf_token, function(response){
+                                                if(response.status != 'ok'){
+                                                    error_message(gettext("Deleting bill failed"),
+                                                        response.message);
+                                                }
+                                                else{
+                                                    // the bill has been deleted, delete the list item as well
+                                                    list_item.remove();
+                                                }
+                                            });
+                                    },
+                                    function(){ }
+                                );
+                            });
 
-                        // load
-                        $(".load-button", list_item).show().unbind().click(function(){
-                            // load this bill to terminal
-                            p.load($(this).data().bill);
-                            dialog.close_dialog(); // custom_dialog() adds this method to jquery object
-                        });
+                            // load
+                            $(".load-button", list_item).show().unbind().click(function(){
+                                // load this bill to terminal
+                                p.load($(this).parent().data().bill);
+                                dialog.close_dialog(); // custom_dialog() adds this method to jquery object
+                            });
 
-                        // append to list
-                        list.append(list_item);
+                            // append to list
+                            list.append(list_item);
+                        })(i);
                     }
 
                     custom_dialog(gettext("Load bill"), dialog, 700, {});

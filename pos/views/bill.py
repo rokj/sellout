@@ -473,7 +473,7 @@ def get_unpaid_bills(request, company):
         return JsonError(_("You have no permission to view bills"))
 
     # return a list of bills
-    unfinished_bills = Bill.objects.filter(company=c).exclude(status='Unfinished').order_by('-timestamp')
+    unfinished_bills = Bill.objects.filter(company=c).exclude(status='Paid').order_by('-timestamp')
 
     bills = []
     for b in unfinished_bills:
@@ -505,8 +505,8 @@ def delete_unpaid_bill(request, company):
         return JsonError(_("You have no permission to edit bills"))
 
     # check if this bill is really unpaid
-    if not bill.status == 'Unpaid':
-        return JsonError(_("This bill is not unpaid, deleting is not possible"))
+    if bill.status != 'Unpaid':
+        return JsonError(_("This bill has already been paid, deleting is not possible"))
 
     # if everything is ok, delete it and send an OK message
     bill.delete()

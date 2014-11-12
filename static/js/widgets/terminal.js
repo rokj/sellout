@@ -149,26 +149,26 @@ Terminal = function(g){
         // save the register to localStorage
         save_local('register_id', r.id);
 
-        // load any possible unfinished/saved bills from this device
+        // load bill or init a fresh one
+        var data = null;
         if(localStorage.bill){
-            var data = load_local('bill');
-                if(data){
-                    // if bill is not loaded yet, wait for it
-                    var i = setInterval(function(){
-                        if(p.g.objects.bill){
-                            try{
-                                p.g.objects.bill.load(data);
-                                clearInterval(i);
-                            }
-                            catch(e){
-                                // if something goes wrong
-                                // (mostly during development... )
-                                clear_local('bill');
-                            }
-                        }
-                    }, 500);
-                }
+            data = load_local('bill');
         }
+
+        // if bill is not loaded yet, wait for it
+        var i = setInterval(function(){
+            if(p.g.objects.bill){
+                try{
+                    p.g.objects.bill.load(data);
+                    clearInterval(i);
+                }
+                catch(e){
+                    // if something goes wrong
+                    // (mostly during development... )
+                    clear_local('bill');
+                }
+            }
+        }, 500);
     };
 
     p.get_register = function(id){
