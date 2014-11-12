@@ -558,25 +558,19 @@ class Bill(SkeletonU, RegisterAbstract):
 
 
 # post-save signal: set bill's serial number
-@receiver(post_save, sender=Bill)
-def set_serial(instance, created, **kwargs):
-    if not created:  # only set the serial number once
-        return
-
-    if not instance.company:
-        return
-
-    try:
-        # get the second last bill (because the last is this bill without serial)
-        last_bill = Bill.objects.only('serial') \
-                        .filter(company=instance.company) \
-                        .exclude(serial=None) \
-                        .order_by('-serial')[0]
-        instance.serial = last_bill.serial + 1
-    except:
-        instance.serial = 1
-
-    instance.save()
+@receiver(pre_save, sender=Bill)
+def set_serial(instance, **kwargs):
+    # set serial number after the bill has been paid;
+    if instance.status == 'Paid' and not instance.serial:
+        try:
+            # get the second last bill (because the last is this bill without serial)
+            last_bill = Bill.objects.only('serial') \
+                            .filter(company=instance.company) \
+                            .exclude(serial=None) \
+                            .order_by('-serial')[0]
+            instance.serial = last_bill.serial + 1
+        except:
+            instance.serial = 1
 
 
 class BillItem(SkeletonU, ProductAbstract): # include all data from Product

@@ -14,11 +14,7 @@ Bill = function(g){
 
     p.g = g;
 
-    p.data = { // BillOptions will need this
-        discount_amount: Big(0),
-        discount_type: 'Relative',
-        notes: ''
-    };
+    p.data = null; // bill be set in clear()
 
     // bill properties
     p.serial = 0; // a number that will be assigned to every item (has nothing to do with id on server)
@@ -144,6 +140,9 @@ Bill = function(g){
     };
 
     p.clear = function(){
+        // clear local storage: we don't want the same bill to pop up next time
+        clear_local('bill');
+
         // remove all items one by one
         for(var i = 0; i < p.items.length; i++){
             p.items[i].item_row.remove();
@@ -156,7 +155,11 @@ Bill = function(g){
         // the bill is empty, saving is not needed
         p.bill.saved = true;
 
-        p.data = null;
+        p.data = { // BillOptions will need this
+            discount_amount: Big(0),
+            discount_type: 'Relative',
+            notes: ''
+        };
         p.serial = 0;
         p.contact = null;
         p.saved = false;
@@ -164,7 +167,8 @@ Bill = function(g){
 
         // update texts:
         // contact
-        p.g.objects.contacts.update_labels();
+        if(p.g.objects.contacts) // may not be initialized yet
+            p.g.objects.contacts.update_labels();
 
         // total
         p.summary_total.text(dn(Big(0), p.g));
@@ -379,7 +383,7 @@ Bill = function(g){
         p.bill_options.toggle_dialog(show)
     };
 
-    p.save_unpaid = function(){
+    p.save_unpaid = function(post_save_callback){
         var notes = $("#save_bill_notes");
 
         notes.val("");
@@ -396,10 +400,20 @@ Bill = function(g){
                     p.data.notes = notes.val();
 
                     // send it to server
+                    send_data(
+                        p.g.urls.create_bill, p.get_data(), p.g.csrf_token, function(response){
+                            if(response.status != 'ok'){
+                                error_message(gettext("Saving bill failed"),
+                                    response.message);
+                            }
+                            else{
+                                // create a new, empty bill
+                                p.clear();
 
-                    // clear local storage - the bill's on the server anyway
-
-                    // create a new, empty bill
+                                // do anything that's ordered
+                                if(post_save_callback) post_save_callback();
+                            }
+                        });
                 },
 
                 no: gettext("Cancal"),
@@ -411,7 +425,99 @@ Bill = function(g){
     };
 
     p.load_unpaid = function(){
+        // this is the function that will be called after checks and save dialogs
+        function do_load(){
+            // fetch unpaid bills from the server
+            get_data(p.g.urls.get_unpaid_bills, function(response){
+                if(response.status != 'ok'){
+                    error_message(gettext("Loading bills failed"),
+                        response.message);
+                }
+                else{
+                    // data
+                    var bill_list = response.data;
+                    // jquery objects
+                    var dialog, list, template, list_item;
+                    // temp objects
+                    var i, bill;
 
+                    // open the dialog and list bills
+                    dialog = $("#load_bill_dialog");
+                    list = $("#load_bill_list");
+                    template = $("thead tr", list).clone();
+                    list = $("tbody", list);
+                    list.empty();
+
+                    // fill the table with bills
+                    for(i = 0; i < bill_list.length; i++){
+                        bill = bill_list[i];
+
+                        list_item = template.clone();
+                        list_item.data({bill:bill_list[i]});
+
+                        $(".time", list_item).text(bill.timestamp);
+                        $(".items", list_item).text(bill.items.length);
+                        $(".notes", list_item).text(bill.notes);
+
+                        // the buttons:
+                        // delete
+                        $(".delete-button", list_item).show().unbind().click(function(){
+                            // ask if the user is  S U R E 'cuz dis is veri imparrtent
+                            confirmation_dialog(gettext("Delete this bill?"), "",
+                                function(){
+                                    // send a delete request to server
+                                    send_data(p.g.urls.delete_unpaid_bill, p.g.csrf_token,
+                                        { bill_id: p.data.id }, function(response){
+                                            if(response.status != 'ok'){
+                                                error_message(gettext("Deleting bill failed"),
+                                                    response.message);
+                                            }
+                                            else{
+                                                // the bill has been deleted, delete the list item as well
+                                                // $(this) is the button, parent() is the cell, its parent() is the row
+                                                $(this).parent().parent().remove();
+                                            }
+                                        });
+                                },
+                                function(){}
+                            );
+                        });
+
+                        // load
+                        $(".load-button", list_item).show().unbind().click(function(){
+                            // load this bill to terminal
+                            p.load($(this).data().bill);
+                            dialog.close_dialog(); // custom_dialog() adds this method to jquery object
+                        });
+
+                        // append to list
+                        list.append(list_item);
+                    }
+
+                    custom_dialog(gettext("Load bill"), dialog, 700, {});
+
+                }
+            });
+        }
+
+        // check if there's an unsaved bill;
+        // if it is, ask to save or clear
+        if(!p.saved){
+            custom_dialog(
+                gettext("The current bill is not saved"),
+                gettext("Do you wish to save or clear it?"),
+                400, {
+                    yes: gettext("Save"),
+                    yes_action: function(){
+                        p.save_unpaid(do_load);
+                    },
+                    no: gettext("Clear"),
+                    no_action: function(){
+                        p.clear();
+                        do_load();
+                    }
+                });
+        }
     };
 
     //
@@ -430,7 +536,7 @@ Bill = function(g){
     p.options_button.unbind().simpleMenu(p.options_menu);
 
     // contacts
-    p.option_contacts.unbind().click(p.g.objects.contacts.choose_contact);
+    p.option_contacts.unbind().click(function(){ p.g.objects.contacts.choose_contact(); });
 
     // discounts and notes (the bill options menu)
     p.option_options.unbind().click(function(){
@@ -438,9 +544,10 @@ Bill = function(g){
     });
 
     // save bill
-    p.option_save.unbind().click(p.save());
+    p.option_save.unbind().click(p.save_unpaid);
 
     // load bill
+    p.option_load.unbind().click(p.load_unpaid);
 
     // print options
     p.option_print.unbind().click(function(){ /* nothing so far */ });
@@ -455,6 +562,8 @@ Bill = function(g){
             function(){}
         );
     });
+
+    p.clear();
 
 };
 
@@ -937,7 +1046,7 @@ ItemDetails = function(item){
     };
 
     p.update_prices = function(){
-        alert("update prices called");
+        p.item.bill.update();
     };
 
     p.cleanup = function(){

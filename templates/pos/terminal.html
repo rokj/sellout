@@ -64,7 +64,8 @@ $(window).load(function(){
               // terminal & stuff
               save_terminal_settings: "{% url 'pos:save_terminal' company.url_name  %}",
               create_bill: "{% url 'pos:create_bill' company.url_name %}",
-              get_unpaid_bill: "{% url 'pos:get_unpaid_bill' company.url_name %}",
+              get_unpaid_bills: "{% url 'pos:get_unpaid_bills' company.url_name %}",
+              delete_unpaid_bill: "{% url 'pos:delete_unpaid_bill' company.url_name %}",
               finish_bill: "{% url 'pos:finish_bill' company.url_name %}",
               check_bill_status: "{% url 'pos:check_bill_status' company.url_name %}",
               // management: registers (a link is needed for choosing current register)
@@ -431,7 +432,32 @@ $(window).load(function(){
 
     {% comment %} the dialog for loading unpaid bills {% endcomment %}
     <div id="load_bill_dialog" class="hidden">
+        <div id="load_bill_list_container">
+            <table id="load_bill_list">
+                <thead>
+                    <tr>
+                        <td class="load-bill time">{% trans 'Time' %}</td>
+                        <td class="load-bill items">{% trans 'Items #' %}</td>
+                        <td class="load-bill notes">{% trans 'Notes' %}</td>
+                        <td class="load-bill">
+                            <img class="load-button hidden" {# buttons should not be shown in header o.0 #}
+                                 src=""
+                                 alt="{% trans 'Load' %}"
+                                 title="{% trans 'Load this bill to terminal' %}" />
 
+                            <img class="delete-button hidden"
+                                 src="{% static 'icons/delete_black.png' %}"
+                                 alt="{% trans 'Delete' %}"
+                                 title="{% trans 'Delete this bill from the list' %}" />
+                        </td>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {# content will be copied here #}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     {% comment %} the payment dialog {% endcomment %}
