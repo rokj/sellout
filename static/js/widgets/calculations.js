@@ -172,3 +172,4 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
         items: items
     };
 }
+
