@@ -349,10 +349,6 @@ def create_bill(request, company):
                 except Discount.DoesNotExist:
                     return item_error(_("Chosen discount does not exist or is not valid"), product)
 
-            # discount type: must be in g.DISCOUNT_TYPES
-            if d.get('type') not in [x[0] for x in g.DISCOUNT_TYPES]:
-                return item_error(_("Wrong discount type"), product)
-
             # amount: parse number and check that percentage does not exceed 100%
             r = parse_decimal(request.user, c, d.get('amount'))
             if not r['success']:
