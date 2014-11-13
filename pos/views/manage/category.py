@@ -66,7 +66,9 @@ def validate_category(user, company, data):
 
         return {'status': True, 'message': None, 'form': form}
     else:
-        return {'status': False, 'data': None, 'message': _("Category is not valid")}
+        message = form.errors.as_data().itervalues().next()[0].message
+
+        return {'status': False, 'data': None, 'message': message}
 
 
 def validate_parent(category, parent):

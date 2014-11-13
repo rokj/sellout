@@ -66,15 +66,38 @@ def get_all_discounts(user, company, android=False):
     return ds
 
 
-def validate_discount(data, user, company):
+def validate_discount(data, user, company, android=False):
     # validate for mobile, use forms
 
     form = DiscountForm(data=data, user=user, company=company)
 
-    try:
-        return {'success': False, 'message': None, 'data': form.cleaned_data}
-    except ValidationError as e:
-        return {'success': False, 'message': e.message, 'data': None}
+    if form.is_valid():
+
+        if android:
+            start_date = data.get('android_start_date')
+
+            if start_date:
+                start = dtm.date(year=start_date[0], month=start_date[1],
+                                 day=start_date[2])
+            else:
+                start = None
+
+            end_date = data.get('android_end_date')
+
+            if end_date:
+                end = dtm.date(year=end_date[0], month=end_date[1],
+                                 day=end_date[2])
+            else:
+                end = None
+            form.cleaned_data['start_date'] = start
+            form.cleaned_data['end_date'] = end
+            form.start_date = start
+            form.end_date = end
+
+        return {'status': True, 'message': None, 'form': form}
+    else:
+        message = form.errors.as_data().itervalues().next()[0].message
+        return {'status': False, 'message': message, 'data': None}
 
 
 #############
@@ -95,6 +118,7 @@ class DiscountForm(CompanyUserForm):
     def clean_code(self):
         try:
             Discount.objects.get(company=self.company, code=self.cleaned_data.get('code'))
+
             raise ValidationError(_("Discount with this code already exists"))
         except Discount.DoesNotExist:
             return self.cleaned_data.get('code')
