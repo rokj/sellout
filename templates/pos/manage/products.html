@@ -113,12 +113,15 @@
 
             if(preselected_id == null || select_none){
                 opt_obj = $("<option>")
-                        .attr("value", null)
+                        .attr("value", -1)
                         .text("---");
 
                 element.append(opt_obj);
 
-                if(!preselected_id) opt_obj.attr("selected", "selected");
+                if(!preselected_id){
+                    opt_obj.attr("selected", "selected");
+                    element.val(-1);
+                }
             }
         }
 
@@ -284,6 +287,9 @@
             p.clear = function(){
                 // clear all search data
                 $(".filter", p.items.advanced_div).val("");
+                // special case: tax filter - it's a select, so select the '-1' option
+                p.items.tax_filter.val(-1);
+
                 p.items.general_filter.val("");
             };
 

@@ -182,7 +182,7 @@ Bill = function(g){
         // get the numbers from all items in one place and send it to calculation
 
         // items and their discounts
-        var i, j, item, discount;
+        var i, j, item, discount, discount_list;
         var c_items = [], c_item;
 
         for(i = 0; i < p.items.length; i++){
@@ -197,23 +197,18 @@ Bill = function(g){
             };
 
             // discount format for calculation:
+            // if the item details box is open, use temp_discounts from that objects;
+            // otherwise, use stored discounts on the item
+            if(item.details) discount_list = item.details.temp_discounts;
+            else discount_list = item.data.discounts;
+
             // { amount: Big(), type: 'absolute'/'percent' }
-            for(j = 0; j < item.data.discounts.length; j++){
-                discount = item.data.discounts[j];
+            for(j = 0; j < discount_list.length; j++){
+                discount = discount_list[j];
                 c_item.discounts.push({
                     amount: discount.amount,
                     type: discount.type
                 });
-            }
-
-            // if the item details box is opened, use those discounts too
-            if(item.details){
-                for(j = 0; j < item.details.temp_discounts.length; j++){
-                    c_item.discounts.push({
-                        amount: item.details.temp_discounts[j].amount,
-                        type: item.details.temp_discounts[j].type
-                    });
-                }
             }
 
             c_items.push(c_item);
@@ -1088,21 +1083,29 @@ ItemDetails = function(item){
             .add(p.shadow_top)
             .add(p.shadow_bottom)
             .add(p.shadow_left)
+            .add(p.shadow_right)
             .add(p.item_blocker);
 
         shadows.fadeOut("fast", function(){
             shadows.remove();
         });
+
+        // dereference this object on its parent
+        p.item.details = null;
     };
 
-    p.cancel_button_action = p.cleanup;
+    p.cancel_button_action = function(){
+        p.cleanup();
+
+        p.item.bill.update();
+    };
 
     p.save_button_action = function(){
         // copy details' values to item data
         p.item.data.discounts = p.get_discounts();
         p.item.data.bill_notes = p.items.notes.val();
 
-        p.item.update();
+        p.item.bill.update();
 
         p.cleanup();
     };

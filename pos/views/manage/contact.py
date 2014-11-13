@@ -485,8 +485,6 @@ def quick_contacts(request, company):
     contact = r['data']
 
     if int(contact.get('id')) == -1:
-        print 'creating new contact'
-
         # it's a new contact: use .get() and forget about different types
         try:
             obj = Contact(
@@ -514,7 +512,6 @@ def quick_contacts(request, company):
             return JsonResponse(_("Saving contact failed") + ": " + str(e))
 
     else:
-        print 'editing existing contact'
         # editing an existing contact
         try:
             obj = Contact.objects.get(id=contact.get('id'))
