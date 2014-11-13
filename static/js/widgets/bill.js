@@ -166,10 +166,12 @@ Bill = function(g){
         p.saved = true; // there's nothing to be saved
         p.payment = null; // will hold the Payment() object
 
-        // update texts:
         // contact
         if(p.g.objects.contacts) // may not be initialized yet
             p.g.objects.contacts.update_labels();
+
+        // discounts and notes
+        p.bill_options = new BillOptions(p);
 
         // total
         p.summary_total.text(dn(Big(0), p.g));
@@ -210,6 +212,7 @@ Bill = function(g){
         // bill discounts
         var bill_discount = p.get_discount();
 
+        // do the calculation
         var prices = calculate_bill(c_items, bill_discount.amount, bill_discount.type, p.g.config.decimal_places);
 
         // update all items' data and refresh them
@@ -233,17 +236,16 @@ Bill = function(g){
 
     // bill manipulation
     p.load = function(data){
+        p.clear();
+
         // loads bill from data;
         // from the server or local storage;
         // if data is null, init a new bill
-        if(data == null){
-            p.clear();
-            return;
-        }
+        if(data == null) return;
 
         p.data = data;
 
-        // bill items
+        // add bill items
         var i, product;
         for(i = 0; i < p.data.items.length; i++){
             // get products from items' ids and create new items
@@ -272,9 +274,6 @@ Bill = function(g){
 
         // other bill data
         p.data.discount_amount = get_number(p.data.discount_amount, p.g.config.separator);
-
-        p.bill_options = new BillOptions(p);
-        p.bill.saved = true; // the bill just 'arrived' from the server
 
         p.update();
     };
@@ -422,12 +421,15 @@ Bill = function(g){
                         });
                 },
 
-                no: gettext("Cancal"),
+                no: gettext("Cancel"),
                 no_action: function(){
                     // do absolutely nothing apart from closing the dialog
                 }
             }
         );
+
+        // focus notes
+        notes.focus();
     };
 
     p.load_unpaid = function(){
@@ -444,11 +446,10 @@ Bill = function(g){
                     var bill_list = response.data;
 
                     // open the dialog and list bills
-                    var dialog_obj = $("#load_bill_dialog").clone().removeAttr("id");
-                    var list_obj = $("#load_bill_list");
-                    template = $("thead tr", list).clone();
-                    list = $("tbody", list);
-                    list.empty();
+                    var list_obj = $("table", p.load_bill_dialog);
+                    var template_obj = $("thead tr", list_obj).clone();
+                    list_obj = $("tbody", list_obj);
+                    list_obj.empty();
 
                     // fill the table with bills
                     for(var i = 0; i < bill_list.length; i++){
@@ -457,9 +458,7 @@ Bill = function(g){
                         (function(i){
                             var bill = bill_list[i];
 
-                            var list_item = template.clone();
-                            list_item.data({bill: bill_list[i]});
-
+                            var list_item = template_obj.clone();
                             $(".time", list_item).text(bill.timestamp);
                             $(".items", list_item).text(bill.items.length);
                             $(".notes", list_item).text(bill.notes);
@@ -490,16 +489,17 @@ Bill = function(g){
                             // load
                             $(".load-button", list_item).show().unbind().click(function(){
                                 // load this bill to terminal
-                                p.load($(this).parent().data().bill);
-                                dialog.close_dialog(); // custom_dialog() adds this method to jquery object
+                                alert("LOWD");
+                                //p.load();
+                                p.load_bill_dialog.close_dialog(); // custom_dialog() adds this method to jquery object
                             });
 
                             // append to list
-                            list.append(list_item);
+                            list_obj.append(list_item);
                         })(i);
                     }
 
-                    custom_dialog(gettext("Load bill"), dialog, 700, {});
+                    custom_dialog(gettext("Load bill"), p.load_bill_dialog, 600, {});
 
                 }
             });
