@@ -14,17 +14,32 @@ function custom_dialog(title, content, width, buttons){
     container.append(title_container);
     container.append(dialog);
 
-    // content can be a jquery object or just some text
-    if(!(content instanceof jQuery)) content = $("<div>").text(content);
+    // content can be a jquery object or just some text;
+    // if it's just text, wrap it in a div and append to dialog;
+    // if it's an element, remember its current parent and when the dialog is destroyed,
+    // put the elements back to where they were
+    if(!(content instanceof jQuery)){
+        content = $("<div>").text(content);
+        content.parent_element = null;
+    }
+    else{
+        content.parent_element = content.parent();
+    }
 
-    content.show();
-    dialog.append(content);
+    // shadow and container z-index: remember this globally
+    if(!window.dialog_index) window.dialog_index = /* a lot */ 1e+6;
+    window.dialog_index += 1; // every new dialog is above the previous one
 
-    dialog.width(width);
+    shadow.css("z-index", window.dialog_index);
+    container.css("z-index", window.dialog_index + 1);
 
     shadow.hide().appendTo(body).fadeIn(function(){
         container.appendTo(body);
     });
+
+    // show the dialog
+    dialog.width(width);
+    content.show().appendTo(dialog);
 
     // add a function to the
     content.close_dialog = function(){
@@ -32,7 +47,17 @@ function custom_dialog(title, content, width, buttons){
             shadow.remove();
         });
 
-        content.hide().detach(); // content will stay in parent's variable
+        content.hide();
+
+        if(!content.parent_element){
+            // there's no parent, just remove the element
+            content.remove();
+        }
+        else{
+            // there's a parent element stored, attach the content back to parent
+            content.appendTo(content.parent_element); // content will stay in parent's variable
+        }
+
         container.remove();
     };
 

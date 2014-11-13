@@ -71,10 +71,10 @@ def validate_discount(data, user, company):
 
     form = DiscountForm(data=data, user=user, company=company)
 
-    if form.is_valid():
-        return {'success': True, 'message': None, 'form': form}
-    else:
-        return {'success': False, 'message': _("Discount is not valid"), 'data': None}
+    try:
+        return {'success': False, 'message': None, 'data': form.cleaned_data}
+    except ValidationError as e:
+        return {'success': False, 'message': e.message, 'data': None}
 
 
 #############
@@ -92,11 +92,14 @@ class DiscountForm(CompanyUserForm):
     enabled = forms.BooleanField(required=False,
                                  widget=forms.Select(choices=((True, _("Yes")), (False, _("No")))))
 
+    def clean_code(self):
+        try:
+            Discount.objects.get(company=self.company, code=self.cleaned_data.get('code'))
+            raise ValidationError(_("Discount with this code already exists"))
+        except Discount.DoesNotExist:
+            return self.cleaned_data.get('code')
 
 
-
-
-    
 
 class DiscountFilterForm(CompanyUserForm):
     search = forms.CharField(label=_("Search text"), required=False)

@@ -425,21 +425,22 @@ $(window).load(function(){
 
     {% comment %} the dialog for saving bills (just asks for optional notes) {% endcomment %}
     <div id="save_bill_dialog">
-        <label for="save_bill_notes">{% trans 'Add a note to this bill (optional)' %}:</label>
-        <input type="text" id="save_bill_notes" />
+        <div class="container">
+            <label for="save_bill_notes">{% trans 'Add a note to this bill (optional)' %}:</label>
+            <input type="text" id="save_bill_notes" />
+        </div>
     </div>
-
 
     {% comment %} the dialog for loading unpaid bills {% endcomment %}
     <div id="load_bill_dialog" class="hidden">
-        <div id="load_bill_list_container">
-            <table id="load_bill_list">
+        <div class="container">
+            <table class="load-bill">
                 <thead>
                     <tr>
                         <td class="load-bill time">{% trans 'Time' %}</td>
                         <td class="load-bill items">{% trans 'Items #' %}</td>
                         <td class="load-bill notes">{% trans 'Notes' %}</td>
-                        <td class="load-bill">
+                        <td class="load-bill tools">
                             <img class="load-button hidden" {# buttons should not be shown in header o.0 #}
                                  src=""
                                  alt="{% trans 'Load' %}"

@@ -475,3 +475,68 @@ textarea#bill_notes{
     width: 100%;
     margin-top: 20px;
 }
+
+/* loading and saving bill */
+/* load dialog */
+#load_bill_dialog .container {
+    height: 400px;
+    overflow-y: auto;
+}
+
+table.load-bill {
+    width: 100%;
+}
+
+table.load-bill thead td {
+    vertical-align: top;
+    color: #646464;
+    white-space: nowrap;
+}
+
+table.load-bill tbody td {
+    line-height: 20px;
+    border-top: 2px solid #ffffff;
+}
+
+table.load-bill td.time{
+    white-space: nowrap;
+}
+
+table.load-bill td.items{
+    text-align: right;
+}
+
+table.load-bill td.notes{
+    padding-left: 10px;
+}
+
+table.load-bill td.tools{
+    width: 70px;
+    text-align: right;
+}
+
+table.load-bill tbody td.tools img{
+    display: inline-block;
+}
+
+table.load-bill td.tools img.load-button{
+    height: 30px;
+    width: 30px;
+
+}
+
+
+table.load-bill td.tools img.delete-button{
+    width: 30px;
+}
+
+/* save dialog */
+#save_bill_dialog{
+    width: 100%;
+}
+
+#save_bill_notes{
+    display: inline-block;
+    width: 100%;
+    margin-top: 10px;
+}
