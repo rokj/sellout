@@ -90,7 +90,15 @@ class DiscountForm(CompanyUserForm):
     end_date = CustomDateField(required=False)
     enabled = forms.BooleanField(required=False,
                                  widget=forms.Select(choices=((True, _("Yes")), (False, _("No")))))
-    
+
+    def clean_code(self):
+        try:
+            Discount.objects.get(company=self.company, code=self.cleaned_data.get('code'))
+            raise ValidationError(_("Discount with this code already exists"))
+        except Discount.DoesNotExist:
+            return self.cleaned_data.get('code')
+
+
 
 class DiscountFilterForm(CompanyUserForm):
     search = forms.CharField(label=_("Search text"), required=False)

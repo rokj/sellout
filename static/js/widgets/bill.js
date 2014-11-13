@@ -1219,11 +1219,11 @@ ItemDetails = function(item){
 
     p.position_box();
 
-    // fill in the details
+    // fill in the details:
     // tax:
-    p.items.tax_percent.text(dn(p.item.data.tax_percent, p.g) + " %");
+    p.items.tax_percent.text(dn(p.item.data.tax_rate, p.g) + " %");
 
-    p.items.tax_absolute.text(display_currency(p.item.data.tax_absolute, p.g));
+    p.items.tax_absolute.text(display_currency(p.item.data.tax, p.g));
 
     // copy current item's discounts to a temporary list;
     // it will be edited and when details is saved, the item's discounts will
