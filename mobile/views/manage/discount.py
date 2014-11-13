@@ -8,7 +8,7 @@ from django.utils.translation import ugettext as _
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework.permissions import IsAuthenticated
 from pos.models import Company
-from pos.views.manage.discount import discount_to_dict
+from pos.views.manage.discount import discount_to_dict, validate_discount
 from pos.views.util import JsonError, has_permission, JsonOk, JsonParse
 from pos.models import Discount
 
@@ -136,34 +136,15 @@ def mobile_add_discount(request, company):
         return JsonError(_("You have no permission to add discounts."))
 
     data = JsonParse(request.POST['data'])
-    start_date = data.get('start_date')
-    if start_date:
-        start = dtm.date(year=start_date[0], month=start_date[1],
-                             day=start_date[2])
-    else:
-        start=None
 
-    end_date = data.get('end_date')
-    if end_date:
-        end = dtm.date(year=end_date[0], month=end_date[1],
-                             day=end_date[2])
-    else:
-        end=None
+    valid = validate_discount(data, request.user, c)
+    if not valid.get('status'):
+        return JsonError(valid['message'])
 
-    d = Discount(
-        description = data.get('description'),
-        code = data.get('code'),
-        type = data.get('type'),
-        amount = Decimal(data.get('amount')),
-        start_date = start,
-        end_date = end,
-        enabled = data.get('enabled'),
-        created_by = request.user,
-        company = c
-    )
-    d.save()
+    form = valid['form']
+    discount = form.save()
 
-    return JsonOk(extra=discount_to_dict(request.user, c, d, android=True))
+    return JsonOk(extra=discount_to_dict(request.user, c, discount, android=True))
 
 
 @api_view(['GET', 'POST'])

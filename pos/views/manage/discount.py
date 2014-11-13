@@ -68,12 +68,13 @@ def get_all_discounts(user, company, android=False):
 
 def validate_discount(data, user, company):
     # validate for mobile, use forms
+
     form = DiscountForm(data=data, user=user, company=company)
 
-    try:
-        return {'success': False, 'message': None, 'data': form.cleaned_data}
-    except ValidationError as e:
-        return {'success': False, 'message': e.message, 'data': None}
+    if form.is_valid():
+        return {'success': True, 'message': None, 'form': form}
+    else:
+        return {'success': False, 'message': _("Discount is not valid"), 'data': None}
 
 
 #############
@@ -90,6 +91,11 @@ class DiscountForm(CompanyUserForm):
     end_date = CustomDateField(required=False)
     enabled = forms.BooleanField(required=False,
                                  widget=forms.Select(choices=((True, _("Yes")), (False, _("No")))))
+
+
+
+
+
     
 
 class DiscountFilterForm(CompanyUserForm):
