@@ -99,6 +99,8 @@ class DiscountForm(CompanyUserForm):
             # it's the same discount that's being edited, that's fine
             if discount.id != self.cleaned_data.get('id'):
                 raise ValidationError(_("Discount with this code already exists"))
+            else:
+                return self.cleaned_data.get('code')
         except Discount.DoesNotExist:
             return self.cleaned_data.get('code')
 
