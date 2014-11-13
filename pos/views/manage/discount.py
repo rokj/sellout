@@ -68,6 +68,7 @@ def get_all_discounts(user, company, android=False):
 
 def validate_discount(data, user, company):
     # validate for mobile, use forms
+
     form = DiscountForm(data=data, user=user, company=company)
 
     try:
