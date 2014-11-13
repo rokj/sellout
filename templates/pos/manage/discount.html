@@ -32,6 +32,8 @@
     {% csrf_token %}
         <div class="error">{{ form.non_field_errors }}</div>
 
+        {{ form.id }}
+
         <div class="form-field">
             <div class="error">{{ form.code.errors }}</div>
             {{ form.code.label_tag }}

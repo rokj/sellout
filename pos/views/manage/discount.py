@@ -80,12 +80,11 @@ def validate_discount(data, user, company):
 ### views ###
 #############
 class DiscountForm(CompanyUserForm):
+    id = forms.IntegerField(widget=forms.HiddenInput, required=False, initial=-1)
     description = forms.CharField(required=False, widget=forms.Textarea, max_length=max_field_length(Discount, 'description'))
     code = forms.CharField(required=True, max_length=max_field_length(Discount, 'code'))
     type = forms.ChoiceField(choices=g.DISCOUNT_TYPES, required=True)
-    # this should be decimal, but we're formatting it our way
     amount = CustomDecimalField(required=True)
-    # this should be date...
     start_date = CustomDateField(required=False)
     end_date = CustomDateField(required=False)
     enabled = forms.BooleanField(required=False,
@@ -93,11 +92,14 @@ class DiscountForm(CompanyUserForm):
 
     def clean_code(self):
         try:
-            Discount.objects.get(company=self.company, code=self.cleaned_data.get('code'))
-            raise ValidationError(_("Discount with this code already exists"))
+            discount = Discount.objects.get(company=self.company, code=self.cleaned_data.get('code'))
+
+            # if ids match, the discount is being edited; if a discount with this code has been found and
+            # it's the same discount that's being edited, that's fine
+            if discount.id != self.cleaned_data.get('id'):
+                raise ValidationError(_("Discount with this code already exists"))
         except Discount.DoesNotExist:
             return self.cleaned_data.get('code')
-
 
 
 class DiscountFilterForm(CompanyUserForm):

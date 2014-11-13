@@ -206,6 +206,16 @@ Bill = function(g){
                 });
             }
 
+            // if the item details box is opened, use those discounts too
+            if(item.details){
+                for(j = 0; j < item.details.temp_discounts.length; j++){
+                    c_item.discounts.push({
+                        amount: item.details.temp_discounts[j].amount,
+                        type: item.details.temp_discounts[j].type
+                    });
+                }
+            }
+
             c_items.push(c_item);
         }
 
@@ -448,6 +458,7 @@ Bill = function(g){
                     // open the dialog and list bills
                     var list_obj = $("table", p.load_bill_dialog);
                     var template_obj = $("thead tr", list_obj).clone();
+
                     list_obj = $("tbody", list_obj);
                     list_obj.empty();
 
@@ -489,8 +500,7 @@ Bill = function(g){
                             // load
                             $(".load-button", list_item).show().unbind().click(function(){
                                 // load this bill to terminal
-                                alert("LOWD");
-                                //p.load();
+                                p.load(bill);
                                 p.load_bill_dialog.close_dialog(); // custom_dialog() adds this method to jquery object
                             });
 
@@ -904,8 +914,10 @@ ItemDetails = function(item){
 
     // will contain $ shadow divs once the box is displayed
     p.shadow_top = null; // shadow above the item
-    p.shadow_bottom = null; // below the item
-    p.shadow_left = null; // everything else
+    p.shadow_left = null; // to the left
+    p.shadow_bottom = null; // below
+    p.shadow_right = null; // to the right
+
     p.item_blocker = null; // an element to block all actions on item (directly above item)
 
     //
@@ -1053,11 +1065,22 @@ ItemDetails = function(item){
         return d;
     };
 
+    p.update_texts = function(){
+        // re-show numbers
+        p.items.tax_percent.text(dn(p.item.data.tax_rate, p.g) + " %");
+        p.items.tax_absolute.text(display_currency(p.item.data.tax, p.g));
+    };
+
+
     p.update_prices = function(){
         p.item.bill.update();
+
+        p.update_texts();
     };
 
     p.cleanup = function(){
+        p.temp_discounts = [];
+
         // common to cancel and save buttons
         p.box.remove();
 
@@ -1072,9 +1095,7 @@ ItemDetails = function(item){
         });
     };
 
-    p.cancel_button_action = function(){
-        p.cleanup();
-    };
+    p.cancel_button_action = p.cleanup;
 
     p.save_button_action = function(){
         // copy details' values to item data
@@ -1120,9 +1141,10 @@ ItemDetails = function(item){
     p.create_shadows = function(){
         var body = $("body");
 
-        p.shadow_top = $("<div>", {"class": "shadow"}).appendTo(body);
-        p.shadow_bottom = $("<div>", {"class": "shadow"}).appendTo(body);
-        p.shadow_left = $("<div>", {"class": "shadow"}).appendTo(body);
+        p.shadow_top = $("<div>", {"class": "shadow __top"}).appendTo(body);
+        p.shadow_bottom = $("<div>", {"class": "shadow __bottom"}).appendTo(body);
+        p.shadow_left = $("<div>", {"class": "shadow __left"}).appendTo(body);
+        p.shadow_right = $("<div>", {"class": "shadow __right"}).appendTo(body);
         p.item_blocker = $("<div>", {"class": "blocker"}).appendTo(body);
     };
 
@@ -1136,8 +1158,8 @@ ItemDetails = function(item){
         };
 
         var item_size = {
-            width: p.item.item_row.outerWidth(),
-            height: p.item.item_row.outerHeight()
+            width: p.item.item_row.outerWidth(true),
+            height: p.item.item_row.outerHeight(true)
         };
 
         var box_size = {
@@ -1146,7 +1168,9 @@ ItemDetails = function(item){
         };
 
         var WINDOW_MARGIN = 10; // minimum distance from window edges
+        var ARROW_MARGIN = 18;
         var window_height = $(window).height();
+        var window_width = $(window).width();
 
         if(arrow_position.top >= (box_size.height/2 + WINDOW_MARGIN) &&
            (window_height - arrow_position.top) >= box_size.height/2){
@@ -1162,7 +1186,7 @@ ItemDetails = function(item){
         else if(arrow_position.top <= (box_size.height/2 + WINDOW_MARGIN)){
             // show the box (almost) at the top of the screen, then adjust the arrow position
             p.box.offset({
-                left: arrow_position.left,
+                left: arrow_position.left + ARROW_MARGIN,
                 top: WINDOW_MARGIN
             });
 
@@ -1172,7 +1196,7 @@ ItemDetails = function(item){
         else{
             // show the box (almost) at the bottom of the screen
             p.box.css({
-                left: arrow_position.left,
+                left: arrow_position.left + ARROW_MARGIN,
                 bottom: WINDOW_MARGIN
             });
 
@@ -1184,22 +1208,25 @@ ItemDetails = function(item){
 
         // move the shadow around the item
         p.shadow_top.css({
-            top: 0, left: 0, width: item_size.width, height: item_position.top
+            top: 0, left: 0, width: window_width, height: item_position.top
+        });
+        p.shadow_left.css({
+            top: item_position.top, left: 0, width: item_position.left, height: item_size.height
+        });
+        p.shadow_right.css({
+            top: item_position.top, left: item_position.left + item_size.width,
+            height: item_size.height, right: 0
         });
         p.shadow_bottom.css({
             top: item_position.top + item_size.height,
-            left: 0, width: item_size.width,
-            bottom: 0
-        });
-        p.shadow_left.css({
-            top: 0, left: item_size.width, right: 0, bottom: 0
+            left: 0, right: 0, bottom: 0
         });
         p.item_blocker.click(function(e){
                 e.preventDefault();
                 e.stopPropagation();
             })
             .css({
-                top: item_position.top, left: 0,
+                top: item_position.top, left: item_position.left,
                 width: item_size.width, height: item_size.height
             })
             .css("z-index", p.box.css("z-index")); // use the same index as the details box
@@ -1219,11 +1246,7 @@ ItemDetails = function(item){
 
     p.position_box();
 
-    // fill in the details:
-    // tax:
-    p.items.tax_percent.text(dn(p.item.data.tax_rate, p.g) + " %");
-
-    p.items.tax_absolute.text(display_currency(p.item.data.tax, p.g));
+    p.update_texts();
 
     // copy current item's discounts to a temporary list;
     // it will be edited and when details is saved, the item's discounts will
@@ -1262,8 +1285,8 @@ ItemDetails = function(item){
     p.items.notes.val(p.item.data.bill_notes);
 
     // bind button actions
-    p.items.cancel.click(function(){ p.cancel_button_action();});
-    p.items.save.click(function(){ p.save_button_action(); });
+    p.items.cancel.unbind().click(function(){ p.cancel_button_action();});
+    p.items.save.unbind().click(function(){ p.save_button_action(); });
 
     // explode button: if quantity is 1, hide it
     if(p.item.data.quantity.cmp(Big(1)) > 0){
