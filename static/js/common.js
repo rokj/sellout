@@ -33,9 +33,9 @@ function custom_dialog(title, content, width, buttons){
     shadow.css("z-index", window.dialog_index);
     container.css("z-index", window.dialog_index + 1);
 
-    shadow.hide().appendTo(body).fadeIn(function(){
+    shadow.hide().appendTo(body).fadeIn("fast", function(){
         container.appendTo(body);
-    }, "fast");
+    });
 
     // show the dialog
     dialog.width(width);

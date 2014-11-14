@@ -89,10 +89,10 @@ def group_tax_rates(items):
             # create a new entry in the list of taxes
             rates[t] = {
                 'id': rate_id,
-                'amount':  item.tax_rate,
-                'tax_sum':  item.tax,
-                'net_sum':  item.net,
-                'gross_sum':  item.total,
+                'amount': item.tax_rate,
+                'tax_sum': item.tax,
+                'net_sum': item.net,
+                'gross_sum': item.total,
             }
 
             # save to the item object for later use
@@ -107,7 +107,7 @@ def group_tax_rates(items):
             rates[t]['gross_sum'] += item.total
 
             # save to the item object for later use
-            item.tax_rate_id = rate_id
+            item.tax_rate_id = rates[t]['id']
 
     # convert rates to list and order by id
     rates = sorted(rates.iteritems())
@@ -491,8 +491,6 @@ def delete_unpaid_bill(request, company):
 
     # bill_id is required in request.POST
     try:
-        print request.POST.get('data')
-        print JsonParse(request.POST.get('data'))
         bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
         bill = Bill.objects.get(company=c, id=bill_id)
     except (TypeError, ValueError):

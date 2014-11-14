@@ -421,12 +421,9 @@ class ContactAbstract(models.Model):
     phone = models.CharField(_("Telephone number"), max_length=30, blank=True, null=True)
     vat = models.CharField(_("VAT identification number"), max_length=30, null=True, blank=True)
 
-    class Meta:
-        abstract = True
-
-
-class Contact(SkeletonU, ContactAbstract):
-    company = models.ForeignKey(Company)
+    @property
+    def country_name(self):
+        return country_by_code.get(self.country)
 
     def __unicode__(self):
         if self.type == "Individual":
@@ -434,9 +431,12 @@ class Contact(SkeletonU, ContactAbstract):
         else:
             return "Company: " + str(self.company_name)
 
-    @property
-    def country_name(self):
-        return country_by_code.get(self.country)
+    class Meta:
+        abstract = True
+
+
+class Contact(SkeletonU, ContactAbstract):
+    company = models.ForeignKey(Company)
 
 
 ### permissions
