@@ -66,15 +66,40 @@ def get_all_discounts(user, company, android=False):
     return ds
 
 
-def validate_discount(data, user, company):
+def validate_discount(data, user, company, android=False, discount=None):
     # validate for mobile, use forms
+    if discount:
+        form = DiscountForm(data=data, user=user, company=company, initial=discount_to_dict(user, company, discount))
+    else:
+        form = DiscountForm(data=data, user=user, company=company)
 
-    form = DiscountForm(data=data, user=user, company=company)
+    if form.is_valid():
 
-    try:
-        return {'success': False, 'message': None, 'data': form.cleaned_data}
-    except ValidationError as e:
-        return {'success': False, 'message': e.message, 'data': None}
+        if android:
+            start_date = data.get('android_start_date')
+
+            if start_date:
+                start = dtm.date(year=start_date[0], month=start_date[1],
+                                 day=start_date[2])
+            else:
+                start = None
+
+            end_date = data.get('android_end_date')
+
+            if end_date:
+                end = dtm.date(year=end_date[0], month=end_date[1],
+                                 day=end_date[2])
+            else:
+                end = None
+            form.cleaned_data['start_date'] = start
+            form.cleaned_data['end_date'] = end
+            form.start_date = start
+            form.end_date = end
+
+        return {'status': True, 'message': None, 'form': form}
+    else:
+        message = form.errors.as_data().itervalues().next()[0].message
+        return {'status': False, 'message': message, 'data': None}
 
 
 #############
@@ -85,7 +110,9 @@ class DiscountForm(CompanyUserForm):
     description = forms.CharField(required=False, widget=forms.Textarea, max_length=max_field_length(Discount, 'description'))
     code = forms.CharField(required=True, max_length=max_field_length(Discount, 'code'))
     type = forms.ChoiceField(choices=g.DISCOUNT_TYPES, required=True)
+    # this should be decimal, but we're formatting it our way
     amount = CustomDecimalField(required=True)
+    # this should be date...
     start_date = CustomDateField(required=False)
     end_date = CustomDateField(required=False)
     enabled = forms.BooleanField(required=False,

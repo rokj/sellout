@@ -69,7 +69,6 @@ def mobile_edit_discount(request, company):
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
-
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'discount', 'edit'):
         return JsonError(_("edit discounts"))
@@ -85,36 +84,30 @@ def mobile_edit_discount(request, company):
     if d.company != c:
         return JsonError(_("failed"))
 
-
-        # check if user has permissions to change contacts
-    if not request.user.has_perm('pos.change_discount'):
-        return JsonError(_("You have no permission to edit discounts."))
-
     if request.method == 'POST':
-        # submit data
-        start_date = data.get('start_date')
-        if start_date:
-            start = dtm.date(year=start_date[0], month=start_date[1],
-                                 day=start_date[2])
-        else:
-            start=None
 
-        end_date = data.get('end_date')
-        if end_date:
-            end = dtm.date(year=end_date[0], month=end_date[1],
-                                 day=end_date[2])
-        else:
-            end=None
-        d.description = data.get('description')
-        d.code = data.get('code')
-        d.type = data.get('type')
-        d.amount = Decimal(data.get('amount'))
-        d.start_date = start
-        d.end_date = end
-        d.enabled = data.get('enabled')
+        data = JsonParse(request.POST['data'])
+        valid = validate_discount(data,request.user, c, android=True, discount=d)
+
+        if not valid.get('status'):
+            return JsonError(valid['message'])
+
+        form = valid['form']
+        d = Discount(
+                description=form.cleaned_data.get('description'),
+                code=form.cleaned_data.get('code'),
+                type=form.cleaned_data.get('type'),
+                amount=form.cleaned_data.get('amount'),
+                start_date=form.cleaned_data.get('start_date'),
+                end_date=form.cleaned_data.get('end_date'),
+                enabled=form.cleaned_data.get('enabled'),
+                created_by=request.user,
+                company=c
+            )
         d.save()
 
-    return JsonOk(extra=discount_to_dict(request.user, c, d, android=True))
+        return JsonOk(extra=discount_to_dict(request.user, c, d, android=True))
+
 
 
 @api_view(['GET', 'POST'])
@@ -137,14 +130,27 @@ def mobile_add_discount(request, company):
 
     data = JsonParse(request.POST['data'])
 
-    valid = validate_discount(data, request.user, c)
+    valid = validate_discount(data, request.user, c, android=True)
+
     if not valid.get('status'):
         return JsonError(valid['message'])
 
     form = valid['form']
-    discount = form.save()
+    d = Discount(
+                description=form.cleaned_data.get('description'),
+                code=form.cleaned_data.get('code'),
+                type=form.cleaned_data.get('type'),
+                amount=form.cleaned_data.get('amount'),
+                start_date=form.cleaned_data.get('start_date'),
+                end_date=form.cleaned_data.get('end_date'),
+                enabled=form.cleaned_data.get('enabled'),
 
-    return JsonOk(extra=discount_to_dict(request.user, c, discount, android=True))
+                created_by=request.user,
+                company=c
+            )
+    d.save()
+
+    return JsonOk(extra=discount_to_dict(request.user, c, d, android=True))
 
 
 @api_view(['GET', 'POST'])

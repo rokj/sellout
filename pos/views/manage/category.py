@@ -45,13 +45,12 @@ def category_to_dict(c, android=False):
     return r
 
 
-def validate_category(user, company, data):
+def validate_category(user, company, data, category=None):
     """ return:
     {status:true/false - if cleaning succeeded
      data:cleaned_data - empty dict if status = false
      message:error_message - empty if status = true """
-    if 'id' in data and int(data['id'] > 0):
-        category = Category.objects.get(id=int(data['id']), company=company)
+    if category:
         form = CategoryForm(data=data, instance=category)
     else:
         form = CategoryForm(data=data)
@@ -66,7 +65,9 @@ def validate_category(user, company, data):
 
         return {'status': True, 'message': None, 'form': form}
     else:
-        return {'status': False, 'data': None, 'message': _("Category is not valid")}
+        message = form.errors.as_data().itervalues().next()[0].message
+
+        return {'status': False, 'data': None, 'message': message}
 
 
 def validate_parent(category, parent):

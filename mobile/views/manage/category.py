@@ -97,8 +97,14 @@ def mobile_edit_category(request, company):
         return JsonError(_("You have no permission to edit products"))
 
     data = JsonParse(request.POST['data'])
+
+    try:
+        category = Category.objects.get(id=int(data['id']), company=company)
+    except Category.DoesNotExist:
+        return JsonError(_("Category does not exsist"))
+
     # data['company'] = c
-    valid = validate_category(request.user, c, data)
+    valid = validate_category(request.user, c, data, category=category)
 
     if not valid.get('status'):
         return JsonError(valid['message'])
