@@ -66,7 +66,6 @@ def validate_category(user, company, data, category=None):
         return {'status': True, 'message': None, 'form': form}
     else:
         message = form.errors.as_data().itervalues().next()[0].message
-
         return {'status': False, 'data': None, 'message': message}
 
 

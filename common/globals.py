@@ -108,6 +108,7 @@ PAYMENT_TYPES = (
 PRINTER_DRIVERS = (
     ("System", _("Default system printer")),
     ("Sellout", _("Sellout serial (must be installed)")),
+
 )
 
 

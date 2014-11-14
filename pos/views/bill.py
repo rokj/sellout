@@ -223,6 +223,7 @@ def create_bill_html(user, company, bill):
 #########
 # views #
 #########
+
 @login_required
 def create_bill(request, company):
     """ there's bill and items in request.POST['data'], create a new bill, and check all items and all """

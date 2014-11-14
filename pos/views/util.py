@@ -47,12 +47,12 @@ def JsonError(message):
     return JsonResponse({'status': 'error', 'message': message})
 
 
-def JsonOk(extra=None):
+def JsonOk(extra=None, safe=True):
     data = {'status': 'ok'}
     if extra:
         data['data'] = extra
 
-    return JsonResponse(data)
+    return JsonResponse(data, safe=safe)
 
 
 def JsonParse(string_data):
