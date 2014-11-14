@@ -99,13 +99,13 @@
                         <div class="item-notes">{{ item.notes }}</div>
                     </td>
                     <td class="price">
-                        <div class="item-price">{{ item.base_price }}</div>
+                        <div class="item-price">{{ item.batch }}</div>
+                    </td>
+                    <td class="discount">
+                        <div class="item-discount">{{ item.discount }}</div>
                     </td>
                     <td class="quantity">
                         <div class="item-quantity">{{ item.quantity }}</div>
-                    </td>
-                    <td class="discount">
-                        <div class="item-discount">{{ item.discount_absolute }}</div>
                     </td>
                     <td class="unit">
                         <div class="item-unit">{{ item.unit_type }}</div>
@@ -146,7 +146,7 @@
             {% for rate in bill.tax_rates %}
                 <tr class="tax-row header">
                     <td class="tax-id">{{ rate.id }}</td>
-                    <td class="tax-percent">{{ rate.amount }}</td>
+                    <td class="tax-percent">{{ rate.amount }} %</td>
                     <td class="tax-net">{{ rate.net_sum }}</td>
                     <td class="tax-absolute">{{ rate.tax_sum }}</td>
                     <td class="tax-gross">{{ rate.gross_sum }}</td>

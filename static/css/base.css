@@ -192,3 +192,10 @@ select{
     background-color: #22e693;
     margin-left: 30px;
 }
+
+/* jquery-ui tweaks of our custom theme */
+/* to avoid overwriting on updates */
+.ui-widget-content,
+.custom-dialog-container{
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+}
