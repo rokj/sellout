@@ -87,7 +87,7 @@ def mobile_edit_discount(request, company):
     if request.method == 'POST':
 
         data = JsonParse(request.POST['data'])
-        valid = validate_discount(data, request.user, c, android=True)
+        valid = validate_discount(data,request.user, c, android=True, discount=d)
 
         if not valid.get('status'):
             return JsonError(valid['message'])

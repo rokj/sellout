@@ -35,7 +35,7 @@ function custom_dialog(title, content, width, buttons){
 
     shadow.hide().appendTo(body).fadeIn(function(){
         container.appendTo(body);
-    });
+    }, "fast");
 
     // show the dialog
     dialog.width(width);
@@ -111,7 +111,7 @@ function custom_dialog(title, content, width, buttons){
     }
     else{
         // if buttons is null, hide all buttons on this dialog, even the close button
-        close_button.hide();
+        close_button.hide("fast");
         shadow.unbind();
     }
 }

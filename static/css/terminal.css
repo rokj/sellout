@@ -143,6 +143,7 @@ div#selector{
 .blocker{
     position: absolute;
     background-color: rgba(0,0,0,0.2);
+    cursor: not-allowed;
 }
 
 /* terminal menus (sliding upwards) */

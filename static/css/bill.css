@@ -294,7 +294,7 @@ button.more{
 .details-box,
 .details-box .details-container{
     background-color: #f7f7f7;
-    border-radius: 8px;
+    border-radius: 0px;
 }
 
 .details-box, .details-box .item-arrow{
@@ -305,7 +305,7 @@ button.more{
 .details-box .details-container{
     position: relative;
     height: 100%;
-    padding: 15px;
+    padding: 20px;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     
@@ -372,10 +372,10 @@ button.more{
     position: absolute;
     z-index: -1; /* between details-box and details-box container */
     
-    left: -20px; /* rotation */
-    margin-top: -20px; /* rotation */
-    width: 40px;
-    height: 40px;
+    left: -15px; /* rotation */
+    margin-top: -15px; /* rotation */
+    width: 30px;
+    height: 30px;
     
     transform: rotate(45deg);
     -ms-transform: rotate(45deg);

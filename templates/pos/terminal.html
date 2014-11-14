@@ -135,12 +135,7 @@ $(window).load(function(){
     // unloading the window: save what's there to be saved
     window.onbeforeunload = function(){
         // the existing bill, if it needs saving
-        if(!g.objects.bill.saved){
-            save_local('bill', g.objects.bill.get_data());
-        }
-        else{
-            clear_local('bill');
-        }
+        save_local('bill', g.objects.bill.get_data());
 
         // search results
         save_local('search_results_by_text', g.objects.search.results_by_text);
@@ -424,7 +419,7 @@ $(window).load(function(){
     </div>
 
     {% comment %} the dialog for saving bills (just asks for optional notes) {% endcomment %}
-    <div id="save_bill_dialog">
+    <div id="save_bill_dialog" class="hidden">
         <div class="container">
             <label for="save_bill_notes">{% trans 'Add a note to this bill (optional)' %}:</label>
             <input type="text" id="save_bill_notes" />

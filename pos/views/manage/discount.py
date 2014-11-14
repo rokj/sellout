@@ -66,10 +66,12 @@ def get_all_discounts(user, company, android=False):
     return ds
 
 
-def validate_discount(data, user, company, android=False):
+def validate_discount(data, user, company, android=False, discount=None):
     # validate for mobile, use forms
-
-    form = DiscountForm(data=data, user=user, company=company)
+    if discount:
+        form = DiscountForm(data=data, user=user, company=company, initial=discount_to_dict(user, company, discount))
+    else:
+        form = DiscountForm(data=data, user=user, company=company)
 
     if form.is_valid():
 
@@ -104,6 +106,7 @@ def validate_discount(data, user, company, android=False):
 ### views ###
 #############
 class DiscountForm(CompanyUserForm):
+    id = forms.IntegerField(widget=forms.HiddenInput, required=False, initial=-1)
     description = forms.CharField(required=False, widget=forms.Textarea, max_length=max_field_length(Discount, 'description'))
     code = forms.CharField(required=True, max_length=max_field_length(Discount, 'code'))
     type = forms.ChoiceField(choices=g.DISCOUNT_TYPES, required=True)
@@ -117,12 +120,16 @@ class DiscountForm(CompanyUserForm):
 
     def clean_code(self):
         try:
-            Discount.objects.get(company=self.company, code=self.cleaned_data.get('code'))
+            discount = Discount.objects.get(company=self.company, code=self.cleaned_data.get('code'))
 
-            raise ValidationError(_("Discount with this code already exists"))
+            # if ids match, the discount is being edited; if a discount with this code has been found and
+            # it's the same discount that's being edited, that's fine
+            if discount.id != self.cleaned_data.get('id'):
+                raise ValidationError(_("Discount with this code already exists"))
+            else:
+                return self.cleaned_data.get('code')
         except Discount.DoesNotExist:
             return self.cleaned_data.get('code')
-
 
 
 class DiscountFilterForm(CompanyUserForm):
