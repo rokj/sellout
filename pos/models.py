@@ -477,6 +477,7 @@ class RegisterAbstract(models.Model):
 class Register(SkeletonU, RegisterAbstract):
     company = models.ForeignKey(Company, null=False, blank=False)
     printer_driver = models.CharField(_("Printer driver"), max_length=50, null=False, choices=g.PRINTER_DRIVERS)
+    device_id = models.CharField(_("Device id"), max_length=128, null=True, blank=True)
 
 
 ### bill details ###
@@ -741,6 +742,7 @@ def signal_change(instance, created, action, **kwargs):
 @receiver(post_delete, sender=Contact)
 @receiver(post_delete, sender=Tax)
 @receiver(post_delete, sender=Discount)
+@receiver(post_delete, sender=Register)
 def set_serial_delete(instance, **kwargs):
     signal_change(instance, False, action='delete', **kwargs)
 
@@ -750,6 +752,7 @@ def set_serial_delete(instance, **kwargs):
 @receiver(post_save, sender=Contact)
 @receiver(post_save, sender=Tax)
 @receiver(post_save, sender=Discount)
+@receiver(post_save, sender=Register)
 def set_serial_save(instance, created, **kwargs):
     signal_change(instance, created, action='save', **kwargs)
 

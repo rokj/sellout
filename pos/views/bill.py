@@ -132,7 +132,7 @@ def bill_to_dict(user, company, bill):
         'id': bill.id,
 
         'issuer': company_to_dict(bill.issuer),
-        'register': register_to_dict(company, user, bill.register),
+        'register': register_to_dict(user, company, bill.register),
 
         'user_id': str(bill.user_id),
         'user_name': str(bill.user_name),

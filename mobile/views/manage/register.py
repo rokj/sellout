@@ -52,10 +52,11 @@ def mobile_add_register(request, company):
     register = form.save(False)
     register.company = c
     register.created_by = request.user
+    register.device_id = data['device_id']
 
     register = form.save()
 
-    return JsonOk(extra=register_to_dict(register))
+    return JsonOk(extra=register_to_dict(request.user, company, register))
 
 
 @api_view(['POST', 'GET'])
@@ -87,10 +88,11 @@ def mobile_edit_register(request, company):
     register = form.save(False)
     register.company = c
     register.created_by = request.user
+    register.device_id = data['device_id']
 
     register = form.save()
 
-    return JsonOk(extra=register_to_dict(c, request.user, register))
+    return JsonOk(extra=register_to_dict(request.user, c, register))
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))

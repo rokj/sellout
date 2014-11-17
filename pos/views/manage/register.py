@@ -12,7 +12,7 @@ from common import globals as g
 from config.functions import get_date_format, get_user_value, get_company_value
 
 
-def register_to_dict(company, user, register):
+def register_to_dict(user, company, register):
     """ company and user are not needed at the moment (maybe for displaying dates/times in the future) """
     r = {
         'id': register.id,
@@ -45,7 +45,7 @@ def get_all_registers(company, user):
     r = []
 
     for register in all_registers:
-        r.append(register_to_dict(company, user, register))
+        r.append(register_to_dict(user, company, register))
 
     return r
 
