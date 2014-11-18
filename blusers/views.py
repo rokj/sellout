@@ -1,6 +1,5 @@
 # -*- coding:utf-8 -*-
 import base64
-from django.contrib.auth.models import AnonymousUser
 import string
 import json
 import django
@@ -12,18 +11,17 @@ from rest_framework import parsers, renderers
 from rest_framework.authentication import OAuth2Authentication, TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from action.models import Action
 from common.functions import JSON_parse, JSON_error, get_random_string, send_email, JSON_ok, min_password_requirments
 from common.globals import GOOGLE
 from common.views import base_context
-from common.globals import WAITING, ACTION_STATUS
+from common.globals import WAITING
 
 from decorators import login_required
 from django.core.files.base import ContentFile
-from django.http import Http404, HttpResponse, QueryDict, HttpResponseRedirect, JsonResponse
+from django.http import Http404, QueryDict, JsonResponse
 from django.contrib.auth import authenticate as django_authenticate
 from django.contrib.auth import login as django_login
 from django.contrib.auth import logout as django_logout
@@ -34,14 +32,15 @@ from django.utils.translation import ugettext as _
 
 from blusers.forms import BlocklogicUserForm, BlocklogicUserChangeForm
 from blusers.models import BlocklogicUser, UserImage
-from common.models import Country
 import common.globals as g
-from config.functions import get_user_value, set_user_value, InvalidKeyError
+from config.functions import get_user_value, set_user_value
 
 from rest_framework.decorators import api_view
 from settings import GOOGLE_API
 
 from easy_thumbnails.files import get_thumbnailer
+
+import config.countries as countries
 
 
 def set_language(request):
@@ -586,7 +585,7 @@ def save_user_settings(request):
         try:
             if user_form.is_valid():
                 bluser.last_name = user_form.cleaned_data["last_name"]
-                bluser.country = user_form.cleaned_data["country"]
+                bluser.country = countries.country_by_code[user_form.cleaned_data["country"]]
                 bluser.sex = user_form.cleaned_data["sex"]
                 bluser.updated_by = bluser
                 bluser.save()
@@ -652,7 +651,6 @@ def user_profile(request, context):
     bluser = BlocklogicUser.objects.get(id=request.user.id)
     messages = {}
     update_password = False
-    countries = Country.objects.all().order_by("name").exclude(two_letter_code='--')
 
     """
     try:
@@ -730,14 +728,14 @@ def user_profile(request, context):
 
     else:
         initial = {'email': bluser.email, 'first_name': bluser.first_name, 'last_name': bluser.last_name,
-                   'sex': bluser.sex, 'password1': bluser.password, 'password2': bluser.password, "country": bluser.country.two_letter_code}
+                   'sex': bluser.sex, 'password1': bluser.password, 'password2': bluser.password, "country": bluser.country}
 
         user_form = BlocklogicUserForm(initial=initial)
         user_form.registration = False
 
         company_country = None
         if user_profile.company_country:
-            company_country = user_profile.company_country.two_letter_code
+            company_country = user_profile.company_country
 
         initial_profile = {'company_name': user_profile.company_name,
                            'company_address': user_profile.company_address,
