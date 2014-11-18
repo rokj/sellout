@@ -14,6 +14,7 @@ from common.globals import MALE, SEX, TAX_PAYER_CHOICES, NORMAL, LOGIN_TYPES, DI
 from common.models import SkeletonU, Skeleton
 
 from easy_thumbnails.models import Source, Thumbnail
+from config.countries import country_choices, country_by_code
 import settings
 
 
@@ -25,8 +26,7 @@ class BlocklogicUser(AbstractUser, Skeleton):
     sex = models.CharField(_("Male or female"), max_length=6, default=MALE, choices=SEX, blank=False, null=False)
     password_reset_key = models.CharField(_("Lost password reset key or activation key"), max_length=15, blank=True,
                                           null=True, unique=True)
-    country = models.ForeignKey('common.Country', related_name='%(app_label)s_%(class)s_country', blank=True,
-                                null=True)
+    country = models.CharField(max_length=2, choices=country_choices, null=True, blank=True)
     images = models.ManyToManyField('UserImage', blank=True, null=True)
     # well, user can be created by itself also, so null=False -> null=True
     created_by = models.ForeignKey('blusers.BlocklogicUser', related_name='%(app_label)s_%(class)s_created_by',
@@ -41,6 +41,10 @@ class BlocklogicUser(AbstractUser, Skeleton):
         else:
             # if there's no first or last for this user, return the username which must exist
             return self.email
+
+    @property
+    def country_name(self):
+        return country_by_code.get(self.country)
 
     def get_subscribed(self):
         from subscription.models import Subscription
