@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 from django.db import models
 from django.db import connections
@@ -6,12 +8,12 @@ from django.db import transaction
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
-from common.globals import MALE, SEX, TAX_PAYER_CHOICES, NORMAL, LOGIN_TYPES
+from common.functions import ImagePath
+from common.globals import MALE, SEX, TAX_PAYER_CHOICES, NORMAL, LOGIN_TYPES, DIRS
 
 from common.models import SkeletonU, Skeleton
 
 from easy_thumbnails.models import Source, Thumbnail
-from config.functions import get_user_value
 import settings
 
 
@@ -73,10 +75,12 @@ class BlocklogicUser(AbstractUser, Skeleton):
         super(BlocklogicUser, self).save(*args, **kwargs)
 
     def get_selected_company(self):
+        from config.functions import get_user_value
+
         selected_company = ""
 
         try:
-            selected_company = get_user_value(self, "selectedcompany")
+            selected_company = get_user_value(self, "selected_company")
         except KeyError, Exception:
             pass
 
@@ -84,20 +88,18 @@ class BlocklogicUser(AbstractUser, Skeleton):
 
     selected_company = property(get_selected_company)
 
-    def get_user_groups(self):
+    def  get_user_companies(self):
         from pos.models import Permission
 
-        return Permission.objects.filter(user=self)
+        return [p.company for p in Permission.objects.filter(user=self)]
 
-    user_groups = property(get_user_groups)
+    companies = property(get_user_companies)
 
 
 class UserImage(SkeletonU):
-    from common.functions import get_image_path
-
     name = models.CharField(_('Image name'), max_length=100, blank=False, null=False)
     description = models.CharField(_('Image description'), max_length=255, blank=True, null=True)
-    image = models.ImageField(upload_to=get_image_path("users", "blusers_userimage"), null=False)
+    image = models.ImageField(upload_to=ImagePath(DIRS['users_image_dir'], "users", "blusers_userimage"), null=False)
     #image = models.ImageField(upload_to="static/img/users", null=False)
     original_filename = models.CharField(_('Original filename'), max_length=255, blank=True, null=True)
 
@@ -128,21 +130,3 @@ class UserImage(SkeletonU):
         self.image.delete()
 
         super(UserImage, self).delete(*args, **kwargs)
-
-
-class UserProfile(SkeletonU):
-    user = models.ForeignKey(BlocklogicUser, unique=True, blank=False, null=False)
-    # website = models.URLField(_("Website"), blank=True, null=True)
-    # facebook = models.URLField(_("Facebook URL"), blank=True, null=True)
-
-    company_name = models.CharField(_("Company name"), max_length=50, blank=True, null=True)
-    company_address = models.CharField(_("Company address"), max_length=70, blank=True, null=True)
-    company_postcode = models.CharField(_("Company postcode"), max_length=20, blank=True, null=True)
-    company_postname = models.CharField(_("Company postname"), max_length=40, blank=True, null=True)
-    company_city = models.CharField(_("Company city"), max_length=40, blank=True, null=True)
-    company_country = models.ForeignKey('common.Country', related_name='%(app_label)s_%(class)s_company_country', blank=True, null=True)
-    company_tax_id = models.CharField(_("Company tax ID"), blank=True, null=True, max_length=40)
-    company_tax_payer = models.CharField(_("Compay tax payer"), choices=TAX_PAYER_CHOICES, blank=True, null=True, max_length=20)
-    company_website = models.CharField(_("Website of the company"), blank=True, null=True, max_length=200)
-
-    __unicode__ = lambda self:  u'%s %s' % (self.user.first_name, self.user.last_name)

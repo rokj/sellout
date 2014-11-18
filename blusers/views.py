@@ -16,6 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from action.models import Action
+from common.functions import JSON_parse, JSON_error, get_random_string, send_email, JSON_ok, min_password_requirments
 from common.globals import GOOGLE
 from common.views import base_context
 from common.globals import WAITING, ACTION_STATUS
@@ -31,19 +32,14 @@ from django.conf import settings as settings
 from django.utils.translation import ugettext as _
 
 
-from blusers.forms import BlocklogicUserForm, UserProfileForm, BlocklogicUserChangeForm
-from blusers.models import BlocklogicUser, UserProfile, UserImage
+from blusers.forms import BlocklogicUserForm, BlocklogicUserChangeForm
+from blusers.models import BlocklogicUser, UserImage
 from common.models import Country
 import common.globals as g
 from config.functions import get_user_value, set_user_value, InvalidKeyError
 
-from rest_framework.decorators import api_view, permission_classes
-from common.functions import redirect_to_last_used_company
-from pos.models import Company
-from group.views import groups_to_dict, group_to_dict
+from rest_framework.decorators import api_view
 from settings import GOOGLE_API
-from tasks.views.cal import get_ongoing_time
-import web.views as web
 
 from easy_thumbnails.files import get_thumbnailer
 
@@ -75,12 +71,14 @@ def login(request):
         # activate this user's language
         set_language(request)
         message = "logged-in"
-        try:
-            # we just need to check this
-            selected_group = get_user_value(user, 'selected_group')
-        except:  # TODO: InvalidKeyError: (?)
-            group = user.homegroup
-            set_user_value(user, 'selected_group', group.id)
+
+        if user.selected_company == "":
+            if len(user.companies) > 0:
+                set_user_value(user, "selected_company")
+
+        if user.selected_company == "":
+            message = 'no-selected-company'
+
     else:
         # error page: wrong name/password
         message = "login-failed"
@@ -185,7 +183,7 @@ def google_login_or_register(request, mobile=False):
     if user is not None:
         if not mobile:
             django_login(request, user)
-            set_value(bluser, 'google_access_token', d["access_token"])
+            set_user_value(bluser, 'google_access_token', d["access_token"])
             set_language(request)
 
         group = user.homegroup
@@ -224,10 +222,11 @@ def register(request):
         user_form = BlocklogicUserForm(request.POST)
         user_form.set_request(request)
 
-        user_profile_form = UserProfileForm(request.POST)
+        # user_profile_form = UserProfileForm(request.POST)
 
         user_form.full_clean()
 
+        """
         if user_form.is_valid() and user_profile_form.is_valid():
             # common function with mobile
             try_register(user_form, user_profile_form)
@@ -237,6 +236,17 @@ def register(request):
             # there were errors
             message = 'registration-errors'
             return message, user_form, user_profile_form
+        """
+
+        if user_form.is_valid():
+            # common function with mobile
+            try_register(user_form)
+            # registration succeeded, return to login page
+            message = 'registration-successful'
+        else:
+            # there were errors
+            message = 'registration-errors'
+            return message, user_form
 
     return message, None, None
 
@@ -264,7 +274,7 @@ def try_register(user_form, user_profile_form):
     new_user.save()
 
     group = new_user.homegroup
-    set_value(new_user, 'selected_group', group.id)
+    set_user_value(new_user, 'selected_group', group.id)
 
     # add_free_subscription(new_user)
 
@@ -345,6 +355,7 @@ def mobile_register(request):
 
         user_form.is_mobile = True
         user_form.set_request(request)
+        """
         user_profile_form = UserProfileForm(request.POST)
 
         if user_form.is_valid() and user_profile_form.is_valid():
@@ -353,6 +364,15 @@ def mobile_register(request):
             return JsonResponse({'status': "created"})
         else:
             return JSON_error(status="error", message='register failed')
+        """
+
+        if user_form.is_valid():
+            # common function with web
+            try_register(user_form)
+            return JsonResponse({'status': "created"})
+        else:
+            return JSON_error(status="error", message='register failed')
+
 
     return JsonResponse({'error': "should not happen"})
 
@@ -429,7 +449,7 @@ def activate_account(request, key):
     if request.user.is_authenticated():
         return redirect('index')
 
-    from web.views import index
+    from views import index
 
     try:
         user = BlocklogicUser.objects.get(password_reset_key=key)
@@ -534,20 +554,20 @@ def save_user_settings(request):
 
     if "location_in_task_times" in d:
         if d["location_in_task_times"] is True or d["location_in_task_times"] is False:
-            set_value(request.user, "location_in_task_times", d["location_in_task_times"])
+            set_user_value(request.user, "location_in_task_times", d["location_in_task_times"])
 
     if "language" in d:
         if d["language"] in [l[0] for l in settings.LANGUAGES]:
-            set_value(request.user, "language", d["language"])
+            set_user_value(request.user, "language", d["language"])
             set_language(request)
 
     if "date_format" in d:
         if d["date_format"] in [x for x in g.DATE_FORMATS]:
-            set_value(request.user, "date_format", d["date_format"])
+            set_user_value(request.user, "date_format", d["date_format"])
 
     if "first_day_of_week" in d:
         if d["first_day_of_week"] in ['monday', 'sunday']:
-            set_value(request.user, "first_day_of_week", d["first_day_of_week"])
+            set_user_value(request.user, "first_day_of_week", d["first_day_of_week"])
 
     d["email"] = request.user.email
     d["first_name"] = request.user.first_name
@@ -574,6 +594,7 @@ def save_user_settings(request):
         except Exception as e:
             return JSON_error("error", _("There was error saving data. Contact support."))
 
+        """
         user_profile_form = UserProfileForm(qdict, instance=bluser)
 
         try:
@@ -592,7 +613,7 @@ def save_user_settings(request):
                 user_profile.save()
         except Exception as e:
             return JSON_error("error", _("There was error saving data. Contact support."))
-
+        """
 
     return JSON_ok()
 
@@ -633,11 +654,13 @@ def user_profile(request, context):
     update_password = False
     countries = Country.objects.all().order_by("name").exclude(two_letter_code='--')
 
+    """
     try:
         user_profile = UserProfile.objects.get(user=bluser)
     except UserProfile.DoesNotExist:
         user_profile = UserProfile(user=bluser, created_by=bluser)
         user_profile.save()
+    """
 
     if request.method == 'POST':
         errors = {}
@@ -650,7 +673,7 @@ def user_profile(request, context):
         user_form.set_request(request)
         user_form.registration = False
 
-        user_profile_form = UserProfileForm(POST)
+        # user_profile_form = UserProfileForm(POST)
 
         if "update_password" in POST and POST.get('update_password', '') == "yes":
             update_password = True
@@ -685,6 +708,7 @@ def user_profile(request, context):
 
             bluser.save()
 
+        """
         if user_profile_form.is_valid():
             fd = user_profile_form.cleaned_data
 
@@ -699,6 +723,11 @@ def user_profile(request, context):
 
         if user_form.is_valid() and user_profile_form.is_valid():
             messages = {"success": _("Your data updated successfully!")}
+        """
+
+        if user_form.is_valid():
+            messages = {"success": _("Your data updated successfully!")}
+
     else:
         initial = {'email': bluser.email, 'first_name': bluser.first_name, 'last_name': bluser.last_name,
                    'sex': bluser.sex, 'password1': bluser.password, 'password2': bluser.password, "country": bluser.country.two_letter_code}
@@ -715,10 +744,10 @@ def user_profile(request, context):
                            'company_postcode': user_profile.company_postcode,
                            'company_country': company_country,
                            'company_website': user_profile.company_website}
-        user_profile_form = UserProfileForm(initial=initial_profile)
+        # user_profile_form = UserProfileForm(initial=initial_profile)
 
     context['bluser'] = bluser
-    context['user_profile_form'] = user_profile_form
+    # context['user_profile_form'] = user_profile_form
     context['countries'] = countries
     context['messages'] = messages
     context['update_password'] = update_password
@@ -759,24 +788,9 @@ def save_last_used_group(request):
     if not 'group_id' in d or not d['group_id']:
         return JsonResponse({'status': 'error', 'message': _("Could not get group ID")})
 
-    set_value(request.user, "last_used_group", d['group_id'])
+    set_user_value(request.user, "last_used_group", d['group_id'])
 
     return JsonResponse({'status': 'ok'})
-
-
-def get_last_used_group(user):
-    try:
-        last_used_group = get_value(user, "last_used_group")
-        try:
-            last_group = Group.objects.get(id=last_used_group)
-        except ObjectDoesNotExist:
-            last_group = user.homegroup
-        if last_used_group == "-1":
-            return user.homegroup
-    except InvalidKeyError:
-        return user.homegroup
-
-    return last_group
 
 
 def get_user_credentials(user):
@@ -790,9 +804,10 @@ def get_user_credentials(user):
     #credentials['last_group_slug'] = GroupUserRole.objects.get(user=user, group=group).group_slug
     credentials['user_id'] = user.id
     credentials['user_email'] = user.email
-    credentials['other_groups'] = groups_to_dict(user.user_groups, user, participant=True)
+    # credentials['other_groups'] = groups_to_dict(user.user_groups, user, participant=True)
 
     credentials['notifications'] = get_notifications(user)
+    """
     try:
         up = UserProfile.objects.get(user=user)
 
@@ -810,6 +825,7 @@ def get_user_credentials(user):
     except UserProfile.DoesNotExist:
         credentials['is_company'] = False
         pass
+    """
 
     return credentials
 
@@ -822,9 +838,11 @@ def get_notifications(user):
 
     for a in actions:
         action_data = json.loads(a.data)
+        """
         if "group_id" in action_data:
             g = Group.objects.get(id=action_data['group_id'])
             data.append(group_to_dict(g, user, True, a.reference))
+        """
 
     return data
 
@@ -863,17 +881,11 @@ class ObtainAuthToken(APIView):
 
         if user:
             user_credentials = get_user_credentials(user)
-            group = get_last_used_group(user)
-            if not group:
-                group = user.homegroup
-            time = get_ongoing_time(user, group)
         else:
             return JSON_error("error", "this should not happen")
 
         return JsonResponse({'token': token.key,
                               'user': user_credentials,
-                              'last_time': time,
-                              'last_group': group.id,
 
                               'status': "ok"})
 
@@ -888,14 +900,7 @@ def get_user(request):
 
 @login_required
 def user_settings(request):
-    group = Group.objects.get(id=get_value(request.user, "last_used_group"))
     bluser = BlocklogicUser.objects.get(id=request.user.id)
-
-    try:
-        user_profile = UserProfile.objects.get(user=bluser)
-    except UserProfile.DoesNotExist:
-        user_profile = UserProfile(user=bluser, created_by=bluser)
-        user_profile.save()
 
     initial = {'email': bluser.email, 'first_name': bluser.first_name, 'last_name': bluser.last_name,
                'sex': bluser.sex, 'password1': bluser.password, 'password2': bluser.password}
@@ -910,25 +915,14 @@ def user_settings(request):
     if user_profile.company_country:
         company_country = user_profile.company_country.two_letter_code
 
-    initial_profile = {'company_name': user_profile.company_name,
-                       'company_address': user_profile.company_address,
-                       'company_postcode': user_profile.company_postcode,
-                       'company_city': user_profile.company_city,
-                       'company_tax_id': user_profile.company_tax_id,
-                       'company_tax_payer': user_profile.company_tax_payer,
-                       'company_country': company_country,
-                       'company_website': user_profile.company_website}
-
-    user_profile_form = UserProfileForm(initial=initial_profile)
-
-    context = base_context(request, group.id)
+    # company_id
+    context = base_context(request, "1")
     context["section"] = "settings"
     context["title"] = _("Settings")
     context['user_form'] = user_form
-    context['user_profile_form'] = user_profile_form
     context['languages'] = settings.LANGUAGES
-    context['language'] = get_value(request.user, 'language')
-    context['date_format'] = get_value(request.user, 'date_format')
+    context['language'] = get_user_value(request.user, 'language')
+    context['date_format'] = get_user_value(request.user, 'date_format')
     context['date_formats'] = [x for x in g.DATE_FORMATS]
 
     return render(request, "blusers/settings.html", context)

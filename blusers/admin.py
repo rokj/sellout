@@ -41,7 +41,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = BlocklogicUser
-        fields = ['email', 'first_name', 'last_name', 'password', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions', 'last_login', 'date_joined',]
+        fields = ['email', 'first_name', 'last_name', 'password', 'is_active', 'is_staff', 'is_superuser', 'user_permissions', 'last_login', 'date_joined',]
 
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.
@@ -65,7 +65,7 @@ class BlocklogicUserAdmin(UserAdmin):
         (None, {'fields': ('email', 'password')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name')}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
-                                       'groups', 'user_permissions')}),
+                                    'user_permissions')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin

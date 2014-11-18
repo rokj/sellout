@@ -28,8 +28,8 @@ class SkeletonU(Skeleton):
     """
     Skeleton model with Users included.
     """
-    created_by = models.ForeignKey(User, related_name='%(app_label)s_%(class)s_created_by', null=False)
-    updated_by = models.ForeignKey(User, related_name='%(app_label)s_%(class)s_updated_by', null=True, blank=True)
+    created_by = models.ForeignKey('blusers.BlocklogicUser', related_name='%(app_label)s_%(class)s_created_by', null=False)
+    updated_by = models.ForeignKey('blusers.BlocklogicUser', related_name='%(app_label)s_%(class)s_updated_by', null=True, blank=True)
 
     class Meta:
         abstract = True

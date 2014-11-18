@@ -4,6 +4,7 @@ from blusers import views as blusers_views
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
+from views import index
 
 admin.autodiscover()
 
@@ -12,8 +13,10 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 
     # main
-    url(r'^' + settings.URL_PREFIX + '$', index, name='index'),
+    url(r'^$', index, name='index'),
     url(r'^logout/$', blusers_views.logout, name="logout"), # registration
+
+    url(r'^lost-password/$', blusers_views.lost_password, name='lost-password'),
 
     # POS
     url(r'^pos/', include('pos.urls', namespace='pos')),

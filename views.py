@@ -44,6 +44,8 @@ def index(request, login_form=None, message=None):
         message = _("Activation failed! (Wrong key?)")
     elif message == 'google-login':
         message = _("This email is used with Google login, so better try logging in with Google account, just by clicking on Google icon below")
+    elif message == "no-selected-company":
+        message = _("Something went wrong. Contact support.")
 
     next = None
 

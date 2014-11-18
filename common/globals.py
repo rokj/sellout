@@ -10,6 +10,7 @@ DIRS = {  # all go to MEDIA folder
     'category_icon_dir': "img/category",
     'product_icon_dir': "img/product",
     'product_image_dir': "img/product",
+    'users_image_dir': "img/blusers",
     'temp': "/tmp",
 }
 

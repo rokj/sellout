@@ -1,12 +1,12 @@
 from django.db import models
 from django.utils.translation import ugettext as _
 from django.db.models.signals import pre_save, pre_delete, post_save, post_delete
-from django.contrib.auth.models import User
 from django.dispatch import receiver
 from sorl import thumbnail
+from blusers.models import BlocklogicUser
+from common.functions import ImagePath
 
 from common.models import SkeletonU
-# from common.functions import ImagePath
 import common.globals as g
 
 from config.countries import country_choices, country_by_code
@@ -40,7 +40,6 @@ class Company(SkeletonU, CompanyAbstract):
     url_name = models.SlugField(_("Company name, used in URL address"),
                                 max_length=g.MISC['company_url_length'],
                                 null=False, blank=False, db_index=True)
-    """
     color_logo = thumbnail.ImageField(_("Logo"),
                                    upload_to=ImagePath(g.DIRS['color_logo_dir'],
                                                        "pos_company", "color_logo"),
@@ -49,7 +48,6 @@ class Company(SkeletonU, CompanyAbstract):
                                         upload_to=ImagePath(g.DIRS['monochrome_logo_dir'],
                                                                  "pos_company", "monochrome_logo"),
                                         null=True, blank=True)
-    """
     notes = models.TextField(_("Notes"), blank=True, null=True)
 
     def __unicode__(self):
@@ -441,7 +439,7 @@ class Contact(SkeletonU, ContactAbstract):
 
 ### permissions
 class Permission(SkeletonU):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(BlocklogicUser)
     company = models.ForeignKey(Company)
     permission = models.CharField(max_length=16, null=False, blank=False, choices=g.PERMISSION_GROUPS)
     
