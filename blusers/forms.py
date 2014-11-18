@@ -5,7 +5,8 @@ from blusers.models import BlocklogicUser
 
 import re
 from common.globals import SEX
-from common.models import Country
+
+import config.countries as countries
 
 FIRST_LAST_NAME_REGEX = re.compile(r"^[\w ]+$", re.U)
 
@@ -66,7 +67,7 @@ class BlocklogicUserForm(forms.ModelForm):
     password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput, required=False)
     password2 = forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput,
                                 help_text=_("Enter the same password as above, for verification."), required=False)
-    country = forms.ModelChoiceField(queryset=Country.objects.all().order_by("name").exclude(two_letter_code='--'), required=True, empty_label=None)
+    country = forms.ChoiceField(choices=countries.country_choices, required=True)
     sex = forms.CharField(required=True, widget=forms.Select(choices=SEX, attrs={'class': 'sex'}))
     images = forms.FileField(label=_("Your photo"), required=False)
 
@@ -147,7 +148,7 @@ class BlocklogicUserChangeForm(forms.ModelForm):
     password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput, required=False)
     password2 = forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput,
                                 help_text=_("Enter the same password as above, for verification."), required=False)
-    country = forms.ModelChoiceField(queryset=Country.objects.all().order_by("name").exclude(two_letter_code='--'), required=True, empty_label='---------')
+    country = forms.ChoiceField(choices=countries.country_choices, required=True)
     sex = forms.CharField(required=True, max_length=6, widget=forms.RadioSelect(choices=SEX, attrs={'class': 'sex'}))
     images = forms.FileField(label=_("Your photo"), required=False)
 
