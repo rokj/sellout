@@ -12,7 +12,7 @@ from common import globals as g
 from config.functions import get_date_format, get_user_value, get_company_value
 
 
-def register_to_dict(company, user, register):
+def register_to_dict(user, company, register):
     """ company and user are not needed at the moment (maybe for displaying dates/times in the future) """
     r = {
         'id': register.id,
@@ -45,7 +45,7 @@ def get_all_registers(company, user):
     r = []
 
     for register in all_registers:
-        r.append(register_to_dict(company, user, register))
+        r.append(register_to_dict(user, company, register))
 
     return r
 
@@ -53,6 +53,25 @@ def get_all_registers(company, user):
 #############
 ### views ###
 #############
+
+def validate_register(user, company, data, register=None):
+    """ return:
+    {status:true/false - if cleaning succeeded
+     data:cleaned_data - empty dict if status = false
+     message:error_message - empty if status = true """
+
+    if register:
+        form = RegisterForm(data=data, instance=register)
+    else:
+        form = RegisterForm(data=data)
+
+    if form.is_valid():
+        return {'status': True, 'message': None, 'form':form}
+    else:
+        message = form.errors.as_data().itervalues().next()[0].message
+        return {'status': False, 'data': None, 'message': message}
+
+
 class RegisterForm(forms.ModelForm):
     class Meta:
         model = Register
@@ -109,23 +128,11 @@ def add_register(request, company):
     if request.method == 'POST':
         # submit data
         form = RegisterForm(request.POST)
-        form.user = request.user
-        form.company = c
 
         if form.is_valid():
-            # create a new Register
-            register = Register(
-                name=form.cleaned_data.get('name'),
-                receipt_format=form.cleaned_data.get('receipt_format'),
-                receipt_type=form.cleaned_data.get('receipt_type'),
-                printer_driver=form.cleaned_data.get('printer_driver'),
-                print_logo=form.cleaned_data.get('print_logo'),
-                location=form.cleaned_data.get('location'),
-                print_location=form.cleaned_data.get('print_location'),
-
-                created_by=request.user,
-                company=c
-            )
+            register = form.save(False)
+            register.company = c
+            register.created_by = request.user
             register.save()
 
             return redirect('pos:list_registers', company=c.url_name)
@@ -160,22 +167,12 @@ def edit_register(request, company, register_id):
 
     if request.method == 'POST':
         # submit data
-        form = RegisterForm(request.POST)
-        form.user = request.user
-        form.company = c
+        form = RegisterForm(request.POST, instance=register)
 
         if form.is_valid():
-            register.name= form.cleaned_data.get('name')
-            register.receipt_format = form.cleaned_data.get('receipt_format')
-            register.receipt_type = form.cleaned_data.get('receipt_type')
-            register.printer_driver = form.cleaned_data.get('printer_driver')
-            register.print_logo = form.cleaned_data.get('print_logo')
-            register.location = form.cleaned_data.get('location')
-            register.print_location = form.cleaned_data.get('print_location')
+            form.save()
 
-            register.save()
-
-            return redirect('pos:list_registers', company=c.url_name)
+        return redirect('pos:list_registers', company=c.url_name)
     else:
         initial = register_to_dict(request.user, c, register)
         form = RegisterForm(initial=initial)

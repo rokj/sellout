@@ -3,7 +3,8 @@ from django.utils.translation import ugettext as _
 
 from common import globals as g
 from mobile.views.manage.company import get_company, edit_company
-from mobile.views.manage.register import mobile_get_all_registers
+from mobile.views.manage.register import list_registers, mobile_add_register, mobile_edit_register, \
+    mobile_delete_register
 from mobile.views.views import mobile_get_cut, mobile_get_units
 
 from mobile.views import login
@@ -85,8 +86,11 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/company/get', get_company, name='mobile_get_company'),
     url(r_company + r'/manage/json/company/edit', edit_company, name='mobile_edit_company'),
 
-    url(r_company + r'/manage/json/registers/get', mobile_get_all_registers, name='mobile_get_registers'),
-
+    # register
+    url(r_company + r'/manage/json/register/get', list_registers, name='mobile_get_registers'),
+    url(r_company + r'/manage/json/register/add', mobile_add_register, name='mobile_add_register'),
+    url(r_company + r'/manage/json/register/edit', mobile_edit_register, name='mobile_edit_register'),
+    url(r_company + r'/manage/json/register/delete', mobile_delete_register, name='mobile_delete_register'),
     # available discounts list
     # url(r_company + r'/manage/json/discounts/?$', discount.JSON_discounts, name='JSON_discounts'),
     

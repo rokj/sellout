@@ -48,14 +48,15 @@ def get_active_bill(request, company):
     try:
         bill = Bill.objects.get(company=c, user=request.user, status="Active")
     except Bill.DoesNotExist:
+        return
         # if there's no active bill, start a new one
-        return JsonResponse(new_bill(request.user, c))
+        # return JsonResponse(new_bill(request.user, c))
     except Bill.MultipleObjectsReturned:
         # two active bills (that shouldn't happen at all)
         return JsonError(_("Multiple active bills found"))
         
     # serialize the fetched bill and return it
-    bill = bill_to_dict(request.user, c, bill)
+    #bill = bill_to_dict(request.user, c, bill)
     return JsonResponse({'status': 'ok', 'bill': bill})
 
 

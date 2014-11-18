@@ -132,7 +132,7 @@ def bill_to_dict(user, company, bill):
         'id': bill.id,
 
         'issuer': company_to_dict(bill.issuer),
-        'register': register_to_dict(company, user, bill.register),
+        'register': register_to_dict(user, company, bill.register),
 
         'user_id': str(bill.user_id),
         'user_name': str(bill.user_name),
@@ -223,6 +223,7 @@ def create_bill_html(user, company, bill):
 #########
 # views #
 #########
+
 @login_required
 def create_bill(request, company):
     """ there's bill and items in request.POST['data'], create a new bill, and check all items and all """

@@ -3,11 +3,12 @@ from django.http import JsonResponse
 # Create your views here.
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from pos.models import Company, Category, Product, Tax, Discount, Contact
+from pos.models import Company, Category, Product, Tax, Discount, Contact, Register
 from pos.views.manage.category import category_to_dict
 from pos.views.manage.contact import contact_to_dict
 from pos.views.manage.discount import discount_to_dict
 from pos.views.manage.product import product_to_dict
+from pos.views.manage.register import register_to_dict
 from pos.views.manage.tax import tax_to_dict, get_all_taxes
 from pos.views.util import JsonError, JsonParse
 from sync.models import Sync
@@ -114,6 +115,10 @@ def mobile_sync_db(request, company):
                 elif seq_item.model == 'Contact':
                     con = Contact.objects.get(id=seq_item.object_id)
                     item_ret['item'] = contact_to_dict(request.user, company, con)
+
+                elif seq_item.model == 'Register':
+                    r = Register.objects.get(id=seq_item.object_id)
+                    item_ret['item'] = register_to_dict(request.user, company, r)
 
             items.append(item_ret)
 
