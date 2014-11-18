@@ -25,6 +25,8 @@
     <form action="" method="post">
         {% csrf_token %}
 
+        <input type="hidden" id="action" name="action" value="login">
+
         {% if next %} <input type="hidden" name="next" value="{{ next }}"> {% endif %}
 
         <p class="label">{% trans 'E-mail' %}</p>
@@ -88,7 +90,7 @@
 </div>
 
 <div id="recover_password_form">
-    RECOVER PASSWORD
+    RESET PASSWORD
     <form action="" method="post">
         {% csrf_token %}
 
