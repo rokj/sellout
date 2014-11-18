@@ -569,6 +569,7 @@ def set_serial(instance, **kwargs):
                             .exclude(serial=None) \
                             .order_by('-serial')[0]
             instance.serial = last_bill.serial + 1
+            instance.timestamp = dtm.datetime.now()
         except:
             instance.serial = 1
 
