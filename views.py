@@ -3,6 +3,7 @@ from django.shortcuts import redirect, render
 from blusers.forms import LoginForm
 from common.functions import redirect_to_selected_company
 from django.utils.translation import ugettext as _
+from decorators import login_required
 import settings
 
 
@@ -66,3 +67,21 @@ def index(request, login_form=None, message=None):
     }
 
     return render(request, "site/index.html", context)
+
+@login_required
+def select_company(request):
+    message = ''
+
+    user = request.user
+
+    context = {
+        'message': message,
+        'user': user,
+        'client_id': settings.GOOGLE_API['client_id'],
+        'title': _("Select company"),
+        'site_title': settings.GLOBAL["site_title"],
+        'STATIC_URL': settings.STATIC_URL,
+        'GOOGLE_API': settings.GOOGLE_API
+    }
+
+    return render(request, "select-company.html", context)
