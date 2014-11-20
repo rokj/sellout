@@ -1,0 +1,34 @@
+/* the 'green' color:
+    #23e691
+*/
+
+* {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+}
+
+#logo{
+    position: relative;
+    top: -3px;
+}
+
+.sellout-background {
+    background-color: #23e693;
+}
+
+.btn {
+    border-radius: 0;
+}
+
+.custom.navbar  .nav li a.nav-button.custom {
+    text-transform: uppercase;
+    color: #ffffff;
+    background: none;
+}
+
+.custom.navbar .nav a.nav-button.custom:hover {
+    background: none;
+}
+
+a:hover{
+    text-decoration: none;
+}

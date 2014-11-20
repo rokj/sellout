@@ -1,0 +1,56 @@
+{% load i18n %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>{% block title %}Sellout{% endblock %}</title>
+
+    {# Bootstrap core CSS #}
+    <link href="{% static 'bootstrap/css/bootstrap.css' %}" rel="stylesheet">
+
+    {# Custom styles for this template  #}
+    <link href="{% static 'bootstrap/custom.css' %}" rel="stylesheet">
+
+    {# scripts #}
+    <script src="{% static 'js/jquery-2.1.1.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
+
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+
+<nav class="custom navbar navbar-fixed-top navbar-collapse sellout-background collapse" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'icons/logo_white.png' %}" alt="Sellout" id="logo" />
+            </a>
+        </div>
+
+        {% block navbar_buttons %}
+
+        {% endblock %}
+        <!--/.navbar-collapse -->
+    </div>
+</nav>
+
+{% block content %}
+{% endblock %}
+</body>
+</html>

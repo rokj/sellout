@@ -1,0 +1,498 @@
+{% extends 'site/bootstrap.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ title }} - {{ site_title }}{% endblock %}
+
+{% block head %}
+    <link href="{% static 'bootstrap/index.css' %}" rel="stylesheet" />
+
+    {# custom fonts #}
+    <link href="{% static 'css/fonts/fonts.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/fonts/montserrat.css' %}" rel="stylesheet" />
+
+    <style type="text/css">
+        {# styles that require {% static %} urls and stuff (to avoid hardcoding) #}
+        #welcome_section { background-image: url("{% static 'images/index/bg-welcome.jpg' %}"); }
+        #budget_section {background-image: url("{% static 'images/index/bg-budget.jpg' %}"); }
+        #payment_types_section{ background-image: url("{% static 'images/index/bg-payment-types.jpg' %}"); }
+        #partner_section{background-image: url("{% static 'images/index/bg-partner.jpg' %}"); }
+
+        ul.payment-features li {
+            background: url("{% static 'images/index/bullet.png' %}") no-repeat left 3px;
+            margin-left: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+            background-size: 12px;
+            padding-top: 0;
+            padding-bottom: 0;
+            text-transform: uppercase;
+            color: #646464;
+            font-size: 12px; /* carefully selected so that the list matches payment option height */
+            padding-left: 20px;
+            line-height: 17px;
+        }
+
+        ul.payment-features {
+            list-style-type: none;
+            float: left;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var items = {
+                open_login_form: $("#open_login_form"),
+                login_forms_container: $("#login_forms_container")
+            };
+
+            // resizing
+            function resize(){
+                var h = $(window).height();
+
+                // resize the sections to meet the screen height and
+                // vertically center the containers in it
+                $(".container, .container-fluid", "section.full-height").each(function(){
+                    var container = $(this);
+                    var section = container.parent();
+
+                    if(section.height() < $(window).height()) section.height($(window).height());
+
+                    container.css("padding-top", (container.parent().outerHeight() - container.outerHeight())/2);
+                });
+            }
+
+            resize();
+            $(window).resize(resize);
+
+            // hiding/showing stuff
+            items.open_login_form.click(function(e){
+                e.preventDefault();
+                items.login_forms_container.toggleClass("hidden");
+                return false;
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block navbar_buttons %}
+    <ul class="nav navbar-nav navbar-right">
+        <li><a class="custom nav-button" href="#">{% trans 'Pricing' %}</a></li>
+        <li><a class="custom nav-button" href="#">{% trans 'Sign up' %}</a></li>
+        <li><a class="custom nav-button" href="#"><div id="open_login_form">{% trans 'Login' %}</div></a>
+
+            <div id="login_forms_container" class="hidden">
+                <div id="login_form">
+                    <form action="" method="post">
+                        {% csrf_token %}
+
+                        {% if next %} <input type="hidden" name="next" value="{{ next }}"> {% endif %}
+
+                        <p class="label">{% trans 'E-mail' %}</p>
+
+                        <div class="second">
+                            <input type="text" name="email" id="email"/>
+                        </div>
+
+                        <p class="label">{% trans 'Password' %}</p>
+
+                        <div class="second">
+                            <input type="password" name="password" id="password"/>
+                        </div>
+
+                        {% if message %}
+                            <div id="login_message">{{ message }}</div>
+                        {% endif %}
+
+                        <div class="nav-links">
+                            <input type="submit" value="Log in" class="buttons hoverable" id="login_register_button">
+                            {# <span class="login-or-google">or</span> #}
+                        </div>
+
+                        <div class="lost-login">
+                            <a href="{% url 'lost-password' %}"
+                               id="lost_password">{% trans "Lost Password?" %}</a>
+                        </div>
+                    </form>
+
+                    <button id="signinButton" style="" class="hoverable">
+                        <span class="icon"></span>
+                    </button>
+                </div>
+
+                <div id="lost_password_form" class="hidden">
+                    LOST PASSWORD
+                    <form action="" method="post">
+                        {% csrf_token %}
+
+                        <input type="hidden" id="action" name="action" value="lost_password">
+
+                        <p class="label">{% trans 'E-mail' %}</p>
+
+                        <div class="second">
+                            <input type="text" name="lost_password_email" id="lost_password_email"/>
+                        </div>
+
+                        <div class="nav-links">
+                            {# 'normal login' button #}
+                            <input type="submit"
+                                   value="{% trans "Send request" %}"
+                                   class="buttons hoverable"
+                                   id="lost_password_button"/>
+                        </div>
+
+
+                        <div class="lost-login">
+                            <a href="#login" class="lost-password back">{% trans "Back" %}</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="recover_password_form" class="hidden">
+                    RECOVER PASSWORD
+                    <form action="" method="post">
+                        {% csrf_token %}
+
+                        <input type="hidden" id="action" name="action" value="recover_password">
+
+                        <p class="label">{% trans 'New password' %}</p>
+
+                        <div class="second">
+                            <input type="password" name="new_password1" id="new_password1"/>
+                        </div>
+
+                        <p class="label">{% trans 'New password one more time' %}</p>
+
+                        <div class="second">
+                            <input type="password" name="new_password2" id="new_password2"/>
+                        </div>
+
+                        {% if message %}
+                            <div id="new_password_message">{{ message }}</div>
+                        {% endif %}
+
+                        <div class="nav-links">
+                            {# 'normal login' button #}
+                            <input type="submit"
+                                   value="{% trans "Set new password" %}"
+                                   class="buttons hoverable"
+                                   id="new_password_button" name="new_password_button"/>
+                        </div>
+
+                        <div class="lost-login">
+                            <a href="#login" class="lost-password back">{% trans "Back" %}</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+    <section id="welcome_section" class="full-height">
+        <div class="container-fluid">
+            <h1 class="text-center">{% trans 'En dober slogan.' %}</h1>
+
+            <h2 class="text-center">{% trans 'Cloud Point Of Sale application' %}</h2>
+        </div>
+    </section>
+
+    <section id="meet_section" class="full-height">
+        <div class="container">
+            <h3 class="text-center dark">{% trans 'Meet Sellout,' %}</h3>
+
+            <div class="row">
+                <div class="col-md-4">
+                    {% blocktrans %}
+                        <p> a new cloud-based multiplatform Point of Sale application
+                            that makes issuing invoices easier than ever. </p>
+                        <p> It combines register, inventory and management. </p>
+                    {% endblocktrans %}
+                </div>
+                <div class="col-md-4 text-center">
+                    <img src="{% static 'images/index/meet-sellout.png' %}"
+                         alt="Sellout" />
+                </div>
+                <div class="col-md-4">
+                    {% blocktrans %}
+                        <p> It offers a simple user friendly and fast software system to help
+                        you grow your business in no time. </p>
+                        <p> Set up an account and start selling. All you need is an Internet connection.</p>
+                    {% endblocktrans %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="budget_section" class="full-height">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div id="budget_container" class="center-block">
+                        <div class="budget-display">
+                            <div class="budget-price">7<span class="euro">&euro;</span></div>
+                            {% trans 'Per month' %}
+                        </div>
+                        <div class="budget-drawer"> {% trans 'One user' %} </div>
+                        <div class="budget-drawer"> {% trans 'Unlimited registers' %}* </div>
+                        <div class="budget-drawer"> {% trans 'Unlimited products' %} </div>
+                        <div class="budget-drawer"> {% trans 'Unlimited contacts' %} </div>
+                        <div class="budget-display">
+                            <input type="button" value="{% trans 'Sign up' %}" class="register-shortcut" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3>{% trans 'Seriously low prices' %}</h3>
+                    <p>{% blocktrans %}
+                        Get started from as low as 7&euro; per month.<br />
+                        It doesn't get much better than this.
+                    {% endblocktrans %}</p>
+                    <p><a href="#" class="dark">{% trans 'Check out other offers' %}</a></p>
+
+                    <div class="footnote">
+                        {% trans '* The term Register refers to digital register in Sellout application, not an actual piece of harware.' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="simple_screen" class="full-height dark">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>{% trans 'Simple and fast, with no setup' %}</h3>
+                    <p>Forget long lasting software installations,
+                        Sellout requires no setup.
+                        All you need is a web browser or a smart phone and basic internet connection.
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <div class="steps-graphic">
+                        <div class="step-container">
+                            <div class="step-number">1</div>{% trans 'Subscribe' %}
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step-container">
+                            <div class="step-number">2</div>{% trans 'Add' %}
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step-container">
+                            <div class="step-number">3</div>{% trans 'Print' %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="payment_types_section" class="full-height">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6" id="payment_type_image">
+                    <img src="{% static 'images/index/payment-types.jpg.png' %}"
+                         alt="{% trans 'Payment types' %}" />
+                </div>
+                <div class="col-md-6">
+                    <h3>{% trans 'Cash. Credit card. Bitcoin.' %}</h3>
+                    <p>{% blocktrans %}
+                        From good old banknotes to digital currency,
+                        Sellout lets you accept any type of payment.
+                        Increase your earning potential now.
+                    {% endblocktrans %}</p>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="possibilities_section" class="full-height dark">
+        <div class="container text-center">
+            <h3>{% trans 'We are all about possibilities.' %}</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="{% static 'images/index/cloud.png' %}" alt="Cloud" />
+                    <h4>{% trans 'Cloud-based' %}</h4>
+                    <p>{% trans 'Any time, any place, sellout is always available.' %}<br />
+                        {% trans 'Never lose your data.' %}
+                    </p>
+                </div>
+
+                <div class="col-md-4">
+                    <img src="{% static 'images/index/hardware.png' %}" alt="Hardware" />
+                    <h4>{% trans 'Any hardware support' %}</h4>
+                    <p>{% trans 'Use it on any kind of device.' %}
+                        {%trans 'Print to any kind of printer.' %}</p>
+                </div>
+
+                <div class="col-md-4">
+                    <img src="{% static 'images/index/multiple-platforms.png' %}" alt="Platforms" />
+                    <h4>{% trans 'Multiple platforms' %}</h4>
+                    <p>{% trans 'Works as web, mobile and tablet app. All you need is a browser and a Wi-Fi.' %}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="{% static 'images/index/multiple-terminals.png' %}" alt="Terminals" />
+                    <h4>{% trans 'Multiple terminals' %}</h4>
+                    <p>{% trans 'Switch between terminals with different preferences, all on a single device.' %}</p>
+                </div>
+
+                <div class="col-md-4">
+                    <img src="{% static 'images/index/multiple-permissions.png' %}" alt="Permissions" />
+                    <h4>{% trans 'Multiple permission profiles' %}</h4>
+                    <p>{% trans 'Define who has access to what. Keep your stock information save.' %}</p>
+                </div>
+
+                <div class="col-md-4">
+                    <img src="{% static 'images/index/customizable.png' %}" alt="Customizable" />
+                    <h4>{% trans 'Customizable' %}</h4>
+                    <p>{% trans 'Set the layout of terminal and printed receipts <br /> to satisfy your requirements.' %}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="partner_section" class="full-height">
+        <div class="container">
+            <div class="reading-text">
+                <h3>{% trans 'The perfect partner.' %}</h3>
+                <p>Sellout is for anyone who runs a profitable business and needs to regularly issue invoices.
+                    It is ideal for freelancers, small companies and start-ups.</p>
+                <p>Ease up your everyday life.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="pricing_section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="dark">{% trans 'Pricing' %}</h3>
+                    <div id="payment_options_boxes"> {# payment options #}
+                            <div class="payment-option">
+                            <div class="payment-duration"> {% trans '1 month' %}</div>
+                            <div class="payment-price">7 &euro;</div>
+                        </div>
+
+                        <div class="payment-option">
+                            <div class="payment-duration"> {% trans '2 months' %} </div>
+                            <div class="payment-price">13 &euro;</div>
+                        </div>
+
+                        <div class="payment-option">
+                            <div class="payment-duration"> {% trans '3 months' %} </div>
+                            <div class="payment-price">19 &euro;</div>
+                        </div>
+
+                        <div class="payment-option">
+                            <div class="payment-duration"> {% trans '6 months' %} </div>
+                            <div class="payment-price">37 &euro;</div>
+                        </div>
+
+                        <div class="payment-option">
+                            <div class="payment-duration"> {% trans '1 year' %} </div>
+                            <div class="payment-price">73 &euro;</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <h3 class="dark">{% trans 'What you get' %}</h3>
+                    <ul class="payment-features">
+                        <li>{% trans 'Unlimited registers' %}</li>
+                        <li>{% trans 'Unlimited products' %}</li>
+                        <li>{% trans 'Unlimited customers' %}</li>
+                        <li>{% trans 'Free mobile app' %}</li>
+                        <li>{% trans 'Free email support' %}</li>
+                    </ul>
+                </div>
+
+                <div class="col-md-3">
+                    <h3 class="dark">{% trans 'Payment options' %}</h3>
+                    <div id="payment_options_container_desktop">
+                        <img src="{% static 'images/index/payment-types.png' %}"
+                             alt="{% trans 'Payment options' %}" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="banner_section">
+        <div class="container">
+            <input type="button" value="{% trans 'Register' %}" />
+            <h3>{% trans 'Start your FREE 30-DAY TRIAL!' %}</h3>
+        </div>
+    </section>
+
+    <section id="footer_section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-2">
+                    <img src="{% static 'images/index/logo-text.png' %}"
+                         alt="Sellout logo"
+                         id="footer_logo" />
+                </div>
+
+                <div class="col-md-4">
+                    <ul>
+                        <li><a href="#">{% trans 'About' %}</a></li>
+                        <li><a href="#">{% trans 'Press kit' %}</a></li>
+                    </ul>
+                    <ul>
+                        <li><a href="">{% trans 'Terms & conditions' %}</a></li>
+                        <li><a href="">{% trans 'Privacy' %}</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-3">
+                    <a href="http://www.facebook.com/timebits" class="hoverable">
+                        <img src="{% static 'images/index/facebook-link.png' %}"
+                             alt="Facebook"
+                             title="{% trans 'Join us on Facebook' %}" />
+                    </a>
+
+                    <a href="#" class="hoverable">
+                        <img src="{% static 'images/index/twitter-link.png' %}"
+                             alt="Twitter"
+                             title="{% trans 'Follow us on Twitter' %}" />
+                    </a>
+
+                    <a href="#" class="hoverable">
+                        <img src="{% static 'images/index/youtube-link.png' %}"
+                             alt="Youtube"
+                             title="{% trans 'Subscribe to us on Youtube' %}" />
+                    </a>
+
+                    <a href="#" class="hoverable">
+                        <img src="{% static 'images/index/linkedin-link.png' %}"
+                             alt="LinkedIn"
+                             title="{% trans 'Add us on LinkedIn' %}" />
+                    </a>
+                </div>
+
+                <div class="col-md-3 timebits-banner">
+                    <div>{% trans 'Tracking time on projects?' %}</div>
+                    <div><a href="http://www.timebits.com" target="_blank">{% trans 'Try Timebits!' %}</a></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="signature_section">
+        <div class="container">
+            {% trans 'A product of ' context 'A product of Blocklogic' %}
+            <a href="http://www.blocklogic.net" target="_blank">
+            <img id="blocklogic_logo"
+                 src="{% static 'images/index/blocklogic_logo_small.png' %}" alt="blocklogic logo" />
+            </a>.
+            {% trans 'Copyright 2014. All rights reserved.' %}
+        </div>
+    </section>
+
+{% endblock %}
