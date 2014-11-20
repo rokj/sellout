@@ -99,7 +99,7 @@ def mobile_edit_category(request, company):
     data = JsonParse(request.POST['data'])
 
     try:
-        category = Category.objects.get(id=int(data['id']), company=company)
+        category = Category.objects.get(id=int(data['id']), company=c)
     except Category.DoesNotExist:
         return JsonError(_("Category does not exsist"))
 

@@ -479,6 +479,9 @@ class Register(SkeletonU, RegisterAbstract):
     printer_driver = models.CharField(_("Printer driver"), max_length=50, null=False, choices=g.PRINTER_DRIVERS)
     device_id = models.CharField(_("Device id"), max_length=128, null=True, blank=True)
 
+    class Meta:
+        unique_together = (('company', 'device_id'))
+
 
 ### bill details ###
 class BillCompany(SkeletonU, CompanyAbstract):

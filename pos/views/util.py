@@ -48,6 +48,7 @@ def JsonError(message):
 
 
 def JsonOk(extra=None, safe=True):
+
     data = {'status': 'ok'}
     if extra:
         data['data'] = extra

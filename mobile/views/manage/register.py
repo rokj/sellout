@@ -10,7 +10,7 @@ from pos.views.util import has_permission, manage_delete_object, JsonOk, JsonErr
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def list_registers(request, company):
+def mobile_get_register(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
@@ -22,10 +22,23 @@ def list_registers(request, company):
     if not has_permission(request.user, c, 'register', 'view'):
         return JsonError(_("You have no permission to view registers"))
 
+    data = JsonParse(request.POST['data'])
+    device_id = data['device_id']
 
-    data = get_all_registers(c, user)
+    print device_id
 
-    return JsonOk(extra=data, safe=False)
+    try:
+        register = Register.objects.get(company=c, device_id=device_id)
+        r = {
+            'register': register_to_dict(request.user, c, register)
+        }
+    except Register.DoesNotExist:
+        r = {
+            'register': None
+        }
+
+    return JsonOk(extra=r, safe=False)
+
 
 
 @api_view(['GET', 'POST'])
@@ -42,7 +55,7 @@ def mobile_add_register(request, company):
         return JsonError(_("You have no permission to edit registers"))
 
     data = JsonParse(request.POST['data'])
-
+    print data
     valid = validate_register(request.user, c, data)
 
     if not valid.get('status'):
@@ -54,7 +67,7 @@ def mobile_add_register(request, company):
     register.created_by = request.user
     register.device_id = data['device_id']
 
-    register = form.save()
+    register.save()
 
     return JsonOk(extra=register_to_dict(request.user, company, register))
 
@@ -90,7 +103,7 @@ def mobile_edit_register(request, company):
     register.created_by = request.user
     register.device_id = data['device_id']
 
-    register = form.save()
+    register.save()
 
     return JsonOk(extra=register_to_dict(request.user, c, register))
 
