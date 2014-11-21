@@ -16,7 +16,7 @@ def mobile_list_taxes(request, company):
         return JsonError(_("Company does not exist"))
 
     taxes = get_all_taxes(request.user, c)
-
+    print taxes
     return JsonOk(extra=taxes)
 
 

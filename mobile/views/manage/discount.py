@@ -87,24 +87,22 @@ def mobile_edit_discount(request, company):
     if request.method == 'POST':
 
         data = JsonParse(request.POST['data'])
-        valid = validate_discount(data,request.user, c, android=True, discount=d)
+        valid = validate_discount(data, request.user, c, android=True, discount=d)
 
         if not valid.get('status'):
             return JsonError(valid['message'])
 
         form = valid['form']
-        d = Discount(
-                description=form.cleaned_data.get('description'),
-                code=form.cleaned_data.get('code'),
-                type=form.cleaned_data.get('type'),
-                amount=form.cleaned_data.get('amount'),
-                start_date=form.cleaned_data.get('start_date'),
-                end_date=form.cleaned_data.get('end_date'),
-                enabled=form.cleaned_data.get('enabled'),
-                created_by=request.user,
-                company=c
-            )
+        # d = form.save(False)
+        d.description = form.cleaned_data.get('description')
+        d.code = form.cleaned_data.get('code')
+        d.type = form.cleaned_data.get('type')
+        d.amount = form.cleaned_data.get('amount')
+        d.start_date = form.cleaned_data.get('start_date')
+        d.end_date = form.cleaned_data.get('end_date')
+        d.enabled = form.cleaned_data.get('enabled')
         d.save()
+        # d.save()
 
         return JsonOk(extra=discount_to_dict(request.user, c, d, android=True))
 

@@ -27,6 +27,7 @@ def mobile_sync_db(request, company):
 
     data = JsonParse(request.POST['data'])
     seq = data['database_version']
+    device_id = data['device_id']
 
     sync_objects = Sync.objects.only('seq')\
         .filter(company=company).order_by('-seq')
@@ -82,6 +83,12 @@ def mobile_sync_db(request, company):
 
         ret['products'] = pr
 
+        try:
+            register = Register.objects.get(company=company, device_id=device_id)
+            ret['register'] = register_to_dict(request.user, company, register)
+        except Register.DoesNotExist:
+            ret['register'] = None
+
     elif seq < last_key:
 
         ret['updated'] = False
@@ -119,6 +126,7 @@ def mobile_sync_db(request, company):
                 elif seq_item.model == 'Register':
                     r = Register.objects.get(id=seq_item.object_id)
                     item_ret['item'] = register_to_dict(request.user, company, r)
+
 
             items.append(item_ret)
 
