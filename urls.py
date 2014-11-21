@@ -17,7 +17,7 @@ urlpatterns = patterns('',
     url(r'^logout/$', blusers_views.logout, name="logout"), # registration
     url(r'^lost-password/$', blusers_views.lost_password, name='lost-password'),
 
-    url(r'^select-company/$', pos_views.select_company, name='select-company'),
+    #url(r'^select-company/$', pos_views.select_company, name='select-company'),
 
     # POS
     url(r'^pos/', include('pos.urls', namespace='pos')),
