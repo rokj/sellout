@@ -1171,7 +1171,7 @@ ItemDetails = function(item){
         };
 
         var WINDOW_MARGIN = 10; // minimum distance from window edges
-        var ARROW_MARGIN = 18;
+        var ARROW_MARGIN = 25; // keep the box's arrow from covering item details
         var window_height = $(window).height();
         var window_width = $(window).width();
 
@@ -1179,7 +1179,7 @@ ItemDetails = function(item){
            (window_height - arrow_position.top) >= box_size.height/2){
             // there's enough space above and below, center the box
             p.box.offset({
-                left: arrow_position.left,
+                left: arrow_position.left + ARROW_MARGIN,
                 top: arrow_position.top - box_size.height/2
             });
 
