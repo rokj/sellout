@@ -9,4 +9,4 @@ media/*
 *.zip
 *.tar.gz
 settings_local.py
-migrations/*
+
