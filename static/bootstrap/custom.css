@@ -2,10 +2,6 @@
     #23e691
 */
 
-* {
-    font-family: 'Roboto', Arial, Helvetica, sans-serif;
-}
-
 #logo{
     position: relative;
     top: -3px;
@@ -31,4 +27,17 @@
 
 a:hover{
     text-decoration: none;
+}
+
+/* custom fonts */
+* {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+}
+
+.extra-font{
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+
+.bold {
+    font-weight: bold;
 }
