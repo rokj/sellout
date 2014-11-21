@@ -10,7 +10,7 @@ Terminal = function(g){
         left_column: $("#left_column"),
         bill_container: $("#bill_container"),
 
-        register: $("#register"),
+        till: $("#till"),
         bill_header: $("#bill_header"),
 
         splitter: $("#splitter"),
@@ -30,7 +30,7 @@ Terminal = function(g){
         select_register: $("#select_register"),
 
         /* terminal status */
-        current_register: $("#current_register"),
+        current_till: $("#current_till"),
         current_date: $("#current_date"),
         current_time: $("#current_time")
     };
@@ -81,7 +81,7 @@ Terminal = function(g){
 
         // bill container
         p.items.bill_container.css("top", p.items.bill_header.outerHeight() + "px");
-        p.items.bill_container.css("bottom", p.items.register.outerHeight() + "px");
+        p.items.bill_container.css("bottom", p.items.till.outerHeight() + "px");
 
         // controls
         var controls_height = p.items.controls.height();
@@ -144,31 +144,42 @@ Terminal = function(g){
         p.register = r;
 
         // show the current register in terminal
-        p.items.current_register.text(p.register.name);
+        p.items.current_till.text(p.register.name);
 
         // save the register to localStorage
         save_local('register_id', r.id);
 
-        // load bill or init a fresh one
-        var data = null;
-        if(localStorage.bill){
-            data = load_local('bill');
-        }
-
-        // if bill is not loaded yet, wait for it
-        var i = setInterval(function(){
-            if(p.g.objects.bill){
-                try{
-                    p.g.objects.bill.load(data);
-                    clearInterval(i);
+        // load any possible unfinished/saved bills from this register
+        send_data(p.g.urls.get_unpaid_bill, { register_id: r.id }, p.g.csrf_token, function(response){
+            if(response.status == 'ok'){
+                // there may be or may not be an unfinished bill on the server
+                if(response.data){
+                    // there's an unpaid bill on the server, load that
+                    p.g.unfinished_bill = response.data;
                 }
-                catch(e){
-                    // if something goes wrong
-                    // (mostly during development... )
-                    clear_local('bill');
+                else{
+                    // there's no bill on the server, check local storage (it may noy be finished at all)
+                    if(localStorage.bill){
+                        var data = load_local('bill');
+
+                        if(data){
+                            // if bill is not loaded yet, wait for it
+                            var i = setInterval(function(){
+                                if(p.g.objects.bill){
+                                    p.g.objects.bill.load(data);
+                                    clearInterval(i);
+                                }
+                            }, 500);
+                        }
+                    }
                 }
             }
-        }, 500);
+            else{
+                // do nothing at the moment, just don't load the bill.
+                // TODO: something went wrong, is there anything to do?
+            }
+
+        });
     };
 
     p.get_register = function(id){

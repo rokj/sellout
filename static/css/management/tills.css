@@ -1,0 +1,47 @@
+#registers{
+    /* a table */
+    min-width: 600px;
+    max-width: 1000px;
+}
+
+/* list of registers */
+#registers td{
+    padding-right: 10px;
+    max-width: 250px;
+    height: 40px;
+    line-height: 40px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#registers .controls{
+    border: none;
+}
+
+#registers .controls img{
+    /* images are 24px high, the row is 40px */
+    position: relative;
+    top: 8px;
+}
+
+#registers tbody td{
+    border-top: 1px solid #ffffff;
+}
+
+#registers .name{
+    min-width: 150px;
+}
+
+#registers .format{
+    min-width: 200px;
+}
+
+#registers .type{
+    min-width: 150px;
+}
+
+input[type='submit']{
+    width: 100%;
+}

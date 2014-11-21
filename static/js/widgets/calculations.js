@@ -1,111 +1,121 @@
 // Big() setup
 Big.RM = 1; // ROUND_HALF_UP, away from zero (must match settings in python)
 
-/*
+var r_discount = {
+    amount: Big(20),
+    type: 'percent'
+};
 
-    the calculate() function expects items and discounts in this format:
+var a_discount = {
+    amount: Big(1),
+    type: 'absolute'
+};
 
-    var r_discount = {
-        amount: Big(20),
-        type: 'Percent'
-    };
+var items = [
+    {
+        // these never change, they are defined in database
+        quantity: Big(2),
+        base: Big(10), // this is without discounts and without tax
+        tax_rate: Big(20), // price in percentage
+        discounts: [r_discount, a_discount], // a list of discount objects
 
-    var a_discount = {
-        amount: Big(1),
-        type: 'Absolute'
-    };
+        // this is what we want to know
+        /*base */ // does not change
+        discount: Big(0), // absolute amount od all discounts combined
+        net: null, // base minus discounts, without tax
+        tax: null, // absolute amount of tax
+        total: null // total.
+    },
+    {
+        quantity: Big(1),
+        base: Big(100),
+        tax_rate: Big(9.5),
+        discounts: [a_discount],
 
-    var items = [
-        {
-            // these never change, they are defined in database
-            serial: <serial>,
-            quantity: Big(2),
-            base: Big(10), // this is without discounts and without tax
-            tax_rate: Big(20), // price in percentage
-            discounts: [r_discount, a_discount], // a list of discount objects
+        discount: Big(0),
+        net: null,
+        tax: null,
+        total: null
+    },
+    {
+        quantity: Big(5),
+        base: Big(25),
+        tax_rate: Big(0),
+        discounts: [r_discount],
 
-            // this is what we want to know
-            // does not change
-            discount: Big(0), // absolute amount od all discounts combined
-            net: null, // base minus discounts, without tax
-            tax: null, // absolute amount of tax
-            total: null // total.
-        }
-    ];
-*/
+        discount: Big(0),
+        net: null,
+        tax: null,
+        total: null
+    },
+    {
+        quantity: Big(2),
+        base: Big(10),
+        tax_rate: Big(0),
+        discounts: [],
+
+        discount: Big(0),
+        net: null,
+        tax: null,
+        total: null
+    }
+];
 
 function get_tax(price, tax){
     return price.times(tax.div(Big(100)));
 }
 
-function calculate_item(item, decimal_places){
-    var i;
-    var item_discount, new_discount, new_total, new_net;
-
-    // single item numbers:
-    item.net = item.base;
-
-    // what is going to be calculated
-    item.discount = Big(0);
-    item.tax = Big(0);
-    item.total = Big(0);
-
-    // subtract all discounts from this item's current base
-    for(i = 0; i < item.discounts.length; i++){
-        item_discount = item.discounts[i];
-
-        if(item_discount.type == 'Relative'){
-            // relative discount: get amount according to item's current base
-            new_discount = item.net.times(item_discount.amount.div(100));
-
-            // the new discount and net
-            item.discount = item.discount.plus(new_discount);
-            item.net = item.net.minus(new_discount);
-        }
-        else if(item_discount.type == 'Absolute'){
-            // absolute discount:
-            // do it so that the new price INCLUDING tax will be lower
-            // by the amount of this discount
-
-            // get current total and subtract discount from it
-            new_total = item.net.plus(get_tax(item.net, item.tax_rate))
-                .minus(item_discount.amount);
-
-            // get the new price without tax
-            new_net = new_total.div(item.tax_rate.div(100).plus(1));
-            item.discount = item.discount.plus(item.net.minus(new_net));
-            item.net = new_net;
-        }
-        else{
-            // it's the 'bill' discount, remove it for now
-            remove_from_array(item.discounts, i);
-        }
-    }
-
-    // discounts are subtracted, get the item's shit together;
-    // multiply everything by quantity and round to desired decimal places;
-    // in real life, one would first multiply by quantity and then calculate with 4 decimal
-    // places instead of 2 (depending on config), but we have Big() that uses 'infinite'
-    // amount of decimal places for exact calculation
-    item.batch = item.base.times(item.quantity).round(decimal_places);
-    item.discount = item.discount.times(item.quantity).round(decimal_places);
-    item.tax = get_tax(item.net, item.tax_rate).times(item.quantity).round(decimal_places);
-    item.net = item.net.times(item.quantity).round(decimal_places);
-
-    item.total = item.batch.minus(item.discount).plus(item.tax).round(decimal_places);
-
-    return item;
-}
-
-function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal_places){
+function calculate(items, bill_discount_amount, bill_discount_type){
     // 1. calculate all items's prices
-    var i, item;
+    var i, j;
+
+    // current item and temp stuff
+    var item, item_discount;
+    var new_item_base, new_item_discount, new_item_total;
 
     // whole bill
     var base, discount, tax, total;
 
     for(i = 0; i < items.length; i++){
-        items[i] = calculate_item(items[i], decimal_places);
+        item = items[i];
+
+        item.net = item.base.times(item.quantity);
+
+        // subtract all discounts from this item's current base
+        for(j = 0; j < item.discounts.length; j++){
+            item_discount = item.discounts[j];
+
+            if(item_discount.type == 'percent'){
+                // relative discount: get amount according to item's current base
+                new_item_discount = item.net.times(item_discount.amount.div(100));
+
+                // subtract from item's current base
+                item.net = item.net.minus(new_item_discount);
+
+                // the new discount
+                item.discount = item.discount.plus(new_item_discount);
+            }
+            else{
+                // absolute discount:
+                // do it so that the new price INCLUDING tax will be lower
+                // by the amount of this discount
+
+                // get current total price and subtract discount from it
+                new_item_total = item.net.plus(get_tax(item.net, item.tax_rate))
+                    .minus(item_discount.amount.times(item.quantity));
+
+                // get the new base
+                new_item_base = new_item_total.div(item.tax_rate.div(100).plus(1));
+
+                // get the new discount according to the new base
+                item.discount = item.discount.plus(new_item_total.minus(new_item_base));
+            }
+        }
+
+        // discounts are subtracted, get the item's shit together
+        // item.discount // already there
+        item.net = item.base.minus(item.discount);
+        item.tax = get_tax(item.net, item.tax_rate);
     }
 
     // 2. calculate bill's total
@@ -117,8 +127,9 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
 
         for(i = 0; i < items.length; i++){
             item = items[i];
+            item.total = item.net.plus(item.tax);
 
-            base = base.plus(item.batch);
+            base = base.plus(item.net);
             discount = discount.plus(item.discount);
             tax = tax.plus(item.tax);
             total = total.plus(item.total);
@@ -129,7 +140,7 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
 
     // 3. bill discount:
     if(bill_discount_amount.cmp(Big(0)) != 0){
-        if(bill_discount_type == 'Absolute'){
+        if(bill_discount_type == 'absolute'){
             // convert absolute discount to relative using current total
             bill_discount_amount = bill_discount_amount.div(total);
         }
@@ -137,26 +148,14 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
             bill_discount_amount = bill_discount_amount.div(100);
         }
 
-        var new_discount;
-
         // subtract this (now relative) discount from each item
         for(i = 0; i < items.length; i++){
             item = items[i];
 
-            // discount amount:
-            new_discount = item.net.times(bill_discount_amount);
+            new_item_discount = item.net.div(bill_discount_amount);
 
-            // create a new discount and add it to item's list discount
-            item.discounts.push({
-                id: -1,
-                type: 'Bill',
-                amount: new_discount
-            });
-
-            item.discount = item.discount.plus(new_discount).round(decimal_places);
-            item.net = item.net.minus(new_discount).round(decimal_places);
-            item.tax = item.net.times(item.tax_rate.div(100)).round(decimal_places);
-            item.total = item.net.plus(item.tax).round(decimal_places);
+            item.discount = item.discount.plus(new_item_discount);
+            item.net = item.net.minus(bill_discount_amount);
         }
     }
 
@@ -173,3 +172,21 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
     };
 }
 
+p = calculate(items, Big(0), 'relative');
+console.log(p);
+console.log(p.total.toString());
+
+////////////////////////////////////////////////////////////
+////////////////////                    ////////////////////
+//////////////////// useless junk below ////////////////////
+////////////////////                    ////////////////////
+////////////////////////////////////////////////////////////
+
+// utilities for calculation of prices etc.
+function do_tax(p_incl, p_excl, tax){
+
+}
+
+function total_price(base_price, tax, discounts, quantity, decimal_places){
+
+}
