@@ -516,7 +516,7 @@ class Bill(SkeletonU, RegisterAbstract):
     serial = models.IntegerField(_("Bill number, unique over all company's bills"), null=True)  # will be updated in post_save signal
 
     # discount applied to whole bill
-    discount_amount = models.DecimalField(_("Discount on the whole bill (absolute or percent)"),
+    discount_amount = models.DecimalField(_("Discount on the whole bill (absolute or relative)"),
         max_digits=g.DECIMAL['currency_digits'],
         decimal_places=g.DECIMAL['currency_decimal_places'],
         null=True, blank=True)

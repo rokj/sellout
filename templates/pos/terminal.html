@@ -520,8 +520,8 @@ $(window).load(function(){
             <div id="bill_discount_container">
                 <input type="text" id="bill_discount_amount" />
                 <select id="bill_discount_type">
-                    <option value="percent" selected>%</option>
-                    <option value="absolute">{{ currency }}</option>
+                    <option value="Relative" selected>%</option>
+                    <option value="Absolute">{{ currency }}</option>
                 </select>
             </div>
         </div>
@@ -559,7 +559,7 @@ $(window).load(function(){
                             <input type="text" class="description" placeholder="{% trans 'Description' %}" /><br />
                             <input type="text" class="amount" placeholder="{% trans 'Amount' %}"/>
                             <select class="type">
-                                <option value="Percent">%</option>
+                                <option value="Relative">%</option>
                                 <option value="Absolute">{{ currency }}</option>
                             </select>
                         </li>
