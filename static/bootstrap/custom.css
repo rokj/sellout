@@ -2,6 +2,26 @@
     #23e691
 */
 
+.v-center {
+    /*
+        when using the this class, there must be no white space
+        between neighboring divs (between the two that use this class)
+    */
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+/* bootstrap customizations */
+button.navbar-toggle {
+    border-radius: 0;
+
+}
+
+.custom.navbar{
+    border: none;
+}
+
 #logo{
     position: relative;
     top: -3px;
@@ -29,12 +49,24 @@ a:hover{
     text-decoration: none;
 }
 
+/* custom buttons/inputs */
+.buttons{
+    color: #ffffff;
+    background-color: #22e693;
+
+    height: 32px;
+    line-height: 32px;
+
+    border: none;
+    box-shadow: 0 2px 0 rgba(100,100,100,0.2);
+}
+
 /* custom fonts */
 * {
     font-family: 'Roboto', Arial, Helvetica, sans-serif;
 }
 
-.extra-font{
+.extra-font, .extra-font *{
     font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
 

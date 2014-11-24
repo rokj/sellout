@@ -52,15 +52,15 @@
             function resize(){
                 var h = $(window).height();
 
-                // resize the sections to meet the screen height and
-                // vertically center the containers in it
+                // resize the sections to meet the screen height
                 $(".container, .container-fluid", "section.full-height").each(function(){
-                    var container = $(this);
-                    var section = container.parent();
+                    var section = $(this).parent();
 
-                    if(section.height() < $(window).height()) section.height($(window).height());
+                    // get the 'natural' height of sections
+                    section.css("height", "auto");
 
-                    container.css("padding-top", (container.parent().outerHeight() - container.outerHeight())/2);
+                    // size them
+                    if(section.height() < h) section.height(h);
                 });
             }
 
@@ -70,7 +70,29 @@
             // hiding/showing stuff
             items.open_login_form.click(function(e){
                 e.preventDefault();
+
+                // show the form and move it below the button
+                var button_pos = items.open_login_form.offset();
+                var button_size = {
+                    width: items.open_login_form.width(),
+                    height: items.open_login_form.height()
+                };
+                var ARROW_SIZE = 40;
+
+                var form_position = {
+                    left: button_pos.left +
+                            button_size.width -
+                            items.login_forms_container.outerWidth() +
+                            ARROW_SIZE,
+                    top: button_pos.top +
+                            button_size.height +
+                            ARROW_SIZE
+                };
+
+                if(form_position.left < 0) form_position.left = 20;
+
                 items.login_forms_container.toggleClass("hidden");
+                items.login_forms_container.offset(form_position);
                 return false;
             });
         });
@@ -79,161 +101,164 @@
 
 {% block navbar_buttons %}
     <ul class="nav navbar-nav navbar-right">
-        <li><a class="custom nav-button" href="#">{% trans 'Pricing' %}</a></li>
-        <li><a class="custom nav-button" href="#">{% trans 'Sign up' %}</a></li>
-        <li><a class="custom nav-button" href="#"><div id="open_login_form">{% trans 'Login' %}</div></a>
-
-            <div id="login_forms_container" class="hidden">
-                <div id="login_form">
-                    <form action="" method="post">
-                        {% csrf_token %}
-
-                        {% if next %} <input type="hidden" name="next" value="{{ next }}"> {% endif %}
-
-                        <p class="label">{% trans 'E-mail' %}</p>
-
-                        <div class="second">
-                            <input type="text" name="email" id="email"/>
-                        </div>
-
-                        <p class="label">{% trans 'Password' %}</p>
-
-                        <div class="second">
-                            <input type="password" name="password" id="password"/>
-                        </div>
-
-                        {% if message %}
-                            <div id="login_message">{{ message }}</div>
-                        {% endif %}
-
-                        <div class="nav-links">
-                            <input type="submit" value="Log in" class="buttons hoverable" id="login_register_button">
-                            {# <span class="login-or-google">or</span> #}
-                        </div>
-
-                        <div class="lost-login">
-                            <a href="{% url 'lost-password' %}"
-                               id="lost_password">{% trans "Lost Password?" %}</a>
-                        </div>
-                    </form>
-
-                    <button id="signinButton" style="" class="hoverable">
-                        <span class="icon"></span>
-                    </button>
-                </div>
-
-                <div id="lost_password_form" class="hidden">
-                    LOST PASSWORD
-                    <form action="" method="post">
-                        {% csrf_token %}
-
-                        <input type="hidden" id="action" name="action" value="lost_password">
-
-                        <p class="label">{% trans 'E-mail' %}</p>
-
-                        <div class="second">
-                            <input type="text" name="lost_password_email" id="lost_password_email"/>
-                        </div>
-
-                        <div class="nav-links">
-                            {# 'normal login' button #}
-                            <input type="submit"
-                                   value="{% trans "Send request" %}"
-                                   class="buttons hoverable"
-                                   id="lost_password_button"/>
-                        </div>
-
-
-                        <div class="lost-login">
-                            <a href="#login" class="lost-password back">{% trans "Back" %}</a>
-                        </div>
-                    </form>
-                </div>
-
-                <div id="recover_password_form" class="hidden">
-                    RECOVER PASSWORD
-                    <form action="" method="post">
-                        {% csrf_token %}
-
-                        <input type="hidden" id="action" name="action" value="recover_password">
-
-                        <p class="label">{% trans 'New password' %}</p>
-
-                        <div class="second">
-                            <input type="password" name="new_password1" id="new_password1"/>
-                        </div>
-
-                        <p class="label">{% trans 'New password one more time' %}</p>
-
-                        <div class="second">
-                            <input type="password" name="new_password2" id="new_password2"/>
-                        </div>
-
-                        {% if message %}
-                            <div id="new_password_message">{{ message }}</div>
-                        {% endif %}
-
-                        <div class="nav-links">
-                            {# 'normal login' button #}
-                            <input type="submit"
-                                   value="{% trans "Set new password" %}"
-                                   class="buttons hoverable"
-                                   id="new_password_button" name="new_password_button"/>
-                        </div>
-
-                        <div class="lost-login">
-                            <a href="#login" class="lost-password back">{% trans "Back" %}</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </li>
+        <li><a class="custom nav-button extra-font" href="#">{% trans 'Pricing' %}</a></li>
+        <li><a class="custom nav-button extra-font" href="#">{% trans 'Sign up' %}</a></li>
+        <li><a class="custom nav-button extra-font" href="#"><div id="open_login_form">{% trans 'Login' %}</div></a></li>
     </ul>
 {% endblock %}
 
 {% block content %}
+    <div id="login_forms_container" class="hidden">
+        <div id="login_form">
+            <form action="" method="post">
+                {% csrf_token %}
+
+                {% if next %} <input type="hidden" name="next" value="{{ next }}"> {% endif %}
+
+                <p class="label">{% trans 'E-mail' %}</p>
+
+                <div class="second">
+                    <input type="text" name="email" id="email"/>
+                </div>
+
+                <p class="label">{% trans 'Password' %}</p>
+
+                <div class="second">
+                    <input type="password" name="password" id="password"/>
+                </div>
+
+                {% if message %}
+                    <div id="login_message">{{ message }}</div>
+                {% endif %}
+
+                <div class="nav-links">
+                    <input type="submit" value="Log in" class="buttons hoverable" id="login_register_button">
+                    {# <span class="login-or-google">or</span> #}
+                </div>
+
+                <div class="lost-login">
+                    <a href="{% url 'lost-password' %}"
+                       id="lost_password">{% trans "Lost Password?" %}</a>
+                </div>
+            </form>
+
+            <button id="signinButton" style="" class="hoverable">
+                <span class="icon"></span>
+            </button>
+        </div>
+
+        <div id="lost_password_form" class="hidden">
+            LOST PASSWORD
+            <form action="" method="post">
+                {% csrf_token %}
+
+                <input type="hidden" id="action" name="action" value="lost_password">
+
+                <p class="label">{% trans 'E-mail' %}</p>
+
+                <div class="second">
+                    <input type="text" name="lost_password_email" id="lost_password_email"/>
+                </div>
+
+                <div class="nav-links">
+                    {# 'normal login' button #}
+                    <input type="submit"
+                           value="{% trans "Send request" %}"
+                           class="buttons hoverable"
+                           id="lost_password_button"/>
+                </div>
+
+
+                <div class="lost-login">
+                    <a href="#login" class="lost-password back">{% trans "Back" %}</a>
+                </div>
+            </form>
+        </div>
+
+        <div id="recover_password_form" class="hidden">
+            RECOVER PASSWORD
+            <form action="" method="post">
+                {% csrf_token %}
+
+                <input type="hidden" id="action" name="action" value="recover_password">
+
+                <p class="label">{% trans 'New password' %}</p>
+
+                <div class="second">
+                    <input type="password" name="new_password1" id="new_password1"/>
+                </div>
+
+                <p class="label">{% trans 'New password one more time' %}</p>
+
+                <div class="second">
+                    <input type="password" name="new_password2" id="new_password2"/>
+                </div>
+
+                {% if message %}
+                    <div id="new_password_message">{{ message }}</div>
+                {% endif %}
+
+                <div class="nav-links">
+                    {# 'normal login' button #}
+                    <input type="submit"
+                           value="{% trans "Set new password" %}"
+                           class="buttons hoverable"
+                           id="new_password_button" name="new_password_button"/>
+                </div>
+
+                <div class="lost-login">
+                    <a href="#login" class="lost-password back">{% trans "Back" %}</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <section id="welcome_section" class="full-height">
         <div class="container-fluid">
             <h1 class="text-center">{% trans 'En dober slogan.' %}</h1>
-
             <h2 class="text-center">{% trans 'Cloud Point Of Sale application' %}</h2>
         </div>
+
+        <input type="button" value="{% trans 'Find out more' %}" id="more" class="extra-font buttons" />
     </section>
 
-    <section id="meet_section" class="full-height">
+    <section id="meet_section">
         <div class="container">
-            <h3 class="text-center dark">{% trans 'Meet Sellout,' %}</h3>
+            <h3 class="text-center dark-fg vertical-spacing">{% trans 'Meet Sellout,' %}</h3>
 
             <div class="row">
-                <div class="col-md-4 dark">
+                <div class="col col-md-4">
+                    <p class="dark-fg reading-text">
                     {% blocktrans %}
-                        <p> a new cloud-based multiplatform Point of Sale application
-                            that makes issuing invoices easier than ever. </p>
-                        <p> It combines register, inventory and management. </p>
-                    {% endblocktrans %}
+                         a new cloud-based multiplatform Point of Sale application
+                            that makes issuing invoices easier than ever.
+                    {% endblocktrans %}</p><p class="dark-fg reading-text">
+                        {% blocktrans %}It combines register, inventory and management.
+                    {% endblocktrans %}</p>
                 </div>
-                <div class="col-md-4 text-center">
+                <div class="col col-md-4 text-center">
                     <img src="{% static 'images/index/meet-sellout.png' %}"
                          alt="Sellout" />
                 </div>
-                <div class="col-md-4 dark">
-                    {% blocktrans %}
-                        <p> It offers a simple user friendly and fast software system to help
-                        you grow your business in no time. </p>
-                        <p> Set up an account and start selling. All you need is an Internet connection.</p>
+                <div class="col col-md-4">
+                    <p class="dark-fg reading-text">{% blocktrans %}
+                        It offers a simple user friendly and fast software system to help
+                        you grow your business in no time.
+                    {% endblocktrans %} </p><p class="dark-fg reading-text">{% blocktrans %}
+                        Set up an account and start selling. All you need is an Internet connection.</p>
                     {% endblocktrans %}
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="budget_section" class="full-height">
+    <section id="budget_section">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col col-md-6 v-center">
                     <div id="budget_container" class="center-block">
                         <div class="budget-display">
-                            <div class="budget-price">7<span class="euro">&euro;</span></div>
+                            <div class="budget-price extra-font bold">7<span class="euro">&euro;</span></div>
                             {% trans 'Per month' %}
                         </div>
                         <div class="budget-drawer"> {% trans 'One user' %} </div>
@@ -241,17 +266,18 @@
                         <div class="budget-drawer"> {% trans 'Unlimited products' %} </div>
                         <div class="budget-drawer"> {% trans 'Unlimited contacts' %} </div>
                         <div class="budget-display">
-                            <input type="button" value="{% trans 'Sign up' %}" class="register-shortcut" />
+                            <input type="button" value="{% trans 'Sign up' %}"
+                                   class="register-shortcut buttons extra-font bold" />
                         </div>
                     </div>
-                </div>
-                <div class="col-md-6">
+                </div><!-- when using the v-center class, there must be no white space between neighboring divs
+                --><div class="col col-md-6 v-center">
                     <h3>{% trans 'Seriously low prices' %}</h3>
                     <p>{% blocktrans %}
                         Get started from as low as 7&euro; per month.<br />
                         It doesn't get much better than this.
                     {% endblocktrans %}</p>
-                    <p><a href="#" class="dark">{% trans 'Check out other offers' %}</a></p>
+                    <p><a href="#" class="dark-bg">{% trans 'Check out other offers' %}</a></p>
 
                     <div class="footnote">
                         {% trans '* The term Register refers to digital register in Sellout application, not an actual piece of harware.' %}
@@ -261,17 +287,17 @@
         </div>
     </section>
 
-    <section id="simple_screen" class="full-height dark">
+    <section id="simple_section" class="dark-bg">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col col-md-6 v-center">
                     <h3>{% trans 'Simple and fast, with no setup' %}</h3>
                     <p>Forget long lasting software installations,
                         Sellout requires no setup.
                         All you need is a web browser or a smart phone and basic internet connection.
                     </p>
-                </div>
-                <div class="col-md-6">
+                </div><!--
+                --><div class="col col-md-6 v-center">
                     <div class="steps-graphic">
                         <div class="step-container">
                             <div class="step-number">1</div>{% trans 'Subscribe' %}
@@ -290,74 +316,86 @@
         </div>
     </section>
 
-    <section id="payment_types_section" class="full-height">
+    <section id="payment_types_section" >
         <div class="container">
             <div class="row">
-                <div class="col-md-6" id="payment_type_image">
+                <div class="col col-md-6 v-center" id="payment_type_image">
                     <img src="{% static 'images/index/payment-types.jpg.png' %}"
                          alt="{% trans 'Payment types' %}" />
-                </div>
-                <div class="col-md-6">
+                </div><!--
+                --><div class="col col-md-6 v-center">
                     <h3>{% trans 'Cash. Credit card. Bitcoin.' %}</h3>
                     <p>{% blocktrans %}
                         From good old banknotes to digital currency,
                         Sellout lets you accept any type of payment.
                         Increase your earning potential now.
                     {% endblocktrans %}</p>
-
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="possibilities_section" class="full-height dark">
+    <section id="possibilities_section" class="dark-bg">
         <div class="container text-center">
-            <h3>{% trans 'We are all about possibilities.' %}</h3>
             <div class="row">
-                <div class="col-md-4">
-                    <img src="{% static 'images/index/cloud.png' %}" alt="Cloud" />
-                    <h4>{% trans 'Cloud-based' %}</h4>
-                    <p>{% trans 'Any time, any place, sellout is always available.' %}<br />
-                        {% trans 'Never lose your data.' %}
-                    </p>
+                <div class="row">
+                    <h3>{% trans 'We are all about possibilities.' %}</h3>
+                    <div class="col col-md-4">
+                        <div class="possibility-image-container">
+                            <img src="{% static 'images/index/cloud.png' %}" alt="Cloud" id="p_cloud" />
+                        </div>
+                        <h4>{% trans 'Cloud-based' %}</h4>
+                        <p>{% trans 'Any time, any place, sellout is always available. <br />Never lose your data.' %}
+                        </p>
+                    </div>
+
+                    <div class="col col-md-4">
+                        <div class="possibility-image-container">
+                            <img src="{% static 'images/index/hardware.png' %}" alt="Hardware" id="p_hardware" />
+                        </div>
+                        <h4>{% trans 'Any hardware support' %}</h4>
+                        <p>{% trans 'Use it on any kind of device. <br/>Print to any kind of printer.' %}</p>
+                    </div>
+
+                    <div class="col col-md-4">
+                        <div class="possibility-image-container">
+                            <img src="{% static 'images/index/multiple-platforms.png' %}" alt="Platforms" id="p_platforms" />
+                        </div>
+                        <h4>{% trans 'Multiple platforms' %}</h4>
+                        <p>{% trans 'Works as web, mobile and tablet app. <br />All you need is a browser and a Wi-Fi.' %}</p>
+                    </div>
                 </div>
 
-                <div class="col-md-4">
-                    <img src="{% static 'images/index/hardware.png' %}" alt="Hardware" />
-                    <h4>{% trans 'Any hardware support' %}</h4>
-                    <p>{% trans 'Use it on any kind of device.' %}
-                        {%trans 'Print to any kind of printer.' %}</p>
-                </div>
+                <div class="row">
+                    <div class="col col-md-4">
+                        <div class="possibility-image-container">
+                            <img src="{% static 'images/index/multiple-terminals.png' %}" alt="Terminals" id="p_terminals" />
+                        </div>
+                        <h4>{% trans 'Multiple terminals' %}</h4>
+                        <p>{% trans 'Switch between terminals with different preferences,<br />all on a single device.' %}</p>
+                    </div>
 
-                <div class="col-md-4">
-                    <img src="{% static 'images/index/multiple-platforms.png' %}" alt="Platforms" />
-                    <h4>{% trans 'Multiple platforms' %}</h4>
-                    <p>{% trans 'Works as web, mobile and tablet app. All you need is a browser and a Wi-Fi.' %}</p>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <img src="{% static 'images/index/multiple-terminals.png' %}" alt="Terminals" />
-                    <h4>{% trans 'Multiple terminals' %}</h4>
-                    <p>{% trans 'Switch between terminals with different preferences, all on a single device.' %}</p>
-                </div>
+                    <div class="col col-md-4">
+                        <div class="possibility-image-container">
+                            <img src="{% static 'images/index/multiple-permissions.png' %}" alt="Permissions" id="p_permissions" />
+                        </div>
+                        <h4>{% trans 'Multiple permission profiles' %}</h4>
+                        <p>{% trans 'Define who has access to what.<br />Keep your company information safe.' %}</p>
+                    </div>
 
-                <div class="col-md-4">
-                    <img src="{% static 'images/index/multiple-permissions.png' %}" alt="Permissions" />
-                    <h4>{% trans 'Multiple permission profiles' %}</h4>
-                    <p>{% trans 'Define who has access to what. Keep your stock information save.' %}</p>
-                </div>
-
-                <div class="col-md-4">
-                    <img src="{% static 'images/index/customizable.png' %}" alt="Customizable" />
-                    <h4>{% trans 'Customizable' %}</h4>
-                    <p>{% trans 'Set the layout of terminal and printed receipts <br /> to satisfy your requirements.' %}</p>
+                    <div class="col col-md-4">
+                        <div class="possibility-image-container">
+                            <img src="{% static 'images/index/customizable.png' %}" alt="Customizable" id="p_customizable" />
+                        </div>
+                        <h4>{% trans 'Customizable' %}</h4>
+                        <p>{% trans 'Set the layout of terminal and printed receipts <br /> to satisfy your requirements.' %}</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="partner_section" class="full-height">
+    <section id="partner_section" >
         <div class="container">
             <div class="reading-text">
                 <h3>{% trans 'The perfect partner.' %}</h3>
@@ -368,56 +406,58 @@
         </div>
     </section>
 
-    <section id="pricing_section">
+    <section id="pricing_section" class="extra-font">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
-                    <h3 class="dark">{% trans 'Pricing' %}</h3>
+                <div class="col col-md-6 col-sm-6 col-xs-12">
+                    <h3 class="dark-fg">{% trans 'Packages & Pricing' %}</h3>
                     <div id="payment_options_boxes"> {# payment options #}
+                        <div class="payment-option-nowrap">
                             <div class="payment-option">
-                            <div class="payment-duration"> {% trans '1 month' %}</div>
-                            <div class="payment-price">7 &euro;</div>
+                                <div class="payment-duration"> {% trans '1 month' %}</div>
+                                <div class="payment-price">7 &euro;</div>
+                            </div>
+                            <div class="payment-option">
+                                <div class="payment-duration"> {% trans '2 months' %} </div>
+                                <div class="payment-price">13 &euro;</div>
+                            </div>
+                            <div class="payment-option">
+                                <div class="payment-duration"> {% trans '3 months' %} </div>
+                                <div class="payment-price">19 &euro;</div>
+                            </div>
                         </div>
 
-                        <div class="payment-option">
-                            <div class="payment-duration"> {% trans '2 months' %} </div>
-                            <div class="payment-price">13 &euro;</div>
-                        </div>
+                        <div class="payment-option-nowrap">
+                            <div class="payment-option">
+                                <div class="payment-duration"> {% trans '6 months' %} </div>
+                                <div class="payment-price">37 &euro;</div>
+                            </div>
 
-                        <div class="payment-option">
-                            <div class="payment-duration"> {% trans '3 months' %} </div>
-                            <div class="payment-price">19 &euro;</div>
-                        </div>
-
-                        <div class="payment-option">
-                            <div class="payment-duration"> {% trans '6 months' %} </div>
-                            <div class="payment-price">37 &euro;</div>
-                        </div>
-
-                        <div class="payment-option">
-                            <div class="payment-duration"> {% trans '1 year' %} </div>
-                            <div class="payment-price">73 &euro;</div>
+                            <div class="payment-option">
+                                <div class="payment-duration"> {% trans '1 year' %} </div>
+                                <div class="payment-price">73 &euro;</div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-3">
-                    <h3 class="dark">{% trans 'What you get' %}</h3>
-                    <ul class="payment-features">
-                        <li>{% trans 'Unlimited registers' %}</li>
-                        <li>{% trans 'Unlimited products' %}</li>
-                        <li>{% trans 'Unlimited customers' %}</li>
-                        <li>{% trans 'Free mobile app' %}</li>
-                        <li>{% trans 'Free email support' %}</li>
-                    </ul>
+                <div class="col col-md-3 col-sm-3 col-xs-12">
+                    <h3 class="dark-fg">{% trans 'What you get' %}</h3>
+                    <div class="payment-features-container">
+                        <ul class="payment-features">
+                            <li>{% trans 'Unlimited registers' %}</li>
+                            <li>{% trans 'Unlimited products' %}</li>
+                            <li>{% trans 'Unlimited customers' %}</li>
+                            <li>{% trans 'Free mobile app' %}</li>
+                            <li>{% trans 'Free email support' %}</li>
+                        </ul>
+                    </div>
                 </div>
 
-                <div class="col-md-3">
-                    <h3 class="dark">{% trans 'Payment options' %}</h3>
-                    <div id="payment_options_container_desktop">
-                        <img src="{% static 'images/index/payment-types.png' %}"
-                             alt="{% trans 'Payment options' %}" />
-                    </div>
+                <div class="col col-md-3 col-sm-3 col-xs-12">
+                    <h3 class="dark-fg">{% trans 'Payment options' %}</h3>
+                    <img src="{% static 'images/index/payment-types.png' %}"
+                         alt="{% trans 'Payment options' %}" />
                 </div>
             </div>
         </div>
@@ -426,20 +466,20 @@
     <section id="banner_section">
         <div class="container">
             <input type="button" value="{% trans 'Register' %}" />
-            <h3>{% trans 'Start your FREE 30-DAY TRIAL!' %}</h3>
+            <h3>{% trans 'Start your <b>FREE 30-DAY TRIAL</b>!' %}</h3>
         </div>
     </section>
 
-    <section id="footer_section">
+    <section id="footer_section" class="extra-font">
         <div class="container">
             <div class="row">
-                <div class="col-md-2">
+                <div class="col col-md-2 col-sm-6 col-xs-12">
                     <img src="{% static 'images/index/logo-text.png' %}"
                          alt="Sellout logo"
                          id="footer_logo" />
                 </div>
 
-                <div class="col-md-4">
+                <div class="col col-md-4 col-sm-6 col-xs-12">
                     <ul>
                         <li><a href="#">{% trans 'About' %}</a></li>
                         <li><a href="#">{% trans 'Press kit' %}</a></li>
@@ -450,7 +490,7 @@
                     </ul>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col col-md-3 col-sm-6 col-xs-12 social-media">
                     <a href="http://www.facebook.com/timebits" class="hoverable">
                         <img src="{% static 'images/index/facebook-link.png' %}"
                              alt="Facebook"
@@ -476,7 +516,7 @@
                     </a>
                 </div>
 
-                <div class="col-md-3 timebits-banner">
+                <div class="col col-md-3 col-sm-6 col-xs-12 timebits-banner">
                     <div>{% trans 'Tracking time on projects?' %}</div>
                     <div><a href="http://www.timebits.com" target="_blank">{% trans 'Try Timebits!' %}</a></div>
                 </div>

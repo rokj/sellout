@@ -1,9 +1,10 @@
 /* index-specific elements that are not styled by bootstrap */
-
 /*             */
 /* login forms */
 /*             */
+
 #open_login_form {
+    /* the button that opens the forms */
     display: inline;
     border: 2px solid #ffffff;
     padding: 5px 20px;
@@ -13,16 +14,15 @@
 #login_forms_container {
     display: block;
     position: absolute;
-    top: 100%;
-    left: 100%;
 
     width: 250px;
-    margin-left: -250px;
-    margin-top: 20px;
+    height: 250px;
     padding: 20px;
+
+    z-index: 2000;
 }
 
-/* the arrow above the container */
+/* the div that drops shadow (behind the arrow) */
 #login_forms_container:before{
     content: "";
     position: absolute;
@@ -31,8 +31,10 @@
     right: 0;
     bottom: 0;
 
-    z-index: -2;
+    z-index: 1998;
 }
+
+/* the arrow */
 #login_forms_container:after{
     content: "";
     position: absolute;
@@ -40,21 +42,37 @@
     width: 30px;
     height: 30px;
 
-    background-color: red;
-
     top: -15px;
-    right: 40px;
+    right: 25px;
 
     transform: rotate(-45deg);
-    
-    z-index: -1;
-    
+
+    z-index: 1999;
 }
-#login_forms_container{ background-color: #f0f0f0;}
+
 #login_forms_container:before,
 #login_forms_container:after{
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.5);
+}
+
+#login_forms_container,
+#login_forms_container:before,
+#login_forms_container:after,
+#login_forms_container > div{
     background-color: #f0f0f0;
-    box-shadow: 5px 5px 20px rgba(0,0,0,0.2)
+}
+
+#login_forms_container > div{
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    z-index: 2001;
+    padding: 20px;
+    background-color: #f0f0f0;
 }
 
 #login_forms_container label, #login_forms_container .label{
@@ -66,23 +84,15 @@
 #login_forms_container input[type='text'],
 #login_forms_container input[type='password']{
     width: 100%;
-    border: none;
-    border-top: 2px solid #cccccc;
-    height: 32px;
+
     padding-left: 5px;
     padding-right: 5px;
 
     margin-top: 5px;
     margin-bottom: 10px;
-
 }
 
 #login_forms_container input[type='submit']{
-    background-color: #23e691;
-    border: none;
-    border-bottom: 2px solid #cccccc;
-    color: #ffffff;
-    height: 32px;
     padding-left: 20px;
     padding-right: 20px;
     margin-top: 10px;
@@ -110,13 +120,18 @@
 /*          */
 /* sections */
 /*          */
-.full-height {
-    background-position: center center;
-    background-size: cover;
-}
-
 h1, h2, h3, h4, p{
     color: #ffffff;
+}
+
+h1{
+    font-size: 75px;
+    font-family: RobotoThin, Arial, Helvetica, sans-serif;
+}
+
+h2{
+    font-size: 40px;
+    font-family: RobotoThin, Arial, Helvetica, sans-serif;
 }
 
 h3{
@@ -124,12 +139,51 @@ h3{
     font-size: 30px;
 }
 
-.dark, .dark p{
+.dark-fg{
     color: #646464;
 }
 
-a.dark{
+.dark-bg {
+    background-color: #646464;
+}
+
+.dark-bg a, a.dark-bg{
+    background: none;
     color: #22e693;
+}
+
+.vertical-spacing {
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+section {
+    position: relative;
+    background-position: center center;
+    background-size: cover;
+
+    padding-top: 20%;
+    padding-bottom: 20%;
+}
+
+/* welcome */
+#welcome_section {
+    padding: 0;
+    position: relative;
+}
+
+#welcome_section .container-fluid{
+    position: relative;
+    top: 30%;
+}
+
+#more{
+    position: absolute;
+    left: 50%;
+    width: 150px;
+    height: 32px;
+    margin-left: -75px;
+    bottom: 30px;
 }
 
 /* meet sellout */
@@ -172,10 +226,8 @@ a.dark{
 
 .budget-display input{
     margin-top: 20px;
-    background-color: #22e693;
-    border: none;
-    color: #ffffff;
-    padding: 6px 30px;
+    padding-left: 30px;
+    padding-right: 30px;
 }
 
 div.footnote{
@@ -187,6 +239,14 @@ div.footnote{
 /* installation */
 section.dark {
     background-color: #646464;
+}
+
+div.steps-graphic {
+    display: block;
+    margin: 0 auto;
+    width: 150px;
+    text-align: left;
+    /* margin-top: 30px; */
 }
 
 div.step-container{
@@ -226,9 +286,32 @@ div.step-connector{
 
 }
 
+/* possibilities */
+.possibility-image-container{
+    height: 100px;
+    position: relative;
+    margin-bottom: 40px;
+    margin-top: 30px;
+}
+
+.possibility-image-container img{
+    position: absolute;
+    bottom: 0;
+
+}
+
+#p_cloud{ margin-left: -30px; }
+#p_hardware{ margin-left: -35px; }
+#p_platforms{ margin-left: -80px; }
+#p_terminals{ margin-left: -75px; }
+#p_permissions{ margin-left: -90px; }
+#p_customizable{margin-left: -30px;}
+
 /* partner */
 .reading-text{
     max-width: 30em;
+    /* text-align: center; */
+    display: inline-block;
 }
 
 /* payment */
@@ -236,9 +319,14 @@ div.step-connector{
     background-color: #f0f0f0;
 }
 
-#pricing_section .container {
-    padding-top: 30px;
-    padding-bottom: 30px;
+#pricing_section h3,
+#pricing_section ul{
+    text-align: left;
+}
+
+div.payment-option-nowrap{
+    white-space: nowrap;
+    display: inline;
 }
 
 div.payment-option{
@@ -287,6 +375,7 @@ div.payment-price{
 /* registration banner */
 #banner_section {
     background-color: #22e693;
+    padding: 0;
 }
 
 #banner_section .container{
@@ -341,6 +430,16 @@ div.payment-price{
     white-space: nowrap;
 }
 
+#footer_section .social-media {
+    text-align: center;
+}
+
+#footer_section .social-media a{
+    display: inline;
+    margin-left: 3%;
+    margin-right: 3%;
+}
+
 /* footer footer (just a blocklogic signature) */
 #signature_section {
     background-color: #646464;
@@ -356,4 +455,32 @@ div.payment-price{
     position: relative;
     top: -4px;
     color: #646464;
+}
+
+/* responsive: special styles for wide/narrow screens */
+@media (max-width: 991px){
+    #meet_section .row,
+    #budget_section .row,
+    #simple_section .row,
+    #payment_types_section .row,
+    #partner_section .row{
+        text-align: center;
+    }
+
+    #pricing_section .col,
+    #pricing_section h3{
+        text-align: center;
+    }
+
+    #pricing_section .payment-features-container {
+        display: inline-block;
+    }
+
+    .col{
+        padding-top: 30px;
+    }
+
+    #footer_section .col {
+        text-align: center;
+    }
 }

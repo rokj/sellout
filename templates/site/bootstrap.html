@@ -12,22 +12,22 @@
 
     <title>{% block title %}Sellout{% endblock %}</title>
 
+    {# scripts #}
+    <script src="{% static 'js/jquery-ui-1.2.11.2/external/jquery/jquery.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
+
     {# Bootstrap core CSS #}
     <link href="{% static 'bootstrap/css/bootstrap.css' %}" rel="stylesheet">
 
     {# Custom styles for this template  #}
     <link href="{% static 'bootstrap/custom.css' %}" rel="stylesheet">
 
-    {# scripts #}
-    <script src="{% static 'js/jquery-ui-1.2.11.2/external/jquery/jquery.js' %}"></script>
-    <script src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
-
     {% block head %}{% endblock %}
 </head>
 
 <body>
 
-<nav class="custom navbar navbar-fixed-top navbar-collapse sellout-background collapse" role="navigation">
+<nav class="navbar navbar-default navbar-fixed-top custom sellout-background" role="navigation">
     <div class="container-fluid">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
@@ -42,10 +42,9 @@
                 <img src="{% static 'icons/logo_white.png' %}" alt="Sellout" id="logo" />
             </a>
         </div>
-
-        {% block navbar_buttons %}
-
-        {% endblock %}
+        <div id="navbar" class="navbar-collapse collapse">
+            {% block navbar_buttons %}{% endblock %}
+        </div>
         <!--/.navbar-collapse -->
     </div>
 </nav>
