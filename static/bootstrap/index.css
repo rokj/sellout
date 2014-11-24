@@ -11,31 +11,22 @@
     position: relative;
 }
 
-#login_forms_container {
+#login_forms_container{
     display: block;
     position: absolute;
 
     width: 250px;
-    height: 250px;
-    padding: 20px;
 
     z-index: 2000;
 }
 
 /* the div that drops shadow (behind the arrow) */
-#login_forms_container:before{
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    z-index: 1998;
+#login_forms_background{
+    z-index: 1;
 }
 
 /* the arrow */
-#login_forms_container:after{
+#login_forms_arrow{
     content: "";
     position: absolute;
 
@@ -47,31 +38,18 @@
 
     transform: rotate(-45deg);
 
-    z-index: 1999;
+    z-index: -1;
 }
 
-#login_forms_container:before,
-#login_forms_container:after{
+#login_forms_background{
+    padding: 20px;
+}
+
+.form-shadow{
     box-shadow: 5px 5px 20px rgba(0,0,0,0.5);
 }
 
-#login_forms_container,
-#login_forms_container:before,
-#login_forms_container:after,
-#login_forms_container > div{
-    background-color: #f0f0f0;
-}
-
-#login_forms_container > div{
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    z-index: 2001;
-    padding: 20px;
+.form-background{
     background-color: #f0f0f0;
 }
 

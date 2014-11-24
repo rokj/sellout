@@ -122,108 +122,111 @@
 {% endblock %}
 
 {% block content %}
-    <div id="login_forms_container" class="hidden">
-        <div id="login_form">
-            <form action="" method="post">
-                {% csrf_token %}
+    <div id="login_forms_container" class="hidden form-shadow form-background">
+        <div id="login_forms_arrow" class="form-background form-shadow"></div>
+        <div id="login_forms_background" class="form-background">
+            <div id="login_form" class="form-background">
+                <form action="" method="post">
+                    {% csrf_token %}
 
-                {% if next %} <input type="hidden" name="next" value="{{ next }}"> {% endif %}
+                    {% if next %} <input type="hidden" name="next" value="{{ next }}"> {% endif %}
 
-                <p class="label">{% trans 'E-mail' %}</p>
+                    <p class="label">{% trans 'E-mail' %}</p>
 
-                <div class="second">
-                    <input type="text" name="email" id="email"/>
-                </div>
+                    <div class="second">
+                        <input type="text" name="email" id="email"/>
+                    </div>
 
-                <p class="label">{% trans 'Password' %}</p>
+                    <p class="label">{% trans 'Password' %}</p>
 
-                <div class="second">
-                    <input type="password" name="password" id="password"/>
-                </div>
+                    <div class="second">
+                        <input type="password" name="password" id="password"/>
+                    </div>
 
-                {% if message %}
-                    <div id="login_message">{{ message }}</div>
-                {% endif %}
+                    {% if message %}
+                        <div id="login_message">{{ message }}</div>
+                    {% endif %}
 
-                <div class="nav-links">
-                    <input type="submit" value="Log in" class="buttons hoverable" id="login_register_button">
-                    {# <span class="login-or-google">or</span> #}
-                </div>
+                    <div class="nav-links">
+                        <input type="submit" value="Log in" class="buttons hoverable" id="login_register_button">
+                        {# <span class="login-or-google">or</span> #}
+                    </div>
 
-                <div class="lost-login">
-                    <a href="{% url 'lost-password' %}"
-                       id="lost_password">{% trans "Lost Password?" %}</a>
-                </div>
-            </form>
+                    <div class="lost-login">
+                        <a href="{% url 'lost-password' %}"
+                           id="lost_password">{% trans "Lost Password?" %}</a>
+                    </div>
+                </form>
 
-            <button id="signinButton" style="" class="hoverable">
-                <span class="icon"></span>
-            </button>
-        </div>
+                <button id="signinButton" style="" class="hoverable">
+                    <span class="icon"></span>
+                </button>
+            </div>
 
-        <div id="lost_password_form" class="hidden">
-            LOST PASSWORD
-            <form action="" method="post">
-                {% csrf_token %}
+            <div id="lost_password_form" class="hidden">
+                LOST PASSWORD
+                <form action="" method="post">
+                    {% csrf_token %}
 
-                <input type="hidden" id="action" name="action" value="lost_password">
+                    <input type="hidden" id="action" name="action" value="lost_password">
 
-                <p class="label">{% trans 'E-mail' %}</p>
+                    <p class="label">{% trans 'E-mail' %}</p>
 
-                <div class="second">
-                    <input type="text" name="lost_password_email" id="lost_password_email"/>
-                </div>
+                    <div class="second">
+                        <input type="text" name="lost_password_email" id="lost_password_email"/>
+                    </div>
 
-                <div class="nav-links">
-                    {# 'normal login' button #}
-                    <input type="submit"
-                           value="{% trans "Send request" %}"
-                           class="buttons hoverable"
-                           id="lost_password_button"/>
-                </div>
+                    <div class="nav-links">
+                        {# 'normal login' button #}
+                        <input type="submit"
+                               value="{% trans "Send request" %}"
+                               class="buttons hoverable"
+                               id="lost_password_button"/>
+                    </div>
 
 
-                <div class="lost-login">
-                    <a href="#login" class="lost-password back">{% trans "Back" %}</a>
-                </div>
-            </form>
-        </div>
+                    <div class="lost-login">
+                        <a href="#login" class="lost-password back">{% trans "Back" %}</a>
+                    </div>
+                </form>
+            </div>
 
-        <div id="recover_password_form" class="hidden">
-            RECOVER PASSWORD
-            <form action="" method="post">
-                {% csrf_token %}
+            <div id="recover_password_form" class="hidden">
+                RECOVER PASSWORD
+                <form action="" method="post">
+                    {% csrf_token %}
 
-                <input type="hidden" id="action" name="action" value="recover_password">
+                    <input type="hidden" id="action" name="action" value="recover_password">
 
-                <p class="label">{% trans 'New password' %}</p>
+                    <p class="label">{% trans 'New password' %}</p>
 
-                <div class="second">
-                    <input type="password" name="new_password1" id="new_password1"/>
-                </div>
+                    <div class="second">
+                        <input type="password" name="new_password1" id="new_password1"/>
+                    </div>
 
-                <p class="label">{% trans 'New password one more time' %}</p>
+                    <p class="label">{% trans 'New password one more time' %}</p>
 
-                <div class="second">
-                    <input type="password" name="new_password2" id="new_password2"/>
-                </div>
+                    <div class="second">
+                        <input type="password" name="new_password2" id="new_password2"/>
+                    </div>
 
-                {% if message %}
-                    <div id="new_password_message">{{ message }}</div>
-                {% endif %}
+                    {% if message %}
+                        <div id="new_password_message">{{ message }}</div>
+                    {% endif %}
 
-                <div class="nav-links">
-                    {# 'normal login' button #}
-                    <input type="submit"
-                           value="{% trans "Set new password" %}"
-                           class="buttons hoverable"
-                           id="new_password_button" name="new_password_button"/>
-                </div>
+                    <div class="nav-links">
+                        {# 'normal login' button #}
+                        <input type="submit"
+                               value="{% trans "Set new password" %}"
+                               class="buttons hoverable"
+                               id="new_password_button" name="new_password_button"/>
+                    </div>
 
-                <div class="lost-login">
-                    <a href="#login" class="lost-password back">{% trans "Back" %}</a>
-                </div>
-            </form>
+                    <div class="lost-login">
+                        <a href="#login" class="lost-password back">{% trans "Back" %}</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -330,7 +333,7 @@
         </div>
     </section>
 
-    <section id="payment_types_section" >
+    <section id="payment_types_section">
         <div class="container">
             <div class="row">
                 <div class="col col-md-6 v-center" id="payment_type_image">
