@@ -34,9 +34,6 @@ def redirect_to_selected_company(user, ajax=False):
 
     selected_company = user.selected_company
 
-    if selected_company == "":
-        return redirect('index')
-
     return redirect('pos:terminal', company=Company.objects.get(pk=int(selected_company).url_name))
 
     # if ajax:

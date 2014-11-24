@@ -70,14 +70,6 @@ def login(request):
         # activate this user's language
         set_language(request)
         message = "logged-in"
-
-        if user.selected_company == "":
-            if len(user.companies) > 0:
-                set_user_value(user, "selected_company")
-
-        if user.selected_company == "":
-            message = 'no-selected-company'
-
     else:
         # error page: wrong name/password
         message = "login-failed"

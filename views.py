@@ -15,7 +15,7 @@ def index(request, login_form=None, message=None):
     action = ""
 
     if request.user.is_authenticated():
-        return redirect_to_selected_company(request.user)
+        return redirect('select-company')
 
     if request.POST.get('action', '') == 'login':
         from blusers.views import login
@@ -25,10 +25,7 @@ def index(request, login_form=None, message=None):
         action = 'login'
 
         if message == 'logged-in':
-            if request.GET.get('next', '') != '' and request.GET.get('next', '') != reverse('logout'):
-                return redirect(next)
-
-            return redirect_to_selected_company(request.user)
+            return redirect('select-company')
 
     if not login_form:
         login_form = LoginForm()

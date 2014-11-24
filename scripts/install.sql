@@ -20,7 +20,7 @@ CREATE FUNCTION bl_insert_user() RETURNS TRIGGER AS $bl_insert_user_trigger$
     password = 'users'
     source = 'pos'
 
-    if TD['new']['type'] != "google":
+    if TD['new']['type'] == "normal":
         data = {source: {'username': TD['new']['username'], 'first_name': TD['new']['first_name'], 'last_name': TD['new']['last_name'], 'email': TD['new']['email'], 'password': TD['new']['password']}}
 
         conn = psycopg2.connect("host=" + host + " dbname=" + dbname + " user=" + in_user + " password=" + password)
@@ -47,7 +47,7 @@ CREATE FUNCTION bl_update_user() RETURNS TRIGGER AS $bl_update_user_trigger$
     password = 'users'
     source = 'pos'
 
-    if TD['new']['type'] != "google":
+    if TD['new']['type'] == "normal":
         data = {'username': TD['new']['username'], 'first_name': TD['new']['first_name'], 'last_name': TD['new']['last_name'], 'email': TD['new']['email'], 'password': TD['new']['password']}
 
         conn = psycopg2.connect("host=" + host + " dbname=" + dbname + " user=" + in_user + " password=" + password)
