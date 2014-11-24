@@ -45,7 +45,12 @@ button.navbar-toggle {
     background: none;
 }
 
+a {
+    color: #22e693;
+}
+
 a:hover{
+    color: #22e693;
     text-decoration: none;
 }
 

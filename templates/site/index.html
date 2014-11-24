@@ -43,9 +43,19 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
+            $("a.fake").click(function(e){
+                e.preventDefault();
+            });
+
+            $(".register-shortcut").click(function(){
+                window.location = "{% url 'index' %}";
+            });
+
             var items = {
                 open_login_form: $("#open_login_form"),
-                login_forms_container: $("#login_forms_container")
+                login_forms_container: $("#login_forms_container"),
+                more_button: $("#more"),
+                more_section: $("#meet_section")
             };
 
             // resizing
@@ -69,8 +79,6 @@
 
             // hiding/showing stuff
             items.open_login_form.click(function(e){
-                e.preventDefault();
-
                 // show the form and move it below the button
                 var button_pos = items.open_login_form.offset();
                 var button_size = {
@@ -95,15 +103,21 @@
                 items.login_forms_container.offset(form_position);
                 return false;
             });
+
+            items.more_button.click(function(){
+                $("body").animate({scrollTop: items.more_section.offset().top}, "fast");
+            });
+
+
         });
     </script>
 {% endblock %}
 
 {% block navbar_buttons %}
     <ul class="nav navbar-nav navbar-right">
-        <li><a class="custom nav-button extra-font" href="#">{% trans 'Pricing' %}</a></li>
-        <li><a class="custom nav-button extra-font" href="#">{% trans 'Sign up' %}</a></li>
-        <li><a class="custom nav-button extra-font" href="#"><div id="open_login_form">{% trans 'Login' %}</div></a></li>
+        <li><a class="custom nav-button extra-font" href="#pricing">{% trans 'Pricing' %}</a></li>
+        <li><a class="custom nav-button extra-font" href="{% url 'index' %}">{% trans 'Sign up' %}</a></li>
+        <li><a class="custom nav-button extra-font fake" href="#"><div id="open_login_form">{% trans 'Login' %}</div></a></li>
     </ul>
 {% endblock %}
 
@@ -227,7 +241,7 @@
             <h3 class="text-center dark-fg vertical-spacing">{% trans 'Meet Sellout,' %}</h3>
 
             <div class="row">
-                <div class="col col-md-4">
+                <div class="col col-md-4 v-center">
                     <p class="dark-fg reading-text">
                     {% blocktrans %}
                          a new cloud-based multiplatform Point of Sale application
@@ -235,12 +249,12 @@
                     {% endblocktrans %}</p><p class="dark-fg reading-text">
                         {% blocktrans %}It combines register, inventory and management.
                     {% endblocktrans %}</p>
-                </div>
-                <div class="col col-md-4 text-center">
+                </div><!--
+                --><div class="col col-md-4 text-center v-center">
                     <img src="{% static 'images/index/meet-sellout.png' %}"
                          alt="Sellout" />
-                </div>
-                <div class="col col-md-4">
+                </div><!--
+                --><div class="col col-md-4 v-center">
                     <p class="dark-fg reading-text">{% blocktrans %}
                         It offers a simple user friendly and fast software system to help
                         you grow your business in no time.
@@ -277,7 +291,7 @@
                         Get started from as low as 7&euro; per month.<br />
                         It doesn't get much better than this.
                     {% endblocktrans %}</p>
-                    <p><a href="#" class="dark-bg">{% trans 'Check out other offers' %}</a></p>
+                    <p><a href="#pricing" class="dark-bg">{% trans 'Check out other offers' %}</a></p>
 
                     <div class="footnote">
                         {% trans '* The term Register refers to digital register in Sellout application, not an actual piece of harware.' %}
@@ -407,6 +421,7 @@
     </section>
 
     <section id="pricing_section" class="extra-font">
+        <a name="pricing"></a>
         <div class="container">
             <div class="row">
                 <div class="col col-md-6 col-sm-6 col-xs-12">
@@ -465,7 +480,7 @@
 
     <section id="banner_section">
         <div class="container">
-            <input type="button" value="{% trans 'Register' %}" />
+            <input type="button" value="{% trans 'Register' %}" class="register-shortcut" />
             <h3>{% trans 'Start your <b>FREE 30-DAY TRIAL</b>!' %}</h3>
         </div>
     </section>

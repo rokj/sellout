@@ -162,8 +162,8 @@ section {
     background-position: center center;
     background-size: cover;
 
-    padding-top: 20%;
-    padding-bottom: 20%;
+    padding-top: 15%;
+    padding-bottom: 15%;
 }
 
 /* welcome */
@@ -317,6 +317,8 @@ div.step-connector{
 /* payment */
 #pricing_section {
     background-color: #f0f0f0;
+    padding-top: 5%;
+    padding-bottom: 5%;
 }
 
 #pricing_section h3,
@@ -428,6 +430,11 @@ div.payment-price{
 #footer_section .timebits-banner {
     color: #ffffff;
     white-space: nowrap;
+}
+
+#footer_section .timebits-banner a,
+#footer_section .timebits-banner a:hover {
+    color: #008cff;
 }
 
 #footer_section .social-media {
