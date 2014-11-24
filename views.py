@@ -63,7 +63,7 @@ def index(request, login_form=None, message=None):
         'GOOGLE_API': settings.GOOGLE_API
     }
 
-    return render(request, "index.html", context)
+    return render(request, "site/index.html", context)
 
 @login_required
 def select_company(request):
