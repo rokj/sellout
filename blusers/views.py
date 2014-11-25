@@ -3,7 +3,7 @@ import base64
 import string
 import json
 import django
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 import requests
@@ -51,6 +51,10 @@ def set_language(request):
 def unset_language(request):
     if 'django_language' in request.session:
         del request.session['django_language']
+
+
+def sign_up(request):
+    return render(request, 'site/sign_up.html', {})
 
 
 def login(request):

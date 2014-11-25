@@ -5,8 +5,28 @@
 {% block title %}{{ title }} - {{ site_title }}{% endblock %}
 
 {% block head %}
+    <link rel="stylesheet" href="{% static 'bootstrap/signup.css' %}" />
 {% endblock %}
 
 {% block content %}
-    Sign up
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    {% trans 'Join the future in retail business.' %}
+                    <p class="free-ad">
+                        {% trans 'Register for free.' %}
+                    </p>
+                </div>
+                <form action="" >
+                    <div class="col-md-4">
+
+                    </div>
+                    <div class="col-md-4">
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
 {% endblock %}
