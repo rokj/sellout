@@ -12,12 +12,15 @@ urlpatterns = patterns('',
     # admin
     url(r'^admin/', include(admin.site.urls)),
 
-    # main
+    # main: logins and registrations
     url(r'^$', index, name='index'),
-    url(r'^logout/$', blusers_views.logout, name="logout"), # registration
-    url(r'^lost-password/$', blusers_views.lost_password, name='lost-password'),
+    url(r'^sign-up/$', blusers_views.sign_up, name='sign_up'),
+    url(r'^register-company/$', blusers_views.register, name='register_company'),
+    url(r'^logout/$', blusers_views.logout, name="logout"),  # registration
+    url(r'^lost-password/$', blusers_views.lost_password, name='lost_password'),
 
-    url(r'^select-company/$', select_company, name='select-company'),
+    # selecting
+    url(r'^select-company/$', select_company, name='select_company'),
 
     # POS
     url(r'^pos/', include('pos.urls', namespace='pos')),

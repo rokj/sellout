@@ -298,7 +298,7 @@ def register_company(request):
         'site_title': g.MISC['site_title'],
     }
 
-    return render(request, 'pos/manage/registration.html', context)
+    return render(request, 'pos/manage/../../../templates/site/register_company.html/register_company.html', context)
 
 # edit after registration
 @login_required

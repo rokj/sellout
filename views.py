@@ -15,7 +15,7 @@ def index(request, login_form=None, message=None):
     action = ""
 
     if request.user.is_authenticated():
-        return redirect('select-company')
+        return redirect('select_company')
 
     if request.POST.get('action', '') == 'login':
         from blusers.views import login
@@ -25,7 +25,7 @@ def index(request, login_form=None, message=None):
         action = 'login'
 
         if message == 'logged-in':
-            return redirect('select-company')
+            return redirect('select_company')
 
     if not login_form:
         login_form = LoginForm()
@@ -81,4 +81,4 @@ def select_company(request):
         'GOOGLE_API': settings.GOOGLE_API
     }
 
-    return render(request, "select-company.html", context)
+    return render(request, "site/select_company.html", context)
