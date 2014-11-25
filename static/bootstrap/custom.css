@@ -2,6 +2,11 @@
     #23e691
 */
 
+nav a.navbar-header{
+    text-decoration: none;
+}
+
+
 .v-center {
     /*
         when using the this class, there must be no white space

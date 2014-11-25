@@ -455,7 +455,7 @@ def activate_account(request, key):
     except BlocklogicUser.DoesNotExist:
         message = 'activation-failed'
 
-    return index(request, message=message)
+    return index(request)
 
 
 def send_reactivation_key(request, bluser):
