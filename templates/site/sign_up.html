@@ -5,7 +5,7 @@
 {% block title %}{{ title }} - {{ site_title }}{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{% static 'bootstrap/signup.css' %}" />
+    <link rel="stylesheet" href="{% static 'bootstrap/sign_up.css' %}" />
 {% endblock %}
 
 {% block content %}
@@ -20,10 +20,34 @@
                 </div>
                 <form action="" >
                     <div class="col-md-4">
+                        <div class="form-field">
+                            {{ user_form.first_name.label_tag }}
+                            {{ user_form.first_name}}
+                        </div>
 
+                        <div class="form-field">
+                            {{ user_form.last_name.label_tag }}
+                            {{ user_form.last_name }}
+                        </div>
+
+                        <div class="form-field">
+                            {{ user_form.email.label_tag }}
+                            {{ user_form.email }}
+                        </div>
                     </div>
                     <div class="col-md-4">
+                        <div class="form-field">
+                            {{ user_form.password1.label_tag }}
+                            {{ user_form.password1 }}
+                        </div>
+                        <div class="form-field">
+                            {{ user_form.password2.label_tag }}
+                            {{ user_form.password2 }}
+                        </div>
 
+                        <div class="form-field">
+                            <input type="submit" class="buttons" value="{% trans 'Register' %}" />
+                        </div>
                     </div>
                 </form>
             </div>

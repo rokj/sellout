@@ -54,7 +54,29 @@ def unset_language(request):
 
 
 def sign_up(request):
-    return render(request, 'site/sign_up.html', {})
+    if request.method == 'POST':
+        user_form = BlocklogicUserForm(request.POST)
+        user_form.set_request(request)
+
+        # user_profile_form = UserProfileForm(request.POST)
+        if user_form.is_valid():
+            try_register(user_form, None)
+
+            # registration succeeded, return to login page
+            message = 'registration-successful'
+        else:
+            # there were errors
+            message = 'registration-errors'
+            return message, user_form
+    else:
+        user_form = BlocklogicUserForm()
+        user_form.set_request(request)
+
+    context = {
+        'user_form': user_form,
+    }
+
+    return render(request, 'site/sign_up.html', context)
 
 
 def login(request):
@@ -207,53 +229,15 @@ def google_login_or_register(request, mobile=False):
     return JSON_error("error", _("Something went wrong during login with google"))
 
 
-def register(request):
-    """ register a user from request.POST;
-        this is not a view, it's called from common.views.index (on submit)
-    """
-    message = ''
-
-    if request.method == 'POST':
-        user_form = BlocklogicUserForm(request.POST)
-        user_form.set_request(request)
-
-        # user_profile_form = UserProfileForm(request.POST)
-
-        user_form.full_clean()
-
-        """
-        if user_form.is_valid() and user_profile_form.is_valid():
-            # common function with mobile
-            try_register(user_form, user_profile_form)
-            # registration succeeded, return to login page
-            message = 'registration-successful'
-        else:
-            # there were errors
-            message = 'registration-errors'
-            return message, user_form, user_profile_form
-        """
-
-        if user_form.is_valid():
-            # common function with mobile
-            try_register(user_form)
-            # registration succeeded, return to login page
-            message = 'registration-successful'
-        else:
-            # there were errors
-            message = 'registration-errors'
-            return message, user_form
-
-    return message, None, None
-
-
-def try_register(user_form, user_profile_form):
+def try_register(user_form, user_profile_form=None):
     new_user = user_form.save()
     new_user.set_password(user_form.cleaned_data['password1'])
 
-    user_profile = user_profile_form.save(commit=False)
-    user_profile.user = new_user
-    user_profile.created_by = new_user
-    user_profile.save()
+    if user_profile_form:
+        user_profile = user_profile_form.save(commit=False)
+        user_profile.user = new_user
+        user_profile.created_by = new_user
+        user_profile.save()
 
     key = ""
     while key == "":

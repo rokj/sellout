@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     # main: logins and registrations
     url(r'^$', index, name='index'),
     url(r'^sign-up/$', blusers_views.sign_up, name='sign_up'),
-    url(r'^register-company/$', blusers_views.register, name='register_company'),
+    url(r'^register-company/$', blusers_views.sign_up, name='register_company'),  # TODO: wrong view, this is
     url(r'^logout/$', blusers_views.logout, name="logout"),  # registration
     url(r'^lost-password/$', blusers_views.lost_password, name='lost_password'),
 

@@ -44,6 +44,7 @@ class LoginForm(forms.ModelForm):
     def set_request(self, request):
         self.request = request
 
+
 class BlocklogicUserForm(forms.ModelForm):
     """
     So we do not really want to fuck around with overriding methods and iterating

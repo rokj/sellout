@@ -129,18 +129,18 @@
                 <form action="" method="post">
                     {% csrf_token %}
 
-                    {% if next %} <input type="hidden" name="next" value="{{ next }}"> {% endif %}
+                    {% if next %} <input type="hidden" name="next" value="{{ next }}" /> {% endif %}
 
                     <p class="label">{% trans 'E-mail' %}</p>
 
                     <div class="second">
-                        <input type="text" name="email" id="email"/>
+                        <input type="text" name="email" id="email" class="custom" />
                     </div>
 
                     <p class="label">{% trans 'Password' %}</p>
 
                     <div class="second">
-                        <input type="password" name="password" id="password"/>
+                        <input type="password" name="password" id="password" class="custom" />
                     </div>
 
                     {% if message %}
@@ -148,7 +148,7 @@
                     {% endif %}
 
                     <div class="nav-links">
-                        <input type="submit" value="Log in" class="buttons hoverable" id="login_register_button">
+                        <input type="submit" value="Log in" class="buttons hoverable custom" id="login_register_button">
                         {# <span class="login-or-google">or</span> #}
                     </div>
 
@@ -168,19 +168,19 @@
                 <form action="" method="post">
                     {% csrf_token %}
 
-                    <input type="hidden" id="action" name="action" value="lost_password">
+                    <input type="hidden" id="action" name="action" value="lost_password" class="custom" />
 
                     <p class="label">{% trans 'E-mail' %}</p>
 
                     <div class="second">
-                        <input type="text" name="lost_password_email" id="lost_password_email"/>
+                        <input type="text" name="lost_password_email" id="lost_password_email" class="custom" />
                     </div>
 
                     <div class="nav-links">
                         {# 'normal login' button #}
                         <input type="submit"
                                value="{% trans "Send request" %}"
-                               class="buttons hoverable"
+                               class="buttons hoverable custom"
                                id="lost_password_button"/>
                     </div>
 
@@ -196,18 +196,18 @@
                 <form action="" method="post">
                     {% csrf_token %}
 
-                    <input type="hidden" id="action" name="action" value="recover_password">
+                    <input type="hidden" id="action" name="action" value="recover_password" class="custom" />
 
                     <p class="label">{% trans 'New password' %}</p>
 
                     <div class="second">
-                        <input type="password" name="new_password1" id="new_password1"/>
+                        <input type="password" name="new_password1" id="new_password1" class="custom"/>
                     </div>
 
                     <p class="label">{% trans 'New password one more time' %}</p>
 
                     <div class="second">
-                        <input type="password" name="new_password2" id="new_password2"/>
+                        <input type="password" name="new_password2" id="new_password2" class="custom"/>
                     </div>
 
                     {% if message %}
@@ -218,7 +218,7 @@
                         {# 'normal login' button #}
                         <input type="submit"
                                value="{% trans "Set new password" %}"
-                               class="buttons hoverable"
+                               class="buttons hoverable custom"
                                id="new_password_button" name="new_password_button"/>
                     </div>
 
