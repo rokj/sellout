@@ -14,7 +14,8 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from action.models import Action
-from common.functions import JSON_parse, JSON_error, get_random_string, send_email, JSON_ok, min_password_requirments
+from common.functions import JSON_parse, JSON_error, get_random_string, send_email, JSON_ok, min_password_requirments, \
+    create_captcha
 from common.globals import GOOGLE
 from common.views import base_context
 from common.globals import WAITING
@@ -54,7 +55,42 @@ def unset_language(request):
 
 
 def sign_up(request):
-    return render(request, 'site/sign_up.html', {})
+    """ a plain login/registration page without errors and data from form verification;
+        if submitted data fails to verify, the view that verified it will
+        re-use the same template with initialized forms """
+    registration_successful = False
+    action = ""
+
+    if request.user.is_authenticated():
+        return redirect('select_company')
+
+    if request.method == "POST":
+        print "we will register now"
+
+        pass
+
+    captcha_file = create_captcha(request)
+
+    user_form = BlocklogicUserForm()
+
+    next = None
+
+    if request.GET.get('next', '') != '' and request.GET.get('next', '') != reverse('logout'):
+        next = request.GET.get('next')
+
+    context = {
+        'action': action,
+        'next': next,
+        'user_form': user_form,
+        'client_id': settings.GOOGLE_API['client_id'],
+        'title': _("Sign up"),
+        'captcha_file': captcha_file,
+        'site_title': settings.GLOBAL["site_title"],
+        'STATIC_URL': settings.STATIC_URL,
+        'GOOGLE_API': settings.GOOGLE_API
+    }
+
+    return render(request, 'site/sign_up.html', context)
 
 
 def login(request):
@@ -211,29 +247,25 @@ def register(request):
     """ register a user from request.POST;
         this is not a view, it's called from common.views.index (on submit)
     """
+    from bl_auth import User
+
     message = ''
 
     if request.method == 'POST':
         user_form = BlocklogicUserForm(request.POST)
         user_form.set_request(request)
 
-        # user_profile_form = UserProfileForm(request.POST)
-
-        user_form.full_clean()
-
-        """
-        if user_form.is_valid() and user_profile_form.is_valid():
-            # common function with mobile
-            try_register(user_form, user_profile_form)
-            # registration succeeded, return to login page
-            message = 'registration-successful'
-        else:
-            # there were errors
-            message = 'registration-errors'
-            return message, user_form, user_profile_form
-        """
-
         if user_form.is_valid():
+            email = user_form.cleaned_data['email']
+
+            if User.exists(email):
+                if User.type(email) == "google":
+                    return 'user-exists-google', user_form
+                elif User.type(email) == "normal":
+                    return 'user-exists-normal', user_form
+
+                return 'user-exists', user_form
+
             # common function with mobile
             try_register(user_form)
             # registration succeeded, return to login page
@@ -241,9 +273,10 @@ def register(request):
         else:
             # there were errors
             message = 'registration-errors'
+
             return message, user_form
 
-    return message, None, None
+    return message, None
 
 
 def try_register(user_form, user_profile_form):
