@@ -20,19 +20,18 @@ CREATE FUNCTION bl_insert_user() RETURNS TRIGGER AS $bl_insert_user_trigger$
     password = 'users'
     source = 'pos'
 
-    if TD['new']['type'] == "normal":
-        data = {source: {'username': TD['new']['username'], 'first_name': TD['new']['first_name'], 'last_name': TD['new']['last_name'], 'email': TD['new']['email'], 'password': TD['new']['password']}}
+    data = {'username': TD['new']['username'], 'first_name': TD['new']['first_name'], 'last_name': TD['new']['last_name'], 'email': TD['new']['email']}
 
-        conn = psycopg2.connect("host=" + host + " dbname=" + dbname + " user=" + in_user + " password=" + password)
-        cursor = conn.cursor()
+    conn = psycopg2.connect("host=" + host + " dbname=" + dbname + " user=" + in_user + " password=" + password)
+    cursor = conn.cursor()
 
-        cursor.execute("SELECT email, password, data FROM users WHERE email = %s", [TD['new']['email']])
-        result = cursor.fetchone()
+    cursor.execute("SELECT email, password, data FROM users WHERE email = %s", [TD['new']['email']])
+    result = cursor.fetchone()
 
-        if result is None:
-            cursor.execute("INSERT INTO users(email, password, data, created_by, updated_by) VALUES (%s, %s, %s, %s, %s)", [TD['new']['email'], TD['new']['password'], json.dumps(data), source, source])
+    if result is None:
+        cursor.execute("INSERT INTO users(email, password, data, type, created_by, updated_by) VALUES (%s, %s, %s, %s, %s, %s)", [TD['new']['email'], TD['new']['password'], json.dumps(data), TD['new']['type'], source, source])
 
-        conn.commit()
+    conn.commit()
 
 $bl_insert_user_trigger$ LANGUAGE plpythonu;
 
@@ -47,30 +46,18 @@ CREATE FUNCTION bl_update_user() RETURNS TRIGGER AS $bl_update_user_trigger$
     password = 'users'
     source = 'pos'
 
-    if TD['new']['type'] == "normal":
-        data = {'username': TD['new']['username'], 'first_name': TD['new']['first_name'], 'last_name': TD['new']['last_name'], 'email': TD['new']['email'], 'password': TD['new']['password']}
+    data = {'username': TD['new']['username'], 'first_name': TD['new']['first_name'], 'last_name': TD['new']['last_name'], 'email': TD['new']['email']}
 
-        conn = psycopg2.connect("host=" + host + " dbname=" + dbname + " user=" + in_user + " password=" + password)
-        cursor = conn.cursor()
+    conn = psycopg2.connect("host=" + host + " dbname=" + dbname + " user=" + in_user + " password=" + password)
+    cursor = conn.cursor()
 
-        cursor.execute("SELECT email, password, data FROM users WHERE email = %s", [TD['new']['email']])
-        result = cursor.fetchone()
+    cursor.execute("SELECT email, password, data FROM users WHERE email = %s", [TD['new']['email']])
+    result = cursor.fetchone()
 
-        if result and len(result) > 0:
-            tmp_data = json.loads(result[2])
-            if len(tmp_data) > 0 and source in tmp_data:
-                for k, v in tmp_data[source].items():
-                    if k not in data:
-                        data[k] = v
+    if result and len(result) > 0:
+        cursor.execute("UPDATE users SET data = %s, datetime_updated = NOW(), updated_by = %s WHERE email = %s", json.dumps(data), source, TD['new']['email']])
 
-                tmp_data[source] = data
-
-            if len(tmp_data) > 0 and source not in tmp_data:
-                tmp_data[source] = data
-
-            cursor.execute("UPDATE users SET password = %s, data = %s WHERE email = %s", [TD['new']['password'], json.dumps(data), TD['new']['email']])
-
-        conn.commit()
+    conn.commit()
 
 $bl_update_user_trigger$ LANGUAGE plpythonu;
 

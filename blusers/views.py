@@ -14,7 +14,8 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from action.models import Action
-from common.functions import JSON_parse, JSON_error, get_random_string, send_email, JSON_ok, min_password_requirments
+from common.functions import JSON_parse, JSON_error, get_random_string, send_email, JSON_ok, min_password_requirments, \
+    create_captcha
 from common.globals import GOOGLE
 from common.views import base_context
 from common.globals import WAITING
@@ -54,26 +55,39 @@ def unset_language(request):
 
 
 def sign_up(request):
-    if request.method == 'POST':
-        user_form = BlocklogicUserForm(request.POST)
-        user_form.set_request(request)
+    """ a plain login/registration page without errors and data from form verification;
+        if submitted data fails to verify, the view that verified it will
+        re-use the same template with initialized forms """
+    registration_successful = False
+    action = ""
 
-        # user_profile_form = UserProfileForm(request.POST)
-        if user_form.is_valid():
-            try_register(user_form, None)
+    if request.user.is_authenticated():
+        return redirect('select_company')
 
-            # registration succeeded, return to login page
-            message = 'registration-successful'
-        else:
-            # there were errors
-            message = 'registration-errors'
-            return message, user_form
-    else:
-        user_form = BlocklogicUserForm()
-        user_form.set_request(request)
+    if request.method == "POST":
+        print "we will register now"
+
+        pass
+
+    captcha_file = create_captcha(request)
+
+    user_form = BlocklogicUserForm()
+
+    next = None
+
+    if request.GET.get('next', '') != '' and request.GET.get('next', '') != reverse('logout'):
+        next = request.GET.get('next')
 
     context = {
+        'action': action,
+        'next': next,
         'user_form': user_form,
+        'client_id': settings.GOOGLE_API['client_id'],
+        'title': _("Sign up"),
+        'captcha_file': captcha_file,
+        'site_title': settings.GLOBAL["site_title"],
+        'STATIC_URL': settings.STATIC_URL,
+        'GOOGLE_API': settings.GOOGLE_API
     }
 
     return render(request, 'site/sign_up.html', context)
@@ -229,15 +243,50 @@ def google_login_or_register(request, mobile=False):
     return JSON_error("error", _("Something went wrong during login with google"))
 
 
-def try_register(user_form, user_profile_form=None):
+def register(request):
+    """ register a user from request.POST;
+        this is not a view, it's called from common.views.index (on submit)
+    """
+    from bl_auth import User
+
+    message = ''
+
+    if request.method == 'POST':
+        user_form = BlocklogicUserForm(request.POST)
+        user_form.set_request(request)
+
+        if user_form.is_valid():
+            email = user_form.cleaned_data['email']
+
+            if User.exists(email):
+                if User.type(email) == "google":
+                    return 'user-exists-google', user_form
+                elif User.type(email) == "normal":
+                    return 'user-exists-normal', user_form
+
+                return 'user-exists', user_form
+
+            # common function with mobile
+            try_register(user_form)
+            # registration succeeded, return to login page
+            message = 'registration-successful'
+        else:
+            # there were errors
+            message = 'registration-errors'
+
+            return message, user_form
+
+    return message, None
+
+
+def try_register(user_form, user_profile_form):
     new_user = user_form.save()
     new_user.set_password(user_form.cleaned_data['password1'])
 
-    if user_profile_form:
-        user_profile = user_profile_form.save(commit=False)
-        user_profile.user = new_user
-        user_profile.created_by = new_user
-        user_profile.save()
+    user_profile = user_profile_form.save(commit=False)
+    user_profile.user = new_user
+    user_profile.created_by = new_user
+    user_profile.save()
 
     key = ""
     while key == "":

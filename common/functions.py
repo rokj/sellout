@@ -3,8 +3,9 @@
 import os
 import string
 import json
-from random import choice
+import random
 from decimal import Decimal, ROUND_DOWN
+import Image
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import connection
@@ -17,9 +18,11 @@ import time
 import globals as g
 import settings
 
+import ImageFont
+import ImageDraw
 
 def get_random_string(length=8, chars=string.letters + string.digits):
-    return ''.join([choice(chars) for _ in xrange(length)])
+    return ''.join([random.choice(chars) for _ in xrange(length)])
 
 
 def get_terminal_url(request):
@@ -224,3 +227,54 @@ def min_password_requirments(password):
         return False
 
     return True
+
+def create_captcha_string(request):
+    operator = random.choice(["+", "-", "x"])
+
+    if operator == "x":
+        num1 = random.randint(0, 10)
+        num2 = random.randint(0, 10)
+
+        request.session['captcha_answer'] = num1 * num2
+    else:
+        num1 = random.randint(20, 40)
+        num2 = random.randint(0, 20)
+
+        # store the correct answer in session
+        if operator == "+":
+            request.session['captcha_answer'] = num1 + num2
+        else:
+            request.session['captcha_answer'] = num1 - num2
+
+    return str(num1) + operator + str(num2) + "="
+
+
+def create_captcha(request):
+    """
+    Method that returns captcha image.
+
+    kudos
+    http://www.sprklab.com/notes/10-math-captcha-for-django/
+    """
+
+    fontslocation = settings.FONTS_DIR
+    fonts = os.listdir(fontslocation)
+
+    font = ImageFont.truetype(fontslocation + random.choice(fonts), 20)
+
+    image = Image.new("RGBA", (80, 30), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(image)
+
+    draw.text((0, 0), create_captcha_string(request), font=font, fill="#000000")
+
+    random_file = None
+    random_string = None
+    while random_file is None:
+        random_string = get_random_string(8)
+        random_file = settings.STATIC_DIR + '/images/site/captchas/' + random_string + '.png'
+        if os.path.isfile(random_file):
+            random_file = None
+
+    image.save(random_file, format="PNG")
+
+    return random_string + ".png"
