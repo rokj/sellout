@@ -22,6 +22,9 @@ urlpatterns = patterns('',
     url(r'^activate-account/key=(?P<key>[\w]+)$', blusers_views.activate_account, name='activate_account'),
     url(r'^lost-password/$', blusers_views.lost_password, name='lost_password'),
 
+    # actions: invitations, ...
+    # TODO
+
     # selecting
     url(r'^select-company/$', select_company, name='select_company'),
 

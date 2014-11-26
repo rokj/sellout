@@ -10,7 +10,6 @@ from blusers.models import BlocklogicUser
 from blusers.views import get_last_used_group
 from common.globals import WAITING, PAID, CANCELED, RUNNING, ALMOST_PAID, FIRST_TIME, FREE, NOT_ENOUGH_MONEY_ARRIVED, \
     NO_MONEY_ARRIVED
-from common.functions import site_title
 from common.models import Currency
 from common.views import base_context
 from decorators import login_required
@@ -66,7 +65,7 @@ def subscriptions(request):
     # 'others_included': None,
     # 'past_subscriptions': past_subscriptions,
     context['title'] = _("My subscriptions")
-    context['site_title'] = site_title()
+    context['site_title'] = g.SITE_TITLE
     context['section'] = 'settings'
     context['NOT_ENOUGH_MONEY_ARRIVED_STATUS'] = NOT_ENOUGH_MONEY_ARRIVED
     context['NO_MONEY_ARRIVED_STATUS'] = NO_MONEY_ARRIVED
@@ -111,6 +110,6 @@ def subscription(request):
     context['section'] = 'settings'
     context['subscription_price'] = settings.SUBSCRIPTION_PRICE
     context['title'] = _("Subscription payment")
-    context['site_title'] = site_title()
+    context['site_title'] = g.SITE_TITLE
 
     return render(request, 'subscription/subscription.html', context)

@@ -83,7 +83,7 @@ def redirect_to_subscriptions(ajax=False):
     return redirect('subscription:new')
 
 def site_title():
-    return settings.GLOBAL['site_title']
+    return g.SITE_TITLE
 
 def send_email(sender, to=None, bcc=None, subject=None, txt=None, html=None, attachment=None):
     """

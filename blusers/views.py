@@ -57,7 +57,7 @@ def unset_language(request):
 
 def sign_up_message(request, message_code):
     context = {
-        'site_title': settings.GLOBAL['site_title'],
+        'site_title': g.SITE_TITLE,
         'message_code': message_code,
     }
 
@@ -103,14 +103,14 @@ def sign_up(request):
     return render(request, 'site/sign_up.html', context)
 
 
-def login(request):
+def login(request, data):
     """ log the user in;
         if successful, redirect to the index page
         if not successful, redirect back to the login page """
     next = ''
 
-    username = request.POST.get('email')
-    password = request.POST.get('password')
+    username = data.get('email')
+    password = data.get('password')
 
     user = django_authenticate(username=username, password=password)
 
@@ -135,7 +135,7 @@ def login(request):
     # if still failing, lets see if user is not activated
     if message == 'login-failed':
         try:
-            user = BlocklogicUser.objects.get(username=username, is_active = False)
+            user = BlocklogicUser.objects.get(username=username, is_active=False)
             message = 'user-inactive'
         except BlocklogicUser.DoesNotExist:
             pass
@@ -672,7 +672,7 @@ def user_profile(request, context):
     context['messages'] = messages
     context['update_password'] = update_password
     context['title'] = _("Settings")
-    context['site_title'] = settings.GLOBAL["site_title"]
+    context['site_title'] = g.SITE_TITLE
     context['STATIC_URL'] = settings.STATIC_URL
 
     return context

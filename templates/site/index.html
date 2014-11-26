@@ -60,8 +60,9 @@
             };
 
             // resizing and repositioning
-            // the login form, a very interactive thing indeed
-            items.login_forms_container.is_visible = false;
+            // the login form, a very interactive thing indeed;
+            // show it if there's a message to be shown
+            items.login_forms_container.is_visible = !!('{{ login_message }}');
 
             function toggle_login_form(show){
                 if(show) items.login_forms_container.removeClass("hidden");
@@ -122,6 +123,7 @@
 
                 return false;
             });
+            toggle_login_form(items.login_forms_container.is_visible);
 
             items.more_button.click(function(){
                 $("body").animate({scrollTop: items.more_section.offset().top}, "fast");
@@ -132,7 +134,7 @@
             function match_url(){
                 switch(get_url_hash()){
                     case 'login':
-                        toggle_login_form(true);
+                        toggle_login_form(items.login_forms_container.is_visible);
                         break;
                     default:
                         break;
@@ -157,26 +159,47 @@
         <div id="login_forms_arrow" class="form-background form-shadow"></div>
         <div id="login_forms_background" class="form-background">
             <div id="login_form" class="form-background">
-                <form action="" method="post">
+                <form action="." method="post" class="custom">
                     {% csrf_token %}
 
-                    {% if next %} <input type="hidden" name="next" value="{{ next }}" /> {% endif %}
-
-                    <p class="label custom">{% trans 'E-mail' %}</p>
-
-                    <div class="second">
-                        <input type="text" name="email" id="email" class="custom" />
-                    </div>
-
-                    <p class="label custom">{% trans 'Password' %}</p>
-
-                    <div class="second">
-                        <input type="password" name="password" id="password" class="custom" />
-                    </div>
-
-                    {% if message %}
-                        <div id="login_message">{{ message }}</div>
+                    {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}" />
                     {% endif %}
+
+                    <div class="form-errors">
+                        {{ login_form.non_field_errors }}
+                    </div>
+
+                    <div class="form-message">
+                        {% if login_message == 'login-failed' %}
+                            <p>{% trans 'Login failed. Check your user name and password.' %}</p>
+                        {% elif login_message == 'google-login' %}
+                            <p>{% trans 'You registered with Google. Please use the google login button below to log in.' %}</p>
+                        {% elif login_message == 'user-inactive' %}
+                            Your username is inactive. Check email (maybe spam folder) again and activate account. If still does not work, just contact support
+                            <p>{% blocktrans %}Your account is inactive.
+                                Search your e-mail inbox (and spam folder) for the activation mail.
+                                If you did not receive the activation mail, use the forgotten password form below.
+                                If thi still doesn't work for you, please contact support.
+                            {% endblocktrans %}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <div class="field-errors">
+                            {{ login_form.email.errors }}
+                        </div>
+                        {{ login_form.email.label_tag }}
+                        {{ login_form.email }}
+                    </div>
+
+                    <div class="form-field">
+                        <div class="field-errors">
+                            {{ login_form.password.errors }}
+                        </div>
+                        {{ login_form.password.label_tag }}
+                        {{ login_form.password }}
+                    </div>
 
                     <div class="nav-links">
                         <input type="submit" value="Log in" class="buttons hoverable custom" id="login_register_button">

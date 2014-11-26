@@ -92,12 +92,12 @@ class BlocklogicUser(AbstractUser, Skeleton):
 
     selected_company = property(get_selected_company)
 
-    def get_user_companies(self):
+    def get_companies(self):
         from pos.models import Permission
 
         return [p.company for p in Permission.objects.filter(user=self)]
 
-    companies = property(get_user_companies)
+    companies = property(get_companies)
 
 
 class UserImage(SkeletonU):

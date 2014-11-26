@@ -2,6 +2,7 @@
 from django.utils.translation import ugettext as _, ugettext
 
 # Common stuff to be used anywhere throughout the site
+SITE_TITLE = "Sellout"
 
 # directories
 DIRS = {  # all go to MEDIA folder
@@ -254,19 +255,17 @@ CATEGORY_COLORS = [  # choices for category.color
     '5ad2fa',
 ]
 
-ACCEPTED = "accepted"
-DECLINED = "declined"
-WAITING = "waiting"
-CANCELED = "canceled"
-SEEN = "seen"
-
-ACTION_STATUS = (
-    (WAITING, _("Waiting")),
-    (SEEN, _("Seen")),
-    (CANCELED, _("Canceled")),
-    (ACCEPTED, _("Accepted")),
-    (DECLINED, _("Declined")),
+###
+### actions
+###
+ACTION_STATUS_CHOICES = (
+    (("accepted"), _("Accpeted")),
+    (("declined"), _("Declined")),
+    (("waiting"), _("Waiting")),
+    (("canceled"), _("Canceled")),
+    (("seen"), _("Seen")),
 )
+ACTION_STATUSES = (x[0] for x in ACTION_STATUS_CHOICES)
 
 BL_USERS = "bl_users"
 BL_MAIL = "bl_mail"
@@ -285,8 +284,8 @@ PAID = "paid"
 FREE = "free"
 
 SUBSCRIPTION_STATUS = (
-    (WAITING, _("Waiting")),
-    (CANCELED, _("Canceled")),
+    ("waiting", _("Waiting")),
+    ("canceled", _("Canceled")),
 )
 
 MALE = "male"
@@ -307,7 +306,8 @@ USER_ROLE = (
 
 TAX_PAYER_CHOICES=[('tax_payer', ugettext(u"Yes")), ('not_tax_payer', ugettext("No"))]
 
-PAID = "paid" # when there >= 3 confirmations and bitcoin client
+WAITING = "waiting"
+PAID = "paid"  # when there >= 3 confirmations and bitcoin client
 ALMOST_PAID = "almost_paid" # when we are checking just transactions on network
 APPROVED = "approved"
 CANCELED = "canceled"

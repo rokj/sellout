@@ -3,7 +3,7 @@ import json
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from action.models import Action
-from common.functions import JSON_parse, _get_subscription_price, get_subscription_btc_price, site_title
+from common.functions import JSON_parse, _get_subscription_price, get_subscription_btc_price
 from config.functions import get_user_value
 
 from decorators import login_required
@@ -89,7 +89,7 @@ def base_context(request, company_id):
         'title': "",  # will be overwritten by javascript
         'language': get_user_value(request.user, "language"),
         'clock_range': get_user_value(request.user, "clock_range"),
-        'site_title': site_title(),
+        'site_title': g.SITE_TITLE,
         'group_notes_keepalive': g.GROUP_NOTES_KEEPALIVE,
         'date_format': g.DATE_FORMATS[get_user_value(request.user, 'date_format')]['jquery'] if request.user.is_authenticated() else g.DATE_FORMATS[g.DEFAULT_DATE_FORMAT]['jquery'],
 

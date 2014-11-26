@@ -19,7 +19,7 @@ import re
 from blusers.models import BlocklogicUser
 from common.globals import WAITING, PAID, CANCELED, APPROVED
 from common.functions import JSON_ok, JSON_parse, JSON_error, get_subscription_btc_price, send_email, \
-    _get_subscription_price, site_title, get_random_string, get_bitcoin_user
+    _get_subscription_price, get_random_string, get_bitcoin_user
 from common.models import Currency
 from decorators import login_required
 from payment.service.Bitcoin import BitcoinRPC
@@ -341,7 +341,7 @@ def payment_info(request, payment):
         'payment': payment,
         'messages': messages,
         'title': _("Payment for subscription/s"),
-        'site_title': site_title(),
+        'site_title': g.SITE_TITLE,
         'WAITING_STATUS': WAITING,
         'CANCELED_STATUS': CANCELED,
     }
