@@ -274,6 +274,7 @@ def try_register(user_form, user_profile_form=None):
     new_user.password_reset_key = key
     new_user.type = 'normal'
     new_user.is_active = False
+    new_user.update_user_password(user_form.cleaned_data['password1'])
     new_user.save()
 
     # TODO: add the free subscription on register
