@@ -45,11 +45,12 @@ class MailUser(object):
 
 
 class User(object):
-    def exists(self, email):
+    @staticmethod
+    def exists(email):
         """
         If user is in "master" users table.
         """
-        
+
         cursor = connections['bl_users'].cursor()
         cursor.execute("SELECT email FROM users WHERE email = %s", [email])
         row = cursor.fetchone()
@@ -59,7 +60,23 @@ class User(object):
 
         return False
 
-    def user_password_valid(self, email, password):
+    @staticmethod
+    def type(email):
+        """
+        If user is in "master" users table.
+        """
+
+        cursor = connections['bl_users'].cursor()
+        cursor.execute("SELECT type FROM users WHERE email = %s", [email])
+        row = cursor.fetchone()
+
+        if row and len(row) == 1:
+            return row[0]
+
+        return ""
+
+    @staticmethod
+    def user_password_valid(email, password):
         cursor = connections['bl_users'].cursor()
         cursor.execute("SELECT email, password FROM users WHERE email = %s", [email])
         row = cursor.fetchone()
@@ -69,8 +86,9 @@ class User(object):
 
         if check_password(password, row[1]):
             return True
-        
+
         return False
+
 
     def user_data(self, email):
         cursor = connections['bl_users'].cursor()

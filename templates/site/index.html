@@ -42,7 +42,7 @@
     </style>
 
     <script type="text/javascript">
-        $(document).ready(function(){
+        $(window).load(function(){
             $("a.fake").click(function(e){
                 e.preventDefault();
             });
@@ -51,6 +51,7 @@
                 window.location = "{% url 'sign_up' %}";
             });
 
+            // jquery objects
             var items = {
                 open_login_form: $("#open_login_form"),
                 login_forms_container: $("#login_forms_container"),
@@ -58,27 +59,18 @@
                 more_section: $("#meet_section")
             };
 
-            // resizing
-            function resize(){
-                var h = $(window).height();
+            // resizing and repositioning
+            // the login form, a very interactive thing indeed
+            items.login_forms_container.is_visible = false;
 
-                // resize the sections to meet the screen height
-                $(".container, .container-fluid", "section.full-height").each(function(){
-                    var section = $(this).parent();
+            function toggle_login_form(show){
+                if(show) items.login_forms_container.removeClass("hidden");
+                else items.login_forms_container.addClass("hidden");
 
-                    // get the 'natural' height of sections
-                    section.css("height", "auto");
-
-                    // size them
-                    if(section.height() < h) section.height(h);
-                });
+                items.login_forms_container.is_visible = show;
             }
 
-            resize();
-            $(window).resize(resize);
-
-            // hiding/showing stuff
-            items.open_login_form.click(function(e){
+            function position_login_form(){
                 // show the form and move it below the button
                 var button_pos = items.open_login_form.offset();
                 var button_size = {
@@ -99,8 +91,35 @@
 
                 if(form_position.left < 0) form_position.left = 20;
 
-                items.login_forms_container.toggleClass("hidden");
                 items.login_forms_container.offset(form_position);
+            }
+
+            function resize(){
+                var h = $(window).height();
+
+                // resize the sections to meet the screen height
+                $(".container, .container-fluid", "section.full-height").each(function(){
+                    var section = $(this).parent();
+
+                    // get the 'natural' height of sections
+                    section.css("height", "auto");
+
+                    // size them
+                    if(section.height() < h) section.height(h);
+                });
+
+                position_login_form();
+            }
+
+            resize();
+            $(window).resize(resize);
+
+            // hiding/showing stuff
+            items.open_login_form.click(function(e){
+                e.preventDefault();
+
+                toggle_login_form(!items.login_forms_container.is_visible);
+
                 return false;
             });
 
@@ -109,6 +128,18 @@
             });
 
 
+            // url checking
+            function match_url(){
+                switch(get_url_hash()){
+                    case 'login':
+                        toggle_login_form(true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            match_url();
+            $(window).on('hashchange', match_url);
         });
     </script>
 {% endblock %}
@@ -131,13 +162,13 @@
 
                     {% if next %} <input type="hidden" name="next" value="{{ next }}" /> {% endif %}
 
-                    <p class="label">{% trans 'E-mail' %}</p>
+                    <p class="label custom">{% trans 'E-mail' %}</p>
 
                     <div class="second">
                         <input type="text" name="email" id="email" class="custom" />
                     </div>
 
-                    <p class="label">{% trans 'Password' %}</p>
+                    <p class="label custom">{% trans 'Password' %}</p>
 
                     <div class="second">
                         <input type="password" name="password" id="password" class="custom" />
@@ -170,7 +201,7 @@
 
                     <input type="hidden" id="action" name="action" value="lost_password" class="custom" />
 
-                    <p class="label">{% trans 'E-mail' %}</p>
+                    <p class="label custom">{% trans 'E-mail' %}</p>
 
                     <div class="second">
                         <input type="text" name="lost_password_email" id="lost_password_email" class="custom" />
@@ -198,13 +229,13 @@
 
                     <input type="hidden" id="action" name="action" value="recover_password" class="custom" />
 
-                    <p class="label">{% trans 'New password' %}</p>
+                    <p class="label custom">{% trans 'New password' %}</p>
 
                     <div class="second">
                         <input type="password" name="new_password1" id="new_password1" class="custom"/>
                     </div>
 
-                    <p class="label">{% trans 'New password one more time' %}</p>
+                    <p class="label custom">{% trans 'New password one more time' %}</p>
 
                     <div class="second">
                         <input type="password" name="new_password2" id="new_password2" class="custom"/>

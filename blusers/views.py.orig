@@ -6,7 +6,6 @@ import django
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
-from django.template.loader import render_to_string
 import requests
 from rest_framework import parsers, renderers
 from rest_framework.authentication import OAuth2Authentication, TokenAuthentication
@@ -15,8 +14,8 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from action.models import Action
-from bl_auth import User
-from common.functions import JSON_parse, JSON_error, get_random_string, send_email, JSON_ok, min_password_requirments
+from common.functions import JSON_parse, JSON_error, get_random_string, send_email, JSON_ok, min_password_requirments, \
+    create_captcha
 from common.globals import GOOGLE
 from common.views import base_context
 from common.globals import WAITING
@@ -55,49 +54,63 @@ def unset_language(request):
         del request.session['django_language']
 
 
-def sign_up_message(request, message_code):
-    context = {
-        'site_title': settings.GLOBAL['site_title'],
-        'message_code': message_code,
-    }
-
-    return render(request, 'site/sign_up_message.html', context)
-
-
 def sign_up(request):
+<<<<<<< HEAD
     if request.method == 'POST':
         user_form = BlocklogicUserForm(request.POST)
         user_form.set_request(request)
 
+        # user_profile_form = UserProfileForm(request.POST)
         if user_form.is_valid():
-            email = user_form.cleaned_data['email']
-
-            if User.exists(email):
-                if User.type(email) == "google":
-                    sign_up_message(request, 'user-exists-google')
-                elif User.type(email) == "normal":
-                    sign_up_message(request, 'user-exists-normal')
-                else:
-                    return sign_up_message(request, 'user-exists')
-
-            # common function with mobile
-            try_register(user_form)
+            try_register(user_form, None)
 
             # registration succeeded, return to login page
-            return sign_up_message(request, 'registration-successful')
+            message = 'registration-successful'
+        else:
+            # there were errors
+            message = 'registration-errors'
+            return message, user_form
     else:
         user_form = BlocklogicUserForm()
+        user_form.set_request(request)
+
+    context = {
+        'user_form': user_form,
+=======
+    """ a plain login/registration page without errors and data from form verification;
+        if submitted data fails to verify, the view that verified it will
+        re-use the same template with initialized forms """
+    registration_successful = False
+    action = ""
+
+    if request.user.is_authenticated():
+        return redirect('select_company')
+
+    if request.method == "POST":
+        print "we will register now"
+
+        pass
+
+    captcha_file = create_captcha(request)
+
+    user_form = BlocklogicUserForm()
 
     next = None
-    if request.GET.get('next') and request.GET.get('next') != reverse('logout'):
+
+    if request.GET.get('next', '') != '' and request.GET.get('next', '') != reverse('logout'):
         next = request.GET.get('next')
 
     context = {
+        'action': action,
         'next': next,
         'user_form': user_form,
         'client_id': settings.GOOGLE_API['client_id'],
         'title': _("Sign up"),
+        'captcha_file': captcha_file,
+        'site_title': settings.GLOBAL["site_title"],
+        'STATIC_URL': settings.STATIC_URL,
         'GOOGLE_API': settings.GOOGLE_API
+>>>>>>> f361ad50e7fac6bfa562124d184509bc4f625269
     }
 
     return render(request, 'site/sign_up.html', context)
@@ -253,7 +266,47 @@ def google_login_or_register(request, mobile=False):
     return JSON_error("error", _("Something went wrong during login with google"))
 
 
+<<<<<<< HEAD
 def try_register(user_form, user_profile_form=None):
+=======
+def register(request):
+    """ register a user from request.POST;
+        this is not a view, it's called from common.views.index (on submit)
+    """
+    from bl_auth import User
+
+    message = ''
+
+    if request.method == 'POST':
+        user_form = BlocklogicUserForm(request.POST)
+        user_form.set_request(request)
+
+        if user_form.is_valid():
+            email = user_form.cleaned_data['email']
+
+            if User.exists(email):
+                if User.type(email) == "google":
+                    return 'user-exists-google', user_form
+                elif User.type(email) == "normal":
+                    return 'user-exists-normal', user_form
+
+                return 'user-exists', user_form
+
+            # common function with mobile
+            try_register(user_form)
+            # registration succeeded, return to login page
+            message = 'registration-successful'
+        else:
+            # there were errors
+            message = 'registration-errors'
+
+            return message, user_form
+
+    return message, None
+
+
+def try_register(user_form, user_profile_form):
+>>>>>>> f361ad50e7fac6bfa562124d184509bc4f625269
     new_user = user_form.save()
     new_user.set_password(user_form.cleaned_data['password1'])
 
@@ -276,27 +329,40 @@ def try_register(user_form, user_profile_form=None):
     new_user.is_active = False
     new_user.save()
 
-    # TODO: add the free subscription on register
+    group = new_user.homegroup
+    set_user_value(new_user, 'selected_group', group.id)
+
     # add_free_subscription(new_user)
 
-    activation_url = reverse('activate_account', args={key})
+    # if django.utils.translation.get_language() == "sl-si":  # TODO: remove - use reverse()
+    #    activation_url = "aktiviraj-racun/kljuc="
+    #else:
 
-    # put the stuff in template, then render it to string and send it via email
-    mail_context = {
-        'url': settings.SITE_URL + activation_url,
-    }
+    activation_url = "activate-account/key="
+
+    activation_url = settings.SITE_URL + settings.URL_PREFIX + activation_url + key
+
+    file = open(settings.STATIC_DIR + "email/blusers/email_verification_" +
+                django.utils.translation.get_language() + ".txt", "r")
+    message_txt = file.read()
+    file.close()
+    message_txt = message_txt % (activation_url, settings.SITE_URL)
+    message_txt = unicode(message_txt, 'utf-8')
+
+    file = open(settings.STATIC_DIR + "email/blusers/email_verification_" +
+                django.utils.translation.get_language() + ".html", "r")
+    message_html = file.read()
+    file.close()
+    message_html = message_html % (activation_url, activation_url, settings.SITE_URL)
+    message_html = unicode(message_html, 'utf-8')
 
     subject = "%s %s" % (settings.EMAIL_SUBJECT_PREFIX, unicode(_("%s - Registration successful" % ("timebits.com"))))
 
-    message_html = render_to_string('email/email_verification.html', mail_context)
-    message_text = render_to_string('email/email_verification.txt', mail_context)
-
     if settings.DEBUG:
         print "sending register email"
-        print message_text
-        print message_html
+        print message_txt
     else:
-        send_email(settings.EMAIL_FROM, [new_user.email], None, subject, message_text, message_html)
+        send_email(settings.EMAIL_FROM, [new_user.email], None, subject, message_txt, message_html)
 
 
 @login_required
@@ -338,6 +404,73 @@ def delete_user_image(bluser, image_id):
 
 
 @api_view(['POST'])
+def mobile_register(request):
+    if request.method == 'POST':
+
+        user_form = BlocklogicUserForm(request.POST)
+
+        user_form.is_mobile = True
+        user_form.set_request(request)
+        """
+        user_profile_form = UserProfileForm(request.POST)
+
+        if user_form.is_valid() and user_profile_form.is_valid():
+            # common function with web
+            try_register(user_form, user_profile_form)
+            return JsonResponse({'status': "created"})
+        else:
+            return JSON_error(status="error", message='register failed')
+        """
+
+        if user_form.is_valid():
+            # common function with web
+            try_register(user_form)
+            return JsonResponse({'status': "created"})
+        else:
+            return JSON_error(status="error", message='register failed')
+
+
+    return JsonResponse({'error': "should not happen"})
+
+
+def successfully_registered(request):
+    context = {
+        'title': _("Successfully registered"),
+        'site_title': settings.GLOBAL["site_title"],
+    }
+
+    return render(request, "blusers/successfully-registered.html", context)
+
+
+@api_view(['POST'])
+def mobile_lost_password(request):
+    data = JSON_parse(request.POST['data'])
+
+    try:
+        if data and "email" in data:
+            try:
+                validate_email(data["email"])
+            except ValidationError:
+                return JsonResponse({"status": "email_invalid", 'message': "Email is invalid"})
+
+            try:
+                bluser = BlocklogicUser.objects.get(email=data["email"])
+                if bluser.type == GOOGLE:
+                    return JsonResponse({"status": "google_login", 'message': "Try login with google"})
+
+                send_reactivation_key(request, bluser)
+
+                return JsonResponse({"status": "ok"})
+
+            except BlocklogicUser.DoesNotExist:
+                return JsonResponse({"status": "user_does_not_exist", 'message': "User does not exist"})
+    except:
+        pass
+
+    return JsonResponse({"status": "something_went_wrong", 'message': "Something went wrong"})
+
+
+@api_view(['POST'])
 def lost_password(request):
     data = JSON_parse(request.POST['data'])
 
@@ -372,6 +505,8 @@ def activate_account(request, key):
     if request.user.is_authenticated():
         return redirect('index')
 
+    from views import index
+
     try:
         user = BlocklogicUser.objects.get(password_reset_key=key)
         user.is_active = True
@@ -381,7 +516,7 @@ def activate_account(request, key):
     except BlocklogicUser.DoesNotExist:
         message = 'activation-failed'
 
-    return sign_up_message(request, message)
+    return index(request)
 
 
 def send_reactivation_key(request, bluser):

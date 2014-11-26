@@ -12,11 +12,14 @@ urlpatterns = patterns('',
     # admin
     url(r'^admin/', include(admin.site.urls)),
 
-    # main: logins and registrations
+    # main: the 'site' pages
     url(r'^$', index, name='index'),
     url(r'^sign-up/$', blusers_views.sign_up, name='sign_up'),
     url(r'^register-company/$', blusers_views.sign_up, name='register_company'),  # TODO: wrong view, this is
     url(r'^logout/$', blusers_views.logout, name="logout"),  # registration
+
+    # registration: passwords, activations, etc.
+    url(r'^activate-account/key=(?P<key>[\w]+)$', blusers_views.activate_account, name='activate_account'),
     url(r'^lost-password/$', blusers_views.lost_password, name='lost_password'),
 
     # selecting
@@ -29,6 +32,9 @@ urlpatterns = patterns('',
     # MOBILE
     url(r'^pos/mobile/', include('mobile.urls', namespace='mobile_pos')),
     url(r'^pos/sync/', include('sync.urls', namespace='sync')),
+
+    # the captcha app
+    url(r'^captcha/', include('captcha.urls')),
 )
 
 # TODO: remove from production
@@ -42,3 +48,4 @@ if settings.DEBUG:
             'document_root': settings.STATIC_ROOT,
         }),
 )
+

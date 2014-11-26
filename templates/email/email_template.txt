@@ -1,0 +1,10 @@
+{% load static %}
+{% load i18n %}
+
+
+{% block content %}{% endblock %}
+
+{% trans 'Kind regards,' %}
+{% trans 'the Sellout team' %}
+
+http://www.sellout.biz"

@@ -11,6 +11,12 @@
 {% block content %}
     <section>
         <div class="container">
+            <form action="{% url 'sign_up' %}" method="post">
+
+            <div class="non-field-errors">
+                {{ user_form.non_field_errors }}
+            </div>
+
             <div class="row">
                 <div class="col-md-4">
                     {% trans 'Join the future in retail business.' %}
@@ -18,39 +24,80 @@
                         {% trans 'Register for free.' %}
                     </p>
                 </div>
-                <form action="" >
+                    {% csrf_token %}
+
                     <div class="col-md-4">
                         <div class="form-field">
+                            <div class="field-error">
+                                {{ user_form.first_name.errors }}
+                            </div>
                             {{ user_form.first_name.label_tag }}
                             {{ user_form.first_name}}
                         </div>
 
                         <div class="form-field">
+                            <div class="field-error">
+                                {{ user_form.last_name.errors }}
+                            </div>
                             {{ user_form.last_name.label_tag }}
                             {{ user_form.last_name }}
                         </div>
 
                         <div class="form-field">
+                            <div class="field-error">
+                                {{ user_form.email.errors }}
+                            </div>
                             {{ user_form.email.label_tag }}
                             {{ user_form.email }}
+                        </div>
+
+                        <div class="form-field">
+                            <div class="field-error">
+                                {{ user_form.country.errors }}
+                            </div>
+                            {{ user_form.country.label_tag }}
+                            {{ user_form.country }}
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-field">
+                            <div class="field-error">
+                                {{ user_form.sex.errors }}
+                            </div>
+                            {{ user_form.sex.label_tag }}
+                            {{ user_form.sex }}
+                        </div>
+
+                        <div class="form-field">
+                            <div class="field-error">
+                                {{ user_form.password1.errors }}
+                            </div>
                             {{ user_form.password1.label_tag }}
                             {{ user_form.password1 }}
                         </div>
+
                         <div class="form-field">
+                            <div class="field-error">
+                                {{ user_form.password2.errors }}
+                            </div>
                             {{ user_form.password2.label_tag }}
                             {{ user_form.password2 }}
+                        </div>
+
+                        <div class="form-field captcha">
+                            <div class="field-error">
+                                {{ user_form.captcha.errors }}
+                            </div>
+                            {{ user_form.captcha.label_tag }}
+                            {{ user_form.captcha }}
                         </div>
 
                         <div class="form-field">
                             <input type="submit" class="buttons" value="{% trans 'Register' %}" />
                         </div>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </section>
 {% endblock %}

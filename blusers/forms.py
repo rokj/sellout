@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+from captcha.fields import CaptchaField
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 from blusers.models import BlocklogicUser
@@ -72,6 +73,8 @@ class BlocklogicUserForm(forms.ModelForm):
     sex = forms.CharField(required=True, widget=forms.Select(choices=SEX, attrs={'class': 'sex'}))
     images = forms.FileField(label=_("Your photo"), required=False)
 
+    captcha = CaptchaField()
+
     registration = True
     is_mobile = False
 
@@ -130,10 +133,13 @@ class BlocklogicUserForm(forms.ModelForm):
     def clean(self):
         # little hack
         # we need captcha only when creating user account
-        if self.is_mobile == False:
-            if self.registration and self.instance.pk is None:
-                if self.data and not self.request.POST['captcha_user_answer'] or ((int(self.request.session['captcha_answer']) != int(self.request.POST['captcha_user_answer']))):
-                    raise forms.ValidationError(_("It really is not that difficult."), "captcha_answer_error")
+
+        # TODO: update this on user settings page (migrate from custom captcha to django-simple-captcha)
+
+        #if self.is_mobile == False:
+        #    if self.registration and self.instance.pk is None:
+        #        if self.data and not self.request.POST['captcha_user_answer'] or ((int(self.request.session['captcha_answer']) != int(self.request.POST['captcha_user_answer']))):
+        #            raise forms.ValidationError(_("It really is not that difficult."), "captcha_answer_error")
 
         return self.cleaned_data
 
