@@ -1,7 +1,7 @@
 import json
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
-from action.models import Action
+from webpos.action.models import Action
 from blusers.forms import LoginForm
 from django.utils.translation import ugettext as _
 from decorators import login_required
