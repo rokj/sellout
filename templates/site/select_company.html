@@ -2,6 +2,22 @@
 {% load i18n %}
 {% load static %}
 
+{% block navbar_buttons %}
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            <div id="user_button" class="button-container simple-menu-button">
+                <div class="vertical-separator"></div>
+
+                <a class="custom nav-button button-text" href="#">{{ request.user }}</a>
+
+                <ul id="user_menu" class="drop-down">
+                    <li class="store"><a  href="{% url 'logout' %}">{% trans 'Log Out' %}</a></li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+{% endblock %}
+
 {% block content %}
     <section>
         <div class="container">
