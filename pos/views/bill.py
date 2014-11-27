@@ -142,7 +142,7 @@ def bill_to_dict(user, company, bill):
 
 
         'discount_amount': format_number(user, company, bill.discount_amount),
-        'discount_type': format_number(user, company, bill.discount_type),
+        'discount_type': bill.discount_type,
 
         # prices
         'base': format_number(user, company, bill.base),
