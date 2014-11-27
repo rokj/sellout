@@ -1,7 +1,6 @@
 import json
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
-from webpos.action.models import Action
 from blusers.forms import LoginForm
 from django.utils.translation import ugettext as _
 from decorators import login_required
@@ -50,6 +49,7 @@ def index(request):
 @login_required
 def select_company(request):
     """ show current user's companies and a list of invites. """
+    from action.models import Action
 
     # the list of companies
     companies = request.user.get_companies()
