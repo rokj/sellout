@@ -12,7 +12,6 @@ from rest_framework import parsers, renderers
 from rest_framework.authentication import OAuth2Authentication, TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
-from rest_framework.response import Response
 from rest_framework.views import APIView
 from action.models import Action
 from bl_auth import User
@@ -55,58 +54,13 @@ def unset_language(request):
         del request.session['django_language']
 
 
-def sign_up_message(request, message_code):
-    context = {
-        'site_title': g.SITE_TITLE,
-        'message_code': message_code,
-    }
-
-    return render(request, 'site/sign_up_message.html', context)
-
-
-def sign_up(request):
-    if request.method == 'POST':
-        user_form = BlocklogicUserForm(request.POST)
-        user_form.set_request(request)
-
-        if user_form.is_valid():
-            email = user_form.cleaned_data['email']
-
-            if User.exists(email):
-                if User.type(email) == "google":
-                    sign_up_message(request, 'user-exists-google')
-                elif User.type(email) == "normal":
-                    sign_up_message(request, 'user-exists-normal')
-                else:
-                    return sign_up_message(request, 'user-exists')
-
-            # common function with mobile
-            try_register(user_form)
-
-            # registration succeeded, return to login page
-            return sign_up_message(request, 'registration-successful')
-    else:
-        user_form = BlocklogicUserForm()
-
-    next = None
-    if request.GET.get('next') and request.GET.get('next') != reverse('logout'):
-        next = request.GET.get('next')
-
-    context = {
-        'next': next,
-        'user_form': user_form,
-        'client_id': settings.GOOGLE_API['client_id'],
-        'title': _("Sign up"),
-        'GOOGLE_API': settings.GOOGLE_API
-    }
-
-    return render(request, 'site/sign_up.html', context)
-
-
 def login(request, data):
     """ log the user in;
         if successful, redirect to the index page
-        if not successful, redirect back to the login page """
+        if not successful, redirect back to the login page
+
+        this is not a view!.
+    """
     next = ''
 
     username = data.get('email')
@@ -254,6 +208,7 @@ def google_login_or_register(request, mobile=False):
 
 
 def try_register(user_form, user_profile_form=None):
+    """ this is not a view """
     new_user = user_form.save()
     new_user.set_password(user_form.cleaned_data['password1'])
 
@@ -274,13 +229,14 @@ def try_register(user_form, user_profile_form=None):
     new_user.password_reset_key = key
     new_user.type = 'normal'
     new_user.is_active = False
-    new_user.update_user_password(user_form.cleaned_data['password1'])
+    #new_user.update_password(user_form.cleaned_data['password1'])
+    new_user.update_password()
     new_user.save()
 
     # TODO: add the free subscription on register
     # add_free_subscription(new_user)
 
-    activation_url = reverse('activate_account', args={key})
+    activation_url = reverse('web:activate_account', args={key})
 
     # put the stuff in template, then render it to string and send it via email
     mail_context = {
@@ -300,32 +256,6 @@ def try_register(user_form, user_profile_form=None):
         send_email(settings.EMAIL_FROM, [new_user.email], None, subject, message_text, message_html)
 
 
-@login_required
-def logout(request):
-    context = {
-        'google_account': False
-    }
-
-    if request.user and request.user.type == GOOGLE:
-        context['google_account'] = True
-        context['GOOGLE_API'] = settings.GOOGLE_API
-
-        # try:
-            # google_access_token = get_value(request.user, 'google_access_token')
-            # url = ('https://accounts.google.com/o/oauth2/revoke?token=%s' % google_access_token)
-
-            # r = requests.get(url)
-            # if r.status_code == 200:
-
-        # except InvalidKeyError:
-        #    pass
-
-    django_logout(request)
-    unset_language(request)
-
-    return render(request, "logout.html", context)
-
-
 def delete_user_image(bluser, image_id):
     try:
         user_image = UserImage.objects.get(id=image_id, created_by=bluser)
@@ -336,53 +266,6 @@ def delete_user_image(bluser, image_id):
         return True
     except UserImage.DoesNotExist:
         return False
-
-
-@api_view(['POST'])
-def lost_password(request):
-    data = JSON_parse(request.POST['data'])
-
-    try:
-        if data and "email" in data:
-            try:
-                validate_email(data["email"])
-            except ValidationError:
-                return Response({"status": "email_invalid"})
-
-            try:
-                bluser = BlocklogicUser.objects.get(email=data["email"])
-                if bluser.type == GOOGLE:
-                    return Response({"status": "google_login"})
-
-                send_reactivation_key(request, bluser)
-
-                return Response({"status": "ok"})
-
-            except BlocklogicUser.DoesNotExist:
-                return Response({"status": "user_does_not_exist"})
-    except:
-        pass
-
-    return Response({"status": "something_went_wrong"})
-
-
-def activate_account(request, key):
-    """ if activation is successful: go to the 'enter' page with message='activation-successful'
-        otherwise, message is 'activation-failed'
-    """
-    if request.user.is_authenticated():
-        return redirect('index')
-
-    try:
-        user = BlocklogicUser.objects.get(password_reset_key=key)
-        user.is_active = True
-        user.save()
-
-        message = 'activation-successful'
-    except BlocklogicUser.DoesNotExist:
-        message = 'activation-failed'
-
-    return sign_up_message(request, message)
 
 
 def send_reactivation_key(request, bluser):
@@ -440,32 +323,32 @@ def reset_password(request):
     data = JSON_parse(request.POST['data'])
 
     if not "new_password1" in data:
-        return Response({"status": "no_key"})
+        return JsonResponse({"status": "no_key"})
 
     if not "new_password2" in data:
-        return Response({"status": "no_key"})
+        return JsonResponse({"status": "no_key"})
 
     if not "key" in data:
-        return Response({"status": "no_key"})
+        return JsonResponse({"status": "no_key"})
 
     try:
         bluser = BlocklogicUser.objects.get(password_reset_key=data["key"])
     except BlocklogicUser.DoesNotExist:
-        return Response({"status": "wrong_key"})
+        return JsonResponse({"status": "wrong_key"})
 
     password1 = data['new_password1']
     password2 = data['new_password2']
 
     if password1 != password2:
-        return Response({"status": "passwords_must_be_identical"})
+        return JsonResponse({"status": "passwords_must_be_identical"})
     else:
         bluser.set_password(password1)
         bluser.password_reset_key = None
         bluser.save()
 
-        return Response({"status": "ok"})
+        return JsonResponse({"status": "ok"})
 
-    return Response({"status": "something_went_wrong"})
+    return JsonResponse({"status": "something_went_wrong"})
 
 @login_required(ajax=True)
 def save_user_settings(request):
@@ -810,7 +693,7 @@ class ObtainAuthToken(APIView):
 
                               'status': "ok"})
 
-        #return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        #return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def get_user(request):

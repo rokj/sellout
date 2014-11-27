@@ -122,20 +122,20 @@
 
     function update_user_password(data) {
         send_data('{% url "update-password" %}', data, "{{ csrf_token }}",
-            function(response) {
+            function(JsonResponse) {
                 hide_password_messages();
 
-                if (response.status == "ok") {
+                if (JsonResponse.status == "ok") {
                     si.new_password.hide();
                     si.update_password.hide();
                     si.change_password.show();
                     si.password_changed_successfully.show();
                 } else {
-                    if (response.status == 'wrong_current_password') {
+                    if (JsonResponse.status == 'wrong_current_password') {
                         show_current_password_error("{% trans "Wrong current password." %}");
-                    } else if (response.status == 'new_password_mismatch') {
+                    } else if (JsonResponse.status == 'new_password_mismatch') {
                         show_new_password_error("{% trans "New passwords should match each other." %}");
-                    } else if (response.status == 'min_pass_requirement_failed') {
+                    } else if (JsonResponse.status == 'min_pass_requirement_failed') {
                         show_new_password_error("{% trans "Password should be at least 6 characters long and can contain digits, letters and following @#$%^&+=" %}");
                     } else {
                         // TODO: nice alert message
@@ -369,11 +369,11 @@
         $("#progress").fadeIn("fast");
 
         upload_file('{% url "change-photo" %}', data, "{{ csrf_token }}",
-            // on response
-            function(response) {
-                if (response.status == "ok") {
-                    $('.change-photo img.avatar').attr("src", "/media/" + response.user_image_photo_url);
-                    $('#user_menu_button img.avatar-small').attr("src", "/media/" + response.user_image_menu_url);
+            // on JsonResponse
+            function(JsonResponse) {
+                if (JsonResponse.status == "ok") {
+                    $('.change-photo img.avatar').attr("src", "/media/" + JsonResponse.user_image_photo_url);
+                    $('#user_menu_button img.avatar-small').attr("src", "/media/" + JsonResponse.user_image_menu_url);
                 } else {
                 }
 

@@ -8,6 +8,7 @@ from django.db import transaction
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
+import psycopg2
 from common.functions import ImagePath
 from common.globals import MALE, SEX, TAX_PAYER_CHOICES, NORMAL, LOGIN_TYPES, DIRS
 
@@ -98,6 +99,28 @@ class BlocklogicUser(AbstractUser, Skeleton):
         return [p.company for p in Permission.objects.filter(user=self)]
 
     companies = property(get_companies)
+
+    def update_password(self):
+        """
+        Updates user password in master users DB.
+
+        @return: True, False
+        """
+
+        conn = psycopg2.connect("host=" + settings.DATABASES["bl_users"]["HOST"] +
+                                " dbname=" + settings.DATABASES["bl_users"]["NAME"] +
+                                " user=" + settings.DATABASES["bl_users"]["USER"] +
+                                " password=" + settings.DATABASES["bl_users"]["PASSWORD"])
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT email, password, data FROM users WHERE email = %s", [self.email])
+        result = cursor.fetchone()
+
+        if result and len(result) > 0:
+            cursor.execute("UPDATE users SET password = %s, datetime_updated = NOW(), updated_by = %s WHERE email = %s",
+                           [self.password, settings.SITE_URL, self.email])
+
+        conn.commit()
 
 
 class UserImage(SkeletonU):

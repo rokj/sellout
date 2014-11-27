@@ -6,10 +6,15 @@ body{
     background-color: #f0f0f0;
 }
 
+nav + *{
+    /* the first element after navbar must be removed from the top border
+        by the size of navbar */
+    margin-top: 60px;
+}
+
 nav a.navbar-header{
     text-decoration: none;
 }
-
 
 .v-center {
     /*

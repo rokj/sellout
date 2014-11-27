@@ -9,9 +9,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.views import APIView
 
-__author__ = 'tomaz'
-
-
 def get_user_credentials(user):
     credentials = {}
 
@@ -58,6 +55,6 @@ class ObtainAuthToken(APIView):
                          'config': get_company_config(user, Company.objects.get(url_name=group)),
                          'status': "ok"})
 
-        #return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        #return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 obtain_auth_token = ObtainAuthToken.as_view()

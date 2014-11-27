@@ -1,4 +1,4 @@
-{% extends 'site/bootstrap.html' %}
+{% extends 'web/bootstrap.html' %}
 {% load static %}
 {% load i18n %}
 
@@ -48,7 +48,7 @@
             });
 
             $(".register-shortcut").click(function(){
-                window.location = "{% url 'sign_up' %}";
+                window.location = "{% url 'web:sign_up' %}";
             });
 
             // jquery objects
@@ -149,7 +149,7 @@
 {% block navbar_buttons %}
     <ul class="nav navbar-nav navbar-right">
         <li><a class="custom nav-button extra-font" href="#pricing">{% trans 'Pricing' %}</a></li>
-        <li><a class="custom nav-button extra-font" href="{% url 'sign_up' %}">{% trans 'Sign up' %}</a></li>
+        <li><a class="custom nav-button extra-font" href="{% url 'web:sign_up' %}">{% trans 'Sign up' %}</a></li>
         <li><a class="custom nav-button extra-font fake" href="#"><div id="open_login_form">{% trans 'Login' %}</div></a></li>
     </ul>
 {% endblock %}
@@ -207,7 +207,7 @@
                     </div>
 
                     <div class="lost-login">
-                        <a href="{% url 'lost_password' %}"
+                        <a href="{% url 'web:lost_password' %}"
                            id="lost_password">{% trans "Lost Password?" %}</a>
                     </div>
                 </form>

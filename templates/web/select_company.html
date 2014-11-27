@@ -1,6 +1,14 @@
-{% extends "site/bootstrap.html" %}
+{% extends "web/bootstrap.html" %}
 {% load i18n %}
 {% load static %}
+
+{% block head %}
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $("#user_button").simpleMenu($("#user_menu"));
+    });
+    </script>
+{% endblock %}
 
 {% block navbar_buttons %}
     <ul class="nav navbar-nav navbar-right">
@@ -11,7 +19,7 @@
                 <a class="custom nav-button button-text" href="#">{{ request.user }}</a>
 
                 <ul id="user_menu" class="drop-down">
-                    <li class="store"><a  href="{% url 'logout' %}">{% trans 'Log Out' %}</a></li>
+                    <li class="store"><a  href="{% url 'web:logout' %}">{% trans 'Log Out' %}</a></li>
                 </ul>
             </div>
         </li>
@@ -25,7 +33,7 @@
 
             {% if actions|length %}
                 {% for a in actions %}
-                    asdf asdf asdf
+
                 {% endfor %}
             {% else %}
                 <p>{% trans 'You have no pending actions.' %}</p>
@@ -38,13 +46,17 @@
         <h2>{% trans 'Your companies' %}</h2>
 
         {% if companies|length %}
-            <p>{% trans 'You are not part of any company yet.' %}</p>
-            <p>{% trans 'Create your own company or wait for an invite.' %}</p>
-        {% else %}
             {% for c in companies %}
 
             {% endfor %}
+        {% else %}
+            <p>{% trans 'You are not part of any company yet.' %}</p>
+            <p>{% trans 'Create your own company or wait for an invite.' %}</p>
         {% endif %}
+
+        <div id="new_company">
+            <a id="new_company_link" href="{% url 'pos:register_company' %}"> + {% trans 'Add Company' %}</a>
+        </div>
     </div>
 
     </section>

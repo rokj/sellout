@@ -1,4 +1,4 @@
-{% extends "site/bootstrap.html" %}
+{% extends "web/bootstrap.html" %}
 {% load static %}
 {% load i18n %}
 
@@ -32,26 +32,26 @@
             {% if message_code == "registration-successful" %}
                 <p>{% trans "Registration successful." %}</p>
                 <p>{% trans "Check your e-mail inbox for confirmation link." %}</p>
-                <p><a href="{% url "index" %}">{% trans "Back to home page" %}</a></p>
+                <p><a href="{% url "web:index" %}">{% trans "Back to home page" %}</a></p>
 
             {% elif message_code == "activation-successful" %}
                 <p>{% trans "Activation successful." %}</p>
                 <p>{% trans "You can now login." %}</p>
-                <p><a href="{% url "index" %}#login">{% trans "Login" %}</a></p>
+                <p><a href="{% url "web:index" %}#login">{% trans "Login" %}</a></p>
 
             {% elif message_code == "activation-failed" %}
                 <p>{% trans "Activation failed (wrong key?)" %}</p>
-                <p><a href="{% url 'index' %}">{% trans 'Back to home page' %}</a></p>
+                <p><a href="{% url 'web:index' %}">{% trans 'Back to home page' %}</a></p>
 
             {% elif message_code == "user-exists-google" %}
                 <p>{% blocktrans %} You are already registered on one of blocklogic sites with Google account.
                     Please log in by clicking the google login button on home page.{% endblocktrans %}</p>
-                <p><a href="{% url "index" %}#login">{% trans "Back to home page" %}</a></p>
+                <p><a href="{% url "web:index" %}#login">{% trans "Back to home page" %}</a></p>
 
             {% elif message_code == "user-exists-normal" or message_code == "user-exists" %}
                 <p>{% blocktrans %} Looks like you are already a member of a Blocklogic product.
                     Use the login form to log in.{% endblocktrans %}</p>
-                <p><a href="{% url "index" %}#login">{% trans "Back to home page" %}</a></p>
+                <p><a href="{% url "web:index" %}#login">{% trans "Back to home page" %}</a></p>
             {% endif %}
         </div>
     </section>
