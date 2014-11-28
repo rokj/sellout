@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('user_id', models.IntegerField()),
                 ('user_name', models.CharField(max_length=64)),
                 ('serial', models.IntegerField(null=True, verbose_name="Bill number, unique over all company's bills")),
-                ('discount_amount', models.DecimalField(null=True, verbose_name='Discount on the whole bill (absolute or percent)', max_digits=24, decimal_places=8, blank=True)),
+                ('discount_amount', models.DecimalField(null=True, verbose_name='Discount on the whole bill (absolute or relative)', max_digits=24, decimal_places=8, blank=True)),
                 ('discount_type', models.CharField(blank=True, max_length=16, null=True, verbose_name='Type of discount', choices=[(b'Relative', 'Percentage'), (b'Absolute', 'Absolute value')])),
                 ('base', models.DecimalField(null=True, verbose_name='Sub total', max_digits=24, decimal_places=8, blank=True)),
                 ('discount', models.DecimalField(null=True, verbose_name='Discount, sum of all discounts', max_digits=24, decimal_places=8, blank=True)),
