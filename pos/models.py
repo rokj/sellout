@@ -18,7 +18,7 @@ import datetime as dtm
 class CompanyAbstract(models.Model):
     # abstract: used in  for Company and BillCompany
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
-    street = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
+    street = models.CharField(_("Street address"), max_length=200, null=True, blank=True)
     postcode = models.CharField(_("Postal code"), max_length=20, null=True, blank=True)
     city = models.CharField(_("City"), max_length=50, null=True, blank=True)
     state = models.CharField(_("State"), max_length=50, null=True, blank=True)
@@ -27,6 +27,8 @@ class CompanyAbstract(models.Model):
     website = models.CharField(_("Website"), max_length=256, null=True, blank=True)
     phone = models.CharField(_("Phone number"), max_length=30, null=True, blank=True)
     vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=False, blank=False)
+
+    tax_payer = models.BooleanField(_("Tax payer"), blank=False)
 
     class Meta:
         abstract = True

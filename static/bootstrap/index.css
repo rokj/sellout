@@ -20,6 +20,10 @@
     z-index: 2000;
 }
 
+#login_forms_container label{
+    font-size: 90%;
+}
+
 /* the div that drops shadow (behind the arrow) */
 #login_forms_background{
     z-index: 1;

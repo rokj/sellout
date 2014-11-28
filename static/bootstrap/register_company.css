@@ -1,0 +1,119 @@
+body{
+    padding-bottom: 30px;
+}
+
+/* company registration form */
+.form-field input,
+.form-field select,
+.form-field textarea{
+    width: 100%;
+    max-width: 300px;
+}
+
+.fake-label, label{
+    margin-top: 10px;
+    display: block;
+    font-weight: normal;
+    color: #646464;
+}
+
+.help-text{
+    color: #969696;
+    font-size: 0.9em;;
+}
+
+/* specific fields */
+
+#logo_placeholder{
+    
+}
+
+#logo_placeholder img{
+    width: 50px;
+    margin-right: 10px;
+    float: left;
+    display: inline-block;
+}
+
+#pos_url{
+    display: inline-block;
+    float: left;
+    
+    /* pretend this is a non-editable part of text input */
+    background-color: #ffffff;
+    margin-top: 5px;
+    border-top: 2px solid #dddddd;
+    height: 32px;
+    line-height: 32px;
+    padding-left: 10px;
+
+    cursor: not-allowed;
+}
+
+.row .url-name .help-text{
+    max-width: 600px;
+}
+
+#suggestion_list_container{
+    display: inline-block;
+    vertical-align: top;
+    background-color: #dddddd;
+
+    margin-top: 5px;
+    margin-left: 10px;
+    
+    position: relative;
+
+    padding-left: 20px;
+    padding-top: 10px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+}
+
+#suggestion_list_container > p{
+    font-size: 90%;
+    font-weight: bold;
+    color: #969696;
+}
+
+#suggestion_list_container:after{
+    content: "";
+    display: block;
+    width: 15px;
+    height: 15px;
+
+    position: absolute;
+    top: 7px;
+    left: -7px;
+    
+    background-color: inherit;
+
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+p.suggestion-list-item{
+    cursor: pointer;
+    color: #444444;
+    margin: 0;
+}
+
+p.suggestion-list-item:hover{
+    opacity: 0.8;
+}
+
+.footer-left a{
+    display: inline-block;
+    height: 32px;
+    line-height: 32px;
+    margin-top: 10px;
+}
+
+.footer-right{
+    text-align: right;
+    max-width: 300px;
+}
+
+
+

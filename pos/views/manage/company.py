@@ -147,6 +147,33 @@ def url_name_suggestions(request):
 ### company ###
 ###############
 class CompanyForm(forms.ModelForm):
+    class Meta:
+        model = Company
+        fields = [  # 'color_logo',  # logos have been left out and moved to separate forms (html only)
+                    #'monochrome_logo',
+                    'name',
+                    'url_name',
+                    'email',
+                    'street',
+                    'postcode',
+                    'city',
+                    'state',
+                    'country',
+                    'phone',
+                    'vat_no',
+                    'tax_payer',
+                    'website',
+                    'notes', ]
+
+        widgets = {
+            'tax_payer': forms.Select(choices=((True, _("Yes")), (False, _("No"))))
+        }
+
+        # widgets = {
+        #    'color_logo': widgets.PlainClearableFileInput,
+        #    'monochrome_logo': widgets.PlainClearableFileInput,
+        #}
+
     # take special care of urls
     def clean_url_name(self):
         url_name = self.cleaned_data['url_name']
@@ -163,27 +190,6 @@ class CompanyForm(forms.ModelForm):
             raise forms.ValidationError(_("Url of the company is invalid or exists already."))
         else:
             return url_name
-
-    class Meta:
-        model = Company
-        fields = [#'color_logo',  # logos have been left out and moved to separate forms (html only)
-                  #'monochrome_logo',
-                  'name',
-                  'url_name',
-                  'email',
-                  'street',
-                  'postcode',
-                  'city',
-                  'state',
-                  'country',
-                  'phone',
-                  'vat_no',
-                  'notes',
-                  'website']
-        #widgets = {
-        #    'color_logo': widgets.PlainClearableFileInput,
-        #    'monochrome_logo': widgets.PlainClearableFileInput,
-        #}
 
 
 def validate_company(user, company, data):
