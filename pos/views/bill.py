@@ -142,7 +142,7 @@ def bill_to_dict(user, company, bill):
 
 
         'discount_amount': format_number(user, company, bill.discount_amount),
-        'discount_type': format_number(user, company, bill.discount_type),
+        'discount_type': bill.discount_type,
 
         # prices
         'base': format_number(user, company, bill.base),
@@ -263,14 +263,22 @@ def create_bill(request, company):
 
     # current register: get BillRegister with the same id as current one
     try:
-        bill_register = BillRegister.objects.get(register__id=int(data.get('register_id')))
+        bill_registers = BillRegister.objects.filter(register__id=int(data.get('register_id')))
+        if len(bill_registers) > 0:
+            bill_register = bill_registers[0]
+        else:
+            raise Register.DoesNotExist
     except (TypeError, ValueError, Register.DoesNotExist):
         return JsonError(_("Invalid register specified."))
 
     # current contact: get BillContact with the same id as the requested contact
     if data.get('contact'):
         try:
-            bill_contact = BillContact.objects.get(contact__id=int(data.get('contact').get('id')))
+            bill_contacts = BillContact.objects.get(contact__id=int(data.get('contact').get('id'))).order_by('datetime_created')
+            if len(bill_contacts) > 0:
+                bill_contact = bill_contacts[0]
+            else:
+                raise Contact.DoesNotExist
         except (Contact.DoesNotExist, ValueError, TypeError):
             return JsonError(_("Invalid contact"))
     else:
