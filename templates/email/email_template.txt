@@ -7,4 +7,4 @@
 {% trans 'Kind regards,' %}
 {% trans 'the Sellout team' %}
 
-http://www.sellout.biz"
+http://www.sellout.biz
