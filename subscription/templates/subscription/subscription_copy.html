@@ -1,0 +1,474 @@
+{% extends 'web/homebase.html' %}
+{% load staticfiles %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block head_jquery %}
+    {# Until we do not really support different currencies we "fix" them to EUR #}
+    var btc_price = -1;
+    var price = -1;
+
+    function on_start() {
+        $("p.error").hide();
+    }
+
+    function on_hash_change() {
+        on_start();
+
+        var hash = get_url_hash();
+
+        if (hash == "paying-for-me-and-for-others") {
+            $("div.for-others").show();
+            $("div#paying_for li." + hash + " a").addClass("selected");
+        } else if (hash == "paying-just-for-others") {
+            $("div.for-others").show();
+        } else if (hash == "paying-just-for-me") {
+            $("div.for-others").hide();
+        }
+
+        $('ol#paying_for li a').removeClass("selected");
+        $('ol#paying_for li a[href="#'+ hash + '"]').addClass("selected");
+
+        get_price("");
+    }
+
+    $(window).on('hashchange', function(e) {
+        on_hash_change();
+    });
+
+    function valid_others_emails() {
+        $("div.for-others ol.errors").hide();
+
+        var emails = $("input#others").val().split(",");
+
+        if (emails.length == 1 && emails[0] == "email@internet.com") {
+            return true;
+        }
+
+        var valid_emails = [];
+        var invalid_emails = [];
+
+        for (var i = 0; i < emails.length; i++) {
+            var email = emails[i].trim();
+            if (email_valid(email)) {
+                valid_emails.push(email);
+            } else {
+                invalid_emails.push(email);
+            }
+        }
+
+        if (invalid_emails.length > 0) {
+            $("input#others").addClass("error");
+
+            for (var i = 0; i < valid_emails.length; i++) {
+                valid_emails[i] = valid_emails[i] + " ";
+            }
+
+            $("input#others").val(valid_emails.join());
+
+            for (var i = 0; i < invalid_emails.length; i++) {
+                $("div.for-others ol.errors").append("<li>" + invalid_emails[i] + " {% trans "is not a valid email" %}</li>");
+                $("div.for-others ol.errors").show();
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    function duration_for_price() {
+        var duration = $("#subscription_duration").val();
+
+        if (duration == "1_months") duration = "1";
+        else if (duration == "2_months") duration = "2";
+        else if (duration == "3_months") duration = "3";
+        else if (duration == "6_months") duration = "5";
+        else if (duration == "12_months") duration = "10";
+
+        return duration;
+    }
+
+    function also_paying_for_others() {
+        var others = [];
+
+        if (! valid_others_emails()) {
+            return others;
+        }
+
+        var hash = get_url_hash();
+
+        if ((hash != "" && hash == "paying-for-me-and-for-others") || (hash != "" && hash == "paying-just-for-others")) {
+            var others = $("input#others").val().split(",");
+
+            if (others.length == 1 && others[0] == "email@internet.com") {
+                return [];
+            }
+
+            for (var i = 0; i < others.length; i++) {
+                others[i] = others[i].trim();
+            }
+
+            others = unique(others);
+        }
+
+        return others;
+    }
+
+    function get_price(after_response) {
+        var duration = duration_for_price();
+
+        var also_in_btc = false;
+        if ($("#payment_type").val() == "bitcoin") {
+            also_in_btc = true;
+        }
+
+        var url = "{% url 'subscription-price' duration=1 %}";
+        url = url.replace("for-duration=1", "for-duration=" + duration);
+
+        var data = {};
+        var others = also_paying_for_others();
+
+        if (others.length > 0) {
+            data["others"] = others.join();
+        }
+
+        var hash = get_url_hash();
+
+        if (hash != "" && hash == "paying-just-for-others") {
+            data["exclude_me"] = "1";
+        }
+
+        if (also_in_btc == true) {
+            data["also_in_btc"] = 1;
+        }
+
+        send_data(url, data, "{{ csrf_token }}",
+            function(response) {
+                if (response.status == "ok") {
+                    price = response.price;
+
+                    if (also_in_btc == true) {
+                        btc_price = response.btc_price;
+                    }
+
+                    change_prices();
+
+                    if (after_response == "pay") {
+                        if ((hash == "") ||
+                                (hash != "" && hash == "paying-just-for-me")) {
+                            pay();
+                        } else {
+                            others_agreement();
+                        }
+                    }
+                } else if (response.status == "not_logged_in") {
+                    redirect_to_login(response.login_url, window.location.pathname)
+                } else {
+                    // TODO: nice alert message
+                    alert("{% trans "Something went wrong, contact support." %}");
+                }
+            }
+        );
+    }
+
+    function others_agreement() {
+        var hash = get_url_hash();
+
+        if (!((hash != "" && hash == "paying-for-me-and-for-others") ||
+                (hash != "" && hash == "paying-just-for-others"))) {
+            return;
+        }
+
+        var others = also_paying_for_others();
+
+        if (others.length == 0) {
+            return;
+        }
+
+        $("#dialog_paying_for_others ol.emails").html("");
+
+        $("#dialog_paying_for_others ol.emails").append("<li>{% trans "Yourself" %}</li>");
+
+        for (var i = 0; i < others.length; i++) {
+            others[i] = others[i].trim();
+
+            $("#dialog_paying_for_others ol.emails").append("<li>" + others[i] + "</li>");
+        }
+
+        $("#dialog_paying_for_others").dialog({
+            resizable: false,
+            modal: true,
+            closeOnEscape: true,
+            buttons: {
+                "{% trans "Yes" %}": function() {
+                    $(this).dialog("close");
+
+                    pay();
+                },
+                "{% trans "No" %}": function() {
+                    $(this).dialog("close");
+
+                    return;
+                }
+            },
+            position: ['center', 120]
+        });
+    }
+
+    function pay() {
+        var others = also_paying_for_others();
+        var payment_type = $("#payment_type").val();
+
+        var data = {
+            "type": payment_type,
+            "duration": $("#subscription_duration").val()
+        };
+
+        if (payment_type == "bitcoin") {
+            data["btc_price"] = btc_price;
+        }
+
+        if (others.length > 0) {
+            data["others"] = others.join();
+        }
+
+        send_data("{% url 'payment:pay' %}", data, "{{ csrf_token }}",
+            function(response) {
+                if (response.status == "ok") {
+                    var currency = "&euro;"
+                    if (data["currency"] == "USD") {
+                        currency = "&dollar;"
+                    }
+
+                    if (payment_type == "bitcoin") {
+                        $("p.successfull-payment #btc_price").html(response.btc_price + " BTC");
+                        $("p.successfull-payment #btc_address").html(response.btc_address);
+                        $("div#qr_btc_address").qrcode(response.btc_address).show();
+                        $("div#successfull_payment .bitcoin").show();
+                    } else if (payment_type == "sepa") {
+                        $("p.successfull-payment #price").html(response.price + " " + currency);
+                        var sepa_address = response.sepa_address.replace(/\|/g, "<br />");
+                        var bank_account_string = "{% trans "Bank account" %}";
+                        sepa_address = sepa_address.replace(/(SI[\d ]+)$/g, bank_account_string + ': <span id="iban">$1</span>');
+                        $("p.successfull-payment #sepa_address").html(sepa_address);
+
+                        $("div.sepa #reference").html(response.transaction_reference);
+                        $("div#successfull_payment .sepa").show();
+                    } else if (payment_type == "paypal") {
+                        window.location.replace(response["redirect_url"]);
+                    }
+
+                    $("p.successfull-payment #price").html(response.price + currency);
+
+                    $("p.back-to-subscriptions").show();
+
+                    $("#pay").hide();
+
+                    $("select#subscription_duration").prop('disabled', 'disabled');
+                    $("select#payment_type").prop('disabled', 'disabled');
+                    $("input#his_price_checkbox").prop('disabled', 'disabled');
+                } else if (response.status == "not_logged_in") {
+                    redirect_to_login(response.login_url, window.location.pathname)
+                } else if (response.status == "btc_price_changed") {
+                    $("p.error").html(response.message);
+                    $("p.error").show();
+
+                    get_price("");
+                    change_prices();
+                } else if (response.status == "error") {
+                    $("p.error").html(response.message);
+                    $("p.error").show();
+
+                    get_price("");
+                    change_prices();
+                }
+            }
+        );
+    }
+
+    function change_prices() {
+        var sepa_in = false;
+
+        $("select#payment_type option[value='sepa']").each(function() {
+            sepa_in = true;
+
+            return;
+        });
+
+        if (sepa_in == false) {
+            var o = new Option("SEPA", "sepa");
+            $(o).html("SEPA");
+            $("select#payment_type").append(o);
+        }
+
+        var currency = "&euro;";
+        $("p.payment").show();
+        $("button#pay").show();
+
+        var total = 0;
+        if ($("#payment_type").val() == "bitcoin") {
+            if (btc_price == -1) {
+                total = price + '&euro; <span class="btc error">{% trans "For some reason could not get price in BTC and so you cannot make payment. Try again later or contatct support if you think that this is really too much." %}</span>';
+                $("button#pay").hide();
+            } else {
+                total = price + '&euro; <span class="btc">(' + btc_price + " BTC)</span>";
+                $("button#pay").show();
+            }
+        } else {
+            total = price + currency;
+
+            $("button#pay").show();
+        }
+
+        if (price == 0) {
+            $("button#pay").hide();
+        }
+
+        $("p.total span").html(total);
+    }
+
+    $("#subscription_duration").change(function() {
+        on_start();
+        get_price("");
+
+        var duration = $("#subscription_duration").val();
+        duration = parseInt(duration.replace("_month", ""));
+
+        var from = $(".subscription h3 span.from").html();
+        from = from.split("-");
+
+        var until = new Date(from[2], from[1]-1, from[0]);
+        until.setMonth(until.getMonth()+duration);
+
+        var month = until.getMonth()+1;
+        if (month < 10) month = "0" + month;
+
+        var day = until.getDate();
+        if (day < 10) day = "0" + day;
+
+        $(".subscription h3 span.until").html(day + "-" + month + "-" + until.getFullYear());
+    });
+
+    $("#payment_type").change(function() {
+        on_start();
+        get_price("");
+    });
+
+    $("#pay").click(function() {
+        on_start();
+        get_price("pay");
+    });
+
+    var hash = get_url_hash();
+    if (hash != "") {
+        on_hash_change();
+    }
+
+    $("input#others").focus(function() {
+        if ($(this).val() == "email@internet.com") {
+            $(this).val("");
+        }
+    }).focusout(function() {
+        if ($(this).val() == "") {
+            $(this).val("email@internet.com");
+        }
+    });
+{% endblock %}
+
+{% block page %}
+
+<div class="manage-subscription">
+    <div class="header">
+        <h2 class="normal"><a href="{% url 'settings' %}">{% trans "Profile" %}</a> <a href="{% url 'manage-groups' %}">{% trans "Groups" %}</a> <a class="active" href="{% url 'subscription:subscriptions' %}">{% trans "Subscriptions" %}</a></h2>
+    </div>
+
+    <h3 class="normal">{% blocktrans with from=from|date:"d-m-Y" until=until|date:"d-m-Y" %}Paying subscription from <span class="from">{{ from }}</span> until <span class="until">{{ until }}</span>{% endblocktrans %}</h3>
+
+    <div class="subscription">
+        <ol id="paying_for">
+            <li class="paying-just-for-me">
+                <a href="#paying-just-for-me" class="selected">{% trans "Paying just for me" %}</a>
+            </li>
+            <li class="paying-for-me-and-for-others">
+                <a href="#paying-for-me-and-for-others">{% trans "Paying for me and for others" %}</a>
+            </li>
+            <li class="paying-just-for-others">
+                <a href="#paying-just-for-others">{% trans "Paying just for others" %}</a>
+            </li>
+        </ol>
+
+        <div class="prices">
+            <table class="fixed-prices">
+                <tr><th>{% trans "Subscription period" %}</th><th>{% trans "Price" %}</th></tr>
+                <tr><td>{% trans "1 month" %}</td><td>{{ subscription_price.EUR.1_months }}&euro;</td></tr>
+                <tr><td>{% trans "2 months" %}</td><td>{{ subscription_price.EUR.2_months }}&euro;</td></tr>
+                <tr><td>{% trans "3 months" %}</td><td>{{ subscription_price.EUR.3_months }}&euro;</td></tr>
+                <tr class="discount"><td>{% trans "6 months (1 month discount)" %}</td><td>{{ subscription_price.EUR.6_months }}&euro;</td></tr>
+                <tr class="discount"><td>{% trans "whole year (2 months discount)" %}</td><td>{{ subscription_price.EUR.12_months }}&euro;</td></tr>
+            </table>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <p class="paying">
+            {% trans "Paying subscription for" %}<select id="subscription_duration" name="subscription_duration">
+                <option value="1_months">{% trans "1 month" %}</option>
+                <option value="2_months">{% trans "2 months" %}</option>
+                <option value="3_months">{% trans "3 months" %}</option>
+                <option value="6_months">{% trans "6 months" %}</option>
+                <option value="12_months">{% trans "whole year" %}</option>
+            </select>.
+        </p>
+
+        <p class="payment">{% trans "Will use"%}
+            <select id="payment_type">
+                <option value="paypal">{% trans "Paypal" %}</option>
+                <option value="sepa">{% trans "SEPA" %}</option>
+                <option value="bitcoin">{% trans "Bitcoins" %}</option>
+            </select>{% trans "for payment" %}.
+        </p>
+
+        <div class="for-others">
+            <p>{% trans "Write emails or groups of people you want to pay for also (excluding you)" %}</p>
+            <input type="text" id="others" name="others" value="email@internet.com" />
+            <ol class="errors"></ol>
+        </div>
+
+        <p class="total">
+            {% trans "Total" %}:<span>1&euro;</span>
+        </p>
+
+        <p>&nbsp;</p>
+
+        <p class="error"></p>
+
+        <div id="successfull_payment">
+            <div class="bitcoin">
+                <p class="successfull-payment">{% blocktrans %}Send <span id="btc_price" name="btc_price" class="btc-price"></span> (<span id="price"></span>) to address <span id="btc_address"></span> within 1 hour.{% endblocktrans %} <br /> <span class="note">{% trans "We will wait then a little bit more, buf after a day or so, you will have to make payment one more time." %}</span></p>
+                <div id="qr_btc_address"></div>
+            </div>
+
+            <div class="sepa">
+                <p class="successfull-payment">{% blocktrans %}Send <span id="price"></span> to following bank account: <br /> <span id="sepa_address"></span>{% endblocktrans %} <br />{% trans "Reference number" %}: <span id="reference"></span></p>
+            </div>
+        </div>
+
+        <button id="pay" class="pay"></button>
+
+        <p class="back-to-subscriptions"><a href="{% url 'subscription:subscriptions' %}">{% trans "Back to subscriptions" %}</a></p>
+
+        <div id="dialog_paying_for_others">
+            <p>{% trans "You will be paying also for the people with the following emails:" %}</p>
+
+            <ol class="emails">
+            </ol>
+
+            <p class="total">{% trans "...with total amount of " %}<span></span></p>
+
+            <p>{% trans "Do you agree?" %}</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,21 @@
+{% load static %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <style type="text/css">
+        p.signature {
+            color: #646464;
+        }
+    </style>
+</head>
+<body>
+    {% block content %}{% endblock %}
+    <p class="signature">{% trans 'Kind regards,' %}</p>
+
+    <p><a href="http://www.sellout.biz">the Sellout team</a></p>
+</body>
+</html>

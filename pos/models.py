@@ -1,12 +1,12 @@
 from django.db import models
 from django.utils.translation import ugettext as _
 from django.db.models.signals import pre_save, pre_delete, post_save, post_delete
-from django.contrib.auth.models import User
 from django.dispatch import receiver
 from sorl import thumbnail
+from blusers.models import BlocklogicUser
+from common.functions import ImagePath
 
 from common.models import SkeletonU
-from common.functions import ImagePath
 import common.globals as g
 
 from config.countries import country_choices, country_by_code
@@ -55,7 +55,6 @@ class Company(SkeletonU, CompanyAbstract):
 
     class Meta:
         verbose_name_plural = _("Companies")
-
 
 ### category ###
 class Category(SkeletonU):
@@ -441,7 +440,7 @@ class Contact(SkeletonU, ContactAbstract):
 
 ### permissions
 class Permission(SkeletonU):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(BlocklogicUser)
     company = models.ForeignKey(Company)
     permission = models.CharField(max_length=16, null=False, blank=False, choices=g.PERMISSION_GROUPS)
     

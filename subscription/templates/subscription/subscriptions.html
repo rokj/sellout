@@ -1,0 +1,689 @@
+{% extends 'web/homebase.html' %}
+{% load staticfiles %}
+{% load i18n %}
+{% load common_tags %}
+
+{% block page %}
+
+<script>
+$(document).ready(function() {
+    var keyboard = new Keyboard();
+    var payment_id = null;
+
+    function on_start() {
+        var hash = get_url_hash();
+
+        hash = hash.match(/payment-info\/(\d+)/);
+
+        if (hash) {
+            $("a.payment-info-link[data-payment-id='" + hash[1] + "']").click();
+        }
+    }
+
+    function cancel_payment(link, payment_id) {
+        send_data(link, {}, "{{ csrf_token }}",
+            function(response) {
+                if (response.status == "ok") {
+                    /*
+                    $('*[data-payment-id="' + payment_id + '"]').each(function() {
+                        $(this).attr("data-payment-status", "canceled");
+                        $(this).addClass("canceled");
+                        $(this).children("td.payment-status").find("span.status").html('&mdash;');
+                        $(this).children("td.payment-status").find("span.status").removeClass("waiting");
+                        $(this).children("td.subscription-status").find("span.status").html(gettext("canceled"));
+                        $(this).children("td").last().html("");
+                        $(this).children("td.payment-status").find("a.payment-info-link").remove();
+                        $("button#hide_canceled").removeClass("hidden");
+                    });
+
+                    $('*[data-payment-id="' + payment_id + '"]:first td.status').append('<a class="payment-info-link" href="#payment-info/' + payment_id + '"></a>');
+                    */
+
+                    window.location.replace("{% url "subscription:subscriptions" %}");
+                } else if (response.status == "not_logged_in") {
+                    redirect_to_login(response.login_url, window.location.pathname)
+                } else {
+                    // TODO: nice alert message
+                    alert("Something went wrong, contact support.");
+                }
+            }
+        );
+    }
+
+    function remove_empty_ones(others_included) {
+        var tmp_array = [];
+
+        for (var i = 0; i < others_included.length; i++) {
+            if (others_included[i].trim() != "") {
+                tmp_array.push(others_included[i].trim());
+            }
+        }
+
+        return tmp_array;
+    }
+
+    function fill_others_included(me_included, others_included, to_what) {
+        others_included = remove_empty_ones(others_included);
+
+        $("div#payment_info .user").html("");
+
+        if (others_included.length > 0) {
+            var nr_users = others_included.length;
+
+            if (me_included == "1") {
+                nr_users = others_included.length + 1;
+            }
+
+            $("div#payment_info .user").html(" <span class='for'>" + gettext("for") + "</span> " + nr_users + " " + gettext("user/s"));
+
+            to_what.html("");
+
+            if (me_included == "1") {
+                var tr = "<tr><td class='me'>{{ user.email }} (" + gettext("me") + ")</td></tr>";
+                to_what.append(tr);
+            }
+
+            for (var i = 0; i < others_included.length; i++) {
+                var tr = "<tr><td>" + others_included[i] + "</td></tr>";
+                to_what.append(tr);
+            }
+        } else {
+            $("div#payment_info .user").html("");
+        }
+    }
+
+    $("tr.subscription a.cancel-payment").on("click", function() {
+        var o = $(this);
+        var payment_id = $(this).attr("data-payment-id");
+
+        $("div.dialog-wrapper button.yes").data("payment_id", payment_id)
+        $("div.dialog-wrapper button.yes").data("cancel_payment_link", o)
+
+        $("div.cancel-payment-dialog").show();
+
+        $("div.fullscreen-shadow.subscription").fadeIn("fast");
+
+        keyboard.add("on-cancel-payment-escape", 'escape', function () {
+            $("div.fullscreen-shadow.subscription").fadeOut("fast");
+            $("div.cancel-payment-dialog").hide();
+
+            keyboard.remove('on-cancel-payment-escape', 'escape');
+        });
+
+        return false;
+    });
+
+    $("div.dialog-wrapper button.no, div.dialog-wrapper button.cancel-button").click(function() {
+        var esc = $.Event("keydown", { keyCode: 27 });
+        $("body").trigger(esc);
+    });
+
+    $("div.dialog-wrapper button.yes").click(function() {
+        var esc = $.Event("keydown", { keyCode: 27 });
+        $("body").trigger(esc);
+
+        cancel_payment($(this).data("cancel_payment_link").attr("href"), $(this).data("payment_id"));
+    });
+
+    $("#hide_canceled").click(function() {
+        if ($(this).hasClass("active")) {
+            $("tr.canceled").show();
+            $(this).removeClass("active");
+            $(this).text(gettext("hide canceled"));
+        } else {
+            $("tr.canceled").hide();
+            $(this).addClass("active");
+            $(this).text(gettext("show canceled"));
+        }
+    });
+
+    $("table.my-subscriptions, table#waiting_payment_subscription, table#my_payments").on("click", "a.payment-info-link", function() {
+        $("div#payment_info div.bitcoin").hide();
+        $("div#payment_info div.paypal").hide();
+        $("div#payment_info div.sepa").hide();
+        $("div#payment_info div.first-time").hide();
+        $("div#payment_info a.invoice").hide();
+
+        $("div#payment_info").removeClass("successful-payment");
+        $("div#payment_info").removeClass("smaller");
+        $("div#payment_info").removeClass("even-smaller");
+        $("div#payment_info").removeClass("sepa");
+
+        if (($(this).data("payment-type") == "paypal")) {
+            $("div#payment_info").addClass("smaller");
+        }
+
+        if (($(this).data("payment-type") == "free") && ($(this).data("payment-status") == "first_time")) {
+            $("div#payment_info").addClass("even-smaller");
+        }
+
+        $("div#payment_info").show();
+
+        $("div#payment_info div.text div.status").hide();
+
+        if ($(this).data("payment-type") == "bitcoin") {
+            $("div#payment_info div.bitcoin").show();
+        }
+
+        if ($(this).data("payment-type") == "paypal") {
+            $("div#payment_info div.paypal").show();
+        }
+
+        if ($(this).data("payment-type") == "sepa") {
+            $("div#payment_info div.sepa").show();
+        }
+
+        if ($(this).data("payment-type") == "free") {
+            if ($(this).data("payment-status") == "first_time") {
+                $("div#payment_info div.first-time").show();
+            }
+        }
+
+        $("div.fullscreen-shadow.subscription").fadeIn("fast");
+
+        keyboard.add("on-subscribed-escape", 'escape', function () {
+            $("div.fullscreen-shadow.subscription").fadeOut("fast");
+            $("div#payment_info").hide();
+
+            keyboard.remove('on-subscribed-escape', 'escape');
+        });
+
+        var duration = $(this).data("duration") == 1 ? "1 " + gettext("month") : $(this).data("duration") + " " + gettext("months");
+
+        $("div#payment_info .period").html(duration);
+
+        if (($(this).data("start-date") != "" ) && ($(this).data("expiration-date") != "")) {
+            $("div#payment_info .start-expiration-date").show();
+        } else {
+            $("div#payment_info .start-expiration-date").hide();
+        }
+
+        $("div#payment_info .start-date").html($(this).data("start-date"));
+        $("div#payment_info .expiration-date").html($(this).data("expiration-date"));
+
+        if ($(this).data("payment-type") == "bitcoin") {
+            $("div#payment_info .total").html($(this).data("total"));
+
+
+            $("div#payment_info div#qr_btc_address").html("");
+            $("div#payment_info div#qr_btc_address").qrcode({width: 180, height: 160, text: "bitcoin:" + $(this).data("transaction-reference") + "?amount=" + $(this).data("total-btc-price"), background: "#ebebeb"}).show();
+            $("div#payment_info .total-btc-price").html($(this).data("total-btc-price") + " BTC");
+            $("div#payment_info .btc-address").html($(this).data("transaction-reference"));
+
+            $("div#payment_info div.bitcoin div.text span.status").hide();
+
+            var payment_status = $(this).data("payment-status");
+
+            if (payment_status == "paid") {
+                $("div#payment_info div.bitcoin div.text span.status.paid").show();
+            } else if (payment_status == "waiting") {
+                $("div#payment_info div.bitcoin div.text span.status.waiting").show();
+            }
+        }
+
+        if ($(this).data("payment-type") == "paypal") {
+            $("div#payment_info .total").html($(this).data("total"));
+            $("div#payment_info .paypal-payment-link").attr("href", $(this).data("paypal-payment-link"));
+
+            $("div#payment_info div.paypal div.text span.status").hide();
+
+            var payment_status = $(this).data("payment-status");
+
+            if (payment_status == "paid") {
+                $("div#payment_info div.paypal div.text span.status.paid").show();
+            } else if (payment_status == "waiting") {
+                $("div#payment_info div.paypal div.text span.status.waiting").show();
+            }
+        }
+
+        if ($(this).data("payment-type") == "sepa") {
+            $("div#payment_info > .sepa #copy_sepa_address").html("");
+
+            $("div#payment_info .total").html($(this).data("total"));
+
+            $("div#payment_info").addClass("sepa");
+
+            var transaction_reference = $(this).data("transaction-reference");
+            var payment_status = $(this).data("payment-status");
+
+            $("div#payment_info div.sepa div.text span.status").hide();
+
+            $("div#payment_info > #sepa_address .company-name").html("{{ sepa_address.company }}");
+            $("div#payment_info > #sepa_address .company-address").html("{{ sepa_address.company_address }}");
+            $("div#payment_info > #sepa_address .company-postal-code").html("{{ sepa_address.company_postal_code }}");
+            $("div#payment_info > #sepa_address .company-city").html("{{ sepa_address.company_city }}");
+            $("div#payment_info > #sepa_address .company-country").html("{{ sepa_address.company_country }}");
+            $("div#payment_info > #sepa_address .company-iban").html("{{ sepa_address.iban }}");
+            $("div#payment_info > #sepa_address .company-ref-number").html("(SI00) " + transaction_reference);
+
+            $("div#payment_info > #sepa_address").children().clone(true, true).appendTo("div#payment_info > .sepa #copy_sepa_address");
+
+            if (payment_status == "paid") {
+                $("div#payment_info div.sepa div.text span.status.paid").show();
+            } else if (payment_status == "waiting") {
+                $("div#payment_info div.sepa div.text span.status.waiting").show();
+            }
+        }
+
+        $("div#payment_info a.invoice").attr("href", "");
+
+        if (payment_status == "paid" && (
+            ($(this).data("payment-type") == "sepa") ||
+            ($(this).data("payment-type") == "paypal") ||
+            ($(this).data("payment-type") == "bitcoin")
+        )) {
+            $("div#payment_info a.invoice").attr("href", $(this).data("invoice-url"));
+            $("div#payment_info a.invoice").show();
+            $("div#payment_info").addClass("successful-payment");
+        }
+
+        var me_included = $(this).data("me-included");
+        var others_included = $(this).data("others-included");
+        others_included = others_included.split(",");
+
+        others_included = remove_empty_ones(others_included);
+
+        var table = $("div#payment_info").find("table.payment-info-users");
+
+        fill_others_included(me_included, others_included, table);
+    });
+
+    $("table.subscriptions tr.subscription td span.user").click(function() {
+        var others_included = $(this).data("others-included");
+        others_included = others_included.split(",");
+
+        others_included = remove_empty_ones(others_included);
+
+        var me_included = $(this).data("me-included");
+
+        var table = $(this).parent().find("table.payment-info-users");
+
+        $("div.fullscreen-shadow.subscription").fadeIn("fast");
+
+        fill_others_included(me_included, others_included, table);
+
+        table.parent().show();
+
+        keyboard.add("on-payment-info-users-no-payment-info-escape", 'escape', function () {
+            $("div.fullscreen-shadow.subscription").fadeOut("fast");
+
+            table.parent().hide();
+
+            keyboard.remove('on-payment-info-users-no-payment-info-escape', 'escape');
+        });
+    });
+
+    $("div#payment_info .ok").click(function() {
+        $("div.fullscreen-shadow.subscription").fadeOut("fast");
+        $("div#payment_info").hide();
+
+        keyboard.remove('on-subscribed-escape', 'escape');
+    });
+
+    $("div#payment_info span.user").click(function() {
+        $("#payment_info .payment-user-wrapper").show();
+
+        keyboard.add("on-payment-info-users-escape", 'escape', function () {
+            $("#payment_info .payment-user-wrapper").hide();
+
+            keyboard.remove('on-payment-info-users-escape', 'escape');
+        });
+    });
+
+    $("div.fullscreen-shadow.subscription").click(function() {
+        var esc = $.Event("keydown", { keyCode: 27 });
+        $("body").trigger(esc);
+    });
+
+    on_start();
+});
+</script>
+
+<div class="manage-subscriptions">
+    <div class="header">
+        <h2 class="normal">
+            <a href="{% url 'subscription:subscriptions' %}">{% trans "Subscriptions" %}</a>
+        </h2>
+    </div>
+
+    <div class="subscriptions">
+        <p>
+            {% trans "Would you like to extend subscription for you or for others?" %}
+            <a href="{% url 'subscription:new' %}" class="new">{% trans "Yes" %}</a>
+        </p>
+
+        {% if subscription %}
+            <div class="subscription-wrapper running">
+                <h3 class="normal">
+                    {% trans "Running" %}
+                </h3>
+
+                <div>
+                    <table id="subscription">
+                        <tr>
+                            <td class="start-date">
+                                <div class="header">
+                                    {% trans "Start date" %}
+                                </div>
+
+                                <div class="data">
+                                    {{ subscription.start_date|date:"F d Y"  }}
+                                </div>
+                            </td>
+
+                            <td class="expiration-date">
+                                <div class="header">
+                                    {% trans "Expiration date" %}
+                                </div>
+
+                                <div class="data">
+                                    {{ subscription.expiration_date|date:"F d Y"  }}
+                                </div>
+                            </td>
+
+                            <td class="days-left {% if subscription.days_left < 7  and subscription.days_left > 2 %}warning{% endif %}{% if subscription.days_left < 3 %}alert{% endif %}">
+                                <div class="header">
+                                    {% trans "Days left" %}
+                                </div>
+
+                                <div class="data days-left">
+                                     {{ subscription.days_left }}
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if waiting_payment_subscriptions %}
+            <div class="subscription-wrapper waiting-payment">
+                <h3 class="normal">
+                    {% trans "Waiting payment subscriptions" %}
+                </h3>
+
+                <div>
+                    <table id="waiting_payment_subscription" class="subscriptions">
+                        <tr>
+                            <th>{% trans "Time period" %}</th>
+                            <th>{% trans "Paying for" %}</th>
+                            <th>{% trans "Payment" %}</th>
+                            <th></th>
+                        </tr>
+
+                        {% for wps in waiting_payment_subscriptions %}
+                            <tr class="subscription">
+                                <td class="duration">
+                                    <span class="months">
+                                        {{ wps.subscription_duration }}
+
+                                        {% if wps.subscription_duration == 1 %}
+                                            {% trans "month" %}
+                                        {% else %}
+                                            {% trans "months" %}
+                                        {% endif %}
+                                    </span>
+
+                                    {% if wps.me_included %}
+                                        <span class="start-expiration-date"><span class="start-date">{{ wps.start_date|date:"F d / Y" }}</span> - <span class="end-date">{{ wps.end_date|date:"F d / Y" }}</span></span></td>
+                                    {% endif %}
+                                <td>
+                                    {% if wps.other_users_included_in_payment|length > 0 %}<span class="user" data-me-included="{% if wps.me_included %}1{% else %}0{% endif %}" data-others-included="{{ wps.other_users_included_in_payment|join:"," }}">{% if wps.me_included %}{% increment_var wps.other_users_included_in_payment %}{% else %}{{ wps.other_users_included_in_payment|length }}{% endif %}</span>{% else %}{% trans "Me" %}{% endif %}
+
+                                    <div class="payment-user-wrapper">
+                                        <table class="payment-info-users not-payment-info">
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a class="payment-info-link" {% if wps.type == "paypal" %}data-paypal-payment-link="{{ wps.paypal_payment_link }}"{% endif %} data-start-date="{{ wps.start_date|date:"Y/F d" }}" data-expiration-date="{{ wps.end_date|date:"Y/F d" }}" data-transaction-reference="{{ wps.transaction_reference }}" data-duration="{{ wps.subscription_duration }}" data-total="{{ wps.total|floatformat:"-2" }}" data-total-btc-price="{{ wps.total_btc|floatformat:"-8" }}" data-others-included="{{ wps.other_users_included_in_payment|join:"," }}" data-me-included="{% if wps.me_included %}1{% else %}0{% endif %}" data-payment-id="{{ wps.id }}" data-payment-status="{{ wps.status }}" data-payment-type="{{ wps.type }}" href="#payment-info/{{ wps.id }}">{% trans "waiting" %}</a>
+                                </td>
+                                <td>
+                                    <a class="cancel-payment" data-payment-id="{{ wps.id }}" href="{% url "payment:cancel" wps.id %}">{% trans "Cancel" %}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if subscriptions %}
+            <div class="subscription-wrapper my-subscriptions">
+                <h3 class="normal">
+                    {% trans "My subscriptions" %}
+
+{#                    <button class="expand my-subscriptions">{% trans "expand" %}</button>#}
+                </h3>
+
+                <div>
+                    <table id="subscriptions" class="my-subscriptions">
+                        <tr>
+                            <th>{% trans "Time period" %}</th>
+                            <th>{% trans "Info" %}</th>
+                        </tr>
+
+                        {% for ps in subscriptions %}
+                            <tr class="subscription">
+                                <td class="duration">
+                                    <span class="months">
+                                        {{ ps.period }}
+
+                                        {% if ps.period == "1" %}
+                                            {% trans "month" %}
+                                        {% else %}
+                                            {% trans "months" %}
+                                        {% endif %}
+                                    </span>
+
+                                    <span class="start-expiration-date"><span class="start-date">{{ ps.start_date|date:"F d / Y" }}</span> - <span class="end-date">{{ ps.end_date|date:"F d / Y" }}</span></span>
+                                </td>
+                                <td>
+{#                                    {% if ps.status == CANCELED_STATUS %}#}
+{#                                        <span class="canceled-status">{% trans "Canceled" %}</span>#}
+{#                                    {% elif ps.status == NOT_ENOUGH_MONEY_ARRIVED_STATUS %}#}
+{#                                        <span class="no-money-arrived-status">{% trans "Not enough money arrived" %}</span>#}
+{#                                    {% elif ps.status == NO_MONEY_ARRIVED_STATUS %}#}
+{#                                        <span class="no-money-arrived-status">{% trans "Not paid" %}</span>#}
+                                    <a class="payment-info-link" data-start-date="{{ ps.start_date|date:"Y/F d" }}" data-expiration-date="{{ ps.end_date|date:"Y/F d" }}" data-transaction-reference="{{ ps.payment.transaction_reference }}" data-duration="{{ ps.payment.subscription_duration }}" data-total="{{ ps.payment.total|floatformat:"-2" }}" data-total-btc-price="{{ ps.payment.total_btc|floatformat:"-8" }}" data-others-included="{{ ps.payment.other_users_included_in_payment|join:"," }}" data-payment-id="{{ ps.payment.id }}" data-payment-status="{{ ps.payment.status }}" data-payment-type="{{ ps.payment.type }}" data-invoice-url="{% url 'payment:invoice' ps.payment.id %}" href="#payment-info/{{ ps.payment.id }}">{% trans "View payment" %}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if my_payments %}
+            <div class="subscription-wrapper my-payments">
+                <h3 class="normal">
+                    {% trans "My payments" %}
+
+{#                    <button class="expand my-payments">{% trans "expand" %}</button>#}
+                </h3>
+
+                <div>
+                    <table id="my_payments" class="subscriptions">
+                        <tr>
+                            <th>{% trans "Payment ID" %}</th>
+                            <th>{% trans "Amount" %}</th>
+                            <th>{% trans "Payment type" %}</th>
+                            <th>{% trans "Payment date" %}</th>
+                        </tr>
+
+                        {% for mp in my_payments %}
+                            <tr class="subscription">
+                                <td class="duration">
+                                    {% if mp.status == PAID_STATUS or mp.status == ALMOST_PAID_STATUS %}
+                                        <a class="payment-info-link my-payment-info-link" data-start-date="{{ mp.start_date|date:"Y/F d" }}" data-expiration-date="{{ mp.end_date|date:"Y/F d" }}" data-transaction-reference="{{ mp.transaction_reference }}" data-duration="{{ mp.subscription_duration }}" data-total="{{ mp.total|floatformat:"-2" }}" data-total-btc-price="{{ mp.total_btc|floatformat:"-8" }}" data-others-included="{{ mp.other_users_included_in_payment|join:"," }}" data-payment-id="{{ mp.id }}" data-payment-status="{{ mp.status }}" data-payment-type="{{ mp.type }}" data-invoice-url="{% url 'payment:invoice' mp.id %}" href="#payment-info/{{ mp.id }}">#{{ mp.id }}</a>
+                                    {% else %}
+                                        #{{ mp.id }}
+                                    {% endif %}
+                                </td>
+                                <td class="payment-total">{% if mp.type == "bitcoin" %}{{ mp.total|floatformat:"-2" }}&euro; / {{ mp.total_btc|floatformat:"-8" }} BTC{% else %}{{ mp.total|floatformat:"-2" }}&euro;{% endif %}</td>
+                                <td class="payment-type">{{ mp.type }}</td>
+                                <td class="payment-date">
+                                    {% if mp.status == CANCELED_STATUS %}
+                                        <span class="canceled-status">{% trans "Canceled" %}</span>
+                                    {% elif mp.status == ALMOST_PAID_STATUS %}
+                                        <span class="warning-status">{% trans "Almost paid status" %}</span>
+                                    {% else %}
+                                        {% if mp.transaction_datetime %}{{ mp.transaction_datetime|date:"F d / Y" }}{% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div id="payment_info">
+    <table id="sepa_address" class="hidden">
+        <tbody>
+            <tr>
+                <td>{% trans "Name" %}</td>
+                <td class="company-name"></td>
+            </tr>
+            <tr>
+                <td>{% trans "Address" %}</td>
+                <td class="company-address"></td>
+            </tr>
+            <tr>
+                <td>{% trans "Postal code" %}</td>
+                <td class="company-postal-code"></td>
+            </tr>
+            <tr>
+                <td>{% trans "City" %}</td>
+                <td class="company-city"></td>
+            </tr>
+            <tr>
+                <td>{% trans "Country" %}</td>
+                <td class="company-country"></td>
+            </tr>
+            <tr>
+                <td>{% trans "IBAN" %}</td>
+                <td class="company-iban"></td>
+            </tr>
+            <tr>
+                <td>{% trans "Ref. Number" %}</td>
+                <td class="company-ref-number"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="bitcoin">
+        <div class="text">
+            <span class="status waiting">
+                {% trans '<span class="uppercase">You subscribed to timebits for <span class="period"></span> <span class="start-expiration-date">(<span class="start-date"></span> - <span class="expiration-date"></span>)</span><span class="user"></span>. <br /> You used <span class="payment-method">bitcoin</span> as payment option, but we did not receive payment yet.<br /></span><span class="important">Send <span class="total-btc-price"></span> (<span class="total"></span>&euro;) to the following address within 1 hour:<br /><span class="btc-address"></span><br /> <br />After that time you will have to subscribe one more time.</span>' %}
+            </span>
+
+            <span class="status paid">
+                {% trans '<span class="uppercase">You subscribed to timebits for <span class="period"></span> <span class="start-expiration-date">(<span class="start-date"></span> - <span class="expiration-date"></span>)</span><span class="user"></span>. <br /> You used <span class="payment-method">bitcoin</span> as payment option.<br /></span><span class="important">You have sent <span class="total-btc-price"></span> BTC (<span class="total"></span>&euro;) to the following address:<br /><span class="btc-address"></span></span>' %}
+            </span>
+
+            <div class="payment-user-wrapper">
+                <table class="payment-info-users">
+                </table>
+            </div>
+        </div>
+
+        <div id="qr_btc_address"></div>
+
+        <a class="invoice" href="" target="_blank" title="{% trans "Invoice" %}">{% trans "Invoice" %}</a>
+
+        <button class="ok">OK</button>
+    </div>
+
+    <div class="sepa">
+        <div class="text">
+            <span class="status waiting">
+                {% trans '<span class="uppercase">You subscribed to timebits for <span class="period"></span>  <span class="start-expiration-date">(<span class="start-date"></span> - <span class="expiration-date"></span>)</span><span class="user"></span>. <br /> You used <span class="payment-method">sepa</span> as payment option, but we did not receive payment yet.<br /></span><span class="important">Send total amount of <span class="total"></span><span class="euro">&euro;</span> to the following bank account:<br /></span><table id="copy_sepa_address"></table>' %}
+            </span>
+
+            <span class="status paid">
+                {% trans '<span class="uppercase">You subscribed to timebits for <span class="period"></span>  <span class="start-expiration-date">(<span class="start-date"></span> - <span class="expiration-date"></span>)</span><span class="user"></span>. <br /> You used <span class="payment-method">sepa</span> as payment option.<br /></span><span class="important">You paid <span class="total"></span><span class="euro">&euro;</span>.</span>' %}
+            </span>
+
+            <div class="payment-user-wrapper">
+                <table class="payment-info-users">
+                </table>
+            </div>
+        </div>
+
+        <a class="invoice" href="" target="_blank" title="{% trans "Invoice" %}">{% trans "Invoice" %}</a>
+
+        <button class="ok">OK</button>
+    </div>
+
+    <div class="paypal">
+        <div class="text">
+            <span class="status waiting">
+                {% trans '<span class="uppercase">You subscribed to timebits for <span class="period"></span> (<span class="start-date"></span> - <span class="expiration-date"></span>)<span class="user"></span>. <br /> You used <span class="payment-method">paypal</span> as payment option, but we did not receive payment yet.<br /></span><span class="important">Follow <a href="" class="paypal-payment-link">this link</a> to make payment.</span>' %}
+            </span>
+
+            <span class="status paid">
+                {% trans '<span class="uppercase">You subscribed to timebits for <span class="period"></span> (<span class="start-date"></span> - <span class="expiration-date"></span>)<span class="user"></span>. <br /> You used <span class="payment-method">paypal</span> as payment option.<br /></span><span class="important">You paid <span class="total"></span><span class="euro">&euro;</span>.</span>' %}
+            </span>
+
+            <div class="payment-user-wrapper">
+                <table class="payment-info-users">
+                </table>
+            </div>
+        </div>
+
+        <a class="invoice" href="" target="_blank" title="{% trans "Invoice" %}">{% trans "Invoice" %}</a>
+
+        <button class="ok">OK</button>
+    </div>
+
+    <div class="first-time">
+        <div class="text">
+            <span class="status paid">
+                {% trans '<span class="uppercase">Since this is the first time you have subscribed to timebits, you got one subscription for free. It is valid for <span class="period"></span> (<span class="start-date"></span> - <span class="expiration-date"></span>).</span>' %}
+            </span>
+        </div>
+
+        <button class="ok">OK</button>
+    </div>
+
+    <div class="free">
+        <div class="text">
+            <span class="status paid">
+                {% trans '<span class="uppercase">You have got timebits subscription for free from <span class="user"></span>for <span class="period"></span> (<span class="start-date"></span> - <span class="expiration-date"></span>).</span>' %}
+            </span>
+        </div>
+
+        <button class="ok">OK</button>
+    </div>
+</div>
+
+<div class="dialog-wrapper cancel-payment-dialog">
+    <div class="header">
+        <span class="text header"></span>
+
+        <button class="cancel-button"></button>
+    </div>
+
+    <div class="body">
+        <div class="text">{% trans "Are you sure you want to cancel the payment?" %}</div>
+
+        <table class="dialog-buttons">
+            <tbody>
+                <tr>
+                    <td><button class="yes">{% trans "yes" %}</button></td><td><button class="no">{% trans "no" %}</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="fullscreen-shadow subscription"></div>
+
+<div id="error"></div>
+
+{% endblock %}

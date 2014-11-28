@@ -1,0 +1,9 @@
+{% extends 'email/email_template.txt' %}
+{% load i18n %}
+
+{% block content %}
+Hi!
+
+To activate your account on sellout.biz, please click click on the following link:
+{{ url }}
+{% endblock %}

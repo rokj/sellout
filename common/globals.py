@@ -1,7 +1,8 @@
 # coding=UTF-8
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ugettext
 
 # Common stuff to be used anywhere throughout the site
+SITE_TITLE = "Sellout"
 
 # directories
 DIRS = {  # all go to MEDIA folder
@@ -10,6 +11,7 @@ DIRS = {  # all go to MEDIA folder
     'category_icon_dir': "img/category",
     'product_icon_dir': "img/product",
     'product_image_dir': "img/product",
+    'users_image_dir': "img/blusers",
     'temp': "/tmp",
 }
 
@@ -253,3 +255,65 @@ CATEGORY_COLORS = [  # choices for category.color
     'ffc864',
     '5ad2fa',
 ]
+
+###
+### actions
+###
+ACTION_STATUS_CHOICES = (
+    (("accepted"), _("Accpeted")),
+    (("declined"), _("Declined")),
+    (("waiting"), _("Waiting")),
+    (("canceled"), _("Canceled")),
+    (("seen"), _("Seen")),
+)
+ACTION_STATUSES = (x[0] for x in ACTION_STATUS_CHOICES)
+
+BL_USERS = "bl_users"
+BL_MAIL = "bl_mail"
+NORMAL = "normal"
+GOOGLE = "google"
+
+LOGIN_TYPES = (
+    (BL_USERS, _("Master BL users table")),
+    (BL_MAIL, _("Blocklogic mail")),
+    (NORMAL, _("Normal")),
+    (GOOGLE, _("Google"))
+)
+
+FIRST_TIME = "first_time"
+PAID = "paid"
+FREE = "free"
+
+SUBSCRIPTION_STATUS = (
+    ("waiting", _("Waiting")),
+    ("canceled", _("Canceled")),
+)
+
+MALE = "male"
+FEMALE = "female"
+SEX = (
+    (MALE, _("Male")),
+    (FEMALE, _("Female")),
+)
+
+MEMBER = "member"
+ADMIN = "admin"
+REMOVED = "removed"
+USER_ROLE = (
+    (MEMBER, _("Member")),
+    (ADMIN, _("Admin")),
+    (REMOVED, _("Removed")),
+)
+
+TAX_PAYER_CHOICES=[('tax_payer', ugettext(u"Yes")), ('not_tax_payer', ugettext("No"))]
+
+WAITING = "waiting"
+PAID = "paid"  # when there >= 3 confirmations and bitcoin client
+ALMOST_PAID = "almost_paid" # when we are checking just transactions on network
+APPROVED = "approved"
+CANCELED = "canceled"
+NO_MONEY_ARRIVED = "no_money_arrived"
+NOT_ENOUGH_MONEY_ARRIVED = "not_enough_money_arrived"
+SEEN = "seen"
+HIDDEN = "hidden"
+RUNNING = "running"

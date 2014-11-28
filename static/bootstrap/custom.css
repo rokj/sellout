@@ -1,0 +1,144 @@
+/* the 'green' color:
+    #23e691
+*/
+
+body{
+    background-color: #f0f0f0;
+}
+
+nav + *{
+    /* the first element after navbar must be removed from the top border
+        by the size of navbar */
+    margin-top: 60px;
+}
+
+nav a.navbar-header{
+    text-decoration: none;
+}
+
+.v-center {
+    /*
+        when using the this class, there must be no white space
+        between neighboring divs (between the two that use this class)
+    */
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+/* bootstrap customizations */
+button.navbar-toggle {
+    border-radius: 0;
+
+}
+
+.custom.navbar{
+    border: none;
+}
+
+#logo{
+    position: relative;
+    top: -3px;
+}
+
+.sellout-background {
+    background-color: #23e693;
+}
+
+.btn {
+    border-radius: 0;
+}
+
+.custom.navbar  .nav li a.nav-button.custom {
+    text-transform: uppercase;
+    color: #ffffff;
+    background: none;
+}
+
+.custom.navbar .nav a.nav-button.custom:hover {
+    background: none;
+}
+
+a {
+    color: #22e693;
+}
+
+a:hover{
+    color: #22e693;
+    text-decoration: none;
+}
+
+/* custom buttons/inputs */
+.buttons{
+    color: #ffffff;
+    background-color: #22e693;
+
+    height: 32px;
+    line-height: 32px;
+
+    border: none;
+    box-shadow: 0 2px 0 rgba(100,100,100,0.2);
+}
+
+.form-errors, 
+.field-errors,
+.form-message,
+.form-message p{
+    color: #ff5a6e;
+}
+
+label.custom,
+.label.custom,
+.custom label,
+.custom .label{
+    color: #646464;
+    padding: 0;
+    margin: 0;
+    display: block;
+    font-weight: normal;
+    font-size: 90%;
+    margin-top: 10px;
+    margin-bottom: 6px;
+}
+
+.custom input[type='text'],
+.custom input[type='password'],
+.custom input[type='email'],
+.custom input[type='number']{
+    width: 100%;
+
+    padding-left: 5px;
+    padding-right: 5px;
+
+    margin-top: 5px;
+    margin-bottom: 10px;
+
+    border: none;
+    border-top: 2px solid #dddddd;
+
+    height: 32px;
+
+    background-color: #ffffff;
+}
+
+.custom input[type='submit'],
+.custom input[type='button']{
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top: 10px;
+
+    text-transform: uppercase;
+}
+
+/* custom fonts */
+* {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+}
+
+.extra-font, .extra-font *{
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+
+.bold {
+    font-weight: bold;
+}
