@@ -1,5 +1,8 @@
 from django.conf.urls import patterns, include, url
 
+from blusers import views as blusers_views
+from web import views as web_views
+
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 
@@ -9,13 +12,21 @@ urlpatterns = patterns('',
     # admin
     url(r'^admin/', include(admin.site.urls)),
 
-    # POS
+    # POS app
     url(r'^pos/', include('pos.urls', namespace='pos')),
     (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', {'packages': ('webpos',)}),
     
-    # MOBILE
+    # MOBILE urls
     url(r'^pos/mobile/', include('mobile.urls', namespace='mobile_pos')),
     url(r'^pos/sync/', include('sync.urls', namespace='sync')),
+
+    # the captcha app
+    url(r'^captcha/', include('captcha.urls')),
+
+    # support
+
+    # web: everything that happens before user enters a specific company
+    url(r'^', include('web.urls', namespace='web')),
 )
 
 # TODO: remove from production
@@ -29,3 +40,4 @@ if settings.DEBUG:
             'document_root': settings.STATIC_ROOT,
         }),
 )
+

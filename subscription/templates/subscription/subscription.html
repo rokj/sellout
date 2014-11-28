@@ -1,0 +1,1101 @@
+{% extends 'web/homebase.html' %}
+{% load staticfiles %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block page %}
+
+<script>
+$(document).ready(function() {
+    {# Until we do not really support different currencies we "fix" them to EUR #}
+    var btc_price = -1;
+    var price = -1;
+    var keyboard = new Keyboard();
+    var others_included = "";
+    var transaction_fee = 0;
+
+    // first element is default
+    var url_hashes = [
+        ["paying-just-for-me", "paying-just-for-me", "paying-for-me-and-for-others", "paying-just-for-others"],
+        ["1-month", "1-month", "2-months", "3-months", "6-months", "12-months"],
+        ["sepa", "sepa", "paypal", "bitcoin"],
+        ["", "additional-info"]
+    ];
+
+    var hash = get_url_hash();
+    var hashed_url = new URLHasher(url_hashes);
+
+    if (hash != "" && hash.split(":").length > 0) {
+        var splitted_hash = hash.split(":");
+
+        for (var i = 0; i < splitted_hash.length; i++) {
+            hashed_url.set_hash(splitted_hash[i]);
+        }
+    }
+
+    function on_start() {
+        $("p.error").hide();
+
+        var hash = get_url_hash();
+
+        if (hash_contains(hash, "paying-for-me-and-for-others")) {
+            $("button.me-and-others").trigger("click");
+        } else if (hash_contains(hash, "paying-just-for-others")) {
+            $("button.just-others").trigger("click");
+        } else if (hash_contains(hash, "paying-just-for-me")) {
+            $("button.just-me").trigger("click");
+        }
+
+        if (hash_contains(hash, "1-month")) {
+            $(".subscription #period").val("1_month");
+        } else if (hash_contains(hash, "2-months")) {
+            $(".subscription #period").val("2_month");
+        } else if (hash_contains(hash, "3-months")) {
+            $(".subscription #period").val("3_month");
+        } else if (hash_contains(hash, "6-months")) {
+            $(".subscription #period").val("6_month");
+        } else if (hash_contains(hash, "12-months")) {
+            $(".subscription #period").val("12_month");
+        }
+
+        if (hash_contains(hash, "sepa") || hash == "") {
+            // $("ol.payment-types li.payment-type-sepa").trigger("click");
+            $("ol.payment-types li.payment-type-bitcoin").trigger("click");
+        } else if (hash_contains(hash, "bitcoin")) {
+            $("ol.payment-types li.payment-type-bitcoin").trigger("click");
+        } else if (hash_contains(hash, "paypal")) {
+            $("ol.payment-types li.payment-type-paypal").trigger("click");
+        }
+
+        if (hash_contains(hash, "additional-info")) {
+            $("div.include-company-details").trigger("click");
+        }
+    }
+
+    function valid_company_details() {
+        var valid = true;
+
+        /*
+            for future use
+            --------------
+
+        $("div.additional-info-data span.errors").remove();
+
+        if (! $("#id_company_name").valid("only_ldscd")) {
+            $("#id_company_name").after('<span class="errors">{% trans "This field is required. It can contain letters, digits, spaces, commas and dashes." %}</span>');
+            valid = false;
+        }
+
+        if (! $("#id_company_address").valid("only_ldscd")) {
+            $("#id_company_address").after('<span class="errors">{% trans "This field is required. It can contain letters, digits, spaces, commas and dashes." %}</span>');
+            valid = false;
+        }
+
+        if (! $("#id_company_city").valid("only_ldscd")) {
+            $("#id_company_city").after('<span class="errors">{% trans "This field is required. It can contain letters, digits, spaces, commas and dashes." %}</span>');
+            valid = false;
+        }
+
+        if (! $("#id_company_postcode").valid("only_ldscd")) {
+            $("#id_company_postcode").after('<span class="errors">{% trans "This field is required. It can contain letters, digits, spaces, commas and dashes." %}</span>');
+            valid = false;
+        }
+
+        if ($("#id_company_tax_id").val() != "") {
+            if (! $("#id_company_tax_id").valid("only_lds")) {
+                $("#id_company_tax_id").after('<span class="errors">{% trans "This field can only contain letters, digits, spaces, commas and dashes." %}</span>');
+                valid = false;
+            }
+        }
+        */
+
+        return valid;
+    }
+
+    function valid_others_emails() {
+        $("textarea#emails").removeClass("errors");
+
+        var emails = $("textarea#emails").val() ? $("textarea#emails").val().split(",") : [];
+
+        var valid_emails = [];
+        var invalid_emails = [];
+
+        for (var i = 0; i < emails.length; i++) {
+            var email = emails[i].trim();
+            if (email_valid(email)) {
+                valid_emails.push(email);
+            } else {
+                invalid_emails.push(email);
+            }
+        }
+
+        if (invalid_emails.length > 0) {
+            $("textarea#emails").addClass("errors");
+
+            for (var i = 0; i < valid_emails.length; i++) {
+                valid_emails[i] = valid_emails[i] + " ";
+            }
+
+            $("textarea#emails").val(valid_emails.join());
+
+            for (var i = 0; i < invalid_emails.length; i++) {
+                // $("div.for-others ol.errors").append("<li>" + invalid_emails[i] + " {% trans "is not a valid email" %}</li>");
+                // $("div.for-others ol.errors").show();
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    function duration_for_price() {
+        var duration = $(".subscription .period select#period").val();
+
+        if (duration == "1_month") {
+            duration = "1";
+        } else if (duration == "2_month") {
+            duration = "2";
+        } else if (duration == "3_month") {
+            duration = "3";
+        } else if (duration == "6_month") {
+            duration = "5";
+        } else if (duration == "12_month") {
+            duration = "10";
+        }
+
+        return duration;
+    }
+
+    function also_paying_for_others() {
+        var others = [];
+
+        if (! valid_others_emails()) {
+            return others;
+        }
+
+        var hash = get_url_hash();
+
+        if ((hash != "" && hash_contains(hash, "paying-for-me-and-for-others")) || (hash != "" && hash_contains(hash, "paying-just-for-others"))) {
+            var others = $("textarea#emails").val().split(",");
+
+            if (others.length == 1 && others[0] == "") {
+                return [];
+            }
+
+            for (var i = 0; i < others.length; i++) {
+                if (others[i].trim() != "") {
+                    others[i] = others[i].trim();
+                }
+            }
+
+            others = unique(others);
+        }
+
+        return others;
+    }
+
+    function others_agreement() {
+        var hash = get_url_hash();
+
+        if (!((hash != "" && hash_contains(hash, "paying-for-me-and-for-others")) ||
+                (hash != "" && hash_contains(hash, "paying-just-for-others")))) {
+            return;
+        }
+
+        var others = also_paying_for_others();
+
+        if (others.length == 0) {
+            return;
+        }
+
+        var price = $("div.total-price span.total-price span.number").text();
+        $("#dialog_paying_for_others span.total").html(price + "&euro;.");
+
+        $("#dialog_paying_for_others ol.others").html("");
+
+        if (!(hash != "" && hash_contains(hash, "paying-just-for-others"))) {
+            $("#dialog_paying_for_others ol.others").append("<li>{% trans "Yourself" %}</li>");
+        }
+
+        for (var i = 0; i < others.length; i++) {
+            others[i] = others[i].trim();
+
+            $("#dialog_paying_for_others ol.others").append("<li>" + others[i] + "</li>");
+        }
+
+        $("div#dialog_paying_for_others").show();
+
+        $("div.fullscreen-shadow.subscription").fadeIn("fast");
+
+        keyboard.add("on-dialog-paying-for-others-escape", 'escape', function () {
+            $("div.fullscreen-shadow.subscription").fadeOut("fast");
+            $("div#dialog_paying_for_others").hide();
+
+            keyboard.remove('on-dialog-paying-for-others-escape', 'escape');
+        });
+    }
+
+    function remove_empty_ones(others_included) {
+        var tmp_array = [];
+
+        for (var i = 0; i < others_included.length; i++) {
+            if (others_included[i].trim() != "") {
+                tmp_array.push(others_included[i].trim());
+            }
+        }
+
+        return tmp_array;
+    }
+
+    function fill_others_included(others_included, to_what) {
+        others_included = remove_empty_ones(others_included);
+
+        to_what.html("");
+
+        if (others_included.length > 0) {
+            if (! paying_just_for_others()) {
+                var tr = "<tr><td class='me'>{{ user.email }} (" + gettext("me") + ")</td></tr>";
+                to_what.append(tr);
+            }
+
+            for (var i = 0; i < others_included.length; i++) {
+                var tr = "<tr><td>" + others_included[i] + "</td></tr>";
+                to_what.append(tr);
+            }
+        }
+    }
+
+    function paying_just_for_others() {
+        var hash = get_url_hash();
+
+        if ((hash != "" && hash_contains(hash, "paying-just-for-others"))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function pay() {
+        var others = also_paying_for_others();
+        var payment_type = get_payment_type();
+        var just_for_others = paying_just_for_others();
+
+        var hash = get_url_hash();
+
+        var data = {
+            "type": payment_type,
+            "duration": duration_for_price(),
+            "for_whom": just_for_others ? "just_for_others" : "also_for_me"
+        };
+
+        if (payment_type == "bitcoin") {
+            data["btc_price"] = btc_price;
+        }
+
+        if (others.length > 0) {
+            data["others"] = others.join();
+        }
+
+        if (hash != "" && hash_contains(hash, "paying-just-for-others")) {
+            data["exclude_me"] = "1";
+        }
+
+        if ($("div.include-company-details .tick-box .tick-green").hasClass("active")) {
+            if (! valid_company_details()) {
+                return false;
+            }
+
+            data["company_name"] = $("#id_company_name").val();
+            data["company_address"] = $("#id_company_address").val();
+            data["company_city"] = $("#id_company_city").val();
+            data["company_postcode"] = $("#id_company_postcode").val();
+            data["company_country"] = $("#id_company_country").val();
+            data["company_tax_id"] = $("#id_company_tax_id").val();
+            data["company_tax_payer"] = $("#id_company_tax_payer").val();
+        }
+
+        send_data("{% url 'payment:pay' %}", data, "{{ csrf_token }}",
+            function(response) {
+                if (response.status == "ok") {
+                    $("div#dialog_paying_for_others").hide();
+                    keyboard.remove('on-dialog-paying-for-others-escape', 'escape');
+
+                    /*
+                    var currency = "&euro;";
+
+                    if (data["currency"] == "USD") {
+                        currency = "&dollar;"
+                    }
+                    */
+
+                    var duration = duration_for_price();
+
+                    if (duration == 1) duration = gettext("1 month");
+                    else if (duration == 2) duration = gettext("2 months");
+                    else if (duration == 3) duration = gettext("3 months");
+                    else if (duration == 6) duration = gettext("6 months");
+                    else if (duration == 12) duration = gettext("12 months");
+
+                    $("div#successful_payment > .bitcoin").hide();
+                    $("div#successful_payment > .sepa").hide();
+                    $("div#successful_payment").removeClass("sepa");
+
+                    if (payment_type == "bitcoin") {
+                        $("div#successful_payment").show();
+
+                        $("div#successful_payment > .bitcoin span.period").html(duration);
+                        $("div#successful_payment > .bitcoin .total").html(price);
+                        $("div#successful_payment > .bitcoin .total-btc-price").html(response.btc_price);
+                        $("div#successful_payment > .bitcoin .btc-address").html(response.btc_address);
+                        $("div#successful_payment > .bitcoin .start-date").html(response.start_date);
+
+                        others_included = "" + response.others_included;
+                        others_included = others_included.split(",");
+
+                        others_included = remove_empty_ones(others_included);
+
+                        if (others_included.length > 0) {
+                            var all_parties = others_included.length;
+
+                            if (! paying_just_for_others()) {
+                                all_parties++;
+                            }
+
+                            $("div#successful_payment > .bitcoin .user").html(" <span class='for'>" + gettext("for") + "</span> " + all_parties + " " + gettext("user/s"));
+                        }
+
+                        $("div#successful_payment > .bitcoin div#qr_btc_address").html("");
+                        $("div#successful_payment > .bitcoin div#qr_btc_address").qrcode({width: 180, height: 160, text: "bitcoin:" + response.btc_address + "?amount=" + response.btc_price, background: "#ebebeb"}).show();
+
+                        $("div#successful_payment > .bitcoin").show();
+                    } else if (payment_type == "sepa") {
+                        $("div#successful_payment").show();
+
+                        $("div#successful_payment").addClass("sepa");
+
+                        $("div#successful_payment > .sepa span.period").html(duration);
+                        $("div#successful_payment > .sepa .total").html(price + "&euro;");
+
+                        $("div#successful_payment > .sepa #sepa_address .company-name").html(response.sepa_company_name);
+                        $("div#successful_payment > .sepa #sepa_address .company-address").html(response.sepa_company_address);
+                        $("div#successful_payment > .sepa #sepa_address .company-postal-code").html(response.sepa_company_postal_code);
+                        $("div#successful_payment > .sepa #sepa_address .company-city").html(response.sepa_company_city);
+                        $("div#successful_payment > .sepa #sepa_address .company-country").html(response.sepa_company_country);
+                        $("div#successful_payment > .sepa #sepa_address .company-iban").html(response.sepa_company_iban);
+                        $("div#successful_payment > .sepa #sepa_address .company-ref-number").html("(SI 00) " + response.sepa_transaction_reference);
+
+                        others_included = "" + response.others_included;
+                        others_included = others_included.split(",");
+
+                        others_included = remove_empty_ones(others_included);
+
+                        if (others_included.length > 0) {
+                            var all_parties = others_included.length;
+
+                            if (! paying_just_for_others()) {
+                                all_parties++;
+                            }
+
+                            $("div#successful_payment > .sepa .user").html(" <span class='for'>" + gettext("for") + "</span> " + all_parties + " " + gettext("user/s"));
+                        }
+
+                        $("div#successful_payment > .sepa #sepa_address").children().clone(true, true).appendTo("div#successful_payment > .sepa #copy_sepa_address");
+
+                        $("div#successful_payment > .sepa").show();
+                    } else if (payment_type == "paypal") {
+                        window.location.replace(response["redirect_url"]);
+                    }
+
+                    $("div.fullscreen-shadow.subscription").fadeIn("fast");
+
+                    keyboard.add("on-subscribed-escape", 'escape', function (event) {
+                        event.preventDefault();
+
+                        $("div.fullscreen-shadow.subscription").fadeOut("fast");
+                        $("div#successful_payment").hide();
+
+                        keyboard.remove('on-subscribed-escape', 'escape');
+
+                        window.location.replace("{% url "subscription:subscriptions" %}");
+                    });
+
+                    $("select#subscription_duration").prop('disabled', 'disabled');
+                    $("select#payment_type").prop('disabled', 'disabled');
+                    $("input#his_price_checkbox").prop('disabled', 'disabled');
+                } else if (response.status == "not_logged_in") {
+                    redirect_to_login(response.login_url, window.location.pathname)
+                } else if (response.status == "btc_price_changed") {
+                    $("div.error div.body div.text").html(response.message);
+                    $("div.error").show();
+
+                    $("div.fullscreen-shadow.subscription").fadeIn("fast");
+
+                    keyboard.add("on-subscription-error", 'escape', function () {
+                        $("div.fullscreen-shadow.subscription").fadeOut("fast");
+                        $("div.error").hide();
+
+                        keyboard.remove('on-subscription-error', 'escape');
+                    });
+
+                    get_price("");
+                    change_prices();
+                } else if (response.status == "error") {
+                    $("div.error div.body div.text").html(response.message);
+                    $("div.error").show();
+
+                    $("div.fullscreen-shadow.subscription").fadeIn("fast");
+
+                    keyboard.add("on-subscription-error", 'escape', function () {
+                        $("div.fullscreen-shadow.subscription").fadeOut("fast");
+                        $("div.error").hide();
+
+                        keyboard.remove('on-subscription-error', 'escape');
+                    });
+
+                    get_price("");
+                    change_prices();
+                }
+            }
+        );
+    }
+
+    function change_prices() {
+        $("div.total-price span.total-sepa-transaction-fee").hide();
+        $("div.total-price span.total-paypal-transaction-fee").hide();
+
+        $("ol.payment-types li.payment-type-sepa").each(function() {
+            if ($(this).hasClass("active")) {
+                $("div.total-price span.total-sepa-transaction-fee").show();
+            }
+
+            return;
+        });
+
+        $("ol.payment-types li.payment-type-paypal").each(function() {
+            if ($(this).hasClass("active")) {
+                $("div.total-price span.total-paypal-transaction-fee").show();
+            }
+
+            $("div.total-price span.total-paypal-transaction-fee span.number").text(transaction_fee);
+
+            return;
+        });
+
+        // $("p.payment").show();
+        // $("button#pay").show();
+        var show_btc_price = false;
+
+        $("ol.payment-types li.payment-type-bitcoin").each(function () {
+            if ($(this).hasClass("active")) {
+                show_btc_price = true;
+            }
+        });
+
+        if (show_btc_price) {
+            $("div.total-price span.total-btc-price").show();
+
+            if (btc_price == -1) {
+                $("div.total-price span.total-btc-price").html('<span class="number"></span>');
+
+                $("div.error div.header span.text ").text("Error");
+
+                // TODO, WATCH (translation)
+                var support_link = "{% url "support:home" %}";
+                var text = gettext("For some reason could not get price in BTC and so you cannot make payment with Bitcoins. <br /> <br />Try again later or contact support if you think that this is really too much.");
+                text = text.replace("contact support", "<a href='" + support_link + "'>contact support</a>");
+
+                $("div.error div.body div.text").html(text);
+                $("div.error").show();
+
+                $("div.fullscreen-shadow.subscription").fadeIn("fast");
+
+                keyboard.add("on-subscription-error", 'escape', function () {
+                    $("div.fullscreen-shadow.subscription").fadeOut("fast");
+                    $("div.error").hide();
+
+                    keyboard.remove('on-subscription-error', 'escape');
+                });
+
+                // $("button#pay").hide();
+            } else {
+                // $("button#pay").show();
+
+                $("div.total-price span.total-btc-price span.number").html(btc_price);
+            }
+        } else {
+            $("div.total-price span.total-btc-price").hide();
+        }
+
+        $("div.total-price span.total-price span.number").html(price);
+    }
+
+    function show_emails_also(show) {
+        if (show == true) {
+            $(".subscription .left-side ol.subscription-steps li.number-of-users").removeClass("just-me");
+            $(".subscription .right-side ol.subscription-steps li:first-child").removeClass("just-me");
+            $(".subscription .center #emails").removeClass("hidden");
+        } else {
+            $(".subscription .left-side ol.subscription-steps li.number-of-users").addClass("just-me");
+            $(".subscription .right-side ol.subscription-steps li:first-child").addClass("just-me");
+            $(".subscription .center #emails").addClass("hidden");
+        }
+    }
+
+    $("#payment_type").change(function() {
+        on_start();
+    });
+
+    $("#pay").click(function() {
+        on_start();
+        get_price("pay");
+    });
+
+    $("input#others").focus(function() {
+        if ($(this).val() == "email@internet.com") {
+            $(this).val("");
+        }
+    }).focusout(function() {
+        if ($(this).val() == "") {
+            $(this).val("email@internet.com");
+        }
+    });
+
+    $(".subscription .center button.just-me").click(function () {
+        $(".subscription .center button").removeClass("active");
+        $(this).addClass("active");
+
+        $(".subscription .left-side ol.subscription-steps").removeClass("higher");
+        $(".subscription .right-side").removeClass("higher");
+
+        show_emails_also(false);
+
+        hashed_url.set_hash("paying-just-for-me");
+
+        if (hash_contains(hash, "sepa")) {
+            $("ol.payment-types li.payment-type-sepa").trigger("click");
+        } else if (hash_contains(hash, "bitcoin")) {
+            $("ol.payment-types li.payment-type-bitcoin").trigger("click");
+        } else if (hash_contains(hash, "paypal")) {
+            $("ol.payment-types li.payment-type-paypal").trigger("click");
+        }
+    });
+
+    $(".subscription .center button.me-and-others").click(function () {
+        $(".subscription .center button").removeClass("active");
+        $(this).addClass("active");
+
+        $(".subscription .left-side ol.subscription-steps").addClass("higher");
+        $(".subscription .right-side").addClass("higher");
+
+        show_emails_also(true);
+
+        hashed_url.set_hash("paying-for-me-and-for-others");
+
+        if (hash_contains(hash, "sepa")) {
+            $("ol.payment-types li.payment-type-sepa").trigger("click");
+        } else if (hash_contains(hash, "bitcoin")) {
+            $("ol.payment-types li.payment-type-bitcoin").trigger("click");
+        } else if (hash_contains(hash, "paypal")) {
+            $("ol.payment-types li.payment-type-paypal").trigger("click");
+        }
+    });
+
+    $(".subscription .center button.just-others").click(function () {
+        $(".subscription .center button").removeClass("active");
+        $(this).addClass("active");
+
+        show_emails_also(true);
+
+        hashed_url.set_hash("paying-just-for-others");
+
+        if (hash_contains(hash, "sepa")) {
+            $("ol.payment-types li.payment-type-sepa").trigger("click");
+        } else if (hash_contains(hash, "bitcoin")) {
+            $("ol.payment-types li.payment-type-bitcoin").trigger("click");
+        } else if (hash_contains(hash, "paypal")) {
+            $("ol.payment-types li.payment-type-paypal").trigger("click");
+        }
+    });
+
+    $("ol.payment-types li").click(function () {
+        if ($(this).data("payment-type") == "sepa") {
+            // TODO: remove
+            $("ol.payment-types li.payment-type-bitcoin").trigger("click");
+        }
+
+        $("ol.payment-types li").removeClass("active");
+        $(this).addClass("active");
+
+        hashed_url.set_hash($(this).data("payment-type"));
+
+        get_price("");
+    });
+
+    function get_payment_type() {
+        var payment_type = "";
+
+        $("ol.payment-types li").each(function() {
+            if ($(this).hasClass("active")) {
+                payment_type = $(this).data("payment-type");
+            }
+        });
+
+        return payment_type;
+    }
+
+    function get_price(after_response) {
+        var duration = duration_for_price();
+
+        var url = "{% url 'subscription-price' duration=1 %}";
+        url = url.replace("for-duration=1", "for-duration=" + duration);
+
+        var data = {};
+        var others = also_paying_for_others();
+
+        if (others.length > 0) {
+            data["others"] = others.join();
+        }
+
+        var hash = get_url_hash();
+
+        if (hash != "" && hash_contains(hash, "paying-just-for-others")) {
+            data["exclude_me"] = "1";
+        }
+
+        data["payment_type"] = get_payment_type();
+
+        send_data(url, data, "{{ csrf_token }}",
+            function(response) {
+                if (response.status == "ok") {
+                    price = response.price;
+
+                    if (data["payment_type"] == "bitcoin") {
+                        btc_price = response.btc_price;
+                    }
+
+                    transaction_fee = response.transaction_fee;
+
+                    change_prices();
+
+                    if (after_response == "pay") {
+                        if ((hash == "") ||
+                                (hash != "" && hash_contains(hash, "paying-just-for-me"))) {
+                            pay();
+                        } else {
+                            others_agreement();
+                        }
+                    }
+                } else if (response.status == "not_logged_in") {
+                    redirect_to_login(response.login_url, window.location.pathname)
+                } else {
+                    // TODO: nice alert message
+                    alert("{% trans "Something went wrong, contact support." %}");
+                }
+            }
+        );
+    }
+
+    $(".subscription .period select#period").change(function() {
+        var duration = $(this).val();
+
+        if (duration == "1_month") {
+            hashed_url.set_hash(duration.replace("_month", "-month"));
+        } else {
+            hashed_url.set_hash(duration.replace("_month", "-month") + "s");
+        }
+
+        duration = parseInt(duration.replace("_months", ""));
+
+        if (! isInt(duration)) {
+            duration = parseInt(duration.replace("_month", ""));
+        }
+
+        var from = $(".subscription-from-to span.from").text();
+        from = from.split("-");
+
+        var until = new Date(from[2], from[1]-1, from[0]);
+        until.setMonth(until.getMonth()+duration);
+
+        var month = until.getMonth()+1;
+        if (month < 10) month = "0" + month;
+
+        var day = until.getDate();
+        if (day < 10) day = "0" + day;
+
+        $(".subscription-from-to span.until").html(day + "-" + month + "-" + until.getFullYear());
+
+        on_start();
+    });
+
+    $(".subscription a#prices").click(function() {
+        if ($(".subscription table#price_list").is(":visible")) {
+            $(".subscription table#price_list").fadeOut("fast");
+            keyboard.remove('on-price-list-escape', 'escape');
+        } else {
+            $(".subscription table#price_list").fadeIn();
+
+            keyboard.add("on-price-list-escape", 'escape', function () {
+                $(".subscription table#price_list").fadeOut("fast");
+
+                keyboard.remove('on-price-list-escape', 'escape');
+            });
+        }
+    });
+
+    $("span.user").click(function() {
+        $("div#successful_payment div.payment-user-wrapper").show();
+
+        var table = $(this).parent().parent().find("table.payment-info-users");
+
+        fill_others_included(others_included, table);
+
+        table.show();
+
+        keyboard.add("on-payment-info-users-no-payment-info-escape", 'escape', function () {
+            $("div#successful_payment div.payment-user-wrapper").hide();
+
+            keyboard.remove('on-payment-info-users-no-payment-info-escape', 'escape');
+        });
+    });
+
+    $(".subscription textarea#emails").on("focus", function() {
+        $(".subscription textarea#emails").text("");
+    });
+
+    $(".subscription textarea#emails").on("blur", function() {
+        $(".subscription textarea#emails").text(gettext("Enter email addresses, separated by comma."));
+    });
+
+    $(".subscription button#subscribe").on("click", function() {
+        get_price("pay");
+    });
+
+    $("div#dialog_paying_for_others.dialog-wrapper table.dialog-buttons button.yes").click(function() {
+        pay();
+    });
+
+    $("div#dialog_paying_for_others.dialog-wrapper table.dialog-buttons button.no, div#dialog_paying_for_others.dialog-wrapper button.cancel-button").click(function() {
+        var esc = $.Event("keydown", { keyCode: 27 });
+        $("body").trigger(esc);
+    });
+
+    $("div.dialog-wrapper.error .close-window, div.dialog-wrapper.error button.cancel-button").click(function() {
+        var esc = $.Event("keydown", { keyCode: 27 });
+        $("body").trigger(esc);
+    });
+
+    $("div#successful_payment .ok").click(function() {
+        $("div.fullscreen-shadow.subscription").fadeOut("fast");
+        $("div#successful_payment").hide();
+
+        keyboard.remove('on-subscribed-escape', 'escape');
+
+        window.location.replace("{% url 'subscription:subscriptions' %}");
+    });
+
+    $("div.include-company-details").click(function() {
+        $(this).find(".tick-box .tick-green").each(function() {
+            if ($(this).hasClass("active")) {
+                $(this).removeClass("active");
+                $(".subscription .additional-info .additional-info-data").addClass("hidden");
+                $(".subscription .right-side").removeClass("additional-info-active");
+                $(".subscription .left-side ol.subscription-steps").removeClass("additional-info-active");
+                hashed_url.remove_hash("additional-info");
+            } else {
+                $(this).addClass("active");
+                $(".subscription .additional-info .additional-info-data").removeClass("hidden");
+                $(".subscription .right-side").addClass("additional-info-active");
+                $(".subscription .left-side ol.subscription-steps").addClass("additional-info-active");
+                hashed_url.set_hash("additional-info");
+            }
+        });
+    });
+
+    on_start();
+});
+</script>
+
+<div class="manage-subscription">
+    <div class="header">
+        <h2 class="normal">
+            <a href="{% url 'subscription:subscriptions' %}">{% trans "Subscriptions" %}</a>
+        </h2>
+    </div>
+
+    <h3 class="normal">
+        {% if user.subscribed %}
+            {% trans "You can extend subscription by choosing one of the following payment options." %}
+        {% else %}
+            {% trans "Your subscription period has expired. Use following form to subscribe to use this service." %}
+        {% endif %}
+    </h3>
+
+    <div class="subscription">
+        <div class="center">
+            <div class="left-side">
+                <ol class="subscription-steps">
+                    <li class="number-of-users just-me">{% trans "number of users" %}</li>
+                    <li class="time-period">{% trans "time period" %}</li>
+                    <li class="total-amount">{% trans "total amount" %}</li>
+                    <li class="payment-type">{% trans "payment type" %}</li>
+                    <li class="additional-info">{% trans "additional info" %}</li>
+                </ol>
+            </div>
+
+            <div class="button-wrappers">
+                <button class="just-me active">
+                    <span>{% trans "just me" %}</span>
+                </button>
+
+                <button class="me-and-others">
+                    <span>{% trans "me and others" %}</span>
+                </button>
+
+                <button class="just-others">
+                    <span>{% trans "just others" %}</span>
+                </button>
+
+                <div class="unnecesarry-space"></div>
+
+                <textarea id="emails" name="emails" class="hidden">{% trans "Enter email addresses, separated by comma." %}</textarea>
+            </div>
+
+            <div class="period">
+                <span>
+                    {% trans "I would like to subscribe for " %}
+                    <select id="period" class="period">
+                        <option value="1_month">{% trans "1 month" %}</option>
+                        <option value="2_month">{% trans "2 months" %}</option>
+                        <option value="3_month">{% trans "3 months" %}</option>
+                        <option value="6_month">{% trans "6 months" %}</option>
+                        <option value="12_month">{% trans "12 months" %}</option>
+                    </select>
+
+                    <div>
+                        <a href="#" id="prices" name="prices">{% trans "Check prices" %}</a>
+
+                        <table id="price_list" name="price_list">
+                            <thead>
+                                <tr>
+                                    <th colspan="2">{% trans "Subscription price list" %}</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>{% trans "1 month" %}</td><td>1&nbsp;&euro;</td>
+                                </tr>
+                                <tr>
+                                    <td>{% trans "2 months" %}</td><td>2&nbsp;&euro;</td>
+                                </tr>
+                                <tr>
+                                    <td>{% trans "3 months" %}</td><td>3&nbsp;&euro;</td>
+                                </tr>
+                                <tr>
+                                    <td>{% trans "6 months" %}</td><td>5&nbsp;&euro;</td>
+                                </tr>
+                                <tr>
+                                    <td>{% trans "12 months" %}</td><td>10&nbsp;&euro;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </span>
+
+                <div class="subscription-from-to">{% blocktrans with from=from|date:"d-m-Y" until=until|date:"d-m-Y" %}You are paying subscription from <span class="from">{{ from }}</span> until <span class="until">{{ until }}</span>.{% endblocktrans %}</div>
+            </div>
+
+            <div class="total-line"></div>
+
+            <div class="total-price">
+                <span class="total-price">{% trans "total price" %}</span>
+
+                <span class="total-price"><span class="number">1</span>&nbsp;&euro;</span>
+                <span class="total-btc-price"><span class="number"></span>&nbsp; BTC</span>
+                <span class="total-sepa-transaction-fee">{% trans "transaction fee" %} <span class="number">{{ sepa_transaction_fee }}</span>&nbsp;&euro;</span>
+                <span class="total-paypal-transaction-fee">{% trans "transaction fee" %} <span class="number"></span>&nbsp;&euro;</span>
+            </div>
+
+            <ol class="payment-types">
+                <li>{% trans "I would like to pay with" %}</li>
+                <li class="payment-type-sepa active" data-payment-type="sepa"></li>
+                <li class="payment-type-paypal" data-payment-type="paypal"></li>
+                <li class="payment-type-bitcoin" data-payment-type="bitcoin"></li>
+            </ol>
+
+            <div class="additional-info">
+                <div class="include-company-details">
+                    <span class="tick-box"><span class="tick-green"></span></span>{% trans "Include my company details in the invoice." %}
+                </div>
+
+                <div class="additional-info-data hidden">
+                    <div class="column1">
+                        <div class="input-wrapper">
+                            <p>{% trans "Company name" %}</p>
+                            {{ user_profile_form.company_name }}
+                        </div>
+                        <div class="input-wrapper">
+                            <p>{% trans "Company address" %}</p>
+                            {{ user_profile_form.company_address }}
+                        </div>
+                        <div class="input-wrapper">
+                            <p>{% trans "Company city" %}</p>
+                            {{ user_profile_form.company_city }}
+                        </div>
+                        <div class="input-wrapper">
+                            <p>{% trans "Company postcode" %}</p>
+                            {{ user_profile_form.company_postcode }}
+                        </div>
+                    </div>
+
+                    <div class="column2">
+                        <div class="input-wrapper">
+                            <p>{% trans "Country" %}</p>
+                            {{ user_profile_form.company_country }}
+                        </div>
+                        <div class="input-wrapper">
+                            <p>{% trans "Tax ID number" %}</p>
+                            {{ user_profile_form.company_tax_id }}
+                        </div>
+                        <div class="input-wrapper">
+                            <p>{% trans "Taxpayer" %}</p>
+                            {{ user_profile_form.company_tax_payer }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="subscribe">{% trans "Subscribe" %}</button>
+
+            <div class="right-side">
+                <ol class="subscription-steps">
+                    <li class="just-me">{% trans "Choose the number of users you wish to subscribe for." %} <br /> {% trans "NOTE: Price per user depends on subscription time period." %}</li>
+                    <li>{% trans "Choose the time period you wish to subscribe for." %}</li>
+                    <li>{% trans "Total amount to be paid." %}</li>
+                    <li>{% trans "Choose your type of payment." %}</li>
+                    <li>{% trans "Choose this option to add your company details." %}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="successful_payment">
+    <div class="bitcoin">
+        <div class="text">
+            {% trans '<span class="uppercase">You subscribed to timebits for <span class="period"></span> <span class="user"></span>. <br /> You used <span class="payment-method">bitcoin</span> as payment option.<br /></span><span class="important">Send <span class="total-btc-price"></span> (<span class="total"></span>&euro;) to the following address within 1 hour:<br /><span class="btc-address"></span><br /> <br />After that time you will have to subscribe one more time.' %}
+
+            <div class="payment-user-wrapper">
+                <table class="payment-info-users">
+                </table>
+            </div>
+        </div>
+        <div id="qr_btc_address"></div>
+        <button class="ok">OK</button>
+    </div>
+
+    <div class="sepa">
+        <div class="text">
+            <table id="sepa_address" class="hidden">
+                <tbody>
+                    <tr>
+                        <td>{% trans "Name" %}</td>
+                        <td class="company-name"></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans "Address" %}</td>
+                        <td class="company-address"></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans "Postal code" %}</td>
+                        <td class="company-postal-code"></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans "City" %}</td>
+                        <td class="company-city"></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans "Country" %}</td>
+                        <td class="company-country"></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans "IBAN" %}</td>
+                        <td class="company-iban"></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans "Ref. Number" %}</td>
+                        <td class="company-ref-number"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {% trans '<span class="uppercase">You subscribed to timebits for <span class="period"></span> <span class="user"></span>. <br /> You used <span class="payment-method">sepa</span> as payment option.<br /></span><span class="important">Send total amount of <span class="total"></span> to the following bank account:<br /></span><table id="copy_sepa_address"></table>' %}
+
+            <div class="payment-user-wrapper">
+                <table class="payment-info-users">
+                </table>
+            </div>
+        </div>
+        <div id="qr_btc_address"></div>
+        <button class="ok">OK</button>
+    </div>
+</div>
+
+
+<div id="dialog_paying_for_others" class="dialog-wrapper">
+    <div class="header">
+        <span class="text header">{% trans "Warning" %}</span>
+
+        <button class="cancel-button"></button>
+    </div>
+
+    <div class="body">
+        <div class="text">
+            <p>{% trans "You will be paying subscriptions also for:" %}</p>
+
+            <ol class="others">
+                <li class="yourself">{% trans "yourself" %}</li>
+            </ol>
+
+            <p>{% trans "That will cost you a total of <span class='total'></total>. Proceed?" %}</p>
+        </div>
+
+        <table class="dialog-buttons">
+            <tbody>
+                <tr>
+                    <td><button class="yes">{% trans "yes" %}</button></td><td><button class="no">{% trans "no" %}</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="fullscreen-shadow subscription"></div>
+
+<div id="error">
+    <button class="close-window"></button>
+
+    <div class="header">{% trans "Error" %}</div>
+    <div class="body"></div>
+
+    <div class="footer"></div>
+</div>
+
+<div class="dialog-wrapper error">
+    <div class="header">
+        <span class="text header"></span>
+
+        <button class="cancel-button"></button>
+    </div>
+
+    <div class="body">
+        <div class="text"></div>
+    </div>
+
+    <div class="footer">
+        <button class="close-window">{% trans "Close this window" %}</button>
+    </div>
+</div>
+
+{% endblock %};

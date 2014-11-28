@@ -16,7 +16,9 @@
   cache is loaded on load_config and deleted on save_config (and reloaded)
 """
 
-from models import UserConfig, CompanyConfig
+from config.models import UserConfig
+from config.models import CompanyConfig
+
 from common import globals as g
 from django.core.cache import cache
 import json
@@ -219,3 +221,10 @@ def get_time_format(user, company, variant):
         variant is one of 'python', 'django', 'jquery'
     """
     return g.TIME_FORMATS[get_company_value(user, company, 'pos_time_format')][variant]
+
+class InvalidKeyError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
