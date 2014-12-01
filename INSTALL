@@ -2,3 +2,4 @@ To install:
     - pip install sorl-thumbnail==11.12.1b (starejse verzije ne delajo z django 1.7)
     - rest-framework (?)
     - memcached
+    - django-simple-captcha

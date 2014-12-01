@@ -1,12 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import User
+from blusers.models import BlocklogicUser
 
 from common.models import SkeletonU
 from pos.models import Company
 
 
 class UserConfig(SkeletonU):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(BlocklogicUser)
     
     # all settings are stored in json format
     data = models.TextField(null=False)

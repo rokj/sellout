@@ -1,0 +1,58 @@
+{% extends "pos/manage/manage.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block section_head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/users.css' %}" />
+{% endblock %}
+
+{% block status_bar_title %}{% trans 'Users' %}{% endblock %}
+
+{% block extra_button %}
+    <a class="extra-button"
+       href="#">
+        {% trans 'Invite users' %}
+    </a>
+{% endblock %}
+
+{% block manage_content %}
+    {# the list of registers: on the left #}
+    <div class="content">
+        <table id="users">
+            <thead>
+                {# include: register name, receipt format and type, and location #}
+                <tr>
+                    <td class="name">{% trans 'Name' %}</td>
+                    <td class="pin">{% trans 'PIN' %}</td>
+                    <td class="permission">{% trans 'Permission' %}</td>
+                    <td class="controls">{# edit and delete links #}</td>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for r in registers %}
+                <tr>
+                    <td class="name">{# register name is a link to edit form #}
+
+                    </td>
+                    <td class="format"></td>
+                    <td class="type"></td>
+                    <td class="location"></td>
+                    <td class="controls">
+                        <a href="#"
+                           data-id="{{ r.id }}"
+                           data-text="{% trans 'Delete register: ' %} {{ r.name }}"
+                           class="delete-link">
+                            <img src="{% static 'icons/delete_black.png' %}"
+                                 alt="{% trans 'Delete' %}"
+                                 title="{% trans 'Delete' %}" />
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
+

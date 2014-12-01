@@ -1,7 +1,6 @@
 import Image
 import base64
 from django.core.files import File
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -10,7 +9,7 @@ from django.utils.translation import ugettext as _
 from django import forms
 from common.images import import_color_image, import_monochrome_image, resize_image, create_file_from_image
 
-from pos.models import Company
+from pos.models import Company, Permission
 
 from pos.views.util import JsonParse, has_permission, no_permission_view, JsonOk, JsonError, \
     max_field_length
@@ -19,8 +18,7 @@ from common import globals as g
 import unidecode
 from common.functions import get_random_string, get_terminal_url
 
-import re
-import os
+import re, os, random
 
 
 ###
@@ -148,6 +146,33 @@ def url_name_suggestions(request):
 ### company ###
 ###############
 class CompanyForm(forms.ModelForm):
+    class Meta:
+        model = Company
+        fields = [  # 'color_logo',  # logos have been left out and moved to separate forms (html only)
+                    #'monochrome_logo',
+                    'name',
+                    'url_name',
+                    'email',
+                    'street',
+                    'postcode',
+                    'city',
+                    'state',
+                    'country',
+                    'phone',
+                    'vat_no',
+                    'tax_payer',
+                    'website',
+                    'notes', ]
+
+        widgets = {
+            'tax_payer': forms.Select(choices=((True, _("Yes")), (False, _("No"))))
+        }
+
+        # widgets = {
+        #    'color_logo': widgets.PlainClearableFileInput,
+        #    'monochrome_logo': widgets.PlainClearableFileInput,
+        #}
+
     # take special care of urls
     def clean_url_name(self):
         url_name = self.cleaned_data['url_name']
@@ -164,27 +189,6 @@ class CompanyForm(forms.ModelForm):
             raise forms.ValidationError(_("Url of the company is invalid or exists already."))
         else:
             return url_name
-
-    class Meta:
-        model = Company
-        fields = [#'color_logo',  # logos have been left out and moved to separate forms (html only)
-                  #'monochrome_logo',
-                  'name',
-                  'url_name',
-                  'email',
-                  'street',
-                  'postcode',
-                  'city',
-                  'state',
-                  'country',
-                  'phone',
-                  'vat_no',
-                  'notes',
-                  'website']
-        #widgets = {
-        #    'color_logo': widgets.PlainClearableFileInput,
-        #    'monochrome_logo': widgets.PlainClearableFileInput,
-        #}
 
 
 def validate_company(user, company, data):
@@ -275,13 +279,23 @@ def register_company(request):
         # submit data
         form = CompanyForm(request.POST, request.FILES)
         if form.is_valid():
+            print request.user
+
             company = form.save(False)
             company.created_by = request.user
             form.save()
             
-            # continue with registration
-            
-            # TODO: add 'admin' permissions for newly registered company to request.user
+            # add 'admin' permissions for the user that registered this company
+            default_permission = Permission(
+                created_by=request.user,
+
+                user=request.user,
+                company=company,
+                permission='admin',
+                pin=random.randint(0, 10000)
+            )
+            default_permission.save()
+
             return redirect('pos:terminal', company=form.cleaned_data['url_name'])  # home page
     else:
         # show an empty form
@@ -298,7 +312,8 @@ def register_company(request):
         'site_title': g.MISC['site_title'],
     }
 
-    return render(request, 'pos/manage/registration.html', context)
+    return render(request, 'web/register_company.html', context)
+
 
 # edit after registration
 @login_required

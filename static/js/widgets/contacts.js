@@ -384,10 +384,10 @@ Contacts = function(g){
 
     // most inputs: when changed, re-save the contact entry
     $.each(p.items.individual, function(key, value){
-        value.change(function(){ p.data_changed = true; });
+        value.unbind().change(function(){ p.data_changed = true; });
     });
     $.each(p.items.company, function(key, value){
-        value.change(function(){p.data_changed = true; });
+        value.unbind().change(function(){p.data_changed = true; });
     });
 
     // if there's a contact selected already, update bill

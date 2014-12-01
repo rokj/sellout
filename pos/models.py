@@ -1,12 +1,12 @@
 from django.db import models
 from django.utils.translation import ugettext as _
 from django.db.models.signals import pre_save, pre_delete, post_save, post_delete
-from django.contrib.auth.models import User
 from django.dispatch import receiver
 from sorl import thumbnail
+from blusers.models import BlocklogicUser
+from common.functions import ImagePath
 
 from common.models import SkeletonU
-from common.functions import ImagePath
 import common.globals as g
 
 from config.countries import country_choices, country_by_code
@@ -18,7 +18,7 @@ import datetime as dtm
 class CompanyAbstract(models.Model):
     # abstract: used in  for Company and BillCompany
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
-    street = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
+    street = models.CharField(_("Street address"), max_length=200, null=True, blank=True)
     postcode = models.CharField(_("Postal code"), max_length=20, null=True, blank=True)
     city = models.CharField(_("City"), max_length=50, null=True, blank=True)
     state = models.CharField(_("State"), max_length=50, null=True, blank=True)
@@ -27,6 +27,8 @@ class CompanyAbstract(models.Model):
     website = models.CharField(_("Website"), max_length=256, null=True, blank=True)
     phone = models.CharField(_("Phone number"), max_length=30, null=True, blank=True)
     vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=False, blank=False)
+
+    tax_payer = models.BooleanField(_("Tax payer"), blank=False, null=False, default=False)
 
     class Meta:
         abstract = True
@@ -50,12 +52,15 @@ class Company(SkeletonU, CompanyAbstract):
                                         null=True, blank=True)
     notes = models.TextField(_("Notes"), blank=True, null=True)
 
+    # will be used for 'deleting' companies (marking them inactive)
+    # TODO: create custom DeletedManager for querysets that leaves out deleted=True
+    deleted = models.BooleanField(null=False, blank=False, default=False)
+
     def __unicode__(self):
         return self.name
 
     class Meta:
         verbose_name_plural = _("Companies")
-
 
 ### category ###
 class Category(SkeletonU):
@@ -441,10 +446,13 @@ class Contact(SkeletonU, ContactAbstract):
 
 ### permissions
 class Permission(SkeletonU):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(BlocklogicUser)
     company = models.ForeignKey(Company)
     permission = models.CharField(max_length=16, null=False, blank=False, choices=g.PERMISSION_GROUPS)
-    
+    pin = models.IntegerField(null=True)
+
+    unique_together = ('company', 'pin')
+
     def __unicode__(self):
         return self.user.email + " | " + self.company.name + ": " + self.get_permission_display()
 

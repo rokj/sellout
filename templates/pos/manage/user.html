@@ -2,55 +2,78 @@
 {% load static %}
 {% load i18n %}
 
+{% comment %} add/edit register form {% endcomment %}
+
 {% block section_head %}
-<link type="text/css" rel="stylesheet" href="{% static 'css/management/config.css' %}" />
-<script type="text/javascript">
-$(document).ready(function(){
-    $("img.currency").click(function(){
-        $("#id_currency").val($(this).attr("data-character"));
-    });
-});
-</script>
+<link type="text/css" rel="stylesheet" href="{% static 'css/management/users.css' %}"/>
 {% endblock %}
 
-{% block status_bar_title %}{% trans 'User settings' %}{% endblock %}
-
-{# no extra buttons this time {% block extra_button %} {% endblock %} #}
+{% block status_bar_title %}
+    {% trans 'Edit user' context 'page title' %}
+{% endblock %}
 
 {% block manage_content %}
-<form action="{% url 'pos:user_settings' company.url_name %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
+    <div class="edit-container">
+        {% if add %}
+            <form action="{% url 'pos:add_register' company.url_name %}" method="post">
+        {% else %}
+            <form action="{% url 'pos:edit_register' company.url_name register_id %}" method="post">
+        {% endif %}
 
-    <div class="management-column">
-        <div class="form-field">
-            <div class="error">{{ form.product_button_size.errors }}</div>
-            {{ form.product_button_size.label_tag }}
-            {{ form.product_button_size }}
-        </div>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
 
-        <div class="form-field">
-            <div class="error">{{ form.product_display.errors }}</div>
-            {{ form.product_display.label_tag }}
-            {{ form.product_display }}
-        </div>
-
-        <div class="form-field">
-            <div class="error">{{ form.display_breadcrumbs.errors }}</div>
-            {{ form.display_breadcrumbs.label_tag }}
-            {{ form.display_breadcrumbs }}
-        </div>
-
-        <div class="form-field no-label">
-            <div class="split-cell first">
-                <input type="button" id="static_cancel" value="{% trans 'Cancel' %}" class="hoverable" />
+            <div class="form-field">
+                <div class="error">{{ form.name.errors }}</div>
+                {{ form.name.label_tag }}
+                {{ form.name }}
             </div>
-            <div class="split-cell last">
-                <input type="submit" value="{% trans 'Save' %}" class="hoverable" />
-            </div>
-        </div>
 
+            <div class="form-field">
+                <div class="error">{{ form.receipt_format.errors }}</div>
+                {{ form.receipt_format.label_tag }}
+                {{ form.receipt_format }}
+            </div>
+
+            <div class="form-field">
+                <div class="error">{{ form.receipt_type.errors }}</div>
+                {{ form.receipt_type.label_tag }}
+                {{ form.receipt_type }}
+            </div>
+
+            <div class="form-field">
+                <div class="error">{{ form.printer_driver.errors }}</div>
+                {{ form.printer_driver.label_tag }}
+                {{ form.printer_driver }}
+            </div>
+
+            <div class="form-field">
+                <div class="error">{{ form.print_logo.errors }}</div>
+                {{ form.print_logo.label_tag }}
+                {{ form.print_logo }}
+            </div>
+
+            <div class="form-field clear-floats">
+                <div class="error">{{ form.location.errors }}</div>
+                {{ form.location.label_tag }}
+                {{ form.location }}
+            </div>
+
+            <div class="form-field">
+                <div class="error">{{ form.print_location.errors }}</div>
+                {{ form.print_location.label_tag }}
+                {{ form.print_location }}
+            </div>
+
+            <div class="form-field clear-floats">
+                <div class="split-cell first">
+                    <a class="button cancel hoverable"
+                       href="{% url 'pos:list_registers' company.url_name %}">{% trans 'Cancel' %}</a>
+                </div>
+                <div class="split-cell last">
+                    <input type="submit" value="{% trans 'Save' %}" class="hoverable" />
+                </div>
+            </div>
+        </form>
     </div>
-</form>
-
 {% endblock %}
-

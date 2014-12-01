@@ -1,9 +1,4 @@
-import logging
-from django.db.models.signals import post_save, post_delete
 from django.db import models
-from django.contrib.auth.models import User
-from django.dispatch import receiver
-from django.utils.translation import ugettext as _
 from django.utils.timezone import now
 
 
@@ -28,8 +23,8 @@ class SkeletonU(Skeleton):
     """
     Skeleton model with Users included.
     """
-    created_by = models.ForeignKey(User, related_name='%(app_label)s_%(class)s_created_by', null=False)
-    updated_by = models.ForeignKey(User, related_name='%(app_label)s_%(class)s_updated_by', null=True, blank=True)
+    created_by = models.ForeignKey('blusers.BlocklogicUser', related_name='%(app_label)s_%(class)s_created_by', null=False)
+    updated_by = models.ForeignKey('blusers.BlocklogicUser', related_name='%(app_label)s_%(class)s_updated_by', null=True, blank=True)
 
     class Meta:
         abstract = True

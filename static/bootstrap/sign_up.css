@@ -1,0 +1,10 @@
+body {
+    padding-top: 60px;
+}
+
+label {
+    display: block;
+    font-weight: normal;
+    color: #969696;
+    font-size: 12px;
+}

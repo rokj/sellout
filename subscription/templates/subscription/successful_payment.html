@@ -1,0 +1,19 @@
+{% extends "pos/base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/subscription.css' %}" />
+{% endblock %}
+
+{% block body_tag %}<body class="successful-payment">{% endblock %}
+
+{% block content %}
+
+<h1 class="normal">PAID</h1>
+
+<div>
+    <a href="{% url 'subscription:subscriptions' %}">{% trans "Back to subscriptions" %}</a>
+</div>
+
+{% endblock %}

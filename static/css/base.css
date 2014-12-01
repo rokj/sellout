@@ -19,9 +19,13 @@ h2{
 
 
 /* 'generic' links */
-a{ text-decoration: none; }
-a:link, a:visited{ color: #00bbda; }
-a:hover, a:active{ color: #33e2ff; }
+a:link, a:visited, a:active{
+    text-decoration: none;
+    color: #00bbda;
+}
+a.add:link, a.add:visited, a.add:active{
+    color: #22e693;
+}
 
 #content_wrapper{
     margin-top: 3em; /* the height of statusbar */
@@ -191,11 +195,4 @@ select{
 .custom-dialog-footer button.ok{
     background-color: #22e693;
     margin-left: 30px;
-}
-
-/* jquery-ui tweaks of our custom theme */
-/* to avoid overwriting on updates */
-.ui-widget-content,
-.custom-dialog-container{
-    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
 }
