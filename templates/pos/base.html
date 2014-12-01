@@ -64,6 +64,9 @@ blocks:
         $(window).load(function(){
             {# common to management #}
             var items = {
+                terminal_menu_button: $("#terminal_button"),
+                terminal_menu_content: $("#terminal_menu"),
+
                 management_menu_button:  $("#management_button"),
                 management_menu_content: $("#management_menu"),
 
@@ -72,6 +75,7 @@ blocks:
             };
 
             // menus
+            items.terminal_menu_button.simpleMenu(items.terminal_menu_content);
             items.management_menu_button.simpleMenu(items.management_menu_content);
             items.user_menu_button.simpleMenu(items.user_menu_content);
         });
@@ -81,12 +85,14 @@ blocks:
 {% block body_tag %}<body>{% endblock %}{% comment %} in case something needs to be assigned to body tag (styles, etc.){% endcomment %}
     <div id="status_bar">
         {% block status_bar_logo %}
+            {# the logo: green/black in management, black/white in terminal #}
+            {# thie is the 'terminal' version #}
             <div id="logo" class="nolink">
-                {# logo block will be replaced with link to management in terminal #}
                 <img src="{% static 'icons/logo_white.png' %}" alt="" />
-                <div id="status_bar_company"></div>
             </div>
         {% endblock %}
+
+        {% block terminal_menu %}{% endblock %}
 
         <div id="user_button" class="button-container simple-menu-button">
             <div class="vertical-separator"></div>
@@ -96,10 +102,10 @@ blocks:
             <ul id="user_menu" class="drop-down">
                 {# store-related stuff #}
                 {% if company %}
-                    <li class="store separator"><a href="{% url 'pos:user_settings' company.url_name %}">{% trans 'User Settings' %}</a></li>
+                    <li class="separator"><a href="{% url 'pos:user_settings' company.url_name %}">{% trans 'User Settings' %}</a></li>
                 {% endif %}
-                <li class="store"><a href="#">{% trans 'Switch User' %}</a> </li>
-                <li class="store"><a href="#">{% trans 'Log Out' %}</a> </li>
+                <li><a href="#">{% trans 'Switch User' %}</a> </li>
+                <li><a href="#">{% trans 'Log Out' %}</a> </li>
             </ul>
         </div>
 

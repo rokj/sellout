@@ -1,0 +1,30 @@
+#companies_list{
+    width: 100%;
+}
+
+.table-row{
+    height: 40px;
+    line-height: 40px;
+    border-top: 1px solid #ffffff;
+    border-bottom: 1px solid #ffffff;
+}
+
+.table-cell{
+    display: table-cell;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-cell.company-delete{
+    padding-left: 20px;
+}
+
+.company-delete img{
+    height: 20px;
+}
+
+#new_company{
+    line-height: 32px;
+    margin-top: 20px;
+}

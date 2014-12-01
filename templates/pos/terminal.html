@@ -153,6 +153,32 @@ $(window).load(function(){
 
 {% endblock %}
 
+{% block terminal_menu %}
+    {# this has been replaced with a 'terminal' menu #}
+    <div id="status_bar_company"></div>
+
+    <div id="terminal_button" class="button-container simple-menu-button">
+        <div class="vertical-separator right"></div>
+
+        <div class="vertical-separator"></div>
+
+        <a href="#" class="button-text">{% trans 'Terminal' %}</a>
+
+        <ul id="terminal_menu" class="drop-down">
+            {# store-related stuff #}
+            <li class="separator">
+                <a href="#">{% trans 'Switch User' %}</a>
+            </li>
+            <li>
+                <a href="#">{% trans 'Lock' %}</a>
+            </li>
+            <li>
+                <a href="{% url 'web:select_company' %}">{% trans 'Leave' %}</a>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
+
 {% block content %}
     {% comment %} the loading screen {% endcomment %}
     <div id="loading">

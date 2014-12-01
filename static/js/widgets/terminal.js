@@ -51,6 +51,10 @@ Terminal = function(g){
     // register: will point to a register object in g.data.registers
     p.register = null;
 
+    // resize at most every N milliseconds
+    p.resize_timeout = 200;
+    p.resize_timeout_handle = null;
+
     //
     // methods: sizing and layout
     //
@@ -284,7 +288,13 @@ Terminal = function(g){
 
     // resize everything now and on resize
     p.size_layout(false); // no need to save on load
-    $(window).resize(function(){p.size_layout(false); }); // and no need to save on window resize
+    $(window).resize(function(){
+        if(p.resize_timeout_handle) clearTimeout(p.resize_timeout_handle);
+
+        p.resize_timeout_handle = setTimeout(
+            p.size_layout(false), p.resize_timeout
+        );
+    });
 
     // convert all stringed numbers to Big() numbers
     // discounts:

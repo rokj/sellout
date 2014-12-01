@@ -60,7 +60,7 @@ def select_company(request):
     """ show current user's companies and a list of invites. """
 
     # the list of companies
-    companies = request.user.get_companies()
+    companies = request.user.companies
 
     # the list of messages
     actions = Action.objects.filter(status="waiting", _for=request.user.email)

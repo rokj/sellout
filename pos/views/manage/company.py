@@ -18,8 +18,7 @@ from common import globals as g
 import unidecode
 from common.functions import get_random_string, get_terminal_url
 
-import re
-import os
+import re, os, random
 
 
 ###
@@ -292,7 +291,8 @@ def register_company(request):
 
                 user=request.user,
                 company=company,
-                permission='admin'
+                permission='admin',
+                pin=random.randint(0, 10000)
             )
             default_permission.save()
 

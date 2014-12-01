@@ -28,7 +28,7 @@ class CompanyAbstract(models.Model):
     phone = models.CharField(_("Phone number"), max_length=30, null=True, blank=True)
     vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=False, blank=False)
 
-    tax_payer = models.BooleanField(_("Tax payer"), blank=False)
+    tax_payer = models.BooleanField(_("Tax payer"), blank=False, null=False, default=False)
 
     class Meta:
         abstract = True
@@ -51,6 +51,10 @@ class Company(SkeletonU, CompanyAbstract):
                                                                  "pos_company", "monochrome_logo"),
                                         null=True, blank=True)
     notes = models.TextField(_("Notes"), blank=True, null=True)
+
+    # will be used for 'deleting' companies (marking them inactive)
+    # TODO: create custom DeletedManager for querysets that leaves out deleted=True
+    deleted = models.BooleanField(null=False, blank=False, default=False)
 
     def __unicode__(self):
         return self.name
@@ -445,7 +449,10 @@ class Permission(SkeletonU):
     user = models.ForeignKey(BlocklogicUser)
     company = models.ForeignKey(Company)
     permission = models.CharField(max_length=16, null=False, blank=False, choices=g.PERMISSION_GROUPS)
-    
+    pin = models.IntegerField(null=True)
+
+    unique_together = ('company', 'pin')
+
     def __unicode__(self):
         return self.user.email + " | " + self.company.name + ": " + self.get_permission_display()
 

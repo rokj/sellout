@@ -27,6 +27,7 @@
     position: absolute;
     width: 100%;
     top: 0;
+    padding-top: 10px;
 }
 
 #bill_container{
@@ -52,7 +53,7 @@
     position:relative;
 }
 
-#till{
+#register{
     position: absolute;
     bottom:0;
     width: 100%;
@@ -436,13 +437,13 @@ button.more{
     position: relative;
 }
 
-.till-button-container{
+.register-button-container{
     position: absolute;
     width: 40%;
     top: 20px;
 }
 
-.till-button-container > button{
+.register-button-container > button{
     width: 100%;
     height: 50px;
     font-size: 20px;
