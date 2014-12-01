@@ -557,6 +557,8 @@ class Bill(SkeletonU, RegisterAbstract):
     timestamp = models.DateTimeField(_("Date and time of bill creation"), null=False)
     status = models.CharField(_("Bill status"), max_length=20, choices=g.BILL_STATUS, default=g.BILL_STATUS[0][0])
 
+    currency = models.CharField(_("Currency"), max_length=4)
+
     def __unicode__(self):
         return self.company.name + ": " + str(self.serial)
 

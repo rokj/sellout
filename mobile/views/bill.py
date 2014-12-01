@@ -64,5 +64,5 @@ def get_active_bill(request, company):
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def mobile_finish_bill(request, company):
-    return finish_bill(request, company)
+    return finish_bill(request, company, android=True)
     # return JsonOk()
