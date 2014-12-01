@@ -10,13 +10,6 @@ body{
     max-width: 300px;
 }
 
-.fake-label, label{
-    margin-top: 10px;
-    display: block;
-    font-weight: normal;
-    color: #646464;
-}
-
 .help-text{
     color: #969696;
     font-size: 0.9em;;

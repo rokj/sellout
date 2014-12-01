@@ -12,6 +12,7 @@ import common.globals as g
 from config.countries import country_choices, country_by_code
 
 import datetime as dtm
+import random
 
 
 ### company ###
@@ -455,6 +456,35 @@ class Permission(SkeletonU):
 
     def __unicode__(self):
         return self.user.email + " | " + self.company.name + ": " + self.get_permission_display()
+
+    def create_pin(self, custom_pin=None):
+        """ creates a pin for this user; if successful, returns True;
+            if this pin already exists in current company, returns False
+        """
+        def rnd_pin():
+            return random.randint(0, 10000)
+
+        def pin_exists(this_pin):
+            return Permission.objects.filter(company=self.company, pin=this_pin).exists()
+
+        if custom_pin:
+            if pin_exists(custom_pin):
+                return False
+
+            p = custom_pin
+        else:
+            p = rnd_pin()
+            while pin_exists(p):
+                p = rnd_pin()
+
+        self.pin = p
+        self.save()
+        return True
+
+
+    @property
+    def pin_display(self):
+        return "%04d"%(self.pin % 10000)
 
 
 @receiver(pre_save, sender=Permission)

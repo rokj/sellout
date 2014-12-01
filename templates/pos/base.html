@@ -128,7 +128,7 @@ blocks:
                     {# company-related stuff #}
                     <li class="company separator"><a href="{% url 'pos:company_settings' company.url_name %}">{% trans 'Configuration' %}</a></li>
                     <li class="company"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
-                    <li class="company"><a href="#">{% trans 'Users' %}</a></li>
+                    <li class="company"><a href="{% url 'pos:list_users' company.url_name %}">{% trans 'Users' %}</a></li>
                 </ul>
             {% endif %}
         </div>

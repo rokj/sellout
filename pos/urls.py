@@ -83,10 +83,10 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + '/json/products/mass-edit/$', product.mass_edit, name='mass_edit'),  # edit (save) product - json
 
     # users
-    url(r_company + '/' + r_manage + _('/users') + '/$', users.list_users, name='list_registers'),
+    url(r_company + '/' + r_manage + _('/users') + '/$', users.list_users, name='list_users'),
     #url(r_company + '/' + r_manage + _('/users/invite') + '/$', register.add_register, name='add_register'),
     #url(r_company + '/' + r_manage + _('/register/edit') + '/(?P<register_id>\d+)/$', register.edit_register, name='edit_register'),
-    #url(r_company + '/' + r_manage + _('/register/delete') + '/$', register.delete_register, name='delete_register'),
+    url(r_company + '/' + r_manage + _('/permission/delete') + '/$', users.delete_permission, name='delete_permission'),
 
     # bill management
     url(r_company + '/' + r_manage + _('/bills') + '/$', bill.list_bills, name='list_bills'),

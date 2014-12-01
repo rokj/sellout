@@ -32,6 +32,13 @@ a.add:link, a.add:visited, a.add:active{
 }
 
 /* misc useful stuff */
+.fake-label, label{
+    margin-top: 10px;
+    display: block;
+    font-weight: normal;
+    color: #646464;
+}
+
 div.clear-floats{
     clear: both;
 }

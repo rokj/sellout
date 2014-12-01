@@ -4,15 +4,48 @@
 
 {% block section_head %}
     <link type="text/css" rel="stylesheet" href="{% static 'css/management/users.css' %}" />
+
+    <script type="text/javascript">
+    $(document).ready(function(){
+        var items = {
+            // invites
+            add_button: $("#invite_button"),
+            invite_dialog: $("#invite_dialog"),
+            invite_mail: $("#invite_mail"), // the invite dialog contents
+            invite_permission: $("#invite_permission")
+
+            // permission editing
+
+        };
+
+        //
+        // invites
+        //
+        // remember the default value from page load
+        var default_invite_permission = items.invite_permission.val();
+        items.add_button.click(function(){
+            items.invite_mail.val("");
+            items.invite_permission.val(default_invite_permission);
+
+            custom_dialog("{% trans 'Invite users' %}", items.invite_dialog, 400, {
+                ok: "{% trans 'Invite' %}",
+                ok_action: edit_permission
+            });
+        });
+
+        //
+        // editing permissions
+        //
+
+
+    });
+    </script>
 {% endblock %}
 
 {% block status_bar_title %}{% trans 'Users' %}{% endblock %}
 
 {% block extra_button %}
-    <a class="extra-button"
-       href="#">
-        {% trans 'Invite users' %}
-    </a>
+    <a class="extra-button" href="#" id="invite_button">{% trans 'Invite users' %}</a>
 {% endblock %}
 
 {% block manage_content %}
@@ -30,18 +63,17 @@
             </thead>
 
             <tbody>
-                {% for r in registers %}
+                {% for p in permissions %}
                 <tr>
                     <td class="name">{# register name is a link to edit form #}
-
+                        {{ p.user }}
                     </td>
-                    <td class="format"></td>
-                    <td class="type"></td>
-                    <td class="location"></td>
+                    <td class="pin">{{ p.pin }}</td>
+                    <td class="permission">{{ p.permission }}</td>
                     <td class="controls">
-                        <a href="#"
-                           data-id="{{ r.id }}"
-                           data-text="{% trans 'Delete register: ' %} {{ r.name }}"
+                        <a href="{% url 'pos:delete_permission' company.url_name %}"
+                           data-id="{{ p.id }}"
+                           data-text="{% trans 'Remove user: ' %} {{ p.user }}"
                            class="delete-link">
                             <img src="{% static 'icons/delete_black.png' %}"
                                  alt="{% trans 'Delete' %}"
@@ -52,6 +84,22 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+
+    <div id="invite_dialog" class="hidden">
+        <p class="fake-label">{% blocktrans %}
+            Enter e-mails of people you want to invite. Separate them with comma or new line.
+        {% endblocktrans %}</p>
+        <textarea id="invite_mail"></textarea>
+
+        <p class="fake-label">{% blocktrans %}
+            Choose which permission the users will have right after they join your company.
+        {% endblocktrans %}</p>
+        <select id="invite_permission">
+            {% for g in permission_groups %}
+                <option value="{{ g.0 }}">{{ g.1 }}</option>
+            {% endfor %}
+        </select>
     </div>
 
 {% endblock %}

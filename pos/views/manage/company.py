@@ -1,5 +1,3 @@
-import Image
-import base64
 from django.core.files import File
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse
@@ -15,10 +13,14 @@ from pos.views.util import JsonParse, has_permission, no_permission_view, JsonOk
     max_field_length
 
 from common import globals as g
-import unidecode
 from common.functions import get_random_string, get_terminal_url
 
-import re, os, random
+import Image
+import base64
+import unidecode
+import re
+import os
+import random
 
 
 ###
@@ -292,9 +294,11 @@ def register_company(request):
                 user=request.user,
                 company=company,
                 permission='admin',
-                pin=random.randint(0, 10000)
             )
             default_permission.save()
+
+            # assign pin number
+            default_permission.create_pin()
 
             return redirect('pos:terminal', company=form.cleaned_data['url_name'])  # home page
     else:

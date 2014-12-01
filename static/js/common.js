@@ -41,12 +41,12 @@ function custom_dialog(title, content, width, buttons){
     });
 
     // buttons is an object that can contain the following:
-    // ok: <ok button text>
-    // ok button closes the dialog by default and does nothing
     // yes: <yes button text>
     // yes_action: <function that is executed when yes is clicked>
     // no: <no button text>
     // no_action: <function that is executed when no button is clicked>
+    // ok: <ok button text>
+    // ok_action: if null, only close the dialog
     if(buttons){
         var footer = $("<div>", {'class': 'custom-dialog-footer'});
         var button_attrs = {type: 'button', 'class': 'hoverable'};
@@ -59,7 +59,10 @@ function custom_dialog(title, content, width, buttons){
             ok_button.attr('value', buttons.ok);
             footer.append(ok_button);
 
-            ok_button.unbind().click(content.close_dialog);
+            // ok buttons closes the dialog and executes ok_action, if it's there
+            ok_button.unbind();
+            if(buttons.ok_action) ok_button.click(buttons.ok_action);
+            ok_button.click(content.close_dialog);
         }
         else if(buttons.yes && buttons.no){
             var yes_button = $("<input>", button_attrs);

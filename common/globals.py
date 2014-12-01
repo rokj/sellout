@@ -212,6 +212,9 @@ PERMISSION_GROUPS = (  # retrieve readable format with get_permission_display()
     ('admin',   _("Admin")),    # can do anything
 )
 
+# for checking if permission in PERMISSION_TYPES
+PERMISSION_TYPES = (x[0] for x in PERMISSION_GROUPS)
+
 PERMISSIONS = {
     'disabled': {
         'view': (),
@@ -230,8 +233,8 @@ PERMISSIONS = {
         'edit': ('category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register',),
         },
     'admin': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register',),
-        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user',),
+        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user',),
         },
 }
 
