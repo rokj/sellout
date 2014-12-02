@@ -1,8 +1,12 @@
+from datetime import datetime as dtm
+from decimal import Decimal
+
 from django.contrib.auth.decorators import login_required
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
+from pytz import timezone
 
 from pos.models import Company, Product, Discount, Register, Contact, \
     Bill, BillCompany, BillContact, BillRegister, BillItem, BillItemDiscount
@@ -14,12 +18,9 @@ from pos.views.util import has_permission, JsonOk, JsonParse, JsonError, \
 from config.functions import get_company_value
 import common.globals as g
 
-from pytz import timezone
-from datetime import datetime as dtm
-from decimal import Decimal
+from printing.escpos import *
+from printing.escpos import escpostext
 
-
-from django.db.models import Q
 
 def bill_item_to_dict(user, company, item):
     i = {}
@@ -145,6 +146,7 @@ def bill_to_dict(user, company, bill):
         'discount_type': bill.discount_type,
 
         # prices
+        'currency': bill.currency,
         'base': format_number(user, company, bill.base),
         'discount': format_number(user, company, bill.discount),
         'tax': format_number(user, company, bill.tax),
@@ -214,7 +216,6 @@ def create_bill_html(user, company, bill):
     context = {
         'bill': bill_data,
         'logo': logo,
-        'currency': get_company_value(user, company, 'pos_currency')
     }
 
     return render_to_string(t, context)
@@ -299,6 +300,7 @@ def create_bill(request, company):
         'type': "Normal",
         'status': "Unpaid",  # the bill is awaiting payment, a second request on the server will confirm it
         'items': [],
+        'currency': get_company_value(request.user, c, 'pos_currency'),
     }
 
     r = parse_decimal(request.user, c, data.get('total'))
@@ -418,6 +420,7 @@ def create_bill(request, company):
         register=bill['register'],  # current settings of the register this bill was created on
         contact=bill['contact'],  # FK on BillContact, copy of the Contact object
         notes=bill['notes'],
+        currency=bill['currency'],
 
         timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
         status=bill['status'],
@@ -544,7 +547,7 @@ def check_bill_status(request, company):
 
 
 @login_required
-def finish_bill(request, company):
+def finish_bill(request, company, android=False):
     """
         find the bill, update its status and set payment type and reference
     """
@@ -578,6 +581,7 @@ def finish_bill(request, company):
 
         bill.status = 'Paid'
         bill.payment_type = d.get('payment_type')
+        # payment reference: if paid with bitcoin - btc address, if paid with cash, cash amount given
         bill.payment_reference = d.get('payment_reference')
     else:
         bill.status = 'Canceled'
@@ -615,3 +619,75 @@ def view_bill(request, company):
         return JsonError(_("Bill does not exist"))
 
     return HttpResponse(create_bill_html(request.user, c, bill))
+
+def esc_format(bill, format, line_no_char=42, esc_commands=False):
+    if format == g.RECEIPT_FORMATS[0]:
+        return 'full_page_format'
+    elif format == g.RECEIPT_FORMATS[1]:
+        string = ''
+
+        if esc_commands:
+            printer = escpostext.EscposText()
+            # center / bold
+            string += printer.set(align='center', bold='True')
+            string += printer.text(bill.issuer.name + constants.CTRL_LF)
+            string += printer.set(bold='False')
+            # center
+            string += printer.text(bill.issuer.street + ' ' + bill.issuer.street + ' ' + bill.issuer.city + constants.CTRL_LF)
+            string += printer.text(bill.issuer.state + ' ' + bill.issuer.country + constants.CTRL_LF)
+
+            string += printer.text(_('VAT') + ':' + ' ' + bill.issuer.vat_no + constants.CTRL_LF)
+            string += constants.CTRL_LF
+
+            string += printer.text(bill.register.location + constants.CTRL_LF)
+
+            if bill.contact:
+                string += printer.text(bill.contact.name + constants.CTRL_LF)
+                string += printer.text(bill.contact.street + ' ' + bill.contact.postcode + ' ' + bill.contact.city + constants.CTRL_LF)
+                string += printer.text(bill.contact.state + ' ' + bill.contact.country + constants.CTRL_LF)
+                string += printer.text(_('VAT') + ':' + ' ' + bill.contact.vat_no + constants.CTRL_LF)
+
+            string += printer.text(_('Bill No.') + ' ' + bill.serial)
+            string += printer.line(line_no_char=line_no_char)
+
+
+            price_no = int.round(0.25*line_no_char) # 12
+            qty_no = int.round(0.15*line_no_char) # 7.2 = 7
+            unit_no = int.round(0.10*line_no_char) # 4.8 = 5
+            discount_no = int.round(0.20*line_no_char) # 9.6 = 10
+            amount_no = int.round(0.25*line_no_char) # 12
+            tax_no = int.round(0.05*line_no_char) # 2.4 = 2
+
+            string += (_('Price').rjust(price_no))
+            string += (_('Qty').rjust(qty_no))
+            string += (''.rjust(unit_no))
+            string += (_('Discount').rjust(discount_no))
+            string += (_('Amount').rjust(amount_no + tax_no))
+
+            string += printer.line(line_no_char=line_no_char)
+
+            for item in bill.items:
+                string += item.name + constants.CTRL_LF
+
+                string += (item.base_price.rjust(price_no))
+                string += (item.quantity.rjust(qty_no))
+                string += (''.rjust(unit_no))
+                string += (item.discount_absolute.rjust(discount_no))
+                string += (item.total.rjust(amount_no))
+                string += (item.tax_rate_id.rjust(tax_no))
+
+                string += item.name + constants.CTRL_LF
+
+
+            string += printer.line(line_no_char=line_no_char)
+
+            total =  _('Total') + ' ' + ':'
+
+            string += (_Tota)
+
+
+
+            return string
+        return 'thermal_page_format'
+
+    return
