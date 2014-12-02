@@ -59,5 +59,5 @@ class EscposText(escpos.Escpos):
     def line(self, line_char_no=48, style='Normal'):
         if type=='Normal':
             return line_char_no*'_'
-        elif type=='Doted':
+        elif type=='Dotted':
             return line_char_no*'.'
