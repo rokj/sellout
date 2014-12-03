@@ -11,7 +11,7 @@ try:
 except ImportError:
     from PIL import Image
 
-import qrcode
+# import qrcode
 
 from printing.escpos.constants import *
 from printing.escpos.exceptions import *
@@ -190,15 +190,15 @@ class Escpos(object):
             version=4,
             box_size=4,
             border=1,
-            error_correction=qrcode.ERROR_CORRECT_M
+            # error_correction=qrcode.ERROR_CORRECT_M
         )
 
         qr_args.update(kwargs)
-        qr_code = qrcode.QRCode(**qr_args)
+        # qr_code = qrcode.QRCode(**qr_args)
 
-        qr_code.add_data(text)
-        qr_code.make(fit=True)
-        qr_img = qr_code.make_image()
+        # qr_code.add_data(text)
+        # qr_code.make(fit=True)
+        # qr_img = qr_code.make_image()
         im = qr_img._img.convert("RGB")
         # Convert the RGB image in printable image
         self._convert_image(im)
