@@ -28,12 +28,6 @@ r_company = r'^(?P<company>[\w-]{1,' + str(g.MISC['company_url_length']) + '})'
 r_manage = g.MISC['management_url']
 
 urlpatterns = patterns('',
-    #
-    # SYSTEM PAGES:
-    #
-    url(r_manage + '/' + _('register-company') + '$', company.register_company, name='register_company'),
-    url(r_manage + '/' + r'url-name-suggestions$', company.url_name_suggestions, name='url_name_suggestions'),
-    
     #token registration for api devices
     url(r_manage + '/' + r'api-token-auth/$', authtoken_views.obtain_auth_token),  # TODO
 
@@ -84,9 +78,10 @@ urlpatterns = patterns('',
 
     # users
     url(r_company + '/' + r_manage + _('/users') + '/$', users.list_users, name='list_users'),
-    #url(r_company + '/' + r_manage + _('/users/invite') + '/$', register.add_register, name='add_register'),
-    #url(r_company + '/' + r_manage + _('/register/edit') + '/(?P<register_id>\d+)/$', register.edit_register, name='edit_register'),
-    url(r_company + '/' + r_manage + _('/permission/delete') + '/$', users.delete_permission, name='delete_permission'),
+    url(r_company + '/' + r_manage + _('/users/edit'), users.edit_permission, name='edit_permission'),
+    url(r_company + '/' + r_manage + _('/users/delete') + '/$', users.delete_permission, name='delete_permission'),
+
+    url(r_company + '/' + r_manage + _('/users/invite') + '/$', users.invite_user, name='invite_users'),
 
     # bill management
     url(r_company + '/' + r_manage + _('/bills') + '/$', bill.list_bills, name='list_bills'),

@@ -39,7 +39,7 @@ def register_to_dict(user, company, register):
     return r
 
 
-def get_all_registers(company, user):
+def get_all_registers(user, company):
     all_registers = Register.objects.filter(company=company)
 
     r = []

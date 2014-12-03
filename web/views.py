@@ -54,7 +54,6 @@ def index(request):
 
     return render(request, "web/index.html", context)
 
-
 @login_required
 def select_company(request):
     """ show current user's companies and a list of invites. """

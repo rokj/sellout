@@ -6,11 +6,11 @@
 @license: GPL
 '''
 
-import serial
-import socket
+#import serial
+#import socket
 
-import usb.core
-import usb.util
+#import usb.core
+#import usb.util
 from printing.escpos.escpos import *
 
 
