@@ -243,7 +243,7 @@ def try_register(user_form, user_profile_form=None):
         'url': settings.SITE_URL + activation_url,
     }
 
-    subject = "%s %s" % (settings.EMAIL_SUBJECT_PREFIX, unicode(_("%s - Registration successful" % ("timebits.com"))))
+    subject = settings.EMAIL_SUBJECT_PREFIX + " " + _("Registration successful")
 
     message_html = render_to_string('email/email_verification.html', mail_context)
     message_text = render_to_string('email/email_verification.txt', mail_context)

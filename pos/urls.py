@@ -81,7 +81,8 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + _('/users/edit'), users.edit_permission, name='edit_permission'),
     url(r_company + '/' + r_manage + _('/users/delete') + '/$', users.delete_permission, name='delete_permission'),
 
-    url(r_company + '/' + r_manage + _('/users/invite') + '/$', users.invite_user, name='invite_users'),
+    url(r_company + '/' + r_manage + _('/users/invite') + '/$', users.invite_users, name='invite_users'),
+    url(r_company + '/' + r_manage + _('/users/cancel-invitation') + '/$', users.cancel_invitation, name='cancel_invitation'),
 
     # bill management
     url(r_company + '/' + r_manage + _('/bills') + '/$', bill.list_bills, name='list_bills'),

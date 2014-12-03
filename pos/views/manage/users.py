@@ -7,6 +7,7 @@ from django.utils.translation import ugettext as _
 from action.models import Action
 from blusers.models import BlocklogicUser
 from common.functions import send_email
+from config.functions import get_date_format
 from decorators import login_required
 
 from pos.models import Company, Permission
@@ -22,15 +23,30 @@ def list_users(request, company):
     """ show a list of users and their pins """
     c = get_object_or_404(Company, url_name=company)
 
+    # this company's permissions
     permissions = Permission.objects.filter(company=c)
+
+    # show waiting and canceled invites
+    actions = Action.objects.filter(
+        company=c,
+        status__in=(g.ACTION_WAITING, g.ACTION_CANCELED, g.ACTION_DECLINED),
+        type=g.ACTION_INVITATION)
+
+    # do some nice formatting on the actions
+    for a in actions:
+        a.sender = str(BlocklogicUser.objects.get(email=a.sender))
 
     context = {
         'company': c,
+
         'permissions': permissions,
         'permission_groups': g.PERMISSION_GROUPS,
 
+        'actions': actions,
+
         'title': _("Discounts"),
         'site_title': g.MISC['site_title'],
+        'date_format_django': get_date_format(request.user, c, 'django'),
     }
 
     return render(request, 'pos/manage/users.html', context)
@@ -102,7 +118,7 @@ def delete_permission(request, company):
 
 
 @login_required
-def invite_user(request, company):
+def invite_users(request, company):
     """ create a new Action entry """
     try:
         c = Company.objects.get(url_name=company)
@@ -128,12 +144,12 @@ def invite_user(request, company):
     valid_data = []
 
     for d in data:
-        email = d.get('email')
+        email = str(d.get('email'))
         if not email:
             continue
 
         # validate permission
-        permission = d.get('permission')
+        permission = str(d.get('permission'))
         if permission not in g.PERMISSION_TYPES:
             # this shouldn't happen, don't even translate
             errors.append("This permission type is not valid: " + email + ": " + permission)
@@ -146,7 +162,7 @@ def invite_user(request, company):
             errors.append(email)
 
         # check if this user is already a member of this company
-        if Permission.objects.get(company=c, user__email=email).exists():
+        if Permission.objects.filter(company=c, user__email=email).exists():
             errors.append(_("User with this email is already member of the group: ") + email)
 
     if len(errors) > 0:
@@ -177,7 +193,7 @@ def invite_user(request, company):
         action.save()
 
         # send a different invite to non-registered users and registered users
-        if BlocklogicUser.objects.get(email=email).exists():
+        if BlocklogicUser.objects.filter(email=email).exists():
             template_html = 'email/invitation_for_registered_users.html'
             template_text = 'email/invitation_for_registered_users.txt'
         else:
@@ -188,7 +204,7 @@ def invite_user(request, company):
         mail_context = {
             'company_name': c.name,
             'register_url': settings.SITE_URL + reverse('web:sign_up'),
-            'login_url': settings.SITE_URL + reverse('web:login'),
+            'login_url': settings.SITE_URL + reverse('web:select_company'),
         }
 
         message_html = render_to_string(template_html, mail_context)
@@ -199,7 +215,38 @@ def invite_user(request, company):
             print "============="
             print message_html
         else:
-            send_email(settings.EMAIL_FROM, [email], None, _("Invitation to join company on Sellout.biz"),
+            send_email(settings.EMAIL_FROM, [email], None,
+                       settings.EMAIL_SUBJECT_PREFIX + " " + _("Invitation to join company on Sellout.biz"),
                        message_text, message_html)
+
+    return JsonOk()
+
+
+@login_required
+def cancel_invitation(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+    # permissions
+    if not has_permission(request.user, c, 'user', 'edit'):
+        return JsonError(_("You have no permission to edit users"))
+
+    # get and check data
+    try:
+        action_id = int(JsonParse(request.POST.get('data')).get('action_id'))
+        if not action_id:
+            raise TypeError
+    except (ValueError, KeyError, TypeError):
+        return JsonError(_("No data in request"))
+
+    # get the right action and delete it
+    try:
+        action = Action.objects.get(company=c, id=action_id)
+    except Action.DoesNotExist:
+        return JsonError(_("Invite does not exist"))
+
+    action.delete()
 
     return JsonOk()

@@ -62,7 +62,7 @@ def select_company(request):
     companies = request.user.companies
 
     # the list of messages
-    actions = Action.objects.filter(status="waiting", _for=request.user.email)
+    actions = Action.objects.filter(status=g.ACTION_WAITING, receiver=request.user.email)
 
     for a in actions:
         if a.what == "invitation":

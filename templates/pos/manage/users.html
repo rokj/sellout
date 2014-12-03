@@ -24,6 +24,47 @@
 
         var DIALOG_WIDTH = 400;
 
+
+        //
+        // editing permissions
+        //
+        function update_permission(row, permission_id){
+            // get the data
+            var data = {
+                permission_id: permission_id,
+                permission: items.edit_permission.val(),
+                pin: items.edit_pin.val()
+            };
+
+            // send the data to server
+            send_data("{% url 'pos:edit_permission' company.url_name %}", data, "{{ csrf_token }}", function(response){
+                if(response.status != 'ok') error_message("{% trans 'Saving failed' %}", response.message);
+                else window.location.reload();
+            });
+        }
+
+        $(".edit-permission").click(function(){
+            // parent: td, parent's parent: tr
+            var row = $(this).parent().parent();
+
+            var user = row.attr('data-user');
+            var id = parseInt(row.attr('data-id'));
+            var permission = row.attr('data-permission');
+            var pin = row.attr('data-pin');
+
+            // fill the dialog with the data
+            items.edit_permission.val(permission);
+            items.edit_pin.val(pin);
+
+            // show the dialog
+            custom_dialog("{% trans 'Edit permission' %}: " + user,
+                items.edit_dialog, DIALOG_WIDTH, {
+                    ok: "{% trans 'OK' %}",
+                    ok_action: function(){ update_permission(row, id); }
+                }
+            );
+        });
+
         //
         // invites
         //
@@ -83,53 +124,42 @@
         items.add_button.click(function(){
             custom_dialog("{% trans 'Invite users' %}", items.invite_dialog, DIALOG_WIDTH, {
                 ok: "{% trans 'Invite' %}",
-                ok_action: invite_users
+                ok_action: invite_users,
+                auto_close: false
             });
         });
 
+        // the default invite dialog: one mail input by default
+        items.add_invite_mail.click();
+
         //
-        // editing permissions
+        // deleting pending invitations
         //
-        function update_permission(row, permission_id){
-            // get the data
-            var data = {
-                permission_id: permission_id,
-                permission: items.edit_permission.val(),
-                pin: items.edit_pin.val()
-            };
+        $(".delete-pending-invite").click(function(){
+            var button = $(this);
 
-            // send the data to server
-            send_data("{% url 'pos:edit_permission' company.url_name %}", data, "{{ csrf_token }}", function(response){
-                if(response.status != 'ok'){
-                    error_message("{% trans 'Saving failed' %}",
-                            response.message);
-                }
-                else{
-                    window.location.reload();
-                }
-            });
-        }
+            confirmation_dialog(
+                "{% trans 'Are you sure?' %}", // title
+                "{% trans 'Cancel this invite? The mail was sent, but the user has not responded yet.' %}",
+                function(){ // yes_action
+                    var id = parseInt(button.attr("data-id"));
+                    if(isNaN(id)) return;
 
-        $(".edit-permission").click(function(){
-            // parent: td, parent's parent: tr
-            var row = $(this).parent().parent();
+                    send_data("{% url 'pos:cancel_invitation' company.url_name %}",
+                        { action_id: id }, "{{ csrf_token }}", function(response){
+                                if(response.status != 'ok'){
+                                    error_message("{% trans 'Could not cancel invitation' %}", response.message);
+                                }
+                                else{
+                                    // the invite has been canceled. no need to reload the page;
+                                    // just delete the row
 
-            var user = row.attr('data-user');
-            var id = parseInt(row.attr('data-id'));
-            var permission = row.attr('data-permission');
-            var pin = row.attr('data-pin');
-
-            // fill the dialog with the data
-            items.edit_permission.val(permission);
-            items.edit_pin.val(pin);
-
-            // show the dialog
-            custom_dialog("{% trans 'Edit permission' %}: " + user,
-                items.edit_dialog, DIALOG_WIDTH, {
-                    ok: "{% trans 'OK' %}",
-                    ok_action: function(){ update_permission(row, id); }
-                }
-            );
+                                    // img  td        tr
+                                    button.parent().parent().remove();
+                                }
+                        });
+                },
+                function(){}); // no action
         });
 
 
@@ -191,12 +221,41 @@
         </table>
 
         <h2>{% trans 'Pending invites' %}</h2>
-        <table id="invites">
 
-        </table>
+        {% if actions|length %}
+            <table id="pending_invites">
+                <thead>
+                    <tr>
+                        <td>{% trans 'Sent by' %}</td>
+                        <td>{% trans 'Sent to' %}</td>
+                        <td>{% trans 'Date sent' %}</td>
+                        <td>{% trans 'Status' %}</td>
+                        <td>{# controls: delete pending #}</td>
+                    </tr>
+                </thead>
 
+                {% for a in actions %}
+                    <tr> {# show: date, mail, status #}
+                        <td>{{ a.sender }}</td>
+                        <td>{{ a.receiver }}</td>
+                        <td>{{ a.datetime_created|date:date_format_django }}</td>
+                        <td>{{ a.get_status_display }}</td>
+                    <td>
+                        <img src="{% static 'icons/delete_black.png' %}"
+                             class="delete-pending-invite hoverable"
+                             data-id="{{ a.id }}"
+                             alt="{% trans 'Cancel' %}"
+                             title="{% trans 'Cancel' %}" />
+                    </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>{% trans 'There are no pending invites.' %}</p>
+        {% endif %}
     </div>
 
+    {# the invite dialog: will be shown with custom_dialog #}
     <div id="invite_dialog" class="hidden">
         <table>
             <thead>
@@ -209,7 +268,7 @@
                     <div class="error"></div>
                     <input type="text" class="mail" />
                 </td>
-                <td><select id="invite_permission">
+                <td><select class="permission">
                         {% for g in permission_groups %}
                             <option value="{{ g.0 }}">{{ g.1 }}</option>
                         {% endfor %}
@@ -232,6 +291,7 @@
         </div>
     </div>
 
+    {# the edit permission dialog: will be shown with custom_dialog #}
     <div id="edit_dialog" class="hidden">
         <label for="edit_pin">{% trans 'PIN' %}: </label>
         <input type="number" id="edit_pin" />
