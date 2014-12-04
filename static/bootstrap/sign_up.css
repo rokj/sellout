@@ -2,9 +2,27 @@ body {
     padding-top: 60px;
 }
 
-label {
-    display: block;
-    font-weight: normal;
+.form-field.captcha img.captcha{
+    float: left;
+}
+
+.form-field.captcha input{
+    width: 40px;
+    margin-left: 20px;
+}
+
+.form-field.submit{
+    margin-top: 40px;
+}
+
+div.ad{
+    margin-top: 100px;
+}
+
+div.ad p{
+    font-size: 30px;
+}
+
+div.ad p:first-child{
     color: #969696;
-    font-size: 12px;
 }

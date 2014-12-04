@@ -205,7 +205,7 @@ IMAGE_DIMENSIONS = {
 
 # premissions
 PERMISSION_GROUPS = (  # retrieve readable format with get_permission_display()
-    ('guest',   _("Guest")),    # can only view stuff
+    ('guest',   _("Guest")),    # can only view stuff (this must be the first in the list as it's the default in error case)
     ('cashier', _("Cashier")),  # can write and edit bills
     ('seller',  _("Seller")),   # can add and edit products
     ('manager', _("Manager")),  # can add and edit discounts, contacts, categories, ...
@@ -269,7 +269,7 @@ ACTION_CANCELED = "canceled"
 ACTION_SEEN = "seen"
 
 ACTION_STATUS_CHOICES = (
-    ((ACTION_ACCEPTED), _("Accpeted")),
+    ((ACTION_ACCEPTED), _("Accepted")),
     ((ACTION_DECLINED), _("Declined")),
     ((ACTION_WAITING), _("Waiting")),
     ((ACTION_CANCELED), _("Canceled")),

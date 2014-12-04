@@ -1,5 +1,4 @@
 #management_content{
-    margin-top: 40px; /* the height of #status_bar */
     padding-top: 30px;
     padding-left: 40px;
     margin-bottom: 40px;
@@ -9,7 +8,7 @@
 
 h2{
     font-size: 24px;
-    margin-top: 20px;
+    margin-top: 60px;
     margin-bottom: 20px;
 }
 
@@ -171,6 +170,16 @@ div.management-column div.read-only-field{
 thead td{
     /* headers for taxes and cash registers */
     color: #646464;
+}
+
+td {
+    border-bottom: 1px solid #ffffff;
+    height: 40px;
+}
+
+table{
+    width: 100%;
+    max-width: 800px;
 }
 
 .hidden{

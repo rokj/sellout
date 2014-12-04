@@ -35,6 +35,8 @@ class Action(SkeletonU):
     reference = models.CharField(_("Reference for an action"),
                                  max_length=REFERENCE_LENGTH, null=False, blank=False, unique=True)
 
+    def __unicode__(self):
+        return self.sender + " for " + self.receiver + " : " + self.status + " : " + self.reference
 
 # a pre_save signal: create a reference for any new object
 @receiver(pre_save, sender=Action)

@@ -12,7 +12,7 @@ from decorators import login_required
 
 from pos.models import Company, Permission
 import common.globals as g
-from pos.views.util import JsonError, JsonParse, has_permission, JsonOk
+from pos.views.util import JsonError, JsonParse, has_permission, JsonOk, no_permission_view
 
 import json
 import settings
@@ -23,14 +23,15 @@ def list_users(request, company):
     """ show a list of users and their pins """
     c = get_object_or_404(Company, url_name=company)
 
+    # check permission
+    if not has_permission(request.user, c, 'user', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view users' settings."))
+
     # this company's permissions
     permissions = Permission.objects.filter(company=c)
 
     # show waiting and canceled invites
-    actions = Action.objects.filter(
-        company=c,
-        status__in=(g.ACTION_WAITING, g.ACTION_CANCELED, g.ACTION_DECLINED),
-        type=g.ACTION_INVITATION)
+    actions = Action.objects.filter(company=c, type=g.ACTION_INVITATION)
 
     # do some nice formatting on the actions
     for a in actions:
@@ -68,7 +69,6 @@ def edit_permission(request, company):
     except (ValueError, AttributeError, TypeError, KeyError):
         return JsonError(_("No data in request"))
 
-
     # check for permission:
     if not has_permission(request.user, c, 'user', 'edit'):
         return JsonError(_("You have no permission to edit users"))
@@ -85,7 +85,7 @@ def edit_permission(request, company):
 
     # everything seems to be OK, update PIN
     if not permission.create_pin(int(d.get('pin'))):
-        return JsonError(_("This PIN has already been assigned to a user from this company."
+        return JsonError(_("This PIN has already been assigned to a user from this company. "
                            "Please choose a different PIN."))
 
     # update permission
@@ -129,7 +129,7 @@ def invite_users(request, company):
     if not has_permission(request.user, c, 'user', 'edit'):
         return JsonError(_("You have no permissions to invite users"))
 
-    # data:
+    # POST data:
     # emails is a list of dictionaries:
     # {'email': 'asdf@example.com', 'permission': 'cashier'}
     try:
@@ -139,7 +139,7 @@ def invite_users(request, company):
     except (ValueError, AttributeError, TypeError, KeyError):
         return JsonError(_("No data in request"))
 
-    # requested data:
+    # check POSTed emails and permissions:
     errors = []
     valid_data = []
 
@@ -165,6 +165,7 @@ def invite_users(request, company):
         if Permission.objects.filter(company=c, user__email=email).exists():
             errors.append(_("User with this email is already member of the group: ") + email)
 
+    # do nothing if there are errors
     if len(errors) > 0:
         return JsonError(errors)
 
@@ -223,7 +224,7 @@ def invite_users(request, company):
 
 
 @login_required
-def cancel_invitation(request, company):
+def delete_invitation(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:

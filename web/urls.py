@@ -20,7 +20,8 @@ urlpatterns = patterns('',
     url(r'^lost-password/$', views.lost_password, name='lost_password'),
 
     # actions: invitations, ...
-    # TODO
+    url(r'^accept-invitation/reference=(?P<reference>[\w]+)$', views.accept_invitation, name='accept_invitation'),
+    url(r'^decline-invitation/reference=(?P<reference>[\w]+)$', views.decline_invitation, name='decline_invitation'),
 
     # selecting
     url(r'^select-company/$', views.select_company, name='select_company'),

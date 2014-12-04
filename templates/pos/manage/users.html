@@ -139,16 +139,16 @@
             var button = $(this);
 
             confirmation_dialog(
-                "{% trans 'Are you sure?' %}", // title
-                "{% trans 'Cancel this invite? The mail was sent, but the user has not responded yet.' %}",
+                "{% trans 'Delete invitation?' %}", // title
+                "{% trans 'The users that have not responded yet will no longer see it and will not be able to join this company.' %}",
                 function(){ // yes_action
                     var id = parseInt(button.attr("data-id"));
                     if(isNaN(id)) return;
 
-                    send_data("{% url 'pos:cancel_invitation' company.url_name %}",
+                    send_data("{% url 'pos:delete_invitation' company.url_name %}",
                         { action_id: id }, "{{ csrf_token }}", function(response){
                                 if(response.status != 'ok'){
-                                    error_message("{% trans 'Could not cancel invitation' %}", response.message);
+                                    error_message("{% trans 'Could not delete invitation' %}", response.message);
                                 }
                                 else{
                                     // the invite has been canceled. no need to reload the page;
@@ -161,8 +161,6 @@
                 },
                 function(){}); // no action
         });
-
-
     });
     </script>
 {% endblock %}
@@ -201,6 +199,11 @@
                     <td class="pin">{{ p.pin }}</td>
                     <td class="permission">{{ p.permission }}</td>
                     <td class="controls">
+                        <img src="{% static 'icons/edit_black.png' %}"
+                             class="hoverable edit-permission"
+                             alt="{% trans 'Edit' %}"
+                             title="{% trans 'Edit' %}" />
+
                         <a href="{% url 'pos:delete_permission' company.url_name %}"
                            data-id="{{ p.id }}"
                            data-text="{% trans 'Remove user: ' %} {{ p.user }}"
@@ -209,28 +212,23 @@
                                  alt="{% trans 'Delete' %}"
                                  title="{% trans 'Delete' %}" />
                         </a>
-
-                        <img src="{% static 'icons/edit_black.png' %}"
-                             class="hoverable edit-permission"
-                             alt="{% trans 'Edit' %}"
-                             title="{% trans 'Edit' %}" />
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <h2>{% trans 'Pending invites' %}</h2>
+        <h2>{% trans 'Invites history' %}</h2>
 
         {% if actions|length %}
-            <table id="pending_invites">
+            <table id="invites_history">
                 <thead>
                     <tr>
                         <td>{% trans 'Sent by' %}</td>
                         <td>{% trans 'Sent to' %}</td>
                         <td>{% trans 'Date sent' %}</td>
                         <td>{% trans 'Status' %}</td>
-                        <td>{# controls: delete pending #}</td>
+                        <td class="controls">{# controls: delete pending #}</td>
                     </tr>
                 </thead>
 
@@ -240,13 +238,13 @@
                         <td>{{ a.receiver }}</td>
                         <td>{{ a.datetime_created|date:date_format_django }}</td>
                         <td>{{ a.get_status_display }}</td>
-                    <td>
-                        <img src="{% static 'icons/delete_black.png' %}"
-                             class="delete-pending-invite hoverable"
-                             data-id="{{ a.id }}"
-                             alt="{% trans 'Cancel' %}"
-                             title="{% trans 'Cancel' %}" />
-                    </td>
+                        <td class="controls">
+                            <img src="{% static 'icons/delete_black.png' %}"
+                                 class="delete-pending-invite hoverable"
+                                 data-id="{{ a.id }}"
+                                 alt="{% trans 'Cancel' %}"
+                                 title="{% trans 'Cancel' %}" />
+                        </td>
                     </tr>
                 {% endfor %}
             </table>
@@ -264,11 +262,11 @@
                 <td> {% trans 'Permission' %} </td>
             </tr>
             <tr id="invite_user_template" class="hidden">
-                <td>
+                <td class="invite-mail">
                     <div class="error"></div>
                     <input type="text" class="mail" />
                 </td>
-                <td><select class="permission">
+                <td class="invite-permission"><select class="permission">
                         {% for g in permission_groups %}
                             <option value="{{ g.0 }}">{{ g.1 }}</option>
                         {% endfor %}
@@ -279,8 +277,10 @@
 
             <tfoot>
                 <tr>
+                    <td id="add_invite_container">
+                        <img src="{% static 'icons/add.png' %}" class="hoverable" id="add_invite_mail" />
+                    </td>
                     <td></td>
-                    <td><img src="{% static 'icons/add.png' %}" class="hoverable" id="add_invite_mail" /></td>
                 </tr>
             </tfoot>
 
@@ -293,15 +293,19 @@
 
     {# the edit permission dialog: will be shown with custom_dialog #}
     <div id="edit_dialog" class="hidden">
-        <label for="edit_pin">{% trans 'PIN' %}: </label>
-        <input type="number" id="edit_pin" />
+        <div class="pin-edit-container">
+            <label for="edit_pin">{% trans 'PIN' %}: </label>
+            <input type="number" id="edit_pin" />
+        </div>
 
-        <label for="edit_permission">{% trans 'Permission' %}: </label>
-        <select id="edit_permission">
-            {% for g in permission_groups %}
-                <option value="{{ g.0 }}">{{ g.1 }}</option>
-            {% endfor %}
-        </select>
+        <div class="permission-edit-container">
+            <label for="edit_permission">{% trans 'Permission' %}: </label>
+            <select id="edit_permission">
+                {% for g in permission_groups %}
+                    <option value="{{ g.0 }}">{{ g.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
 {% endblock %}
 
