@@ -1,5 +1,3 @@
-import Image
-import base64
 from django.core.files import File
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse
@@ -15,11 +13,14 @@ from pos.views.util import JsonParse, has_permission, no_permission_view, JsonOk
     max_field_length
 
 from common import globals as g
-import unidecode
 from common.functions import get_random_string, get_terminal_url
 
+import Image
+import base64
+import unidecode
 import re
 import os
+import random
 
 
 ###
@@ -147,6 +148,33 @@ def url_name_suggestions(request):
 ### company ###
 ###############
 class CompanyForm(forms.ModelForm):
+    class Meta:
+        model = Company
+        fields = [  # 'color_logo',  # logos have been left out and moved to separate forms (html only)
+                    #'monochrome_logo',
+                    'name',
+                    'url_name',
+                    'email',
+                    'street',
+                    'postcode',
+                    'city',
+                    'state',
+                    'country',
+                    'phone',
+                    'vat_no',
+                    'tax_payer',
+                    'website',
+                    'notes', ]
+
+        widgets = {
+            'tax_payer': forms.Select(choices=((True, _("Yes")), (False, _("No"))))
+        }
+
+        # widgets = {
+        #    'color_logo': widgets.PlainClearableFileInput,
+        #    'monochrome_logo': widgets.PlainClearableFileInput,
+        #}
+
     # take special care of urls
     def clean_url_name(self):
         url_name = self.cleaned_data['url_name']
@@ -163,27 +191,6 @@ class CompanyForm(forms.ModelForm):
             raise forms.ValidationError(_("Url of the company is invalid or exists already."))
         else:
             return url_name
-
-    class Meta:
-        model = Company
-        fields = [#'color_logo',  # logos have been left out and moved to separate forms (html only)
-                  #'monochrome_logo',
-                  'name',
-                  'url_name',
-                  'email',
-                  'street',
-                  'postcode',
-                  'city',
-                  'state',
-                  'country',
-                  'phone',
-                  'vat_no',
-                  'notes',
-                  'website']
-        #widgets = {
-        #    'color_logo': widgets.PlainClearableFileInput,
-        #    'monochrome_logo': widgets.PlainClearableFileInput,
-        #}
 
 
 def validate_company(user, company, data):
@@ -286,9 +293,12 @@ def register_company(request):
 
                 user=request.user,
                 company=company,
-                permission='admin'
+                permission='admin',
             )
             default_permission.save()
+
+            # assign pin number
+            default_permission.create_pin()
 
             return redirect('pos:terminal', company=form.cleaned_data['url_name'])  # home page
     else:

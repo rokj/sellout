@@ -18,9 +18,6 @@ import time
 import globals as g
 import settings
 
-import ImageFont
-import ImageDraw
-
 def get_random_string(length=8, chars=string.letters + string.digits):
     return ''.join([random.choice(chars) for _ in xrange(length)])
 
@@ -32,6 +29,7 @@ def get_terminal_url(request):
     full_url = request.build_absolute_uri()
     return full_url[:full_url.rfind(g.MISC['management_url'] + '/')]
 
+
 def redirect_to_selected_company(user, ajax=False):
     from pos.models import Company
 
@@ -41,8 +39,6 @@ def redirect_to_selected_company(user, ajax=False):
 
     # if ajax:
         # return reverse('web:home', kwargs={'group_id': group.id, 'section': 'home'})
-
-    return redirect('index')
 
 @deconstructible
 class ImagePath(object):

@@ -1,0 +1,10 @@
+{% extends 'email/email_template.txt' %}
+{% load i18n %}
+{% block content %}
+{% trans 'Hi!' %}
+
+{% trans 'You have been invited to join a company on sellout.biz: '%} {{ company_name }}
+
+{% trans 'You can accept or decline this invitation by logging in Sellout application.' %}
+{{ login_url }}
+{% endblock %}

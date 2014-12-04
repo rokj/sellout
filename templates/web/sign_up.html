@@ -19,10 +19,10 @@
 
             <div class="row">
                 <div class="col-md-4">
-                    {% trans 'Join the future in retail business.' %}
-                    <p class="free-ad">
-                        {% trans 'Register for free.' %}
-                    </p>
+                    <div class="ad">
+                        <p>{% trans 'Join the future in <br/>retail business.' %}</p>
+                        <p> {% trans 'Register for free.' %} </p>
+                    </div>
                 </div>
                     {% csrf_token %}
 
@@ -88,11 +88,13 @@
                             <div class="field-errors">
                                 {{ user_form.captcha.errors }}
                             </div>
-                            {{ user_form.captcha.label_tag }}
+                            {# use a custom captcha label tag #}
+                            {% comment %}{{ user_form.captcha.label_tag }}{% endcomment %}
+                            <label for="id_captcha">{% trans 'Please solve this ridiculous riddle to prove you are human:' %}</label>
                             {{ user_form.captcha }}
                         </div>
 
-                        <div class="form-field">
+                        <div class="form-field submit">
                             <input type="submit" class="buttons" value="{% trans 'Register' %}" />
                         </div>
                     </div>

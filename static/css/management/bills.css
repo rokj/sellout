@@ -18,15 +18,6 @@
     
 }
 
-.bill-list.header {
-    color: #646464;
-}
-
-.bill-list td{
-    border-bottom: 1px solid #ffffff;
-    height: 40px;
-}
-
 .bill-list.item:nth-child(odd) {
     
 }

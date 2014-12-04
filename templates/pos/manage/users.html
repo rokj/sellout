@@ -1,0 +1,311 @@
+{% extends "pos/manage/manage.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block section_head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/users.css' %}" />
+
+    <script type="text/javascript">
+    $(document).ready(function(){
+        var items = {
+            // invites
+            add_button: $("#invite_button"),
+            invite_dialog: $("#invite_dialog"),
+            // the invites dialog
+            invites: $("tbody", "#invite_dialog"),
+            invite_user_template: $("#invite_user_template"),
+            add_invite_mail: $("#add_invite_mail"),
+
+            // permission editing
+            edit_dialog: $("#edit_dialog"),
+            edit_pin: $("#edit_pin"),
+            edit_permission: $("#edit_permission")
+        };
+
+        var DIALOG_WIDTH = 400;
+
+
+        //
+        // editing permissions
+        //
+        function update_permission(row, permission_id){
+            // get the data
+            var data = {
+                permission_id: permission_id,
+                permission: items.edit_permission.val(),
+                pin: items.edit_pin.val()
+            };
+
+            // send the data to server
+            send_data("{% url 'pos:edit_permission' company.url_name %}", data, "{{ csrf_token }}", function(response){
+                if(response.status != 'ok') error_message("{% trans 'Saving failed' %}", response.message);
+                else window.location.reload();
+            });
+        }
+
+        $(".edit-permission").click(function(){
+            // parent: td, parent's parent: tr
+            var row = $(this).parent().parent();
+
+            var user = row.attr('data-user');
+            var id = parseInt(row.attr('data-id'));
+            var permission = row.attr('data-permission');
+            var pin = row.attr('data-pin');
+
+            // fill the dialog with the data
+            items.edit_permission.val(permission);
+            items.edit_pin.val(pin);
+
+            // show the dialog
+            custom_dialog("{% trans 'Edit permission' %}: " + user,
+                items.edit_dialog, DIALOG_WIDTH, {
+                    ok: "{% trans 'OK' %}",
+                    ok_action: function(){ update_permission(row, id); }
+                }
+            );
+        });
+
+        //
+        // invites
+        //
+        function invite_users(){
+            var valid_emails = []; // a list of dictionaries: {'email': 'asdf@example.com', 'permission': 'cashier'}
+
+            var row, email, permission;
+            var all_valid = true;
+
+            $("tr", items.invites).each(function(){
+                row = $(this);
+
+                email = $(".mail", row).val().trim();
+                permission = $(".permission", row).val();
+
+                if(!email_valid(email)){
+                    $(".error", row).text("{% trans 'This not a valid email address:' %}");
+                    all_valid = false;
+                }
+                else{
+                    valid_emails.push({
+                        email: email,
+                        permission: permission
+                    });
+                }
+
+            });
+
+            if(all_valid){
+                // send the data to server
+                send_data("{% url 'pos:invite_users' company.url_name %}", valid_emails, "{{ csrf_token }}",
+                    function(response){
+                        if(response.status != 'ok'){
+                            error_message("{% trans 'Inviting users failed' %}", response.message);
+                        }
+                        else{
+                            // success: clear the dialog and add a single row for email
+                            items.invites.empty();
+                            items.add_invite_mail.click();
+
+                            // reload the page
+                            window.location.reload();
+                        }
+                    }
+                );
+            }
+        }
+
+        items.add_invite_mail.click(function(){
+            items.invite_user_template
+                    .clone()
+                    .removeAttr("id")
+                    .show()
+                    .appendTo(items.invites);
+        });
+
+        items.add_button.click(function(){
+            custom_dialog("{% trans 'Invite users' %}", items.invite_dialog, DIALOG_WIDTH, {
+                ok: "{% trans 'Invite' %}",
+                ok_action: invite_users,
+                auto_close: false
+            });
+        });
+
+        // the default invite dialog: one mail input by default
+        items.add_invite_mail.click();
+
+        //
+        // deleting pending invitations
+        //
+        $(".delete-pending-invite").click(function(){
+            var button = $(this);
+
+            confirmation_dialog(
+                "{% trans 'Delete invitation?' %}", // title
+                "{% trans 'The users that have not responded yet will no longer see it and will not be able to join this company.' %}",
+                function(){ // yes_action
+                    var id = parseInt(button.attr("data-id"));
+                    if(isNaN(id)) return;
+
+                    send_data("{% url 'pos:delete_invitation' company.url_name %}",
+                        { action_id: id }, "{{ csrf_token }}", function(response){
+                                if(response.status != 'ok'){
+                                    error_message("{% trans 'Could not delete invitation' %}", response.message);
+                                }
+                                else{
+                                    // the invite has been canceled. no need to reload the page;
+                                    // just delete the row
+
+                                    // img  td        tr
+                                    button.parent().parent().remove();
+                                }
+                        });
+                },
+                function(){}); // no action
+        });
+    });
+    </script>
+{% endblock %}
+
+{% block status_bar_title %}{% trans 'Users' %}{% endblock %}
+
+{% block extra_button %}
+    <a class="extra-button" href="#" id="invite_button">{% trans 'Invite users' %}</a>
+{% endblock %}
+
+{% block manage_content %}
+    {# the list of registers: on the left #}
+    <div class="content">
+        <h2>{% trans 'Users in this company' %}</h2>
+        <table id="users">
+            <thead>
+                {# include: register name, receipt format and type, and location #}
+                <tr>
+                    <td class="name">{% trans 'Name' %}</td>
+                    <td class="pin">{% trans 'PIN' %}</td>
+                    <td class="permission">{% trans 'Permission' %}</td>
+                    <td class="controls">{# edit and delete links #}</td>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in permissions %}
+                <tr data-id="{{ p.id }}"
+                    data-permission="{{ p.permission }}"
+                    data-pin="{{ p.pin }}"
+                    data-user="{{ p.user }}">
+
+                    <td class="name">{# register name is a link to edit form #}
+                        {{ p.user }}
+                    </td>
+                    <td class="pin">{{ p.pin }}</td>
+                    <td class="permission">{{ p.permission }}</td>
+                    <td class="controls">
+                        <img src="{% static 'icons/edit_black.png' %}"
+                             class="hoverable edit-permission"
+                             alt="{% trans 'Edit' %}"
+                             title="{% trans 'Edit' %}" />
+
+                        <a href="{% url 'pos:delete_permission' company.url_name %}"
+                           data-id="{{ p.id }}"
+                           data-text="{% trans 'Remove user: ' %} {{ p.user }}"
+                           class="delete-link">
+                            <img src="{% static 'icons/delete_black.png' %}"
+                                 alt="{% trans 'Delete' %}"
+                                 title="{% trans 'Delete' %}" />
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>{% trans 'Invites history' %}</h2>
+
+        {% if actions|length %}
+            <table id="invites_history">
+                <thead>
+                    <tr>
+                        <td>{% trans 'Sent by' %}</td>
+                        <td>{% trans 'Sent to' %}</td>
+                        <td>{% trans 'Date sent' %}</td>
+                        <td>{% trans 'Status' %}</td>
+                        <td class="controls">{# controls: delete pending #}</td>
+                    </tr>
+                </thead>
+
+                {% for a in actions %}
+                    <tr> {# show: date, mail, status #}
+                        <td>{{ a.sender }}</td>
+                        <td>{{ a.receiver }}</td>
+                        <td>{{ a.datetime_created|date:date_format_django }}</td>
+                        <td>{{ a.get_status_display }}</td>
+                        <td class="controls">
+                            <img src="{% static 'icons/delete_black.png' %}"
+                                 class="delete-pending-invite hoverable"
+                                 data-id="{{ a.id }}"
+                                 alt="{% trans 'Cancel' %}"
+                                 title="{% trans 'Cancel' %}" />
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>{% trans 'There are no pending invites.' %}</p>
+        {% endif %}
+    </div>
+
+    {# the invite dialog: will be shown with custom_dialog #}
+    <div id="invite_dialog" class="hidden">
+        <table>
+            <thead>
+            <tr>
+                <td> {% trans 'E-mail' %} </td>
+                <td> {% trans 'Permission' %} </td>
+            </tr>
+            <tr id="invite_user_template" class="hidden">
+                <td class="invite-mail">
+                    <div class="error"></div>
+                    <input type="text" class="mail" />
+                </td>
+                <td class="invite-permission"><select class="permission">
+                        {% for g in permission_groups %}
+                            <option value="{{ g.0 }}">{{ g.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <td id="add_invite_container">
+                        <img src="{% static 'icons/add.png' %}" class="hoverable" id="add_invite_mail" />
+                    </td>
+                    <td></td>
+                </tr>
+            </tfoot>
+
+            <tbody>{# will be filled #}</tbody>
+        </table>
+        <div class="hidden invite-user-row" id="invite_template">
+
+        </div>
+    </div>
+
+    {# the edit permission dialog: will be shown with custom_dialog #}
+    <div id="edit_dialog" class="hidden">
+        <div class="pin-edit-container">
+            <label for="edit_pin">{% trans 'PIN' %}: </label>
+            <input type="number" id="edit_pin" />
+        </div>
+
+        <div class="permission-edit-container">
+            <label for="edit_permission">{% trans 'Permission' %}: </label>
+            <select id="edit_permission">
+                {% for g in permission_groups %}
+                    <option value="{{ g.0 }}">{{ g.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+{% endblock %}
+

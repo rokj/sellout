@@ -1,0 +1,35 @@
+nejc@Buquica ~/Blocklogic/projects/webpos $ sudo -u postgres dropdb pos
+nejc@Buquica ~/Blocklogic/projects/webpos $ sudo -u postgres dropdb users
+nejc@Buquica ~/Blocklogic/projects/webpos $ sudo -u postgres dropdb mail
+
+nejc@Buquica ~/Blocklogic/projects/webpos $ sudo -u postgres psql
+postgres=# drop user pos;
+postgres=# drop user users;
+postgres=# drop user mail;
+
+postgres=# create user pos with password 'pos';
+postgres=# create user users with password 'users';
+postgres=# create user mail with password 'mail';
+
+nejc@Buquica ~/Blocklogic/projects/webpos $ sudo -u postgres createdb pos;
+nejc@Buquica ~/Blocklogic/projects/webpos $ sudo -u postgres createdb users;
+nejc@Buquica ~/Blocklogic/projects/webpos $ sudo -u postgres createdb mail;
+
+nejc@Buquica ~/Blocklogic/projects/webpos $ sudo -u postgres psql
+postgres=# grant all on database pos to pos;
+postgres=# grant all on database mail to mail;
+postgres=# grant all on database users to users;
+
+nejc@Buquica ~/Blocklogic/projects/webpos $ python manage.py makemigrations
+nejc@Buquica ~/Blocklogic/projects/webpos $ python manage.py migrate
+
+ACHTUNG! Set connection strings in install.sql!
+
+nejc@Buquica ~/Blocklogic/projects/webpos/scripts $ sudo -u postgres psql pos -f install.sql
+nejc@Buquica ~/Blocklogic/projects/webpos/scripts $ sudo -u postgres createdb users;
+nejc@Buquica ~/Blocklogic/projects/webpos/scripts $ sudo -u postgres psql users -f users.sql 
+nejc@Buquica ~/Blocklogic/projects/webpos/scripts $ sudo -u postgres users
+
+nejc@Buquica ~/Blocklogic/projects/webpos/scripts $ sudo -u postgres psql users
+users=# grant all on database users to users;
+users=# grant all on table users to users;

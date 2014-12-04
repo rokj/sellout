@@ -19,29 +19,22 @@ blocks:
 
 <head>
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+
     {% comment %} CSS {% endcomment %}
     <link rel="stylesheet" href="{% static 'css/fonts/fonts.css' %}" />
-<<<<<<< HEAD:templates/base.html
+
     <link rel="stylesheet" href="{% static 'jquery-ui-1.11.2.custom/jquery-ui.structure.css' %}" />
     <link rel="stylesheet" href="{% static 'jquery-ui-1.11.2.custom/jquery-ui.theme.css' %}" />
-=======
->>>>>>> origin/registration:templates/pos/base.html
+
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
     <link rel="stylesheet" href="{% static 'css/statusbar.css' %}" />
 
     {% comment %} jQuery {% endcomment %}
-<<<<<<< HEAD:templates/base.html
     <script type="text/javascript" src="{% static 'jquery-ui-1.11.2.custom/external/jquery/jquery.js' %}"></script>
     <script type="text/javascript" src="{% static 'jquery-ui-1.11.2.custom/jquery-ui.js' %}"></script>
 
-=======
-    <script type="text/javascript" src="{% static 'js/jquery-ui-1.2.11.2/external/jquery/jquery.js' %}"></script>
-
     {% comment %} jQuery UI {% endcomment %}
-    <link rel="stylesheet" href="{% static 'js/jquery-ui-1.11.2.custom/jquery-ui.css' %}" />
-    <script type="text/javascript" src="{% static 'js/jquery-ui-1.11.2.custom/jquery-ui.js' %}"></script>
-    
->>>>>>> origin/registration:templates/pos/base.html
+
     {% comment %} bignumber (for all number manipulation) {% endcomment %}
     <script src="{% static 'js/big.js' %}"></script>
 
@@ -71,6 +64,9 @@ blocks:
         $(window).load(function(){
             {# common to management #}
             var items = {
+                terminal_menu_button: $("#terminal_button"),
+                terminal_menu_content: $("#terminal_menu"),
+
                 management_menu_button:  $("#management_button"),
                 management_menu_content: $("#management_menu"),
 
@@ -79,6 +75,7 @@ blocks:
             };
 
             // menus
+            items.terminal_menu_button.simpleMenu(items.terminal_menu_content);
             items.management_menu_button.simpleMenu(items.management_menu_content);
             items.user_menu_button.simpleMenu(items.user_menu_content);
         });
@@ -88,12 +85,14 @@ blocks:
 {% block body_tag %}<body>{% endblock %}{% comment %} in case something needs to be assigned to body tag (styles, etc.){% endcomment %}
     <div id="status_bar">
         {% block status_bar_logo %}
+            {# the logo: green/black in management, black/white in terminal #}
+            {# thie is the 'terminal' version #}
             <div id="logo" class="nolink">
-                {# logo block will be replaced with link to management in terminal #}
                 <img src="{% static 'icons/logo_white.png' %}" alt="" />
-                <div id="status_bar_company"></div>
             </div>
         {% endblock %}
+
+        {% block terminal_menu %}{% endblock %}
 
         <div id="user_button" class="button-container simple-menu-button">
             <div class="vertical-separator"></div>
@@ -103,10 +102,10 @@ blocks:
             <ul id="user_menu" class="drop-down">
                 {# store-related stuff #}
                 {% if company %}
-                    <li class="store separator"><a href="{% url 'pos:user_settings' company.url_name %}">{% trans 'User Settings' %}</a></li>
+                    <li class="separator"><a href="{% url 'pos:user_settings' company.url_name %}">{% trans 'User Settings' %}</a></li>
                 {% endif %}
-                <li class="store"><a href="#">{% trans 'Switch User' %}</a> </li>
-                <li class="store"><a href="#">{% trans 'Log Out' %}</a> </li>
+                <li><a href="#">{% trans 'Switch User' %}</a> </li>
+                <li><a href="{% url 'web:logout' %}">{% trans 'Log Out' %}</a> </li>
             </ul>
         </div>
 
@@ -129,7 +128,7 @@ blocks:
                     {# company-related stuff #}
                     <li class="company separator"><a href="{% url 'pos:company_settings' company.url_name %}">{% trans 'Configuration' %}</a></li>
                     <li class="company"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
-                    <li class="company"><a href="#">{% trans 'Users' %}</a></li>
+                    <li class="company"><a href="{% url 'pos:list_users' company.url_name %}">{% trans 'Users' %}</a></li>
                 </ul>
             {% endif %}
         </div>

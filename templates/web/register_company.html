@@ -1,142 +1,248 @@
-{% extends "pos/base.html" %}
+{% extends "web/bootstrap.html" %}
 {% load static %}
 {% load i18n %}
 
 {% block head %}
-<script type="text/javascript">// <![CDATA[
-function show_suggestions(data){
-    div_obj = $("#suggestion_list");
-    div_obj.empty();
-    
-    for(var i = 0; i < data.suggestions.length; i++){
-        s = data.suggestions[i];
-        
-        entry = $("<p>", {"class":"suggestion-list-item"});
-        entry.text(s);
-        
-        div_obj.append(entry);
-        
-        entry.click(function(){
-            $("#id_url_name").val($(this).text());
-        });
-    }
-}
-                                           
-$(document).ready(function(){
-    // get url suggestions after #id_name loses fo\cus
-    $("#id_name").blur(function(){
-        send_data("{% url 'pos:url_name_suggestions' %}",
-                {'name':$(this).val()},
-                "{{ csrf_token }}",
-                function(returned_data){
-                    show_suggestions(returned_data);
+    <link href="{% static 'bootstrap/register_company.css' %}" rel="stylesheet" />
+
+    <script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+
+    <script type="text/javascript">// <![CDATA[
+
+    $(document).ready(function(){
+        var items = {
+            suggestion_container: $("#suggestion_list_container"),
+            suggestion_list: $("#suggestion_list")
+        };
+
+        function show_suggestions(data){
+            if(data.suggestions.length > 0){
+                items.suggestion_container.show();
+                items.suggestion_list.empty();
+
+                var entry;
+
+                for(var i = 0; i < data.suggestions.length; i++){
+                    s = data.suggestions[i];
+
+                    entry = $("<p>", {"class": "suggestion-list-item"});
+                    entry.text(s);
+
+                    items.suggestion_list.append(entry);
+
+                    entry.click(function(){
+                        $("#id_url_name").val($(this).text());
+                    });
                 }
-        );
-    });
-    
-    // show image before upload
-    $("#id_color_logo").change(function(){
-        preview_image(this, "#logo", {{color_logo_dimensions.0}}, {{color_logo_dimensions.1}});
-    });
-});
+            }
+            else{
+                items.suggestion_container.hide();
+            }
+        }
 
-// ]]>
-</script>
+        // get url suggestions after #id_name loses fo\cus
+        $("#id_name").blur(function(){
+            send_data("{% url 'web:url_name_suggestions' %}",
+                    {'name': $(this).val()},
+                    "{{ csrf_token }}",
+                    function(returned_data){
+                        show_suggestions(returned_data);
+                    }
+            );
+        });
+        // initially, hide the list
+        show_suggestions({suggestions: []});
+    });
+
+    // ]]>
+    </script>
 
 {% endblock %}
 
-{% block status_bar %}
-    TEH STATUS IS EMPTY
+{% block navbar_buttons %}
+    <ul class="nav navbar-nav navbar-right">
+        {% comment %}
+        <li><a class="custom nav-button extra-font" href="#pricing">{% trans 'Pricing' %}</a></li>
+        <li><a class="custom nav-button extra-font" href="{% url 'web:sign_up' %}">{% trans 'Sign up' %}</a></li>
+        <li><a class="custom nav-button extra-font fake" href="#"><div id="open_login_form">{% trans 'Login' %}</div></a></li>
+        {% endcomment %}
+    </ul>
 {% endblock %}
+
 
 {% block content %}
-<img id="logo" src="">
+    <section>
+        <div class="container">
+            <h2> {% trans 'Register a new company' %}</h2>
+            <p>{% blocktrans %}
+                Enter details about your company. These will be printed on bills you will issue
+                and for paying Sellout subscriptions.
+            {% endblocktrans %}</p>
+        </div>
+    </section>
 
-<form action="{% url 'pos:register_company' %}" method="post"
-      {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
+    <section class="custom">
+        <div class="container">
+            <form action="{% url 'web:register_company' %}" method="post"
+                  {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
+                {% csrf_token %}
 
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <!-- name -->
-    <div class="form_field">
-        {{ form.name.errors }}
-        <label for="id_name">{% trans 'Company name' %}:</label>
-        {{ form.name }}
-    </div>
-    <!-- url -->
-    <div class="form_field">
-        {{ form.url_name.errors }}
-        <label for="id_url_name">{% trans 'POS address' %}:</label>
-        <div>
-            {{ pos_url }} {{ form.url_name }} /
-            <div id="suggestion_list"></div>
-        </div> 
-        <div class="help-text">
-        {% blocktrans %}Your POS system will be accessible at this address.
-        It can consist of characters, numbers and dashes only.
-        You can make up your own or choose from the suggestions below.
-        It can be changed later.
-        {% endblocktrans %}</div>
-    </div>
-    <!-- logo -->
-    <div class="form-field">
-        {{ form.color_logo.errors }}
-        <label for="id_color_logo">{% trans 'Company logo' %}:</label>
-        {{ form.color_logo }}
-        <div class="help-text">{% trans 'Allowed formats: TODO' %}</div>
-    </div>
-    <!-- e-mail -->
-    <div class="form-field">
-        {{ form.email.errors }}
-        <label for="id_email">{% trans 'Contact e-mail' %}:</label>
-        {{ form.email }}
-        <div class="help-text">{% trans 'Official e-mail address of the company' %}</div>
-    </div>
-    <!-- street, number -->
-    <div class="form-field">
-        {{ form.street.errors }}
-        <label for="id_street">{% trans 'Street address and house number' %}:</label>
-        {{ form.street }}
-    </div>
-    <!-- post code -->
-    <div class="form-field">
-        {{ form.postcode.errors }}
-        <label for="id_postcode">{% trans 'ZIP/Postal code' %}:</label>
-        {{ form.postcode }}
-    </div>
-    <!-- city -->
-    <div class="form-field">
-        {{ form.city.errors }}
-        <label for="id_city">{% trans 'City' %}:</label>
-        {{ form.city }}
-    </div>
-    <!-- country -->
-    <div class="form-field">
-        {{ form.country.errors }}
-        <label for="id_country">{% trans 'Country' %}:</label>
-        {{ form.country }}
-    </div>
-    <!-- phone -->
-    <div class="form-field">
-        {{ form.phone.errors }}
-        <label for="id_phone">{% trans 'Phone number' %}:</label>
-        {{ form.phone }}
-    </div>
-    <!-- VAT exemption no. -->
-    <div class="form-field">
-        {{ form.vat_no.errors }}
-        <label for="id_vat_no">{% trans 'VAT exemption number' %}:</label>
-        {{ form.vat_no }}
-    </div>
-    <!-- notes -->
-    <div class="form-field">
-        {{ form.notes.errors }}
-        <label for="id_notes">{% trans 'Additional info/notes' %}:</label>
-        {{ form.notes }}
-    </div>
-    
-    <p><input type="submit" value="{% trans 'Submit' %}" /></p>
-</form>
+                <div class="row single">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 form-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                </div>
 
+                {# company name: in single line #}
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 form-field name">
+                        <div class="field-errors">
+                            {{ form.name.errors }}
+                        </div>
+
+                        {{ form.name.label_tag }}
+                        {{ form.name }}
+                    </div>
+
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 form-field logo">
+                        {# logo: it cannot be uploaded before the company is created; #}
+                        {# show a placeholder image with a note on this #}
+                        <div class="fake-label">
+                            {% trans 'Logo' %}
+                        </div>
+
+                        <div id="logo_placeholder">
+                            <img src="{% static 'images/company_placeholder_color.png' %}"
+                                 alt="logo" />
+
+                            <div class="help-text">{% blocktrans %}
+                                You will upload your company's logo after registration.
+                                Find your company settings in management menu.
+                            {% endblocktrans %}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {# url_name: show suggestions #}
+                <div class="row single">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 form-field url-name">
+                        {{ form.url_name.label_tag }}
+                        <div class="help-text">
+                            {% blocktrans %}Your POS system will be accessible at this address.
+                                It can consist of characters, numbers and dashes only.
+                                You can make up your own or choose from the suggestions.
+                                It can be changed later.{% endblocktrans %}
+                        </div>
+
+                        <div class="field-errors">
+                            {{ form.url_name.errors }}
+                        </div>
+                        <div id="pos_url">{{ pos_url }}</div>
+                        <div id="url_name">
+                            {{ form.url_name }}
+                            <div id="suggestion_list_container">
+                                <p>{% trans 'Available names:' %}</p>
+                                <div id="suggestion_list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# e-mail and street address #}
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 form-field">
+                        {{ form.email.label_tag }}
+                        <div class="help-text">{% trans 'Official e-mail address of the company' %}</div>
+                        <div class="field-errors">{{ form.email.errors }}</div>
+                        {{ form.email }}
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 form-field">
+                        {{ form.street.label_tag }}
+                        <div class="help-text">&nbsp;</div>{# this is not required, but is kept here to align input boxes #}
+                        <div class="field-errors">{{ form.street.errors }}</div>
+                        {{ form.street }}
+                    </div>
+                </div>
+
+                {# postal code and city #}
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 form-field">
+                        <div class="field-errors"> {{ form.postcode.errors }}</div>
+
+                        {{ form.postcode.label_tag }}
+                        {{ form.postcode }}
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 form-field">
+                        <div class="field-errors">{{ form.city.errors }}</div>
+
+                        {{ form.city.label_tag }}
+                        {{ form.city }}
+                    </div>
+                </div>
+
+                {# country and phone number #}
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 form-field">
+                        <div class="field-errors">{{ form.country.errors }}</div>
+
+                        {{ form.country.label_tag }}
+                        {{ form.country }}
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 form-field">
+                        <div class="field-errors">{{ form.phone.errors }}</div>
+
+                        {{ form.phone.label_tag }}
+                        {{ form.phone }}
+                    </div>
+                </div>
+
+                {# VAT and tax_payer #}
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 form-field">
+                        <div class="field-errors">{{ form.vat_no.errors }}</div>
+
+                        {{ form.vat_no.label_tag }}
+                        {{ form.vat_no }}
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 form-field">
+                        <div class="field-errors">{{ form.tax_payer.errors }}</div>
+
+                        {{ form.tax_payer.label_tag }}
+                        {{ form.tax_payer }}
+                    </div>
+                </div>
+
+                {# website and notes #}
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 form-field">
+                        <div class="field-errors">{{ form.website.errors }}</div>
+
+                        {{ form.website.label_tag }}
+                        {{ form.website }}
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 form-field">
+                        <div class="field-errors">{{ form.notes.errors }}</div>
+
+                        {{ form.notes.label_tag }}
+                        {{ form.notes }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 footer-left">
+                        <a href="{% url 'web:select_company' %}"
+                           class="buttons cancel">
+                            {% trans 'Back' %}
+                        </a>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                        <div class="footer-right">
+                            <input type="submit" value="{% trans 'Create' %}"/>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
 {% endblock %}
 

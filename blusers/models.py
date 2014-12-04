@@ -64,8 +64,6 @@ class BlocklogicUser(AbstractUser, Skeleton):
 
         return False
 
-    subscribed = property(get_subscribed)
-
     def delete(self, *args, **kwargs):
         cursor = connections['bl_users'].cursor()
         cursor.execute("DELETE FROM users WHERE email = %s", [self.email])
@@ -79,6 +77,7 @@ class BlocklogicUser(AbstractUser, Skeleton):
 
         super(BlocklogicUser, self).save(*args, **kwargs)
 
+    @property
     def get_selected_company(self):
         from config.functions import get_user_value
 
@@ -91,14 +90,13 @@ class BlocklogicUser(AbstractUser, Skeleton):
 
         return selected_company
 
-    selected_company = property(get_selected_company)
+    @property
+    def companies(self):
+        # from pos.models import Permission
+        # return [p.company for p in Permission.objects.filter(user=self)]
 
-    def get_companies(self):
-        from pos.models import Permission
-
-        return [p.company for p in Permission.objects.filter(user=self)]
-
-    companies = property(get_companies)
+        from pos.models import Company
+        return Company.objects.all()
 
     def update_password(self):
         """
@@ -149,7 +147,7 @@ class UserImage(SkeletonU):
                     try:
                         os.remove(os.path.join(settings.MEDIA_ROOT, thumb.name))
                         thumb.delete()
-                    except Exception, e:
+                    except Exception:
                         pass
 
     def delete(self, *args, **kwargs):

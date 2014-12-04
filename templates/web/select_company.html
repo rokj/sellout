@@ -3,6 +3,8 @@
 {% load static %}
 
 {% block head %}
+    <link href="{% static 'bootstrap/select_company.css' %}" rel="stylesheet" />
+
     <script type="text/javascript">
     $(document).ready(function(){
         $("#user_button").simpleMenu($("#user_menu"));
@@ -28,17 +30,28 @@
 
 {% block content %}
     <section>
-        <div class="container">
+        {% if actions|length %}
+            <div class="container">
             <h2>{% trans 'Awaiting actions' %}</h2>
-
-            {% if actions|length %}
+            <table id="actions">
                 {% for a in actions %}
-
+                    <div class="action-container table-row">
+                        <p class="action-message">
+                            {% if a.type == 'invitation' %}
+                                {% trans 'You have been invited to join a company: ' %}
+                                {{ a.company.name }}
+                            {% endif %}
+                            <a href="{{ a.accept_url }}" class="action accept">{% trans 'Accept' %}</a>
+                            <a href="{{ a.decline_url }}" class="action decline">{% trans 'Decline' %}</a>
+                        </p>
+                    </div>
                 {% endfor %}
-            {% else %}
-                <p>{% trans 'You have no pending actions.' %}</p>
-            {% endif %}
-        </div>
+            </table>
+            </div>
+        {% else %}
+            {# show nothing if there's no actions #}
+            {% comment %} <p>{% trans 'You have no pending actions.' %}</p>{% endcomment %}
+        {% endif %}
     </section>
 
     <section>
@@ -46,16 +59,29 @@
         <h2>{% trans 'Your companies' %}</h2>
 
         {% if companies|length %}
-            {% for c in companies %}
-
-            {% endfor %}
+            <div id="companies_list">
+                {% for company in companies %}
+                    <div class="company table-row top-border">
+                        <div class="company-name table-cell">
+                            <a href="{% url 'pos:terminal' company.url_name %}"> {{ company.name }} </a>
+                        </div>
+                        <div class="company-delete table-cell hidden">{# so far, this is hidden #}
+                            <img src="{% static 'icons/delete_red.png' %}"
+                                 class="hoverable delete"
+                                 data-id="{{ company.id }}" />
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         {% else %}
             <p>{% trans 'You are not part of any company yet.' %}</p>
             <p>{% trans 'Create your own company or wait for an invite.' %}</p>
         {% endif %}
 
         <div id="new_company">
-            <a id="new_company_link" href="{% url 'pos:register_company' %}"> + {% trans 'Add Company' %}</a>
+            <a id="new_company_link"
+               href="{% url 'web:register_company' %}"
+               class="add"> + {% trans 'Add Company' %}</a>
         </div>
     </div>
 

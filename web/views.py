@@ -15,6 +15,7 @@ from django.contrib.auth import logout as django_logout
 from action.models import Action
 
 import common.globals as g
+from pos.models import Permission
 import settings
 
 
@@ -54,35 +55,22 @@ def index(request):
 
     return render(request, "web/index.html", context)
 
-
 @login_required
 def select_company(request):
     """ show current user's companies and a list of invites. """
 
     # the list of companies
-    companies = request.user.get_companies()
+    companies = request.user.companies
 
     # the list of messages
-    actions = Action.objects.filter(status="waiting", _for=request.user.email)
+    actions = Action.objects.filter(status=g.ACTION_WAITING, receiver=request.user.email)
 
     for a in actions:
-        if a.what == "invitation":
+        if a.type == g.ACTION_INVITATION:
             a.data = json.loads(a.data)
 
-            # if get_language() == "sl-si":
-            #    accept_url = "sprejmi-povabilo-v-skupino/kljuc=%s" % (a.reference)
-            #    decline_url = "zavrni-povabilo-v-skupino/kljuc=%s" % (a.reference)
-
-            #    a.accept_url = settings.SITE_URL + settings.URL_PREFIX + accept_url
-            #    a.decline_url = settings.SITE_URL + settings.URL_PREFIX + decline_url
-            #else:
-
-            # TODO: use reverse()
-            accept_url = "accept-group-invitation/key=%s" % (a.reference)
-            decline_url = "decline-group-invitation/key=%s" % (a.reference)
-
-            a.accept_url = settings.SITE_URL + accept_url
-            a.decline_url = settings.SITE_URL + decline_url
+            a.accept_url = settings.SITE_URL + reverse('web:accept_invitation', args=[a.reference])
+            a.decline_url = settings.SITE_URL + reverse('web:decline_invitation', args=[a.reference])
 
     context = {
         'title': _("Select company"),
@@ -214,3 +202,49 @@ def lost_password(request):
         pass
 
     return JsonResponse({"status": "something_went_wrong"})
+
+
+def handle_invitation(request, reference, user_response):
+    try:
+        action = Action.objects.get(receiver=request.user.email,
+                                    reference=reference,
+                                    status=g.ACTION_WAITING)
+    except Action.DoesNotExist: # wtf?
+        return redirect('web:select_company')
+
+    # if the invite has been accepted, create a new permission
+    if user_response == g.ACTION_ACCEPTED:
+        data = json.loads(action.data)
+        permission = data.get('permission')
+        if permission not in g.PERMISSION_TYPES:
+            permission = g.PERMISSION_TYPES[0]
+
+        # get the user that sent the invite and select it as the user that created the permission
+        try:
+            sender = BlocklogicUser.objects.get(email=action.sender)
+        except BlocklogicUser.DoesNotExist:
+            sender = None
+
+        new_permission = Permission(
+            created_by=sender,
+            user=request.user,
+            company=action.company,
+            permission=permission
+        )
+        new_permission.create_pin(False)
+        new_permission.save()
+
+    action.status = user_response
+    action.save()
+
+    return redirect('web:select_company')
+
+
+@login_required
+def accept_invitation(request, reference):
+    return handle_invitation(request, reference, g.ACTION_ACCEPTED)
+
+
+@login_required
+def decline_invitation(request, reference):
+    return handle_invitation(request, reference, g.ACTION_ACCEPTED)

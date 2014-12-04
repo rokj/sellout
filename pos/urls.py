@@ -16,6 +16,7 @@ from pos.views.manage import tax
 from pos.views.manage import configuration
 from pos.views.manage import register
 from pos.views.manage import bill
+from pos.views.manage import users
 
 from pos.views import bill as terminal_bill
 
@@ -27,12 +28,6 @@ r_company = r'^(?P<company>[\w-]{1,' + str(g.MISC['company_url_length']) + '})'
 r_manage = g.MISC['management_url']
 
 urlpatterns = patterns('',
-    #
-    # SYSTEM PAGES:
-    #
-    url(r_manage + '/' + _('register-company') + '$', company.register_company, name='register_company'),
-    url(r_manage + '/' + r'url-name-suggestions$', company.url_name_suggestions, name='url_name_suggestions'),
-    
     #token registration for api devices
     url(r_manage + '/' + r'api-token-auth/$', authtoken_views.obtain_auth_token),  # TODO
 
@@ -80,6 +75,14 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + '/json/products/edit/$', product.edit_product, name='edit_product'),  # edit (save) product - json
     url(r_company + '/' + r_manage + '/json/products/delete/$', product.delete_product, name='delete_product'),  # edit (save) product - json
     url(r_company + '/' + r_manage + '/json/products/mass-edit/$', product.mass_edit, name='mass_edit'),  # edit (save) product - json
+
+    # users
+    url(r_company + '/' + r_manage + _('/users') + '/$', users.list_users, name='list_users'),
+    url(r_company + '/' + r_manage + _('/users/edit'), users.edit_permission, name='edit_permission'),
+    url(r_company + '/' + r_manage + _('/users/delete') + '/$', users.delete_permission, name='delete_permission'),
+
+    url(r_company + '/' + r_manage + _('/users/invite') + '/$', users.invite_users, name='invite_users'),
+    url(r_company + '/' + r_manage + _('/users/delete-invitation') + '/$', users.delete_invitation, name='delete_invitation'),
 
     # bill management
     url(r_company + '/' + r_manage + _('/bills') + '/$', bill.list_bills, name='list_bills'),

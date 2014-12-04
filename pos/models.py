@@ -12,13 +12,14 @@ import common.globals as g
 from config.countries import country_choices, country_by_code
 
 import datetime as dtm
+import random
 
 
 ### company ###
 class CompanyAbstract(models.Model):
     # abstract: used in  for Company and BillCompany
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
-    street = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
+    street = models.CharField(_("Street address"), max_length=200, null=True, blank=True)
     postcode = models.CharField(_("Postal code"), max_length=20, null=True, blank=True)
     city = models.CharField(_("City"), max_length=50, null=True, blank=True)
     state = models.CharField(_("State"), max_length=50, null=True, blank=True)
@@ -27,6 +28,8 @@ class CompanyAbstract(models.Model):
     website = models.CharField(_("Website"), max_length=256, null=True, blank=True)
     phone = models.CharField(_("Phone number"), max_length=30, null=True, blank=True)
     vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=False, blank=False)
+
+    tax_payer = models.BooleanField(_("Tax payer"), blank=False, null=False, default=False)
 
     class Meta:
         abstract = True
@@ -49,6 +52,10 @@ class Company(SkeletonU, CompanyAbstract):
                                                                  "pos_company", "monochrome_logo"),
                                         null=True, blank=True)
     notes = models.TextField(_("Notes"), blank=True, null=True)
+
+    # will be used for 'deleting' companies (marking them inactive)
+    # TODO: create custom DeletedManager for querysets that leaves out deleted=True
+    deleted = models.BooleanField(null=False, blank=False, default=False)
 
     def __unicode__(self):
         return self.name
@@ -443,9 +450,45 @@ class Permission(SkeletonU):
     user = models.ForeignKey(BlocklogicUser)
     company = models.ForeignKey(Company)
     permission = models.CharField(max_length=16, null=False, blank=False, choices=g.PERMISSION_GROUPS)
-    
+    pin = models.IntegerField(null=True)
+
+    unique_together = ('company', 'pin')
+
     def __unicode__(self):
         return self.user.email + " | " + self.company.name + ": " + self.get_permission_display()
+
+    def create_pin(self, custom_pin=None, save=True):
+        """ creates a pin for this user; if successful, returns True;
+            if this pin already exists in current company, returns False
+        """
+        def rnd_pin():
+            return random.randint(0, 10000)
+
+        def pin_exists(this_pin):
+            # exclude this permission from checking;
+            return Permission.objects.filter(company=self.company, pin=this_pin).exclude(id=self.id).exists()
+
+        if custom_pin:
+            if pin_exists(custom_pin):
+                return False
+
+            p = custom_pin
+        else:
+            p = rnd_pin()
+            while pin_exists(p):
+                p = rnd_pin()
+
+        self.pin = p
+
+        if save:
+            self.save()
+
+        return True
+
+
+    @property
+    def pin_display(self):
+        return "%04d"%(self.pin % 10000)
 
 
 @receiver(pre_save, sender=Permission)
@@ -477,9 +520,6 @@ class Register(SkeletonU, RegisterAbstract):
     company = models.ForeignKey(Company, null=False, blank=False)
     printer_driver = models.CharField(_("Printer driver"), max_length=50, null=False, choices=g.PRINTER_DRIVERS)
     device_id = models.CharField(_("Device id"), max_length=128, null=True, blank=True)
-
-    class Meta:
-        unique_together = (('company', 'device_id'))
 
 
 ### bill details ###
@@ -555,6 +595,8 @@ class Bill(SkeletonU, RegisterAbstract):
 
     timestamp = models.DateTimeField(_("Date and time of bill creation"), null=False)
     status = models.CharField(_("Bill status"), max_length=20, choices=g.BILL_STATUS, default=g.BILL_STATUS[0][0])
+
+    currency = models.CharField(_("Currency"), max_length=4)
 
     def __unicode__(self):
         return self.company.name + ": " + str(self.serial)

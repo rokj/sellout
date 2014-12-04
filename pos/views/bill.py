@@ -1,8 +1,12 @@
+from datetime import datetime as dtm
+from decimal import Decimal
+
 from django.contrib.auth.decorators import login_required
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
+from pytz import timezone
 
 from pos.models import Company, Product, Discount, Register, Contact, \
     Bill, BillCompany, BillContact, BillRegister, BillItem, BillItemDiscount
@@ -14,12 +18,8 @@ from pos.views.util import has_permission, JsonOk, JsonParse, JsonError, \
 from config.functions import get_company_value
 import common.globals as g
 
-from pytz import timezone
-from datetime import datetime as dtm
-from decimal import Decimal
+from printing.escpos import escpostext
 
-
-from django.db.models import Q
 
 def bill_item_to_dict(user, company, item):
     i = {}
@@ -145,6 +145,7 @@ def bill_to_dict(user, company, bill):
         'discount_type': bill.discount_type,
 
         # prices
+        'currency': bill.currency,
         'base': format_number(user, company, bill.base),
         'discount': format_number(user, company, bill.discount),
         'tax': format_number(user, company, bill.tax),
@@ -214,7 +215,6 @@ def create_bill_html(user, company, bill):
     context = {
         'bill': bill_data,
         'logo': logo,
-        'currency': get_company_value(user, company, 'pos_currency')
     }
 
     return render_to_string(t, context)
@@ -299,6 +299,7 @@ def create_bill(request, company):
         'type': "Normal",
         'status': "Unpaid",  # the bill is awaiting payment, a second request on the server will confirm it
         'items': [],
+        'currency': get_company_value(request.user, c, 'pos_currency'),
     }
 
     r = parse_decimal(request.user, c, data.get('total'))
@@ -418,6 +419,7 @@ def create_bill(request, company):
         register=bill['register'],  # current settings of the register this bill was created on
         contact=bill['contact'],  # FK on BillContact, copy of the Contact object
         notes=bill['notes'],
+        currency=bill['currency'],
 
         timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
         status=bill['status'],
@@ -544,7 +546,7 @@ def check_bill_status(request, company):
 
 
 @login_required
-def finish_bill(request, company):
+def finish_bill(request, company, android=False):
     """
         find the bill, update its status and set payment type and reference
     """
@@ -578,6 +580,7 @@ def finish_bill(request, company):
 
         bill.status = 'Paid'
         bill.payment_type = d.get('payment_type')
+        # payment reference: if paid with bitcoin - btc address, if paid with cash, cash amount given
         bill.payment_reference = d.get('payment_reference')
     else:
         bill.status = 'Canceled'
@@ -587,6 +590,7 @@ def finish_bill(request, company):
     # if print is requested, return html, otherwise the 'ok' response
     if d.get('print'):
         return JsonResponse({'status': 'ok',
+                             'print': esc_format(bill, esc_commands=True),
                              'bill': create_bill_html(request.user, c, bill)})
 
     return JsonOk()
@@ -615,3 +619,138 @@ def view_bill(request, company):
         return JsonError(_("Bill does not exist"))
 
     return HttpResponse(create_bill_html(request.user, c, bill))
+
+def esc_format(bill, format, line_char_no=42, esc_commands=False):
+    if format == g.RECEIPT_FORMATS[0]:
+        return 'full_page_format'
+    elif format == g.RECEIPT_FORMATS[1]:
+        string = ''
+
+        if esc_commands:
+            printer = escpostext.EscposText()
+            # center / bold
+            string += printer.set(align='center', bold='True')
+            string += printer.text(bill.issuer.name + constants.CTRL_LF)
+            string += printer.set(bold='False')
+            # center
+            string += printer.text(bill.issuer.street + ' ' + bill.issuer.street + ' ' + bill.issuer.city + constants.CTRL_LF)
+            string += printer.text(bill.issuer.state + ' ' + bill.issuer.country + constants.CTRL_LF)
+
+            string += printer.text(_('VAT') + ':' + ' ' + bill.issuer.vat_no + constants.CTRL_LF)
+            string += constants.CTRL_LF
+
+            string += printer.text(bill.register.location + constants.CTRL_LF)
+
+            if bill.contact:
+                string += printer.text(bill.contact.name + constants.CTRL_LF)
+                string += printer.text(bill.contact.street + ' ' + bill.contact.postcode + ' ' + bill.contact.city + constants.CTRL_LF)
+                string += printer.text(bill.contact.state + ' ' + bill.contact.country + constants.CTRL_LF)
+                string += printer.text(_('VAT') + ':' + ' ' + bill.contact.vat_no + constants.CTRL_LF)
+
+            string += printer.text(_('Bill No.') + ' ' + bill.serial)
+            string += printer.line(line_char_no=line_char_no)
+
+            white_spaces = [0.25, 0.15, 0.1, 0.2, 0.25, 0.05]
+
+            temp_s = list(' '*line_char_no)
+            price_s = _('Price')
+            qty_s = _('Qty')
+            unit_s = ''
+            discount_s = _('Discount')
+            amount_s = _('Amount')
+
+            price_n = sum(white_spaces[:1])*line_char_no
+            qty_n = sum(white_spaces[:2]*line_char_no)
+            unit_n = sum(white_spaces[:3]*line_char_no)
+            discount_n = sum(white_spaces[:4]*line_char_no)
+            amount_n = sum(white_spaces[:5]*line_char_no)
+
+            temp_s[price_n-len(price_s):price_n] = price_s
+            temp_s[qty_n-len(qty_s):qty_n] = qty_s
+            temp_s[unit_n-len(unit_s):unit_n] = unit_s
+            temp_s[discount_n-len(discount_s):discount_n] = discount_s
+            temp_s[amount_n-len(amount_s):amount_n] = amount_s
+
+            string += "".join(temp_s)
+            string += printer.line(line_char_no=line_char_no)
+
+            for item in bill.items:
+
+                string += item.name + constants.CTRL_LF
+
+                temp_s = list(' '*line_char_no)
+
+                temp_s[price_n-len(item.base_price):price_n] = item.base_price
+                temp_s[qty_n-len(item.quantity):qty_n] = item.quantity
+                temp_s[unit_n-len(''):unit_n] = ''
+                temp_s[discount_n-len(item.discount_absolute):discount_n] = item.discount_absolute
+                temp_s[amount_n-len(item.tax_rate_id):amount_n] = item.tax_rate_id
+
+                string += "".join(temp_s)
+
+            string += printer.line(line_char_no=line_char_no)
+
+            temp_s = list(' '*line_char_no)
+            total = _('Total') + ' ' + bill.currency + ':'
+            temp_s[0:] = total
+            temp_s[line_char_no-len(bill.total):] = bill.total
+            string += "".join(temp_s)
+
+            string += printer.line(line_char_no=line_char_no)
+
+            temp_s = list(' '*line_char_no)
+
+            white_spaces = [0.08, 0.22, 0.23, 0.23, 0.23]
+
+            rate_s = _('Rate')
+            subtotal_s = _('Subtotal')
+            tax_s = _('Tax')
+            total_s = _('Total')
+
+            rate_id_n = sum(white_spaces[1]*line_char_no)
+            rate_n = sum(white_spaces[:2])*line_char_no
+            subtotal_n = sum(white_spaces[:3]*line_char_no)
+            tax_n = sum(white_spaces[:4]*line_char_no)
+            total_n = sum(white_spaces[:5]*line_char_no)
+
+            temp_s[rate_n-len(rate_s):rate_n] = rate_s
+            temp_s[subtotal_n-len(subtotal_s):subtotal_n] = subtotal_s
+            temp_s[tax_n-len(tax_s):tax_n] = tax_s
+            temp_s[total_n-len(total_s):total_n] = total_s
+
+            string += "".join(temp_s)
+
+            string += printer.line(line_char_no=line_char_no, style='Dotted')
+            for rate in bill.tax_rates:
+                temp_s = list(' '*line_char_no)
+                temp_s[rate_id_n-len(rate.id)] = rate.id
+                temp_s[rate_n-len(rate.amount):rate_n] = rate.amount
+                temp_s[subtotal_n-len(rate.net_sum):subtotal_n] = rate.net_sum
+                temp_s[tax_n-len(rate.tax_sum):tax_n] = rate.tax_sum
+                temp_s[total_n-len(rate.gross_sum):total_n] = rate.gross_sum
+
+                string += "".join(temp_s)
+
+                string += printer.line(line_char_no=line_char_no, style='Dotted')
+
+            sum = _('Sum')
+
+            temp_s = list(' '*line_char_no)
+            temp_s[rate_id_n-len(sum)] = sum
+            temp_s[subtotal_n-len(bill.tax_sums.net_sum):subtotal_n] = bill.tax_sums.net_sum
+            temp_s[tax_n-len(bill.tax_sums.tax_sum):tax_n] = bill.tax_sums.tax_sum
+            temp_s[total_n-len(bill.tax_sums.gross_sum):total_n] = bill.tax_sums.gross_sum
+
+            string += "".join(temp_s)
+
+            temp_s = list(' '*line_char_no)
+            total = _('Cashier') + ' ' + bill.user_name + ':'
+            temp_s[0:] = total
+            temp_s[line_char_no-len(bill.timestamp):] = bill.timestamp
+            string += "".join(temp_s)
+
+            return string
+
+        return 'thermal_page_format'
+
+    return

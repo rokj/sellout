@@ -14,32 +14,24 @@ function custom_dialog(title, content, width, buttons){
     container.append(title_container);
     container.append(dialog);
 
-    // content can be a jquery object or just some text;
-    // if it's just text, wrap it in a div and append to dialog;
-    // if it's an element, remember its current parent and when the dialog is destroyed,
-    // put the elements back to where they were
-    if(!(content instanceof jQuery)){
-        content = $("<div>").text(content);
-        content.parent_element = null;
-    }
-    else{
-        content.parent_element = content.parent();
-    }
+    // content can be a jquery object or just some text
+    if(!(content instanceof jQuery)) content = $("<div>").text(content);
 
-    // shadow and container z-index: remember this globally
-    if(!window.dialog_index) window.dialog_index = /* a lot */ 1e+6;
-    window.dialog_index += 1; // every new dialog is above the previous one
+    content.show();
+    dialog.append(content);
 
-    shadow.css("z-index", window.dialog_index);
-    container.css("z-index", window.dialog_index + 1);
-
-    shadow.hide().appendTo(body).fadeIn("fast", function(){
-        container.appendTo(body);
-    });
-
-    // show the dialog
     dialog.width(width);
-    content.show().appendTo(dialog);
+
+    // shadow: remember the last shadow's z-index and increase it by 1:
+    // the next dialog will always be above the previous
+    if(!window.last_dialog_zindex) window.last_dialog_zindex = 5000;
+    window.last_dialog_zindex += 1;
+
+    shadow
+        .css("z-index", window.last_dialog_zindex)
+        .hide()
+        .appendTo(body)
+        .fadeIn(function(){ container.appendTo(body); });
 
     // add a function to the
     content.close_dialog = function(){
@@ -47,36 +39,27 @@ function custom_dialog(title, content, width, buttons){
             shadow.remove();
         });
 
-        content.hide();
-
-        if(!content.parent_element){
-            // there's no parent, just remove the element
-            content.remove();
-        }
-        else{
-            // there's a parent element stored, attach the content back to parent
-            content.appendTo(content.parent_element); // content will stay in parent's variable
-        }
-
+        content.hide().detach(); // content will stay in parent's variable
         container.remove();
     };
 
+    close_button.unbind().click(function(){
+        content.close_dialog();
+    });
+
     // buttons is an object that can contain the following:
-    // ok: <ok button text>
-    // ok button closes the dialog by default and does nothing
     // yes: <yes button text>
     // yes_action: <function that is executed when yes is clicked>
     // no: <no button text>
     // no_action: <function that is executed when no button is clicked>
+    // ok: <ok button text>
+    // ok_action: if null, only close the dialog
+    // auto_close: if false, do not bind close_dialog on buttons
     if(buttons){
         var footer = $("<div>", {'class': 'custom-dialog-footer'});
         var button_attrs = {type: 'button', 'class': 'hoverable'};
 
         container.append(footer);
-
-        // close button and shadow close the dialog
-        close_button.unbind().click(content.close_dialog);
-        shadow.unbind().click(content.close_dialog);
 
         if(buttons.ok){
             var ok_button = $("<input>", button_attrs);
@@ -84,7 +67,11 @@ function custom_dialog(title, content, width, buttons){
             ok_button.attr('value', buttons.ok);
             footer.append(ok_button);
 
-            ok_button.unbind().click(content.close_dialog);
+            // ok buttons closes the dialog and executes ok_action, if it's there
+            ok_button.unbind();
+            if(buttons.ok_action) ok_button.click(buttons.ok_action);
+
+            if(buttons.auto_close != false) ok_button.click(content.close_dialog);
         }
         else if(buttons.yes && buttons.no){
             var yes_button = $("<input>", button_attrs);
@@ -93,7 +80,8 @@ function custom_dialog(title, content, width, buttons){
 
             yes_button.click(function(){
                 if(buttons.yes_action) buttons.yes_action();
-                content.close_dialog();
+
+                if(buttons.auto_close != false) content.close_dialog();
             });
 
             var no_button = $("<input>", button_attrs);
@@ -102,7 +90,8 @@ function custom_dialog(title, content, width, buttons){
 
             no_button.click(function(){
                 if(buttons.no_action) buttons.no_action();
-                content.close_dialog();
+
+                if(buttons.auto_close != false) content.close_dialog();
             });
 
             footer.append(no_button);
@@ -111,8 +100,7 @@ function custom_dialog(title, content, width, buttons){
     }
     else{
         // if buttons is null, hide all buttons on this dialog, even the close button
-        close_button.hide("fast");
-        shadow.unbind();
+        close_button.hide();
     }
 }
 
@@ -158,19 +146,6 @@ function upload_image(input, url, token, max_size, callback){
     }
 }
 
-function preview_image(input, container_id){
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-
-        reader.onload = function (e) {
-            container = $(container_id);
-            container.css("background-image", "url(" + e.target.result + ")");
-        };
-
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
 function escape(text){
     if(!text) return ""; // avoid writing "undefined"
     
@@ -188,6 +163,11 @@ function escape(text){
     return String(text).replace(/[&<>"'\/]/g, function (s) {
         return entityMap[s];
     });
+}
+
+function email_valid(email){
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
 }
 
 function get_size(element){ // get computed element size before it's inserted into document

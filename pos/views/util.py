@@ -211,11 +211,11 @@ def manage_delete_object(request, company_url_name, model, messages):
     except Company.DoesNotExist:
         return JsonError(_("Company not found"))
 
-    # check permissions: needs to be at least manager
+    # check permissions
     if not has_permission(request.user, c, model.__name__.lower(), 'edit'):
         return JsonError(messages[0])
 
-    # discount id is in request.POST in JSON format
+    # object id is in request.POST in JSON format
     id = JsonParse(request.POST.get('data')).get('id')
     if not id:
         return JsonError(_("No id specified."))

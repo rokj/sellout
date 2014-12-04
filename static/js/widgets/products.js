@@ -11,8 +11,7 @@ Products = function(g){
     };
 
     p.shown_products = null; // will show ids that show_products has shown
-    p.no_products_message = $("<div>", {id: "no_products"})
-        .text(gettext("No products found"));
+    p.no_products_message = $("<div>", {id: "no_products"}).text(gettext("No products found"));
 
     //
     // methods
@@ -138,7 +137,7 @@ Products = function(g){
     }
 
     // make the div draggable
-    set_horizontal_draggable(p.items.container, "div.products-column, #no_products", p.g.settings.t_easing);
+    set_horizontal_draggable(p.items.container, "div.products-column", p.g.settings.t_easing);
 };
 
 Product = function(list, data){

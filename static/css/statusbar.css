@@ -28,13 +28,16 @@
 }
 
 #status_bar #logo.nolink img{
+    display: inline-block;
+    margin-left: 10px;
+    margin-right: 20px;
     position: relative;
-    left: 10px;
-    display: inline;
+    top: 5px;
 }
 
 #status_bar_company{
-    display: inline;
+    /* this has been replaced with the 'terminal' menu */
+    display: none;
     margin-left: 25px;
     height: 40px;
 
@@ -52,7 +55,6 @@
     cursor: pointer;
     color: #ffffff;
     text-decoration: none;
-    text-transform: uppercase;
     position: relative;
     width: 200px;
 }
@@ -67,6 +69,7 @@
 
 a.button-text, a.extra-button{
     color: #ffffff;
+    text-transform: uppercase;
 }
 
 .drop-down{ /* 'ul' element */
@@ -129,8 +132,12 @@ h1.status-bar-title{
     box-sizing: border-box;
 }
 
-.drop-down li.store a{
-    color: #d0d0d0;
+.drop-down li.store{
+    background-color: #404040;
+}
+
+.drop-down a{
+    color: #ffffff;
     border-top: 1px dotted #cccccc;
 }
 
@@ -144,7 +151,7 @@ h1.status-bar-title{
 }
 
 div.vertical-separator{
-    display: block;
+    display: inline-block;
 
     /* height + margin-top + margin_bottom must match statusbar height */
     height: 30px;
@@ -157,4 +164,8 @@ div.vertical-separator{
     box-sizing: border-box;
 
     float: left;
+}
+
+div.vertical-separator.right {
+    float: right;
 }
