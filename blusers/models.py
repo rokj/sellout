@@ -40,7 +40,7 @@ class BlocklogicUser(AbstractUser, Skeleton):
         if self.first_name or self.last_name:
             return u'%s %s' % (self.first_name, self.last_name)
         else:
-            # if there's no first or last for this user, return the username which must exist
+            # if there's no first or last for this user, return the us ername which must exist
             return self.email
 
     @property

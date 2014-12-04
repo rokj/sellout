@@ -80,7 +80,7 @@ class BlocklogicUserForm(forms.ModelForm):
 
     class Meta:
         model = BlocklogicUser
-        fields = ("email", "first_name", "last_name", "country", "images")
+        fields = ("email", "first_name", "last_name", "country", "images", "sex", )
 
     def clean_old_password(self):
         if not self.registration and self.request.POST.get('update_password', '') == "yes":
@@ -161,7 +161,7 @@ class BlocklogicUserChangeForm(forms.ModelForm):
 
     class Meta:
         model = BlocklogicUser
-        fields = ("last_name", "country", "images",)
+        fields = ("last_name", "country", "images", "sex",)
 
     def set_request(self, request):
         self.request = request
