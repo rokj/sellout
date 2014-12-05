@@ -39,7 +39,7 @@ def register_to_dict(user, company, register):
     return r
 
 
-def get_all_registers(company, user):
+def get_all_registers(user, company):
     all_registers = Register.objects.filter(company=company)
 
     r = []
@@ -64,9 +64,15 @@ def validate_register(user, company, data, register=None):
         form = RegisterForm(data=data, instance=register)
     else:
         form = RegisterForm(data=data)
+        if 'device_id' in data:
+            try:
+                Register.objects.get(company=company, device_id=data.get('device_id'))
+                return {'status': False, 'data': None, 'message': _('Device with this id already exists')}
+            except Register.DoesNotExist:
+                pass
 
     if form.is_valid():
-        return {'status': True, 'message': None, 'form':form}
+        return {'status': True, 'message': None, 'form': form}
     else:
         message = form.errors.as_data().itervalues().next()[0].message
         return {'status': False, 'data': None, 'message': message}

@@ -34,9 +34,11 @@ from django.utils.translation import ugettext as _
 from blusers.forms import BlocklogicUserForm, BlocklogicUserChangeForm
 from blusers.models import BlocklogicUser, UserImage
 import common.globals as g
-from config.functions import get_user_value, set_user_value
+from config.functions import get_user_value, set_user_value, get_company_config
 
 from rest_framework.decorators import api_view
+from mobile.views.manage.configuration import get_mobile_config, company_config_to_dict
+from pos.models import Company
 from settings import GOOGLE_API
 
 from easy_thumbnails.files import get_thumbnailer
@@ -599,7 +601,7 @@ def save_last_used_group(request):
 
 def get_user_credentials(user):
     credentials = {}
-
+    return credentials
 
     group = user.homegroup
 
@@ -661,6 +663,7 @@ class ObtainAuthToken(APIView):
     model = Token
 
     def post(self, request, backend):
+
         if backend == 'auth':
             if request.META and 'HTTP_AUTHORIZATION' in request.META:
                 user = get_user(request)
@@ -687,13 +690,11 @@ class ObtainAuthToken(APIView):
             user_credentials = get_user_credentials(user)
         else:
             return JSON_error("error", "this should not happen")
-
+        company = Company.objects.get(id=1)
         return JsonResponse({'token': token.key,
                               'user': user_credentials,
-
+                              'config': company_config_to_dict(request, company),
                               'status': "ok"})
-
-        #return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def get_user(request):

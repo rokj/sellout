@@ -8,6 +8,8 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from pytz import timezone
 
+import unidecode
+
 from pos.models import Company, Product, Discount, Register, Contact, \
     Bill, BillCompany, BillContact, BillRegister, BillItem, BillItemDiscount
 from pos.views.manage.company import company_to_dict
@@ -134,8 +136,8 @@ def bill_to_dict(user, company, bill):
         'issuer': company_to_dict(bill.issuer),
         'register': register_to_dict(user, company, bill.register),
 
-        'user_id': str(bill.user_id),
-        'user_name': str(bill.user_name),
+        'user_id': bill.user_id,
+        'user_name': bill.user_name,
 
         'serial': bill.serial,
         'notes': bill.notes,
@@ -590,7 +592,7 @@ def finish_bill(request, company, android=False):
     # if print is requested, return html, otherwise the 'ok' response
     if d.get('print'):
         return JsonResponse({'status': 'ok',
-                             'print': esc_format(bill, esc_commands=True),
+                             'print': esc_format(request.user, c, bill, bill.register.receipt_format, esc_commands=True),
                              'bill': create_bill_html(request.user, c, bill)})
 
     return JsonOk()
@@ -620,137 +622,108 @@ def view_bill(request, company):
 
     return HttpResponse(create_bill_html(request.user, c, bill))
 
-def esc_format(bill, format, line_char_no=42, esc_commands=False):
-    if format == g.RECEIPT_FORMATS[0]:
+def esc_format(user, company, bill, format, line_char_no=48, esc_commands=False):
+
+    if format == "Page":
         return 'full_page_format'
-    elif format == g.RECEIPT_FORMATS[1]:
+    elif format == "Thermal":
         string = ''
-
         if esc_commands:
+            bill_dict = bill_to_dict(user, company, bill)
             printer = escpostext.EscposText()
+            new_line = '\x0a'
+            center_align =  '\x1b\x61\x01'
+            left_align = '\x1b\x61\x00'
             # center / bold
-            string += printer.set(align='center', bold='True')
-            string += printer.text(bill.issuer.name + constants.CTRL_LF)
-            string += printer.set(bold='False')
+            string += center_align
+            string += printer.text(bill_dict.get('issuer').get('name'))
+            string += new_line
             # center
-            string += printer.text(bill.issuer.street + ' ' + bill.issuer.street + ' ' + bill.issuer.city + constants.CTRL_LF)
-            string += printer.text(bill.issuer.state + ' ' + bill.issuer.country + constants.CTRL_LF)
+            string += printer.text(bill_dict.get('issuer').get('street') + ' ' + bill_dict.get('issuer').get('postcode') + ' ' + bill_dict.get('issuer').get('city'))
+            string += new_line
+            string += printer.text(bill_dict['issuer']['state'] + ' ' + bill_dict['issuer']['country'])
+            string += new_line
 
-            string += printer.text(_('VAT') + ':' + ' ' + bill.issuer.vat_no + constants.CTRL_LF)
-            string += constants.CTRL_LF
+            string += printer.text(_('VAT') + ':' + ' ' + bill_dict['issuer']['vat_no'])
+            string += new_line
 
-            string += printer.text(bill.register.location + constants.CTRL_LF)
+            string += printer.text(bill_dict['register']['location'])
 
-            if bill.contact:
-                string += printer.text(bill.contact.name + constants.CTRL_LF)
-                string += printer.text(bill.contact.street + ' ' + bill.contact.postcode + ' ' + bill.contact.city + constants.CTRL_LF)
-                string += printer.text(bill.contact.state + ' ' + bill.contact.country + constants.CTRL_LF)
-                string += printer.text(_('VAT') + ':' + ' ' + bill.contact.vat_no + constants.CTRL_LF)
+            string += new_line
 
-            string += printer.text(_('Bill No.') + ' ' + bill.serial)
+            if bill_dict.get('contact'):
+                string += printer.text(bill_dict['contact']['name'] + new_line)
+                string += new_line
+                string += printer.text(bill_dict['contact']['street'] + ' ' + bill_dict['contact']['postcode'] + ' ' + bill_dict['contact']['city'])
+                string += printer.text(bill_dict['contact']['state'] + ' ' + bill_dict['contact']['country'])
+                string += new_line
+                string += printer.text(_('VAT') + ':' + ' ' + bill_dict['contact']['vat_no'])
+                string += new_line
+
+            string += left_align
+            string += printer.text(_('Bill No.') + ': ' + str(bill_dict['serial']))
+            string += new_line
             string += printer.line(line_char_no=line_char_no)
+            string += new_line
 
-            white_spaces = [0.25, 0.15, 0.1, 0.2, 0.25, 0.05]
 
-            temp_s = list(' '*line_char_no)
-            price_s = _('Price')
-            qty_s = _('Qty')
-            unit_s = ''
-            discount_s = _('Discount')
-            amount_s = _('Amount')
+            white_spaces = [0.25, 0.20, 0.25, 0.25, 0.05]
+            strings = [_('Price'), _('Quantity'), _('Discount'), '', _('Amount')]
+            aligns = ['left', 'right', 'right', 'right', 'right']
 
-            price_n = sum(white_spaces[:1])*line_char_no
-            qty_n = sum(white_spaces[:2]*line_char_no)
-            unit_n = sum(white_spaces[:3]*line_char_no)
-            discount_n = sum(white_spaces[:4]*line_char_no)
-            amount_n = sum(white_spaces[:5]*line_char_no)
-
-            temp_s[price_n-len(price_s):price_n] = price_s
-            temp_s[qty_n-len(qty_s):qty_n] = qty_s
-            temp_s[unit_n-len(unit_s):unit_n] = unit_s
-            temp_s[discount_n-len(discount_s):discount_n] = discount_s
-            temp_s[amount_n-len(amount_s):amount_n] = amount_s
-
-            string += "".join(temp_s)
-            string += printer.line(line_char_no=line_char_no)
-
-            for item in bill.items:
-
-                string += item.name + constants.CTRL_LF
-
-                temp_s = list(' '*line_char_no)
-
-                temp_s[price_n-len(item.base_price):price_n] = item.base_price
-                temp_s[qty_n-len(item.quantity):qty_n] = item.quantity
-                temp_s[unit_n-len(''):unit_n] = ''
-                temp_s[discount_n-len(item.discount_absolute):discount_n] = item.discount_absolute
-                temp_s[amount_n-len(item.tax_rate_id):amount_n] = item.tax_rate_id
-
-                string += "".join(temp_s)
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=2)
 
             string += printer.line(line_char_no=line_char_no)
 
-            temp_s = list(' '*line_char_no)
-            total = _('Total') + ' ' + bill.currency + ':'
-            temp_s[0:] = total
-            temp_s[line_char_no-len(bill.total):] = bill.total
-            string += "".join(temp_s)
+            for item in bill_dict['items']:
+
+                string += item['name']
+                string += new_line
+                strings = [item['base'], item['quantity'], item['discount'], item['total'], item['tax_rate_id']]
+                string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=2)
+                string += new_line
 
             string += printer.line(line_char_no=line_char_no)
+            string += new_line
 
-            temp_s = list(' '*line_char_no)
 
-            white_spaces = [0.08, 0.22, 0.23, 0.23, 0.23]
+            white_spaces = [0.5, 0.5]
+            strings = [_('Total') + ' ' + bill_dict['currency'] + ':', bill_dict['total']]
+            aligns = ['left', 'right']
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
 
-            rate_s = _('Rate')
-            subtotal_s = _('Subtotal')
-            tax_s = _('Tax')
-            total_s = _('Total')
 
-            rate_id_n = sum(white_spaces[1]*line_char_no)
-            rate_n = sum(white_spaces[:2])*line_char_no
-            subtotal_n = sum(white_spaces[:3]*line_char_no)
-            tax_n = sum(white_spaces[:4]*line_char_no)
-            total_n = sum(white_spaces[:5]*line_char_no)
+            string += printer.line(line_char_no=line_char_no)
+            string += new_line
 
-            temp_s[rate_n-len(rate_s):rate_n] = rate_s
-            temp_s[subtotal_n-len(subtotal_s):subtotal_n] = subtotal_s
-            temp_s[tax_n-len(tax_s):tax_n] = tax_s
-            temp_s[total_n-len(total_s):total_n] = total_s
+            white_spaces = [0.08, 0.22, 0.23, 0.23, 0.24]
+            strings = ['', _('Rate'), _('Subtotal'), _('Tax'), _('Total')]
+            aligns = ['left', 'right', 'right', 'right', 'right']
 
-            string += "".join(temp_s)
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
 
-            string += printer.line(line_char_no=line_char_no, style='Dotted')
-            for rate in bill.tax_rates:
-                temp_s = list(' '*line_char_no)
-                temp_s[rate_id_n-len(rate.id)] = rate.id
-                temp_s[rate_n-len(rate.amount):rate_n] = rate.amount
-                temp_s[subtotal_n-len(rate.net_sum):subtotal_n] = rate.net_sum
-                temp_s[tax_n-len(rate.tax_sum):tax_n] = rate.tax_sum
-                temp_s[total_n-len(rate.gross_sum):total_n] = rate.gross_sum
 
-                string += "".join(temp_s)
+            for rate in bill_dict['tax_rates']:
+                strings = [rate['id'], rate['amount'], rate['net_sum'], rate['tax_sum'], rate['gross_sum']]
+                string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
+                string += new_line
 
-                string += printer.line(line_char_no=line_char_no, style='Dotted')
 
-            sum = _('Sum')
+            string += printer.line(line_char_no=line_char_no, style='Dashed')
 
-            temp_s = list(' '*line_char_no)
-            temp_s[rate_id_n-len(sum)] = sum
-            temp_s[subtotal_n-len(bill.tax_sums.net_sum):subtotal_n] = bill.tax_sums.net_sum
-            temp_s[tax_n-len(bill.tax_sums.tax_sum):tax_n] = bill.tax_sums.tax_sum
-            temp_s[total_n-len(bill.tax_sums.gross_sum):total_n] = bill.tax_sums.gross_sum
+            strings = [_('Sum'), '', bill_dict['tax_sums']['net_sum'], bill_dict['tax_sums']['tax_sum'], bill_dict['tax_sums']['gross_sum']]
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
 
-            string += "".join(temp_s)
+            string += new_line
 
-            temp_s = list(' '*line_char_no)
-            total = _('Cashier') + ' ' + bill.user_name + ':'
-            temp_s[0:] = total
-            temp_s[line_char_no-len(bill.timestamp):] = bill.timestamp
-            string += "".join(temp_s)
+            white_spaces = [0, 1]
+            strings = [_('Cashier') + ': ' + bill_dict['user_name'], bill_dict['timestamp']]
+            aligns = ['left', 'right']
 
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
+
+            string += new_line
+            string += new_line
+            string += new_line
             return string
-
-        return 'thermal_page_format'
-
     return

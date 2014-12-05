@@ -10,5 +10,5 @@ urlpatterns = patterns('',
     # url(r'^mobile-register', views.mobile_register, name='mobile-register'),
 
     #API
-    url(r'api-token-auth/?$', views.obtain_auth_token)
+    # url(r'api-token-auth/?$', views.obtain_auth_token)
 )

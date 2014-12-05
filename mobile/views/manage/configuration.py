@@ -1,7 +1,7 @@
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from config.functions import get_company_value, set_company_value
+from config.functions import get_company_value, set_company_value, get_company_config
 from pos.models import Company, Tax
 from pos.views.util import JsonError, has_permission, JsonOk, no_permission_view, JsonParse
 from django.utils.translation import ugettext as _
@@ -20,10 +20,10 @@ def get_mobile_config(request, company):
     if not has_permission(request.user, c, 'config', 'edit'):
         return no_permission_view(request, c, _("You have no permission to edit system configuration."))
 
-    return JsonOk(extra=get_company_config(request.user, Company.objects.get(url_name=company)))
+    return JsonOk(extra=company_config_to_dict(request.user, Company.objects.get(url_name=company)))
 
 
-def get_company_config(user, company):
+def company_config_to_dict(user, company):
     return {
         'company_id': company.id,
         'pos_decimal_separator': get_company_value(user, company, 'pos_decimal_separator'),
@@ -66,4 +66,4 @@ def save_company_config(request, company):
     for key in data:
         set_company_value(request.user, c, key, data[key])
 
-    return JsonOk(extra=get_company_config(request.user, Company.objects.get(url_name=company)))
+    return JsonOk(extra=company_config_to_dict(request.user, c))
