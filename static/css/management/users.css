@@ -1,8 +1,63 @@
+/* tables */
 #invite_mail{
     width: 100%;
     height: 128px;
 }
 
 #invite_permission{
+    width: 100%;
+}
+
+td.controls{
+    text-align: right;
+}
+
+#users td.controls{
+    width: 100px;
+}
+
+#invites_history td.controls{
+    width: 40px;
+}
+
+/* dialogs */
+/* invites */
+#invite_dialog table td{
+    vertical-align: bottom;
+    border: none;
+}
+
+#invite_dialog td.invite-mail{ width: 70%; }
+
+#invite_dialog td input, 
+#invite_dialog td select{
+    width: 100%;
+}
+
+#invite_dialog td.invite-permission{
+    width: 40%;
+}
+
+/* permission editing */
+#edit_dialog label{
+    margin-bottom: 10px;
+}
+
+#edit_dialog div.pin-edit-container{
+    width: 100px;
+    float: left;
+}
+
+#edit_dialog div.pin-edit-container input{
+    width: 100%;
+}
+
+#edit_dialog div.permission-edit-container{
+    float: left;
+    margin-left: 20px;
+    width: 150px;
+}
+
+#edit_dialog div.permission-edit-container select{
     width: 100%;
 }

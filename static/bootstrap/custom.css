@@ -105,28 +105,24 @@ label.custom,
     margin: 0;
     display: block;
     font-weight: normal;
-    margin-top: 10px;
-    margin-bottom: 6px;
+    margin-top: 20px;
+    margin-bottom: 5px;
 }
 
 .custom input[type='text'],
 .custom input[type='password'],
 .custom input[type='email'],
 .custom input[type='number'],
-.custom select,
 .custom textarea{
     width: 100%;
 
     padding-left: 5px;
     padding-right: 5px;
 
-    margin-top: 5px;
-    margin-bottom: 10px;
-
     border: none;
     border-top: 2px solid #dddddd;
 
-    height: 32px;
+    height: 40px;
 
     background-color: #ffffff;
 }

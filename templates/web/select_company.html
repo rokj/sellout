@@ -33,9 +33,20 @@
         {% if actions|length %}
             <div class="container">
             <h2>{% trans 'Awaiting actions' %}</h2>
+            <table id="actions">
                 {% for a in actions %}
-                    {{ a }}
+                    <div class="action-container table-row">
+                        <p class="action-message">
+                            {% if a.type == 'invitation' %}
+                                {% trans 'You have been invited to join a company: ' %}
+                                {{ a.company.name }}
+                            {% endif %}
+                            <a href="{{ a.accept_url }}" class="action accept">{% trans 'Accept' %}</a>
+                            <a href="{{ a.decline_url }}" class="action decline">{% trans 'Decline' %}</a>
+                        </p>
+                    </div>
                 {% endfor %}
+            </table>
             </div>
         {% else %}
             {# show nothing if there's no actions #}
@@ -69,7 +80,7 @@
 
         <div id="new_company">
             <a id="new_company_link"
-               href="{% url 'pos:register_company' %}"
+               href="{% url 'web:register_company' %}"
                class="add"> + {% trans 'Add Company' %}</a>
         </div>
     </div>

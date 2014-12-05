@@ -62,7 +62,7 @@
             // resizing and repositioning
             // the login form, a very interactive thing indeed;
             // show it if there's a message to be shown
-            items.login_forms_container.is_visible = !!('{{ login_message }}');
+            items.login_forms_container.is_visible = {{ login_message|yesno:"true,false" }};
 
             function toggle_login_form(show){
                 if(show) items.login_forms_container.removeClass("hidden");
@@ -134,7 +134,7 @@
             function match_url(){
                 switch(get_url_hash()){
                     case 'login':
-                        toggle_login_form(items.login_forms_container.is_visible);
+                        toggle_login_form(true);
                         break;
                     default:
                         break;

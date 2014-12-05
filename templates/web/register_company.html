@@ -42,7 +42,7 @@
 
         // get url suggestions after #id_name loses fo\cus
         $("#id_name").blur(function(){
-            send_data("{% url 'pos:url_name_suggestions' %}",
+            send_data("{% url 'web:url_name_suggestions' %}",
                     {'name': $(this).val()},
                     "{{ csrf_token }}",
                     function(returned_data){
@@ -83,7 +83,7 @@
 
     <section class="custom">
         <div class="container">
-            <form action="{% url 'pos:register_company' %}" method="post"
+            <form action="{% url 'web:register_company' %}" method="post"
                   {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
                 {% csrf_token %}
 

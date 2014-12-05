@@ -205,7 +205,7 @@ IMAGE_DIMENSIONS = {
 
 # premissions
 PERMISSION_GROUPS = (  # retrieve readable format with get_permission_display()
-    ('guest',   _("Guest")),    # can only view stuff
+    ('guest',   _("Guest")),    # can only view stuff (this must be the first in the list as it's the default in error case)
     ('cashier', _("Cashier")),  # can write and edit bills
     ('seller',  _("Seller")),   # can add and edit products
     ('manager', _("Manager")),  # can add and edit discounts, contacts, categories, ...
@@ -213,7 +213,7 @@ PERMISSION_GROUPS = (  # retrieve readable format with get_permission_display()
 )
 
 # for checking if permission in PERMISSION_TYPES
-PERMISSION_TYPES = (x[0] for x in PERMISSION_GROUPS)
+PERMISSION_TYPES = [x[0] for x in PERMISSION_GROUPS]
 
 PERMISSIONS = {
     'disabled': {
@@ -262,15 +262,35 @@ CATEGORY_COLORS = [  # choices for category.color
 ###
 ### actions
 ###
+ACTION_ACCEPTED = "accepted"
+ACTION_DECLINED = "declined"
+ACTION_WAITING = "waiting"
+ACTION_CANCELED = "canceled"
+ACTION_SEEN = "seen"
+
 ACTION_STATUS_CHOICES = (
-    (("accepted"), _("Accpeted")),
-    (("declined"), _("Declined")),
-    (("waiting"), _("Waiting")),
-    (("canceled"), _("Canceled")),
-    (("seen"), _("Seen")),
+    ((ACTION_ACCEPTED), _("Accepted")),
+    ((ACTION_DECLINED), _("Declined")),
+    ((ACTION_WAITING), _("Waiting")),
+    ((ACTION_CANCELED), _("Canceled")),
+    ((ACTION_SEEN), _("Seen")),
 )
 ACTION_STATUSES = (x[0] for x in ACTION_STATUS_CHOICES)
 
+
+ACTION_INVITATION = "invitation"
+ACTION_NOTIFICATION = "notification"
+
+ACTION_TYPE_CHOICES = (
+    ((ACTION_INVITATION), _("Invite")),
+    ((ACTION_NOTIFICATION), _("Notification")),
+)
+ACTION_TYPES = (x[0] for x in ACTION_TYPE_CHOICES)
+
+
+###
+### logins and subscriptions
+###
 BL_USERS = "bl_users"
 BL_MAIL = "bl_mail"
 NORMAL = "normal"
@@ -297,15 +317,6 @@ FEMALE = "female"
 SEX = (
     (MALE, _("Male")),
     (FEMALE, _("Female")),
-)
-
-MEMBER = "member"
-ADMIN = "admin"
-REMOVED = "removed"
-USER_ROLE = (
-    (MEMBER, _("Member")),
-    (ADMIN, _("Admin")),
-    (REMOVED, _("Removed")),
 )
 
 TAX_PAYER_CHOICES=[('tax_payer', ugettext(u"Yes")), ('not_tax_payer', ugettext("No"))]

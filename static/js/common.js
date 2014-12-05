@@ -22,9 +22,16 @@ function custom_dialog(title, content, width, buttons){
 
     dialog.width(width);
 
-    shadow.hide().appendTo(body).fadeIn(function(){
-        container.appendTo(body);
-    });
+    // shadow: remember the last shadow's z-index and increase it by 1:
+    // the next dialog will always be above the previous
+    if(!window.last_dialog_zindex) window.last_dialog_zindex = 5000;
+    window.last_dialog_zindex += 1;
+
+    shadow
+        .css("z-index", window.last_dialog_zindex)
+        .hide()
+        .appendTo(body)
+        .fadeIn(function(){ container.appendTo(body); });
 
     // add a function to the
     content.close_dialog = function(){
@@ -47,6 +54,7 @@ function custom_dialog(title, content, width, buttons){
     // no_action: <function that is executed when no button is clicked>
     // ok: <ok button text>
     // ok_action: if null, only close the dialog
+    // auto_close: if false, do not bind close_dialog on buttons
     if(buttons){
         var footer = $("<div>", {'class': 'custom-dialog-footer'});
         var button_attrs = {type: 'button', 'class': 'hoverable'};
@@ -62,7 +70,8 @@ function custom_dialog(title, content, width, buttons){
             // ok buttons closes the dialog and executes ok_action, if it's there
             ok_button.unbind();
             if(buttons.ok_action) ok_button.click(buttons.ok_action);
-            ok_button.click(content.close_dialog);
+
+            if(buttons.auto_close != false) ok_button.click(content.close_dialog);
         }
         else if(buttons.yes && buttons.no){
             var yes_button = $("<input>", button_attrs);
@@ -71,7 +80,8 @@ function custom_dialog(title, content, width, buttons){
 
             yes_button.click(function(){
                 if(buttons.yes_action) buttons.yes_action();
-                content.close_dialog();
+
+                if(buttons.auto_close != false) content.close_dialog();
             });
 
             var no_button = $("<input>", button_attrs);
@@ -80,7 +90,8 @@ function custom_dialog(title, content, width, buttons){
 
             no_button.click(function(){
                 if(buttons.no_action) buttons.no_action();
-                content.close_dialog();
+
+                if(buttons.auto_close != false) content.close_dialog();
             });
 
             footer.append(no_button);
@@ -135,19 +146,6 @@ function upload_image(input, url, token, max_size, callback){
     }
 }
 
-function preview_image(input, container_id){
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-
-        reader.onload = function (e) {
-            container = $(container_id);
-            container.css("background-image", "url(" + e.target.result + ")");
-        };
-
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
 function escape(text){
     if(!text) return ""; // avoid writing "undefined"
     
@@ -165,6 +163,11 @@ function escape(text){
     return String(text).replace(/[&<>"'\/]/g, function (s) {
         return entityMap[s];
     });
+}
+
+function email_valid(email){
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
 }
 
 function get_size(element){ // get computed element size before it's inserted into document

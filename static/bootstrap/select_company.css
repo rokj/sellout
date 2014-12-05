@@ -28,3 +28,15 @@
     line-height: 32px;
     margin-top: 20px;
 }
+
+a.action{
+    margin-left: 20px;
+}
+
+a.action.accept{
+    color: #22e693;
+}
+
+a.action.decline{
+    color: #ff5a6e;
+}

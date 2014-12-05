@@ -457,7 +457,7 @@ class Permission(SkeletonU):
     def __unicode__(self):
         return self.user.email + " | " + self.company.name + ": " + self.get_permission_display()
 
-    def create_pin(self, custom_pin=None):
+    def create_pin(self, custom_pin=None, save=True):
         """ creates a pin for this user; if successful, returns True;
             if this pin already exists in current company, returns False
         """
@@ -465,7 +465,8 @@ class Permission(SkeletonU):
             return random.randint(0, 10000)
 
         def pin_exists(this_pin):
-            return Permission.objects.filter(company=self.company, pin=this_pin).exists()
+            # exclude this permission from checking;
+            return Permission.objects.filter(company=self.company, pin=this_pin).exclude(id=self.id).exists()
 
         if custom_pin:
             if pin_exists(custom_pin):
@@ -478,7 +479,10 @@ class Permission(SkeletonU):
                 p = rnd_pin()
 
         self.pin = p
-        self.save()
+
+        if save:
+            self.save()
+
         return True
 
 

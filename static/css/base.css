@@ -101,8 +101,7 @@ a.button,
     font-size: inherit;
     text-transform: uppercase;
     border: none;
-    background-color: #c8c8c8;
-    box-shadow: 0 2px 0 rgba(180,180,180,0.8);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.2);
 }
 input[type='submit']{ background-color: #22e693; width: 100%; }
 input#static_cancel{ background-color: #ff5a6e; width: 100%; }
@@ -111,9 +110,12 @@ select{
     border: none;
     background-color: #c8c8c8;
     color: #646464;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    box-shadow: 0 2px 0 rgba(180,180,180,0.8);
+    height: 40px;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+
+    box-sizing: border-box;
+    width: 100%;
+    -moz-box-sizing: border-box;
 }
 
 .no-shadow{
