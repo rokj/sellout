@@ -1,21 +1,4 @@
-#login_form, #lost_password_form, #recover_password_form {
-    background-color: fuchsia;
-    width: 400px;
-    height: 300px;
-    margin: 0 auto;
-    position: relative;
-    margin-bottom: 10px;
-}
-
-#lost_password_form {
-    background-color: cyan;
-}
-
-#recover_password_form {
-    background-color: chartreuse;
-}
-
-#signinButton {
+#google_signin_button {
     position: absolute;
     background-color: transparent;
     bottom: 59px;
@@ -24,9 +7,11 @@
     margin: 0px;
     border: 0px;
     padding: 0px;
+    box-shadow: none;
+    padding-top: 2px;
 }
 
-#signinButton span.icon {
+#google_signin_button span.icon {
     background: url('/static/icons/google-signin-44dp.png') no-repeat transparent;
     background-size: 100%;
     display: inline-block;
@@ -38,7 +23,11 @@
     border: 0px;
 }
 
+#login_register_button {
+    width: 43%;
+    height: 36px;
+}
 
-.hoverable {
-    cursor: pointer;
+#login_form .form-message {
+    padding-top: 13px;
 }

@@ -6,6 +6,7 @@
 
 {% block head %}
     <link href="{% static 'bootstrap/index.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/index.css' %}" rel="stylesheet" />
 
     {# custom fonts #}
     <link href="{% static 'css/fonts/fonts.css' %}" rel="stylesheet" />
@@ -140,6 +141,12 @@
                         break;
                 }
             }
+
+            var action = '{{ action }}';
+            if (action == 'login') {
+                toggle_login_form(true);
+            }
+
             match_url();
             $(window).on('hashchange', match_url);
         });
@@ -170,21 +177,6 @@
                         {{ login_form.non_field_errors }}
                     </div>
 
-                    <div class="form-message">
-                        {% if login_message == 'login-failed' %}
-                            <p>{% trans 'Login failed. Check your user name and password.' %}</p>
-                        {% elif login_message == 'google-login' %}
-                            <p>{% trans 'You registered with Google. Please use the google login button below to log in.' %}</p>
-                        {% elif login_message == 'user-inactive' %}
-                            Your username is inactive. Check email (maybe spam folder) again and activate account. If still does not work, just contact support
-                            <p>{% blocktrans %}Your account is inactive.
-                                Search your e-mail inbox (and spam folder) for the activation mail.
-                                If you did not receive the activation mail, use the forgotten password form below.
-                                If thi still doesn't work for you, please contact support.
-                            {% endblocktrans %}</p>
-                        {% endif %}
-                    </div>
-
                     <div class="form-field">
                         <div class="field-errors">
                             {{ login_form.email.errors }}
@@ -201,9 +193,23 @@
                         {{ login_form.password }}
                     </div>
 
+                    <div class="form-message">
+                        {% if login_message == 'login-failed' %}
+                            <p>{% trans 'Login failed. Check your user name and password.' %}</p>
+                        {% elif login_message == 'google-login' %}
+                            <p>{% trans 'You registered with Google. Please use the google login button below to log in.' %}</p>
+                        {% elif login_message == 'user-inactive' %}
+                            Your username is inactive. Check email (maybe spam folder) again and activate account. If still does not work, just contact support
+                            <p>{% blocktrans %}Your account is inactive.
+                                Search your e-mail inbox (and spam folder) for the activation mail.
+                                If you did not receive the activation mail, use the forgotten password form below.
+                                If thi still doesn't work for you, please contact support.
+                            {% endblocktrans %}</p>
+                        {% endif %}
+                    </div>
+
                     <div class="nav-links">
-                        <input type="submit" value="Log in" class="buttons hoverable custom" id="login_register_button">
-                        {# <span class="login-or-google">or</span> #}
+                        <input type="submit" value="{% trans "Log in" %}" class="buttons hoverable custom" id="login_register_button">
                     </div>
 
                     <div class="lost-login">
@@ -212,7 +218,7 @@
                     </div>
                 </form>
 
-                <button id="signinButton" style="" class="hoverable">
+                <button id="google_signin_button" style="" class="hoverable">
                     <span class="icon"></span>
                 </button>
             </div>

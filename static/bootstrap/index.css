@@ -15,7 +15,7 @@
     display: block;
     position: absolute;
 
-    width: 250px;
+    width: 300px;
 
     z-index: 2000;
 }
@@ -60,11 +60,10 @@
 #signinButton{ display: none; }
 
 #login_forms_container .nav-links{
-
 }
 
 #login_forms_container .lost-login{
-    text-align: right;
+    text-align: left;
     font-size: 90%;
 }
 

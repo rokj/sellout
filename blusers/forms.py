@@ -30,10 +30,10 @@ class LoginForm(forms.ModelForm):
         model = BlocklogicUser
         fields = ("email", "password")
 
+    """
     def clean_email(self):
-        """
         Validates that a user exists with the given e-mail address.
-        """
+
         email = self.cleaned_data["email"]
         self.users_cache = BlocklogicUser.objects.filter(email__iexact=email)
 
@@ -41,6 +41,7 @@ class LoginForm(forms.ModelForm):
             raise forms.ValidationError(_("User with this email does not exist. Maybe you misspelled it?"))
 
         return self.cleaned_data["email"]
+    """
 
     def set_request(self, request):
         self.request = request
