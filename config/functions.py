@@ -190,7 +190,7 @@ def set_user_value(user, key, value):
 
     # if it's not a boolean or an integer, convert it to string
     if not isinstance(value, bool) and not isinstance(value, int):
-        value = str(value)
+        value = unicode(value)
 
     data[key] = value
     save_user_config(user, data)  # memcache is handled in save_cofig
@@ -201,7 +201,7 @@ def set_company_value(user, company, key, value):
 
     # if it's not a boolean or an integer, convert it to string
     if not isinstance(value, bool) and not isinstance(value, int):
-        value = str(value)
+        value = unicode(value)
 
     data[key] = value
     save_company_config(user, company, data)  # memcache is handled in save_cofig

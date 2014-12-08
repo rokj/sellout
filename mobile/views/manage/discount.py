@@ -121,11 +121,6 @@ def mobile_add_discount(request, company):
     if not has_permission(request.user, c, 'discount', 'edit'):
         return JsonError(_("add discounts"))
 
-
-    # check for permission for adding discounts
-    if not request.user.has_perm('pos.add_discount'):
-        return JsonError(_("You have no permission to add discounts."))
-
     data = JsonParse(request.POST['data'])
 
     valid = validate_discount(data, request.user, c, android=True)

@@ -45,23 +45,9 @@ def save_company_config(request, company):
 
     # permissions
     if not has_permission(request.user, c, 'config', 'edit'):
-        return no_permission_view(request, c, _("You have no permission to edit system configuration."))
+        return JsonError(_("You have no permission to edit system configuration."))
 
     data = JsonParse(request.POST['data'])
-
-    # get config: specify initial data manually (also for security reasons,
-    # to not accidentally include secret data in request.POST or whatever)
-
-    # this may be a little wasteful on resources, but config is only edited once in a lifetime or so
-    # get_value is needed because dict['key'] will fail if new keys are added but not yet saved
-    initial = {
-        'date_format': get_company_value(request.user, c, 'pos_date_format'),
-        'time_format': get_company_value(request.user, c, 'pos_time_format'),
-        'timezone': get_company_value(request.user, c, 'pos_timezone'),
-        'currency': get_company_value(request.user, c, 'pos_currency'),
-        'decimal_separator': get_company_value(request.user, c, 'pos_decimal_separator'),
-        'decimal_places': get_company_value(request.user, c, 'pos_decimal_places'),
-    }
 
     for key in data:
         set_company_value(request.user, c, key, data[key])
