@@ -12,7 +12,7 @@ from subscription.models import Subscription
 import common.globals as g
 
 
-@login_required(ajax=True)
+@login_required
 def get_subscription_price(request, duration, his_price=0):
     others = []
 

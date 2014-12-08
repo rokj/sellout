@@ -1,6 +1,6 @@
 from django.db import IntegrityError
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _
 
 from pos.models import Company, Tax, Product

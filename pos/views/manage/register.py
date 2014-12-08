@@ -1,7 +1,7 @@
 # this file should be named register.py, but would be confused with user registration, so here's a synonym
 from django.db.models import FieldDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
 

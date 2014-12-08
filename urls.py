@@ -1,10 +1,7 @@
 from django.conf.urls import patterns, include, url
-
-from blusers import views as blusers_views
-from web import views as web_views
-
-# Uncomment the next two lines to enable the admin:
 from django.contrib import admin
+
+from web import views as web_views
 
 admin.autodiscover()
 
@@ -24,6 +21,19 @@ urlpatterns = patterns('',
     url(r'^captcha/', include('captcha.urls')),
 
     # support
+    # TODO
+
+
+    #
+    # locking the screen (session, actually)
+    # this must work on any page except index (and the unlock view, of course)
+    #
+    # lock (sets request.session['locked'] = True)
+    url(r'^lock-session/$', web_views.lock_session, name='lock_session'),
+    # the page that shows up when a user is logged in but the session is locked
+    url(r'^locked-session/$', web_views.locked_session, name='locked_session'),
+    # unlocking
+    #url(r'^unlock-session/$', web_views.unlock_session, name='unlock_session'),
 
     # web: everything that happens before user enters a specific company
     url(r'^', include('web.urls', namespace='web')),

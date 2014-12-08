@@ -1,9 +1,8 @@
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _
 
-from pos.models import Company, Register, Bill
-from pos.views.bill import bill_to_dict
+from pos.models import Company
 from pos.views.manage.category import get_all_categories_structured
 from pos.views.manage.company import company_to_dict
 from pos.views.manage.contact import get_all_contacts

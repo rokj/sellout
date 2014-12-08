@@ -3,7 +3,7 @@
 #
 # Views for managing POS data: home
 from django.shortcuts import get_object_or_404, render
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _
 
 from pos.models import Company

@@ -197,7 +197,7 @@
                         {{ p.user }}
                     </td>
                     <td class="pin">{{ p.pin }}</td>
-                    <td class="permission">{{ p.permission }}</td>
+                    <td class="permission">{{ p.get_permission_display }}</td>
                     <td class="controls">
                         <img src="{% static 'icons/edit_black.png' %}"
                              class="hoverable edit-permission"

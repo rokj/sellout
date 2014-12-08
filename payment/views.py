@@ -21,7 +21,7 @@ from common.globals import WAITING, PAID, CANCELED, APPROVED
 from common.functions import JSON_ok, JSON_parse, JSON_error, get_subscription_btc_price, send_email, \
     _get_subscription_price, get_random_string, get_bitcoin_user
 from common.models import Currency
-from decorators import login_required
+from common.decorators import login_required
 from payment.service.Bitcoin import BitcoinRPC
 from payment.models import Payment
 from payment.service.Paypal import Paypal
@@ -302,7 +302,7 @@ def invoice(request, payment):
 
     return HttpResponse(invoice_html)
 
-@login_required(ajax=True)
+@login_required
 def pay(request, mobile=False):
     d = JSON_parse(request.POST.get('data'))
     payment_type = d['type']
@@ -313,7 +313,7 @@ def pay(request, mobile=False):
     return JSON_error("no_such_currency", _("No such currency..."))
 
 
-@login_required(ajax=True)
+@login_required
 def cancel_payment(request, payment):
     try:
         payment = Payment.objects.get(id=payment, created_by=request.user)

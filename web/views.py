@@ -10,12 +10,13 @@ from django.utils.translation import ugettext as _
 from blusers.models import BlocklogicUser
 from blusers.views import try_register, unset_language, send_reactivation_key
 from common.functions import JSON_parse
-from decorators import login_required
+from common.decorators import login_required
 from django.contrib.auth import logout as django_logout
 from action.models import Action
 
 import common.globals as g
 from pos.models import Permission
+from pos.views.util import JsonOk
 import settings
 
 
@@ -245,6 +246,37 @@ def accept_invitation(request, reference):
     return handle_invitation(request, reference, g.ACTION_ACCEPTED)
 
 
+
 @login_required
 def decline_invitation(request, reference):
     return handle_invitation(request, reference, g.ACTION_ACCEPTED)
+
+
+@login_required
+def lock_session(request):
+    # lock this session by setting locked flag
+    request.session['locked'] = True
+
+    return JsonOk()
+
+
+# @login_required must not be here: check authentication manually
+# (the thing will create an infinite loop with locked>unlock view)
+def locked_session(request):
+    if not request.user.is_authenticated():
+        return redirect('web:index')
+
+    context = {
+        'site_title': g.SITE_TITLE,
+        'title': _("Unlock terminal"),
+
+        'pin_length': g.PIN_LENGTH,
+        'original_url': request.session.get('original_url'),
+    }
+
+    return render(request, 'locked.html', context)
+
+
+@login_required
+def unlock_session(request):
+    pass

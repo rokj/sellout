@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
 
@@ -26,7 +26,8 @@ def list_date_formats():
 def list_timezones():
     timezones = []
     for tz in pytz.common_timezones:
-        timezones.append((tz, tz))
+        # TODO: not tested
+        timezones.append((tz, tz.replace('_', ' ')))
         
     return timezones
 
@@ -42,7 +43,7 @@ def list_time_formats():
 #######################
 class ConfigForm(forms.Form):
     decimal_places_choices = (
-        (0, '1'),
+        (0, '0'),
         (1, '1'),
         (2, '2'),
         (3, '3'),

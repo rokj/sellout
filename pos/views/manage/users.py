@@ -8,7 +8,7 @@ from action.models import Action
 from blusers.models import BlocklogicUser
 from common.functions import send_email
 from config.functions import get_date_format
-from decorators import login_required
+from common.decorators import login_required
 
 from pos.models import Company, Permission
 import common.globals as g

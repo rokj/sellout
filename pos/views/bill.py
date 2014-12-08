@@ -1,7 +1,7 @@
 from datetime import datetime as dtm
 from decimal import Decimal
 
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string

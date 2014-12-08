@@ -12,7 +12,7 @@ from common.globals import WAITING, PAID, CANCELED, RUNNING, ALMOST_PAID, FIRST_
     NO_MONEY_ARRIVED
 from common.models import Currency
 from common.views import base_context
-from decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from payment.models import Payment
 import settings

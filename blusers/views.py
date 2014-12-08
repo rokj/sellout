@@ -20,7 +20,7 @@ from common.globals import GOOGLE
 from common.views import base_context
 from common.globals import WAITING
 
-from decorators import login_required
+from common.decorators import login_required
 from django.core.files.base import ContentFile
 from django.http import Http404, QueryDict, JsonResponse
 from django.contrib.auth import authenticate as django_authenticate
@@ -350,7 +350,7 @@ def reset_password(request):
 
     return JsonResponse({"status": "something_went_wrong"})
 
-@login_required(ajax=True)
+@login_required
 def save_user_settings(request):
     if not request.method == 'POST':
         return JSON_error("error")
@@ -423,7 +423,7 @@ def save_user_settings(request):
     return JSON_ok()
 
 
-@login_required(ajax=True)
+@login_required
 def update_password(request):
     if not request.method == 'POST':
         return JSON_error("error")
@@ -580,7 +580,7 @@ def remove_user_profile_image(request):
     return JsonResponse({'status': 'ok'})
 
 
-@login_required(ajax=True)
+@login_required
 def save_last_used_group(request):
     if not request.is_ajax():
         raise Http404()
@@ -731,7 +731,7 @@ def user_settings(request):
 
     return render(request, "blusers/settings.html", context)
 
-@login_required(ajax=True)
+@login_required
 def change_photo(request, android=False):
     if 'image' in request.FILES and request.FILES['image'] and len(request.FILES['image']) > 0:
         user = request.user

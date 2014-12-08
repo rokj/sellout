@@ -462,7 +462,7 @@ class Permission(SkeletonU):
             if this pin already exists in current company, returns False
         """
         def rnd_pin():
-            return random.randint(0, 10000)
+            return random.randint(0, 10**g.PIN_LENGTH)
 
         def pin_exists(this_pin):
             # exclude this permission from checking;

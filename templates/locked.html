@@ -1,0 +1,37 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{% trans 'The page is locked' %} - {{ site_title }}</title>
+
+    {# common styles and scripts that could be loaded with base.html, but it's too bloated #}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+
+    <script type="text/javascript" src="{% static 'jquery-ui-1.11.2.custom/external/jquery/jquery.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery-ui-1.11.2.custom/jquery-ui.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/common.js' %}"></script>
+
+    {# custom stuff #}
+    <link rel="stylesheet" href="{% static 'css/locked.css' %}" />
+
+    <script src="{% static 'js/widgets/unlock.js' %}" language="javascript"></script>
+
+    <script language="javascript">
+        $(document).ready(function(){
+            var unlock_screen = new UnlockScreen(
+                "{% url 'unlock_session' %}",
+                "{{ original_url }}",
+                "{{ csrf_token }}"
+            );
+
+            $("*").disableSelection();
+        });
+    </script>
+</head>
+<body>
+    {% include 'unlock_content.html' %}
+</body>
+</html>

@@ -2,7 +2,7 @@ from django.core.files import File
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
 from common.images import import_color_image, import_monochrome_image, resize_image, create_file_from_image
