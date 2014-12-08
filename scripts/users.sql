@@ -1,3 +1,12 @@
+/*
+author: Rok Jaklič
+date: 30. 11. 2014
+company: Blocklogic
+*/
+
+-- must be run as superuser
+-- on users database
+
 --
 -- PostgreSQL database dump
 --
@@ -51,10 +60,65 @@ rjaklic@gmail.com	pbkdf2_sha256$10000$NDty6P4Ir8dk$nm0CUZ5CQOBnORVE15oTdzrNNNtVG
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_email_pk PRIMARY KEY (email);
 
-
---
--- PostgreSQL database dump complete
---
-
 alter table users add column type character varying(15) not null default 'normal';
 grant all on database users to users;
+
+-- TRIGGERS
+
+CREATE LANGUAGE plpythonu;
+
+DROP FUNCTION update_django_users() CASCADE;
+
+CREATE OR REPLACE FUNCTION update_django_users() RETURNS TRIGGER AS $update_django_users_trigger$
+    import json
+    import psycopg2
+    import logging
+
+    go = ''
+
+    taskmanager_host = '127.0.0.1'
+    taskmanager_dbname = 'taskmanager'
+    taskmanager_in_user = 'taskmanager'
+    taskmanager_password = 'taskmanager'
+
+    pos_host = '127.0.0.1'
+    pos_dbname = 'pos'
+    pos_in_user = 'pos'
+    pos_password = 'pos'
+
+    if TD['new']['updated_by'] == 'taskmanager':
+        go = 'pos'
+    elif TD['new']['updated_by'] == 'pos':
+        go = 'taskmanager'
+
+    if go == 'taskmanager':
+        conn = psycopg2.connect("host=" + taskmanager_host + " dbname=" + taskmanager_dbname + " user=" + taskmanager_in_user + " password=" + taskmanager_password)
+        cursor = conn.cursor()
+    elif go == 'pos':
+        conn = psycopg2.connect("host=" + pos_host + " dbname=" + pos_dbname + " user=" + pos_in_user + " password=" + pos_password)
+        cursor = conn.cursor()
+
+    if go != '':
+        user_data = json.loads(TD['new']['data'])
+
+        cursor.execute("SELECT email FROM blusers_blocklogicuser WHERE email = %s", [TD['new']['email']])
+        result = cursor.fetchone()
+
+        if result:
+          cursor.execute("UPDATE blusers_blocklogicuser SET first_name = %s, last_name = %s, password = %s, datetime_updated = NOW() WHERE email = %s", [user_data['first_name'], user_data['last_name'], TD['new']['password'], TD['new']['email']])
+          if 'sex' in user_data:
+              cursor.execute("UPDATE blusers_blocklogicuser SET sex = %s WHERE email = %s", [user_data['sex'],  TD['new']['email']])
+          if 'country' in user_data:
+              cursor.execute("UPDATE blusers_blocklogicuser SET country = %s WHERE email = %s", [user_data['country'],  TD['new']['email']])
+
+    conn.commit()
+
+$update_django_users_trigger$ LANGUAGE plpythonu;
+
+DROP TRIGGER update_django_users_trigger ON users CASCADE;
+CREATE TRIGGER update_django_users_trigger
+    AFTER UPDATE ON users
+    FOR EACH ROW
+    EXECUTE PROCEDURE update_django_users();
+
+-- update users set updated_by = 'pos' where email = 'rok@blocklogic.net';
