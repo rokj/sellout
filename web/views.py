@@ -25,8 +25,16 @@ def index(request):
         return redirect('web:select_company')
 
     message = None
+    next = None
+
+    action = ''
 
     if request.method == 'POST':
+        action = 'login'
+
+        if request.POST.get('next', '') != '':
+            next = request.POST.get('next')
+
         login_form = LoginForm(request.POST)
 
         if login_form.is_valid():
@@ -38,12 +46,11 @@ def index(request):
     else:
         login_form = LoginForm()
 
-    next = None
-
     if request.GET.get('next') != '' and request.GET.get('next') != reverse('web:logout'):
         next = request.GET.get('next')
 
     context = {
+        'action': action,
         'next': next,
         'login_message': message,
         'login_form': login_form,

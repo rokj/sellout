@@ -212,8 +212,8 @@ def list_discounts(request, company):
 @login_required
 def add_discount(request, company):
     c = get_object_or_404(Company, url_name=company)
-    
-    # check permissions: needs to be at least manager
+
+    # check for permission for adding discounts
     if not has_permission(request.user, c, 'discount', 'edit'):
         return no_permission_view(request, c, _("You have no permission to add discounts."))
     
@@ -223,10 +223,6 @@ def add_discount(request, company):
         'company': c,
         'date_format_js': get_date_format(request.user, c, 'js'),
     }
-    
-    # check for permission for adding discounts
-    if not request.user.has_perm('pos.add_discount'):
-        return no_permission_view(request, c, _("You have no permission to add discounts."))
 
     if request.method == 'POST':
         # submit data

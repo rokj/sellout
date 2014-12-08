@@ -1,3 +1,5 @@
+import re
+import unidecode
 import escpos
 from printing.escpos.constants import TEXT_STYLE, PAGE_CP_SET_COMMAND, PAGE_CP_CODE
 from printing.escpos.exceptions import TextError
@@ -5,13 +7,14 @@ from printing.escpos.exceptions import TextError
 
 class EscposText(escpos.Escpos):
     def text(self, text):
-        if text:
+        t = unicode(text)
+        if t:
             if self._codepage:
                 return unicode(text).encode(self._codepage)
             else:
-                return text
+                return unidecode.unidecode(t)
         else:
-            raise TextError()
+            return ''
 
 
     def set(self, codepage=None, **kwargs):
@@ -57,7 +60,28 @@ class EscposText(escpos.Escpos):
            return PAGE_CP_SET_COMMAND + chr(PAGE_CP_CODE[codepage])
 
     def line(self, line_char_no=48, style='Normal'):
-        if type=='Normal':
-            return line_char_no*'_'
-        elif type=='Dotted':
-            return line_char_no*'.'
+        if style=='Normal':
+            return line_char_no*'_' + '\x0a'
+        elif style=='Dotted':
+            return line_char_no*'.' + '\x0a'
+        elif style=='Dashed':
+            return line_char_no*'-' + '\x0a'
+
+    def full_text_line(self, percents, strings, line_char_no=48, aligns=[], left_offset=0):
+        if len(aligns) == 0:
+            aligns = ['left']*line_char_no
+        temp_s = list(' '*line_char_no)
+        numberized = []
+        for i in range(0, len(percents)):
+            numberized.append(int(sum(percents[:(i+1)])*line_char_no))
+
+        for i in range(0, len(strings)):
+            if aligns[i] == 'left':
+                if i == 0:
+                    temp_s[(int(sum(percents[:i]))+left_offset):(len(strings[i])+left_offset)] = strings[i]
+                else:
+                    temp_s[int(sum(percents[:i])):len(strings[i])] = strings[i]
+            elif aligns[i] == 'right':
+                temp_s[(numberized[i]-len(strings[i])):(numberized[i])] = strings[i]
+
+        return unidecode.unidecode("".join(temp_s)) + '\x0a'

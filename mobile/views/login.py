@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from mobile.views.manage.configuration import get_company_config
+from mobile.views.manage.configuration import company_config_to_dict
 from pos.models import Company
 from pos.views.util import JsonError
 
@@ -12,7 +12,6 @@ from rest_framework.views import APIView
 def get_user_credentials(user):
     credentials = {}
 
-    #credentials['last_group_slug'] = GroupUserRole.objects.get(user=user, group=group).group_slug
     credentials['user_id'] = user.id
     credentials['user_email'] = user.email
     credentials['other_groups'] = None
@@ -52,9 +51,8 @@ class ObtainAuthToken(APIView):
         return JsonResponse({'token': token.key,
                          'user': user_credentials,
                          'last_group': group,
-                         'config': get_company_config(user, Company.objects.get(url_name=group)),
+                         'config': company_config_to_dict(user, Company.objects.get(url_name=group)),
                          'status': "ok"})
 
-        #return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 obtain_auth_token = ObtainAuthToken.as_view()

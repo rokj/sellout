@@ -30,10 +30,10 @@ class LoginForm(forms.ModelForm):
         model = BlocklogicUser
         fields = ("email", "password")
 
+    """
     def clean_email(self):
-        """
         Validates that a user exists with the given e-mail address.
-        """
+
         email = self.cleaned_data["email"]
         self.users_cache = BlocklogicUser.objects.filter(email__iexact=email)
 
@@ -41,6 +41,7 @@ class LoginForm(forms.ModelForm):
             raise forms.ValidationError(_("User with this email does not exist. Maybe you misspelled it?"))
 
         return self.cleaned_data["email"]
+    """
 
     def set_request(self, request):
         self.request = request
@@ -80,7 +81,7 @@ class BlocklogicUserForm(forms.ModelForm):
 
     class Meta:
         model = BlocklogicUser
-        fields = ("email", "first_name", "last_name", "country", "images")
+        fields = ("email", "first_name", "last_name", "country", "images", "sex", )
 
     def clean_old_password(self):
         if not self.registration and self.request.POST.get('update_password', '') == "yes":
@@ -161,7 +162,7 @@ class BlocklogicUserChangeForm(forms.ModelForm):
 
     class Meta:
         model = BlocklogicUser
-        fields = ("last_name", "country", "images",)
+        fields = ("last_name", "country", "images", "sex",)
 
     def set_request(self, request):
         self.request = request
