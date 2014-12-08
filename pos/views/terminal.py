@@ -216,9 +216,8 @@ def unlock_session(request, company):
     django_logout(request)
 
     # log in the other user
-    #user = authenticate(username=switched_user.username, password='')
-    switched_user.backend = "asdf asdf "
-    django_login(request, switched_user)
+    user = authenticate(username=switched_user.username, password=data.get('pin'), type='pin', company=c)
+    django_login(request, user)
 
     # return the url that we'll redirect to
     return JsonOk()

@@ -449,8 +449,8 @@ button.more{
     font-size: 20px;
 }
 
-#finish_the_fukin_bill{ left: 0; }
-#finish_the_fukin_bill button{ background-color: fuchsia; }
+#finish_the_bill{ left: 0; }
+#finish_the_bill button{ background-color: fuchsia; }
 
 #bill_options{ right: 0; }
 

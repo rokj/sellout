@@ -103,7 +103,7 @@ class BlocklogicMailAuthBackend(object):
     Authenticate against the Blocklogic mail server (bl_mail_user_*) or Blocklogic users (bl_user_*) database.
     """
 
-    def authenticate(self, username=None, password=None, type='normal'):
+    def authenticate(self, username=None, password=None, type='normal', company=None):
         if username == '' or username is None:
             return None
 
@@ -122,6 +122,15 @@ class BlocklogicMailAuthBackend(object):
 
         if not login_valid and user.exists(username) and user.user_password_valid(username, password):
             login_valid = True
+
+        if not login_valid and type == 'pin' and company is not None:
+            try:
+                from pos.models import Permission
+
+                switched_permission = Permission.objects.get(company=company, pin=password)
+                return switched_permission.user
+            except (Permission.DoesNotExist, TypeError, ValueError):
+                return None
 
         if login_valid:
             try:
