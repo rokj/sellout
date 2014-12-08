@@ -263,20 +263,13 @@ def lock_session(request):
 # @login_required must not be here: check authentication manually
 # (the thing will create an infinite loop with locked>unlock view)
 def locked_session(request):
-    if not request.user.is_authenticated():
-        return redirect('web:index')
-
-    context = {
-        'site_title': g.SITE_TITLE,
-        'title': _("Unlock terminal"),
-
-        'pin_length': g.PIN_LENGTH,
-        'original_url': request.session.get('original_url'),
-    }
+    # show the unlock screen
+    context = {}
 
     return render(request, 'locked.html', context)
 
 
-@login_required
+# @login_required must not be here: check authentication manually
+# (the thing will create an infinite loop with locked>unlock view)
 def unlock_session(request):
     pass

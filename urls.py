@@ -31,9 +31,11 @@ urlpatterns = patterns('',
     # lock (sets request.session['locked'] = True)
     url(r'^lock-session/$', web_views.lock_session, name='lock_session'),
     # the page that shows up when a user is logged in but the session is locked
+    # this is only shown when visiting static pages (management) with locked session
+    # unlocking will redirect to the page that the user wanted to visit
     url(r'^locked-session/$', web_views.locked_session, name='locked_session'),
     # unlocking
-    #url(r'^unlock-session/$', web_views.unlock_session, name='unlock_session'),
+    url(r'^unlock-session/$', web_views.unlock_session, name='unlock_session'),
 
     # web: everything that happens before user enters a specific company
     url(r'^', include('web.urls', namespace='web')),

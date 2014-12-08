@@ -12,7 +12,7 @@ def login_required(view):
 
         if request.user.is_authenticated():
             # the user is logged in, check if the session is not locked
-            if False: # TODO request.session.get('locked'):
+            if False: # TODO: request.session.get('locked'):
                 # the session is locked, redirect to 'locked' page
                 request.session['original_url'] = request.get_full_path()
 
@@ -21,13 +21,13 @@ def login_required(view):
                     return JsonResponse({
                         'status': 'session_locked',
                         'message': _("This session is locked"),
-                        'redirect_url': reverse('web:unlock_session'),
+                        'redirect_url': reverse('locked_session'),
                         'original_url': request.session['original_url'],
                     })
                 else:
-                    # redirect to
+                    # redirect to the unlock screen
                     return HttpResponseRedirect(
-                        reverse('unlock_session') +
+                        reverse('locked_session') +
                         '?next=' + request.session['original_url']
                     )
             else:
