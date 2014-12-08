@@ -5,7 +5,7 @@ from pos.models import Company, Contact
 from common import globals as g
 from config.functions import get_date_format, get_user_value
 from pos.views.manage.contact import contact_to_dict, get_contact, validate_contact
-from pos.views.util import JsonOk, JsonParse, JsonError, has_permission, no_permission_view
+from common.functions import JsonOk, JsonParse, JsonError, has_permission, no_permission_view
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated

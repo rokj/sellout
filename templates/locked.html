@@ -9,6 +9,7 @@
     {# common styles and scripts that could be loaded with base.html, but it's too bloated #}
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
 
+    <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
     <script type="text/javascript" src="{% static 'jquery-ui-1.11.2.custom/external/jquery/jquery.js' %}"></script>
     <script type="text/javascript" src="{% static 'jquery-ui-1.11.2.custom/jquery-ui.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
@@ -22,7 +23,7 @@
     <script language="javascript">
         $(document).ready(function(){
             var unlock_screen = new UnlockScreen(
-                "{% url 'unlock_session' %}",
+                "{% url 'pos:unlock_session' company.url_name %}",
                 "{{ original_url }}",
                 "{{ csrf_token }}"
             );

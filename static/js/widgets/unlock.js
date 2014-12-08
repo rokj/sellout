@@ -15,8 +15,10 @@ UnlockScreen = function(unlock_url, original_url, csrf_token){
         switch_to_password: $(".password", "#switch_pin_password"),
         switch_to_pin: $(".pin", "#switch_pin_password"),
         pin_container: $("#pin_container"),
-        password_container: $("#password_container")
+        password_container: $("#password_container"),
 
+        email: $("#id_email"),
+        password: $("#id_password")
     };
 
     p.password_visible = false;
@@ -37,8 +39,28 @@ UnlockScreen = function(unlock_url, original_url, csrf_token){
             .val(pin_val + number);
     };
 
-    p.switch_type = function(e){
+    p.unlock = function(e){
+        e.preventDefault();
+        e.stopPropagation();
 
+        // assemble the data for sending
+        var data = {
+            pin: p.items.pin.val(),
+            email: p.items.email.val(),
+            password: p.items.password.val(),
+            unlock_type: p.password_visible ? 'password' : 'pin'
+        };
+
+        // send unlock request to server
+        send_data(unlock_url, data, csrf_token, function(response){
+            if(response.status != 'ok'){
+                error_message(gettext("Could not unlock"),
+                    response.message);
+            }
+            else{
+                console.log(response.message)
+            }
+        });
     };
 
     //
@@ -49,19 +71,7 @@ UnlockScreen = function(unlock_url, original_url, csrf_token){
     p.items.keys.unbind().click(p.key);
 
     // enter: send the 'unlock' to server and when
-    p.items.enter.unbind().click(function(){
-        send_data(unlock_url, {pin: p.items.pin.val()}, p.token, function(response){
-            console.log(response);
-
-            if(response.status != 'ok'){
-                error_message(gettext("Unlock failed"), response.message);
-            }
-            else{
-                console.log(response);
-                window.location.href = original_url;
-            }
-        });
-    });
+    p.items.enter.unbind().click(p.unlock);
 
     // clear button: clear pin input
     p.items.clear.unbind().click(function(){

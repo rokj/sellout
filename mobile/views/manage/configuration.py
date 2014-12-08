@@ -1,9 +1,9 @@
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from config.functions import get_company_value, set_company_value, get_company_config
+from config.functions import get_company_value, set_company_value
 from pos.models import Company, Tax
-from pos.views.util import JsonError, has_permission, JsonOk, no_permission_view, JsonParse
+from common.functions import JsonError, has_permission, JsonOk, no_permission_view, JsonParse
 from django.utils.translation import ugettext as _
 
 

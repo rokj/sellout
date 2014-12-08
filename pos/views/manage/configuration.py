@@ -4,7 +4,7 @@ from django.utils.translation import ugettext as _
 from django import forms
 
 from pos.models import Company
-from pos.views.util import has_permission, no_permission_view
+from common.functions import has_permission, no_permission_view
 from common import globals as g
 from config.functions import set_user_value, get_user_value, get_company_value, set_company_value
 

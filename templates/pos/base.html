@@ -104,7 +104,7 @@ blocks:
                 {% if company %}
                     <li class="separator"><a  href="{% url 'pos:user_settings' company.url_name %}">{% trans 'User Settings' %}</a></li>
                 {% endif %}
-                <li><a href="{% url 'lock_session' %}">{% trans 'Switch User' %}</a> </li>
+                <li><a href="{% url 'pos:lock_session' company.url_name %}">{% trans 'Switch User' %}</a> </li>
                 <li><a href="{% url 'web:logout' %}">{% trans 'Log Out' %}</a></li>
             </ul>
         </div>

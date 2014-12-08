@@ -8,7 +8,7 @@ from config.functions import get_date_format, get_company_value
 
 from pos.models import Company, Product, Bill, BillItem
 from pos.views.bill import bill_to_dict
-from pos.views.util import max_field_length, has_permission, no_permission_view, \
+from common.functions import max_field_length, has_permission, no_permission_view, \
     CompanyUserForm, CustomDateField, CustomDecimalField
 
 from common import globals as g

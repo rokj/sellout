@@ -7,7 +7,7 @@ from common.decorators import login_required
 from django.utils.translation import ugettext as _
 
 from pos.models import Company
-from pos.views.util import has_permission, no_permission_view
+from common.functions import has_permission, no_permission_view
 import common.globals as g
 
 ###################

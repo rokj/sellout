@@ -6,7 +6,7 @@ from django.utils.translation import ugettext as _
 from pos.models import Company, Tax, Product
 from common import globals as g
 from config.functions import get_company_value
-from pos.views.util import JsonParse, JsonError, JsonOk, \
+from common.functions import JsonParse, JsonError, JsonOk, \
                             has_permission, no_permission_view, \
                             format_number, \
                             max_field_length, \

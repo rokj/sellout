@@ -7,7 +7,7 @@ from django import forms
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 
 from pos.models import Company, Category, Product
-from pos.views.util import JsonError, JsonParse, JsonOk,  \
+from common.functions import JsonError, JsonParse, JsonOk,  \
     has_permission, no_permission_view, JsonStringify
 
 from common import globals as g

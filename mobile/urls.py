@@ -93,6 +93,6 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/register/delete', mobile_delete_register, name='mobile_delete_register'),
     url(r_company + r'/manage/json/register/get_with_id', mobile_get_register, name='mobile_get_register_with_id'),
     # available discounts list
-    # url(r_company + r'/manage/json/discounts/?$', discount.JSON_discounts, name='JSON_discounts'),
+    # url(r_company + r'/manage/json/discounts/?$', discount.json_discounts, name='json_discounts'),
     
 )

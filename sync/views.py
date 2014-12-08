@@ -10,7 +10,7 @@ from pos.views.manage.discount import discount_to_dict
 from pos.views.manage.product import product_to_dict
 from pos.views.manage.register import register_to_dict
 from pos.views.manage.tax import tax_to_dict, get_all_taxes
-from pos.views.util import JsonError, JsonParse
+from common.functions import JsonError, JsonParse
 from sync.models import Sync
 
 from django.utils.translation import ugettext as _

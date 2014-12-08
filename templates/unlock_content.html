@@ -32,10 +32,18 @@
         <div id="password_container">
             <input type="password" id="id_password" placeholder="{% trans 'Password' %}" class="large-input" />
         </div>
+
+        <div id="submit_container">
+            <input type="submit" id="id_submit" value="{% trans 'Switch' %}" />
+        </div>
     </div>
 
-    <div id="switch_pin_password">
+    <div id="switch_pin_password" class="hidden">
         <a href="#" class="password">{% trans 'Use e-mail and password instead' %}</a>
         <a href="#" class="pin hidden">{% trans 'Use PIN' %}</a>
+    </div>
+
+    <div id="logout">
+        <a href="{% url 'web:logout' %}#login" class="logout">{% trans 'Log in with username and password' %}</a>
     </div>
 </div>

@@ -93,26 +93,39 @@ urlpatterns = patterns('',
     # misc (ajax): urls not translated
     url(r_company + '/' + r_manage + '/json/categories/?$', category.JSON_categories, name='JSON_categories'), # categories list TODO: in use?
     url(r_company + '/' + r_manage + '/json/units/' + '?$', product.JSON_units, name='JSON_units'), # unit types list
-    url(r_company + '/' + r_manage + '/json/discounts/' + '?$', discount.JSON_discounts, name='JSON_discounts'), # available discounts list
+    url(r_company + '/' + r_manage + '/json/discounts/' + '?$', discount.json_discounts, name='json_discounts'), # available discounts list
     url(r_company + '/' + r_manage + '/json/toggle-favorite/' + '?$', product.toggle_favorite, name='toggle_favorite'), # set/remove favorite prodcut
 
     #
     # TERMINAL:
     #
     # save terminal settings (will width and such)
-    url(r_company + '/save/$', terminal.save, name='save_terminal'),
-    url(r_company + '/set-register/$', terminal.set_register, name='set_register'),
-    url(r_company + '/quick-contact/$', contact.quick_contacts, name='quick_contacts'),
-    url(r_company + '/finish-bill/$', terminal_bill.finish_bill, name='finish_bill'),
-    url(r_company + '/check-bill-status/$', terminal_bill.check_bill_status, name='check_bill_status'),
-    url(r_company + '/get-unpaid-bills/$', terminal_bill.get_unpaid_bills, name='get_unpaid_bills'),
-    url(r_company + '/delete-unpaid-bill/$', terminal_bill.delete_unpaid_bill, name='delete_unpaid_bill'),
-    url(r_company + '/view-bill/$', terminal_bill.view_bill, name='view_bill'),
+    url(r_company + r'/save/$', terminal.save, name='save_terminal'),
+    url(r_company + r'/set-register/$', terminal.set_register, name='set_register'),
+    url(r_company + r'/quick-contact/$', contact.quick_contacts, name='quick_contacts'),
+    url(r_company + r'/finish-bill/$', terminal_bill.finish_bill, name='finish_bill'),
+    url(r_company + r'/check-bill-status/$', terminal_bill.check_bill_status, name='check_bill_status'),
+    url(r_company + r'/get-unpaid-bills/$', terminal_bill.get_unpaid_bills, name='get_unpaid_bills'),
+    url(r_company + r'/delete-unpaid-bill/$', terminal_bill.delete_unpaid_bill, name='delete_unpaid_bill'),
+    url(r_company + r'/view-bill/$', terminal_bill.view_bill, name='view_bill'),
 
     # views for bill
     url(r_company + '/bill/save/$', terminal_bill.create_bill, name='create_bill'),  # adds an item to bill
     #url(r_company + '/bill/get-active/$', bill.get_active_bill, name='get_active_bill'),
     #url(r_company + '/bill/item/remove/$', bill.remove_item, name='remove_bill_item'), # removes Item from bill
+
+    #
+    # locking the screen (session, actually)
+    # this must work on any page except index (and the unlock view, of course)
+    #
+    # lock (sets request.session['locked'] = True)
+    url(r_company + r'/lock-session/$', terminal.lock_session, name='lock_session'),
+    # the page that shows up when a user is logged in but the session is locked
+    # this is only shown when visiting static pages (management) with locked session
+    # unlocking will redirect to the page that the user wanted to visit
+    url(r_company + r'/locked-session/$', terminal.locked_session, name='locked_session'),
+    # unlocking
+    url(r_company + r'/unlock-session/$', terminal.unlock_session, name='unlock_session'),
 
     # and finally: home: POS terminal, directly
     url(r_company + '/$', terminal.terminal, name='terminal'),  # by url_name

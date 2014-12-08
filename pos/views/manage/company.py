@@ -9,7 +9,7 @@ from common.images import import_color_image, import_monochrome_image, resize_im
 
 from pos.models import Company, Permission
 
-from pos.views.util import JsonParse, has_permission, no_permission_view, JsonOk, JsonError, \
+from common.functions import JsonParse, has_permission, no_permission_view, JsonOk, JsonError, \
     max_field_length
 
 from common import globals as g

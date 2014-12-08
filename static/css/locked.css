@@ -4,8 +4,8 @@ body{
 
 #unlock_dialog_container{
     position: absolute;
-    width: 350px;
-    height: 520px;
+    width: 340px;
+    height: 530px;
     background-color: #f0f0f0;
 
     left: 50%;
@@ -17,10 +17,8 @@ body{
 }
 
 .container{
-    width: 100%;
     text-align: center;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin: 20px;
 }
 
 .large-input{
@@ -42,7 +40,6 @@ body{
 }
 
 #keypad_container{
-    padding-left: 25px;
 }
 
 .key{
@@ -74,10 +71,19 @@ body{
     color: #ffffff;
 }
 
-#switch_pin_password{
+#switch_pin_password,
+#logout{
     position: absolute;
     height: 20px;
     bottom: -20px;
     right: 0;
     font-size: 15px;
+}
+
+#submit_container{
+    text-align: center;
+}
+
+#id_submit{
+width: 150px;
 }

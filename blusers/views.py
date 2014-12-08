@@ -15,7 +15,7 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.views import APIView
 from action.models import Action
 from bl_auth import User
-from common.functions import JSON_parse, JSON_error, get_random_string, send_email, JSON_ok, min_password_requirments
+from common.functions import JsonParse, JsonError, get_random_string, send_email, JsonOk, min_password_requirments
 from common.globals import GOOGLE
 from common.views import base_context
 from common.globals import WAITING
@@ -25,7 +25,6 @@ from django.core.files.base import ContentFile
 from django.http import Http404, QueryDict, JsonResponse
 from django.contrib.auth import authenticate as django_authenticate
 from django.contrib.auth import login as django_login
-from django.contrib.auth import logout as django_logout
 from django.shortcuts import render, redirect
 from django.conf import settings as settings
 from django.utils.translation import ugettext as _
@@ -114,9 +113,9 @@ def google_login_or_register(request, mobile=False):
         if not successful, redirect back to the login page """
     context = {}
 
-    d = JSON_parse(request.POST.get('data'))
+    d = JsonParse(request.POST.get('data'))
     if "access_token" not in d:
-        return JSON_error("no_access_token", _("No access_token provided."))
+        return JsonError("no_access_token", _("No access_token provided."))
 
     url = (GOOGLE_API['client_userinfo'] % d["access_token"])
     r = requests.get(url)
@@ -130,25 +129,25 @@ def google_login_or_register(request, mobile=False):
             return {'status': 'error', 'google_api_error': _("Something went wrong.")}
     else:
         if r is None:
-            return JSON_error("google_api_error", _("Something went wrong."))
+            return JsonError("google_api_error", _("Something went wrong."))
         if r.status_code != 200:
-            return JSON_error("google_api_error", _("Something went wrong."))
+            return JsonError("google_api_error", _("Something went wrong."))
 
 
     r = r.json()
 
     if "error" in r:
-        return JSON_error("google_api_error", _("Something went wrong."))
+        return JsonError("google_api_error", _("Something went wrong."))
     if not "email" in r and r['email'] != "":
         if mobile:
             return {'status': 'error', 'google_api_error': _("Something went wrong.")}
         else:
-            return JSON_error("google_api_error", _("Something went wrong."))
+            return JsonError("google_api_error", _("Something went wrong."))
 
     try:
         bluser = BlocklogicUser.objects.get(email=r["email"])
         if bluser.type != GOOGLE and not mobile:
-            return JSON_error("already_registered_via_normal", _("Already registered via normal"))
+            return JsonError("already_registered_via_normal", _("Already registered via normal"))
         elif bluser.type != GOOGLE and mobile:
             return {'status': 'error', 'already_registered_via_normal': _("Already registered via normal")}
 
@@ -208,7 +207,7 @@ def google_login_or_register(request, mobile=False):
 
         return JsonResponse(data)
 
-    return JSON_error("error", _("Something went wrong during login with google"))
+    return JsonError("error", _("Something went wrong during login with google"))
 
 
 def try_register(user_form, user_profile_form=None):
@@ -324,7 +323,7 @@ def send_reactivation_key(request, bluser):
 @api_view(['POST'])
 def reset_password(request):
     errors = {}
-    data = JSON_parse(request.POST['data'])
+    data = JsonParse(request.POST['data'])
 
     if not "new_password1" in data:
         return JsonResponse({"status": "no_key"})
@@ -357,9 +356,9 @@ def reset_password(request):
 @login_required
 def save_user_settings(request):
     if not request.method == 'POST':
-        return JSON_error("error")
+        return JsonError("error")
 
-    d = JSON_parse(request.POST.get('data'))
+    d = JsonParse(request.POST.get('data'))
 
     if "location_in_task_times" in d:
         if d["location_in_task_times"] is True or d["location_in_task_times"] is False:
@@ -401,7 +400,7 @@ def save_user_settings(request):
                 bluser.save()
 
         except Exception as e:
-            return JSON_error("error", _("There was error saving data. Contact support."))
+            return JsonError("error", _("There was error saving data. Contact support."))
 
         """
         user_profile_form = UserProfileForm(qdict, instance=bluser)
@@ -421,39 +420,39 @@ def save_user_settings(request):
                 user_profile.updated_by = bluser
                 user_profile.save()
         except Exception as e:
-            return JSON_error("error", _("There was error saving data. Contact support."))
+            return JsonError("error", _("There was error saving data. Contact support."))
         """
 
-    return JSON_ok()
+    return JsonOk()
 
 
 @login_required
 def update_password(request):
     if not request.method == 'POST':
-        return JSON_error("error")
+        return JsonError("error")
 
-    d = JSON_parse(request.POST.get('data'))
+    d = JsonParse(request.POST.get('data'))
 
     if 'current_password' not in d or 'password1' not in d or 'password2' not in d:
-        return JSON_error('error', _('Something went wrong during password saving. Contact support.'))
+        return JsonError('error', _('Something went wrong during password saving. Contact support.'))
 
     if d['password1'] != d['password2']:
-        return JSON_error('new_password_mismatch', _('New passwords do not match'))
+        return JsonError('new_password_mismatch', _('New passwords do not match'))
 
     if not min_password_requirments(d['password1']):
-        return JSON_error('min_pass_requirement_failed', _('Password minimal requirments failed.'))
+        return JsonError('min_pass_requirement_failed', _('Password minimal requirments failed.'))
 
     user = django_authenticate(username=request.user.email, password=d['current_password'])
     if user is None:
-        return JSON_error('wrong_current_password')
+        return JsonError('wrong_current_password')
 
     if user is not None:
         user.set_password(d['password1'])
         user.save()
 
-        return JSON_ok()
+        return JsonOk()
 
-    return JSON_error('error', _('Something went wrong during password saving. Contact support.'))
+    return JsonError('error', _('Something went wrong during password saving. Contact support.'))
 
 
 @login_required
@@ -573,7 +572,7 @@ def remove_user_profile_image(request):
 
     bluser = BlocklogicUser.objects.get(id=request.user.id)
 
-    d = JSON_parse(request.POST.get('data'))
+    d = JsonParse(request.POST.get('data'))
 
     if not 'image_id' in d or not d['image_id']:
         return JsonResponse({'status': 'error', 'message': _("Which photo to remove?")})
@@ -591,7 +590,7 @@ def save_last_used_group(request):
 
     bluser = BlocklogicUser.objects.get(id=request.user.id)
 
-    d = JSON_parse(request.POST.get('data'))
+    d = JsonParse(request.POST.get('data'))
 
     if not 'group_id' in d or not d['group_id']:
         return JsonResponse({'status': 'error', 'message': _("Could not get group ID")})
@@ -674,7 +673,7 @@ class ObtainAuthToken(APIView):
                 if serializer.is_valid():
                     user = serializer.object['user']
                 else:
-                    return JSON_error(status="error", message="wrong credentials")
+                    return JsonError(status="error", message="wrong credentials")
 
         elif backend == "google-oauth2":
             d = google_login_or_register(request, mobile=True)
@@ -684,14 +683,14 @@ class ObtainAuthToken(APIView):
                 return JsonResponse(d)
 
         else:
-            return JSON_error("error", "wrong login")
+            return JsonError("error", "wrong login")
 
         token, created = Token.objects.get_or_create(user=user)
 
         if user:
             user_credentials = get_user_credentials(user)
         else:
-            return JSON_error("error", "this should not happen")
+            return JsonError("error", "this should not happen")
         company = Company.objects.get(id=1)
         return JsonResponse({'token': token.key,
                               'user': user_credentials,

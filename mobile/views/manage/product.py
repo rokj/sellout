@@ -5,7 +5,7 @@ from django.db.models import Q
 from pos.models import Company, Category, Discount, Product, ProductDiscount, Price, PurchasePrice, Tax
 from pos.views.manage.product import JSON_units, get_product, search_products, create_product, edit_product, \
     delete_product, product_to_dict, toggle_favorite
-from pos.views.util import JsonError, \
+from common.functions import JsonError, \
                             has_permission
 from rest_framework.decorators import api_view, permission_classes,\
     authentication_classes

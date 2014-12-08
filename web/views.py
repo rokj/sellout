@@ -9,21 +9,19 @@ from blusers.forms import LoginForm, BlocklogicUserForm
 from django.utils.translation import ugettext as _
 from blusers.models import BlocklogicUser
 from blusers.views import try_register, unset_language, send_reactivation_key
-from common.functions import JSON_parse
+from common.functions import JsonParse, JsonError
 from common.decorators import login_required
 from django.contrib.auth import logout as django_logout
 from action.models import Action
 
 import common.globals as g
 from pos.models import Permission
-from pos.views.util import JsonOk
+from common.functions import JsonOk
+
 import settings
 
 
 def index(request):
-    if request.user.is_authenticated():
-        return redirect('web:select_company')
-
     message = None
     next = None
 
@@ -186,7 +184,7 @@ def activate_account(request, key):
 
 
 def lost_password(request):
-    data = JSON_parse(request.POST['data'])
+    data = JsonParse(request.POST['data'])
 
     try:
         if data and "email" in data:
@@ -257,26 +255,3 @@ def accept_invitation(request, reference):
 @login_required
 def decline_invitation(request, reference):
     return handle_invitation(request, reference, g.ACTION_ACCEPTED)
-
-
-@login_required
-def lock_session(request):
-    # lock this session by setting locked flag
-    request.session['locked'] = True
-
-    return JsonOk()
-
-
-# @login_required must not be here: check authentication manually
-# (the thing will create an infinite loop with locked>unlock view)
-def locked_session(request):
-    # show the unlock screen
-    context = {}
-
-    return render(request, 'locked.html', context)
-
-
-# @login_required must not be here: check authentication manually
-# (the thing will create an infinite loop with locked>unlock view)
-def unlock_session(request):
-    pass

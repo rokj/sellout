@@ -6,7 +6,7 @@ from django.utils.translation import ugettext as _
 from django import forms
 
 from pos.models import Register, Company
-from pos.views.util import has_permission, no_permission_view, manage_delete_object
+from common.functions import has_permission, no_permission_view, manage_delete_object
 
 from common import globals as g
 from config.functions import get_date_format, get_user_value, get_company_value

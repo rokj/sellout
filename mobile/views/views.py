@@ -9,7 +9,7 @@ from pos.views.manage.category import get_all_categories
 from pos.views.manage.configuration import ConfigForm
 from pos.views.manage.discount import get_all_discounts
 from pos.views.manage.tax import tax_to_dict
-from pos.views.util import JsonError, has_permission, JsonOk, no_permission_view, JsonParse
+from common.functions import JsonError, has_permission, JsonOk, no_permission_view, JsonParse
 from django.utils.translation import ugettext as _
 
 

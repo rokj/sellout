@@ -495,7 +495,7 @@ class Permission(SkeletonU):
 @receiver(pre_delete, sender=Permission)
 def delete_permission_cache(**kwargs):
     """ deletes cached permissions on save or delete """
-    from views.util import permission_cache_key
+    from common.functions import permission_cache_key
     from django.core.cache import cache
     
     ckey = permission_cache_key(kwargs['instance'].user, kwargs['instance'].company)
@@ -692,7 +692,7 @@ class BillItemDiscount(SkeletonU, DiscountAbstract):
 # company
 @receiver(post_save, sender=Company)
 def company_updated(instance, **kwargs):
-    from pos.views.util import compare_objects, copy_data
+    from common.functions import compare_objects, copy_data
 
     # get the last saved object from that table and see if anything has changed
     last_object = BillCompany.objects.filter(company=instance).order_by('-datetime_created')[:1]
@@ -717,7 +717,7 @@ def company_updated(instance, **kwargs):
 # register
 @receiver(post_save, sender=Register)
 def register_updated(instance, **kwargs):  # see comments for company_updated
-    from pos.views.util import compare_objects, copy_data
+    from common.functions import compare_objects, copy_data
 
     last_object = BillRegister.objects.filter(register=instance).order_by('-datetime_updated')[:1]
 
@@ -737,7 +737,7 @@ def register_updated(instance, **kwargs):  # see comments for company_updated
 # contact
 @receiver(post_save, sender=Contact)
 def contact_updated(instance, **kwargs):
-    from pos.views.util import compare_objects, copy_data
+    from common.functions import compare_objects, copy_data
 
     last_object = BillContact.objects.filter(contact=instance).order_by('-datetime_updated')[:1]
 

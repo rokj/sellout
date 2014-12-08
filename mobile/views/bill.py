@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Bill, BillItem, Product
 from pos.views.bill import create_bill, finish_bill
-from pos.views.util import has_permission, JsonResponse, JsonParse, JsonError, \
+from common.functions import has_permission, JsonResponse, JsonParse, JsonError, \
     format_number, parse_decimal, format_date, format_time
 from config.functions import get_company_value
 import common.globals as g

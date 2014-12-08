@@ -12,7 +12,7 @@ from common.decorators import login_required
 
 from pos.models import Company, Permission
 import common.globals as g
-from pos.views.util import JsonError, JsonParse, has_permission, JsonOk, no_permission_view
+from common.functions import JsonError, JsonParse, has_permission, JsonOk, no_permission_view
 
 import json
 import settings
