@@ -68,6 +68,15 @@ def login(request, data):
     username = data.get('email')
     password = data.get('password')
 
+    if request.GET.get('next', '') != '':
+        next = request.GET.get('next')
+
+    if request.POST.get('next', '') != '':
+        next = request.POST.get('next')
+
+    if User.exists(username) and User.type(username) == "google":
+        return 'registered-with-google', next
+
     user = django_authenticate(username=username, password=password)
 
     if user is not None:
@@ -95,13 +104,6 @@ def login(request, data):
             message = 'user-inactive'
         except BlocklogicUser.DoesNotExist:
             pass
-
-    if request.GET.get('next', '') != '':
-        next = request.GET.get('next')
-
-    if user is not None:
-        if request.POST.get('next', '') != '':
-            next = request.POST.get('next')
 
     return message, next
 
