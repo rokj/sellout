@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.decorators import login_required as login_required_nolocking
+from django.core.context_processors import csrf
 
 from django.contrib.auth import logout as django_logout, authenticate
 from django.contrib.auth import login as django_login
@@ -72,6 +73,7 @@ def terminal(request, company):
         'currency': get_company_value(request.user, c, 'pos_currency'),
         'sexes': g.SEXES,
         'countries': country_choices,
+        'pin_length': g.PIN_LENGTH,
 
         # user config
         'config': JsonStringify(config),
@@ -128,6 +130,7 @@ def lock_session(request, company):
         request.session['locked'] = []
 
     request.session['locked'].append(c.url_name)
+    request.session['original_url'] = request.get_full_path()
     request.session.modified = True
 
     return JsonOk()
@@ -144,6 +147,7 @@ def locked_session(request, company):
 
     context = {
         'company': c,
+        'pin_length': g.PIN_LENGTH,
     }
 
     return render(request, 'locked.html', context)
@@ -188,7 +192,8 @@ def unlock_session(request, company):
     if data.get('unlock_type') == 'pin':
         # get a user from current company by entered pin
         try:
-            switched_permission = Permission.objects.get(company=c, pin=int(data.get('pin')))
+            pin = int(data['pin'])
+            switched_permission = Permission.objects.get(company=c, pin=pin)
             switched_user = switched_permission.user
         except (Permission.DoesNotExist, TypeError, ValueError):
             return JsonError(_("Wrong PIN"))
@@ -203,11 +208,14 @@ def unlock_session(request, company):
     else:
         return JsonError("Unknown unlock type")
 
+    # TODO: prevent a user with higher privileges to log in using only PIN
+
     # log the user in
     if not switched_user.is_active:
         return JsonError(_("This user is not active."))
 
     # clear this user's session
+    redirect_url = request.session['original_url']
     request.session['locked'] = []
     request.session.modified = True
     request.session.clear()
@@ -216,9 +224,20 @@ def unlock_session(request, company):
     django_logout(request)
 
     # log in the other user
-    user = authenticate(username='loonquawl@t-2.net', password='asdf123')
+    user = authenticate(username=switched_user.username, password=pin, type='pin', company=c)
+
+    if not user:
+        return JsonError(_("User authentication failed."))
 
     django_login(request, user)
 
     # return the url that we'll redirect to
-    return JsonOk()
+    data = {
+        'status': 'ok',
+        'redirect_to': redirect_url,
+        'user_id': user.id,
+        'user_name': unicode(user),
+        'csrf_token': unicode(csrf(request)['csrf_token']),
+    }
+
+    return JsonResponse(data)

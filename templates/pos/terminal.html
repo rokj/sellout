@@ -11,6 +11,7 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/contacts.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'css/payment.css' %}" />
 <link type="text/css" rel="stylesheet" href="{% static 'css/print.css' %}" />
+<link type="text/css" rel="stylesheet" href="{% static 'css/locked.css' %}" />
 
 <style type="text/css">
 .item-val.quantity input[type='text']{
@@ -89,7 +90,8 @@ $(window).load(function(){
             products: null,
             search: null,
             bill: null, // current bill (will be loaded with ajax)
-            contacts: null
+            contacts: null,
+            unlock: null
         },
 
         // static ui settings
@@ -125,6 +127,12 @@ $(window).load(function(){
     g.objects.search = new Search(g);
     g.objects.bill = new Bill(g);
     g.objects.contacts = new Contacts(g);
+    g.objects.unlock = new UnlockScreen(
+        "{% url 'pos:unlock_session' company.url_name %}",
+        "{{ csrf_token }}",
+        true,
+        g
+    );
 
     // in the beginning, show favorites and topmost category
     g.objects.categories.favorites_button_action();
@@ -153,32 +161,6 @@ $(window).load(function(){
 
 {% endblock %}
 
-{% block terminal_menu %}
-    {# this has been replaced with a 'terminal' menu #}
-    <div id="status_bar_company"></div>
-
-    <div id="terminal_button" class="button-container simple-menu-button">
-        <div class="vertical-separator right"></div>
-
-        <div class="vertical-separator"></div>
-
-        <a href="#" class="button-text">{% trans 'Terminal' %}</a>
-
-        <ul id="terminal_menu" class="drop-down">
-            {# store-related stuff #}
-            <li class="separator">
-                <a href="#">{% trans 'Switch User' %}</a>
-            </li>
-            <li>
-                <a href="#">{% trans 'Lock' %}</a>
-            </li>
-            <li>
-                <a href="{% url 'web:select_company' %}">{% trans 'Leave' %}</a>
-            </li>
-        </ul>
-    </div>
-{% endblock %}
-
 {% block content %}
     {% comment %} the loading screen {% endcomment %}
     <div id="loading">
@@ -186,6 +168,12 @@ $(window).load(function(){
             <img src="{% static 'icons/loading.gif' %}" alt="loading" class="loading" />
             <span id="loading_text">{% trans 'Loading' %}</span>
         </div>
+    </div>
+
+    {% comment %} the locking screen {% endcomment %}
+    <div class="hidden">
+        <div id="lock_shadow" class="hidden"></div>
+        {% include 'unlock_content.html' %}
     </div>
 
     {% comment %} the bill (scrolling) {% endcomment %}
@@ -274,7 +262,7 @@ $(window).load(function(){
 
                 {% comment %} buttons etc. {% endcomment %}
                 <div id="bill_actions">
-                    <div class="register-button-container" id="finish_the_fukin_bill">
+                    <div class="register-button-container" id="finish_the_bill">
                         <button>{% trans 'Finish' context 'Create bill button text' %}</button>
                     </div>
 
@@ -349,7 +337,6 @@ $(window).load(function(){
 
         <div id="controls">
             <div> {# for margins and position: absolute #}
-
                 <div id="controls_more" class="terminal-menu">
                     <button class="open-menu">
                         {% trans 'Stuff' %}
@@ -398,7 +385,7 @@ $(window).load(function(){
             <div class="left-column">
                 <input type="text" class="first-name" placeholder="{% trans 'First name' %}" />
                 <input type="text" class="last-name" placeholder="{% trans 'Last name' %}" />
-                <select class="sex" autocomplete="off">
+                <select class="sex">
                     {% for s in sexes %}<option value="{{ s.0 }}">{{ s.1 }}</option>{% endfor %}
                 </select>
                 <input type="text" class="email" placeholder="{% trans 'E-mail' %}" />
@@ -555,10 +542,6 @@ $(window).load(function(){
         <div id="bill_notes_container">
             <textarea id="bill_notes" placeholder="{% trans 'Notes on this bill' %}"></textarea>
         </div>
-    </div>
-
-    <div id="new_terminal_message">
-
     </div>
 
     <div id="templates" class="hidden">

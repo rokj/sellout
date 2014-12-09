@@ -36,7 +36,7 @@ Bill = function(g){
 
     // the 'finish' button
     p.actions = $("#bill_actions");
-    p.pay_button = $("#finish_the_fukin_bill", p.actions);
+    p.pay_button = $("#finish_the_bill", p.actions);
 
     // the options menu
     p.options_button = $("button.open-menu", "#bill_options");
