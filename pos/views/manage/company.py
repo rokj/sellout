@@ -225,6 +225,7 @@ def validate_company(user, company, data):
 # for json etc.
 def company_to_dict(company, android=False):
     c = {
+        'id': company.id,
         'name': company.name,
         'email': company.email,
         'street': company.street,

@@ -717,9 +717,13 @@ def finish_bill(request, company, android=False):
 
     # if print is requested, return html, otherwise the 'ok' response
     if d.get('print'):
-        return JsonResponse({'status': 'ok',
-                             'print': esc_format(request.user, c, bill, bill.register.receipt_format, esc_commands=True),
-                             'bill': create_bill_html(request.user, c, bill)})
+        if android:
+            return JsonResponse({'status': 'ok',
+                                 'print': esc_format(request.user, c, bill, bill.register.receipt_format, esc_commands=True)})
+        else:
+            return JsonResponse({'status': 'ok',
+                                 # 'print': esc_format(request.user, c, bill, bill.register.receipt_format, esc_commands=True),
+                                 'bill': create_bill_html(request.user, c, bill)})
 
     return JsonOk()
 
