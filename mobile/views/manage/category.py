@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from pos.models import Company, Category
 from pos.views.manage.category import validate_category, \
     get_all_categories_structured, category_to_dict, validate_parent, delete_category
-from pos.views.util import JsonError, JsonParse, JsonOk, \
+from common.functions import JsonError, JsonParse, JsonOk, \
     has_permission
 from common import globals as g
 

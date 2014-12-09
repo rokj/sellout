@@ -1,10 +1,7 @@
 from django.conf.urls import patterns, include, url
+from django.contrib import admin
 
 from blusers import views as blusers_views
-from web import views as web_views
-
-# Uncomment the next two lines to enable the admin:
-from django.contrib import admin
 
 admin.autodiscover()
 
@@ -28,6 +25,7 @@ urlpatterns = patterns('',
     url(r'^captcha/', include('captcha.urls')),
 
     # support
+    # TODO
 
     # web: everything that happens before user enters a specific company
     url(r'^', include('web.urls', namespace='web')),

@@ -177,6 +177,8 @@ ALPHABETS = {
     'si': 'abcčdefghijklmnoprsštuvzž',
 }
 
+PIN_LENGTH = 4
+
 DATE = {
     'max_date_length': 10,
 }

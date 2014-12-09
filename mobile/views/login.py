@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from mobile.views.manage.configuration import company_config_to_dict
 from pos.models import Company
-from pos.views.util import JsonError
+from common.functions import JsonError
 
 from rest_framework import parsers, renderers
 from rest_framework.authentication import OAuth2Authentication

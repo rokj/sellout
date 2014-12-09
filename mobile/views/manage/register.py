@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Register, Company
 from pos.views.manage.register import get_all_registers, validate_register, register_to_dict
-from pos.views.util import has_permission, manage_delete_object, JsonOk, JsonError, JsonParse
+from common.functions import has_permission, manage_delete_object, JsonOk, JsonError, JsonParse
 
 
 @api_view(['GET', 'POST'])

@@ -2,13 +2,13 @@ import base64
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
 from common.images import image_dimensions, import_color_image, create_file_from_image
 
 from pos.models import Company, Category, Product, Price, PurchasePrice, Tax, Discount, ProductDiscount
-from pos.views.util import JsonParse, JsonError, JsonOk, \
+from common.functions import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
                            max_field_length, error, JsonStringify

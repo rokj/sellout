@@ -3,13 +3,18 @@
     Bill: handles everything regarding billing and bill items, contains items
       Item: data about items, editing, etc.
 
+
+    Messages sent to the document:
+     - bill.item-changed : update bill summary
+
+
  */
 Bill = function(g){
     var p = this;
 
     p.g = g;
 
-    p.data = null;
+    p.data = null; // bill be set in clear()
 
     // bill properties
     p.serial = 0; // a number that will be assigned to every item (has nothing to do with id on server)
@@ -31,20 +36,25 @@ Bill = function(g){
 
     // the 'finish' button
     p.actions = $("#bill_actions");
-    p.pay_button = $("#finish_the_fukin_bill", p.actions);
+    p.pay_button = $("#finish_the_bill", p.actions);
 
     // the options menu
     p.options_button = $("button.open-menu", "#bill_options");
     p.options_menu = $("#bill_options_menu");
 
-    p.option_save = $(".save", p.options_menu);
     p.option_contacts = $(".select-client", p.options_menu);
+    p.option_options = $(".options", p.options_menu);
+    p.option_save = $(".save", p.options_menu);
+    p.option_load = $(".load", p.options_menu);
     p.option_clear = $(".clear", p.options_menu);
     p.option_print = $(".print", p.options_menu);
-    p.option_options = $(".options", p.options_menu);
 
     // the options dialog
-    p.bill_options = null; // (initialized later)
+    p.bill_options = null; // BillOptions object, (initialized later)
+
+    // the dialogs for loading/saving unpaid bills
+    p.save_bill_dialog = $("#save_bill_dialog");
+    p.load_bill_dialog = $("#load_bill_dialog");
 
     // save item template for items and remove it from the document
     p.item_template = $("#bill_item_template").detach().removeAttr("id");
@@ -69,12 +79,6 @@ Bill = function(g){
 
         // save it to the list of items
         p.items.push(item);
-
-        // save references for quick access:
-        // by serial number on this bill
-        p.items_by_serial[item.serial] = item;
-        // by product id
-        p.items_by_id[product.id] = item;
     };
 
     p.add_product = function(product, to_existing){
@@ -85,7 +89,7 @@ Bill = function(g){
         }
         else{
             // see if this item is already on the bill
-            var existing_item = p.get_item(product.id);
+            var existing_item = p.get_product(product.data.id);
 
             if(!existing_item){
                 // it's not there yet, add a new item
@@ -100,7 +104,7 @@ Bill = function(g){
         // bill has been changed and it must be saved
         p.bill.saved = false;
 
-        p.update_summary();
+        p.update();
     };
 
     p.remove_item = function(item){
@@ -115,17 +119,30 @@ Bill = function(g){
         item.item_row.remove();
         remove_from_array(p.items, i);
         delete p.items_by_serial[item.serial];
-        delete p.items_by_id(item.product.id);
+        delete p.items_by_id[item.product.id];
 
         item = null;
 
         // updated bill
         p.bill.saved = false;
+    };
 
-        p.update_summary();
+    p.get_discount = function(){
+        // get the discount from bill data;
+        // return {type: and amount:};
+        // if there's not data, the amount is 0
+        if(p.data && p.data.discount_amount != null){
+            return {type: p.data.discount_type, amount: p.data.discount_amount}
+        }
+        else{
+            return {type: 'Relative', amount: Big(0)};
+        }
     };
 
     p.clear = function(){
+        // clear local storage: we don't want the same bill to pop up next time
+        clear_local('bill');
+
         // remove all items one by one
         for(var i = 0; i < p.items.length; i++){
             p.items[i].item_row.remove();
@@ -135,41 +152,109 @@ Bill = function(g){
         p.items_by_serial = {};
         p.items_by_id = {};
 
-        // the bill is empty, saving is not needed
-        p.bill.saved = true;
+        p.data = { // Data that should be here at all times
+            items: [],
+            contact: null,
 
-        p.update_summary();
+            discount_amount: Big(0),
+            discount_type: 'Relative',
+            notes: ''
+        };
+
+        p.serial = 0;
+        p.contact = null;
+        p.saved = true; // there's nothing to be saved
+        p.payment = null; // will hold the Payment() object
+
+        // contact
+        if(p.g.objects.contacts) // may not be initialized yet
+            p.g.objects.contacts.update_labels();
+
+        // discounts and notes
+        p.bill_options = new BillOptions(p);
+
+        // total
+        p.summary_total.text(dn(Big(0), p.g));
+
     };
 
-    p.update_summary = function(){
-        // get the numbers from all items in one place:
+    p.update = function(){
+        // get the numbers from all items in one place and send it to calculation
+
         // items and their discounts
-        var items = [];
+        var i, j, item, discount, discount_list;
+        var c_items = [], c_item;
+
+        for(i = 0; i < p.items.length; i++){
+            item = p.items[i];
+
+            c_item = {
+                serial: item.serial,
+                quantity: item.data.quantity,
+                base: item.data.base, // price without discounts and without tax
+                tax_rate: item.data.tax_rate, // price in percentage
+                discounts: [] // a list of discount objects
+            };
+
+            // discount format for calculation:
+            // if the item details box is open, use temp_discounts from that objects;
+            // otherwise, use stored discounts on the item
+            if(item.details) discount_list = item.details.temp_discounts;
+            else discount_list = item.data.discounts;
+
+            // { amount: Big(), type: 'absolute'/'percent' }
+            for(j = 0; j < discount_list.length; j++){
+                discount = discount_list[j];
+                c_item.discounts.push({
+                    amount: discount.amount,
+                    type: discount.type
+                });
+            }
+
+            c_items.push(c_item);
+        }
 
         // bill discounts
+        var bill_discount = p.get_discount();
 
-        //
+        // do the calculation
+        var prices = calculate_bill(c_items, bill_discount.amount, bill_discount.type, p.g.config.decimal_places);
 
+        // update all items' data and refresh them
+        for(i = 0; i < prices.items.length; i++){
+            item = p.items_by_serial[prices.items[i].serial];
 
+            item.data.batch = prices.items[i].batch;
+            item.data.net = prices.items[i].net;
+            item.data.tax = prices.items[i].tax;
+            item.data.discount = prices.items[i].discount;
+            item.data.total = prices.items[i].total;
 
-        p.summary_total.text(dn(total, p.g));
+            item.update();
+        }
 
-        return total;
+        // update bill's amounts
+        p.summary_total.text(dn(prices.total, p.g));
+
+        return prices;
     };
 
     // bill manipulation
     p.load = function(data){
-        console.log("LOAD BILL: re-do");
-        return;
-
-        // load bill from data (loaded from the server or localStorage)
         p.clear();
 
-        // bill items
+        // loads bill from data;
+        // from the server or local storage;
+        // if data is null, init a new bill
+        if(data == null) return;
+
+        p.data = data;
+
+        // add bill items
         var i, product;
-        for(i = 0; i < data.items.length; i++){
+        for(i = 0; i < p.data.items.length; i++){
             // get products from items' ids and create new items
-            product = p.g.objects.products.products_by_id[data.items[i].product_id];
+            product = p.g.objects.products.products_by_id[p.data.items[i].product_id];
 
             if(!product) continue;
 
@@ -178,28 +263,24 @@ Bill = function(g){
 
         // contact: if the bill is retrieved from the server, the contact is id only,
         // otherwise it's a contact object (saved from js)
-        if(typeof(data.contact) == 'number'){
+        if(typeof(p.data.contact) == 'number'){
             // search contacts by id and select the right one
             for(i = 0; i < p.g.data.contacts.length; i++){
                 if(p.g.data.contacts[i].id == data.contact){
-                    data.contact = p.g.data.contacts[i].id;
+                    p.data.contact = p.g.data.contacts[i].id;
                     break;
                 }
             }
         }
         else{
             // just assign the data
-            p.contact = data.contact;
+            p.contact = p.data.contact;
         }
 
         // other bill data
-        p.data = data;
         p.data.discount_amount = get_number(p.data.discount_amount, p.g.config.separator);
 
-        p.bill_options = new BillOptions(p);
-
-        p.bill.saved = true;
-        p.update_summary();
+        p.update();
     };
 
     p.get_data = function(){
@@ -210,41 +291,68 @@ Bill = function(g){
         // to prevent errors)
         if(!p.g.objects.terminal.register) return null;
 
-        var i, id, register;
+        // data
 
-        register = p.g.objects.terminal.register;
+        // id: if saving existing bill
+        var id;
 
         if(p.data && !isNaN(p.data.id)) id = p.data.id;
         else id = -1;
 
-        if(!p.data){
-            // some stuff must be entered
-            p.data = {
-                notes: '',
-                discount_amount: Big(0),
-                discount_type: "percent"
-            }
+        // issuer: the current company, in view
+
+        // contact:
+        var contact = p.contact;
+
+        // register:
+        var register_id = p.g.objects.terminal.register.id;
+
+        // user and user_id: from request
+        // serial: will be set on the server
+
+        // discount amount and type:
+        var discount_amount = p.data.discount_amount;
+        var discount_type = p.data.discount_type;
+
+        // prices: recalculate everything
+        var prices = p.update();
+
+        // base price:
+        var base = prices.base;
+        var discount = prices.discount;
+        var tax = prices.tax;
+        var total = prices.total;
+
+        // note:
+        var notes = p.data.notes;
+
+        // prepare items:
+        var i, item, items = [];
+
+        for(i = 0; i < prices.items.length; i++){
+            item = p.get_item(prices.items[i].serial);
+
+            items.push(item.format());
         }
 
-        var r = {
+        // put everything in a neat object
+        return {
             id: id,
-            items: [],
-            total: dn(p.update_summary(), p.g),
-            till_id: register.id,
-            contact: p.contact,
-            // stuff that applies to whole bill
-            notes: p.data.notes,
-            discount_amount: dn(p.data.discount_amount, p.g),
-            discount_type: p.data.discount_type
-        };
+            contact: contact,
+            register_id: register_id,
 
-        // get all items
-        for(i = 0; i < p.items.length; i++){
-            p.items[i].update();
-            r.items.push(p.items[i].format());
+            discount_amount: dn(discount_amount, p.g),
+            discount_type: discount_type,
+
+            base: dn(base, p.g),
+            discount: dn(discount, p.g),
+            tax: dn(tax, p.g),
+            total: dn(total, p.g),
+
+            notes: notes,
+
+            items: items
         }
-
-        return r;
     };
 
     p.pay = function(){
@@ -281,20 +389,148 @@ Bill = function(g){
         vertical_scroll_into_view(item.item_row);
     };
 
-    p.reset = function(){
-        p.clear();
-
-        // used when the bill is finished and a new one is to be created
-        p.data = null;
-        p.items = [];
-        p.serial = 0;
-        p.contact = null;
-        p.saved = false;
-        p.payment = null; // will hold the Payment() object
+    p.toggle_bill_options = function(show){
+        p.bill_options.toggle_dialog(show);
     };
 
-    p.toggle_bill_options = function(show){
-        p.bill_options.toggle_dialog(show)
+    p.save_unpaid = function(post_save_callback){
+        var notes = $("#save_bill_notes");
+
+        notes.val("");
+
+        // open the dialog
+        custom_dialog(
+            gettext("Save Bill"), // title
+            p.save_bill_dialog, // content
+            400, // width
+            { // buttons: 'save' and 'cancel'
+                yes: gettext("Save"),
+                yes_action: function(){
+                    // put the notes to p.data
+                    p.data.notes = notes.val();
+
+                    // send it to server
+                    send_data(
+                        p.g.urls.create_bill, p.get_data(), p.g.csrf_token, function(response){
+                            if(response.status != 'ok'){
+                                error_message(gettext("Saving bill failed"),
+                                    response.message);
+                            }
+                            else{
+                                // create a new, empty bill
+                                p.clear();
+
+                                // do anything that's ordered
+                                if(post_save_callback) post_save_callback();
+                            }
+                        });
+                },
+
+                no: gettext("Cancel"),
+                no_action: function(){
+                    // do absolutely nothing apart from closing the dialog
+                }
+            }
+        );
+
+        // focus notes
+        notes.focus();
+    };
+
+    p.load_unpaid = function(){
+        // this is the function that will be called after checks and save dialogs
+        function do_load(){
+            // fetch unpaid bills from the server
+            get_data(p.g.urls.get_unpaid_bills, function(response){
+                if(response.status != 'ok'){
+                    error_message(gettext("Loading bills failed"),
+                        response.message);
+                }
+                else{
+                    // data
+                    var bill_list = response.data;
+
+                    // open the dialog and list bills
+                    var list_obj = $("table", p.load_bill_dialog);
+                    var template_obj = $("thead tr", list_obj).clone();
+
+                    list_obj = $("tbody", list_obj);
+                    list_obj.empty();
+
+                    // fill the table with bills
+                    for(var i = 0; i < bill_list.length; i++){
+                        // wrap everything in a new function to prevent
+                        // 'access mutable variable from closure' problem
+                        (function(i){
+                            var bill = bill_list[i];
+
+                            var list_item = template_obj.clone();
+                            $(".time", list_item).text(bill.timestamp);
+                            $(".items", list_item).text(bill.items.length);
+                            $(".notes", list_item).text(bill.notes);
+
+                            // the buttons:
+                            // delete
+                            $(".delete-button", list_item).show().unbind().click(function(){
+                                // ask if the user is  S U R E 'cuz dis is veri imparrtent
+                                confirmation_dialog(gettext("Delete this bill?"), "",
+                                    function(){
+                                        // send a delete request to server
+                                        send_data(p.g.urls.delete_unpaid_bill, { bill_id: bill.id },
+                                            p.g.csrf_token, function(response){
+                                                if(response.status != 'ok'){
+                                                    error_message(gettext("Deleting bill failed"),
+                                                        response.message);
+                                                }
+                                                else{
+                                                    // the bill has been deleted, delete the list item as well
+                                                    list_item.remove();
+                                                }
+                                            });
+                                    },
+                                    function(){ }
+                                );
+                            });
+
+                            // load
+                            $(".load-button", list_item).show().unbind().click(function(){
+                                // load this bill to terminal
+                                p.load(bill);
+                                p.load_bill_dialog.close_dialog(); // custom_dialog() adds this method to jquery object
+                            });
+
+                            // append to list
+                            list_obj.append(list_item);
+                        })(i);
+                    }
+
+                    custom_dialog(gettext("Load bill"), p.load_bill_dialog, 600, {});
+
+                }
+            });
+        }
+
+        // check if there's an unsaved bill;
+        // if it is, ask to save or clear
+        if(!p.saved){
+            custom_dialog(
+                gettext("The current bill is not saved"),
+                gettext("Do you wish to save or clear it?"),
+                400, {
+                    yes: gettext("Save"),
+                    yes_action: function(){
+                        p.save_unpaid(do_load);
+                    },
+                    no: gettext("Clear"),
+                    no_action: function(){
+                        p.clear();
+                        do_load();
+                    }
+                });
+        }
+        else{
+            do_load();
+        }
     };
 
     //
@@ -308,16 +544,29 @@ Bill = function(g){
         p.pay();
     });
 
-    // bill options
-    p.options_button.simpleMenu(p.options_menu);
+    // bill options:
+    // the menu
+    p.options_button.unbind().simpleMenu(p.options_menu);
 
-    p.option_contacts.click(function(){
-        // show the contacts dialog (is handled by Contacts class)
-        p.g.objects.contacts.choose_contact();
+    // contacts
+    p.option_contacts.unbind().click(function(){ p.g.objects.contacts.choose_contact(); });
+
+    // discounts and notes (the bill options menu)
+    p.option_options.unbind().click(function(){
+        p.toggle_bill_options(true);
     });
 
-    p.option_print.click(function(){  });
-    p.option_clear.click(function(){
+    // save bill
+    p.option_save.unbind().click(p.save_unpaid);
+
+    // load bill
+    p.option_load.unbind().click(p.load_unpaid);
+
+    // print options
+    p.option_print.unbind().click(function(){ /* nothing so far */ });
+
+    // clear bill
+    p.option_clear.unbind().click(function(){
         // a confirmation is required
         confirmation_dialog(
             gettext("Confirm bill clear"),
@@ -327,9 +576,8 @@ Bill = function(g){
         );
     });
 
-    p.option_options.click(function(){
-        p.toggle_bill_options(true);
-    });
+    p.clear();
+
 };
 
 Item = function(bill, product) {
@@ -383,14 +631,14 @@ Item = function(bill, product) {
         // quantity
         p.items.qty.val(dn(p.data.quantity, p.g));
 
-        // base price
-        p.items.price.text(dn(p.data.base_price, p.g));
+        // batch price
+        p.items.price.text(dn(p.data.batch, p.g));
 
         // tax (only absolute value)
-        p.items.tax_absolute.text(dn(p.data.tax_absolute, p.g));
+        p.items.tax_absolute.text(dn(p.data.tax, p.g));
 
         // discounts
-        p.items.discount.text(dn(p.data.discount_absolute, p.g));
+        p.items.discount.text(dn(p.data.discount, p.g));
 
         // total
         p.items.total.text(dn(p.data.total, p.g));
@@ -398,9 +646,6 @@ Item = function(bill, product) {
         // out of stock class
         //if(p.data.quantity.cmp(p.product.data.stock) >= 0) p.item_row.addClass("out-of-stock");
         //else p.item_row.removeClass("out-of-stock");
-
-        // also update bill
-        p.bill.update_summary();
     };
 
     p.add_quantity = function(add){
@@ -427,7 +672,7 @@ Item = function(bill, product) {
         // update prices
         if(update){
             p.data.quantity = q;
-            p.update();
+            p.bill.update();
         }
     };
 
@@ -460,7 +705,7 @@ Item = function(bill, product) {
         // set the new quantity and update everything
         p.data.quantity = q;
 
-        p.update();
+        p.bill.update();
     };
 
     p.format = function(){
@@ -483,14 +728,19 @@ Item = function(bill, product) {
             name: p.data.name,
             product_id: p.data.product_id,
             stock: dn(p.data.stock, p.g),
+            bill_notes: p.data.bill_notes,
+
+            base: dn(p.data.base, p.g),
             quantity: dn(p.data.quantity, p.g),
-            base_price: dn(p.data.base_price, p.g),
-            tax_percent: dn(p.data.tax_percent, p.g),
-            discounts: discounts,
-            single_total: dn(p.data.single_total, p.g),
-            discount_absolute: dn(p.data.discount_absolute, p.g),
+            tax_rate: dn(p.data.tax_rate, p.g),
+
+            batch: dn(p.data.batch, p.g),
+            discount: dn(p.data.discount, p.g),
+            net: dn(p.data.net, p.g),
+            tax: dn(p.data.tax, p.g),
             total: dn(p.data.total, p.g),
-            bill_notes: p.data.bill_notes
+
+            discounts: discounts
         };
     };
 
@@ -522,24 +772,25 @@ Item = function(bill, product) {
         product_id: p.product.data.id,
         name: p.product.data.name,
         code: p.product.data.code,
-        quantity: Big(1),
         unit_type: p.product.data.unit_type_display,
-        base_price: p.product.data.price,
-        tax_percent: p.product.data.tax,
-        tax_absolute: null, // will be calculated later
-        discounts: [], // see below
+        bill_notes: '',
         stock: p.product.data.stock,
-        discount_absolute: null, // calculated later
-        total_price: null, // calculated later
-        bill_notes: ''
+
+        quantity: Big(1),
+        base: p.product.data.price,
+        tax_rate: p.product.data.tax,
+
+        batch: null,
+        discount: null,
+        net: null,
+        tax: null, // will be calculated later
+        total: null, // calculated later
+        discounts: [] // see below
     };
 
     // discounts: copy discounts from product
     for(var i = 0; i < p.product.data.discounts.length; i++)
         p.data.discounts.push(p.product.data.discounts[i]);
-
-    // then update it
-    p.update();
 
     // bind events
     // click on an item
@@ -600,16 +851,20 @@ Item = function(bill, product) {
     p.items.qty
         .unbind()
         .click(function(e){ e.stopPropagation(); })
-        .blur(function(e){ // there is a bug in chrome that sends change() event twice;
-                           // as a workaround, use blur and keyup(enter)
-            p.check_quantity();
-        })
-        .keyup(function(e){
-            if(e.keyCode == 13) p.items.qty.blur();
-        });
+        .change(p.check_quantity);
+
+
+    // save references for quick access:
+    // by serial number on this bill
+    p.bill.items_by_serial[p.serial] = p;
+    // by product id
+    p.bill.items_by_id[p.data.product_id] = p;
 
     // when the item is added, scroll the bill to show it
     p.bill.show_item(p);
+
+    // show the numbers
+    p.update();
 };
 
 ItemDetails = function(item){
@@ -654,8 +909,10 @@ ItemDetails = function(item){
 
     // will contain $ shadow divs once the box is displayed
     p.shadow_top = null; // shadow above the item
-    p.shadow_bottom = null; // below the item
-    p.shadow_left = null; // everything else
+    p.shadow_left = null; // to the left
+    p.shadow_bottom = null; // below
+    p.shadow_right = null; // to the right
+
     p.item_blocker = null; // an element to block all actions on item (directly above item)
 
     //
@@ -667,7 +924,7 @@ ItemDetails = function(item){
             // if editable == true, it includes a 'remove' button, otherwise not
             var li = $(element, {title: discount.description, 'class': 'inserted'});
 
-            if(discount.type == "Percent"){
+            if(discount.type == "Relative"){
                 // example: ND10 (10 %)
                 li.text(discount.code + " (" + dn(discount.amount, p.g) + " %)");
             }
@@ -803,34 +1060,22 @@ ItemDetails = function(item){
         return d;
     };
 
+    p.update_texts = function(){
+        // re-show numbers
+        p.items.tax_percent.text(dn(p.item.data.tax_rate, p.g) + " %");
+        p.items.tax_absolute.text(display_currency(p.item.data.tax, p.g));
+    };
+
+
     p.update_prices = function(){
-        var r = total_price(
-            p.item.data.base_price,
-            p.item.data.tax_percent,
-            p.temp_discounts,
-            p.item.data.quantity,
-            p.g.config.decimal_places
-        );
+        p.item.bill.update();
 
-        // update only text fields, not item's data;
-        // if the user cancels this dialog, nothing must be saved
-
-        // fields:
-        // tax in item and details
-        p.item.items.tax_absolute.text(dn(r.tax, p.g));
-        p.items.tax_absolute.text(display_currency(r.tax, p.g));
-
-        // discount sum in item and details
-        p.item.items.discount.text(dn(r.discount, p.g));
-        // total in item
-        p.item.items.total.text(dn(r.total, p.g));
-
-        // show update prices when:
-        //  - quantity changes
-        //  - discounts are added or reordered
+        p.update_texts();
     };
 
     p.cleanup = function(){
+        p.temp_discounts = [];
+
         // common to cancel and save buttons
         p.box.remove();
 
@@ -838,15 +1083,21 @@ ItemDetails = function(item){
             .add(p.shadow_top)
             .add(p.shadow_bottom)
             .add(p.shadow_left)
+            .add(p.shadow_right)
             .add(p.item_blocker);
 
         shadows.fadeOut("fast", function(){
             shadows.remove();
         });
+
+        // dereference this object on its parent
+        p.item.details = null;
     };
 
     p.cancel_button_action = function(){
         p.cleanup();
+
+        p.item.bill.update();
     };
 
     p.save_button_action = function(){
@@ -854,7 +1105,7 @@ ItemDetails = function(item){
         p.item.data.discounts = p.get_discounts();
         p.item.data.bill_notes = p.items.notes.val();
 
-        p.item.update();
+        p.item.bill.update();
 
         p.cleanup();
     };
@@ -887,15 +1138,16 @@ ItemDetails = function(item){
 
         if(!a) return false;
 
-        return !(p.items.unique_discount_type.val() == 'Percent' && a.cmp(Big(100)) > 0);
+        return !(p.items.unique_discount_type.val() == 'Relative' && a.cmp(Big(100)) > 0);
     };
 
     p.create_shadows = function(){
         var body = $("body");
 
-        p.shadow_top = $("<div>", {"class": "shadow"}).appendTo(body);
-        p.shadow_bottom = $("<div>", {"class": "shadow"}).appendTo(body);
-        p.shadow_left = $("<div>", {"class": "shadow"}).appendTo(body);
+        p.shadow_top = $("<div>", {"class": "shadow __top"}).appendTo(body);
+        p.shadow_bottom = $("<div>", {"class": "shadow __bottom"}).appendTo(body);
+        p.shadow_left = $("<div>", {"class": "shadow __left"}).appendTo(body);
+        p.shadow_right = $("<div>", {"class": "shadow __right"}).appendTo(body);
         p.item_blocker = $("<div>", {"class": "blocker"}).appendTo(body);
     };
 
@@ -909,8 +1161,8 @@ ItemDetails = function(item){
         };
 
         var item_size = {
-            width: p.item.item_row.outerWidth(),
-            height: p.item.item_row.outerHeight()
+            width: p.item.item_row.outerWidth(true),
+            height: p.item.item_row.outerHeight(true)
         };
 
         var box_size = {
@@ -919,13 +1171,15 @@ ItemDetails = function(item){
         };
 
         var WINDOW_MARGIN = 10; // minimum distance from window edges
+        var ARROW_MARGIN = 25; // keep the box's arrow from covering item details
         var window_height = $(window).height();
+        var window_width = $(window).width();
 
         if(arrow_position.top >= (box_size.height/2 + WINDOW_MARGIN) &&
            (window_height - arrow_position.top) >= box_size.height/2){
             // there's enough space above and below, center the box
             p.box.offset({
-                left: arrow_position.left,
+                left: arrow_position.left + ARROW_MARGIN,
                 top: arrow_position.top - box_size.height/2
             });
 
@@ -935,7 +1189,7 @@ ItemDetails = function(item){
         else if(arrow_position.top <= (box_size.height/2 + WINDOW_MARGIN)){
             // show the box (almost) at the top of the screen, then adjust the arrow position
             p.box.offset({
-                left: arrow_position.left,
+                left: arrow_position.left + ARROW_MARGIN,
                 top: WINDOW_MARGIN
             });
 
@@ -945,7 +1199,7 @@ ItemDetails = function(item){
         else{
             // show the box (almost) at the bottom of the screen
             p.box.css({
-                left: arrow_position.left,
+                left: arrow_position.left + ARROW_MARGIN,
                 bottom: WINDOW_MARGIN
             });
 
@@ -957,22 +1211,25 @@ ItemDetails = function(item){
 
         // move the shadow around the item
         p.shadow_top.css({
-            top: 0, left: 0, width: item_size.width, height: item_position.top
+            top: 0, left: 0, width: window_width, height: item_position.top
+        });
+        p.shadow_left.css({
+            top: item_position.top, left: 0, width: item_position.left, height: item_size.height
+        });
+        p.shadow_right.css({
+            top: item_position.top, left: item_position.left + item_size.width,
+            height: item_size.height, right: 0
         });
         p.shadow_bottom.css({
             top: item_position.top + item_size.height,
-            left: 0, width: item_size.width,
-            bottom: 0
-        });
-        p.shadow_left.css({
-            top: 0, left: item_size.width, right: 0, bottom: 0
+            left: 0, right: 0, bottom: 0
         });
         p.item_blocker.click(function(e){
                 e.preventDefault();
                 e.stopPropagation();
             })
             .css({
-                top: item_position.top, left: 0,
+                top: item_position.top, left: item_position.left,
                 width: item_size.width, height: item_size.height
             })
             .css("z-index", p.box.css("z-index")); // use the same index as the details box
@@ -992,11 +1249,7 @@ ItemDetails = function(item){
 
     p.position_box();
 
-    // fill in the details
-    // tax:
-    p.items.tax_percent.text(dn(p.item.data.tax_percent, p.g) + " %");
-
-    p.items.tax_absolute.text(display_currency(p.item.data.tax_absolute, p.g));
+    p.update_texts();
 
     // copy current item's discounts to a temporary list;
     // it will be edited and when details is saved, the item's discounts will
@@ -1035,8 +1288,8 @@ ItemDetails = function(item){
     p.items.notes.val(p.item.data.bill_notes);
 
     // bind button actions
-    p.items.cancel.click(function(){ p.cancel_button_action();});
-    p.items.save.click(function(){ p.save_button_action(); });
+    p.items.cancel.unbind().click(function(){ p.cancel_button_action();});
+    p.items.save.unbind().click(function(){ p.save_button_action(); });
 
     // explode button: if quantity is 1, hide it
     if(p.item.data.quantity.cmp(Big(1)) > 0){
@@ -1138,7 +1391,7 @@ BillOptions = function(bill){
     };
 
     p.close_dialog = function(){
-        p.bill.update_summary();
+        p.bill.update();
         p.toggle_dialog(false);
     };
 

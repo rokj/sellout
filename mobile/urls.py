@@ -5,7 +5,7 @@ from common import globals as g
 from mobile.views.manage.company import get_company, edit_company
 from mobile.views.manage.register import mobile_add_register, mobile_edit_register, \
     mobile_delete_register, mobile_get_register
-from mobile.views import views
+from mobile.views.views import mobile_get_cut, mobile_get_units
 
 from mobile.views import login
 from mobile.views import bill

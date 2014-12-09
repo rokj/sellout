@@ -3,7 +3,7 @@ import json
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from action.models import Action
-from common.functions import JSON_parse, _get_subscription_price, get_subscription_btc_price
+from common.functions import JsonParse, _get_subscription_price, get_subscription_btc_price
 from config.functions import get_user_value
 
 from decorators import login_required
@@ -12,11 +12,11 @@ from subscription.models import Subscription
 import common.globals as g
 
 
-@login_required(ajax=True)
+@login_required
 def get_subscription_price(request, duration, his_price=0):
     others = []
 
-    d = JSON_parse(request.POST.get('data'))
+    d = JsonParse(request.POST.get('data'))
 
     if "others" in d:
         others = d['others'].split(",")

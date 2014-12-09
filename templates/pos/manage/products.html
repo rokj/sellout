@@ -1065,7 +1065,7 @@
             }
 
             // stock
-            p.items.stock.val(p.data.stock);
+            p.items.stock.val(display_number(p.data.stock, "{{ decimal_separator }}", "{{ decimal_places }}"));
 
             // ... per unit (listbox with unit types)
             p.items.unit_sel.empty();

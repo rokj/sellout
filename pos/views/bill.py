@@ -15,7 +15,7 @@ from pos.models import Company, Product, Discount, Register, Contact, \
 from pos.views.manage.company import company_to_dict
 from pos.views.manage.contact import contact_to_dict
 from pos.views.manage.register import register_to_dict
-from pos.views.util import has_permission, JsonOk, JsonParse, JsonError, \
+from common.functions import has_permission, JsonOk, JsonParse, JsonError, \
     format_number, parse_decimal, format_date, format_time, parse_decimal_exc, max_field_length
 from config.functions import get_company_value
 import common.globals as g

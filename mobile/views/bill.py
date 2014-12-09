@@ -6,14 +6,14 @@
 #     edit_item: edits an existing item
 #     delete_item
 #
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Bill, BillItem, Product
 from pos.views.bill import create_bill, finish_bill
-from pos.views.util import has_permission, JsonResponse, JsonParse, JsonError, \
+from common.functions import has_permission, JsonResponse, JsonParse, JsonError, \
     format_number, parse_decimal, format_date, format_time
 from config.functions import get_company_value
 import common.globals as g

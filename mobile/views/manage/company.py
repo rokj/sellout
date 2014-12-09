@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from pos.models import Company
 from pos.views.manage.company import company_to_dict, CompanyForm, validate_company, save_color_image, \
     save_monochrome_image
-from pos.views.util import JsonError, JsonOk, has_permission, JsonParse
+from common.functions import JsonError, JsonOk, has_permission, JsonParse
 from django.utils.translation import ugettext as _
 
 

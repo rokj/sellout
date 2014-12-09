@@ -20,12 +20,13 @@ function custom_dialog(title, content, width, buttons){
     content.show();
     dialog.append(content);
 
-    dialog.width(width);
-
     // shadow: remember the last shadow's z-index and increase it by 1:
     // the next dialog will always be above the previous
-    if(!window.last_dialog_zindex) window.last_dialog_zindex = 5000;
+    if(!window.last_dialog_zindex) window.last_dialog_zindex = 15000;
     window.last_dialog_zindex += 1;
+
+    dialog.width(width);
+    container.css("z-index", window.last_dialog_zindex+1);
 
     shadow
         .css("z-index", window.last_dialog_zindex)

@@ -9,6 +9,10 @@ p.explanation{
     min-width: 300px;
 }
 
+#tax_list_container {
+    width: 300px;
+}
+
 /* table */
 tbody td{
     border-top: 1px solid #ffffff;

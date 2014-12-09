@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _, get_language
 from django import forms
 from django.http import Http404, JsonResponse
@@ -8,7 +8,7 @@ from pos.models import Company, Contact
 from common import globals as g
 from config.functions import get_date_format
 from config.countries import country_choices, country_by_code
-from pos.views.util import JsonError, has_permission, no_permission_view, format_date, \
+from common.functions import JsonError, has_permission, no_permission_view, format_date, \
     max_field_length, parse_date, manage_delete_object, JsonParse, JsonOk
 
 import re

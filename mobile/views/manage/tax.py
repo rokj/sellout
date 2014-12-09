@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from pos.models import Company
 from pos.views.manage.tax import list_taxes, get_all_taxes, edit_tax, delete_tax, \
     set_default_tax  #, get_taxes, save_taxes
-from pos.views.util import JsonError, JsonOk
+from common.functions import JsonError, JsonOk
 from django.utils.translation import ugettext as _
 
 

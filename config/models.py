@@ -1,11 +1,9 @@
 from django.db import models
-from blusers.models import BlocklogicUser
-
 from common.models import SkeletonU
-from pos.models import Company
 
 
 class UserConfig(SkeletonU):
+    from blusers.models import BlocklogicUser
     user = models.ForeignKey(BlocklogicUser)
     
     # all settings are stored in json format
@@ -16,6 +14,7 @@ class UserConfig(SkeletonU):
 
 
 class CompanyConfig(SkeletonU):
+    from pos.models import Company
     company = models.ForeignKey(Company)
 
     data = models.TextField(null=False)

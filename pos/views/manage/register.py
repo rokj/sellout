@@ -1,12 +1,12 @@
 # this file should be named register.py, but would be confused with user registration, so here's a synonym
 from django.db.models import FieldDoesNotExist
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
 
 from pos.models import Register, Company
-from pos.views.util import has_permission, no_permission_view, manage_delete_object
+from common.functions import has_permission, no_permission_view, manage_delete_object
 
 from common import globals as g
 from config.functions import get_date_format, get_user_value, get_company_value

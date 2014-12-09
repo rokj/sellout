@@ -17,6 +17,6 @@ urlpatterns = patterns('',
     # categories
 
     # available discounts list
-    # url(r_company + r'/manage/json/discounts/?$', discount.JSON_discounts, name='JSON_discounts'),
+    # url(r_company + r'/manage/json/discounts/?$', discount.json_discounts, name='json_discounts'),
     
 )

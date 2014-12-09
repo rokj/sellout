@@ -2,14 +2,14 @@ from django.core.files import File
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
 from common.images import import_color_image, import_monochrome_image, resize_image, create_file_from_image
 
 from pos.models import Company, Permission
 
-from pos.views.util import JsonParse, has_permission, no_permission_view, JsonOk, JsonError, \
+from common.functions import JsonParse, has_permission, no_permission_view, JsonOk, JsonError, \
     max_field_length
 
 from common import globals as g

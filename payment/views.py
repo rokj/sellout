@@ -18,10 +18,10 @@ import re
 
 from blusers.models import BlocklogicUser
 from common.globals import WAITING, PAID, CANCELED, APPROVED
-from common.functions import JSON_ok, JSON_parse, JSON_error, get_subscription_btc_price, send_email, \
+from common.functions import JsonOk, JsonParse, JsonError, get_subscription_btc_price, send_email, \
     _get_subscription_price, get_random_string, get_bitcoin_user
 from common.models import Currency
-from decorators import login_required
+from common.decorators import login_required
 from payment.service.Bitcoin import BitcoinRPC
 from payment.models import Payment
 from payment.service.Paypal import Paypal
@@ -52,7 +52,7 @@ def paypal_return_url(request, transaction_reference):
 
     paypal = Paypal()
     if not payer_id or not approve_url or not paypal.execute_payment(approve_url, payer_id):
-        return JSON_error("error", _("Something went wrong during paypal payment. Please try again later or be nice "
+        return JsonError("error", _("Something went wrong during paypal payment. Please try again later or be nice "
                                      "and contact support."))
 
     payment.transaction_datetime = datetime.datetime.now()
@@ -97,10 +97,10 @@ def pay_for_everyone(request, real_duration, users, payment_type):
 def actual_payment(request, payment_type, mobile=False):
     from mobile.views import payment_to_dict
     data = {}
-    d = JSON_parse(request.POST.get('data'))
+    d = JsonParse(request.POST.get('data'))
 
     if "duration" not in d:
-        return JSON_error("error", _("Error occured during payment. Please try again later or be nice and contact support."))
+        return JsonError("error", _("Error occured during payment. Please try again later or be nice and contact support."))
 
     users = [request.user.email]
 
@@ -164,7 +164,7 @@ def actual_payment(request, payment_type, mobile=False):
                 send_email(settings.EMAIL_FROM, [settings.EMAIL_FROM], None, "ERROR when getting BTC address for user",
                            message, message)
 
-            return JSON_error("error", _("Error occured during payment. Please try again later or be nice and contact support."))
+            return JsonError("error", _("Error occured during payment. Please try again later or be nice and contact support."))
 
     new_subscriptions = []
 
@@ -209,7 +209,7 @@ def actual_payment(request, payment_type, mobile=False):
 
         paypal = Paypal()
         if not paypal.pay(price, "EUR", real_duration, return_url, cancel_url):
-            return JSON_error("error", _("Something went wrong during paypal payment. Please try again later or be nice and contact support."))
+            return JsonError("error", _("Something went wrong during paypal payment. Please try again later or be nice and contact support."))
 
         if paypal.response and "links" in paypal.response:
             for link in paypal.response["links"]:
@@ -302,18 +302,18 @@ def invoice(request, payment):
 
     return HttpResponse(invoice_html)
 
-@login_required(ajax=True)
+@login_required
 def pay(request, mobile=False):
-    d = JSON_parse(request.POST.get('data'))
+    d = JsonParse(request.POST.get('data'))
     payment_type = d['type']
 
     if payment_type == "bitcoin" or payment_type == "sepa" or payment_type == "paypal":
         return actual_payment(request, payment_type, mobile)
 
-    return JSON_error("no_such_currency", _("No such currency..."))
+    return JsonError("no_such_currency", _("No such currency..."))
 
 
-@login_required(ajax=True)
+@login_required
 def cancel_payment(request, payment):
     try:
         payment = Payment.objects.get(id=payment, created_by=request.user)
@@ -324,9 +324,9 @@ def cancel_payment(request, payment):
         payment.status = CANCELED
         payment.save()
     except Payment.DoesNotExist:
-        return JSON_error("no_payment")
+        return JsonError("no_payment")
 
-    return JSON_ok()
+    return JsonOk()
 
 @login_required
 def payment_info(request, payment):

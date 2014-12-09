@@ -1,0 +1,49 @@
+{% load i18n %}
+
+<div id="unlock_dialog_container">
+    <div id="pin_container" class="container">
+        <h2>{% trans 'Enter your PIN:' %}</h2>
+        <input id="pin" class="large-input"
+               type="password" placeholder="PIN" maxlength="{{ pin_length }}" />
+
+        <div id="keypad_container">
+            <div class="key number" data-number="1">1</div>
+            <div class="key number" data-number="2">2</div>
+            <div class="key number" data-number="3">3</div>
+            <div class="key number" data-number="4">4</div>
+            <div class="key number" data-number="5">5</div>
+            <div class="key number" data-number="6">6</div>
+            <div class="key number" data-number="7">7</div>
+            <div class="key number" data-number="8">8</div>
+            <div class="key number" data-number="9">9</div>
+            <div class="key clear">C</div>
+            <div class="key number" data-number="0">0</div>
+            <div class="key enter">
+                # {# TODO: replace with 'return' icon #}
+            </div>
+        </div>
+    </div>
+
+    <div id="password_container" class="hidden container">
+        <h2>{% trans 'Enter e-mail and password:' %}</h2>
+        <div id="email_container">
+            <input type="text" id="id_email" placeholder="{% trans 'E-mail' %}" class="large-input"/>
+        </div>
+        <div id="password_container">
+            <input type="password" id="id_password" placeholder="{% trans 'Password' %}" class="large-input" />
+        </div>
+
+        <div id="submit_container">
+            <input type="submit" id="id_submit" value="{% trans 'Switch' %}" />
+        </div>
+    </div>
+
+    <div id="switch_pin_password" class="hidden">
+        <a href="#" class="password">{% trans 'Use e-mail and password instead' %}</a>
+        <a href="#" class="pin hidden">{% trans 'Use PIN' %}</a>
+    </div>
+
+    <div id="logout">
+        <a href="{% url 'web:logout' %}#login" class="logout">{% trans 'Log in with username and password' %}</a>
+    </div>
+</div>

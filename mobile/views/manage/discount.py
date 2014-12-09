@@ -9,7 +9,7 @@ from rest_framework.decorators import permission_classes, api_view
 from rest_framework.permissions import IsAuthenticated
 from pos.models import Company
 from pos.views.manage.discount import discount_to_dict, validate_discount
-from pos.views.util import JsonError, has_permission, JsonOk, JsonParse
+from common.functions import JsonError, has_permission, JsonOk, JsonParse
 from pos.models import Discount
 
 @api_view(['GET', 'POST'])

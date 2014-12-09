@@ -1,15 +1,13 @@
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
 from django.http import Http404, JsonResponse
 from django.core.paginator import Paginator
 from pos.models import Company, Discount
-from pos.views.util import JsonError, \
-                           has_permission, no_permission_view, \
-                           format_number, format_date, \
-                           max_field_length, manage_delete_object, CompanyUserForm, CustomDateField, CustomDecimalField
+from common.functions import JsonError, has_permission, no_permission_view, format_number, format_date,\
+    max_field_length, manage_delete_object, CompanyUserForm, CustomDateField, CustomDecimalField
 from common import globals as g
 import datetime as dtm
 from config.functions import get_date_format, get_company_value
@@ -39,7 +37,7 @@ def discount_to_dict(user, company, d, android=False):
 
 
 @login_required
-def JSON_discounts(request, company):
+def json_discounts(request, company):
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
