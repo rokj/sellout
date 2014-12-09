@@ -5,7 +5,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>{% trans 'Bill No.' context 'Bill viewing page title' %}</title>
+    <title>{% trans 'Bill No.' context 'Bill viewing page title' %} {{ bill.serial }}</title>
 
     <link type="text/css" rel="stylesheet" href="{% static 'css/print.css' %}" />
     <link type="text/css" rel="stylesheet" href="{% static 'css/base.css' %}"/>

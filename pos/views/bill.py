@@ -189,27 +189,33 @@ def bill_to_dict(user, company, bill):
         
     b['items'] = i
 
+
     return b
 
 
-def create_bill_html(user, company, bill):
+def create_printable_bill(user, company, bill, receipt_format=None, esc=True):
     # get the template and some other details
     logo = None
 
-    if bill.register.receipt_format == 'Page':
+    if not receipt_format:
+        receipt_format = bill.register.receipt_format
+    if receipt_format == 'Page':
         t = 'pos/large_receipt.html'
 
         if company.color_logo:
             logo = company.color_logo.url
 
-    elif bill.register.receipt_format == 'Thermal':
+    elif receipt_format == 'Thermal':
         t = 'pos/small_receipt.html'
 
         if company.monochrome_logo:
             logo = company.monochrome_logo.url
 
     else:
-        return _("Unsupported bill format") + ": " + str(bill.register.receipt_format)
+        return {
+            'status': 'Unsupported_bill_format',
+            'message': _("Unsupported bill format") + ": " + str(bill.register.receipt_format)
+        }
 
     # get the data
     bill_data = bill_to_dict(user, company, bill)
@@ -218,8 +224,128 @@ def create_bill_html(user, company, bill):
         'bill': bill_data,
         'logo': logo,
     }
+    data = {
+        'bill': bill_data,
+        'html': render_to_string(t, context),
+        'status': 'ok'
+    }
+    if esc:
+        data['esc'] = esc_format(user, company, bill, receipt_format, esc_commands=True)
+    return data
 
-    return render_to_string(t, context)
+
+
+
+def create_bill_html(user, company, bill):
+    data = create_printable_bill(user, company, bill)
+    if data.get('status') == 'ok':
+        return data['html']
+    else:
+        return data['message']
+
+
+def esc_format(user, company, bill, bill_format, line_char_no=48, esc_commands=False):
+
+    if bill_format == 'Page':
+        return 'full_page_format'
+    elif bill_format == "Thermal":
+        string = ''
+        if esc_commands:
+            bill_dict = bill_to_dict(user, company, bill)
+            printer = escpostext.EscposText()
+            new_line = '\x0a'
+            center_align =  '\x1b\x61\x01'
+            left_align = '\x1b\x61\x00'
+            # center / bold
+            string += center_align
+            string += printer.text(bill_dict.get('issuer').get('name'))
+            string += new_line
+            # center
+            string += printer.text(bill_dict.get('issuer').get('street') + ' ' + bill_dict.get('issuer').get('postcode') + ' ' + bill_dict.get('issuer').get('city'))
+            string += new_line
+            string += printer.text(bill_dict['issuer']['state'] + ' ' + bill_dict['issuer']['country'])
+            string += new_line
+
+            string += printer.text(_('VAT') + ':' + ' ' + bill_dict['issuer']['vat_no'])
+            string += new_line
+
+            string += printer.text(bill_dict['register']['location'])
+
+            string += new_line
+
+            if bill_dict.get('contact'):
+                string += printer.text(bill_dict['contact']['name'] + new_line)
+                string += new_line
+                string += printer.text(bill_dict['contact']['street'] + ' ' + bill_dict['contact']['postcode'] + ' ' + bill_dict['contact']['city'])
+                string += printer.text(bill_dict['contact']['state'] + ' ' + bill_dict['contact']['country'])
+                string += new_line
+                string += printer.text(_('VAT') + ':' + ' ' + bill_dict['contact']['vat_no'])
+                string += new_line
+
+            string += left_align
+            string += printer.text(_('Bill No.') + ': ' + str(bill_dict['serial']))
+            string += new_line
+            string += printer.line(line_char_no=line_char_no)
+            string += new_line
+
+            white_spaces = [0.25, 0.20, 0.25, 0.25, 0.05]
+            strings = [_('Price'), _('Quantity'), _('Discount'), '', _('Amount')]
+            aligns = ['left', 'right', 'right', 'right', 'right']
+
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=2)
+
+            string += printer.line(line_char_no=line_char_no)
+
+            for item in bill_dict['items']:
+
+                string += item['name']
+                string += new_line
+                strings = [item['base'], item['quantity'], item['discount'], item['total'], item['tax_rate_id']]
+                string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=2)
+                string += new_line
+
+            string += printer.line(line_char_no=line_char_no)
+            string += new_line
+
+            white_spaces = [0.5, 0.5]
+            strings = [_('Total') + ' ' + bill_dict['currency'] + ':', bill_dict['total']]
+            aligns = ['left', 'right']
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
+
+            string += printer.line(line_char_no=line_char_no)
+            string += new_line
+
+            white_spaces = [0.08, 0.22, 0.23, 0.23, 0.24]
+            strings = ['', _('Rate'), _('Subtotal'), _('Tax'), _('Total')]
+            aligns = ['left', 'right', 'right', 'right', 'right']
+
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
+
+
+            for rate in bill_dict['tax_rates']:
+                strings = [rate['id'], rate['amount'], rate['net_sum'], rate['tax_sum'], rate['gross_sum']]
+                string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
+                string += new_line
+
+
+            string += printer.line(line_char_no=line_char_no, style='Dashed')
+
+            strings = [_('Sum'), '', bill_dict['tax_sums']['net_sum'], bill_dict['tax_sums']['tax_sum'], bill_dict['tax_sums']['gross_sum']]
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
+
+            string += new_line
+
+            white_spaces = [0, 1]
+            strings = [_('Cashier') + ': ' + bill_dict['user_name'], bill_dict['timestamp']]
+            aligns = ['left', 'right']
+
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
+
+            string += new_line
+            string += new_line
+            string += new_line
+            return string
+    return
 
 
 #########
@@ -621,109 +747,3 @@ def view_bill(request, company):
         return JsonError(_("Bill does not exist"))
 
     return HttpResponse(create_bill_html(request.user, c, bill))
-
-def esc_format(user, company, bill, format, line_char_no=48, esc_commands=False):
-
-    if format == "Page":
-        return 'full_page_format'
-    elif format == "Thermal":
-        string = ''
-        if esc_commands:
-            bill_dict = bill_to_dict(user, company, bill)
-            printer = escpostext.EscposText()
-            new_line = '\x0a'
-            center_align =  '\x1b\x61\x01'
-            left_align = '\x1b\x61\x00'
-            # center / bold
-            string += center_align
-            string += printer.text(bill_dict.get('issuer').get('name'))
-            string += new_line
-            # center
-            string += printer.text(bill_dict.get('issuer').get('street') + ' ' + bill_dict.get('issuer').get('postcode') + ' ' + bill_dict.get('issuer').get('city'))
-            string += new_line
-            string += printer.text(bill_dict['issuer']['state'] + ' ' + bill_dict['issuer']['country'])
-            string += new_line
-
-            string += printer.text(_('VAT') + ':' + ' ' + bill_dict['issuer']['vat_no'])
-            string += new_line
-
-            string += printer.text(bill_dict['register']['location'])
-
-            string += new_line
-
-            if bill_dict.get('contact'):
-                string += printer.text(bill_dict['contact']['name'] + new_line)
-                string += new_line
-                string += printer.text(bill_dict['contact']['street'] + ' ' + bill_dict['contact']['postcode'] + ' ' + bill_dict['contact']['city'])
-                string += printer.text(bill_dict['contact']['state'] + ' ' + bill_dict['contact']['country'])
-                string += new_line
-                string += printer.text(_('VAT') + ':' + ' ' + bill_dict['contact']['vat_no'])
-                string += new_line
-
-            string += left_align
-            string += printer.text(_('Bill No.') + ': ' + str(bill_dict['serial']))
-            string += new_line
-            string += printer.line(line_char_no=line_char_no)
-            string += new_line
-
-
-            white_spaces = [0.25, 0.20, 0.25, 0.25, 0.05]
-            strings = [_('Price'), _('Quantity'), _('Discount'), '', _('Amount')]
-            aligns = ['left', 'right', 'right', 'right', 'right']
-
-            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=2)
-
-            string += printer.line(line_char_no=line_char_no)
-
-            for item in bill_dict['items']:
-
-                string += item['name']
-                string += new_line
-                strings = [item['base'], item['quantity'], item['discount'], item['total'], item['tax_rate_id']]
-                string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=2)
-                string += new_line
-
-            string += printer.line(line_char_no=line_char_no)
-            string += new_line
-
-
-            white_spaces = [0.5, 0.5]
-            strings = [_('Total') + ' ' + bill_dict['currency'] + ':', bill_dict['total']]
-            aligns = ['left', 'right']
-            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
-
-
-            string += printer.line(line_char_no=line_char_no)
-            string += new_line
-
-            white_spaces = [0.08, 0.22, 0.23, 0.23, 0.24]
-            strings = ['', _('Rate'), _('Subtotal'), _('Tax'), _('Total')]
-            aligns = ['left', 'right', 'right', 'right', 'right']
-
-            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
-
-
-            for rate in bill_dict['tax_rates']:
-                strings = [rate['id'], rate['amount'], rate['net_sum'], rate['tax_sum'], rate['gross_sum']]
-                string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
-                string += new_line
-
-
-            string += printer.line(line_char_no=line_char_no, style='Dashed')
-
-            strings = [_('Sum'), '', bill_dict['tax_sums']['net_sum'], bill_dict['tax_sums']['tax_sum'], bill_dict['tax_sums']['gross_sum']]
-            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
-
-            string += new_line
-
-            white_spaces = [0, 1]
-            strings = [_('Cashier') + ': ' + bill_dict['user_name'], bill_dict['timestamp']]
-            aligns = ['left', 'right']
-
-            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
-
-            string += new_line
-            string += new_line
-            string += new_line
-            return string
-    return
