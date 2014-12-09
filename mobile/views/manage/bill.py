@@ -4,8 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Bill, BillItem
 from pos.views.bill import bill_to_dict, create_printable_bill
-from pos.views.util import has_permission, \
-    JsonError, JsonParse, JsonOk
+from common.functions import has_permission, JsonError, JsonParse, JsonOk
 
 import datetime as dtm
 

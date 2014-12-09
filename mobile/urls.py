@@ -1,5 +1,4 @@
 from django.conf.urls import patterns, url
-from django.utils.translation import ugettext as _
 
 from common import globals as g
 from mobile.views.manage.company import get_company, edit_company
