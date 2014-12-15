@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.decorators import login_required as login_required_nolocking
@@ -133,7 +133,10 @@ def lock_session(request, company):
     request.session['original_url'] = request.get_full_path()
     request.session.modified = True
 
-    return JsonOk()
+    if request.is_ajax():
+        return JsonOk()
+    else:
+        return redirect('pos:locked_session', args=(c.url_name,))
 
 
 # ignore locking here or we'll be caught in an infinite redirect loop
@@ -256,6 +259,21 @@ def check_unlock_credentials(request, company, android=False):
 
         # log in the other user
         user = authenticate(username=switched_user.username, password=pin, type='pin', company=c)
+		if not user:
+        	return JsonError(_("User authentication failed."))
 
-        return {'status': 'ok', 'user': user, 'redirect_url': redirect_url}
+    	django_login(request, user)		
 
+    # return the url that we'll redirect to
+    if request.is_ajax():
+        # there is no redirecting
+        data = {
+            'status': 'ok',
+            'user_id': user.id,
+            'user_name': unicode(user),
+            'csrf_token': unicode(csrf(request)['csrf_token']),
+        }
+        return JsonResponse(data)
+    else:
+        # redirect to the redirect url
+        return redirect(redirect_url)

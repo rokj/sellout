@@ -1,14 +1,12 @@
 from datetime import datetime as dtm
 from decimal import Decimal
 
-from django.contrib.auth.decorators import login_required
+from common.decorators import login_required
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from pytz import timezone
-
-import unidecode
 
 from pos.models import Company, Product, Discount, Register, Contact, \
     Bill, BillCompany, BillContact, BillRegister, BillItem, BillItemDiscount
