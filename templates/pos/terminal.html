@@ -71,8 +71,6 @@ $(window).load(function(){
               check_bill_status: "{% url 'pos:check_bill_status' company.url_name %}",
               // management: registers (a link is needed for choosing current register)
               manage_registers: "{% url 'pos:list_registers' company.url_name %}",
-              // save last used register
-              set_register: "{% url 'pos:set_register' company.url_name %}",
               // create contacts on the fly
               quick_contacts: "{% url 'pos:quick_contacts' company.url_name %}"
         },

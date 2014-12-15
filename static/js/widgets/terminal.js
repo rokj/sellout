@@ -190,6 +190,7 @@ Terminal = function(g){
         // if there are no registers defined, send user to create one
         if(p.g.data.registers.length == 0){
             // do not use error_message() here because it won't block and redirect will be  instant
+            // TODO: replace with a fancy custom dialog
             alert(gettext("There are no registers defined, please add one"));
             window.location.href = p.g.urls.manage_registers;
         }
