@@ -13,6 +13,12 @@ from pos.views.terminal import switch_user
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
+def lock_session(request, company):
+    return
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
 def unlock_session(request, company):
     """
         always returns an ajax response
