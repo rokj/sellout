@@ -8,7 +8,7 @@ from pos.models import Company, Permission
 from django.utils.translation import ugettext as _
 from rest_framework.authtoken.models import Token
 from pos.views.manage.company import company_to_dict
-from pos.views.terminal import check_unlock_credentials
+from pos.views.terminal import switch_user
 
 
 @api_view(['GET', 'POST'])
@@ -24,7 +24,7 @@ def unlock_session(request, company):
         always returns an ajax response
     """
 
-    cleaned_data = check_unlock_credentials(request, company, android=True)
+    cleaned_data = switch_user(request, company)
 
     if cleaned_data['status'] == 'ok':
         user = cleaned_data['user']

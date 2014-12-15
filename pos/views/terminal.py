@@ -1,5 +1,7 @@
+from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from gnome.ui import scores_display_with_pixmap
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.decorators import login_required as login_required_nolocking
@@ -99,26 +101,6 @@ def save(request, company):
 
 
 @login_required
-def set_register(request, company):
-    try:
-        c = Company.objects.get(url_name=company)
-    except Company.DoesNotExist:
-        return JsonError(_("Company does not exist."))
-
-    # the user must have view permissions for terminal
-    if not has_permission(request.user, c, 'terminal', 'view'):
-        return JsonError(_("Permission denied"))
-
-    # get the number and
-    try:
-        id = int(JsonParse(request.POST.get('data')).get('register_id'))
-    except (ValueError, TypeError):
-        return JsonError("Data error")
-
-    return JsonOk()
-
-
-@login_required
 def lock_session(request, company):
     try:
         c = Company.objects.get(url_name=company)
@@ -151,6 +133,7 @@ def locked_session(request, company):
     context = {
         'company': c,
         'pin_length': g.PIN_LENGTH,
+        'message': '',
     }
 
     return render(request, 'locked.html', context)
@@ -159,51 +142,53 @@ def locked_session(request, company):
 # ignore locking here or we'll be caught in an infinite redirect loop
 @login_required_nolocking
 def unlock_session(request, company):
+
+    switch_data = switch_user(request, company)
+    c = switch_data.get('company')
+
+    if switch_data.get('status') == 'ok':
+        # redirect to
+        user = switch_data.get('user')
+
+        redirect_url = switch_data.get('redirect_url')
+        if not redirect_url:
+            redirect_url = reverse('pos:terminal', args=(c.url_name,))
+
+        # return the url that we'll redirect to
+        # there is no redirecting
+        return JsonResponse({
+            'status': switch_data.get('status'),
+            'user_id': switch_data.get('user').id,
+            'user_name': unicode(user),
+            'company': c.url_name,  # here, url name is required
+            'csrf_token': unicode(csrf(request)['csrf_token']),
+            'redirect_url': redirect_url,
+        })
+    else:  # switching failed for some reason
+        return JsonError(switch_data.get('message'))
+
+
+def switch_user(request, company):
     """
-        always returns an ajax response
+        switches user with PIN in request.POST.
+        returns {status, message } if something went wrong or
+                { status, user, redirect_url, company } if the user has been switched successfully
     """
-
-    cleaned_data = check_unlock_credentials(request, company)
-
-    if cleaned_data['status'] == 'ok':
-        user = cleaned_data['user']
-        redirect_url = cleaned_data['redirect_url']
-    else:
-        return JsonResponse(cleaned_data)
-
-    if not user:
-        return JsonError(_("User authentication failed."))
-
-    django_login(request, user)
-
-    # return the url that we'll redirect to
-    data = {
-        'status': 'ok',
-        'redirect_to': redirect_url,
-        'user_id': user.id,
-        'user_name': unicode(user),
-        'csrf_token': unicode(csrf(request)['csrf_token']),
-    }
-
-    return JsonResponse(data)
-
-
-def check_unlock_credentials(request, company, android=False):
-    # check the user credentials:
-    if not request.user.is_authenticated():
-        return {'status': 'locked', 'message': _("This session is locked")}
-
     # get the company
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return {'status': 'error', 'message': _("Company does not exist")}
 
+    # check the user credentials:
+    if not request.user.is_authenticated():
+        return {'status': 'locked', 'message': _("This session is locked"), 'company': c}
+
     # check if the user belongs to this company
     try:
         current_permission = Permission.objects.get(company=c, user=request.user)
     except Permission.DoesNotExist:
-        return {'status': 'error', 'message': _("You have no permission for this company")}
+        return {'status': 'error', 'message': _("You have no permission for this company"), 'company': c}
 
     # get the new user using data in request.POST:
     # next: the next url
@@ -216,7 +201,7 @@ def check_unlock_credentials(request, company, android=False):
         if not data:
             raise KeyError
     except (KeyError, ValueError, TypeError):
-        return
+        return {'status': 'error', 'message': "Invalid request data", 'company': c}
 
     if data.get('unlock_type') == 'pin':
         # get a user from current company by entered pin
@@ -225,7 +210,7 @@ def check_unlock_credentials(request, company, android=False):
             switched_permission = Permission.objects.get(company=c, pin=pin)
             switched_user = switched_permission.user
         except (Permission.DoesNotExist, TypeError, ValueError):
-            return {'status': 'error', 'message': _("Wrong PIN")}
+            return {'status': 'error', 'message': _("Wrong PIN"), 'company': c}
     elif data.get('unlock_type') == 'password':
         # get a user from current company by email and password (achtung! filter by company!)
         # try:
@@ -233,48 +218,33 @@ def check_unlock_credentials(request, company, android=False):
         #     switched_permission = Permission.objects.get(user=switched_user, company=c)
         #
         #     if switched_user
-        return {'status': 'error', 'message': _("Not implemented")}
+        return {'status': 'error', 'message': _("Not implemented"), 'company': c}
     else:
-        return {'status': 'error', 'message': _("Unknown unlock type")}
+        return {'status': 'error', 'message': _("Unknown unlock type"), 'company': c}
 
     # TODO: prevent a user with higher privileges to log in using only PIN
 
     # log the user in
     if not switched_user.is_active:
-        return {'status': 'error', 'message': _("This user is not active.")}
+        return {'status': 'error', 'message': _("This user is not active."), 'company': c}
 
-    if android:
+    # clear this user's session
+    redirect_url = request.session.get('original_url')
+    request.session['locked'] = []
+    request.session.modified = True
+    request.session.clear()
 
-        return {'status': 'ok', 'user': switched_user, 'company': c}
+    # log out the current user
+    django_logout(request)
 
-    else:
-        # clear this user's session
-        redirect_url = request.session['original_url']
-        request.session['locked'] = []
-        request.session.modified = True
-        request.session.clear()
+    # log in the other user
+    user = authenticate(username=switched_user.username, password=pin, type='pin', company=c)
+    if not user:
+        return {'status': 'error', 'message': _("Authentication failed"), 'company': c}
 
-        # log out the current user
-        django_logout(request)
+    django_login(request, user)
 
-        # log in the other user
-        user = authenticate(username=switched_user.username, password=pin, type='pin', company=c)
-
-        if not user:
-            return JsonError(_("User authentication failed."))
-
-        django_login(request, user)
-
-        # return the url that we'll redirect to
-        if request.is_ajax():
-            # there is no redirecting
-            data = {
-                'status': 'ok',
-                'user_id': user.id,
-                'user_name': unicode(user),
-                'csrf_token': unicode(csrf(request)['csrf_token']),
-            }
-            return JsonResponse(data)
-        else:
-            # redirect to the redirect url
-            return redirect(redirect_url)
+    return {'status': 'ok',
+            'user': switched_user,
+            'redirect_url': redirect_url,
+            'company': c, }

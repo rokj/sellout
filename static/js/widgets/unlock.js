@@ -121,7 +121,7 @@ UnlockScreen = function(unlock_url, csrf_token, ajax, g){
                     }
                 }
                 else{
-                    window.location.href = response.redirect_to;
+                    window.location.href = response.redirect_url;
                 }
             }
         });
