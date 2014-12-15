@@ -8,8 +8,6 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from pytz import timezone
 
-import unidecode
-
 from pos.models import Company, Product, Discount, Register, Contact, \
     Bill, BillCompany, BillContact, BillRegister, BillItem, BillItemDiscount
 from pos.views.manage.company import company_to_dict
