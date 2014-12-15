@@ -21,14 +21,17 @@
     <script src="{% static 'js/widgets/unlock.js' %}" language="javascript"></script>
 
     <script language="javascript">
-        $(document).ready(function(){
+        $(window).load(function(){
+            window.keyboard = new Keyboard();
+
             var unlock_screen = new UnlockScreen(
                 "{% url 'pos:unlock_session' company.url_name %}",
-                "{{ original_url }}",
                 "{{ csrf_token }}"
             );
 
             $("*").disableSelection();
+
+            $("#unlock_dialog_container").show(); // hidden by default in terminal
         });
     </script>
 </head>

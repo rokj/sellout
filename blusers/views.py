@@ -3,9 +3,7 @@ import base64
 import string
 import json
 import django
-from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.core.validators import validate_email
 from django.template.loader import render_to_string
 import requests
 from rest_framework import parsers, renderers
@@ -38,6 +36,7 @@ from config.functions import get_user_value, set_user_value, get_company_config
 from rest_framework.decorators import api_view
 from mobile.views.manage.configuration import get_mobile_config, company_config_to_dict
 from pos.models import Company
+from pos.views.manage.company import company_to_dict
 from settings import GOOGLE_API
 
 from easy_thumbnails.files import get_thumbnailer
@@ -690,11 +689,13 @@ class ObtainAuthToken(APIView):
         if user:
             user_credentials = get_user_credentials(user)
         else:
-            return JsonError("error", "this should not happen")
+            return JsonError("error", _("User authentication failed."))
+        # TODO: get company
         company = Company.objects.get(id=1)
         return JsonResponse({'token': token.key,
                               'user': user_credentials,
                               'config': company_config_to_dict(request, company),
+                              'company': company_to_dict(company, android=True),
                               'status': "ok"})
 
 

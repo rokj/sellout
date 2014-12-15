@@ -26,7 +26,7 @@ class ObtainAuthToken(APIView):
     authentication_classes = (OAuth2Authentication,)
     model = Token
 
-    def post(self, request, backend):
+    def post(self, request, backend, type="Normal"):
         if backend == 'auth':
             serializer = self.serializer_class(data=request.DATA)
             if serializer.is_valid():

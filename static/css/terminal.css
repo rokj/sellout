@@ -98,6 +98,22 @@ div#selector{
     margin-top: 10px;
 }
 
+/*                    */
+/* lock/unlock screen */
+/*                    */
+#lock_shadow {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: #f0f0f0;
+    opacity: 0.7;
+    z-index: 14998; /* see window.last_dialog_zindex in common.js */
+}
+
 /*       */
 /* other */
 /*       */

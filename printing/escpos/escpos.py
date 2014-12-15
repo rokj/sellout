@@ -201,7 +201,7 @@ class Escpos(object):
         # qr_img = qr_code.make_image()
         # im = qr_img._img.convert("RGB")
         # Convert the RGB image in printable image
-        self._convert_image(im)
+        # self._convert_image(im)
 
     """
     def barcode(self, code, bc, width, height, pos, font):

@@ -29,10 +29,43 @@
 {% endblock %}
 
 {% block content %}
+    {% comment %} company list {% endcomment %}
+    <section>
+        <div class="container">
+            <h2>{% trans 'Your companies' %}</h2>
+            {% if companies|length %}
+                <div id="companies_list">
+                    {% for company in companies %}
+                        <div class="company table-row top-border">
+                            <div class="company-name table-cell">
+                                <a href="{% url 'pos:terminal' company.url_name %}"> {{ company.name }} </a>
+                            </div>
+                            <div class="company-delete table-cell hidden">{# so far, this is hidden #}
+                                <img src="{% static 'icons/delete_red.png' %}"
+                                     class="hoverable delete"
+                                     data-id="{{ company.id }}" />
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>{% trans 'You are not part of any company yet.' %}</p>
+                <p>{% trans 'Create your own company or wait for an invite.' %}</p>
+            {% endif %}
+
+            <div id="new_company">
+                <a id="new_company_link"
+                   href="{% url 'web:register_company' %}"
+                   class="add"> + {% trans 'Add Company' %}</a>
+            </div>
+        </div>
+    </section>
+
+    {% comment %} notifications {% endcomment %}
     <section>
         {% if actions|length %}
             <div class="container">
-            <h2>{% trans 'Awaiting actions' %}</h2>
+            <h2>{% trans 'Notifications' %}</h2>
             <table id="actions">
                 {% for a in actions %}
                     <div class="action-container table-row">
@@ -54,37 +87,12 @@
         {% endif %}
     </section>
 
+    {% comment %} user settings {% endcomment %}
     <section>
-    <div class="container">
-        <h2>{% trans 'Your companies' %}</h2>
-
-        {% if companies|length %}
-            <div id="companies_list">
-                {% for company in companies %}
-                    <div class="company table-row top-border">
-                        <div class="company-name table-cell">
-                            <a href="{% url 'pos:terminal' company.url_name %}"> {{ company.name }} </a>
-                        </div>
-                        <div class="company-delete table-cell hidden">{# so far, this is hidden #}
-                            <img src="{% static 'icons/delete_red.png' %}"
-                                 class="hoverable delete"
-                                 data-id="{{ company.id }}" />
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p>{% trans 'You are not part of any company yet.' %}</p>
-            <p>{% trans 'Create your own company or wait for an invite.' %}</p>
-        {% endif %}
-
-        <div id="new_company">
-            <a id="new_company_link"
-               href="{% url 'web:register_company' %}"
-               class="add"> + {% trans 'Add Company' %}</a>
+        <div class="container">
+            <h2>{% trans 'Your settings' %}</h2>
+            <input type="button" value="fuck yourself in the arse" />
         </div>
-    </div>
-
     </section>
 {% endblock %}
 

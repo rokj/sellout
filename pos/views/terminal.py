@@ -1,8 +1,11 @@
+from django.core.urlresolvers import reverse
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from gnome.ui import scores_display_with_pixmap
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.decorators import login_required as login_required_nolocking
+from django.core.context_processors import csrf
 
 from django.contrib.auth import logout as django_logout, authenticate
 from django.contrib.auth import login as django_login
@@ -72,6 +75,7 @@ def terminal(request, company):
         'currency': get_company_value(request.user, c, 'pos_currency'),
         'sexes': g.SEXES,
         'countries': country_choices,
+        'pin_length': g.PIN_LENGTH,
 
         # user config
         'config': JsonStringify(config),
@@ -97,26 +101,6 @@ def save(request, company):
 
 
 @login_required
-def set_register(request, company):
-    try:
-        c = Company.objects.get(url_name=company)
-    except Company.DoesNotExist:
-        return JsonError(_("Company does not exist."))
-
-    # the user must have view permissions for terminal
-    if not has_permission(request.user, c, 'terminal', 'view'):
-        return JsonError(_("Permission denied"))
-
-    # get the number and
-    try:
-        id = int(JsonParse(request.POST.get('data')).get('register_id'))
-    except (ValueError, TypeError):
-        return JsonError("Data error")
-
-    return JsonOk()
-
-
-@login_required
 def lock_session(request, company):
     try:
         c = Company.objects.get(url_name=company)
@@ -128,9 +112,13 @@ def lock_session(request, company):
         request.session['locked'] = []
 
     request.session['locked'].append(c.url_name)
+    request.session['original_url'] = request.GET.get('next')
     request.session.modified = True
 
-    return JsonOk()
+    if request.is_ajax():
+        return JsonOk()
+    else:
+        return redirect('pos:locked_session', company=c.url_name)
 
 
 # ignore locking here or we'll be caught in an infinite redirect loop
@@ -144,6 +132,8 @@ def locked_session(request, company):
 
     context = {
         'company': c,
+        'pin_length': g.PIN_LENGTH,
+        'message': '',
     }
 
     return render(request, 'locked.html', context)
@@ -152,25 +142,52 @@ def locked_session(request, company):
 # ignore locking here or we'll be caught in an infinite redirect loop
 @login_required_nolocking
 def unlock_session(request, company):
-    """
-        always returns an ajax response
-    """
+    switch_data = switch_user(request, company)
+    c = switch_data.get('company')
 
-    # check the user credentials:
-    if not request.user.is_authenticated():
-        return JsonResponse({'status': 'locked', 'message': _("This session is locked")})
+    if switch_data.get('status') == 'ok':
+        # redirect to
+        user = switch_data.get('user')
 
+        redirect_url = switch_data.get('redirect_url')
+        if not redirect_url:
+            redirect_url = reverse('pos:terminal', args=(c.url_name,))
+
+        # return the url that we'll redirect to
+        # there is no redirecting
+        return JsonResponse({
+            'status': switch_data.get('status'),
+            'user_id': switch_data.get('user').id,
+            'user_name': unicode(user),
+            'company': c.url_name,  # here, url name is required
+            'csrf_token': unicode(csrf(request)['csrf_token']),
+            'redirect_url': redirect_url,
+        })
+    else:  # switching failed for some reason
+        return JsonError(switch_data.get('message'))
+
+
+def switch_user(request, company):
+    """
+        switches user with PIN in request.POST.
+        returns {status, message } if something went wrong or
+                { status, user, redirect_url, company } if the user has been switched successfully
+    """
     # get the company
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
-        return JsonError(_("Company does not exist"))
+        return {'status': 'error', 'message': _("Company does not exist")}
+
+    # check the user credentials:
+    if not request.user.is_authenticated():
+        return {'status': 'locked', 'message': _("This session is locked"), 'company': c}
 
     # check if the user belongs to this company
     try:
         current_permission = Permission.objects.get(company=c, user=request.user)
     except Permission.DoesNotExist:
-        return JsonError(_("You have no permission for this company"))
+        return {'status': 'error', 'message': _("You have no permission for this company"), 'company': c}
 
     # get the new user using data in request.POST:
     # next: the next url
@@ -183,15 +200,16 @@ def unlock_session(request, company):
         if not data:
             raise KeyError
     except (KeyError, ValueError, TypeError):
-        return
+        return {'status': 'error', 'message': "Invalid request data", 'company': c}
 
     if data.get('unlock_type') == 'pin':
         # get a user from current company by entered pin
         try:
-            switched_permission = Permission.objects.get(company=c, pin=int(data.get('pin')))
+            pin = int(data['pin'])
+            switched_permission = Permission.objects.get(company=c, pin=pin)
             switched_user = switched_permission.user
         except (Permission.DoesNotExist, TypeError, ValueError):
-            return JsonError(_("Wrong PIN"))
+            return {'status': 'error', 'message': _("Wrong PIN"), 'company': c}
     elif data.get('unlock_type') == 'password':
         # get a user from current company by email and password (achtung! filter by company!)
         # try:
@@ -199,15 +217,18 @@ def unlock_session(request, company):
         #     switched_permission = Permission.objects.get(user=switched_user, company=c)
         #
         #     if switched_user
-        return JsonError("Not implemented")
+        return {'status': 'error', 'message': _("Not implemented"), 'company': c}
     else:
-        return JsonError("Unknown unlock type")
+        return {'status': 'error', 'message': _("Unknown unlock type"), 'company': c}
+
+    # TODO: prevent a user with higher privileges to log in using only PIN
 
     # log the user in
     if not switched_user.is_active:
-        return JsonError(_("This user is not active."))
+        return {'status': 'error', 'message': _("This user is not active."), 'company': c}
 
     # clear this user's session
+    redirect_url = request.session.get('original_url')
     request.session['locked'] = []
     request.session.modified = True
     request.session.clear()
@@ -216,8 +237,13 @@ def unlock_session(request, company):
     django_logout(request)
 
     # log in the other user
-    user = authenticate(username=switched_user.username, password=data.get('pin'), type='pin', company=c)
+    user = authenticate(username=switched_user.username, password=pin, type='pin', company=c)
+    if not user:
+        return {'status': 'error', 'message': _("Authentication failed"), 'company': c}
+
     django_login(request, user)
 
-    # return the url that we'll redirect to
-    return JsonOk()
+    return {'status': 'ok',
+            'user': switched_user,
+            'redirect_url': redirect_url,
+            'company': c, }

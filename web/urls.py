@@ -3,8 +3,6 @@ import views
 from pos.views.manage import company
 
 urlpatterns = patterns('',
-    url(r'^$', views.index, name='index'),
-
     # user registrations
     url(r'^sign-up/$', views.sign_up, name='sign_up'),
 
@@ -25,4 +23,7 @@ urlpatterns = patterns('',
 
     # selecting
     url(r'^select-company/$', views.select_company, name='select_company'),
+
+    # index
+    url(r'^$', views.index, name='index'),
 )

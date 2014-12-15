@@ -25,7 +25,6 @@ def login_required(view):
                         'original_url': request.session['original_url'],
                     })
                 else:
-                    print 'redirect to unlock'
                     # redirect to the unlock screen
                     return HttpResponseRedirect(
                         reverse('pos:locked_session', kwargs=kwargs) +
@@ -33,11 +32,9 @@ def login_required(view):
                     )
             else:
                 # the user is logged in and session is not locked, pass on
-                print 'redirecting to original'
                 return view(*args, **kwargs)
         else:  # the user is not logged in
-            print 'redirecting to index'
-            redirect_url = reverse('web:index') + '/?next=' + request.get_full_path() + '#login'
+            redirect_url = reverse('web:index') + '?next=' + request.get_full_path() + '#login'
 
             if request.is_ajax():
                 # return ajax message

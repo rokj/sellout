@@ -31,6 +31,7 @@ class BillSearchForm(CompanyUserForm):
     page = forms.IntegerField(required=False, widget=forms.HiddenInput)
 
 
+
 ###
 ### views
 ###

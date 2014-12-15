@@ -161,6 +161,14 @@
                 },
                 function(){}); // no action
         });
+
+        // custom number inputs: do not use type="number" because of decimal separators some browsers put them there
+        // just cancel everything entered
+        $(".custom-number").keypress(function(e){
+            if(e.which < '0'.charCodeAt(0) || e.which > '9'.charCodeAt(0)){
+                e.preventDefault();
+            }
+        });
     });
     </script>
 {% endblock %}
@@ -190,13 +198,13 @@
                 {% for p in permissions %}
                 <tr data-id="{{ p.id }}"
                     data-permission="{{ p.permission }}"
-                    data-pin="{{ p.pin }}"
+                    data-pin="{{ p.pin_display }}"
                     data-user="{{ p.user }}">
 
                     <td class="name">{# register name is a link to edit form #}
                         {{ p.user }}
                     </td>
-                    <td class="pin">{{ p.pin }}</td>
+                    <td class="pin">{{ p.pin_display }}</td>
                     <td class="permission">{{ p.get_permission_display }}</td>
                     <td class="controls">
                         <img src="{% static 'icons/edit_black.png' %}"
@@ -218,9 +226,9 @@
             </tbody>
         </table>
 
-        <h2>{% trans 'Invites history' %}</h2>
+        <h2>{% trans 'Invite history' %}</h2>
 
-        {% if actions|length %}
+        {% if actions %}
             <table id="invites_history">
                 <thead>
                     <tr>
@@ -295,7 +303,7 @@
     <div id="edit_dialog" class="hidden">
         <div class="pin-edit-container">
             <label for="edit_pin">{% trans 'PIN' %}: </label>
-            <input type="number" id="edit_pin" />
+            <input type="text" id="edit_pin" class="custom-number" maxlength="{{ pin_length }}" />
         </div>
 
         <div class="permission-edit-container">

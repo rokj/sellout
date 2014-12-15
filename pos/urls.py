@@ -101,7 +101,6 @@ urlpatterns = patterns('',
     #
     # save terminal settings (will width and such)
     url(r_company + r'/save/$', terminal.save, name='save_terminal'),
-    url(r_company + r'/set-register/$', terminal.set_register, name='set_register'),
     url(r_company + r'/quick-contact/$', contact.quick_contacts, name='quick_contacts'),
     url(r_company + r'/finish-bill/$', terminal_bill.finish_bill, name='finish_bill'),
     url(r_company + r'/check-bill-status/$', terminal_bill.check_bill_status, name='check_bill_status'),

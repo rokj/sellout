@@ -29,11 +29,9 @@ blocks:
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
     <link rel="stylesheet" href="{% static 'css/statusbar.css' %}" />
 
-    {% comment %} jQuery {% endcomment %}
+    {% comment %} jQuery (UI) {% endcomment %}
     <script type="text/javascript" src="{% static 'jquery-ui-1.11.2.custom/external/jquery/jquery.js' %}"></script>
     <script type="text/javascript" src="{% static 'jquery-ui-1.11.2.custom/jquery-ui.js' %}"></script>
-
-    {% comment %} jQuery UI {% endcomment %}
 
     {% comment %} bignumber (for all number manipulation) {% endcomment %}
     <script src="{% static 'js/big.js' %}"></script>
@@ -50,6 +48,7 @@ blocks:
     <script type="text/javascript" src="{% static 'js/draggable.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/widgets/calculations.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/jquery.simpleMenu.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/widgets/unlock.js' %}"></script>
 
     <title>{% block title %}{{title}} - {{site_title}}{% endblock %}</title>
 
@@ -64,9 +63,6 @@ blocks:
         $(window).load(function(){
             {# common to management #}
             var items = {
-                terminal_menu_button: $("#terminal_button"),
-                terminal_menu_content: $("#terminal_menu"),
-
                 management_menu_button:  $("#management_button"),
                 management_menu_content: $("#management_menu"),
 
@@ -75,9 +71,11 @@ blocks:
             };
 
             // menus
-            items.terminal_menu_button.simpleMenu(items.terminal_menu_content);
             items.management_menu_button.simpleMenu(items.management_menu_content);
             items.user_menu_button.simpleMenu(items.user_menu_content);
+
+            // the keyboard object is accessible throughout the site
+            window.keyboard = new Keyboard();
         });
     </script>
     {% block head %}{% endblock %}
@@ -92,8 +90,6 @@ blocks:
             </div>
         {% endblock %}
 
-        {% block terminal_menu %}{% endblock %}
-
         <div id="user_button" class="button-container simple-menu-button">
             <div class="vertical-separator"></div>
 
@@ -102,9 +98,9 @@ blocks:
             <ul id="user_menu" class="drop-down">
                 {# store-related stuff #}
                 {% if company %}
-                    <li class="separator"><a  href="{% url 'pos:user_settings' company.url_name %}">{% trans 'User Settings' %}</a></li>
+                    <li><a href="{% url 'web:select_company' %}">{% trans 'Home' %}</a></li>
+                <li><a href="{% url 'pos:lock_session' company.url_name %}" id="switch_user">{% trans 'Switch User' %}</a></li>
                 {% endif %}
-                <li><a href="{% url 'pos:lock_session' company.url_name %}">{% trans 'Switch User' %}</a> </li>
                 <li><a href="{% url 'web:logout' %}">{% trans 'Log Out' %}</a></li>
             </ul>
         </div>

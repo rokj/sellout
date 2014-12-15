@@ -11,6 +11,7 @@ from blusers.models import BlocklogicUser
 from blusers.views import try_register, unset_language, send_reactivation_key
 from common.functions import JsonParse, JsonError
 from common.decorators import login_required
+from django.contrib.auth.decorators import login_required as login_required_nolocking
 from django.contrib.auth import logout as django_logout
 from action.models import Action
 
@@ -61,7 +62,7 @@ def index(request):
 
     return render(request, "web/index.html", context)
 
-@login_required
+@login_required_nolocking
 def select_company(request):
     """ show current user's companies and a list of invites. """
 

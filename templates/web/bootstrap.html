@@ -17,6 +17,7 @@
     <script type="text/javascript" src="{% static 'jquery-ui-1.11.2.custom/jquery-ui.js' %}"></script>
 
     <script type="text/javascript" src="{% static 'js/jquery.simpleMenu.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/common.js' %}"></script>
 
     <script src="{% static 'js/common.js' %}"></script>
 
@@ -28,6 +29,13 @@
 
     {# common styles for the whole site #}
     <link href="{% static 'css/base.css' %}" rel="stylesheet">
+
+    <script type="text/javascript">
+        // the ommnipresent keyboard object
+        $(window).load(function(){
+            window.keyboard = new Keyboard();
+        });
+    </script>
 
     {% block head %}{% endblock %}
 </head>

@@ -1,11 +1,11 @@
 from django.conf.urls import patterns, url
-from django.utils.translation import ugettext as _
 
 from common import globals as g
 from mobile.views.manage.company import get_company, edit_company
 from mobile.views.manage.register import mobile_add_register, mobile_edit_register, \
     mobile_delete_register, mobile_get_register
-from mobile.views.views import mobile_get_cut, mobile_get_units
+
+from mobile.views import views
 
 from mobile.views import login
 from mobile.views import bill
@@ -15,7 +15,8 @@ from mobile.views.manage import discount
 from mobile.views.manage import tax
 from mobile.views.manage import contact
 from mobile.views.manage import configuration
-
+from mobile.views.manage import bill as bill_management
+from mobile.views.manage import users
 
 ### common URL prefixes: ###
 # company's site: /pos/blocklogic
@@ -52,7 +53,7 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/discounts/edit/?$', discount.mobile_edit_discount, name='edit_discount'),
 
     # units
-    url(r_company + r'/manage/json/units/?$', mobile_get_units, name='get_units'),
+    url(r_company + r'/manage/json/units/?$', views.mobile_get_units, name='get_units'),
 
     # taxes
     url(r_company + r'/manage/json/taxes/?$', tax.mobile_list_taxes, name='get_taxes'), # get all taxes in a json list
@@ -70,7 +71,7 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/products/favourite/?$', product.mobile_toggle_favorite, name='delete_product'), # edit (save) product - json
 
     # CUT (Categories, units, taxes)
-    url(r_company + r'/manage/json/cut/get', mobile_get_cut, name='get_cut'), # get categories, units, taxes
+    url(r_company + r'/manage/json/cut/get', views.mobile_get_cut, name='get_cut'), # get categories, units, taxes
 
     url(r_company + r'/manage/json/units/?$', product.mobile_JSON_units, name='mobile_JSON_units'),
 
@@ -93,6 +94,12 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/register/delete', mobile_delete_register, name='mobile_delete_register'),
     url(r_company + r'/manage/json/register/get_with_id', mobile_get_register, name='mobile_get_register_with_id'),
     # available discounts list
-    # url(r_company + r'/manage/json/discounts/?$', discount.json_discounts, name='json_discounts'),
-    
+    # url(r_company + r'/manage/json/discounts/?$', discount.JSON_discounts, name='JSON_discounts'),
+
+    # bill
+    url(r_company + r'/manage/json/bill/list/?$', bill_management.list_bills, name='mobile_list_bills'),
+    url(r_company + r'/manage/json/bill/print/?$', bill_management.print_bill, name='mobile_print_bill'),
+
+    # user
+    url(r_company + r'/manage/json/users/unlock/?$', users.unlock_session, name='mobile_unlock_session'),
 )

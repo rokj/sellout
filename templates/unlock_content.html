@@ -1,10 +1,12 @@
 {% load i18n %}
 
-<div id="unlock_dialog_container">
+<div id="unlock_title">{% trans 'Enter PIN' %}</div>
+<div id="unlock_dialog_container" class="hidden">
+    {% if message %}<div id="unlock_message">{{ message }}</div>{% endif %}
+
     <div id="pin_container" class="container">
-        <h2>{% trans 'Enter your PIN:' %}</h2>
         <input id="pin" class="large-input"
-               type="password" placeholder="PIN" maxlength="{{ pin_length }}" />
+               type="password" maxlength="{{ pin_length }}" />
 
         <div id="keypad_container">
             <div class="key number" data-number="1">1</div>

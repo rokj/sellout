@@ -34,7 +34,11 @@ function custom_dialog(title, content, width, buttons){
         .appendTo(body)
         .fadeIn(function(){ container.appendTo(body); });
 
-    // add a function to the
+    // add a function to the dialog for use outside this function
+    var unique_id = Math.random().toString();
+    var ok_message = "custom-dialog-ok-" + unique_id;
+    var cancel_message = "custom-dialog-cancel-" + unique_id;
+
     content.close_dialog = function(){
         shadow.fadeOut("fast", function(){
             shadow.remove();
@@ -42,11 +46,33 @@ function custom_dialog(title, content, width, buttons){
 
         content.hide().detach(); // content will stay in parent's variable
         container.remove();
+
+        window.keyboard.remove(ok_message);
+        window.keyboard.remove(cancel_message);
     };
 
-    close_button.unbind().click(function(){
-        content.close_dialog();
-    });
+    close_button.unbind().click(content.close_dialog);
+
+    // clicks, keys and document events
+    function bind_key(button, action, auto_close, message_code, key_code){
+        function on_click(){
+            if(action) action();
+            if(auto_close != false) content.close_dialog();
+        }
+
+        button.unbind();
+        button.click(on_click);
+
+        window.keyboard.add(ok_message, key_code, on_click);
+    }
+
+    function bind_ok_key(button, action, auto_close){
+        bind_key(button, action, auto_close, ok_message, 'enter');
+    }
+
+    function bind_cancel_key(button, action, auto_close){
+        bind_key(button, action, auto_close, cancel_message, 'escape');
+    }
 
     // buttons is an object that can contain the following:
     // yes: <yes button text>
@@ -69,31 +95,20 @@ function custom_dialog(title, content, width, buttons){
             footer.append(ok_button);
 
             // ok buttons closes the dialog and executes ok_action, if it's there
-            ok_button.unbind();
-            if(buttons.ok_action) ok_button.click(buttons.ok_action);
-
-            if(buttons.auto_close != false) ok_button.click(content.close_dialog);
+            bind_ok_key(ok_button, buttons.ok_action, buttons.auto_close);
         }
         else if(buttons.yes && buttons.no){
             var yes_button = $("<input>", button_attrs);
             yes_button.addClass("ok");
             yes_button.attr("value", buttons.yes);
 
-            yes_button.click(function(){
-                if(buttons.yes_action) buttons.yes_action();
-
-                if(buttons.auto_close != false) content.close_dialog();
-            });
+            bind_ok_key(yes_button, buttons.yes_action, buttons.auto_close);
 
             var no_button = $("<input>", button_attrs);
             no_button.addClass("cancel");
             no_button.attr("value", buttons.no);
 
-            no_button.click(function(){
-                if(buttons.no_action) buttons.no_action();
-
-                if(buttons.auto_close != false) content.close_dialog();
-            });
+            bind_cancel_key(no_button, buttons.no_action, buttons.auto_close);
 
             footer.append(no_button);
             footer.append(yes_button);
@@ -537,3 +552,63 @@ function load_local(key){
 function clear_local(key){
     delete localStorage[key];
 }
+
+// keyboard shortcuts
+Keyboard = function(){
+    // handles keyboard actions;
+    // window.keyboard.add(event-id, key, handler)
+    //   event-id: arbitrary unique id of event, (string)
+    //   key: pre-defined keys (must be added in event under init section of this object
+    //   handler: function that will be called when key is pressed
+
+    var p = this;
+
+    // stores custom event identifiers (like 'close-search' etc)
+    p.stack = {};
+
+    //
+    // methods
+    //
+    p.add = function(eid, key, handler){
+        // add an event id to escape stack
+        if (key in p.stack) {
+            p.stack[key].push(eid)
+        } else {
+            p.stack[key] = [eid];
+        }
+
+        // register the event
+        $(document).on(eid, handler);
+    };
+
+    p.remove = function(eid, key){
+        // removes event id from stack
+        if (key in p.stack && p.stack[key].length > 0) {
+            var i = p.stack[key].indexOf(eid);
+            if(i > -1){
+                remove_from_array(p.stack[key], i);
+            }
+        }
+        // remove event binding
+        $(document).unbind(eid);
+    };
+
+    //
+    // init
+    //
+    // capture key
+    $(document).keydown(function(e){
+        if (e.keyCode == 27) { // escape
+            if('escape' in p.stack && p.stack['escape'].length > 0){
+                e.stopImmediatePropagation();
+                $(document).trigger(p.stack['escape'].pop());
+            }
+        }
+        else if(e.keyCode == 13) { // enter
+            if('enter' in p.stack && p.stack['enter'].length > 0){
+                e.stopImmediatePropagation();
+                $(document).trigger(p.stack['enter'].pop());
+            }
+        }
+    });
+};
