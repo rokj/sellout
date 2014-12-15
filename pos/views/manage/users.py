@@ -45,7 +45,9 @@ def list_users(request, company):
 
         'actions': actions,
 
-        'title': _("Discounts"),
+        'pin_length': g.PIN_LENGTH,
+
+        'title': _("Users"),
         'site_title': g.MISC['site_title'],
         'date_format_django': get_date_format(request.user, c, 'django'),
     }
@@ -83,12 +85,20 @@ def edit_permission(request, company):
     if d.get('permission') not in g.PERMISSION_TYPES:
         return JsonError(_("This permission type does not exist"))
 
+    if len(d.get('pin')) != g.PIN_LENGTH:
+        return JsonError(_("Wrong pin length."))
+
     # everything seems to be OK, update PIN
     if not permission.create_pin(int(d.get('pin'))):
         return JsonError(_("This PIN has already been assigned to a user from this company. "
-                           "Please choose a different PIN."))
+                           "Please choose a different one."))
 
-    # update permission
+    # update permission:
+    # check if not degrading the last admin in the group
+    if Permission.objects.filter(company=c, permission='admin').exclude(id=permission.id).count() == 0:
+        # there would be no admins left in this company do not allow changing permission
+        return JsonError(_("You cannot change permission of the last admin of this company."))
+
     permission.permission = d.get('permission')
     permission.save()
 
@@ -212,9 +222,11 @@ def invite_users(request, company):
         message_text = render_to_string(template_text, mail_context)
 
         if settings.DEBUG:
+            print "============="
             print message_text
             print "============="
             print message_html
+            print "============="
         else:
             send_email(settings.EMAIL_FROM, [email], None,
                        settings.EMAIL_SUBJECT_PREFIX + " " + _("Invitation to join company on Sellout.biz"),

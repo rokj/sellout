@@ -112,13 +112,13 @@ def lock_session(request, company):
         request.session['locked'] = []
 
     request.session['locked'].append(c.url_name)
-    request.session['original_url'] = request.get_full_path()
+    request.session['original_url'] = request.GET.get('next')
     request.session.modified = True
 
     if request.is_ajax():
         return JsonOk()
     else:
-        return redirect('pos:locked_session', args=(c.url_name,))
+        return redirect('pos:locked_session', company=c.url_name)
 
 
 # ignore locking here or we'll be caught in an infinite redirect loop
@@ -142,7 +142,6 @@ def locked_session(request, company):
 # ignore locking here or we'll be caught in an infinite redirect loop
 @login_required_nolocking
 def unlock_session(request, company):
-
     switch_data = switch_user(request, company)
     c = switch_data.get('company')
 

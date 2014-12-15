@@ -55,6 +55,12 @@ Terminal = function(g){
     p.resize_timeout = 200;
     p.resize_timeout_handle = null;
 
+    // locking timeouts
+    p.lock_timeout = 5000; // lock session after ... ms of inactivity
+    p.lock_timeout_handle = null; // handle to timeout
+    p.lock_filter = 2000; // reset timeout timer at most once per ... ms (mousemove events are too frequent)
+    p.lock_timestamp = Date.now();
+
     //
     // methods: sizing and layout
     //
@@ -335,5 +341,14 @@ Terminal = function(g){
         clear_local('register_id');
 
         p.get_register(null);
+    });
+
+    // locking: capture all events in window and when there's nothing for ...minutes,
+    // lock the session
+    $(window).on("keypress click mousemove", function(){
+        var d = new Date();
+        if(false){
+
+        }
     });
 };

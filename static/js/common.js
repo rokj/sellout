@@ -102,13 +102,13 @@ function custom_dialog(title, content, width, buttons){
             yes_button.addClass("ok");
             yes_button.attr("value", buttons.yes);
 
-            bind_ok_key(buttons.yes, buttons.yes_action, buttons.auto_close);
+            bind_ok_key(yes_button, buttons.yes_action, buttons.auto_close);
 
             var no_button = $("<input>", button_attrs);
             no_button.addClass("cancel");
             no_button.attr("value", buttons.no);
 
-            bind_cancel_key(buttons.no, buttons.no_action, buttons.auto_close);
+            bind_cancel_key(no_button, buttons.no_action, buttons.auto_close);
 
             footer.append(no_button);
             footer.append(yes_button);
