@@ -1,4 +1,4 @@
-from datetime import datetime as dtm
+from datetime import datetime as dtm, datetime
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
@@ -9,6 +9,7 @@ from django.utils.translation import ugettext as _
 from pytz import timezone
 
 import unidecode
+from payment.models import BillPayment
 
 from pos.models import Company, Product, Discount, Register, Contact, \
     Bill, BillCompany, BillContact, BillRegister, BillItem, BillItemDiscount
@@ -461,13 +462,25 @@ def create_bill(request, company):
             db_discount = BillItemDiscount(
                 created_by=request.user,
                 bill_item=db_item,
-
                 description=discount['description'],
                 code=discount['code'],
                 type=discount['type'],
                 amount=discount['amount']
             )
             db_discount.save()
+
+    bill_payment = BillPayment(
+        type=g.CASH,
+        total=grand_total,
+        currency="USD", # TODO
+        transaction_datetime=datetime.now(),
+        status=g.WAITING,
+        created_by=request.user
+    )
+    bill_payment.save()
+
+    db_bill.payment = bill_payment
+    db_bill.save()
 
     d = {'bill': bill_to_dict(request.user, c, db_bill)}
     return JsonOk(extra=d)
@@ -727,3 +740,30 @@ def esc_format(user, company, bill, format, line_char_no=48, esc_commands=False)
             string += new_line
             return string
     return
+
+@login_required
+def get_payment_btc_info(request, company):
+    """
+        check if the bill has been paid and return the status
+    """
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+    # there should be bill_id in request.POST
+    try:
+        bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
+        bill = Bill.objects.get(company=c, id=bill_id)
+    except (Bill.DoesNotExist, ValueError, TypeError):
+        return JsonError(_("Bill does not exist or data is invalid"))
+
+    extra = {}
+
+    if bill.company == c:
+        # TODO: check for company and bill permission
+        extra['btc_address'] = bill.payment.get_btc_address(c.id)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
+
+    return JsonOk(extra=extra)
