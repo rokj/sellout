@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.decorators import login_required as login_required_nolocking
@@ -231,13 +231,15 @@ def unlock_session(request, company):
 
     django_login(request, user)
 
-    # return the url that we'll redirect to
-    data = {
-        'status': 'ok',
-        'redirect_to': redirect_url,
-        'user_id': user.id,
-        'user_name': unicode(user),
-        'csrf_token': unicode(csrf(request)['csrf_token']),
-    }
-
-    return JsonResponse(data)
+    if request.is_ajax():
+        # there is no redirecting
+        data = {
+            'status': 'ok',
+            'user_id': user.id,
+            'user_name': unicode(user),
+            'csrf_token': unicode(csrf(request)['csrf_token']),
+        }
+        return JsonResponse(data)
+    else:
+        # redirect to the redirect url
+        return redirect(redirect_url)
