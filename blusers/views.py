@@ -3,9 +3,7 @@ import base64
 import string
 import json
 import django
-from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.core.validators import validate_email
 from django.template.loader import render_to_string
 import requests
 from rest_framework import parsers, renderers
@@ -691,7 +689,8 @@ class ObtainAuthToken(APIView):
         if user:
             user_credentials = get_user_credentials(user)
         else:
-            return JsonError("error", "this should not happen")
+            return JsonError("error", _("User authentication failed."))
+        # TODO: get company
         company = Company.objects.get(id=1)
         return JsonResponse({'token': token.key,
                               'user': user_credentials,

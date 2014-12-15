@@ -193,7 +193,7 @@ def bill_to_dict(user, company, bill):
     return b
 
 
-def create_printable_bill(user, company, bill, receipt_format=None, esc=True):
+def create_printable_bill(user, company, bill, receipt_format=None, esc=False):
     # get the template and some other details
     logo = None
 

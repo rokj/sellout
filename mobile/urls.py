@@ -16,6 +16,7 @@ from mobile.views.manage import tax
 from mobile.views.manage import contact
 from mobile.views.manage import configuration
 from mobile.views.manage import bill as bill_management
+from mobile.views.manage import users
 
 ### common URL prefixes: ###
 # company's site: /pos/blocklogic
@@ -98,4 +99,7 @@ urlpatterns = patterns('',
     # bill
     url(r_company + r'/manage/json/bill/list/?$', bill_management.list_bills, name='mobile_list_bills'),
     url(r_company + r'/manage/json/bill/print/?$', bill_management.print_bill, name='mobile_print_bill'),
+
+    # user
+    url(r_company + r'/manage/json/users/unlock/?$', users.unlock_session, name='mobile_unlock_session'),
 )
