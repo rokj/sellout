@@ -32,7 +32,10 @@ Terminal = function(g){
         /* terminal status */
         current_till: $("#current_till"),
         current_date: $("#current_date"),
-        current_time: $("#current_time")
+        current_time: $("#current_time"),
+
+        // locking
+        lock_link: $("#switch_user")
     };
 
     // bill sizes (in pixels):
@@ -56,13 +59,13 @@ Terminal = function(g){
     p.resize_timeout_handle = null;
 
     // locking timeouts
-    p.lock_timeout = 5000; // lock session after ... ms of inactivity
+    p.lock_timeout = 300e+3; // lock session after ... ms of inactivity
     p.lock_timeout_handle = null; // handle to timeout
     p.lock_filter = 2000; // reset timeout timer at most once per ... ms (mousemove events are too frequent)
     p.lock_timestamp = Date.now();
 
     //
-    // methods: sizing and layout
+    // methods
     //
     p.size_layout = function(save){
         // position: #bill_container, #splitter, #selector
@@ -267,6 +270,10 @@ Terminal = function(g){
         }
     };
 
+    p.lock_terminal = function(){
+        p.items.lock_link.click();
+    };
+
     //
     // init
     //
@@ -346,9 +353,17 @@ Terminal = function(g){
     // locking: capture all events in window and when there's nothing for ...minutes,
     // lock the session
     $(window).on("keypress click mousemove", function(){
-        var d = new Date();
-        if(false){
+        if(window.session_locked) return;
 
-        }
+        // leave out too frequent messages
+        //if(Date.now() - p.lock_timestamp > p.lock_filter){
+            // clear the lock timeout and set a new one
+            if(p.lock_timeout_handle) clearTimeout(p.lock_timeout_handle);
+            p.lock_timeout_handle = setTimeout(p.lock_terminal, p.lock_timeout);
+        //}
+        //else{
+        //    p.lock_timestamp = Date.now();
+        //}
     });
+    p.lock_timeout_handle = setTimeout(p.lock_terminal, p.lock_timeout);
 };
