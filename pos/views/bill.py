@@ -1,4 +1,4 @@
-from datetime import datetime as dtm
+from datetime import datetime as dtm, datetime
 from decimal import Decimal
 
 from common.decorators import login_required
@@ -7,6 +7,9 @@ from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from pytz import timezone
+
+import unidecode
+from payment.models import BillPayment
 
 from pos.models import Company, Product, Discount, Register, Contact, \
     Bill, BillCompany, BillContact, BillRegister, BillItem, BillItemDiscount
@@ -593,6 +596,19 @@ def create_bill(request, company):
             )
             db_discount.save()
 
+    bill_payment = BillPayment(
+        type=g.CASH,
+        total=grand_total,
+        currency="USD", # TODO
+        transaction_datetime=datetime.now(),
+        status=g.WAITING,
+        created_by=request.user
+    )
+    bill_payment.save()
+
+    db_bill.payment = bill_payment
+    db_bill.save()
+
     d = {'bill': bill_to_dict(request.user, c, db_bill)}
     return JsonOk(extra=d)
 
@@ -749,3 +765,137 @@ def view_bill(request, company):
         return JsonError(_("Bill does not exist"))
 
     return HttpResponse(create_bill_html(request.user, c, bill))
+
+def esc_format(user, company, bill, format, line_char_no=48, esc_commands=False):
+
+    if format == "Page":
+        return 'full_page_format'
+    elif format == "Thermal":
+        string = ''
+        if esc_commands:
+            bill_dict = bill_to_dict(user, company, bill)
+            printer = escpostext.EscposText()
+            new_line = '\x0a'
+            center_align =  '\x1b\x61\x01'
+            left_align = '\x1b\x61\x00'
+            # center / bold
+            string += center_align
+            string += printer.text(bill_dict.get('issuer').get('name'))
+            string += new_line
+            # center
+            string += printer.text(bill_dict.get('issuer').get('street') + ' ' + bill_dict.get('issuer').get('postcode') + ' ' + bill_dict.get('issuer').get('city'))
+            string += new_line
+            string += printer.text(bill_dict['issuer']['state'] + ' ' + bill_dict['issuer']['country'])
+            string += new_line
+
+            string += printer.text(_('VAT') + ':' + ' ' + bill_dict['issuer']['vat_no'])
+            string += new_line
+
+            string += printer.text(bill_dict['register']['location'])
+
+            string += new_line
+
+            if bill_dict.get('contact'):
+                string += printer.text(bill_dict['contact']['name'] + new_line)
+                string += new_line
+                string += printer.text(bill_dict['contact']['street'] + ' ' + bill_dict['contact']['postcode'] + ' ' + bill_dict['contact']['city'])
+                string += printer.text(bill_dict['contact']['state'] + ' ' + bill_dict['contact']['country'])
+                string += new_line
+                string += printer.text(_('VAT') + ':' + ' ' + bill_dict['contact']['vat_no'])
+                string += new_line
+
+            string += left_align
+            string += printer.text(_('Bill No.') + ': ' + str(bill_dict['serial']))
+            string += new_line
+            string += printer.line(line_char_no=line_char_no)
+            string += new_line
+
+
+            white_spaces = [0.25, 0.20, 0.25, 0.25, 0.05]
+            strings = [_('Price'), _('Quantity'), _('Discount'), '', _('Amount')]
+            aligns = ['left', 'right', 'right', 'right', 'right']
+
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=2)
+
+            string += printer.line(line_char_no=line_char_no)
+
+            for item in bill_dict['items']:
+
+                string += item['name']
+                string += new_line
+                strings = [item['base'], item['quantity'], item['discount'], item['total'], item['tax_rate_id']]
+                string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=2)
+                string += new_line
+
+            string += printer.line(line_char_no=line_char_no)
+            string += new_line
+
+
+            white_spaces = [0.5, 0.5]
+            strings = [_('Total') + ' ' + bill_dict['currency'] + ':', bill_dict['total']]
+            aligns = ['left', 'right']
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
+
+
+            string += printer.line(line_char_no=line_char_no)
+            string += new_line
+
+            white_spaces = [0.08, 0.22, 0.23, 0.23, 0.24]
+            strings = ['', _('Rate'), _('Subtotal'), _('Tax'), _('Total')]
+            aligns = ['left', 'right', 'right', 'right', 'right']
+
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
+
+
+            for rate in bill_dict['tax_rates']:
+                strings = [rate['id'], rate['amount'], rate['net_sum'], rate['tax_sum'], rate['gross_sum']]
+                string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
+                string += new_line
+
+
+            string += printer.line(line_char_no=line_char_no, style='Dashed')
+
+            strings = [_('Sum'), '', bill_dict['tax_sums']['net_sum'], bill_dict['tax_sums']['tax_sum'], bill_dict['tax_sums']['gross_sum']]
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
+
+            string += new_line
+
+            white_spaces = [0, 1]
+            strings = [_('Cashier') + ': ' + bill_dict['user_name'], bill_dict['timestamp']]
+            aligns = ['left', 'right']
+
+            string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
+
+            string += new_line
+            string += new_line
+            string += new_line
+            return string
+    return
+
+@login_required
+def get_payment_btc_info(request, company):
+    """
+        check if the bill has been paid and return the status
+    """
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+    # there should be bill_id in request.POST
+    try:
+        bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
+        bill = Bill.objects.get(company=c, id=bill_id)
+    except (Bill.DoesNotExist, ValueError, TypeError):
+        return JsonError(_("Bill does not exist or data is invalid"))
+
+    extra = {}
+
+    if bill.company == c:
+        # TODO: check for company and bill permission
+        extra['btc_address'] = bill.payment.get_btc_address(c.id)
+        extra['btc_amount'] = bill.payment.get_btc_amount(c.id)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
+
+    return JsonOk(extra=extra)

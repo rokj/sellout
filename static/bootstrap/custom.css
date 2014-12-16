@@ -162,3 +162,47 @@ input[type='submit']{
 .bold {
     font-weight: bold;
 }
+
+/* other common classes */
+.no-text { /* messages saying there are no notifications/companies/... */
+    color: #969696;
+}
+
+/* custom drop-down menus and buttons for users */
+#user_button.button-container{
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+}
+
+#user_button .simple-menu-button{
+    background-color: #22e693 !important;
+}
+
+#user_button.button-container.simple-menu-button:after,
+#user_button .drop-down:after{
+    border-top-color: #22e693;
+}
+
+#user_button li{
+    background-color: #22e693;
+}
+
+#user_button .drop-down a{
+    border-top: 1px solid #ffffff;
+}
+
+#user_button div.vertical-separator{
+    border-left: 1px dotted #ffffff;
+    height: 30px;
+    margin-top: 10px;
+}
+
+.footer a,
+.footer input{
+    display: inline-block;
+    height: 32px;
+    line-height: 32px;
+    margin-top: 10px;
+    max-width: 300px;
+}

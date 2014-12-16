@@ -4,6 +4,8 @@
 
 {% block head %}
     <link href="{% static 'bootstrap/select_company.css' %}" rel="stylesheet" />
+    {# for drop-down menu #}
+    <link href="{% static 'css/statusbar.css' %}" rel="stylesheet" />
 
     <script type="text/javascript">
     $(document).ready(function(){
@@ -21,7 +23,7 @@
                 <a class="custom nav-button button-text" href="#">{{ request.user }}</a>
 
                 <ul id="user_menu" class="drop-down">
-                    <li class="store"><a  href="{% url 'web:logout' %}">{% trans 'Log Out' %}</a></li>
+                    <li><a href="{% url 'web:logout' %}">{% trans 'Log Out' %}</a></li>
                 </ul>
             </div>
         </li>
@@ -33,7 +35,7 @@
     <section>
         <div class="container">
             <h2>{% trans 'Your companies' %}</h2>
-            {% if companies|length %}
+            {% if companies %}
                 <div id="companies_list">
                     {% for company in companies %}
                         <div class="company table-row top-border">
@@ -49,8 +51,8 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <p>{% trans 'You are not part of any company yet.' %}</p>
-                <p>{% trans 'Create your own company or wait for an invite.' %}</p>
+                <p class="no-text">{% trans 'You are not part of any company yet.' %}</p>
+                <p class="no-text">{% trans 'Create your own company or wait for an invite.' %}</p>
             {% endif %}
 
             <div id="new_company">
@@ -63,35 +65,44 @@
 
     {% comment %} notifications {% endcomment %}
     <section>
-        {% if actions|length %}
-            <div class="container">
-            <h2>{% trans 'Notifications' %}</h2>
-            <table id="actions">
-                {% for a in actions %}
-                    <div class="action-container table-row">
-                        <p class="action-message">
-                            {% if a.type == 'invitation' %}
-                                {% trans 'You have been invited to join a company: ' %}
-                                {{ a.company.name }}
-                            {% endif %}
-                            <a href="{{ a.accept_url }}" class="action accept">{% trans 'Accept' %}</a>
-                            <a href="{{ a.decline_url }}" class="action decline">{% trans 'Decline' %}</a>
-                        </p>
-                    </div>
-                {% endfor %}
-            </table>
-            </div>
-        {% else %}
-            {# show nothing if there's no actions #}
-            {% comment %} <p>{% trans 'You have no pending actions.' %}</p>{% endcomment %}
-        {% endif %}
+        <div class="container">
+            <h2>{% trans 'Your notifications' %}</h2>
+            {% if actions %}
+                <div class="container">
+                <table id="actions">
+                    {% for a in actions %}
+                        <div class="action-container table-row">
+                            <p class="action-message">
+                                {% if a.type == 'invitation' %}
+                                    {% trans 'You have been invited to join a company: ' %}
+                                    {{ a.company.name }}
+                                {% endif %}
+                                <a href="{{ a.accept_url }}" class="action accept">{% trans 'Accept' %}</a>
+                                <a href="{{ a.decline_url }}" class="action decline">{% trans 'Decline' %}</a>
+                            </p>
+                        </div>
+                    {% endfor %}
+                </table>
+                </div>
+            {% else %}
+                <p class="no-text">{% trans 'You have no pending notifications.' %}</p>
+            {% endif %}
+        </div>
     </section>
 
     {% comment %} user settings {% endcomment %}
     <section>
         <div class="container">
             <h2>{% trans 'Your settings' %}</h2>
-            <input type="button" value="fuck yourself in the arse" />
+            <div class="settings-link-container">
+                <a href="{% url 'web:user_profile' %}">{% trans 'User profile' %}</a>
+            </div>
+            <div class="settings-link-container">
+                <a href="#">{% trans 'Subscriptions' %}</a>
+            </div>
+            <div class="settings-link-container">
+                <a href="#">{% trans 'Support center' %}</a>
+            </div>
         </div>
     </section>
 {% endblock %}

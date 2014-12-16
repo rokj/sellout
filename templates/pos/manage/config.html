@@ -44,45 +44,10 @@ $(document).ready(function(){
             {{ form.timezone }}
         </div>
 
-        <div class="form-field currency">
+        <div class="form-field">
             <div class="error">{{ form.currency.errors }}</div>
             {{ form.currency.label_tag }}
-
-            <div class="currency-table">
-                <div class="spacer left">
-                    {{ form.currency }}
-                </div>
-
-                <div class="spacer">
-                    <img class="hoverable currency fake-button"
-                         src="{% static 'icons/currency/eur.png' %}"
-                         title="EUR" alt="EUR" data-character="€" />
-                </div>
-
-                <div class="spacer">
-                    <img class="hoverable currency fake-button"
-                         src="{% static 'icons/currency/usd.png' %}"
-                         title="USD" alt="USD" data-character="$" />
-                </div>
-
-                <div class="spacer">
-                    <img class="hoverable currency fake-button"
-                         src="{% static 'icons/currency/gbp.png' %}"
-                         title="GBP" alt="GBP" data-character="£" />
-                </div>
-
-                <div class="spacer">
-                    <img class="hoverable currency fake-button"
-                         src="{% static 'icons/currency/jpy.png' %}"
-                        title="jpy" alt="jpy" data-character="¥" />
-                </div>
-
-                <div class="spacer">
-                    <img class="hoverable currency fake-button"
-                         src="{% static 'icons/currency/btc.png' %}"
-                         title="BTC" alt="BTC" data-character="BTC" />
-                </div>
-            </div>
+            {{ form.currency }}
         </div>
 
         <div class="form-field">

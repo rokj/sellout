@@ -1,7 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from gnome.ui import scores_display_with_pixmap
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.contrib.auth.decorators import login_required as login_required_nolocking
@@ -136,7 +135,7 @@ def locked_session(request, company):
         'message': '',
     }
 
-    return render(request, 'locked.html', context)
+    return render(request, 'pos/locked.html', context)
 
 
 # ignore locking here or we'll be caught in an infinite redirect loop

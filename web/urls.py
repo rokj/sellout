@@ -10,7 +10,6 @@ urlpatterns = patterns('',
     url(r'^register-company/$', company.register_company, name='register_company'),
     url(r'^url-name-suggestions$', company.url_name_suggestions, name='url_name_suggestions'),
 
-    # TODO: wrong view, this is
     url(r'^logout/$', views.logout, name="logout"),
 
     # registration: passwords, activations, etc.
@@ -21,7 +20,12 @@ urlpatterns = patterns('',
     url(r'^accept-invitation/reference=(?P<reference>[\w]+)$', views.accept_invitation, name='accept_invitation'),
     url(r'^decline-invitation/reference=(?P<reference>[\w]+)$', views.decline_invitation, name='decline_invitation'),
 
-    # selecting
+    # companies
+    url(r'^select-company/$', views.select_company, name='select_company'),
+
+    # user settings etc.
+    url(r'^select-company/$', views.select_company, name='select_company'),
+    url(r'^user-profile/$', views.user_profile, name='user_profile'),
     url(r'^select-company/$', views.select_company, name='select_company'),
 
     # index

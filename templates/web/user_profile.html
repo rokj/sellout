@@ -1,0 +1,45 @@
+{% extends 'web/bootstrap.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block navbar_buttons %}
+
+{% endblock %}
+
+{% block content %}
+    <section class="container">
+        <h2>{% trans 'User settings' %}</h2>
+
+        email
+        first_name
+        last_name
+        type
+        sex
+        country
+
+        <div class="row">
+
+            <div class="col-md-6">
+
+            </div>
+
+            <div class="col-md-6">
+
+            </div>
+        </div>
+    </section>
+
+    <section class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <a href="{% url 'web:select_company' %}" class="buttons cancel">{% trans 'Back' %}</a>
+                </div>
+
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right">
+                    <input type="submit" value="{% trans 'Submit' %}" class="button ok" />
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

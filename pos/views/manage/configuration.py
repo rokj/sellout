@@ -7,6 +7,7 @@ from pos.models import Company
 from common.functions import has_permission, no_permission_view
 from common import globals as g
 from config.functions import set_user_value, get_user_value, get_company_value, set_company_value
+from config.currencies import currency_choices
 
 import pytz
 
@@ -33,8 +34,7 @@ def list_timezones():
 
 
 def list_time_formats():
-    """ lists first-level keys in g.TIME_FORMATS (see list_date_formats)
-    """
+    """ lists first-level keys in g.TIME_FORMATS (see list_date_formats) """
     return sorted([(key, key) for key in g.TIME_FORMATS])
 
 
@@ -53,7 +53,7 @@ class ConfigForm(forms.Form):
     date_format = forms.ChoiceField(choices=list_date_formats(), required=True)
     time_format = forms.ChoiceField(choices=list_time_formats(), required=True)
     timezone = forms.ChoiceField(choices=list_timezones(), required=True)
-    currency = forms.CharField(max_length=4, required=True)
+    currency = forms.ChoiceField(choices=currency_choices, required=True)
     decimal_separator = forms.CharField(max_length=1, required=True)
     decimal_places = forms.ChoiceField(choices=decimal_places_choices, required=True)
 

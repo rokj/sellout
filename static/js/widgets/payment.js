@@ -25,7 +25,10 @@ Payment = function(g, bill){
         },
         bitcoin:{
             button: $(".payment-type.bitcoin", p.dialog),
-            section: $(".payment-details.bitcoin", p.dialog)
+            section: $(".payment-details.bitcoin", p.dialog),
+            btc_qrcode: $(".payment-details.bitcoin .btc-qrcode", p.dialog),
+            btc_amount: $(".payment-details.bitcoin .btc-amount", p.dialog),
+            btc_address: $(".payment-details.bitcoin .btc-address", p.dialog)
         },
 
         total: $(".bill-total", p.dialog), // common to all sections (payment types)
@@ -84,28 +87,38 @@ Payment = function(g, bill){
             // disable the print button on the dialog
             toggle_element(p.items.print_button, false);
 
-            // set up a timer that will check if the bill has been paid
-            p.bitcoin_interval = setInterval(function(){
-                send_data(p.g.urls.check_bill_status, {bill_id: p.data.id}, p.g.csrf_token, function(response){
-                    if(response.status != 'ok'){
-                        // something went wrong
-                        alert(response.message);
-                    }
-                    else{
-                        if(response.data.paid){
-                            // paid, finish the thing
-                            alert("paid");
-                            // TODO
+            send_data(p.g.urls.get_payment_btc_info, {bill_id: p.data.id}, p.g.csrf_token, function(response) {
+                if (response.status == 'ok') {
+                    if ('data' in response && 'btc_address' in response.data && 'btc_amount' in response.data) {
+                        p.items.bitcoin.btc_address.html(response.btc_address);
+                        p.items.bitcoin.btc_amount.val(response.btc_amount);
+                        p.items.bitcoin.btc_qrcode.html("");
+                        p.items.bitcoin.btc_qrcode.qrcode({width: 180, height: 160, text: "bitcoin:" + response.btc_address + "?amount=" + response.btc_amount, background: "#ebebeb"});
 
-                            clearInterval(p.bitcoin_interval);
-                        }
-                        else{
-                            // not paid yet, continue polling
+                        // set up a timer that will check if the bill has been paid
+                        p.bitcoin_interval = setInterval(function () {
+                            send_data(p.g.urls.check_bill_status, {bill_id: p.data.id}, p.g.csrf_token, function (response) {
+                                if (response.status != 'ok') {
+                                    // something went wrong
+                                    alert(response.message);
+                                } else if (response.status == 'ok') {
+                                    if (response.data.paid) {
+                                        // paid, finish the thing
+                                        alert("paid");
+                                        // TODO
 
-                        }
+                                        clearInterval(p.bitcoin_interval);
+                                    }
+                                    else {
+                                        // not paid yet, continue polling
+
+                                    }
+                                }
+                            });
+                        }, 2000);
                     }
-                });
-            }, 2000);
+                }
+            });
         }
         else{
             p.items.bitcoin.button.removeClass("active");
