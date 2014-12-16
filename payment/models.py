@@ -48,15 +48,16 @@ class BillPayment(SkeletonU):
 
         return ""
 
-    def get_btc_amount(self):
+    def get_btc_amount(self, company_id):
         """
         This method should be used when paying, otherwise get amount from self.total_btc
         """
 
         datetime_updated_with_offset = self.datetime_updated + datetime.timedelta(hours=int(settings.PAYMENT_OFFICER["bitcoin_payment_waiting_interval"]))
 
-        if self.total_btc is None or datetime_updated_with_offset < datetime.datetime.now():
-            self.total_btc = 0 # get from calculations...
-            self.save()
+        if self.status == WAITING:
+            if self.total_btc is None or datetime_updated_with_offset < datetime.datetime.now():
+                    self.total_btc = 0 # ...
+                    self.save()
 
         return self.total_btc
