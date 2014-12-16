@@ -32,6 +32,7 @@
 
 {# jquery libraries (only used in terminal) #}
 <script src="{% static 'js/jquery.printThis.js' %}"></script>
+<script src="{% static 'js/jquery.qrcode.min.js' %}"></script>
 
 {% comment %} the terminal {% endcomment %}
 <script src="{% static 'js/widgets/terminal.js' %}"></script>
@@ -62,17 +63,20 @@ $(window).load(function(){
     var g = { // global data for the terminal
         csrf_token: "{{ csrf_token }}",
         urls: {
-              // terminal & stuff
-              save_terminal_settings: "{% url 'pos:save_terminal' company.url_name  %}",
-              create_bill: "{% url 'pos:create_bill' company.url_name %}",
-              get_unpaid_bills: "{% url 'pos:get_unpaid_bills' company.url_name %}",
-              delete_unpaid_bill: "{% url 'pos:delete_unpaid_bill' company.url_name %}",
-              finish_bill: "{% url 'pos:finish_bill' company.url_name %}",
-              check_bill_status: "{% url 'pos:check_bill_status' company.url_name %}",
-              // management: registers (a link is needed for choosing current register)
-              manage_registers: "{% url 'pos:list_registers' company.url_name %}",
-              // create contacts on the fly
-              quick_contacts: "{% url 'pos:quick_contacts' company.url_name %}"
+            // terminal & stuff
+            save_terminal_settings: "{% url 'pos:save_terminal' company.url_name  %}",
+            create_bill: "{% url 'pos:create_bill' company.url_name %}",
+            get_unpaid_bills: "{% url 'pos:get_unpaid_bills' company.url_name %}",
+            delete_unpaid_bill: "{% url 'pos:delete_unpaid_bill' company.url_name %}",
+            finish_bill: "{% url 'pos:finish_bill' company.url_name %}",
+            check_bill_status: "{% url 'pos:check_bill_status' company.url_name %}",
+            get_payment_btc_info: "{% url 'pos:get_payment_btc_info' company.url_name  %}",
+            // management: registers (a link is needed for choosing current register)
+            manage_registers: "{% url 'pos:list_registers' company.url_name %}",
+            // save last used register
+            set_register: "{% url 'pos:set_register' company.url_name %}",
+            // create contacts on the fly
+            quick_contacts: "{% url 'pos:quick_contacts' company.url_name %}"
         },
 
         // config (data comes directly from view)
@@ -157,6 +161,32 @@ $(window).load(function(){
 });
 </script>
 
+{% endblock %}
+
+{% block terminal_menu %}
+    {# this has been replaced with a 'terminal' menu #}
+    <div id="status_bar_company"></div>
+
+    <div id="terminal_button" class="button-container simple-menu-button">
+        <div class="vertical-separator right"></div>
+
+        <div class="vertical-separator"></div>
+
+        <a href="#" class="button-text">{% trans 'Terminal' %}</a>
+
+        <ul id="terminal_menu" class="drop-down">
+            {# store-related stuff #}
+            <li class="separator">
+                <a href="#">{% trans 'Switch User' %}</a>
+            </li>
+            <li>
+                <a href="#">{% trans 'Lock' %}</a>
+            </li>
+            <li>
+                <a href="{% url 'web:select_company' %}">{% trans 'Leave' %}</a>
+            </li>
+        </ul>
+    </div>
 {% endblock %}
 
 {% block content %}
@@ -335,6 +365,7 @@ $(window).load(function(){
 
         <div id="controls">
             <div> {# for margins and position: absolute #}
+
                 <div id="controls_more" class="terminal-menu">
                     <button class="open-menu">
                         {% trans 'Stuff' %}
@@ -383,7 +414,7 @@ $(window).load(function(){
             <div class="left-column">
                 <input type="text" class="first-name" placeholder="{% trans 'First name' %}" />
                 <input type="text" class="last-name" placeholder="{% trans 'Last name' %}" />
-                <select class="sex">
+                <select class="sex" autocomplete="off">
                     {% for s in sexes %}<option value="{{ s.0 }}">{{ s.1 }}</option>{% endfor %}
                 </select>
                 <input type="text" class="email" placeholder="{% trans 'E-mail' %}" />
@@ -498,6 +529,17 @@ $(window).load(function(){
                 som ditejls abaut kredit kard
             </div>
 
+            <div class="payment-details paypal hidden">
+                <div class="paypal-calc">
+                    <div>
+                        <div class="label">{% trans 'Customer email' %}</div>
+                        <input type="text" class="customer-email" />
+
+                        <button id="request_money" class="request-money" >{% trans "Request money" %}</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="payment-details bitcoin hidden">
                 <div class="btc-qrcode">
                     {# this is temporary #}
@@ -540,6 +582,10 @@ $(window).load(function(){
         <div id="bill_notes_container">
             <textarea id="bill_notes" placeholder="{% trans 'Notes on this bill' %}"></textarea>
         </div>
+    </div>
+
+    <div id="new_terminal_message">
+
     </div>
 
     <div id="templates" class="hidden">

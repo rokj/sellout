@@ -333,3 +333,16 @@ NOT_ENOUGH_MONEY_ARRIVED = "not_enough_money_arrived"
 SEEN = "seen"
 HIDDEN = "hidden"
 RUNNING = "running"
+
+PAYMENT_STATUS = (
+    (WAITING, _("Waiting")),
+    (APPROVED, _("Approved")),
+    (PAID, _("Paid")),
+    (CANCELED, _("Canceled")),
+    (NO_MONEY_ARRIVED, _("No money arrived")),
+    (NOT_ENOUGH_MONEY_ARRIVED, _("Not enough money arrived")),
+    (FREE, _("Free")),
+    (FIRST_TIME, _("First time"))
+)
+
+CASH="cash"

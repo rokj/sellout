@@ -566,3 +566,72 @@ def min_password_requirments(password):
         return False
 
     return True
+
+
+def get_btc_price(from_what="from_eur", price=0):
+    btc_price = -1
+
+    if nr_people == 0:
+        return 0
+
+    try_one_more_time = 0
+
+    while try_one_more_time == 0 or try_one_more_time == 1:
+        try:
+            f = open(settings.BTC_PRICE, "r")
+
+            last_modified = dtm.datetime.utcfromtimestamp(os.path.getmtime(settings.BTC_PRICE))
+            now = dtm.datetime.utcfromtimestamp(time.time())
+
+            diff = now-last_modified
+            diff_minutes = diff.seconds/60
+
+            if diff_minutes > settings.MAX_BTC_PRICE_UPDATE_INTERVAL:
+                btc_price = -1
+
+                subject = "Probably could not update BTC price (check %s)." % (settings.BTC_PRICE)
+                message_txt = "Look subject!"
+                message_html = message_txt
+
+                if settings.DEBUG:
+                    print subject
+                else:
+                    send_email(settings.EMAIL_FROM, [settings.EMAIL_FROM], None, subject, message_txt, message_html)
+            else:
+                for line in f.readlines():
+                    price = line.strip().split(": ")
+
+                    if from_what == "from_eur":
+                        if price[0] == settings.EXCHANGE_BTCEUR:
+                            btc_price = price[1]
+
+            if btc_price == -1:
+                return btc_price
+
+            if his_price > 0:
+                btc_price = Decimal(btc_price)*Decimal(his_price)
+
+            if for_duration > 1:
+                btc_price = Decimal(btc_price)*Decimal(for_duration)
+
+            btc_price = Decimal(btc_price)*Decimal(nr_people)
+
+            try_one_more_time = 2
+
+            return Decimal(btc_price).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
+
+        except IOError:
+            if try_one_more_time == 0:
+                try_one_more_time = 1
+                pass
+            else:
+                subject = "Could not get BTC price for subscription payment (check %s that it exists)." % (settings.BTC_PRICE)
+                message_txt = "Look subject!"
+                message_html = message_txt
+
+                if settings.DEBUG:
+                    print subject
+                else:
+                    send_email(settings.EMAIL_FROM, [settings.EMAIL_FROM], None, subject, message_txt, message_html)
+
+    return btc_price

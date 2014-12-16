@@ -80,3 +80,9 @@ class BitcoinRPC():
 
     def get_transaction(self, txid):
         return self.access.gettransaction(txid)
+
+    def list_since_block(self, blockhash=""):
+        if blockhash == "":
+            return self.access.listsinceblock()
+
+        return self.access.listsinceblock(blockhash)
