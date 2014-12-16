@@ -13,36 +13,31 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.views import APIView
 from action.models import Action
 from bl_auth import User
+from blusers.forms import BlocklogicUserForm
 from common.functions import JsonParse, JsonError, get_random_string, send_email, JsonOk, min_password_requirments
 from common.globals import GOOGLE
-from common.views import base_context
 from common.globals import WAITING
 
 from common.decorators import login_required
+from django.contrib.auth.decorators import login_required as login_required_nolocking
+
 from django.core.files.base import ContentFile
-from django.http import Http404, QueryDict, JsonResponse
+from django.http import Http404, JsonResponse
 from django.contrib.auth import authenticate as django_authenticate
 from django.contrib.auth import login as django_login
 from django.shortcuts import render, redirect
 from django.conf import settings as settings
 from django.utils.translation import ugettext as _
 
-
-from blusers.forms import BlocklogicUserForm, BlocklogicUserChangeForm
 from blusers.models import BlocklogicUser, UserImage
+from config.functions import get_user_value, set_user_value
 import common.globals as g
-from config.functions import get_user_value, set_user_value, get_company_config
 
 from rest_framework.decorators import api_view
-from mobile.views.manage.configuration import get_mobile_config, company_config_to_dict
+from mobile.views.manage.configuration import company_config_to_dict
 from pos.models import Company
 from pos.views.manage.company import company_to_dict
 from settings import GOOGLE_API
-
-from easy_thumbnails.files import get_thumbnailer
-
-import config.countries as countries
-
 
 def set_language(request):
     if 'session' in request:
@@ -320,287 +315,6 @@ def send_reactivation_key(request, bluser):
         send_email(settings.EMAIL_FROM, [bluser.email], None, subject, message_txt, message_html)
 
 
-@api_view(['POST'])
-def reset_password(request):
-    errors = {}
-    data = JsonParse(request.POST['data'])
-
-    if not "new_password1" in data:
-        return JsonResponse({"status": "no_key"})
-
-    if not "new_password2" in data:
-        return JsonResponse({"status": "no_key"})
-
-    if not "key" in data:
-        return JsonResponse({"status": "no_key"})
-
-    try:
-        bluser = BlocklogicUser.objects.get(password_reset_key=data["key"])
-    except BlocklogicUser.DoesNotExist:
-        return JsonResponse({"status": "wrong_key"})
-
-    password1 = data['new_password1']
-    password2 = data['new_password2']
-
-    if password1 != password2:
-        return JsonResponse({"status": "passwords_must_be_identical"})
-    else:
-        bluser.set_password(password1)
-        bluser.password_reset_key = None
-        bluser.save()
-
-        return JsonResponse({"status": "ok"})
-
-    return JsonResponse({"status": "something_went_wrong"})
-
-
-@login_required
-def save_user_settings(request):
-    if not request.method == 'POST':
-        return JsonError("error")
-
-    d = JsonParse(request.POST.get('data'))
-
-    if "location_in_task_times" in d:
-        if d["location_in_task_times"] is True or d["location_in_task_times"] is False:
-            set_user_value(request.user, "location_in_task_times", d["location_in_task_times"])
-
-    if "language" in d:
-        if d["language"] in [l[0] for l in settings.LANGUAGES]:
-            set_user_value(request.user, "language", d["language"])
-            set_language(request)
-
-    if "date_format" in d:
-        if d["date_format"] in [x for x in g.DATE_FORMATS]:
-            set_user_value(request.user, "date_format", d["date_format"])
-
-    if "first_day_of_week" in d:
-        if d["first_day_of_week"] in ['monday', 'sunday']:
-            set_user_value(request.user, "first_day_of_week", d["first_day_of_week"])
-
-    d["email"] = request.user.email
-    d["first_name"] = request.user.first_name
-    d["pk"] = request.user.pk
-
-    bluser = BlocklogicUser.objects.get(pk=request.user.pk)
-
-    qdict = QueryDict('')
-    qdict = qdict.copy()
-    qdict.update(d)
-
-    if "saving_user_profile" in d:
-        user_form = BlocklogicUserChangeForm(qdict, instance=bluser)
-        user_form.set_request(request)
-
-        try:
-            if user_form.is_valid():
-                bluser.last_name = user_form.cleaned_data["last_name"]
-                bluser.country = countries.country_by_code[user_form.cleaned_data["country"]]
-                bluser.sex = user_form.cleaned_data["sex"]
-                bluser.updated_by = bluser
-                bluser.save()
-
-        except Exception as e:
-            return JsonError("error", _("There was error saving data. Contact support."))
-
-        """
-        user_profile_form = UserProfileForm(qdict, instance=bluser)
-
-        try:
-            if user_profile_form.is_valid():
-                user_profile = UserProfile.objects.get(user=bluser)
-                user_profile.company_name = user_profile_form.cleaned_data["company_name"]
-                user_profile.company_address = user_profile_form.cleaned_data["company_address"]
-                user_profile.company_postcode = user_profile_form.cleaned_data["company_postcode"]
-                user_profile.company_city = user_profile_form.cleaned_data["company_city"]
-                user_profile.company_website = user_profile_form.cleaned_data["company_website"]
-                user_profile.company_country = user_profile_form.cleaned_data["company_country"]
-                user_profile.company_tax_id = user_profile_form.cleaned_data["company_tax_id"]
-                user_profile.company_tax_payer = user_profile_form.cleaned_data["company_tax_payer"]
-
-                user_profile.updated_by = bluser
-                user_profile.save()
-        except Exception as e:
-            return JsonError("error", _("There was error saving data. Contact support."))
-        """
-
-    return JsonOk()
-
-
-@login_required
-def update_password(request):
-    if not request.method == 'POST':
-        return JsonError("error")
-
-    d = JsonParse(request.POST.get('data'))
-
-    if 'current_password' not in d or 'password1' not in d or 'password2' not in d:
-        return JsonError('error', _('Something went wrong during password saving. Contact support.'))
-
-    if d['password1'] != d['password2']:
-        return JsonError('new_password_mismatch', _('New passwords do not match'))
-
-    if not min_password_requirments(d['password1']):
-        return JsonError('min_pass_requirement_failed', _('Password minimal requirments failed.'))
-
-    user = django_authenticate(username=request.user.email, password=d['current_password'])
-    if user is None:
-        return JsonError('wrong_current_password')
-
-    if user is not None:
-        user.set_password(d['password1'])
-        user.save()
-
-        return JsonOk()
-
-    return JsonError('error', _('Something went wrong during password saving. Contact support.'))
-
-
-@login_required
-def user_profile(request, context):
-    bluser = BlocklogicUser.objects.get(id=request.user.id)
-    messages = {}
-    update_password = False
-
-    """
-    try:
-        user_profile = UserProfile.objects.get(user=bluser)
-    except UserProfile.DoesNotExist:
-        user_profile = UserProfile(user=bluser, created_by=bluser)
-        user_profile.save()
-    """
-
-    if request.method == 'POST':
-        errors = {}
-
-        # so we do not allow forging POST['email']
-        POST = request.POST.copy()
-        POST['email'] = request.user.email
-
-        user_form = BlocklogicUserForm(POST)
-        user_form.set_request(request)
-        user_form.registration = False
-
-        # user_profile_form = UserProfileForm(POST)
-
-        if "update_password" in POST and POST.get('update_password', '') == "yes":
-            update_password = True
-
-        if user_form.is_valid():
-            fd = user_form.cleaned_data
-
-            bluser.first_name = fd.get('first_name', '')
-            bluser.last_name = fd.get('last_name', '')
-            bluser.country = fd.get('country', '')
-            bluser.sex = fd.get('sex', '')
-
-            if "update_password" in POST and POST.get('update_password', '') == "yes":
-                password1 = fd.get('password1', '')
-                password2 = fd.get('password2', '')
-
-                if len(password1) > 0 and len(password2) > 0:
-                    if password1 == password2:
-                        bluser.set_password(password1)
-
-            if 'images' in request.FILES and request.FILES['images'] and len(request.FILES['images']) > 0:
-                # ne da se nam "bindat" samo eno sliko na "user profile", zato brisemo vse.
-                # physically delete related image
-                if POST.get('user_profile_image_id', "") != "":
-                    delete_user_image(bluser, POST.get('user_profile_image_id', ""))
-
-                user_image = UserImage(name=bluser.first_name + " " + bluser.last_name, original_filename=request.FILES['images'].name, created_by=bluser, updated_by=bluser)
-                user_image.image.save(request.FILES['images'].name, ContentFile(request.FILES['images'].read()))
-                user_image.save()
-
-                bluser.images.add(user_image)
-
-            bluser.save()
-
-        """
-        if user_profile_form.is_valid():
-            fd = user_profile_form.cleaned_data
-
-            user_profile.company_name = fd.get('company_name', '')
-            user_profile.company_address = fd.get('company_address', '')
-            user_profile.company_postcode = fd.get('company_postcode', '')
-            user_profile.company_country = fd.get('company_country', '')
-            user_profile.company_website = fd.get('company_website', '')
-            user_profile.updated_by = request.user
-
-            user_profile.save()
-
-        if user_form.is_valid() and user_profile_form.is_valid():
-            messages = {"success": _("Your data updated successfully!")}
-        """
-
-        if user_form.is_valid():
-            messages = {"success": _("Your data updated successfully!")}
-
-    else:
-        initial = {'email': bluser.email, 'first_name': bluser.first_name, 'last_name': bluser.last_name,
-                   'sex': bluser.sex, 'password1': bluser.password, 'password2': bluser.password, "country": bluser.country}
-
-        user_form = BlocklogicUserForm(initial=initial)
-        user_form.registration = False
-
-        company_country = None
-        if user_profile.company_country:
-            company_country = user_profile.company_country
-
-        initial_profile = {'company_name': user_profile.company_name,
-                           'company_address': user_profile.company_address,
-                           'company_postcode': user_profile.company_postcode,
-                           'company_country': company_country,
-                           'company_website': user_profile.company_website}
-        # user_profile_form = UserProfileForm(initial=initial_profile)
-
-    context['bluser'] = bluser
-    # context['user_profile_form'] = user_profile_form
-    context['countries'] = countries
-    context['messages'] = messages
-    context['update_password'] = update_password
-    context['title'] = _("Settings")
-    context['site_title'] = g.SITE_TITLE
-    context['STATIC_URL'] = settings.STATIC_URL
-
-    return context
-
-
-@login_required
-def remove_user_profile_image(request):
-    if not request.is_ajax():
-        raise Http404()
-
-    bluser = BlocklogicUser.objects.get(id=request.user.id)
-
-    d = JsonParse(request.POST.get('data'))
-
-    if not 'image_id' in d or not d['image_id']:
-        return JsonResponse({'status': 'error', 'message': _("Which photo to remove?")})
-
-    if not delete_user_image(bluser, d['image_id']):
-        return JsonResponse({'status': 'error', 'message': _("Could not delete image.")})
-
-    return JsonResponse({'status': 'ok'})
-
-
-@login_required
-def save_last_used_group(request):
-    if not request.is_ajax():
-        raise Http404()
-
-    bluser = BlocklogicUser.objects.get(id=request.user.id)
-
-    d = JsonParse(request.POST.get('data'))
-
-    if not 'group_id' in d or not d['group_id']:
-        return JsonResponse({'status': 'error', 'message': _("Could not get group ID")})
-
-    set_user_value(request.user, "last_used_group", d['group_id'])
-
-    return JsonResponse({'status': 'ok'})
-
-
 def get_user_credentials(user):
     credentials = {}
     return credentials
@@ -708,76 +422,4 @@ def get_user(request):
         return None
 
 
-@login_required
-def user_settings(request):
-    bluser = BlocklogicUser.objects.get(id=request.user.id)
-
-    initial = {'email': bluser.email, 'first_name': bluser.first_name, 'last_name': bluser.last_name,
-               'sex': bluser.sex, 'password1': bluser.password, 'password2': bluser.password}
-
-    if bluser.country:
-        initial["country"] = bluser.country.two_letter_code
-
-    user_form = BlocklogicUserForm(initial=initial)
-    user_form.registration = False
-
-    company_country = None
-    if user_profile.company_country:
-        company_country = user_profile.company_country.two_letter_code
-
-    # company_id
-    context = base_context(request, "1")
-    context["section"] = "settings"
-    context["title"] = _("Settings")
-    context['user_form'] = user_form
-    context['languages'] = settings.LANGUAGES
-    context['language'] = get_user_value(request.user, 'language')
-    context['date_format'] = get_user_value(request.user, 'date_format')
-    context['date_formats'] = [x for x in g.DATE_FORMATS]
-
-    return render(request, "blusers/settings.html", context)
-
-
-@login_required
-def change_photo(request, android=False):
-    if 'image' in request.FILES and request.FILES['image'] and len(request.FILES['image']) > 0:
-        user = request.user
-
-        for image in user.images.all():
-            user_image = UserImage.objects.get(id=image.pk)
-            user_image.delete()
-
-        user.images.all().delete()
-
-        #print request.FILES['image'].name
-        #print request.FILES['image'].read()
-
-        user_image = UserImage(name=user.first_name + " " + user.last_name, original_filename=request.FILES['image'].name, created_by=user, updated_by=user)
-        user_image.image.save(request.FILES['image'].name, ContentFile(request.FILES['image'].read()))
-        user_image.save()
-
-        user.images.add(user_image)
-        user.save()
-
-        options = {'size': (150, 120), 'crop': True, 'quality': 100}
-        user_image_photo_url = get_thumbnailer(user.images.all()[0].image).get_thumbnail(options).url
-
-        options = {'size': (22, 22), 'crop': True, 'quality': 100}
-        user_image_menu_url = get_thumbnailer(user.images.all()[0].image).get_thumbnail(options).url
-        if android:
-            return JsonResponse({"status": "ok", "user_image_photo_url": user_image_photo_url, "user_image_menu_url": user_image_menu_url})
-        else:
-            i = get_thumbnailer(user.images.all()[0].image)
-            image = i.get_thumbnail({'size': (160, 160), 'crop': True})
-            image.seek(0)
-            image_read = image.read()
-            encoded_string = base64.b64encode(image_read)
-
-            return JsonResponse({"status": "ok", "image": encoded_string})
-
-    return JsonResponse({"status": "no_image"})
-
-
 obtain_auth_token = ObtainAuthToken.as_view()
-
-

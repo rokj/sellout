@@ -95,18 +95,3 @@ p.suggestion-list-item{
 p.suggestion-list-item:hover{
     opacity: 0.8;
 }
-
-.footer-left a{
-    display: inline-block;
-    height: 32px;
-    line-height: 32px;
-    margin-top: 10px;
-}
-
-.footer-right{
-    text-align: right;
-    max-width: 300px;
-}
-
-
-

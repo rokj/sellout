@@ -254,3 +254,12 @@ def accept_invitation(request, reference):
 @login_required_nolocking
 def decline_invitation(request, reference):
     return handle_invitation(request, reference, g.ACTION_DECLINED)
+
+
+@login_required_nolocking
+def user_profile(request):
+    context = {
+
+    }
+
+    return render(request, 'web/user_profile.html', context)
