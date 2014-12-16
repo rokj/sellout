@@ -63,9 +63,9 @@
 
     {% comment %} notifications {% endcomment %}
     <section>
+        <h2>{% trans 'Your notifications' %}</h2>
         {% if actions %}
             <div class="container">
-            <h2>{% trans 'Notifications' %}</h2>
             <table id="actions">
                 {% for a in actions %}
                     <div class="action-container table-row">
@@ -82,8 +82,7 @@
             </table>
             </div>
         {% else %}
-            {# show nothing if there's no actions #}
-            {% comment %} <p>{% trans 'You have no pending actions.' %}</p>{% endcomment %}
+            <p>{% trans 'You have no .' %}</p>
         {% endif %}
     </section>
 
@@ -91,7 +90,7 @@
     <section>
         <div class="container">
             <h2>{% trans 'Your settings' %}</h2>
-            <input type="button" value="fuck yourself in the arse" />
+
         </div>
     </section>
 {% endblock %}

@@ -10,4 +10,4 @@ currencies = {
     "CNY": ("Chinese yuan", "¥"),
 }
 
-currency_choices = tuple((key, value[0]) for key, value in currencies.iteritems())
+currency_choices = tuple((key, key + " (" + value[0] + ")") for key, value in currencies.iteritems())
