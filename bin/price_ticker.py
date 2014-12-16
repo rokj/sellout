@@ -64,9 +64,9 @@ bitcoin_db_username = 'bitcoin'
 bitcoin_db_password = 'bitcoin'
 bitcoin_db_database = 'bitcoin'
 
-def update_btc_price(currency, price):
+def update_btc_price(currency, price, datetime_updated=None):
     try:
-        conn=psycopg2.connect("host=%s dbname=%s user=%s password=%s", (bitcoin_db_hostname, bitcoin_db_database, bitcoin_db_username, bitcoin_db_password, ))
+        conn=psycopg2.connect("host='%s' dbname='%s' user='%s' password='%s'" % (bitcoin_db_hostname, bitcoin_db_database, bitcoin_db_username, bitcoin_db_password, ))
     except Exception as e:
         print e
         return False
@@ -82,7 +82,11 @@ def update_btc_price(currency, price):
 
     try:
         if len(rows) == 1:
-            cur.execute("UPDATE bitcoin SET value = %s WHERE key = %s", (price, currency))
+            if datetime_updated:
+                cur.execute("UPDATE bitcoin SET value = %s, datetime_updated = %s WHERE key = %s", (price, datetime_updated, currency))
+            else:
+                cur.execute("UPDATE bitcoin SET value = %s WHERE key = %s", (price, currency))
+
         else:
             cur.execute("INSERT INTO bitcoin(key, value) VALUES (%s, %s)", (currency, price, ))
     except Exception as e:
@@ -99,31 +103,18 @@ for exchange, url in urls.iteritems():
     response = requests.get(url, data={}, headers=headers, verify=False)
 
     if response.status_code == 200:
-        print datetime.datetime.now()
+        datetime_updated = datetime.datetime.now()
 
         response = response.json()
 
-        if exchange == "mtgox_btceur":
-            if u"data" in response and u"last_local" in response[u"data"]:
-                last_price = Decimal(response[u"data"][u"last_local"][u"value"])
-                print "mtgox_1_btceur: %s" % last_price
-
-                last_price = Decimal(str(1/last_price)).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
-                print "mtgox_1_eurbtc: %s" % last_price
-                price["mtgox_btceur"] = last_price
-
-        elif exchange == "mtgox_btcusd":
-            if u"data" in response and u"last_local" in response[u"data"]:
-                last_price = Decimal(response[u"data"][u"last_local"][u"value"])
-                print "mtgox_1_btcusd: %s" % last_price
-                price["mtgox_btcusd"] = last_price
-
-        elif exchange == "bitstamp_btcusd":
+        if exchange == "bitstamp_btcusd":
             if u"vwap" in response:
                 last_price = Decimal(response["vwap"])
-                print "bitstamp_1_btcusd: %s" % last_price
+                update_btc_price("bitstamp_1_btcusd", last_price)
+
+                price["bitstamp_1_usdbtc"] = Decimal(str(1/(last_price))).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
+                update_btc_price("bitstamp_1_usdbtc", price["bitstamp_1_usdbtc"])
 
                 conversion_rate = bitstamp_conversion_rate()
                 price["bitstamp_1_eurbtc"] = Decimal(str(1/(last_price/Decimal(conversion_rate["sell"])))).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
-
-                print "bitstamp_1_eurbtc: %s" % price["bitstamp_1_eurbtc"]
+                update_btc_price("bitstamp_1_eurbtc", price["bitstamp_1_eurbtc"])
