@@ -89,15 +89,11 @@ Payment = function(g, bill){
 
             send_data(p.g.urls.get_payment_btc_info, {bill_id: p.data.id}, p.g.csrf_token, function(response) {
                 if (response.status == 'ok') {
-                    if (response.btc_address != "" && response.btc_amount != "") {
-
-                        alert('hi');
-                        console.log(response);
-
+                    if ('data' in response && 'btc_address' in response.data && 'btc_amount' in response.data) {
                         p.items.bitcoin.btc_address.html(response.btc_address);
                         p.items.bitcoin.btc_amount.val(response.btc_amount);
                         p.items.bitcoin.btc_qrcode.html("");
-                        p.items.bitcoin.btc_qrcode.qrcode({text: "bitcoin:" + response.btc_address + "?amount=" + response.btc_amount, background: "#ebebeb"});
+                        p.items.bitcoin.btc_qrcode.qrcode({width: 180, height: 160, text: "bitcoin:" + response.btc_address + "?amount=" + response.btc_amount, background: "#ebebeb"});
 
                         // set up a timer that will check if the bill has been paid
                         p.bitcoin_interval = setInterval(function () {
@@ -105,7 +101,7 @@ Payment = function(g, bill){
                                 if (response.status != 'ok') {
                                     // something went wrong
                                     alert(response.message);
-                                } else if (reponse.status == 'ok') {
+                                } else if (response.status == 'ok') {
                                     if (response.data.paid) {
                                         // paid, finish the thing
                                         alert("paid");

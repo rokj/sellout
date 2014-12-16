@@ -74,7 +74,7 @@ $(window).load(function(){
             // management: registers (a link is needed for choosing current register)
             manage_registers: "{% url 'pos:list_registers' company.url_name %}",
             // save last used register
-            set_register: "{% url 'pos:set_register' company.url_name %}",
+{#            set_register: "{% url 'pos:set_register' company.url_name %}",#}
             // create contacts on the fly
             quick_contacts: "{% url 'pos:quick_contacts' company.url_name %}"
         },
@@ -543,7 +543,7 @@ $(window).load(function(){
             <div class="payment-details bitcoin hidden">
                 <div class="btc-qrcode">
                     {# this is temporary #}
-                    <img src="{% static 'images/qrcode.png' %}" alt="temp qrcode" title="sample" />
+{#                    <img src="{% static 'images/qrcode.png' %}" alt="temp qrcode" title="sample" />#}
                 </div>
                 <div class="btc-amount-container">
                     <div class="label">{% trans 'Total BTC' %}</div>
