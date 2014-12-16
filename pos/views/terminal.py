@@ -135,7 +135,7 @@ def locked_session(request, company):
         'message': '',
     }
 
-    return render(request, 'locked.html', context)
+    return render(request, 'pos/locked.html', context)
 
 
 # ignore locking here or we'll be caught in an infinite redirect loop

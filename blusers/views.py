@@ -319,6 +319,7 @@ def send_reactivation_key(request, bluser):
     else:
         send_email(settings.EMAIL_FROM, [bluser.email], None, subject, message_txt, message_html)
 
+
 @api_view(['POST'])
 def reset_password(request):
     errors = {}
@@ -351,6 +352,7 @@ def reset_password(request):
         return JsonResponse({"status": "ok"})
 
     return JsonResponse({"status": "something_went_wrong"})
+
 
 @login_required
 def save_user_settings(request):
@@ -705,6 +707,7 @@ def get_user(request):
     else:
         return None
 
+
 @login_required
 def user_settings(request):
     bluser = BlocklogicUser.objects.get(id=request.user.id)
@@ -733,6 +736,7 @@ def user_settings(request):
     context['date_formats'] = [x for x in g.DATE_FORMATS]
 
     return render(request, "blusers/settings.html", context)
+
 
 @login_required
 def change_photo(request, android=False):

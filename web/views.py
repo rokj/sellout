@@ -9,15 +9,13 @@ from blusers.forms import LoginForm, BlocklogicUserForm
 from django.utils.translation import ugettext as _
 from blusers.models import BlocklogicUser
 from blusers.views import try_register, unset_language, send_reactivation_key
-from common.functions import JsonParse, JsonError
-from common.decorators import login_required
+from common.functions import JsonParse
 from django.contrib.auth.decorators import login_required as login_required_nolocking
 from django.contrib.auth import logout as django_logout
 from action.models import Action
 
 import common.globals as g
 from pos.models import Permission
-from common.functions import JsonOk
 
 import settings
 
@@ -139,7 +137,7 @@ def sign_up(request):
 
 
 
-@login_required
+@login_required_nolocking
 def logout(request):
     context = {
         'google_account': False
@@ -247,12 +245,12 @@ def handle_invitation(request, reference, user_response):
     return redirect('web:select_company')
 
 
-@login_required
+@login_required_nolocking
 def accept_invitation(request, reference):
     return handle_invitation(request, reference, g.ACTION_ACCEPTED)
 
 
 
-@login_required
+@login_required_nolocking
 def decline_invitation(request, reference):
-    return handle_invitation(request, reference, g.ACTION_ACCEPTED)
+    return handle_invitation(request, reference, g.ACTION_DECLINED)

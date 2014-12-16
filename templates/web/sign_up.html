@@ -5,7 +5,7 @@
 {% block title %}{{ title }} - {{ site_title }}{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{% static 'bootstrap/sign_up.css' %}" />
+    <link rel="stylesheet" href="{% static 'bootstrap/sign_up.css' %}"/>
 {% endblock %}
 
 {% block content %}
@@ -13,17 +13,18 @@
         <div class="container">
             <form action="{% url 'web:sign_up' %}" method="post" class="custom">
 
-            <div class="form-errors">
-                {{ user_form.non_field_errors }}
-            </div>
-
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="ad">
-                        <p>{% trans 'Join the future in <br/>retail business.' %}</p>
-                        <p> {% trans 'Register for free.' %} </p>
-                    </div>
+                <div class="form-errors">
+                    {{ user_form.non_field_errors }}
                 </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="ad">
+                            <p>{% trans 'Join the future in <br/>retail business.' %}</p>
+
+                            <p> {% trans 'Register for free.' %} </p>
+                        </div>
+                    </div>
                     {% csrf_token %}
 
                     <div class="col-md-4">
@@ -32,7 +33,7 @@
                                 {{ user_form.first_name.errors }}
                             </div>
                             {{ user_form.first_name.label_tag }}
-                            {{ user_form.first_name}}
+                            {{ user_form.first_name }}
                         </div>
 
                         <div class="form-field">
@@ -59,6 +60,7 @@
                             {{ user_form.country }}
                         </div>
                     </div>
+
                     <div class="col-md-4">
                         <div class="form-field">
                             <div class="field-errors">
@@ -95,7 +97,7 @@
                         </div>
 
                         <div class="form-field submit">
-                            <input type="submit" class="buttons" value="{% trans 'Register' %}" />
+                            <input type="submit" class="buttons" value="{% trans 'Register' %}"/>
                         </div>
                     </div>
                 </div>

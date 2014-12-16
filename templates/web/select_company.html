@@ -33,7 +33,7 @@
     <section>
         <div class="container">
             <h2>{% trans 'Your companies' %}</h2>
-            {% if companies|length %}
+            {% if companies %}
                 <div id="companies_list">
                     {% for company in companies %}
                         <div class="company table-row top-border">
@@ -63,7 +63,7 @@
 
     {% comment %} notifications {% endcomment %}
     <section>
-        {% if actions|length %}
+        {% if actions %}
             <div class="container">
             <h2>{% trans 'Notifications' %}</h2>
             <table id="actions">
