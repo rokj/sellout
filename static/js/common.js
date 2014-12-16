@@ -1,3 +1,6 @@
+// used for all dialogs and pop-up screens
+window.last_dialog_zindex = 15000;
+
 function custom_dialog(title, content, width, buttons){
     var container = $("<div>", {'class': 'custom-dialog-container'});
     var title_container = $("<div>", {'class': 'custom-dialog-title'});
@@ -20,9 +23,7 @@ function custom_dialog(title, content, width, buttons){
     content.show();
     dialog.append(content);
 
-    // shadow: remember the last shadow's z-index and increase it by 1:
-    // the next dialog will always be above the previous
-    if(!window.last_dialog_zindex) window.last_dialog_zindex = 15000;
+    // the new pop-up is above everything older
     window.last_dialog_zindex += 1;
 
     dialog.width(width);

@@ -45,6 +45,12 @@ UnlockScreen = function(unlock_url, csrf_token, ajax, g){
             p.items.lock_shadow.parent().show();
             p.items.lock_shadow.show();
             p.items.lock_content.show();
+
+            // handle z-indexes so that keypad won't be under any existing dialog
+            window.last_dialog_zindex += 1;
+            p.items.lock_shadow.css("z-index", ++window.last_dialog_zindex);
+            p.items.lock_content.css("z-index", ++window.last_dialog_zindex);
+
             p.clear_pin();
             p.focus_pin();
 
@@ -118,6 +124,8 @@ UnlockScreen = function(unlock_url, csrf_token, ajax, g){
                     if(p.ajax){
                         p.toggle_screen(false);
                         p.switch_user_data(response);
+
+                        window.session_locked = false;
                     }
                 }
                 else{
@@ -162,7 +170,7 @@ UnlockScreen = function(unlock_url, csrf_token, ajax, g){
                 else{
                     // lock the screen
                     p.toggle_screen(true);
-
+                    window.session_locked = true;
                 }
             });
         });
