@@ -91,11 +91,11 @@ class BlocklogicUser(AbstractUser, Skeleton):
 
     @property
     def companies(self):
-        # from pos.models import Permission
-        # return [p.company for p in Permission.objects.filter(user=self)]
+        from pos.models import Permission
+        return [p.company for p in Permission.objects.filter(user=self)]
 
-        from pos.models import Company
-        return Company.objects.all()
+        # from pos.models import Company
+        # return Company.objects.all()
 
     def update_password(self):
         """

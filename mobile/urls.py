@@ -102,4 +102,5 @@ urlpatterns = patterns('',
 
     # user
     url(r_company + r'/manage/json/users/unlock/?$', users.unlock_session, name='mobile_unlock_session'),
+    url(r_company + r'/manage/json/users/lock/?$', users.mobile_lock_session, name='mobile_unlock_session'),
 )

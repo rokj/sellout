@@ -3,6 +3,7 @@ from django.http import JsonResponse
 # Create your views here.
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from common.decorators import login_required
 from pos.models import Company, Category, Product, Tax, Discount, Contact, Register
 from pos.views.manage.category import category_to_dict
 from pos.views.manage.contact import contact_to_dict
@@ -10,7 +11,7 @@ from pos.views.manage.discount import discount_to_dict
 from pos.views.manage.product import product_to_dict
 from pos.views.manage.register import register_to_dict
 from pos.views.manage.tax import tax_to_dict, get_all_taxes
-from common.functions import JsonError, JsonParse
+from common.functions import JsonError, JsonParse, JsonOk
 from sync.models import Sync
 
 from django.utils.translation import ugettext as _
@@ -18,6 +19,7 @@ from django.utils.translation import ugettext as _
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
+@login_required
 def mobile_sync_db(request, company):
 
     try:
@@ -26,6 +28,7 @@ def mobile_sync_db(request, company):
         return JsonError(_("Company does not exist"))
 
     data = JsonParse(request.POST['data'])
+
     seq = data['database_version']
     device_id = data['device_id']
 
@@ -135,4 +138,4 @@ def mobile_sync_db(request, company):
     else:
         ret['updated'] = True
 
-    return JsonResponse(ret, safe=False)
+    return JsonOk(extra=ret, safe=False)

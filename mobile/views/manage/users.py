@@ -8,13 +8,13 @@ from pos.models import Company, Permission
 from django.utils.translation import ugettext as _
 from rest_framework.authtoken.models import Token
 from pos.views.manage.company import company_to_dict
-from pos.views.terminal import switch_user
+from pos.views.terminal import switch_user, lock_session
 
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def lock_session(request, company):
-    return
+def mobile_lock_session(request, company):
+    return lock_session(request, company)
 
 
 @api_view(['GET', 'POST'])

@@ -11,6 +11,7 @@ from rest_framework.authentication import OAuth2Authentication, TokenAuthenticat
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.views import APIView
+from action.functions import action_to_dict
 from action.models import Action
 from bl_auth import User
 from common.functions import JsonParse, JsonError, get_random_string, send_email, JsonOk, min_password_requirments
@@ -636,19 +637,15 @@ def get_user_credentials(user):
     return credentials
 
 
-def get_notifications(user):
-    email = user.email
-    actions = Action.objects.filter(_for=email, what="invitation", status=WAITING)
+def get_actions(user):
+    # companies = user.companies
+
+    # the list of messages
+    actions = Action.objects.filter(status=g.ACTION_WAITING, receiver=user.email)
 
     data = []
-
     for a in actions:
-        action_data = json.loads(a.data)
-        """
-        if "group_id" in action_data:
-            g = Group.objects.get(id=action_data['group_id'])
-            data.append(group_to_dict(g, user, True, a.reference))
-        """
+        data.append(action_to_dict(a, android=True))
 
     return data
 
@@ -690,12 +687,14 @@ class ObtainAuthToken(APIView):
             user_credentials = get_user_credentials(user)
         else:
             return JsonError("error", _("User authentication failed."))
-        # TODO: get company
-        company = Company.objects.get(id=1)
+
+        companies = user.companies
+        actions = get_actions(user)
+
         return JsonResponse({'token': token.key,
                               'user': user_credentials,
-                              'config': company_config_to_dict(request, company),
-                              'company': company_to_dict(company, android=True),
+                              'actions': actions,
+                              'companies': [company_to_dict(i, android=True) for i in companies],
                               'status': "ok"})
 
 
