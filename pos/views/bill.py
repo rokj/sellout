@@ -894,6 +894,7 @@ def get_payment_btc_info(request, company):
     if bill.company == c:
         # TODO: check for company and bill permission
         extra['btc_address'] = bill.payment.get_btc_address(c.id)
+        extra['btc_amount'] = bill.payment.get_btc_amount(c.id)
     else:
         return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
 
