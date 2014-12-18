@@ -103,18 +103,18 @@ for exchange, url in urls.iteritems():
     response = requests.get(url, data={}, headers=headers, verify=False)
 
     if response.status_code == 200:
-        datetime_updated = datetime.datetime.now()
+        datetime_updated = datetime.datetime.utcnow()
 
         response = response.json()
 
         if exchange == "bitstamp_btcusd":
-            if u"vwap" in response:
-                last_price = Decimal(response["vwap"])
-                update_btc_price("bitstamp_1_btcusd", last_price)
+            if u"last" in response:
+                last_price = Decimal(response["last"])
+                update_btc_price("bitstamp_1_btcusd", last_price, datetime_updated)
 
                 price["bitstamp_1_usdbtc"] = Decimal(str(1/(last_price))).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
-                update_btc_price("bitstamp_1_usdbtc", price["bitstamp_1_usdbtc"])
+                update_btc_price("bitstamp_1_usdbtc", price["bitstamp_1_usdbtc"], datetime_updated)
 
                 conversion_rate = bitstamp_conversion_rate()
                 price["bitstamp_1_eurbtc"] = Decimal(str(1/(last_price/Decimal(conversion_rate["sell"])))).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
-                update_btc_price("bitstamp_1_eurbtc", price["bitstamp_1_eurbtc"])
+                update_btc_price("bitstamp_1_eurbtc", price["bitstamp_1_eurbtc"], datetime_updated)

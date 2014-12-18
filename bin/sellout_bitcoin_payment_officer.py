@@ -22,63 +22,49 @@ from payment.service.Bitcoin import BitcoinRPC
 from payment.models import BillPayment
 from common.globals import WAITING, PAID, NOT_ENOUGH_MONEY_ARRIVED, NO_MONEY_ARRIVED
 from django.db.models import Q
+from django.db import connections
 
 bitcoin_db_key = 'sellout_last_checked_block'
 
 confirmations = 0
 
 def get_last_checked_block():
-    try:
-        conn=psycopg2.connect("host='" + settings.PAYMENT_OFFICER['bitcoin_db']['hostname'] + "' dbname='" + settings.PAYMENT_OFFICER['bitcoin_db']['database'] + "' user='" + settings.PAYMENT_OFFICER['bitcoin_db']['username'] + "' password='" + settings.PAYMENT_OFFICER['bitcoin_db']['password'] + "'")
-    except:
-        print "I am unable to connect to the database."
-
-    cur = conn.cursor()
+    cursor = connections['bitcoin'].cursor()
 
     try:
-        cur.execute("SELECT value FROM bitcoin WHERE key = %s", (bitcoin_db_key,))
+        cursor.execute("SELECT value FROM bitcoin WHERE key = %s", (bitcoin_db_key,))
     except Exception as e:
         print e
 
-    rows = cur.fetchall()
+    rows = cursor.fetchall()
 
     if len(rows) == 1:
         return rows[0][0]
 
-    conn.commit()
-    cur.close()
-    conn.close()
+    cursor.close()
 
     return ""
 
 def update_last_checked_block(block):
-    try:
-        conn=psycopg2.connect("host='" + settings.PAYMENT_OFFICER['bitcoin_db']['hostname'] + "' dbname='" + settings.PAYMENT_OFFICER['bitcoin_db']['database'] + "' user='" + settings.PAYMENT_OFFICER['bitcoin_db']['username'] + "' password='" + settings.PAYMENT_OFFICER['bitcoin_db']['password'] + "'")
-    except Exception as e:
-        print e
-        return False
-
-    cur = conn.cursor()
+    cursor = connections['bitcoin'].cursor()
 
     try:
-        cur.execute("SELECT value FROM bitcoin WHERE key = %s", (bitcoin_db_key,))
+        cursor.execute("SELECT value FROM bitcoin WHERE key = %s", (bitcoin_db_key,))
     except Exception as e:
         return False
 
-    rows = cur.fetchall()
+    rows = cursor.fetchall()
 
     try:
         if len(rows) == 1:
-            cur.execute("UPDATE bitcoin SET value = %s WHERE key = %s", (block, bitcoin_db_key))
+            cursor.execute("UPDATE bitcoin SET value = %s WHERE key = %s", (block, bitcoin_db_key))
         else:
-            cur.execute("INSERT INTO bitcoin(key, value) VALUES (%s, %s)", (bitcoin_db_key, block, ))
+            cursor.execute("INSERT INTO bitcoin(key, value) VALUES (%s, %s)", (bitcoin_db_key, block, ))
     except Exception as e:
         print e
         return False
 
-    conn.commit()
-    cur.close()
-    conn.close()
+    cursor.close()
 
     return True
 

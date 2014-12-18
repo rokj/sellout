@@ -3,6 +3,7 @@ import os
 import string
 import json
 import random
+import psycopg2
 from decimal import Decimal, ROUND_DOWN
 from django import forms
 
@@ -10,7 +11,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
-from django.db import connection, IntegrityError
+from django.db import connection, IntegrityError, connections
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -460,7 +461,7 @@ def send_email(sender, to=None, bcc=None, subject=None, txt=None, html=None, att
     message.content_subtype = "html"
     message.send()
 
-
+"""
 def get_subscription_btc_price(from_what="from_eur", for_duration=1, his_price=0, nr_people=1):
     btc_price = -1
 
@@ -553,7 +554,7 @@ def _get_subscription_price(in_what="EUR", duration=1, his_price=0, nr_people=1,
         price = price + transaction_fee
 
     return floatformat(price, 2), floatformat(transaction_fee, 2)
-
+"""
 
 min_pass_length = 6
 pass_allowed_chars = set(string.letters + string.digits + '@#$%^&+=')
@@ -568,70 +569,44 @@ def min_password_requirments(password):
     return True
 
 
-def get_btc_price(from_what="from_eur", price=0):
+def calculate_btc_price(currency="EUR", price=0):
     btc_price = -1
 
-    if nr_people == 0:
-        return 0
+    cursor = connections['bitcoin'].cursor()
 
-    try_one_more_time = 0
+    exchange = settings.PAYMENT_OFFICER["btc_exchange"][currency]
+    key = exchange + "_1_" + currency.lower() + "btc"
 
-    while try_one_more_time == 0 or try_one_more_time == 1:
-        try:
-            f = open(settings.BTC_PRICE, "r")
+    try:
+        cursor.execute("SELECT value, datetime_updated FROM bitcoin WHERE key = %s", (key,))
+    except Exception as e:
+        return btc_price
 
-            last_modified = dtm.datetime.utcfromtimestamp(os.path.getmtime(settings.BTC_PRICE))
-            now = dtm.datetime.utcfromtimestamp(time.time())
+    rows = cursor.fetchall()
 
-            diff = now-last_modified
-            diff_minutes = diff.seconds/60
+    if len(rows) == 0:
+        return btc_price
 
-            if diff_minutes > settings.MAX_BTC_PRICE_UPDATE_INTERVAL:
-                btc_price = -1
+    last_modified = rows[0][1]
+    now = dtm.datetime.utcnow()
 
-                subject = "Probably could not update BTC price (check %s)." % (settings.BTC_PRICE)
-                message_txt = "Look subject!"
-                message_html = message_txt
+    diff = now-last_modified
+    diff_minutes = diff.seconds/60
 
-                if settings.DEBUG:
-                    print subject
-                else:
-                    send_email(settings.EMAIL_FROM, [settings.EMAIL_FROM], None, subject, message_txt, message_html)
-            else:
-                for line in f.readlines():
-                    price = line.strip().split(": ")
+    if diff_minutes > settings.MAX_BTC_PRICE_UPDATE_INTERVAL:
+        btc_price = -1
 
-                    if from_what == "from_eur":
-                        if price[0] == settings.EXCHANGE_BTCEUR:
-                            btc_price = price[1]
+        subject = "BTC price was not updated for some time (check %s)." % (str(settings.MAX_BTC_PRICE_UPDATE_INTERVAL))
+        message_txt = "Look subject!"
+        message_html = message_txt
 
-            if btc_price == -1:
-                return btc_price
+        if settings.DEBUG:
+            print subject
+        else:
+            send_email(settings.EMAIL_FROM, [settings.EMAIL_FROM], None, subject, message_txt, message_html)
 
-            if his_price > 0:
-                btc_price = Decimal(btc_price)*Decimal(his_price)
+        return btc_price
 
-            if for_duration > 1:
-                btc_price = Decimal(btc_price)*Decimal(for_duration)
+    btc_price = Decimal(rows[0][0])*Decimal(price)
 
-            btc_price = Decimal(btc_price)*Decimal(nr_people)
-
-            try_one_more_time = 2
-
-            return Decimal(btc_price).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
-
-        except IOError:
-            if try_one_more_time == 0:
-                try_one_more_time = 1
-                pass
-            else:
-                subject = "Could not get BTC price for subscription payment (check %s that it exists)." % (settings.BTC_PRICE)
-                message_txt = "Look subject!"
-                message_html = message_txt
-
-                if settings.DEBUG:
-                    print subject
-                else:
-                    send_email(settings.EMAIL_FROM, [settings.EMAIL_FROM], None, subject, message_txt, message_html)
-
-    return btc_price
+    return Decimal(btc_price).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)

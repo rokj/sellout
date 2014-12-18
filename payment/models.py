@@ -2,10 +2,12 @@
 import datetime
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from common.functions import calculate_btc_price
 from common.globals import WAITING, PAYMENT_STATUS, CASH, DECIMAL
 
 from common.models import SkeletonU
 from config.currencies import currency_choices
+from config.functions import get_company_value
 from payment.service.Bitcoin import BitcoinRPC
 from settings import PAYMENT
 import settings
@@ -48,7 +50,7 @@ class BillPayment(SkeletonU):
 
         return ""
 
-    def get_btc_amount(self, company_id):
+    def get_btc_amount(self, user, company):
         """
         This method should be used when paying, otherwise get amount from self.total_btc
         """
@@ -57,7 +59,11 @@ class BillPayment(SkeletonU):
 
         if self.status == WAITING:
             if self.total_btc is None or datetime_updated_with_offset < datetime.datetime.now():
-                    self.total_btc = 0 # ...
+                currency = get_company_value(user, company, 'pos_currency')
+                btc_price = calculate_btc_price(currency, self.total)
+
+                if btc_price != -1:
+                    self.total_btc = btc_price
                     self.save()
 
         return self.total_btc

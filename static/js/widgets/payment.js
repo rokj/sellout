@@ -87,11 +87,16 @@ Payment = function(g, bill){
             // disable the print button on the dialog
             toggle_element(p.items.print_button, false);
 
+            p.items.bitcoin.btc_qrcode.html("");
+            p.items.bitcoin.btc_amount.val("");
+            p.items.bitcoin.btc_address.html("");
+
             send_data(p.g.urls.get_payment_btc_info, {bill_id: p.data.id}, p.g.csrf_token, function(response) {
                 if (response.status == 'ok') {
                     if ('data' in response && 'btc_address' in response.data && 'btc_amount' in response.data) {
-                        p.items.bitcoin.btc_address.html(response.btc_address);
-                        p.items.bitcoin.btc_amount.val(response.btc_amount);
+                        p.items.bitcoin.btc_address.val(response.data.btc_address);
+                        p.items.bitcoin.btc_address.data("value", response.data.btc_address);
+                        p.items.bitcoin.btc_amount.html(response.data.btc_amount);
                         p.items.bitcoin.btc_qrcode.html("");
                         p.items.bitcoin.btc_qrcode.qrcode({width: 180, height: 160, text: "bitcoin:" + response.btc_address + "?amount=" + response.btc_amount, background: "#ebebeb"});
 
@@ -116,6 +121,8 @@ Payment = function(g, bill){
                                 }
                             });
                         }, 2000);
+                    } else {
+                        error_message(gettext("Bitcoin payment problem"), gettext("Something went wrong when trying to get information about Bitcoin payment. Try later, or be nice and contact support."))
                     }
                 }
             });
@@ -270,6 +277,15 @@ Payment = function(g, bill){
         var ret = paid.minus(total);
 
         p.items.cash.return_box.val(dn(ret, p.g));
+    });
+
+    p.items.bitcoin.btc_address.click(function() {
+        p.items.bitcoin.btc_address.focus().select();
+    });
+
+    p.items.bitcoin.btc_address.on('keyup keypress blur change', function() {
+        $(this).val($(this).data("value"));
+        p.items.bitcoin.btc_address.focus().select();
     });
 
     // the print ( = finish) button
