@@ -9,12 +9,13 @@ from blusers.forms import LoginForm, BlocklogicUserForm
 from django.utils.translation import ugettext as _
 from blusers.models import BlocklogicUser
 from blusers.views import try_register, unset_language, send_reactivation_key
-from common.functions import JsonParse
+from common.functions import JsonParse, JsonError, JsonOk
 from django.contrib.auth.decorators import login_required as login_required_nolocking
 from django.contrib.auth import logout as django_logout
 from action.models import Action
 
 import common.globals as g
+from config.functions import get_user_value, set_user_value
 from pos.models import Permission
 
 import settings
@@ -60,6 +61,27 @@ def index(request):
 
     return render(request, "web/index.html", context)
 
+
+def get_tutorial_step(request):
+    """ returns this user's current tutorial step """
+    return get_user_value(request.user, 'tutorial_step')
+
+
+@login_required_nolocking
+def set_tutorial_step(request):
+    """ sets the current tutorial step to user's config """
+    if request.method != "POST":
+        return JsonError("Invalid request type")
+
+    try:
+        step = int(JsonParse(request.POST.get('data')).get('tutorial_step'))
+    except (ValueError, KeyError, TypeError):
+        return JsonError("Invalid data")
+
+    set_user_value(request.user, 'tutorial_step', step)
+    return JsonOk()
+
+
 @login_required_nolocking
 def select_company(request):
     """ show current user's companies and a list of invites. """
@@ -82,7 +104,8 @@ def select_company(request):
         'site_title': g.SITE_TITLE,
 
         'companies': companies,
-        'actions': actions
+        'actions': actions,
+        'tutorial_step': get_tutorial_step(request),
     }
 
     return render(request, "web/select_company.html", context)
@@ -183,30 +206,44 @@ def activate_account(request, key):
 
 
 def lost_password(request):
-    data = JsonParse(request.POST['data'])
+    def render_return(message):
+        context = {
+            'message': message,
 
-    try:
-        if data and "email" in data:
+            'site_title': g.SITE_TITLE,
+            'title': _("Lost password"),
+        }
+
+        return render(request, 'web/lost_password.html', context)
+
+    if request.method == 'POST':
+        if "email" in request.POST:
             try:
-                validate_email(data["email"])
+                validate_email(request.POST["email"])
             except ValidationError:
-                return JsonResponse({"status": "email_invalid"})
+                return render_return(_("Invalid e-mail"))
 
             try:
-                bluser = BlocklogicUser.objects.get(email=data["email"])
+                bluser = BlocklogicUser.objects.get(email=request.POST["email"])
                 if bluser.type == g.GOOGLE:
-                    return JsonResponse({"status": "google_login"})
+                    return render_return(_("You have registered with google account. "
+                                           "Try signing in by clicking on 'google login' button in login form."))
 
                 send_reactivation_key(request, bluser)
 
-                return JsonResponse({"status": "ok"})
+                return render_return(_("Your password reset key has been sent to your e-mail, "
+                                       "please check your inbox."))
 
             except BlocklogicUser.DoesNotExist:
-                return JsonResponse({"status": "user_does_not_exist"})
-    except:
-        pass
+                return render_return(_("A user with this e-mail does not exist"))
 
-    return JsonResponse({"status": "something_went_wrong"})
+        return render_return(_("Unknown error occured. Please contact support."))
+    else:
+        return render_return(None)
+
+
+def recover_password(request, key):
+    pass
 
 
 def handle_invitation(request, reference, user_response):
@@ -214,7 +251,7 @@ def handle_invitation(request, reference, user_response):
         action = Action.objects.get(receiver=request.user.email,
                                     reference=reference,
                                     status=g.ACTION_WAITING)
-    except Action.DoesNotExist: # wtf?
+    except Action.DoesNotExist:  # wtf?
         return redirect('web:select_company')
 
     # if the invite has been accepted, create a new permission
@@ -228,7 +265,7 @@ def handle_invitation(request, reference, user_response):
         try:
             sender = BlocklogicUser.objects.get(email=action.sender)
         except BlocklogicUser.DoesNotExist:
-            sender = None
+            sender = request.user
 
         new_permission = Permission(
             created_by=sender,
@@ -239,6 +276,7 @@ def handle_invitation(request, reference, user_response):
         new_permission.create_pin(False)
         new_permission.save()
 
+    # else: if the invite was declined, just update its status (which must be done anyway)
     action.status = user_response
     action.save()
 

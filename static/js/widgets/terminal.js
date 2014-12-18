@@ -356,14 +356,14 @@ Terminal = function(g){
         if(window.session_locked) return;
 
         // leave out too frequent messages
-        //if(Date.now() - p.lock_timestamp > p.lock_filter){
+        if(Date.now() - p.lock_timestamp > p.lock_filter){
             // clear the lock timeout and set a new one
             if(p.lock_timeout_handle) clearTimeout(p.lock_timeout_handle);
             p.lock_timeout_handle = setTimeout(p.lock_terminal, p.lock_timeout);
-        //}
-        //else{
-        //    p.lock_timestamp = Date.now();
-        //}
+        }
+        else{
+            p.lock_timestamp = Date.now();
+        }
     });
     p.lock_timeout_handle = setTimeout(p.lock_terminal, p.lock_timeout);
 };

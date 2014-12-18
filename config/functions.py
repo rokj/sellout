@@ -40,12 +40,12 @@ user_defaults = {
     'pos_interface_bill_width': 370,  # width of the bill area in terminal (in pixels)
     'pos_product_display': 'box',
     'pos_display_breadcrumbs': True,
+    'tutorial_step': 0,
 }
 
 
 # caching helpers
 def user_cache_key(user):
-    # TODO: anonymous users
     if user.is_authenticated():
         return "config_" + str(user.id)
     else:

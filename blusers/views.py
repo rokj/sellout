@@ -263,45 +263,36 @@ def send_reactivation_key(request, bluser):
     """
 
     # we need unique key
-    __bluser = ["ratatata"] # fake
+    def create_key():
+        # 15: defined in BlocklogicUser model (password_reset_key)
+        return get_random_string(15, string.lowercase + string.digits)
 
-    key = None
-    while len(__bluser) > 0:
-        key = get_random_string(15, string.lowercase + string.digits)
-        __bluser = BlocklogicUser.objects.filter(password_reset_key=key)
+    key = create_key()
+    while BlocklogicUser.objects.filter(password_reset_key=key).count() > 0:
+        key = create_key()
 
     bluser.password_reset_key = key
     bluser.save()
 
-    file = open(settings.STATIC_DIR + "email/blusers/lost-password_" + django.utils.translation.get_language() + ".txt", "r")
-    message_txt = file.read()
-    file.close()
+    # render a message from template and send it to email
+    reactivation_url = reverse('web:recover_password', args={key})
 
-    # TODO: language dependency
-    #
-    #if django.utils.translation.get_language() == "sl-si":
-    #    reactivation_url = settings.SITE_URL.strip("/") + reverse('ponastavi_geslo', kwargs={'key': key})
-    # else:
-    reactivation_url = settings.SITE_URL.strip("/") + "/#recover-password=" + key
+    # put the stuff in template, then render it to string and send it via email
+    mail_context = {
+        'url': settings.SITE_URL + reactivation_url,
+    }
 
-    message_txt = message_txt % (reactivation_url, settings.SITE_URL)
+    subject = settings.EMAIL_SUBJECT_PREFIX + " " + _("Recover lost password")
 
-    reset_url = '<a href="%s">%s</a>' % (reactivation_url, reactivation_url)
-    file = open(settings.STATIC_DIR + "email/blusers/lost-password_" + django.utils.translation.get_language() + ".html", "r")
-    message_html = file.read()
-    file.close()
-    message_html = message_html % (reset_url, settings.SITE_URL)
+    message_html = render_to_string('email/lost_password.html', mail_context)
+    message_text = render_to_string('email/lost_password.txt', mail_context)
 
-    subject = "%s %s" % (settings.EMAIL_SUBJECT_PREFIX, unicode(_("%s - Recover password" % ("timebits.com"))))
-
-    # TODO: remove
     if settings.DEBUG:
-        print message_txt
-        print "------"
+        print "sending register email"
+        print message_text
         print message_html
-        print "sending reactivation key"
     else:
-        send_email(settings.EMAIL_FROM, [bluser.email], None, subject, message_txt, message_html)
+        send_email(settings.EMAIL_FROM, [bluser.email], None, subject, message_text, message_html)
 
 
 def get_user_credentials(user):

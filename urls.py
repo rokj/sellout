@@ -2,6 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
 from blusers import views as blusers_views
+from web import views as web_views
 
 admin.autodiscover()
 
@@ -26,6 +27,9 @@ urlpatterns = patterns('',
 
     # support
     # TODO
+
+    # tutorials
+    url(r'^update-tutorial-status/', web_views.set_tutorial_step, name="set_tutorial_step"),
 
     # web: everything that happens before user enters a specific company
     url(r'^', include('web.urls', namespace='web')),
