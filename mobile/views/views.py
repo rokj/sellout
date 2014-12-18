@@ -11,13 +11,14 @@ from pos.views.manage.discount import get_all_discounts
 from pos.views.manage.tax import tax_to_dict
 from common.functions import JsonError, has_permission, JsonOk, no_permission_view, JsonParse
 from django.utils.translation import ugettext as _
+from web.views import accept_invitation, decline_invitation
 
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_get_units(request, company):
+def mobile_get_units(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -27,9 +28,9 @@ def mobile_get_units(request, company):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_get_cut(request, company):
+def mobile_get_cut(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -52,5 +53,21 @@ def mobile_get_cut(request, company):
     discounts = get_all_discounts(request.user, c, android=True)
     result['discounts'] = discounts
 
-
     return JsonResponse(result)
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_accept_invitation(request):
+    data = (request.POST['data'])
+    key = data['key']
+    return accept_invitation(request, key, mobile=True)
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_decline_invitation(request):
+    data = JsonParse(request.POST['data'])
+    key = data['key']
+    return decline_invitation(request, key, mobile=True)
+

@@ -4,7 +4,8 @@ from django.db.models import Q
 
 from pos.models import Company, Category, Discount, Product, ProductDiscount, Price, PurchasePrice, Tax
 from pos.views.manage.product import JSON_units, get_product, search_products, create_product, edit_product, \
-    delete_product, product_to_dict, toggle_favorite
+    delete_product, product_to_dict, toggle_favorite, get_product_, search_products_, create_product_, edit_product_, \
+    delete_product_, toggle_favorite_
 from common.functions import JsonError, \
                             has_permission
 from rest_framework.decorators import api_view, permission_classes,\
@@ -17,45 +18,66 @@ from rest_framework.permissions import IsAuthenticated
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_JSON_units(request, company):
-    return JSON_units(request, company)
+def mobile_JSON_units(request, company_id):
+    return JSON_units(request, company_id)
 
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_get_product(request, company, product_id):
-    return get_product(request, company, product_id)
-
-
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_search_products(request, company):
-    return search_products(request, company, android=True)
-
-
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_create_product(request, company):
-    return create_product(request, company, android=True)
-
-
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_edit_product(request, company):
-    return edit_product(request, company, android=True)
-
-
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_delete_prodcut(request, company):
-    return delete_product(request, company)
-
-
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_get_products(request, company):
+def mobile_get_product(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
+        return get_product_(request, c)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_search_products(request, company_id):
+    try:
+        c = Company.objects.get(id=company_id)
+        return search_products_(request, c, android=True)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_create_product(request, company_id):
+    try:
+        c = Company.objects.get(id=company_id)
+        return create_product_(request, c, android=True)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_edit_product(request, company_id):
+    try:
+        c = Company.objects.get(id=company_id)
+        return edit_product_(request, c, android=True)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_delete_prodcut(request, company_id):
+    try:
+        c = Company.objects.get(id=company_id)
+        return delete_product_(request, c)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_get_products(request, company_id):
+    try:
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -72,9 +94,9 @@ def mobile_get_products(request, company):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_get_product_discounts(request, company):
+def mobile_get_product_discounts(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -93,4 +115,4 @@ def mobile_get_product_discounts(request, company):
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_toggle_favorite(request, company):
-    return toggle_favorite(request, company)
+    return toggle_favorite_(request, company)

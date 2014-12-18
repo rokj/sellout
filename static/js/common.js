@@ -2,6 +2,21 @@
 window.last_dialog_zindex = 15000;
 
 function custom_dialog(title, content, width, buttons){
+    // display a dialog with arbitrary content and few different button options
+    // title: dialog title, text only
+    // content: text or jQuery object
+    // width: width of dialog in pixels, if null, 500 is default
+    // buttons is an object that can contain the following:
+    //     yes: <yes button text>
+    //     yes_action: <function that is executed when yes is clicked>
+    //     no: <no button text>
+    //     no_action: <function that is executed when no button is clicked>
+    //     ok: <ok button text>
+    //     ok_action: if null, only close the dialog
+    //     auto_close: if false, do not bind close_dialog on buttons
+
+    // this function binds escape and enter keys for close/no and enter for yes
+
     var container = $("<div>", {'class': 'custom-dialog-container'});
     var title_container = $("<div>", {'class': 'custom-dialog-title'});
     var dialog = $("<div>", {'class': 'custom-dialog-content'});

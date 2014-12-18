@@ -162,10 +162,14 @@ def products(request, company):
 def get_product(request, company):
     try:
         c = Company.objects.get(url_name=company)
+        return get_product_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
     
     # permissions
+
+
+def get_product_(request, c):
     if not has_permission(request.user, c, 'product', 'view'):
         return JsonError(_("You have no permission to view products"))
 
@@ -178,17 +182,20 @@ def get_product(request, company):
         return JsonError(_("No product specified"))
 
     product = Product.objects.get(company=c, id=product_id)
-    
+
     return JsonResponse(product_to_dict(request.user, c, product))
 
 
 @login_required
-def search_products(request, company, android=False):
+def search_products(request, company):
     try:
         c = Company.objects.get(url_name=company)
+        return search_products_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
-    
+
+
+def search_products_(request, c, android=False):
     # permissions: needs to be guest
     if not has_permission(request.user, c, 'product', 'view'):
         return JsonError(_("You have no permission to view products"))
@@ -489,13 +496,16 @@ def validate_product(user, company, data):
 
 
 @login_required
-def create_product(request, company, android=False):
+def create_product(request, company):
     # create new product
     try:
         c = Company.objects.get(url_name=company)
+        return create_product_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
-    
+
+
+def create_product_(request, c, android=False):
     # sellers can add product
     if not has_permission(request.user, c, 'product', 'edit'):
         return JsonError(_("You have no permission to add products"))
@@ -549,13 +559,16 @@ def create_product(request, company, android=False):
 
 
 @login_required
-def edit_product(request, company, android=False):
+def edit_product(request, company):
     # update existing product
     try:
         c = Company.objects.get(url_name=company)
+        return edit_product_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
-    
+
+
+def edit_product_(request, c, android=False):
     # sellers can edit product
     if not has_permission(request.user, c, 'product', 'edit'):
         return JsonError(_("You have no permission to edit products"))
@@ -618,10 +631,13 @@ def edit_product(request, company, android=False):
 @login_required
 def delete_product(request, company):
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(url_name=company)
+        return delete_product_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
-    
+
+
+def delete_product_(request, c):
     # sellers can delete products
     if not has_permission(request.user, c, 'product', 'edit'):
         return JsonError(_("You have no permission to delete products"))
@@ -654,9 +670,12 @@ def toggle_favorite(request, company):
     # company
     try:
         c = Company.objects.get(url_name=company)
+        return toggle_favorite_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
+
+def toggle_favorite_(request, c):
     # permissions
     if not has_permission(request.user, c, 'product', 'edit'):
         return JsonError(_("You have no permission to edit products"))

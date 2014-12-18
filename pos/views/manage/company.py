@@ -6,6 +6,8 @@ from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
 from common.images import import_color_image, import_monochrome_image, resize_image, create_file_from_image
+from config.functions import get_company_config
+from mobile.views.manage.configuration import company_config_to_dict
 
 from pos.models import Company, Permission
 
@@ -223,7 +225,7 @@ def validate_company(user, company, data):
 
 
 # for json etc.
-def company_to_dict(company, android=False):
+def company_to_dict(user, company, android=False, with_config=False):
     c = {
         'id': company.id,
         'name': company.name,
@@ -238,6 +240,9 @@ def company_to_dict(company, android=False):
         'vat_no': company.vat_no,
         'website': company.website,
     }
+
+    if with_config:
+        c['config'] = get_company_config(user, company)
 
     try:
         # when using company_to_dict on BillCompany model, some properties are missing

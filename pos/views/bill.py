@@ -134,7 +134,7 @@ def bill_to_dict(user, company, bill):
     b = {
         'id': bill.id,
 
-        'issuer': company_to_dict(bill.issuer),
+        'issuer': company_to_dict(user, bill.issuer),
         'register': register_to_dict(user, company, bill.register),
 
         'user_id': bill.user_id,
@@ -142,7 +142,6 @@ def bill_to_dict(user, company, bill):
 
         'serial': bill.serial,
         'notes': bill.notes,
-
 
         'discount_amount': format_number(user, company, bill.discount_amount),
         'discount_type': bill.discount_type,
@@ -190,7 +189,6 @@ def bill_to_dict(user, company, bill):
         
     b['items'] = i
 
-
     return b
 
 
@@ -235,8 +233,6 @@ def create_printable_bill(user, company, bill, receipt_format=None, esc=False):
     return data
 
 
-
-
 def create_bill_html(user, company, bill):
     data = create_printable_bill(user, company, bill)
     if data.get('status') == 'ok':
@@ -255,7 +251,7 @@ def esc_format(user, company, bill, bill_format, line_char_no=48, esc_commands=F
             bill_dict = bill_to_dict(user, company, bill)
             printer = escpostext.EscposText()
             new_line = '\x0a'
-            center_align =  '\x1b\x61\x01'
+            center_align = '\x1b\x61\x01'
             left_align = '\x1b\x61\x00'
             # center / bold
             string += center_align
@@ -357,14 +353,18 @@ def esc_format(user, company, bill, bill_format, line_char_no=48, esc_commands=F
 def create_bill(request, company):
     """ there's bill and items in request.POST['data'], create a new bill, and check all items and all """
 
-    def item_error(message, product):
-        return JsonError(message + " " + _("(Item" + ": ") + product.name + ")")
-
     # get company
     try:
         c = Company.objects.get(url_name=company)
+        return create_bill_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
+
+
+def create_bill_(request, c):
+    def item_error(message, product):
+        return JsonError(message + " " + _("(Item" + ": ") + product.name + ")")
+
 
     # check permissions
     if not has_permission(request.user, c, 'bill', 'edit'):
@@ -688,15 +688,18 @@ def check_bill_status(request, company):
 
 
 @login_required
-def finish_bill(request, company, android=False):
+def finish_bill(request, company):
     """
         find the bill, update its status and set payment type and reference
     """
     try:
         c = Company.objects.get(url_name=company)
+        return finish_bill_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
+
+def finish_bill_(request, c, android=False):
     # permissions
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JsonError(_("You have no permission to edit bills"))

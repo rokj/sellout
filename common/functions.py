@@ -62,7 +62,7 @@ def JsonError(message):
 def JsonOk(extra=None, safe=True):
 
     data = {'status': 'ok'}
-    if extra:
+    if extra is not None:  # if extra is empty list or dict, it still has to be included
         data['data'] = extra
 
     return JsonResponse(data, safe=safe)
@@ -198,7 +198,7 @@ def has_permission(user, company, model, task):
     # ...or database
     if not permission:
         try:
-            permission = Permission.objects.get(user__id=user.id, company=company)
+            permission = Permission.objects.get(user=user, company=company)
             cache.set(ckey, permission)
         except Permission.DoesNotExist:
             # there's no entry in the database,
@@ -237,9 +237,12 @@ def manage_delete_object(request, company_url_name, model, messages):
 
     try:
         c = Company.objects.get(url_name=company_url_name)
+        return manage_delete_object_(request, c, model, messages)
     except Company.DoesNotExist:
         return JsonError(_("Company not found"))
 
+
+def manage_delete_object_(request, c, model, messages):
     # check permissions
     if not has_permission(request.user, c, model.__name__.lower(), 'edit'):
         return JsonError(messages[0])

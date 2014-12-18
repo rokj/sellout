@@ -1,0 +1,31 @@
+{% load static %}
+
+{% if tutorial_step != -1 %}
+    <link href="{% static 'css/tutorial.css' %}" rel="stylesheet"/>
+
+    <script type="text/javascript" src="{% static 'js/tutorial.js' %}"></script>
+
+    <div id="tutorial_dialog">
+        <div>
+            <div id="tutorial_dialog_container">
+                <div id="tutorial_title"></div>
+                <div id="tutorial_text"></div>
+                <div id="tutorial_help_image" class="hidden">
+                    <div class="help-button">
+                        <img src="{% static 'icons/help-dashboard.png' %}" alt=""/>
+                    </div>
+                </div>
+                <div id="tutorial_dialog_buttons">
+                    <input type="button" id="tutorial_next" class="buttons hoverable" value=""/>
+                    <input type="button" id="tutorial_prev" class="hoverable" value=""/>
+                </div>
+
+                <div id="tutorial_cancel">
+                    <img src="{% static 'icons/close-thin.png' %}" class="hoverable"/>
+                </div>
+            </div>
+        </div>
+
+        <div id="tutorial_arrow"></div>
+    </div>
+{% endif %}

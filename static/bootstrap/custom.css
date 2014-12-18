@@ -150,6 +150,11 @@ input[type='submit']{
     text-transform: uppercase;
 }
 
+.lost-password.back {
+    margin-top: 20px;
+    display: inline-block;
+}
+
 /* custom fonts */
 * {
     font-family: 'Roboto', Arial, Helvetica, sans-serif;

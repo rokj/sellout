@@ -2,6 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
 from blusers import views as blusers_views
+from web import views as web_views
 
 admin.autodiscover()
 

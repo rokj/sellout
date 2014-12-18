@@ -1,18 +1,18 @@
 from django.db import models
-from django.utils.timezone import now
+from datetime import datetime as dtm
 
 
 class Skeleton(models.Model):
     # the 'datetime_deleted' stuff has been removed in favor of a separate table for deleted items
-    datetime_created = models.DateTimeField(null=False, blank=True, editable=False, default=now)
-    datetime_updated = models.DateTimeField(null=True, blank=True, editable=False, default=now)
+    datetime_created = models.DateTimeField(null=False, blank=True, editable=False, default=dtm.utcnow)
+    datetime_updated = models.DateTimeField(null=True, blank=True, editable=False, default=dtm.utcnow)
 
     def save(self, *args, **kwargs): 
         """ add datetime_created on first and datetime_updated on each subsequent save """
         if not self.id:
-            self.datetime_created = now()
+            self.datetime_created = dtm.utcnow()
         else:
-            self.datetime_updated = now()
+            self.datetime_updated = dtm.utcnow()
         return super(Skeleton, self).save(*args, **kwargs)
 
     class Meta:
