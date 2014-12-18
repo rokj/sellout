@@ -254,18 +254,6 @@ def try_register(user_form, user_profile_form=None):
         send_email(settings.EMAIL_FROM, [new_user.email], None, subject, message_text, message_html)
 
 
-def delete_user_image(bluser, image_id):
-    try:
-        user_image = UserImage.objects.get(id=image_id, created_by=bluser)
-        user_image.delete()
-
-        bluser.images.filter(id=image_id).delete()
-
-        return True
-    except UserImage.DoesNotExist:
-        return False
-
-
 def send_reactivation_key(request, bluser):
     """
     This is not a view, just normal function used in lost_password view.
