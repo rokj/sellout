@@ -18,9 +18,9 @@ from common import globals as g
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_JSON_categories_strucutred(request, company):
+def mobile_JSON_categories_strucutred(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -34,9 +34,9 @@ def mobile_JSON_categories_strucutred(request, company):
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_JSON_categories(request, company):
+def mobile_JSON_categories(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -55,9 +55,9 @@ def mobile_JSON_categories(request, company):
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_add_category(request, company):
+def mobile_add_category(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -86,10 +86,10 @@ def mobile_add_category(request, company):
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_edit_category(request, company):
+def mobile_edit_category(request, company_id):
 
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -117,15 +117,10 @@ def mobile_edit_category(request, company):
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_delete_category(request, company):
-    return delete_category(request, company)
-
-
-def mobile_JSON_dump_categories(request, company):
+def mobile_delete_category(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
+        return delete_category(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
-    cat = Category.objects.filter(company__id=c.id)
-    return JsonOk(extra="")

@@ -10,9 +10,9 @@ from django.utils.translation import ugettext as _
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def get_mobile_config(request, company):
+def get_mobile_config(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -37,9 +37,9 @@ def company_config_to_dict(user, company):
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
-def save_company_config(request, company):
+def save_company_config(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 

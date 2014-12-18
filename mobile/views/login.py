@@ -9,6 +9,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.views import APIView
 
+
 def get_user_credentials(user):
     credentials = {}
 
@@ -16,6 +17,7 @@ def get_user_credentials(user):
     credentials['user_email'] = user.email
     credentials['other_groups'] = None
     return credentials
+
 
 class ObtainAuthToken(APIView):
     throttle_classes = ()

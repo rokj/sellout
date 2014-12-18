@@ -297,18 +297,11 @@ def send_reactivation_key(request, bluser):
 
 def get_user_credentials(user):
     credentials = {}
-    return credentials
 
-    group = user.homegroup
-
-    credentials['group_name'] = group.name
-    credentials['group_id'] = group.id
-    #credentials['last_group_slug'] = GroupUserRole.objects.get(user=user, group=group).group_slug
     credentials['user_id'] = user.id
     credentials['user_email'] = user.email
     # credentials['other_groups'] = groups_to_dict(user.user_groups, user, participant=True)
 
-    credentials['notifications'] = get_notifications(user)
     """
     try:
         up = UserProfile.objects.get(user=user)
@@ -340,7 +333,7 @@ def get_actions(user):
 
     data = []
     for a in actions:
-        data.append(action_to_dict(a, android=True))
+        data.append(action_to_dict(user, a, android=True))
 
     return data
 
@@ -364,7 +357,7 @@ class ObtainAuthToken(APIView):
                 if serializer.is_valid():
                     user = serializer.object['user']
                 else:
-                    return JsonError(status="error", message="wrong credentials")
+                    return JsonError(message=_("wrong credentials"))
 
         elif backend == "google-oauth2":
             d = google_login_or_register(request, mobile=True)
@@ -374,23 +367,23 @@ class ObtainAuthToken(APIView):
                 return JsonResponse(d)
 
         else:
-            return JsonError("error", "wrong login")
+            return JsonError(message=_("wrong login"))
 
         token, created = Token.objects.get_or_create(user=user)
 
         if user:
             user_credentials = get_user_credentials(user)
         else:
-            return JsonError("error", _("User authentication failed."))
+            return JsonError(_("User authentication failed."))
 
         companies = user.companies
         actions = get_actions(user)
 
         return JsonResponse({'token': token.key,
-                              'user': user_credentials,
-                              'actions': actions,
-                              'companies': [company_to_dict(i, android=True) for i in companies],
-                              'status': "ok"})
+                             'user': user_credentials,
+                             'actions': actions,
+                             'companies': [company_to_dict(user, i, android=True, with_config=True) for i in companies],
+                             'status': "ok"})
 
 
 def get_user(request):

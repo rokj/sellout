@@ -10,20 +10,20 @@ from django.utils.translation import ugettext as _
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def get_company(request, company):
+def get_company(request, company_id):
 
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
-    return JsonOk(extra=company_to_dict(c, android=True))
+    return JsonOk(extra=company_to_dict(request.user, c, android=True))
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def edit_company(request, company):
+def edit_company(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 

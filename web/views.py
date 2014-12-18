@@ -1,11 +1,12 @@
 import json
+from django import forms
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from bl_auth import User
-from blusers.forms import LoginForm, BlocklogicUserForm
+from blusers.forms import LoginForm, BlocklogicUserForm, ResetPasswordForm
 from django.utils.translation import ugettext as _
 from blusers.models import BlocklogicUser
 from blusers.views import try_register, unset_language, send_reactivation_key
@@ -243,7 +244,35 @@ def lost_password(request):
 
 
 def recover_password(request, key):
-    pass
+    if request.method == 'POST':
+        form = ResetPasswordForm(request.POST)
+
+        if form.is_valid():
+            # passwords are the same
+            password = form.cleaned_data['new_password_1']
+
+            print password
+
+            # reset key has been checked in form validation
+            bluser = BlocklogicUser.objects.get(password_reset_key=key)
+            bluser.set_password(password)
+            bluser.password_reset_key = None
+            bluser.save()
+            bluser.update_password()
+
+            return redirect('web:index')
+    else:
+        form = ResetPasswordForm(initial={'key': key})
+
+    context = {
+        'title': _("Recover lost password"),
+        'site_title': g.SITE_TITLE,
+
+        'form': form,
+        'key': key,
+    }
+
+    return render(request, 'web/recover_password.html', context)
 
 
 def handle_invitation(request, reference, user_response):

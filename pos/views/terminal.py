@@ -58,7 +58,7 @@ def terminal(request, company):
         'taxes':  get_all_taxes(request.user, c),
         'registers': get_all_registers(request.user, c),
         'unit_types': g.UNITS,
-        'company': company_to_dict(c),  # this company's details (will be shown on the receipt)
+        'company': company_to_dict(request.user, c),  # this company's details (will be shown on the receipt)
         # current user  TODO: change when login system changes
         'user_name': str(request.user),  # TODO: specify how user is displayed
         'user_id': request.user.id,
@@ -103,9 +103,12 @@ def save(request, company):
 def lock_session(request, company):
     try:
         c = Company.objects.get(url_name=company)
+        return lock_session(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
+
+def lock_session(request, c):
     # a session is locked for a specific company by adding its url_name
     if 'locked' not in request.session:
         request.session['locked'] = []
@@ -175,9 +178,12 @@ def switch_user(request, company):
     # get the company
     try:
         c = Company.objects.get(url_name=company)
+        return switch_user_(request, c)
     except Company.DoesNotExist:
         return {'status': 'error', 'message': _("Company does not exist")}
 
+
+def switch_user_(request, c):
     # check the user credentials:
     if not request.user.is_authenticated():
         return {'status': 'locked', 'message': _("This session is locked"), 'company': c}

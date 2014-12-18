@@ -9,41 +9,42 @@ from django.utils.translation import ugettext as _
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_list_taxes(request, company):
+def mobile_list_taxes(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
     taxes = get_all_taxes(request.user, c)
-    print taxes
     return JsonOk(extra=taxes)
 
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_edit_tax(request, company):
-    return edit_tax(request, company)
+def mobile_edit_tax(request, company_id):
+    try:
+        c = Company.objects.get(id=company_id)
+        return edit_tax(request, c)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
 
 
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_delete_tax(request, company):
-    return delete_tax(request, company)
+def mobile_delete_tax(request, company_id):
+    try:
+        c = Company.objects.get(id=company_id)
+        return delete_tax(request, c)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
 
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_save_default_tax(request, company):
-    return set_default_tax(request, company)
-
-#@api_view(['GET', 'POST'])
-#@permission_classes((IsAuthenticated,))
-#def mobile_get_taxes(request, company):
-#    return get_taxes(request, company)
-#
-#@api_view(['GET', 'POST'])
-#@permission_classes((IsAuthenticated,))
-#def mobile_save_taxes(request, company):
-#    return save_taxes(request, company)
+def mobile_save_default_tax(request, company_id):
+    try:
+        c = Company.objects.get(id=company_id)
+        return set_default_tax(request, company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))

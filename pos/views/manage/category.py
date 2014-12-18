@@ -334,12 +334,14 @@ def edit_category(request, company, category_id):
 
 @login_required
 def web_delete_category(request, company):
-    return delete_category(request, company)
+    try:
+        c = Company.objects.get(url_name=company)
+        return delete_category(request, c)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
 
 
-def delete_category(request, company):
-    c = Company.objects.get(url_name=company)
-
+def delete_category(request, c):
     # check permissions: needs to be at least manager
     if not has_permission(request.user, c, 'category', 'edit'):
         return JsonError(_("You have no permission to delete categories"))

@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     # registration: passwords, activations, etc.
     url(r'^activate-account/key=(?P<key>[\w]+)$', views.activate_account, name='activate_account'),
     url(r'^lost-password/$', views.lost_password, name='lost_password'),
-    url(r'^recover-password/key=(?P<key>[\w]+)$', views.recover_password, name='recover_password'),
+    url(r'^recover-password/key=(?P<key>[\w]{15})$', views.recover_password, name='recover_password'),
 
     # actions: invitations, ...
     url(r'^accept-invitation/reference=(?P<reference>[\w]+)$', views.accept_invitation, name='accept_invitation'),
