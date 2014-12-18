@@ -47,7 +47,6 @@ Bill = function(g){
     p.option_save = $(".save", p.options_menu);
     p.option_load = $(".load", p.options_menu);
     p.option_clear = $(".clear", p.options_menu);
-    p.option_print = $(".print", p.options_menu);
 
     // the options dialog
     p.bill_options = null; // BillOptions object, (initialized later)
@@ -58,7 +57,6 @@ Bill = function(g){
 
     // save item template for items and remove it from the document
     p.item_template = $("#bill_item_template").detach().removeAttr("id");
-
 
     //
     // methods
@@ -562,9 +560,6 @@ Bill = function(g){
     // load bill
     p.option_load.unbind().click(p.load_unpaid);
 
-    // print options
-    p.option_print.unbind().click(function(){ /* nothing so far */ });
-
     // clear bill
     p.option_clear.unbind().click(function(){
         // a confirmation is required
@@ -576,8 +571,8 @@ Bill = function(g){
         );
     });
 
+    // a new bill
     p.clear();
-
 };
 
 Item = function(bill, product) {

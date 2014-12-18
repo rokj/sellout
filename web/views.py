@@ -63,26 +63,6 @@ def index(request):
     return render(request, "web/index.html", context)
 
 
-def get_tutorial_step(request):
-    """ returns this user's current tutorial step """
-    return get_user_value(request.user, 'tutorial_step')
-
-
-@login_required_nolocking
-def set_tutorial_step(request):
-    """ sets the current tutorial step to user's config """
-    if request.method != "POST":
-        return JsonError("Invalid request type")
-
-    try:
-        step = int(JsonParse(request.POST.get('data')).get('tutorial_step'))
-    except (ValueError, KeyError, TypeError):
-        return JsonError("Invalid data")
-
-    set_user_value(request.user, 'tutorial_step', step)
-    return JsonOk()
-
-
 @login_required_nolocking
 def select_company(request):
     """ show current user's companies and a list of invites. """
@@ -106,7 +86,6 @@ def select_company(request):
 
         'companies': companies,
         'actions': actions,
-        'tutorial_step': get_tutorial_step(request),
     }
 
     return render(request, "web/select_company.html", context)

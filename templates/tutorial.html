@@ -4,11 +4,6 @@
     <link href="{% static 'css/tutorial.css' %}" rel="stylesheet"/>
 
     <script type="text/javascript" src="{% static 'js/tutorial.js' %}"></script>
-    <script type="text/javascript">
-        $(window).load(function(){
-            var tutorial = new Tutorial({{ tutorial_step }}, "{% url 'set_tutorial_step' %}");
-        });
-    </script>
 
     <div id="tutorial_dialog">
         <div>

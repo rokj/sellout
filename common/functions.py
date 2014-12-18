@@ -61,7 +61,7 @@ def JsonError(message):
 def JsonOk(extra=None, safe=True):
 
     data = {'status': 'ok'}
-    if extra:
+    if extra is not None:  # if extra is empty list or dict, it still has to be included
         data['data'] = extra
 
     return JsonResponse(data, safe=safe)

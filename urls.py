@@ -28,9 +28,6 @@ urlpatterns = patterns('',
     # support
     # TODO
 
-    # tutorials
-    url(r'^update-tutorial-status/', web_views.set_tutorial_step, name="set_tutorial_step"),
-
     # web: everything that happens before user enters a specific company
     url(r'^', include('web.urls', namespace='web')),
 )

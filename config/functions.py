@@ -18,6 +18,7 @@
 
 from config.models import UserConfig
 from config.models import CompanyConfig
+from config import currencies
 
 from common import globals as g
 from django.core.cache import cache
@@ -29,7 +30,7 @@ company_defaults = {
     'pos_date_format': 'yyyy-mm-dd',  # keys for DATE_FORMATS dictionary in globals
     'pos_time_format': '23:59',  # keys for TIME_FORMATS dictionary in globals
     'pos_timezone': 'utc',  # keywords for pytz timezones
-    'pos_currency': "$",
+    'pos_currency': currencies.default_currency,
     'pos_decimal_separator': '.',
     # billing and calculation defaults
     'pos_decimal_places': 2,  # default decimal places for display
