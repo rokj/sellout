@@ -236,9 +236,12 @@ def manage_delete_object(request, company_url_name, model, messages):
 
     try:
         c = Company.objects.get(url_name=company_url_name)
+        return manage_delete_object_(request, c, model, messages)
     except Company.DoesNotExist:
         return JsonError(_("Company not found"))
 
+
+def manage_delete_object_(request, c, model, messages):
     # check permissions
     if not has_permission(request.user, c, model.__name__.lower(), 'edit'):
         return JsonError(messages[0])

@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Bill, BillItem, Product
-from pos.views.bill import create_bill, finish_bill
+from pos.views.bill import create_bill, finish_bill, finish_bill_, create_bill_
 from common.functions import has_permission, JsonResponse, JsonParse, JsonError, \
     format_number, parse_decimal, format_date, format_time
 from config.functions import get_company_value
@@ -28,16 +28,19 @@ from decimal import Decimal
 #########
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_create_bill(request, company):
-    return create_bill(request, company)
+def mobile_create_bill(request, company_id):
+    try:
+        c = Company.objects.get(id=company_id)
+        return create_bill_(request, c)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
     # return JsonOk()
 
 
 @login_required
-def get_active_bill(request, company):
-    """ returns the last edited (active) bill if any, or an empty one """
+def get_active_bill(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
     
@@ -63,6 +66,10 @@ def get_active_bill(request, company):
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_finish_bill(request, company):
-    return finish_bill(request, company, android=True)
+def mobile_finish_bill(request, company_id):
+    try:
+        c = Company.objects.get(id=company_id)
+        return finish_bill_(request, c, android=True)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
     # return JsonOk()

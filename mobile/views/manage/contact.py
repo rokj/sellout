@@ -13,9 +13,9 @@ from rest_framework.permissions import IsAuthenticated
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_list_contacts(request, company):
+def mobile_list_contacts(request, company_id):
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -23,7 +23,7 @@ def mobile_list_contacts(request, company):
     if not has_permission(request.user, c, 'contact', 'view'):
         return JsonError(_("You have no permission to view products"))
 
-    contacts = Contact.objects.filter(company__id=c.id)
+    contacts = Contact.objects.filter(company=c)
 
     criteria = JsonParse(request.POST['data'])
     cs = []
@@ -42,9 +42,9 @@ def mobile_get_contact(request, company, contact_id):
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_add_contact(request, company):
+def mobile_add_contact(request, company_id):
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -89,15 +89,13 @@ def mobile_add_contact(request, company):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_edit_contact(request, company):
+def mobile_edit_contact(request, company_id):
 
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
-    #contact_id = request.POST.get('contact_id')
-    #print contact_id
     # sellers can edit product
     if not has_permission(request.user, c, 'product', 'edit'):
         return JsonError(_("You have no permission to edit products"))
@@ -140,9 +138,9 @@ def mobile_edit_contact(request, company):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_delete_contact(request, company):
+def mobile_delete_contact(request, company_id):
     try:
-        c = Company.objects.get(url_name = company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 

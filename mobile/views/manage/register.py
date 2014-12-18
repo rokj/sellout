@@ -10,9 +10,9 @@ from common.functions import has_permission, manage_delete_object, JsonOk, JsonE
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_get_register(request, company):
+def mobile_get_register(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -43,10 +43,10 @@ def mobile_get_register(request, company):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_add_register(request, company):
+def mobile_add_register(request, company_id):
     # add a new register
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -69,15 +69,15 @@ def mobile_add_register(request, company):
 
     register.save()
 
-    return JsonOk(extra=register_to_dict(request.user, company, register))
+    return JsonOk(extra=register_to_dict(request.user, c, register))
 
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_edit_register(request, company):
+def mobile_edit_register(request, company_id):
     # add a new register
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(url_name=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -109,7 +109,11 @@ def mobile_edit_register(request, company):
 
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
-def mobile_delete_register(request, company):
-    return manage_delete_object(request, company, Register,
+def mobile_delete_register(request, company_id):
+    try:
+        c = Company.objects.get(url_name=company_id)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+    return manage_delete_object(request, c, Register,
                                 (_("You have no permission to delete registers"), _("Could not delete register")))
 

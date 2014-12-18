@@ -110,9 +110,11 @@ def edit_tax(request, company):
     # the company
     try:
         c = Company.objects.get(url_name=company)
+        return edit_tax_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
+def edit_tax_(request, c):
     # permission
     if not has_permission(request.user, c, 'tax', 'edit'):
         return JsonError(_("You have no permission to edit taxes"))
@@ -160,9 +162,11 @@ def delete_tax(request, company):
     # the company
     try:
         c = Company.objects.get(url_name=company)
+        return delte_tax_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
+def delte_tax_(request, c):
     # permissions
     if not has_permission(request.user, c, 'tax', 'edit'):
         return JsonError(_("You have no permission to edit taxes"))
@@ -191,9 +195,11 @@ def delete_tax(request, company):
 def set_default_tax(request, company):
     try:
         c = Company.objects.get(url_name=company)
+        return set_default_tax_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
+def set_default_tax_(request, c):
     # permissions
     if not has_permission(request.user, c, 'tax', 'edit'):
         return JsonError(_("You have no permission to edit taxes"))

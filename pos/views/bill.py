@@ -357,14 +357,17 @@ def esc_format(user, company, bill, bill_format, line_char_no=48, esc_commands=F
 def create_bill(request, company):
     """ there's bill and items in request.POST['data'], create a new bill, and check all items and all """
 
-    def item_error(message, product):
-        return JsonError(message + " " + _("(Item" + ": ") + product.name + ")")
-
     # get company
     try:
         c = Company.objects.get(url_name=company)
+        return create_bill_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
+
+def create_bill_(request, company):
+    def item_error(message, product):
+        return JsonError(message + " " + _("(Item" + ": ") + product.name + ")")
+
 
     # check permissions
     if not has_permission(request.user, c, 'bill', 'edit'):
@@ -688,15 +691,17 @@ def check_bill_status(request, company):
 
 
 @login_required
-def finish_bill(request, company, android=False):
+def finish_bill(request, company):
     """
         find the bill, update its status and set payment type and reference
     """
     try:
         c = Company.objects.get(url_name=company)
+        return finish_bill_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
+def finish_bill_(request, c, android=False):
     # permissions
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JsonError(_("You have no permission to edit bills"))

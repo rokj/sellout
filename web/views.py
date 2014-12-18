@@ -9,7 +9,7 @@ from blusers.forms import LoginForm, BlocklogicUserForm
 from django.utils.translation import ugettext as _
 from blusers.models import BlocklogicUser
 from blusers.views import try_register, unset_language, send_reactivation_key
-from common.functions import JsonParse
+from common.functions import JsonParse, JsonOk
 from django.contrib.auth.decorators import login_required as login_required_nolocking
 from django.contrib.auth import logout as django_logout
 from action.models import Action
@@ -209,7 +209,7 @@ def lost_password(request):
     return JsonResponse({"status": "something_went_wrong"})
 
 
-def handle_invitation(request, reference, user_response):
+def handle_invitation(request, reference, user_response, mobile=False):
     try:
         action = Action.objects.get(receiver=request.user.email,
                                     reference=reference,
@@ -241,19 +241,21 @@ def handle_invitation(request, reference, user_response):
 
     action.status = user_response
     action.save()
-
-    return redirect('web:select_company')
-
-
-@login_required_nolocking
-def accept_invitation(request, reference):
-    return handle_invitation(request, reference, g.ACTION_ACCEPTED)
-
+    if mobile:
+        return JsonOk()
+    else:
+        return redirect('web:select_company')
 
 
 @login_required_nolocking
-def decline_invitation(request, reference):
-    return handle_invitation(request, reference, g.ACTION_DECLINED)
+def accept_invitation(request, reference, mobile=False):
+    return handle_invitation(request, reference, g.ACTION_ACCEPTED, mobile=mobile)
+
+
+
+@login_required_nolocking
+def decline_invitation(request, reference, mobile=False):
+    return handle_invitation(request, reference, g.ACTION_DECLINED, mobile=mobile)
 
 
 @login_required_nolocking

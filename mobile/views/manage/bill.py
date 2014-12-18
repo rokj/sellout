@@ -10,9 +10,9 @@ import datetime as dtm
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def list_bills(request, company):
+def list_bills(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -103,9 +103,9 @@ def list_bills(request, company):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def print_bill(request, company):
+def print_bill(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 

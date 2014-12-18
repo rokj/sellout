@@ -8,23 +8,31 @@ from pos.models import Company, Permission
 from django.utils.translation import ugettext as _
 from rest_framework.authtoken.models import Token
 from pos.views.manage.company import company_to_dict
-from pos.views.terminal import switch_user, lock_session
+from pos.views.terminal import switch_user, lock_session, switch_user_
 
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_lock_session(request, company):
-    return lock_session(request, company)
+def mobile_lock_session(request, company_id):
+    try:
+        c = Company.objects.get(id=company_id)
+        return lock_session(request, c)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
 
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def unlock_session(request, company):
+def unlock_session(request, company_id):
     """
         always returns an ajax response
     """
+    try:
+        c = Company.objects.get(id=company_id)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
 
-    cleaned_data = switch_user(request, company)
+    cleaned_data = switch_user_(request, c)
 
     if cleaned_data['status'] == 'ok':
         user = cleaned_data['user']
@@ -40,7 +48,7 @@ def unlock_session(request, company):
         return JsonResponse({'token': token.key,
                              'user': user_credentials,
                              'config': company_config_to_dict(request, c),
-                             'company': company_to_dict(c, android=True),
+                             'company': company_to_dict(user, c, android=True),
                              'status': "ok"})
 
     else:

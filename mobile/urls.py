@@ -22,9 +22,9 @@ from mobile.views.manage import users
 # company's site: /pos/blocklogic
 # readable pattern: (?P<company>[\w-]{1,30})
 
-r_company = r'^(?P<company>[\w-]{1,' + str(g.MISC['company_url_length']) + '})'
+r_company = r'^(?P<company_id>[\w-]+)'
 # system pages (registration, login, logout, ...: /pos/app/register-company
-r_manage = g.MISC['management_url'] + '/'
+# r_manage = g.MISC['management_url'] + '/'
 
 urlpatterns = patterns('',
 
@@ -37,7 +37,7 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/category/delete/?$', category.mobile_delete_category, name='delete_category'), # delete
     url(r_company + r'/manage/json/categories/?$', category.mobile_JSON_categories_strucutred, name='JSON_categories'),
     url(r_company + r'/manage/json/categories/all/?$', category.mobile_JSON_categories, name='JSON_categories'),
-    url(r_company + r'/manage/json/category/dumps', category.mobile_JSON_dump_categories, name='dump_category'),
+    # url(r_company + r'/manage/json/category/dumps', category.mobile_JSON_dump_categories, name='dump_category'),
     # contacts
     url(r_company + r'/manage/json/contacts/?$', contact.mobile_list_contacts, name='list_contacts'),
     url(r_company + r'/manage/json/contact/add/?$', contact.mobile_add_contact, name='add_contact'),
@@ -103,4 +103,8 @@ urlpatterns = patterns('',
     # user
     url(r_company + r'/manage/json/users/unlock/?$', users.unlock_session, name='mobile_unlock_session'),
     url(r_company + r'/manage/json/users/lock/?$', users.mobile_lock_session, name='mobile_unlock_session'),
+
+
+    url(r'mobile-accept-invitation', views.mobile_accept_invitation, name='mobile-accept-invitation'),
+    url(r'mobile-decline-invitation', views.mobile_decline_invitation, name='mobile-decline-invitation'),
 )

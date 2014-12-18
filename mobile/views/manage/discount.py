@@ -14,9 +14,9 @@ from pos.models import Discount
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_get_discounts(request, company):
+def mobile_get_discounts(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -36,7 +36,7 @@ def mobile_get_discounts(request, company):
 @permission_classes((IsAuthenticated,))
 def mobile_delete_discount(request, company):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -62,10 +62,10 @@ def mobile_delete_discount(request, company):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_edit_discount(request, company):
+def mobile_edit_discount(request, company_id):
     # edit an existing contact
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -110,10 +110,10 @@ def mobile_edit_discount(request, company):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_add_discount(request, company):
+def mobile_add_discount(request, company_id):
     # edit an existing contact
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -148,9 +148,9 @@ def mobile_add_discount(request, company):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_list_discounts(request, company):
+def mobile_list_discounts(request, company_id):
     try:
-        c = Company.objects.get(url_name=company)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
