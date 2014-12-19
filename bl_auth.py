@@ -150,10 +150,10 @@ class BlocklogicMailAuthBackend(object):
                 bl_user.save()
 
                 user_data = json.loads(user.user_data(username))
-                bl_user.first_name = user_data['first_name']
-                bl_user.last_name = user_data['last_name']
-                bl_user.sex = user_data['sex']
-                bl_user.country = user_data['country']
+                bl_user.first_name = user_data.get('first_name', '')
+                bl_user.last_name = user_data.get('last_name', '')
+                bl_user.sex = user_data.get('sex', '')
+                bl_user.country = user_data.get('country', '')
                 bl_user.save()
 
             return bl_user
