@@ -198,7 +198,6 @@ Terminal = function(g){
     p.get_register = function(id){
         // if there are no registers defined, send user to create one
         if(p.g.data.registers.length == 0){
-            // do not use error_message() here because it won't block and redirect will be  instant
             custom_dialog(
                 gettext("Register is required"),
                 gettext("There are no registers defined, please add one"),
@@ -208,6 +207,8 @@ Terminal = function(g){
                     ok_action: function(){ window.location.href = p.g.urls.manage_registers; }
                 }
             );
+
+            // do nothing else
             return;
         }
 

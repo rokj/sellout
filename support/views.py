@@ -4,54 +4,20 @@ from django.db.models import Q
 from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.translation import ugettext as _
-from common.functions import site_title, JSON_parse
-from config.functions import set_value, get_value
-from decorators import login_required
+from common.functions import site_title, JsonParse
+from django.contrib.auth.decorators import login_required as login_required_nolocking
 
 from models import Question, Comment, Vote
-from django import forms
+from support.forms import QuestionForm, CommentForm, SearchForm
 
 import parameters as p
-
-# support 'workflow':
-#  1. go to support page. (views.home/index.html)
-#       contains category tabs, latest answers and search box
-#  2. browse / search for an interesting question/answer (views.search/search_results.html)
-#       contains paginated question list
-#  3. read the question/answer (views.question/question.html)
-#       contains one question and its answers
-#  4. if still not satisfied, post a new answer or a new question (views.post/post.html)
-#       contains post form
-
-#
-# forms
-#
-
-
-class QuestionForm(forms.ModelForm):
-    class Meta:
-        model = Question
-        fields = ['title', 'category', 'text']
-
-
-class CommentForm(forms.ModelForm):
-    class Meta:
-        model = Comment
-        fields = ['text']
-
-
-class SearchForm(forms.Form):
-    select_choices = [('-', _("Choose a category"))] + list(p.CATEGORIES)
-
-    search_text = forms.CharField(max_length=64, min_length=3)
-    category = forms.ChoiceField(choices=select_choices, required=False)
 
 
 #
 # views
 #
 # login is not required for support index, but it is required for posting
-def home(request, category):
+def index(request, category=None):
     category_name = None
 
     if category:
@@ -99,7 +65,6 @@ def home(request, category):
 
         'title': _("Support"),
         'site_title': site_title(),
-        'show_welcome': get_value(request.user, 'show_support_welcome'),
     }
 
     return render(request, 'support/index.html', c)
@@ -212,7 +177,7 @@ def question(request, question_id):
     return render(request, 'support/question.html', c)
 
 
-@login_required
+@login_required_nolocking
 def ask(request):
     if request.method == 'POST':
         form = QuestionForm(request.POST)
@@ -243,11 +208,11 @@ def ask(request):
     return render(request, 'support/ask.html', c)
 
 
-@login_required(ajax=True)
+@login_required_nolocking
 def vote(request):
     # there's 'question_id' and 'up' in request.POST;
     # before doing anything, check if this user already voted on that question
-    d = JSON_parse(request.POST.get('data'))
+    d = JsonParse(request.POST.get('data'))
 
     try:
         question_id = int(d.get('question_id'))
@@ -278,10 +243,10 @@ def vote(request):
     return JsonResponse({'status': 'ok'})
 
 
-@login_required(ajax=True)
+@login_required_nolocking
 def accept(request):
     # receive (comment) id in request.POST and mark that comment as an answer
-    d = JSON_parse(request.POST.get('data'))
+    d = JsonParse(request.POST.get('data'))
 
     try:
         comment_id = d.get('id')
@@ -305,11 +270,11 @@ def accept(request):
     return JsonResponse({'status': 'ok'})
 
 
-@login_required(ajax=True)
+@login_required_nolocking
 def delete_question(request):
     # there must be (question) id in request.POST.data
     try:
-        id = int(JSON_parse(request.POST.get('data')).get('id'))
+        id = int(JsonParse(request.POST.get('data')).get('id'))
         question = Question.objects.get(id=id)
     except:
         return JsonResponse({'status': 'error', 'message': _("Question not found")})
@@ -320,14 +285,14 @@ def delete_question(request):
 
     # ok, delete it.
     question.delete()
-    return JsonResponse({'status': 'ok', 'url': reverse('support:home')})
+    return JsonResponse({'status': 'ok', 'url': reverse('support:index')})
 
 
-@login_required(ajax=True)
+@login_required_nolocking
 def delete_comment(request):
     # read comment_id from request.POST.data
     try:
-        id = int(JSON_parse(request.POST.get('data')).get('id'))
+        id = int(JsonParse(request.POST.get('data')).get('id'))
         comment = Comment.objects.get(id=id)
     except:
         return JsonResponse({'status': 'error', 'message': _("Comment not found")})
@@ -341,10 +306,3 @@ def delete_comment(request):
     url = reverse('support:question', args=(comment.question.id,))
     comment.delete()
     return JsonResponse({'status': 'ok', 'url': url})
-
-
-def hide_welcome_message(request):
-    if request.user.is_authenticated():
-        set_value(request.user, 'show_support_welcome', False)
-
-    return JsonResponse({'status': 'ok'})

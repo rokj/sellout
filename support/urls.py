@@ -25,9 +25,6 @@ urlpatterns = patterns('',
     # accept an answer
     url(r'accept', views.accept, name='accept'),
 
-    # hide welcome message
-    url(r'hide-welcome-message', views.hide_welcome_message, name='hide_welcome_message'),
-
     # support homepage
-    url(r'^(?P<category>[\w\d-]+)?', views.home, name='home'),
+    url(r'', views.index, name='index'),
 )
