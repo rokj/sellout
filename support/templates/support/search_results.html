@@ -1,0 +1,60 @@
+{% extends "support/supportbase.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block main_content_body %}
+    <div id="question_header">
+        <p class="question-category">{% trans 'Search results' %}
+            {% if results %}
+                <span class="results-no">{% trans 'Questions found' %}: {{ results.paginator.count }}</span>
+            {% endif %} </p>
+    </div>
+    <div id="search_results" class="space">
+        {% if not results %}
+            <p>{% trans 'No results found' %}</p>
+        {% else %}
+            <table class="search-results">
+                <thead>
+                    <tr>
+                        <td>{% trans 'Question' %}</td>
+                        <td>{% trans 'Rating' %}</td>
+                        <td>{% trans 'Comments' %}</td>
+                        <td>{% trans 'Answered' %}</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comment in results %}
+                        <tr>
+                            <td>
+                                <p class="search-result-title">
+                                    <a href="{% url 'support:question' comment.question.id %}">
+                                        {{ comment.question.title }}
+                                    </a>
+                                </p>
+                                <p class="search-result-text">{{ comment.text }}</p>
+                            </td>
+                            <td>
+                                {{ comment.question.rating }}
+                            </td>
+                            <td>
+                                {{ comment.question.comments }}
+                            </td>
+                            <td>
+                                {% if comment.question.answered %}
+                                    <img class="is-answer"
+                                         src="{% static 'icons/ok.png' %}"
+                                         alt="{% trans 'Yes' %}"/>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {# pagination in case there's too much results #}
+            {% include 'support/pagination.html' with d=results %}
+        {% endif %}
+
+    </div>
+{% endblock %}

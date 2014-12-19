@@ -1,0 +1,124 @@
+{% extends "support/supportbase.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block search_form %}{# empty #}{% endblock %}
+{% block ask_link %}{% endblock %}
+
+{% block main_content_header %}
+    <div id="question_header">
+        {# question's category and detail titles #}
+        <div class="question-detail detail-title">{% trans 'Answered' %}</div>
+        <div class="question-detail detail-title">{% trans 'Rating' %}</div>
+        <div class="question-detail detail-title">{% trans 'Comments' %}</div>
+
+        <p class="question-category">{{ question.get_category_display }}</p>
+    </div>
+{% endblock %}
+
+{% block main_content_body %}
+    <div class="question border-heavy">
+        <div class="question-detail detail-padded">
+            {% if question.answered %}
+                <a href="#answer" class="answer-anchor">
+                    <img class="is-answer main"
+                     src="{% static 'icons/ok.png' %}"
+                     alt="{% trans 'Yes' %}"/>
+                </a>
+            {% endif %}
+            &nbsp;
+        </div>
+        <div class="question-detail">
+                {# plus and minus button #}
+            <div class="vote-icons">
+                <img src="{% static 'icons/vote_up.png' %}"
+                     class="vote hoverable up"
+                     alt="{% trans 'Vote up' %}"
+                     data-id="{{ question.id }}"
+                     data-up="1" /><br />
+                {{ question.rating }}<br />
+                <img src="{% static 'icons/vote_down.png' %}"
+                     class="vote hoverable down"
+                     alt="{% trans 'Vote down' %}"
+                     data-id="{{ question.id }}"
+                     data-up="0" />
+            </div>
+        </div>
+
+        <div class="question-detail detail-padded">
+                {{ question.comments }}
+        </div>
+
+        <div class="question-author">
+            {{ question.author }} | {{ question.date }} | {{ question.time }}
+        </div>
+        <h1 class="question-title">
+            {# the question #}
+            {{ question.title }}
+            {# delete button, if applicable #}
+            {% if can_delete %}
+                <img src="{% static 'icons/delete.png' %}"
+                         class="delete-question hoverable"
+                         alt="{% trans 'Delete this question' %}"
+                         title="{% trans 'Delete this question' %}"
+                         data-id="{{ question.id }}"/>
+            {% endif %}
+        </h1>
+
+        <div class="text space text-width">{{ question.text }}</div>
+    </div>
+
+    {# all answers #}
+    {% for c in comments %}
+        <div class="comment-header space">
+            {% if c.is_answer %}
+                {# show the tick #}
+                <div class="accepted-answer">
+                    <a name="answer" class="answer-anchor">
+                        <img src="{% static 'icons/ok.png' %}"
+                         class="is-answer"
+                         alt="{% trans 'This is the accepted answer' %}" />
+                    {% trans 'Answer' %}</a>
+                </div>
+            {% elif not question.answered and can_add %}
+                {# show 'accept' button #}
+                <a class="accept hoverable" data-id="{{ c.id }}" href="#">{% trans 'Accept' %}</a>
+
+                {% comment %} show delete button for last comments that are owned by this user;
+                    actual checking for permissions will be done on the server {% endcomment %}
+                {% if forloop.last and c.author.id == current_user.id %}
+                    <a class="delete-comment hoverable" data-id="{{ c.id }}" href="#">
+                        {% trans 'Delete' %}
+                    </a>
+                {% endif %}
+            {% endif %}
+            {{ c.author }} | {{ c.date }} | {{ c.time }}
+        </div>
+        <div class="comment-text space border-light text-width">
+            {{ c.text }}
+        </div>
+
+    {% endfor %}
+
+    {# and an add answer form #}
+    <div class="add-comment">
+        <h2 class="space">{% trans 'Add your comment' %}</h2>
+        {% if logged_in %}
+            <form method="post" action="{% url 'support:question' question.id %}">
+                <div>
+                    {% csrf_token %}
+                    {{ comment_form.as_p }}
+                </div>
+                <div class="form-submit">
+                    <input type="submit" value="{% trans 'Submit' %}" class="buttons" />
+                </div>
+            </form>
+        {% else %}
+            <p class="subtitle">
+                {% trans 'You have to be logged in to add comments.' %}
+            </p>
+        {% endif %}
+    </div>
+
+{% endblock %}

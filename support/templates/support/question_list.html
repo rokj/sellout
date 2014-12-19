@@ -1,0 +1,31 @@
+{% load staticfiles %}
+{% load i18n %}
+
+<table class="question-list">
+    <thead>
+        <tr>
+            <td class="title"></td>
+            <td class="header narrow">{% trans 'Comments' %}</td>
+            <td class="header narrow">{% trans 'Rating' %}</td>
+            <td class="header narrow">{% trans 'Answered' %}</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for q in questions %}
+            <tr>
+                <td><a href="{% url 'support:question' q.id %}">{{ q.title }}</a></td>
+                <td class="narrow">{{ q.comments }}</td>
+                <td class="narrow">{{ q.rating }}</td> {# TODO: format rating #}
+                <td class="narrow">
+                {# show tick mark if answered, otherwise nothing #}
+                    {% if q.answered %}
+                        <img class="is-answer"
+                             src="{% static 'icons/ok.png' %}"
+                             alt="{% trans 'Yes' %}"/>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
