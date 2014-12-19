@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/support.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/todo.css' %}" />
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        // show stuff
+        $(".hidden-on-load").removeClass("hidden-on-load");
+
+        // user menu
+        $("#user_menu_button").simpleMenu($("#user_menu_items"));
+
+        // voting buttons
+        $(".vote").click(function(){
+            // the vote button needs the following data-attributes:
+            // data-id: question id
+            // up: 1 or zero (vote up: true or false)
+            var obj = $(this);
+            var id = parseInt(obj.data("id"));
+            var up = parseInt(obj.data("up")) > 0 ? 1 : 0;
+
+            send_data("{% url 'support:vote' %}", {question_id:id, up:up}, "{{ csrf_token }}", function(recv_data){
+                if(recv_data.status != 'ok'){
+                    error_message(null, gettext("Vote failed"), recv_data.message);
+                }
+                else{
+                    // everything ok, refresh the page
+                    window.location.reload();
+                }
+            });
+        });
+
+        // accept comment as answer, delete question and delete comment:
+        // virtually the same function
+        function ajax_call(object, url, confirm_message, error_message_title){
+
+            var id = parseInt(object.data("id"));
+
+            confirmation_dialog(null,
+                "",
+                confirm_message,
+                "{% trans 'Yes' %}",
+                "{% trans 'No' %}",
+                function(){
+                    send_data(url, {id:id}, "{{ csrf_token }}", function(recv_data){
+                        if(recv_data.status != 'ok'){
+                            error_message(null, error_message_title, recv_data.message);
+                        }
+                        else{
+                            // everything ok, refresh the page
+                            if(recv_data.url) window.location = recv_data.url;
+                            else window.location.reload();
+                        }
+                    });
+                },
+                function(){ }
+            );
+        }
+
+        // accept buttons
+        $(".accept").click(function(){
+            ajax_call(
+                $(this),
+                "{% url 'support:accept' %}",
+                gettext("Accept this comment as the answer to the question?"),
+                gettext("Could not accept answer")); });
+
+        // delete buttons: question...
+        $(".delete-question").click(function(){
+            ajax_call(
+                $(this),
+                "{% url 'support:delete_question' %}",
+                gettext("Really delete this question?"),
+                gettext("Could not delete question")); });
+
+        // and comments
+        $(".delete-comment").click(function(){
+            ajax_call(
+                $(this),
+                "{% url 'support:delete_comment' %}",
+                gettext("Really delete this comment?"),
+                gettext("Could not delete comment")); });
+
+        // close welcome message
+        var msg = $("#welcome_message");
+        msg.click(function(){
+            send_data("{% url 'support:hide_welcome_message' %}", null, "{{ csrf_token }}",
+                function(response){
+                    if(response.status == 'ok'){
+                        msg.remove();
+                    }
+                });
+        });
+    });
+</script>
+
+{% endblock %}
+
+{% block body_tag %}<body class="level3">{% endblock %}
+
+{% block content %}
+    <div id="status_bar" class="shadow">
+        {% if request.user.is_authenticated %}
+            <div id="account_bar" class="single">
+                {# user menu #}
+                {% include 'web/usermenu.html' %}
+            </div>
+        {% endif %}
+
+        {# logo and link #}
+        <div id="logo_bar" class="column1 hidden-on-load">
+            <a href="{% url 'index' %}" title="Timebits" class="plain">
+                <img id="logo_static" class="flush-left"
+                     src="{% static 'icons/logo_icon_static.png' %}" />
+                <img id="logo_text" class="logo hidden-on-load"
+                     src="{% static 'icons/logo_text.png' %}" />
+            </a>
+        </div>
+    </div>
+
+    <div id="sidebar">
+		{% block home_button %}
+            {# home link #}
+            <p id="back_button">
+                <a href="{% url 'support:home' %}">
+                    <img src="{% static 'icons/task_pointer.png' %}" alt="{% trans 'Back' %}"/>
+                </a>
+            </p>
+        {% endblock %}
+
+        {% if not show_welcome %}
+            <div id="welcome_message" class="shadow">
+                <div id="close_sidebar_button">
+                    <img src="{% static 'icons/close-thin.png' %}"
+                         alt="{% trans 'Hide' %}"/>
+                </div>
+
+                <h1> {% trans 'Welcome to our support center' %}</h1>
+
+                <p class="subtitle">{% blocktrans %}
+                    Here you can post a question about our service,
+                    report an error you came across, or suggest a new feature we should include.
+                {% endblocktrans %}</p>
+
+                <p class="subtitle"> {% blocktrans %}
+                    Please always use the search form before posting a new question
+                    as it may already be in the database.
+                {% endblocktrans %}</p>
+            </div>
+        {% endif %}
+
+        {% comment %}
+        {# a list of all categories #}
+        <div class="line"></div>
+        {% for c in categories %}
+            <p><a href="{% url 'support:home' c.0 %}">{{ c.1 }}</a></p>
+        {% endfor %}
+        {% endcomment %}
+
+        {% block ask_link %}
+            <div id="ask">
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'support:ask' %}" class="post-question shadow">
+                       {% trans 'Post' %}
+                    </a>
+                {% else %}
+                    <p class="login"> {% trans 'You have to log in first.' %} <br/>
+                        <a href="{% url 'index' %}">{% trans 'Log in' %}
+                        <img class="login-pointer"
+                             src="{% static 'icons/login_pointer.png' %}"
+                             alt="{% trans 'Log in' %}" />
+                        </a>
+                    </p>
+                {% endif %}
+            </div>
+        {% endblock %}
+
+        {% block email_support %}
+            <div id="email_support" class="shadow">
+                <h1>{% trans 'Email support' %}</h1>
+
+                <p class="subtitle">
+                    <a class="email_support" href="mailto:support@timebits.com">support@timebits.com</a>
+                </p>
+
+                <p class="subtitle">
+                    {% trans "We will try our best to answer within 24h." %}
+                </p>
+            </div>
+        {% endblock %}
+    </div>
+
+    <div id="main_content">
+        <div id="support_header_container">
+            {% block search_form %}
+                {# search #}
+                <div id="search">
+                    <h3>{% trans 'Search' %}</h3>
+                    <div class="search-errors">
+                        {{ search_form.search_text.errors }}
+                    </div>
+                    <form class="search" method="get" action="{% url 'support:search' %}">
+                        {% csrf_token %}
+                        <div class="search-column text">
+                            <div class="search-container">
+                                {{ search_form.search_text }}
+                            </div>
+                        </div>
+
+                        <div class="search-column category">
+                            <div class="search-container">
+                                {{ search_form.category }}
+                            </div>
+                        </div>
+
+                        <div class="search-column submit">
+                            <div class="search-container">
+                                <input type="submit" class="buttons shadow" value="{% trans 'Search' %}" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            {% endblock %}
+
+            {% block main_content_header %}{% endblock %}
+        </div>
+        <div id="support_body">
+            {% block main_content_body %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Google analytics code -->
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-56398823-1', 'auto');
+        ga('require', 'displayfeatures');
+        ga('send', 'pageview');
+    </script>
+
+{% endblock %}

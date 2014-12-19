@@ -10,7 +10,6 @@ from blusers.forms import LoginForm, BlocklogicUserForm, ResetPasswordForm
 from django.utils.translation import ugettext as _
 from blusers.models import BlocklogicUser
 from blusers.views import try_register, unset_language, send_reactivation_key
-from common.functions import JsonParse, JsonError, JsonOk
 from django.contrib.auth.decorators import login_required as login_required_nolocking
 from django.contrib.auth import logout as django_logout
 from action.models import Action

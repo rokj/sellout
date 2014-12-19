@@ -1,0 +1,26 @@
+{% extends "support/supportbase.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block search_form %}{# empty #}{% endblock %}
+{% block ask_link%}{# empty #}{% endblock %}
+
+{% block main_content_header %}
+    <div id="question_header">
+        <p class="ask">{% trans 'Ask a new question' %}</p>
+    </div>
+{% endblock %}
+
+{% block main_content_body %}
+    <form method="post" action="{% url 'support:ask' %}" class="ask">
+        <div>
+            {% csrf_token %}
+            {{ form.as_p }}
+        </div>
+        <div class="form-submit">
+            <input type="submit" value="{% trans 'Submit' %}" class="buttons" />
+            <a href="{% url 'support:home' %}" class="cancel-form">{% trans 'Cancel' %}</a>
+        </div>
+    </form>
+{% endblock %}

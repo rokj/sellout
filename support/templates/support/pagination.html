@@ -1,0 +1,29 @@
+{% load staticfiles %}
+{% load i18n %}
+
+<div class="pagination">
+    {% comment %}
+        assemble whole GET parameters from previous queries:
+        prev_get comes from view (if), add 'page' to 'href' attribute
+    {% endcomment %}
+    {% if d.has_previous %}
+        <a href="?{% if prev_get %}{{prev_get.urlencode}}&amp;{% endif %}page={{ d.previous_page_number }}">
+    {% endif %}
+            <img src="{% static 'icons/back.png' %}"
+                 class="pagination-nav hoverable {% if not d.has_previous %}disabled{% endif %}"
+                 title="{% trans 'Previous page' %}"
+                 alt="{% trans 'Previous page' %}" />
+    {% if d.has_previous %}</a>{% endif %}
+
+    <span class="current-page" title="{% trans 'Current page' %}">{{ d.number }}</span>
+    <span class="all-pages" title="{% trans 'All pages' %}">/ {{ d.paginator.num_pages }}</span>
+
+    {% if d.has_next %}
+        <a href="?{% if prev_get %}{{prev_get.urlencode}}&amp;{% endif %}page={{ d.next_page_number }}">
+    {% endif %}
+            <img src="{% static 'icons/forward.png' %}"
+                 class="pagination-nav hoverable {% if not d.has_next %}disabled{% endif %}"
+                 title="{% trans 'Next page' %}"
+                 alt="{% trans 'Next page' %}" />
+    {% if d.has_next %}</a>{% endif %}
+</div>
