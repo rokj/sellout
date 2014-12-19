@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-from oauth2 import Token
 import string
 
 import django
