@@ -681,6 +681,9 @@ def check_bill_status(request, company):
     except (Bill.DoesNotExist, ValueError, TypeError):
         return JsonError(_("Bill does not exist or data is invalid"))
 
+    if not has_permission(request.user, c, 'bill', 'edit'):
+        return JsonResponse({'status': 'no_permission', 'message': 'no_permission'})
+
     if bill.status == 'Paid':
         return JsonOk(extra={'paid': True})
     else:

@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth.models import check_password
 from django.db import connections
 
@@ -95,7 +96,10 @@ class User(object):
         cursor.execute("SELECT data FROM users WHERE email = %s", [email])
         row = cursor.fetchone()
 
-        return row    
+        if row:
+            return row[0]
+
+        return ""
 
 
 class BlocklogicMailAuthBackend(object):
@@ -143,6 +147,13 @@ class BlocklogicMailAuthBackend(object):
                 bl_user = BlocklogicUser.objects.create_user(username=username, email=username, password=password)
                 bl_user.is_staff = False
                 bl_user.is_superuser = False
+                bl_user.save()
+
+                user_data = json.loads(user.user_data(username))
+                bl_user.first_name = user_data['first_name']
+                bl_user.last_name = user_data['last_name']
+                bl_user.sex = user_data['sex']
+                bl_user.country = user_data['country']
                 bl_user.save()
 
             return bl_user

@@ -98,7 +98,7 @@ Payment = function(g, bill){
                         p.items.bitcoin.btc_address.data("value", response.data.btc_address);
                         p.items.bitcoin.btc_amount.html(response.data.btc_amount);
                         p.items.bitcoin.btc_qrcode.html("");
-                        p.items.bitcoin.btc_qrcode.qrcode({width: 180, height: 160, text: "bitcoin:" + response.btc_address + "?amount=" + response.btc_amount, background: "#ebebeb"});
+                        p.items.bitcoin.btc_qrcode.qrcode({width: 180, height: 160, text: "bitcoin:" + response.data.btc_address + "?amount=" + response.data.btc_amount, background: "#ebebeb"});
 
                         // set up a timer that will check if the bill has been paid
                         p.bitcoin_interval = setInterval(function () {
