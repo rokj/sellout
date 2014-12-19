@@ -1,8 +1,8 @@
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from blusers.views import get_user_credentials, get_actions
 from common.functions import JsonError, JsonParse
-from mobile.views.login import get_user_credentials
 from mobile.views.manage.configuration import company_config_to_dict
 from pos.models import Company, Permission
 from django.utils.translation import ugettext as _
@@ -52,5 +52,24 @@ def unlock_session(request, company_id):
                              'status': "ok"})
 
     else:
-        return JsonResponse(cleaned_data)
+        return JsonResponse({'status': cleaned_data['status'],
+                             'message': cleaned_data['message']})
 
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def mobile_get_user_credentials(request):
+    user = request.user
+    if user:
+        user_credentials = get_user_credentials(user)
+    else:
+        return JsonError(_("Authentication failed"))
+
+    companies = user.companies
+    actions = get_actions(user)
+
+    return JsonResponse({'user': user_credentials,
+                         'actions': actions,
+                         'companies': [company_to_dict(user, i, android=True, with_config=True) for i in companies],
+                         'status': "ok"})

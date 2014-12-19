@@ -1,44 +1,41 @@
 # -*- coding:utf-8 -*-
-import base64
+from oauth2 import Token
 import string
-import json
+
 import django
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
+
 import requests
+from action.functions import action_to_dict
+from action.models import Action
+from bl_auth import User
+
+from common.functions import JsonParse, JsonError, get_random_string, send_email, JsonOk, min_password_requirments
+from common.globals import GOOGLE
+
+from django.core.files.base import ContentFile
+from django.http import JsonResponse
+from django.contrib.auth import authenticate as django_authenticate
+from django.contrib.auth import login as django_login
+from django.conf import settings as settings
+from django.utils.translation import ugettext as _
+
+from blusers.models import BlocklogicUser, UserImage
+
+from config.functions import get_user_value, set_user_value
+import common.globals as g
+from pos.views.manage.company import company_to_dict
+
+from settings import GOOGLE_API
+
 from rest_framework import parsers, renderers
 from rest_framework.authentication import OAuth2Authentication, TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.views import APIView
-from action.functions import action_to_dict
-from action.models import Action
-from bl_auth import User
-from blusers.forms import BlocklogicUserForm
-from common.functions import JsonParse, JsonError, get_random_string, send_email, JsonOk, min_password_requirments
-from common.globals import GOOGLE
-from common.globals import WAITING
-
-from common.decorators import login_required
-from django.contrib.auth.decorators import login_required as login_required_nolocking
-
-from django.core.files.base import ContentFile
-from django.http import Http404, JsonResponse
-from django.contrib.auth import authenticate as django_authenticate
-from django.contrib.auth import login as django_login
-from django.shortcuts import render, redirect
-from django.conf import settings as settings
-from django.utils.translation import ugettext as _
-
-from blusers.models import BlocklogicUser, UserImage
-from config.functions import get_user_value, set_user_value
-import common.globals as g
-
-from rest_framework.decorators import api_view
-from mobile.views.manage.configuration import company_config_to_dict
-from pos.models import Company
 from pos.views.manage.company import company_to_dict
-from settings import GOOGLE_API
+
 
 def set_language(request):
     if 'session' in request:
@@ -304,11 +301,14 @@ def send_reactivation_key(request, bluser):
         send_email(settings.EMAIL_FROM, [bluser.email], None, subject, message_txt, message_html)
 
 
+
 def get_user_credentials(user):
     credentials = {}
 
     credentials['user_id'] = user.id
     credentials['user_email'] = user.email
+    credentials['user_first_name'] = user.first_name
+    credentials['user_last_name'] = user.last_name
     # credentials['other_groups'] = groups_to_dict(user.user_groups, user, participant=True)
 
     """
@@ -393,6 +393,7 @@ class ObtainAuthToken(APIView):
                              'actions': actions,
                              'companies': [company_to_dict(user, i, android=True, with_config=True) for i in companies],
                              'status': "ok"})
+obtain_auth_token = ObtainAuthToken.as_view()
 
 
 def get_user(request):
@@ -402,4 +403,4 @@ def get_user(request):
         return None
 
 
-obtain_auth_token = ObtainAuthToken.as_view()
+

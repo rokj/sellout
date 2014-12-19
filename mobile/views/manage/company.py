@@ -65,5 +65,5 @@ def edit_company(request, company_id):
 
     c.save()
 
-    return JsonOk(extra=company_to_dict(c, android=True))
+    return JsonOk(extra=company_to_dict(request.user, c, android=True))
 
