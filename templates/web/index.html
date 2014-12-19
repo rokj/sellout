@@ -2,7 +2,7 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}{{ title }} - {{ site_title }}{% endblock %}
+{% block title %}{{ site_title }}{% endblock %}
 
 {% block head %}
     <link href="{% static 'bootstrap/index.css' %}" rel="stylesheet" />
@@ -353,7 +353,9 @@
                     <h3>{% trans 'We are all about possibilities.' %}</h3>
                     <div class="col col-md-4">
                         <div class="possibility-image-container">
-                            <img src="{% static 'images/index/cloud.png' %}" alt="Cloud" id="p_cloud" />
+                            <div class="possibility-image-container-inner">
+                                <img src="{% static 'images/index/cloud.png' %}" alt="Cloud" id="p_cloud" />
+                            </div>
                         </div>
                         <h4>{% trans 'Cloud-based' %}</h4>
                         <p>{% trans 'Any time, any place, sellout is always available. <br />Never lose your data.' %}
@@ -362,7 +364,9 @@
 
                     <div class="col col-md-4">
                         <div class="possibility-image-container">
-                            <img src="{% static 'images/index/hardware.png' %}" alt="Hardware" id="p_hardware" />
+                            <div class="possibility-image-container-inner">
+                                <img src="{% static 'images/index/hardware.png' %}" alt="Hardware" id="p_hardware" />
+                            </div>
                         </div>
                         <h4>{% trans 'Any hardware support' %}</h4>
                         <p>{% trans 'Use it on any kind of device. <br/>Print to any kind of printer.' %}</p>
@@ -370,7 +374,9 @@
 
                     <div class="col col-md-4">
                         <div class="possibility-image-container">
-                            <img src="{% static 'images/index/multiple-platforms.png' %}" alt="Platforms" id="p_platforms" />
+                            <div class="possibility-image-container-inner">
+                                <img src="{% static 'images/index/multiple-platforms.png' %}" alt="Platforms" id="p_platforms" />
+                            </div>
                         </div>
                         <h4>{% trans 'Multiple platforms' %}</h4>
                         <p>{% trans 'Works as web, mobile and tablet app. <br />All you need is a browser and a Wi-Fi.' %}</p>
@@ -380,7 +386,9 @@
                 <div class="row">
                     <div class="col col-md-4">
                         <div class="possibility-image-container">
-                            <img src="{% static 'images/index/multiple-terminals.png' %}" alt="Terminals" id="p_terminals" />
+                            <div class="possibility-image-container-inner">
+                                <img src="{% static 'images/index/multiple-terminals.png' %}" alt="Terminals" id="p_terminals" />
+                            </div>
                         </div>
                         <h4>{% trans 'Multiple terminals' %}</h4>
                         <p>{% trans 'Switch between terminals with different preferences,<br />all on a single device.' %}</p>
@@ -388,7 +396,9 @@
 
                     <div class="col col-md-4">
                         <div class="possibility-image-container">
-                            <img src="{% static 'images/index/multiple-permissions.png' %}" alt="Permissions" id="p_permissions" />
+                            <div class="possibility-image-container-inner">
+                                <img src="{% static 'images/index/multiple-permissions.png' %}" alt="Permissions" id="p_permissions" />
+                            </div>
                         </div>
                         <h4>{% trans 'Multiple permission profiles' %}</h4>
                         <p>{% trans 'Define who has access to what.<br />Keep your company information safe.' %}</p>
@@ -396,7 +406,9 @@
 
                     <div class="col col-md-4">
                         <div class="possibility-image-container">
-                            <img src="{% static 'images/index/customizable.png' %}" alt="Customizable" id="p_customizable" />
+                            <div class="possibility-image-container-inner">
+                                <img src="{% static 'images/index/customizable.png' %}" alt="Customizable" id="p_customizable" />
+                            </div>
                         </div>
                         <h4>{% trans 'Customizable' %}</h4>
                         <p>{% trans 'Set the layout of terminal and printed receipts <br /> to satisfy your requirements.' %}</p>

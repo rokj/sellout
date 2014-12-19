@@ -102,6 +102,7 @@
     <section>
         <div class="container">
             <h2>{% trans 'Your settings' %}</h2>
+
             <div class="settings-link-container">
                 <a href="{% url 'web:user_profile' %}">{% trans 'User profile' %}</a>
             </div>
@@ -116,7 +117,5 @@
             </div>
         </div>
     </section>
-
-    {% include 'tutorial.html' %}
 {% endblock %}
 

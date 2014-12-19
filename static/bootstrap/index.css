@@ -280,18 +280,23 @@ div.step-connector{
     margin-top: 30px;
 }
 
-.possibility-image-container img{
+.possibility-image-container-inner {
     position: absolute;
+    text-align: center;
+    width: 100%;
     bottom: 0;
+}
+
+.possibility-image-container img{
 
 }
 
-#p_cloud{ margin-left: -30px; }
-#p_hardware{ margin-left: -35px; }
-#p_platforms{ margin-left: -80px; }
-#p_terminals{ margin-left: -75px; }
-#p_permissions{ margin-left: -90px; }
-#p_customizable{margin-left: -30px;}
+#p_cloud{  }
+#p_hardware{  }
+#p_platforms{  }
+#p_terminals{  }
+#p_permissions{  }
+#p_customizable{  }
 
 /* partner */
 .reading-text{
@@ -381,7 +386,6 @@ div.payment-price{
     float: right;
     background-color: #ffffff;
     border: none;
-    border-bottom: 2px solid #cccccc;
     color: #646464;
     text-transform: uppercase;
     padding: 10px 30px;
