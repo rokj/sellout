@@ -29,7 +29,7 @@ r_company = r'^(?P<company_id>[\w-]+)'
 urlpatterns = patterns('',
 
     # LOGIN
-    url(r'^mobile-login/(?P<backend>[\w-]+)$', login.obtain_auth_token),
+    # url(r'^mobile-login/(?P<backend>[\w-]+)$', login.obtain_auth_token),
 
     # categories
     url(r_company + r'/manage/json/category/add/?$', category.mobile_add_category, name='add_category'),
@@ -103,7 +103,7 @@ urlpatterns = patterns('',
     # user
     url(r_company + r'/manage/json/users/unlock/?$', users.unlock_session, name='mobile_unlock_session'),
     url(r_company + r'/manage/json/users/lock/?$', users.mobile_lock_session, name='mobile_unlock_session'),
-
+    url(r'manage/json/users/get_credentials/?$', users.mobile_get_user_credentials, name='mobile_get_user_credentials'),
 
     url(r'mobile-accept-invitation', views.mobile_accept_invitation, name='mobile-accept-invitation'),
     url(r'mobile-decline-invitation', views.mobile_decline_invitation, name='mobile-decline-invitation'),

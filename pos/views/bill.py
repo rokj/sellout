@@ -599,7 +599,7 @@ def create_bill_(request, c):
     bill_payment = BillPayment(
         type=g.CASH,
         total=grand_total,
-        currency="USD", # TODO
+        currency=get_company_value(request.user, c, 'pos_currency'),
         transaction_datetime=datetime.now(),
         status=g.WAITING,
         created_by=request.user
@@ -680,6 +680,9 @@ def check_bill_status(request, company):
         bill = Bill.objects.get(company=c, id=bill_id)
     except (Bill.DoesNotExist, ValueError, TypeError):
         return JsonError(_("Bill does not exist or data is invalid"))
+
+    if not has_permission(request.user, c, 'bill', 'edit'):
+        return JsonResponse({'status': 'no_permission', 'message': 'no_permission'})
 
     if bill.status == 'Paid':
         return JsonOk(extra={'paid': True})
@@ -894,10 +897,19 @@ def get_payment_btc_info(request, company):
 
     extra = {}
 
-    if bill.company == c:
-        # TODO: check for company and bill permission
-        extra['btc_address'] = bill.payment.get_btc_address(c.id)
-        extra['btc_amount'] = bill.payment.get_btc_amount(c.id)
+    if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
+        btc_address = bill.payment.get_btc_address(c.id)
+        btc_amount = bill.payment.get_btc_amount(request.user, c)
+
+        if btc_address == "":
+            return JsonResponse({'status': 'could_not_get_btc_address', 'message': 'could_not_get_btc_address'})
+        if btc_amount is None:
+            return JsonResponse({'status': 'could_not_get_btc_amount', 'message': 'could_not_get_btc_amount'})
+
+        extra['btc_address'] = btc_address
+        extra['btc_amount'] = btc_amount
+
+        print extra
     else:
         return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
 
