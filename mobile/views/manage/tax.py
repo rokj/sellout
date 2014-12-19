@@ -2,7 +2,7 @@ from rest_framework.decorators import permission_classes, api_view
 from rest_framework.permissions import IsAuthenticated
 from pos.models import Company
 from pos.views.manage.tax import list_taxes, get_all_taxes, edit_tax, delete_tax, \
-    set_default_tax  #, get_taxes, save_taxes
+    set_default_tax, edit_tax_, delete_tax_, set_default_tax_  #, get_taxes, save_taxes
 from common.functions import JsonError, JsonOk
 from django.utils.translation import ugettext as _
 
@@ -24,7 +24,7 @@ def mobile_list_taxes(request, company_id):
 def mobile_edit_tax(request, company_id):
     try:
         c = Company.objects.get(id=company_id)
-        return edit_tax(request, c)
+        return edit_tax_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -35,7 +35,7 @@ def mobile_edit_tax(request, company_id):
 def mobile_delete_tax(request, company_id):
     try:
         c = Company.objects.get(id=company_id)
-        return delete_tax(request, c)
+        return delete_tax_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -45,6 +45,6 @@ def mobile_delete_tax(request, company_id):
 def mobile_save_default_tax(request, company_id):
     try:
         c = Company.objects.get(id=company_id)
-        return set_default_tax(request, company)
+        return set_default_tax_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
