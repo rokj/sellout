@@ -1,20 +1,22 @@
 import json
+from django import forms
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from bl_auth import User
-from blusers.forms import LoginForm, BlocklogicUserForm
+from blusers.forms import LoginForm, BlocklogicUserForm, ResetPasswordForm
 from django.utils.translation import ugettext as _
 from blusers.models import BlocklogicUser
 from blusers.views import try_register, unset_language, send_reactivation_key
-from common.functions import JsonParse, JsonOk
+from common.functions import JsonParse, JsonError, JsonOk
 from django.contrib.auth.decorators import login_required as login_required_nolocking
 from django.contrib.auth import logout as django_logout
 from action.models import Action
 
 import common.globals as g
+from config.functions import get_user_value, set_user_value
 from pos.models import Permission
 
 import settings
@@ -60,6 +62,7 @@ def index(request):
 
     return render(request, "web/index.html", context)
 
+
 @login_required_nolocking
 def select_company(request):
     """ show current user's companies and a list of invites. """
@@ -82,7 +85,7 @@ def select_company(request):
         'site_title': g.SITE_TITLE,
 
         'companies': companies,
-        'actions': actions
+        'actions': actions,
     }
 
     return render(request, "web/select_company.html", context)
@@ -183,38 +186,80 @@ def activate_account(request, key):
 
 
 def lost_password(request):
-    data = JsonParse(request.POST['data'])
+    def render_return(message):
+        context = {
+            'message': message,
 
-    try:
-        if data and "email" in data:
+            'site_title': g.SITE_TITLE,
+            'title': _("Lost password"),
+        }
+
+        return render(request, 'web/lost_password.html', context)
+
+    if request.method == 'POST':
+        if "email" in request.POST:
             try:
-                validate_email(data["email"])
+                validate_email(request.POST["email"])
             except ValidationError:
-                return JsonResponse({"status": "email_invalid"})
+                return render_return(_("Invalid e-mail"))
 
             try:
-                bluser = BlocklogicUser.objects.get(email=data["email"])
+                bluser = BlocklogicUser.objects.get(email=request.POST["email"])
                 if bluser.type == g.GOOGLE:
-                    return JsonResponse({"status": "google_login"})
+                    return render_return(_("You have registered with google account. "
+                                           "Try signing in by clicking on 'google login' button in login form."))
 
                 send_reactivation_key(request, bluser)
 
-                return JsonResponse({"status": "ok"})
+                return render_return(_("Your password reset key has been sent to your e-mail, "
+                                       "please check your inbox."))
 
             except BlocklogicUser.DoesNotExist:
-                return JsonResponse({"status": "user_does_not_exist"})
-    except:
-        pass
+                return render_return(_("A user with this e-mail does not exist"))
 
-    return JsonResponse({"status": "something_went_wrong"})
+        return render_return(_("Unknown error occured. Please contact support."))
+    else:
+        return render_return(None)
 
 
-def handle_invitation(request, reference, user_response, mobile=False):
+def recover_password(request, key):
+    if request.method == 'POST':
+        form = ResetPasswordForm(request.POST)
+
+        if form.is_valid():
+            # passwords are the same
+            password = form.cleaned_data['new_password_1']
+
+            print password
+
+            # reset key has been checked in form validation
+            bluser = BlocklogicUser.objects.get(password_reset_key=key)
+            bluser.set_password(password)
+            bluser.password_reset_key = None
+            bluser.save()
+            bluser.update_password()
+
+            return redirect('web:index')
+    else:
+        form = ResetPasswordForm(initial={'key': key})
+
+    context = {
+        'title': _("Recover lost password"),
+        'site_title': g.SITE_TITLE,
+
+        'form': form,
+        'key': key,
+    }
+
+    return render(request, 'web/recover_password.html', context)
+
+
+def handle_invitation(request, reference, user_response):
     try:
         action = Action.objects.get(receiver=request.user.email,
                                     reference=reference,
                                     status=g.ACTION_WAITING)
-    except Action.DoesNotExist: # wtf?
+    except Action.DoesNotExist:  # wtf?
         return redirect('web:select_company')
 
     # if the invite has been accepted, create a new permission
@@ -228,7 +273,7 @@ def handle_invitation(request, reference, user_response, mobile=False):
         try:
             sender = BlocklogicUser.objects.get(email=action.sender)
         except BlocklogicUser.DoesNotExist:
-            sender = None
+            sender = request.user
 
         new_permission = Permission(
             created_by=sender,
@@ -239,23 +284,22 @@ def handle_invitation(request, reference, user_response, mobile=False):
         new_permission.create_pin(False)
         new_permission.save()
 
+    # else: if the invite was declined, just update its status (which must be done anyway)
     action.status = user_response
     action.save()
-    if mobile:
-        return JsonOk()
-    else:
-        return redirect('web:select_company')
+
+    return redirect('web:select_company')
 
 
 @login_required_nolocking
-def accept_invitation(request, reference, mobile=False):
-    return handle_invitation(request, reference, g.ACTION_ACCEPTED, mobile=mobile)
+def accept_invitation(request, reference):
+    return handle_invitation(request, reference, g.ACTION_ACCEPTED)
 
 
 
 @login_required_nolocking
-def decline_invitation(request, reference, mobile=False):
-    return handle_invitation(request, reference, g.ACTION_DECLINED, mobile=mobile)
+def decline_invitation(request, reference):
+    return handle_invitation(request, reference, g.ACTION_DECLINED)
 
 
 @login_required_nolocking

@@ -47,6 +47,23 @@ class LoginForm(forms.ModelForm):
         self.request = request
 
 
+class ResetPasswordForm(forms.Form):
+    new_password_1 = forms.CharField(
+        label=_("Enter new password"),
+        required=True, widget=forms.PasswordInput)
+    new_password_2 = forms.CharField(
+        label=_("Enter new password again"),
+        required=True, widget=forms.PasswordInput)
+    key = forms.CharField(required=True, widget=forms.HiddenInput)
+
+    def clean(self):
+        if self.cleaned_data['new_password_1'] != self.cleaned_data['new_password_2']:
+            raise forms.ValidationError(_("Passwords do not match."))
+
+    def clean_key(self):
+        if not BlocklogicUser.objects.filter(password_reset_key=self.cleaned_data['key']).exists():
+            raise forms.ValidationError(_("Invalid password reset key"))
+
 class BlocklogicUserForm(forms.ModelForm):
     """
     So we do not really want to fuck around with overriding methods and iterating

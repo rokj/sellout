@@ -199,9 +199,16 @@ Terminal = function(g){
         // if there are no registers defined, send user to create one
         if(p.g.data.registers.length == 0){
             // do not use error_message() here because it won't block and redirect will be  instant
-            // TODO: replace with a fancy custom dialog
-            alert(gettext("There are no registers defined, please add one"));
-            window.location.href = p.g.urls.manage_registers;
+            custom_dialog(
+                gettext("Register is required"),
+                gettext("There are no registers defined, please add one"),
+                400,
+                {
+                    ok: gettext("Go"),
+                    ok_action: function(){ window.location.href = p.g.urls.manage_registers; }
+                }
+            );
+            return;
         }
 
         // if there's only one register, use that
@@ -356,14 +363,14 @@ Terminal = function(g){
         if(window.session_locked) return;
 
         // leave out too frequent messages
-        //if(Date.now() - p.lock_timestamp > p.lock_filter){
+        if(Date.now() - p.lock_timestamp > p.lock_filter){
             // clear the lock timeout and set a new one
             if(p.lock_timeout_handle) clearTimeout(p.lock_timeout_handle);
             p.lock_timeout_handle = setTimeout(p.lock_terminal, p.lock_timeout);
-        //}
-        //else{
-        //    p.lock_timestamp = Date.now();
-        //}
+        }
+        else{
+            p.lock_timestamp = Date.now();
+        }
     });
     p.lock_timeout_handle = setTimeout(p.lock_terminal, p.lock_timeout);
 };

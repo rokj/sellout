@@ -76,7 +76,9 @@
     <div id="management_content">
         {% comment %} block filled by manage templates {% endcomment %}
         {% block manage_content %}
-            <span style="font-size:150px; margin: 50px;">Ch00s sumtin to manag, MOFO!</span>
+            <div id="management_hint">
+                {% trans 'Choose what you want to manage from this menu.' %}
+            </div>
         {% endblock %}
     </div>
 {% endblock %}

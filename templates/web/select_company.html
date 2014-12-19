@@ -39,9 +39,17 @@
                 <div id="companies_list">
                     {% for company in companies %}
                         <div class="company table-row top-border">
+                            <div class="company-link">
+                                <a href="{% url 'pos:terminal' company.url_name %}">{% trans 'Terminal' %}</a>
+                            </div>
+                            <div class="company-link">
+                                <a href="{% url 'pos:manage_home' company.url_name %}">{% trans 'Management' %}</a>
+                            </div>
+
                             <div class="company-name table-cell">
                                 <a href="{% url 'pos:terminal' company.url_name %}"> {{ company.name }} </a>
                             </div>
+
                             <div class="company-delete table-cell hidden">{# so far, this is hidden #}
                                 <img src="{% static 'icons/delete_red.png' %}"
                                      class="hoverable delete"
@@ -85,7 +93,7 @@
                 </table>
                 </div>
             {% else %}
-                <p class="no-text">{% trans 'You have no pending notifications.' %}</p>
+                <p class="no-text">{% trans 'You have no unseen notifications.' %}</p>
             {% endif %}
         </div>
     </section>
@@ -103,7 +111,12 @@
             <div class="settings-link-container">
                 <a href="#">{% trans 'Support center' %}</a>
             </div>
+            <div class="settings-link-container">
+                <a href="#">{% trans 'Run tutorial' %}</a>
+            </div>
         </div>
     </section>
+
+    {% include 'tutorial.html' %}
 {% endblock %}
 

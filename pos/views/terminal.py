@@ -103,12 +103,12 @@ def save(request, company):
 def lock_session(request, company):
     try:
         c = Company.objects.get(url_name=company)
-        return lock_session(request, c)
+        return lock_session_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
 
-def lock_session(request, c):
+def lock_session_(request, c):
     # a session is locked for a specific company by adding its url_name
     if 'locked' not in request.session:
         request.session['locked'] = []

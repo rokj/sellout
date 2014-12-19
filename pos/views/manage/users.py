@@ -88,16 +88,16 @@ def edit_permission(request, company):
     if len(d.get('pin')) != g.PIN_LENGTH:
         return JsonError(_("Wrong pin length."))
 
+    # check if not degrading the last admin in the group
+    if Permission.objects.filter(company=c, permission='admin').exclude(id=permission.id).count() == 0:
+        # there would be no admins left in this company; do not allow changing permission
+        if d.get('permission') != 'admin':
+            return JsonError(_("You cannot change permission of the last admin of this company."))
+
     # everything seems to be OK, update PIN
     if not permission.create_pin(int(d.get('pin'))):
         return JsonError(_("This PIN has already been assigned to a user from this company. "
                            "Please choose a different one."))
-
-    # update permission:
-    # check if not degrading the last admin in the group
-    if Permission.objects.filter(company=c, permission='admin').exclude(id=permission.id).count() == 0:
-        # there would be no admins left in this company do not allow changing permission
-        return JsonError(_("You cannot change permission of the last admin of this company."))
 
     permission.permission = d.get('permission')
     permission.save()

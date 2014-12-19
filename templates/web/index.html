@@ -6,7 +6,6 @@
 
 {% block head %}
     <link href="{% static 'bootstrap/index.css' %}" rel="stylesheet" />
-    <link href="{% static 'css/index.css' %}" rel="stylesheet" />
 
     {# custom fonts #}
     <link href="{% static 'css/fonts/fonts.css' %}" rel="stylesheet" />
@@ -57,7 +56,9 @@
                 open_login_form: $("#open_login_form"),
                 login_forms_container: $("#login_forms_container"),
                 more_button: $("#more"),
-                more_section: $("#meet_section")
+                more_section: $("#meet_section"),
+
+                login_form: $("#login_form")
             };
 
             // resizing and repositioning
@@ -129,7 +130,6 @@
             items.more_button.click(function(){
                 $("body").animate({scrollTop: items.more_section.offset().top}, "fast");
             });
-
 
             // url checking
             function match_url(){
@@ -209,81 +209,15 @@
                     </div>
 
                     <div class="nav-links">
+                        <button id="google_signin_button" style="" class="hoverable">
+                            <span class="icon"></span>
+                        </button>
+
                         <input type="submit" value="{% trans "Log in" %}" class="buttons hoverable custom" id="login_register_button">
                     </div>
 
                     <div class="lost-login">
-                        <a href="{% url 'web:lost_password' %}"
-                           id="lost_password">{% trans "Lost Password?" %}</a>
-                    </div>
-                </form>
-
-                <button id="google_signin_button" style="" class="hoverable">
-                    <span class="icon"></span>
-                </button>
-            </div>
-
-            <div id="lost_password_form" class="hidden">
-                LOST PASSWORD
-                <form action="" method="post">
-                    {% csrf_token %}
-
-                    <input type="hidden" id="action" name="action" value="lost_password" class="custom" />
-
-                    <p class="label custom">{% trans 'E-mail' %}</p>
-
-                    <div class="second">
-                        <input type="text" name="lost_password_email" id="lost_password_email" class="custom" />
-                    </div>
-
-                    <div class="nav-links">
-                        {# 'normal login' button #}
-                        <input type="submit"
-                               value="{% trans "Send request" %}"
-                               class="buttons hoverable custom"
-                               id="lost_password_button"/>
-                    </div>
-
-
-                    <div class="lost-login">
-                        <a href="#login" class="lost-password back">{% trans "Back" %}</a>
-                    </div>
-                </form>
-            </div>
-
-            <div id="recover_password_form" class="hidden">
-                RECOVER PASSWORD
-                <form action="" method="post">
-                    {% csrf_token %}
-
-                    <input type="hidden" id="action" name="action" value="recover_password" class="custom" />
-
-                    <p class="label custom">{% trans 'New password' %}</p>
-
-                    <div class="second">
-                        <input type="password" name="new_password1" id="new_password1" class="custom"/>
-                    </div>
-
-                    <p class="label custom">{% trans 'New password one more time' %}</p>
-
-                    <div class="second">
-                        <input type="password" name="new_password2" id="new_password2" class="custom"/>
-                    </div>
-
-                    {% if message %}
-                        <div id="new_password_message">{{ message }}</div>
-                    {% endif %}
-
-                    <div class="nav-links">
-                        {# 'normal login' button #}
-                        <input type="submit"
-                               value="{% trans "Set new password" %}"
-                               class="buttons hoverable custom"
-                               id="new_password_button" name="new_password_button"/>
-                    </div>
-
-                    <div class="lost-login">
-                        <a href="#login" class="lost-password back">{% trans "Back" %}</a>
+                        <a href="{% url 'web:lost_password' %}"> {% trans 'Lost password?' %} </a>
                     </div>
                 </form>
             </div>

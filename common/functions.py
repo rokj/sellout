@@ -61,7 +61,7 @@ def JsonError(message):
 def JsonOk(extra=None, safe=True):
 
     data = {'status': 'ok'}
-    if extra:
+    if extra is not None:  # if extra is empty list or dict, it still has to be included
         data['data'] = extra
 
     return JsonResponse(data, safe=safe)
@@ -197,7 +197,7 @@ def has_permission(user, company, model, task):
     # ...or database
     if not permission:
         try:
-            permission = Permission.objects.get(user__id=user.id, company=company)
+            permission = Permission.objects.get(user=user, company=company)
             cache.set(ckey, permission)
         except Permission.DoesNotExist:
             # there's no entry in the database,

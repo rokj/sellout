@@ -126,6 +126,7 @@ UnlockScreen = function(unlock_url, csrf_token, ajax, g){
                         p.switch_user_data(response);
 
                         window.session_locked = false;
+                        p.unbind_enter();
                     }
                 }
                 else{
@@ -175,6 +176,11 @@ UnlockScreen = function(unlock_url, csrf_token, ajax, g){
             });
         });
     }
+    else{
+        // keys
+        if(window.keyboard) window.keyboard.add('unlock-confirm', 'enter', p.unlock);
+        else console.warn("window.keyboard is not defined");
+    }
 
     // bind events on keys
     p.items.keys.unbind().click(p.key);
@@ -211,7 +217,4 @@ UnlockScreen = function(unlock_url, csrf_token, ajax, g){
 
     p.clear_pin();
     p.focus_pin();
-
-    // keys (only for static html)
-    window.keyboard.add('unlock-confirm', 'enter', p.unlock);
 };

@@ -1,5 +1,5 @@
 #management_content{
-    padding-top: 30px;
+    padding-top: 60px;
     padding-left: 40px;
     margin-bottom: 40px;
     /* to prevent floated elements from not taking up space */
@@ -217,3 +217,33 @@ div.clear-results a{
     margin-right: 10px;
     height: 20px;
 }
+
+#management_hint{
+    display: block;
+    position: absolute;
+
+    width: 200px;
+    right: 180px;
+    top: 100px;
+
+    padding: 20px;
+
+    background-color: #ffffff;
+}
+
+#management_hint:after{
+    content: "";
+    background-color: inherit;
+    position: absolute;
+
+    left: 50%;
+    margin-left: -15px;
+
+    top: -15px;
+
+    width: 30px;
+    height: 30px;
+    transform: rotate(45deg);
+    z-index: -1;
+}
+
