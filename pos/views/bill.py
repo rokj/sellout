@@ -10,6 +10,7 @@ from pytz import timezone
 
 import unidecode
 from payment.models import BillPayment
+from payment.service.Paypal import Paypal
 
 from pos.models import Company, Product, Discount, Register, Contact, \
     Bill, BillCompany, BillContact, BillRegister, BillItem, BillItemDiscount
@@ -610,6 +611,7 @@ def create_bill_(request, c):
     db_bill.save()
 
     d = {'bill': bill_to_dict(request.user, c, db_bill)}
+
     return JsonOk(extra=d)
 
 
@@ -973,16 +975,69 @@ def send_invoice(request, company):
             if bill_payment.status == g.PAID:
                 return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
 
-            bill_payment.type = type
-            bill_payment.save()
+            merchant_info = {
+                'email': c.email,
+                'business_name': c.name,
+                'phone': c.phone,
+                'website': c.website,
+                'address': {
+                    'line1': c.street,
+                    'city': c.city,
+                    'postal_code': c.postcode,
+                    'country_code': c.country
+                },
+                'tax_id': c.vat_no
+            }
+
+            billing_info_email = get_company_value(request.user, c, 'pos_payment_paypal_address')
+            if billing_info_email == "":
+                billing_info_email = c.email
+
+            billing_info = [
+                {
+                    "email": billing_info_email
+                }
+            ]
+
+            shipping_info = None
+            items = []
+
+            bill_date_format = g.DATE_FORMATS[get_company_value(request.user, c, 'pos_date_format')]['django']
+            bill_date = bill.timestamp.strftime(bill_date_format)
+
+            currency = get_company_value(request.user, c, 'pos_currency')
+
+            bill_items = BillItem.objects.filter(bill=bill)
+            for bi in bill_items:
+                try:
+                    product = Product.objects.get(id=bi.product_id)
+
+                    bi.append({
+                        'name': product.name,
+                        'description': product.description,
+                        'quantity': bi.quantity,
+                        'unit_price': {
+                            'currency': currency,
+                            'value': bi.base
+                        },
+                        'tax': {
+                            'name': product.tax.name,
+                            'percent': bi.tax_rate
+                        },
+                        'date': bill_date,
+                        'discount': bi.discount
+                    })
+                except Product.DoesNotExist:
+                    pass
+
+            paypal = Paypal()
+            paypal.create_invoice(invoice_id=bill.serial, merchant_info=merchant_info, billing_info=billing_info,
+                                  shipping_info=shipping_info, items=items, invoice_date=bill_date)
 
         except BillPayment.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'no_payment_for_bill'})
 
     else:
-    """
-
-
-    #    return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
+        return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
 
     return JsonOk()

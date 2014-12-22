@@ -622,7 +622,7 @@ def set_serial(instance, **kwargs):
 
 class BillItem(SkeletonU, ProductAbstract): # include all data from Product
     bill = models.ForeignKey(Bill)
-    product_id = models.BigIntegerField(null=False)  # store reference to product (used by UI/jQuery/stats/...)
+    product_id = models.BigIntegerField(null=False)  # stor reference to product (used by UI/jQuery/stats/...)
                                                      # (not a FK, in case the product gets deleted)
 
     bill_notes = models.CharField(_("Bill notes"),

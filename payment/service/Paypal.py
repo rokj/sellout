@@ -197,7 +197,16 @@ class Paypal(ServiceAbstract):
         data = {
             "number": invoice_id,
             "merchant_info": merchant_info,
+            "billing_info": billing_info,
+            "shipping_info": shipping_info,
+            "items": items,
+            "invoice_date": invoice_date
         }
+
+        print json.dumps(data)
+
+        if True:
+            return False
 
         response = self._send_request(url=self.create_invoice_url["url"], method=self.create_invoice_url["method"], params={},
                                       data=json.dumps(data), headers=headers)
