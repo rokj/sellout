@@ -7,6 +7,9 @@ urlpatterns = patterns('',
     # search results
     url(r'search', views.search, name='search'),
 
+    # FAQ list
+    url(r'faq', views.faq, name='faq'),
+
     # single question/post a comment
     url(r'^question/(?P<question_id>\d?)', views.question, name='question'),
 
@@ -26,5 +29,6 @@ urlpatterns = patterns('',
     url(r'accept', views.accept, name='accept'),
 
     # support homepage
-    url(r'', views.index, name='index'),
+    url(r'(?P<category>\w+)', views.index, name='index'),
+    url(r'$', views.index, name='index'),
 )

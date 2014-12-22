@@ -85,6 +85,8 @@
     });
 </script>
 
+{% block section_head %}{% endblock %}
+
 {% endblock %}
 
 {% block navbar_buttons %}
@@ -92,65 +94,7 @@
 {% endblock %}
 
 {% block content %}
-    <section id="search">
-        <div class="container text-center">
-            <h1>{% trans 'Support' %}</h1>
-            <p>{% trans 'Welcome to our support center. Use the search form, check our F.A.Q. or send us an e-mail.' %}</p>
-
-            <div id="search_container">
-                <form class="search" method="get" action="{% url 'support:search' %}">
-                    {% csrf_token %}
-
-                    <div class="errors">{{ search_form.search_text.errors }}</div>
-                    {{ search_form.search_text }}<!--
-                        {# commented out in html to prevent space between two display: inline elements #}
-                    --><button type="submit" class="buttons">
-                        <img src="{% static 'images/support/search.png' %}" alt="" />
-                    </button>
-                </form>
-            </div>
-
-            <div id="support_options">
-                <div class="row">
-                    <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 support-option">
-                        <a class="option-container" href="#">
-                            <div class="option-image-container">
-                                <img src="{% static 'images/support/community.png' %}" alt="" />
-                            </div>
-
-                            <div class="option-text-container">
-                                {% trans 'Community' %}
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 support-option">
-                        <a class="option-container" href="#">
-                            <div class="option-image-container">
-                                <img src="{% static 'images/support/faq.png' %}" alt="" />
-                            </div>
-
-                            <div class="option-text-container">
-                                {% trans 'F.A.Q.' %}
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 support-option">
-                        <a class="option-container" href="#">
-                            <div class="option-image-container">
-                                <img src="{% static 'images/support/email.png' %}" alt="" />
-                            </div>
-
-                            <div class="option-text-container">
-                                {% trans 'E-mail' %}
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    {% block search_content %}{% endblock %}
 
     <section>
         <div class="container" id="support_body">

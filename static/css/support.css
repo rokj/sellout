@@ -4,6 +4,10 @@
     margin-top: 0;
 }
 
+#search.low{
+    margin-bottom: 20px;
+}
+
 #search .errors{
     color: #22e693;
 }
@@ -16,23 +20,46 @@
     text-transform: none;
 }
 
-#search h1{
+#search.high h1{
     font-size: 50px;
     margin-top: 100px;
     margin-bottom: 30px;
 }
 
-#search_container{
+.low #back_link img{
+    position: relative;
+    left: -5px;
+}
+
+.high #search_container{
     margin-top: 40px;
     margin-bottom: 40px;
 }
 
-#search_container input[type='text']{
+.high #search_container input[type='text']{
     width: 50%;
     min-width: 200px;
 
     margin-right: 0;
     display: inline;
+}
+
+.low #search_container input[type='text']{
+    width: 50%;
+    min-width: 200px;
+
+    margin-right: 0;
+    display: inline;
+}
+
+
+.low #search_container{
+    position: relative;
+    top: 10px;
+}
+
+.low #search_container input[type='text']{
+    margin-right: 0;
 }
 
 #search_container button{
@@ -51,25 +78,81 @@
     box-shadow: none;
 }
 
-.support-option{
+.high .support-option{
     margin-top: 100px;
     height: 100px;
     margin-bottom: 100px;
     position: relative;
 }
 
-.option-container{
+.low .support-option{
+
+}
+
+.high .option-container{
     width: 100%;
     position: absolute;
     bottom: 0;
     display: block;
 }
 
-.option-image-container{
+.low .option-container{
+    float: left;
+    display: block;
+    width: 24%;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.high .option-image-container{
     margin-bottom: 20px;
+}
+
+.low .option-image-container img{
+    height: 30px;
 }
 
 .option-text-container{
     color: #ffffff;
+}
+
+.high .option-text-container{
     font-size: 20px;
+}
+
+h2.section-title{
+    color: #646464;
+    font-size: 40px;
+    text-transform: none;
+    margin-top: 70px;
+    margin-bottom: 50px;
+}
+
+h2.category{
+    color: #22e693;
+    font-size: 20px;
+}
+
+h3.question{
+    color: #646464;
+    font-size: 14px;
+    
+    cursor: pointer;
+    border-bottom: 1px solid #ffffff;
+
+    margin: 0;
+
+    padding-bottom: 15px;
+    padding-top: 15px;
+}
+
+.accordion h3.question:first-child{
+    border-top: 1px solid #ffffff;
+}
+
+p.question{
+    margin-top: 30px;
+    margin-bottom: 30px;
+    font-size: 12px;
 }

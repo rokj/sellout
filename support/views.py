@@ -7,10 +7,11 @@ from django.utils.translation import ugettext as _
 from common.functions import site_title, JsonParse
 from django.contrib.auth.decorators import login_required as login_required_nolocking
 
-from models import Question, Comment, Vote
+from models import Question, Comment, Vote, Faq
 from support.forms import QuestionForm, CommentForm, SearchForm
 
 import parameters as p
+import common.globals as g
 
 
 #
@@ -21,6 +22,7 @@ def index(request, category=None):
     category_name = None
 
     if category:
+        print 'category'
         # a category is selected, show its questions
         cats = {k[0]: k[1] for k in p.CATEGORIES}
         if category not in cats:
@@ -126,6 +128,33 @@ def search(request):
     }
 
     return render(request, 'support/search_results.html', c)
+
+
+def faq(request):
+    # return all FAQ answers , ordered by category
+    # structure of faqs:
+    # [
+    #  category1: [faq1, faq2, faq3]
+    #  category2: [faq1, faq2, faq3]
+    # ]
+    faqs = []
+
+    for i in p.CATEGORIES:
+        faqs.append({
+            'category_code': i[0],
+            'category_name': i[1],
+            'faqs': Faq.objects.filter(category=i[0]),
+        })
+
+    context = {
+        'categories': faqs,
+        'search_form': SearchForm(),
+
+        'title': _("Frequently Asked Questions"),
+        'site_title': g.SITE_TITLE,
+    }
+
+    return render(request, 'support/faq.html', context)
 
 
 # @login_not_required
