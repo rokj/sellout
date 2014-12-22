@@ -108,6 +108,8 @@ urlpatterns = patterns('',
     url(r_company + r'/delete-unpaid-bill/$', terminal_bill.delete_unpaid_bill, name='delete_unpaid_bill'),
     url(r_company + r'/view-bill/$', terminal_bill.view_bill, name='view_bill'),
     url(r_company + r'/get-payment-btc-info/$', terminal_bill.get_payment_btc_info, name='get_payment_btc_info'),
+    url(r_company + r'/change-payment-type/$', terminal_bill.change_payment_type, name='change_payment_type'),
+    url(r_company + r'/paypal-send-invoice/$', terminal_bill.send_invoice, name='send_invoice'),
 
     # views for bill
     url(r_company + '/bill/save/$', terminal_bill.create_bill, name='create_bill'),  # adds an item to bill

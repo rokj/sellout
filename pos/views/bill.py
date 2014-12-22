@@ -684,10 +684,10 @@ def check_bill_status(request, company):
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JsonResponse({'status': 'no_permission', 'message': 'no_permission'})
 
-    if bill.status == 'Paid':
-        return JsonOk(extra={'paid': True})
+    if bill.payment.status == g.PAID:
+        return JsonOk(extra={'paid': 'true'})
     else:
-        return JsonOk(extra={'paid': False})
+        return JsonOk(extra={'paid': 'false'})
 
 
 @login_required
@@ -880,9 +880,6 @@ def esc_format(user, company, bill, format, line_char_no=48, esc_commands=False)
 
 @login_required
 def get_payment_btc_info(request, company):
-    """
-        check if the bill has been paid and return the status
-    """
     try:
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
@@ -908,9 +905,84 @@ def get_payment_btc_info(request, company):
 
         extra['btc_address'] = btc_address
         extra['btc_amount'] = btc_amount
-
-        print extra
     else:
         return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
 
     return JsonOk(extra=extra)
+
+@login_required
+def change_payment_type(request, company):
+    """
+        check if the bill has been paid and return the status
+    """
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+    # there should be bill_id in request.POST
+    try:
+        bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
+        bill = Bill.objects.get(company=c, id=bill_id)
+    except (Bill.DoesNotExist, ValueError, TypeError):
+        return JsonError(_("Bill does not exist or data is invalid"))
+
+    if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
+        type = JsonParse(request.POST.get('data')).get('type')
+
+        try:
+            bill_payment = BillPayment.objects.get(id=bill.payment.id)
+            if bill_payment.status == g.PAID:
+                return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
+
+            bill_payment.type = type
+            bill_payment.save()
+
+        except BillPayment.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'no_payment_for_bill'})
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
+
+    return JsonOk()
+
+
+@login_required
+def send_invoice(request, company):
+    """
+        sends paypal invoice to the customer
+    """
+
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+    # there should be bill_id in request.POST
+    try:
+        bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
+        bill = Bill.objects.get(company=c, id=bill_id)
+    except (Bill.DoesNotExist, ValueError, TypeError):
+        return JsonError(_("Bill does not exist or data is invalid"))
+
+    if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
+        type = JsonParse(request.POST.get('data')).get('type')
+
+        try:
+            bill_payment = BillPayment.objects.get(id=bill.payment.id)
+            if bill_payment.status == g.PAID:
+                return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
+
+            bill_payment.type = type
+            bill_payment.save()
+
+        except BillPayment.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'no_payment_for_bill'})
+
+    else:
+    """
+
+
+    #    return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
+
+    return JsonOk()

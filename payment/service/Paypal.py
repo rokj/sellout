@@ -10,6 +10,8 @@ from django.utils.translation import ugettext as _
 class Paypal(ServiceAbstract):
     token_url = {"method": "POST", "url": settings.PAYMENT["paypal"]["url"] + "/v1/oauth2/token"}
     payment_url = {"method": "POST", "url": settings.PAYMENT["paypal"]["url"] + "/v1/payments/payment"}
+    create_invoice_url = {"method": "POST", "url": settings.PAYMENT["paypal"]["url"] + "/v1/invoicing/invoices"}
+
     response = None
 
     def __init__(self):
@@ -170,5 +172,46 @@ class Paypal(ServiceAbstract):
 
         if response.status_code == requests.codes.ok:
             return True
+
+        return False
+
+
+    def create_invoice(self, invoice_id=None, merchant_info=None, billing_info=None, shipping_info=None, items=None,
+                       invoice_date="", payment_term=None, discount=None, shipping_cost=None, custom=None,
+                       tax_calculated_after_discount=False, tax_inclusive=False, terms="", note="", merchant_memo="",
+                       logo_url="", ):
+        """
+        Method used for paying bill with paypal.
+
+        It creates invoice in draft state. After that, send invoice request should be called.
+        """
+        token = self._try_to_get_token()
+
+        if not token:
+            return False
+
+        if not invoice_id or not billing_info:
+            return False
+
+        headers = {"Authorization": "Bearer " + token, "Content-Type": "application/json", "Accept": "application/json"}
+        data = {
+            "number": invoice_id,
+            "merchant_info": merchant_info,
+        }
+
+        response = self._send_request(url=self.create_invoice_url["url"], method=self.create_invoice_url["method"], params={},
+                                      data=json.dumps(data), headers=headers)
+
+        if not response:
+            return False
+
+        self.response = response.json()
+
+        if "id" not in self.response or "number" not in self.response or "uri" not in self.response or "status" not in self.response:
+            if settings.DEBUG:
+                print self.response
+                pass
+
+            return False
 
         return False

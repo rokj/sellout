@@ -64,6 +64,25 @@ $(document).ready(function(){
             {{ form.decimal_places }}
             </div>
         </div>
+
+        <div class="sepaarator">
+            <br />
+            <hr />
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.payment_bitcoin_address.errors }}</div>
+            {{ form.payment_bitcoin_address.label_tag }}
+            <span class="help-text">{{ form.payment_bitcoin_address.help_text }}</span>
+            {{ form.payment_bitcoin_address }}
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.payment_bitcoin_address.errors }}</div>
+            {{ form.payment_paypal_address.label_tag }}
+            <span class="help-text">{{ form.payment_paypal_address.help_text }}</span>
+            {{ form.payment_paypal_address }}
+        </div>
     </div>
 
     <div class="management-column">

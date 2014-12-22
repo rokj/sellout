@@ -70,6 +70,13 @@ label, .custom-label{
     font-size: 10px;
 }
 
+.form-field .help-text {
+    color: #999999;
+    display: block;
+    text-transform: lowercase;
+    font-size: 10px;
+}
+
 .custom-label.description{
     text-transform: none;
 }

@@ -34,6 +34,8 @@ company_defaults = {
     'pos_decimal_separator': '.',
     # billing and calculation defaults
     'pos_decimal_places': 2,  # default decimal places for display
+    'pos_payment_bitcoin_address': '',
+    'pos_payment_paypal_address': '' 
 }
 
 user_defaults = {

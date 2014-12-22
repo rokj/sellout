@@ -100,6 +100,12 @@
     top: 50px;
 }
 
+#payment_details .paypal-calc {
+    position: absolute;
+    left: 200px;
+    top: 50px;
+}
+
 #payment_details .return-change-container{
     margin-top: 30px;
 }

@@ -8,7 +8,7 @@ Payment = function(g, bill){
     p.bill = bill;
     p.data = p.bill.data;
 
-    p.bitcoin_interval = null; // a reference to timer for bitcoin queries on server
+    p.payment_interval = null; // a reference to timer for bitcoin queries on server
 
     p.dialog = $("#payment");
     p.items = {
@@ -22,6 +22,11 @@ Payment = function(g, bill){
         credit_card:{
             button: $(".payment-type.credit-card", p.dialog),
             section: $(".payment-details.credit-card", p.dialog)
+        },
+        paypal:{
+            button: $(".payment-type.paypal", p.dialog),
+            section: $(".payment-details.paypal", p.dialog),
+            send_invoice: $('.payment-details #send_paypal_invoice', p.dialog)
         },
         bitcoin:{
             button: $(".payment-type.bitcoin", p.dialog),
@@ -44,45 +49,121 @@ Payment = function(g, bill){
     p.switch_section = function(section){
         // the last section is stored in g.settings
 
-        // first, hide sections
-        p.items.cash.button.removeClass("active");
-        p.items.cash.section.hide();
+        send_data(p.g.urls.change_payment_type, {bill_id: p.data.id, type: section}, p.g.csrf_token, function(response) {
+            if (response.status == 'ok') {
+                clearInterval(p.payment_interval);
 
-        p.items.credit_card.button.removeClass("active");
-        p.items.credit_card.section.hide();
+                // first, hide sections
+                p.items.cash.button.removeClass("active");
+                p.items.cash.section.hide();
 
-        p.toggle_bitcoin_section(false);
+                p.items.credit_card.button.removeClass("active");
+                p.items.credit_card.section.hide();
 
-        // now display the required section
-        p.g.settings.last_payment_type = section;
+                p.toggle_bitcoin_section(false);
+                p.toggle_paypal_section(false);
 
-        switch(p.g.settings.last_payment_type){
-            case "cash":
-                p.items.cash.button.addClass("active");
-                p.items.cash.section.show();
+                // now display the required section
+                p.g.settings.last_payment_type = section;
 
-                p.items.cash.paid_box.val("");
-                p.items.cash.return_box.val("");
+                switch (p.g.settings.last_payment_type) {
+                    case "cash":
+                        p.items.cash.button.addClass("active");
+                        p.items.cash.section.show();
 
-                p.items.cash.paid_box.focus();
-                break;
-            case "credit-card":
-                p.items.credit_card.button.addClass("active");
-                p.items.credit_card.section.show();
-                break;
-            case "bitcoin":
-                p.toggle_bitcoin_section(true);
+                        p.items.cash.paid_box.val("");
+                        p.items.cash.return_box.val("");
 
-                break;
+                        p.items.cash.paid_box.focus();
+                        break;
+                    case "credit-card":
+                        p.items.credit_card.button.addClass("active");
+                        p.items.credit_card.section.show();
+                        break;
+                    case "paypal":
+                        p.items.paypal.button.addClass("active");
+                        p.items.paypal.section.show();
+                        break;
+                    case "bitcoin":
+                        p.toggle_bitcoin_section(true);
+
+                        break;
+                }
+            }
+        });
+    };
+
+    p.toggle_paypal_section = function(show){
+        if(show){
+            p.items.paypal.button.addClass("active");
+            p.items.paypal.section.show();
+
+            if(p.payment_interval) clearInterval(p.payment_interval);
+
+            // disable the print button on the dialog
+            toggle_element(p.items.print_button, false);
+
+            /*
+            send_data(p.g.urls.get_payment_btc_info, {bill_id: p.data.id}, p.g.csrf_token, function(response) {
+                if (response.status == 'ok') {
+                    if ('data' in response && 'btc_address' in response.data && 'btc_amount' in response.data) {
+                        p.items.bitcoin.btc_address.val(response.data.btc_address);
+                        p.items.bitcoin.btc_address.data("value", response.data.btc_address);
+                        p.items.bitcoin.btc_amount.html(response.data.btc_amount);
+                        p.items.bitcoin.btc_qrcode.html("");
+                        p.items.bitcoin.btc_qrcode.qrcode({width: 180, height: 160, text: "bitcoin:" + response.data.btc_address + "?amount=" + response.data.btc_amount, background: "#ebebeb"});
+
+                        // set up a timer that will check if the bill has been paid
+                        p.payment_interval = setInterval(function () {
+                            send_data(p.g.urls.check_bill_status, {bill_id: p.data.id}, p.g.csrf_token, function (response) {
+                                if (response.status != 'ok') {
+                                    // something went wrong
+                                    alert(response.message);
+                                } else if (response.status == 'ok') {
+                                    if (response.data.paid == 'true') {
+                                        // paid, finish the thing
+                                        alert("paid");
+                                        // TODO
+
+                                        clearInterval(p.payment_interval);
+                                    }
+                                    else {
+                                        // not paid yet, continue polling
+
+                                    }
+                                }
+                                console.log(response);
+                            });
+                        }, 2000);
+                    } else {
+                        error_message(gettext("Bitcoin payment problem"), gettext("Something went wrong when trying to get information about Bitcoin payment. Try later, or be nice and contact support."))
+                    }
+                }
+            });
+            */
+        }
+        else{
+            p.items.paypal.button.removeClass("active");
+            p.items.paypal.section.hide();
+
+            // enable the print button
         }
     };
+
+    p.section.paypal.send_invoice.click(function() {
+        send_data(p.g.urls.paypal_send_invoice, {bill_id: p.data.id}, p.g.csrf_token, function(response) {
+            if (response.status == 'ok') {
+                alert('sent invoice');
+            }
+        });
+    });
 
     p.toggle_bitcoin_section = function(show){
         if(show){
             p.items.bitcoin.button.addClass("active");
             p.items.bitcoin.section.show();
 
-            if(p.bitcoin_interval) clearInterval(p.bitcoin_interval);
+            if(p.payment_interval) clearInterval(p.payment_interval);
 
             // disable the print button on the dialog
             toggle_element(p.items.print_button, false);
@@ -101,18 +182,18 @@ Payment = function(g, bill){
                         p.items.bitcoin.btc_qrcode.qrcode({width: 180, height: 160, text: "bitcoin:" + response.data.btc_address + "?amount=" + response.data.btc_amount, background: "#ebebeb"});
 
                         // set up a timer that will check if the bill has been paid
-                        p.bitcoin_interval = setInterval(function () {
+                        p.payment_interval = setInterval(function () {
                             send_data(p.g.urls.check_bill_status, {bill_id: p.data.id}, p.g.csrf_token, function (response) {
                                 if (response.status != 'ok') {
                                     // something went wrong
                                     alert(response.message);
                                 } else if (response.status == 'ok') {
-                                    if (response.data.paid) {
+                                    if (response.data.paid == 'true') {
                                         // paid, finish the thing
                                         alert("paid");
                                         // TODO
 
-                                        clearInterval(p.bitcoin_interval);
+                                        clearInterval(p.payment_interval);
                                     }
                                     else {
                                         // not paid yet, continue polling
@@ -259,6 +340,7 @@ Payment = function(g, bill){
     p.items.cash.button.unbind().click(function(){ p.switch_section("cash"); });
     p.items.credit_card.button.unbind().click(function(){ p.switch_section("credit-card"); });
     p.items.bitcoin.button.unbind().click(function(){ p.switch_section("bitcoin"); });
+    p.items.paypal.button.unbind().click(function(){ p.switch_section("paypal"); });
 
     // set total text
     p.items.total.text(p.data.total);

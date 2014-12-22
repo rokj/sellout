@@ -28,3 +28,10 @@ class SkeletonU(Skeleton):
 
     class Meta:
         abstract = True
+
+class TemporaryStorage(Skeleton):
+    key = models.CharField(max_length=50, null=False, blank=False, unique=True)
+    value = models.TextField(null=False, db_index=True)
+
+    created_by = models.CharField(max_length=40, null=True, blank=True)
+    updated_by = models.CharField(max_length=40, null=True, blank=True)
