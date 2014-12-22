@@ -1,12 +1,11 @@
 from django.db import models
 from django.utils.translation import ugettext as _
 from blusers.models import BlocklogicUser
-from common.functions import format_date, format_time
 import parameters as p
 from common.models import SkeletonU
 
 from datetime import datetime as dtm
-import globals as g
+import common.globals as g
 
 
 class AnswerAbstract(SkeletonU):
