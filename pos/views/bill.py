@@ -542,6 +542,17 @@ def create_bill_(request, c):
     if existing_bill:
         existing_bill.delete()
 
+
+    bill_payment = BillPayment(
+        type=g.CASH,
+        total=grand_total,
+        currency=get_company_value(request.user, c, 'pos_currency'),
+        transaction_datetime=datetime.now(),
+        status=g.WAITING,
+        created_by=request.user
+    )
+    bill_payment.save()
+
     # create a new bill
     db_bill = Bill(
         created_by=request.user,
@@ -553,7 +564,7 @@ def create_bill_(request, c):
         contact=bill['contact'],  # FK on BillContact, copy of the Contact object
         notes=bill['notes'],
         currency=bill['currency'],
-
+        payment=bill_payment,
         timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
         status=bill['status'],
         total=grand_total
@@ -600,17 +611,6 @@ def create_bill_(request, c):
             )
             db_discount.save()
 
-    bill_payment = BillPayment(
-        type=g.CASH,
-        total=grand_total,
-        currency=get_company_value(request.user, c, 'pos_currency'),
-        transaction_datetime=datetime.now(),
-        status=g.WAITING,
-        created_by=request.user
-    )
-    bill_payment.save()
-
-    db_bill.payment = bill_payment
     db_bill.save()
 
     d = {'bill': bill_to_dict(request.user, c, db_bill)}
@@ -906,9 +906,12 @@ def get_payment_btc_info(request, company):
     """
     try:
         c = Company.objects.get(url_name=company)
+        return get_payment_btc_info_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
+
+def get_payment_btc_info_(request, c):
     # there should be bill_id in request.POST
     try:
         bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
@@ -919,20 +922,34 @@ def get_payment_btc_info(request, company):
     extra = {}
 
     if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
-        btc_address = bill.payment.get_btc_address(c.id)
-        btc_amount = bill.payment.get_btc_amount(request.user, c)
+
+        if settings.DEBUG:
+            btc_address = ""
+            btc_amount = ""
+        else:
+            btc_address = bill.payment.get_btc_address(c.id)
+            btc_amount = bill.payment.get_btc_amount(request.user, c)
 
         if btc_address == "":
-            return JsonResponse({'status': 'could_not_get_btc_address', 'message': 'could_not_get_btc_address'})
-        if btc_amount is None:
-            return JsonResponse({'status': 'could_not_get_btc_amount', 'message': 'could_not_get_btc_amount'})
+            if settings.DEBUG:
+                btc_address = "17VP9cu7K75MswYrh2Ue5Ua6Up4ZiMLpYw"
+            else:
+                return JsonResponse({'status': 'could_not_get_btc_address', 'message': 'could_not_get_btc_address'})
+        if not btc_amount:
+            if settings.DEBUG:
+                btc_amount = 0.0000005
+            else:
+                return JsonResponse({'status': 'could_not_get_btc_amount', 'message': 'could_not_get_btc_amount'})
 
         extra['btc_address'] = btc_address
         extra['btc_amount'] = btc_amount
+
+        print extra
     else:
         return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
 
     return JsonOk(extra=extra)
+
 
 @login_required
 def change_payment_type(request, company):
@@ -941,9 +958,12 @@ def change_payment_type(request, company):
     """
     try:
         c = Company.objects.get(url_name=company)
+        return change_payment_type_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
+
+def change_payment_type_(request, c):
     # there should be bill_id in request.POST
     try:
         bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
