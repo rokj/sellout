@@ -122,6 +122,12 @@ PRINTER_DRIVERS = (
 #  - django templates
 #  - jquery format string (for datepicker etc.)
 DATE_FORMATS = {
+    'yyyy-mm-dd': {'regex': "^\d{4}\.\d{2}\.\d{2}$",  # strictly with leading zeros
+                   'python': "%Y-%m-%d",
+                   'django': "Y-m-d",
+                   'android': "%Y-%m-%d",
+                   'js': "yy-mm-dd",
+                   },
     'dd.mm.yyyy': {'regex': "^\d{1,2}\.\d{1,2}\.\d{4}$",  # with or without leading zeros
                    'python': "%d.%m.%Y",  # the docs say zero-padded decimal, but will also parse non-padded numbers
                    'django': "j.n.Y",  # show no leading zeros in template
@@ -134,12 +140,6 @@ DATE_FORMATS = {
                    'android': "%m/%d/%Y",
                    'js': "mm/dd/yy",
                   },
-    'yyyy-mm-dd': {'regex': "^\d{4}\.\d{2}\.\d{2}$",  # strictly with leading zeros
-                   'python': "%Y-%m-%d",
-                   'django': "Y-m-d",
-                   'android': "%Y-%m-%d",
-                   'js': "yy-mm-dd",
-                   },
 }
 
 TIME_FORMATS = {

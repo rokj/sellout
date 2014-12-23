@@ -1,0 +1,65 @@
+{% load i18n %}
+{% load static %}
+
+<section id="search" class="low">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-16" id="search_container">
+                <form class="search" method="get" action="{% url 'support:search' %}">
+                    {% csrf_token %}
+
+                    <div class="errors">{{ search_form.search_text.errors }}</div>
+                    {{ search_form.search_text }}<!--
+                            {# commented out in html to prevent space between two display: inline elements #}
+                        --><button type="submit" class="buttons">
+                        <img src="{% static 'images/support/search.png' %}" alt=""/>
+                    </button>
+                </form>
+            </div>
+
+            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                <a href="{% url 'support:index' %}" id="back_link" class="option-container">
+                    <div class="option-image-container">
+                        <img src="{% static 'images/support/back.png' %}"
+                             title="{% trans 'Back' %}"
+                             alt="{% trans 'Back' %}"/>
+                    </div>
+
+                    <div class="option-text-container">
+                        {% trans 'Home' %}
+                    </div>
+                </a>
+
+                <a class="option-container" href="#">
+                    <div class="option-image-container">
+                        <img src="{% static 'images/support/community.png' %}" alt=""/>
+                    </div>
+
+                    <div class="option-text-container">
+                        {% trans 'Community' %}
+                    </div>
+                </a>
+
+                <a class="option-container" href="{% url 'support:faq' %}">
+                    <div class="option-image-container">
+                        <img src="{% static 'images/support/faq.png' %}" alt=""/>
+                    </div>
+
+                    <div class="option-text-container">
+                        {% trans 'F.A.Q.' %}
+                    </div>
+                </a>
+
+                <a class="option-container" href="#">
+                    <div class="option-image-container">
+                        <img src="{% static 'images/support/email.png' %}" alt=""/>
+                    </div>
+
+                    <div class="option-text-container">
+                        {% trans 'E-mail' %}
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

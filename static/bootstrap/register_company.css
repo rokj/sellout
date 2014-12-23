@@ -34,9 +34,8 @@ body{
     
     /* pretend this is a non-editable part of text input */
     background-color: #ffffff;
-    margin-top: 5px;
     border-top: 2px solid #dddddd;
-    height: 32px;
+    height: 40px;
     line-height: 32px;
     padding-left: 10px;
 

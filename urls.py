@@ -26,7 +26,7 @@ urlpatterns = patterns('',
     url(r'^captcha/', include('captcha.urls')),
 
     # support
-    # TODO
+    url(r'^support/', include('support.urls', namespace="support")),
 
     # web: everything that happens before user enters a specific company
     url(r'^', include('web.urls', namespace='web')),

@@ -1,0 +1,36 @@
+{% extends "support/supportbase.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block search_content %}
+    {% include 'support/search_high.html' %}
+{% endblock %}
+
+{% block main_content_body %}
+    {# show latest questions from each category or all in chosen category #}
+    {% if latest %}
+        <h2 class="section-title">{% trans 'Latest questions' %}</h2>
+        {% for l in latest %}
+            <h2 class="category">{{ l.category_name }}</h2>
+            {% if l.questions %}
+                {% include 'support/question_list.html' with questions=l.questions %}
+            {% else %}
+                <p class="no-text">{% trans 'No questions in this category' %}</p>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        {% if questions %}
+            <h2 class="category">{{ category_name }} <span class="results-no">({{ questions.paginator.count }})</span></h2>
+            {% include 'support/question_list.html' with questions=questions %}
+
+            {# show pagination #}
+            {% include 'support/pagination.html' with d=questions %}
+
+        {% else %}
+            <h2 class="category">{{ category_name }}</h2>
+            <p class="no-text">{% trans 'No questions in this category' %}</p>
+        {% endif %}
+    {% endif %}
+
+{% endblock %}

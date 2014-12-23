@@ -87,9 +87,10 @@ a:hover{
 
 .buttons.cancel{
     background-color: #ff5a6e;
+    color: #ffffff;
 }
 
-.form-errors, 
+.form-errors,
 .field-errors,
 .form-message,
 .form-message p{
