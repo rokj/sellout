@@ -922,20 +922,34 @@ def get_payment_btc_info_(request, c):
     extra = {}
 
     if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
-        btc_address = bill.payment.get_btc_address(c.id)
-        btc_amount = bill.payment.get_btc_amount(request.user, c)
+
+        if settings.DEBUG:
+            btc_address = ""
+            btc_amount = ""
+        else:
+            btc_address = bill.payment.get_btc_address(c.id)
+            btc_amount = bill.payment.get_btc_amount(request.user, c)
 
         if btc_address == "":
-            return JsonResponse({'status': 'could_not_get_btc_address', 'message': 'could_not_get_btc_address'})
-        if btc_amount is None:
-            return JsonResponse({'status': 'could_not_get_btc_amount', 'message': 'could_not_get_btc_amount'})
+            if settings.DEBUG:
+                btc_address = "17VP9cu7K75MswYrh2Ue5Ua6Up4ZiMLpYw"
+            else:
+                return JsonResponse({'status': 'could_not_get_btc_address', 'message': 'could_not_get_btc_address'})
+        if not btc_amount:
+            if settings.DEBUG:
+                btc_amount = 0.0000005
+            else:
+                return JsonResponse({'status': 'could_not_get_btc_amount', 'message': 'could_not_get_btc_amount'})
 
         extra['btc_address'] = btc_address
         extra['btc_amount'] = btc_amount
+
+        print extra
     else:
         return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
 
     return JsonOk(extra=extra)
+
 
 @login_required
 def change_payment_type(request, company):
@@ -947,6 +961,7 @@ def change_payment_type(request, company):
         return change_payment_type_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
+
 
 def change_payment_type_(request, c):
     # there should be bill_id in request.POST
