@@ -193,6 +193,17 @@ def bill_to_dict(user, company, bill):
         
     b['items'] = i
 
+    p = bill.payment
+    payment = {
+        'type': p.type,
+        'amount_paid': format_number(user, company, p.amount_paid),
+        'currency': p.currency,
+        'total': format_number(user, company, p.total),
+        'total_btc': format_number(user, company, p.total_btc),
+        'transaction_datetime': format_date(user, company, p.transaction_datetime),
+        'transaction_reference': p.transaction_reference,
+    }
+
     return b
 
 
