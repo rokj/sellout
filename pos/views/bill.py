@@ -978,7 +978,6 @@ def send_invoice(request, company):
     """
 
     try:
-        return
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
@@ -1056,6 +1055,7 @@ def send_invoice(request, company):
             paypal = Paypal()
             paypal.create_invoice(invoice_id=bill.serial, merchant_info=merchant_info, billing_info=billing_info,
                                   shipping_info=shipping_info, items=items, invoice_date=bill_date)
+            # paypal.send_in
 
         except BillPayment.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'no_payment_for_bill'})
