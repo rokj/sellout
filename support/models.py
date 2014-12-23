@@ -1,19 +1,26 @@
 from django.db import models
 from django.utils.translation import ugettext as _
 from blusers.models import BlocklogicUser
-from common.functions import format_date, format_time
 import parameters as p
 from common.models import SkeletonU
 
 from datetime import datetime as dtm
+import common.globals as g
 
 
-# question
-class Question(SkeletonU):
-    author = models.ForeignKey(BlocklogicUser, null=False, blank=False)
+class AnswerAbstract(SkeletonU):
     category = models.CharField(_("Category"), max_length=16, choices=p.CATEGORIES, null=False, blank=False)
     title = models.CharField(_("Title"), max_length=64, null=False, blank=False)
     text = models.TextField(_("Question"), null=False, blank=False)
+
+    class Meta:
+        abstract = True
+
+
+# question
+class Question(AnswerAbstract):
+    author = models.ForeignKey(BlocklogicUser, null=False, blank=False)
+    # stuff from AnswerAbstract
     plus = models.IntegerField(_("Up votes"), null=True, default=0)
     minus = models.IntegerField(_("Down votes"), null=True, default=0)
     timestamp = models.DateTimeField(_("Timestamp"), default=dtm.now)
@@ -31,11 +38,12 @@ class Question(SkeletonU):
 
     @property
     def date(self):
-        return format_date(self.author, self.timestamp)
+        # there is no company, just use the default (first)
+        return self.timestamp.strftime(g.DATE_FORMATS[0]['python'])
 
     @property
     def time(self):
-        return format_time(self.timestamp)
+        return self.timestamp.strftime(g.TIME_FORMATS[0]['python'])
 
     def can_delete(self, user):
         # user must be logged in
@@ -67,11 +75,11 @@ class Comment(SkeletonU):
 
     @property
     def date(self):
-        return format_date(self.author, self.timestamp)
+        return self.timestamp.strftime(g.DATE_FORMATS[0]['python'])
 
     @property
     def time(self):
-        return format_time(self.timestamp)
+        return self.timestamp.strftime(g.TIME_FORMATS[0]['python'])
 
     def can_delete(self, user):
         # user must be logged in
@@ -98,3 +106,7 @@ class Vote(SkeletonU):
     """ collects data on who voted on what question; user can vote only once for each question """
     user = models.ForeignKey(BlocklogicUser, null=False, blank=False)
     question = models.ForeignKey(Question)
+
+
+class Faq(AnswerAbstract):
+    pass

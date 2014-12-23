@@ -501,7 +501,7 @@ $(document).ready(function() {
                 $("div.error div.header span.text ").text("Error");
 
                 // TODO, WATCH (translation)
-                var support_link = "{% url "support:home" %}";
+                var support_link = "{% url "support:index" %}";
                 var text = gettext("For some reason could not get price in BTC and so you cannot make payment with Bitcoins. <br /> <br />Try again later or contact support if you think that this is really too much.");
                 text = text.replace("contact support", "<a href='" + support_link + "'>contact support</a>");
 

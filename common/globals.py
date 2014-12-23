@@ -85,12 +85,6 @@ SEXES = (
     ("U", _("Undisclosed")),
 )
 
-BILL_STATUS = (
-    ("Unpaid", _("Awaiting payment")),
-    ("Paid", _("Paid")),
-    ("Canceled", _("Canceled")),
-)
-
 RECEIPT_FORMATS = (
     ("Page", _("Full page (Letter/A4)")),
     ("Thermal", _("Thermal (80mm)")),
@@ -101,10 +95,17 @@ RECEIPT_TYPES = (
     ("E-mail", _("E-mail")),
 )
 
+# should be same as in settings
+BITCOIN = "bitcoin"
+PAYPAL = "paypal"
+CASH = "cash"
+CREDIT_CARD = "credit_card"
+
 PAYMENT_TYPES = (
-    ("cash", _("Cash")),  # the keys should match javascript payment types (see payment.js)
-    ("credit-card", _("Credit card")),
-    ("bitcoin", _("Bitcoin")),
+    (CASH, _("Cash")),  # the keys should match javascript payment types (see payment.js)
+    (CREDIT_CARD, _("Credit card")),
+    (BITCOIN, _("Bitcoin")),
+    (PAYPAL, _("Paypal")),
 )
 
 PRINTER_DRIVERS = (
@@ -121,6 +122,12 @@ PRINTER_DRIVERS = (
 #  - django templates
 #  - jquery format string (for datepicker etc.)
 DATE_FORMATS = {
+    'yyyy-mm-dd': {'regex': "^\d{4}\.\d{2}\.\d{2}$",  # strictly with leading zeros
+                   'python': "%Y-%m-%d",
+                   'django': "Y-m-d",
+                   'android': "%Y-%m-%d",
+                   'js': "yy-mm-dd",
+                   },
     'dd.mm.yyyy': {'regex': "^\d{1,2}\.\d{1,2}\.\d{4}$",  # with or without leading zeros
                    'python': "%d.%m.%Y",  # the docs say zero-padded decimal, but will also parse non-padded numbers
                    'django': "j.n.Y",  # show no leading zeros in template
@@ -133,12 +140,6 @@ DATE_FORMATS = {
                    'android': "%m/%d/%Y",
                    'js': "mm/dd/yy",
                   },
-    'yyyy-mm-dd': {'regex': "^\d{4}\.\d{2}\.\d{2}$",  # strictly with leading zeros
-                   'python': "%Y-%m-%d",
-                   'django': "Y-m-d",
-                   'android': "%Y-%m-%d",
-                   'js': "yy-mm-dd",
-                   },
 }
 
 TIME_FORMATS = {
@@ -345,4 +346,10 @@ PAYMENT_STATUS = (
     (FIRST_TIME, _("First time"))
 )
 
-CASH="cash"
+CASH = "cash"
+
+BILL_STATUS = (
+    (WAITING, _("Awaiting payment")),
+    (PAID, _("Paid")),
+    (CANCELED, _("Canceled")),
+)

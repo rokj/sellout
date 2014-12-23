@@ -1,0 +1,104 @@
+{% extends "web/bootstrap.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load thumbnail %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/support.css' %}" />
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        // user menu
+        $("#user_menu_button").simpleMenu($("#user_menu_items"));
+
+        // voting buttons
+        $(".vote").click(function(){
+            // the vote button needs the following data-attributes:
+            // data-id: question id
+            // up: 1 or zero (vote up: true or false)
+            var obj = $(this);
+            var id = parseInt(obj.data("id"));
+            var up = parseInt(obj.data("up")) > 0 ? 1 : 0;
+
+            send_data("{% url 'support:vote' %}", {question_id:id, up:up}, "{{ csrf_token }}", function(recv_data){
+                if(recv_data.status != 'ok'){
+                    error_message(null, gettext("Vote failed"), recv_data.message);
+                }
+                else{
+                    // everything ok, refresh the page
+                    window.location.reload();
+                }
+            });
+        });
+
+        // accept comment as answer, delete question and delete comment:
+        // virtually the same function
+        function ajax_call(object, url, confirm_message, error_message_title){
+
+            var id = parseInt(object.data("id"));
+
+            confirmation_dialog(null,
+                "",
+                confirm_message,
+                "{% trans 'Yes' %}",
+                "{% trans 'No' %}",
+                function(){
+                    send_data(url, {id:id}, "{{ csrf_token }}", function(recv_data){
+                        if(recv_data.status != 'ok'){
+                            error_message(null, error_message_title, recv_data.message);
+                        }
+                        else{
+                            // everything ok, refresh the page
+                            if(recv_data.url) window.location = recv_data.url;
+                            else window.location.reload();
+                        }
+                    });
+                },
+                function(){ }
+            );
+        }
+
+        // accept buttons
+        $(".accept").click(function(){
+            ajax_call(
+                $(this),
+                "{% url 'support:accept' %}",
+                gettext("Accept this comment as the answer to the question?"),
+                gettext("Could not accept answer")); });
+
+        // delete buttons: question...
+        $(".delete-question").click(function(){
+            ajax_call(
+                $(this),
+                "{% url 'support:delete_question' %}",
+                gettext("Really delete this question?"),
+                gettext("Could not delete question")); });
+
+        // and comments
+        $(".delete-comment").click(function(){
+            ajax_call(
+                $(this),
+                "{% url 'support:delete_comment' %}",
+                gettext("Really delete this comment?"),
+                gettext("Could not delete comment"));
+        });
+    });
+</script>
+
+{% block section_head %}{% endblock %}
+
+{% endblock %}
+
+{% block navbar_buttons %}
+
+{% endblock %}
+
+{% block content %}
+    {% block search_content %}{% endblock %}
+
+    <section>
+        <div class="container" id="support_body">
+            {% block main_content_body %}{% endblock %}
+        </div>
+    </section>
+{% endblock %}

@@ -53,7 +53,6 @@ def index(request):
         'login_message': message,
         'login_form': login_form,
         'client_id': settings.GOOGLE_API['client_id'],
-        'title': "",
         'site_title': g.SITE_TITLE,
         'STATIC_URL': settings.STATIC_URL,
         'GOOGLE_API': settings.GOOGLE_API
