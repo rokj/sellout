@@ -60,6 +60,7 @@ class BillPayment(SkeletonU):
         if self.status == WAITING:
             if self.total_btc is None or datetime_updated_with_offset < datetime.datetime.now():
                 currency = get_company_value(user, company, 'pos_currency')
+
                 btc_price = calculate_btc_price(currency, self.total)
 
                 if btc_price != -1:

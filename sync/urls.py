@@ -4,14 +4,15 @@ from common import globals as g
 
 from sync.views import mobile_sync_db
 
-r_company = r'^(?P<company>[\w-]{1,' + str(g.MISC['company_url_length']) + '})'
+# r_company = r'^(?P<company>[\w-]{1,' + str(g.MISC['company_url_length']) + '})'
 
+r_company_id = r'^(?P<company_id>[\w-]+)'
 
 urlpatterns = patterns('',
 
     # LOGIN
 
-    url(r_company + r'/sync-database?$', mobile_sync_db, name='syncdb'), # syncdb
+    url(r_company_id + r'/sync-database?$', mobile_sync_db, name='syncdb'), # syncdb
 
 
     # categories

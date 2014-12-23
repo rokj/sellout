@@ -20,10 +20,10 @@ from django.utils.translation import ugettext as _
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
 @login_required
-def mobile_sync_db(request, company):
+def mobile_sync_db(request, company_id):
 
     try:
-        company = Company.objects.get(url_name=company)
+        company = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
@@ -42,7 +42,7 @@ def mobile_sync_db(request, company):
 
     ret = {'version': last_key}
 
-    if seq == 0 or last_key - 5000 > seq:
+    if seq == 0 or last_key - 5000 > seq or seq > last_key:
 
         # if first sync or sync outdated, why not load whole DB
 

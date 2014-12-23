@@ -77,7 +77,7 @@ def mobile_add_register(request, company_id):
 def mobile_edit_register(request, company_id):
     # add a new register
     try:
-        c = Company.objects.get(url_name=company_id)
+        c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 

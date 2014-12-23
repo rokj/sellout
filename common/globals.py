@@ -85,12 +85,6 @@ SEXES = (
     ("U", _("Undisclosed")),
 )
 
-BILL_STATUS = (
-    ("Unpaid", _("Awaiting payment")),
-    ("Paid", _("Paid")),
-    ("Canceled", _("Canceled")),
-)
-
 RECEIPT_FORMATS = (
     ("Page", _("Full page (Letter/A4)")),
     ("Thermal", _("Thermal (80mm)")),
@@ -101,10 +95,17 @@ RECEIPT_TYPES = (
     ("E-mail", _("E-mail")),
 )
 
+# should be same as in settings
+BITCOIN = "bitcoin"
+PAYPAL = "paypal"
+CASH = "cash"
+CREDIT_CARD = "credit_card"
+
 PAYMENT_TYPES = (
-    ("cash", _("Cash")),  # the keys should match javascript payment types (see payment.js)
-    ("credit-card", _("Credit card")),
-    ("bitcoin", _("Bitcoin")),
+    (CASH, _("Cash")),  # the keys should match javascript payment types (see payment.js)
+    (CREDIT_CARD, _("Credit card")),
+    (BITCOIN, _("Bitcoin")),
+    (PAYPAL, _("Paypal")),
 )
 
 PRINTER_DRIVERS = (
@@ -345,4 +346,10 @@ PAYMENT_STATUS = (
     (FIRST_TIME, _("First time"))
 )
 
-CASH="cash"
+CASH = "cash"
+
+BILL_STATUS = (
+    (WAITING, _("Awaiting payment")),
+    (PAID, _("Paid")),
+    (CANCELED, _("Canceled")),
+)

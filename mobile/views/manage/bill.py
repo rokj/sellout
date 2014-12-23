@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext as _
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from common.globals import PAID
 
 from pos.models import Company, Bill, BillItem
 from pos.views.bill import bill_to_dict, create_printable_bill
@@ -37,7 +38,7 @@ def list_bills(request, company_id):
         if data.get('sort_order') == 'desc':
             order = '-' + order
 
-        bills = Bill.objects.filter(company=c, status='Paid').order_by(order)
+        bills = Bill.objects.filter(company=c, payment__status=PAID).order_by(order)
 
         # filter by whatever is in the form:
         # issue date: from
@@ -93,7 +94,7 @@ def list_bills(request, company_id):
         page = data.get('page')
         searched = True
     else:
-        bills = Bill.objects.filter(company=c, status='Paid').order_by('-timestamp')[:N]
+        bills = Bill.objects.filter(company=c, payment__status=PAID).order_by('-timestamp')[:N]
 
     # format all bills manually
     bills = [bill_to_dict(request.user, c, b) for b in bills]

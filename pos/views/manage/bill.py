@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
+from common.globals import PAID
 from config.functions import get_date_format, get_company_value
 
 from pos.models import Company, Product, Bill, BillItem
@@ -62,7 +63,7 @@ def list_bills(request, company):
         if form.cleaned_data.get('sort_order') == 'desc':
             order = '-' + order
 
-        bills = Bill.objects.filter(company=c, status='Paid').order_by(order)
+        bills = Bill.objects.filter(company=c, payment__status=PAID).order_by(order)
 
         # filter by whatever is in the form:
         # issue date: from
@@ -117,7 +118,7 @@ def list_bills(request, company):
         form = BillSearchForm(data=None, user=request.user, company=c)
         page = 1
 
-        bills = Bill.objects.filter(company=c, status='Paid').order_by('-timestamp')[:N]
+        bills = Bill.objects.filter(company=c, payment__status=PAID).order_by('-timestamp')[:N]
 
     # format all bills manually
     bills = [bill_to_dict(request.user, c, b) for b in bills]

@@ -78,6 +78,8 @@ urlpatterns = patterns('',
     # Mr. Bill
     url(r_company + r'/manage/json/bill/add/?$', bill.mobile_create_bill, name='mobile_add_bill'),
     url(r_company + r'/manage/json/bill/finish/?$', bill.mobile_finish_bill, name='mobile_add_bill'),
+    url(r_company + r'/manage/json/bill/get_btc_price/?$', bill.get_payment_btc_info, name='mobile_add_bill'),
+    url(r_company + r'/manage/json/bill/check_bill_status/?$', bill.check_bill_status, name='mobile_check_status'),
 
     # configuration
     url(r_company + r'/manage/json/config/?$', configuration.get_mobile_config, name='mobile_get_config'),

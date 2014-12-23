@@ -212,7 +212,7 @@ Payment = function(g, bill){
         // send an update of the bill to the server and print the bill
         var data = {
             bill_id: p.data.id,
-            status: 'Paid',
+            status: 'paid',
             payment_type: p.g.settings.last_payment_type,
 
             print: true,
@@ -223,7 +223,7 @@ Payment = function(g, bill){
             case 'cash':
                 data.payment_reference = p.items.cash.paid_box.val();
                 break;
-            case 'credit-card':
+            case 'credit_card':
 
                 break;
             case 'bitcoin':

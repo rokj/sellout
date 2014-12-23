@@ -8,7 +8,6 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from pytz import timezone
 
-import unidecode
 from payment.models import BillPayment
 
 from pos.models import Company, Product, Discount, Register, Contact, \
@@ -22,6 +21,9 @@ from config.functions import get_company_value
 import common.globals as g
 
 from printing.escpos import escpostext
+import settings
+
+import random
 
 
 def bill_item_to_dict(user, company, item):
@@ -379,7 +381,7 @@ def create_bill_(request, c):
     existing_bill = None
     try:
         existing_bill = Bill.objects.get(company=c, id=int(data.get('id')))
-        if existing_bill.status == 'Paid':
+        if existing_bill.payment.status == g.PAID:
             return JsonError(_("This bill has already been paid, editing is not possible"))
     except (ValueError, TypeError):
         pass
@@ -626,7 +628,7 @@ def get_unpaid_bills(request, company):
         return JsonError(_("You have no permission to view bills"))
 
     # return a list of bills
-    unfinished_bills = Bill.objects.filter(company=c).exclude(status='Paid').order_by('-timestamp')
+    unfinished_bills = Bill.objects.filter(company=c).exclude(payment__status=g.PAID).order_by('-timestamp')
 
     bills = []
     for b in unfinished_bills:
@@ -671,9 +673,12 @@ def check_bill_status(request, company):
     """
     try:
         c = Company.objects.get(url_name=company)
+        return check_bill_status_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
+
+def check_bill_status_(request, c):
     # there should be bill_id in request.POST
     try:
         bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
@@ -682,9 +687,14 @@ def check_bill_status(request, company):
         return JsonError(_("Bill does not exist or data is invalid"))
 
     if not has_permission(request.user, c, 'bill', 'edit'):
-        return JsonResponse({'status': 'no_permission', 'message': 'no_permission'})
+        return JsonResponse({'status': 'no_permission', 'message': 'You have no permission'})
 
-    if bill.status == 'Paid':
+    if settings.DEBUG:
+        if random.randint(0, 9) > 7:
+            return JsonOk(extra={'paid': True})
+        else:
+            return JsonOk(extra={'paid': False})
+    if bill.payment.status == g.PAID:
         return JsonOk(extra={'paid': True})
     else:
         return JsonOk(extra={'paid': False})
@@ -703,6 +713,8 @@ def finish_bill(request, company):
 
 
 def finish_bill_(request, c, android=False):
+    # this should be only called from web, when paying with cash or credit card
+
     # permissions
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JsonError(_("You have no permission to edit bills"))
@@ -721,17 +733,21 @@ def finish_bill_(request, c, android=False):
 
     # check status: if 'Paid', set payment type and reference;
     # if 'Canceled', just update status
-    if d.get('status') == 'Paid':
+    if d.get('status') == g.PAID:
         # check payment type
-        if d.get('payment_type') not in [x[0] for x in g.PAYMENT_TYPES]:
+        payment_type = d.get('payment_type')
+
+        if payment_type not in [x[0] for x in g.PAYMENT_TYPES]:
             return JsonError(_("Payment type does not exist"))
 
-        bill.status = 'Paid'
-        bill.payment_type = d.get('payment_type')
-        # payment reference: if paid with bitcoin - btc address, if paid with cash, cash amount given
-        bill.payment_reference = d.get('payment_reference')
+        bill.payment.status = g.PAID
+
+        if payment_type == g.CASH or payment_type == g.CREDIT_CARD:
+            bill.payment.type = payment_type
+            # payment reference: if paid with bitcoin - btc address, if paid with cash, cash amount given
+            bill.payment.transaction_reference = d.get('payment_reference')
     else:
-        bill.status = 'Canceled'
+        bill.payment.status = g.CANCELED
 
     bill.save()
 
@@ -771,6 +787,7 @@ def view_bill(request, company):
         return JsonError(_("Bill does not exist"))
 
     return HttpResponse(create_bill_html(request.user, c, bill))
+
 
 def esc_format(user, company, bill, format, line_char_no=48, esc_commands=False):
 
@@ -858,7 +875,6 @@ def esc_format(user, company, bill, format, line_char_no=48, esc_commands=False)
                 string += printer.full_text_line(white_spaces, strings, line_char_no, aligns=aligns, left_offset=0)
                 string += new_line
 
-
             string += printer.line(line_char_no=line_char_no, style='Dashed')
 
             strings = [_('Sum'), '', bill_dict['tax_sums']['net_sum'], bill_dict['tax_sums']['tax_sum'], bill_dict['tax_sums']['gross_sum']]
@@ -878,6 +894,7 @@ def esc_format(user, company, bill, format, line_char_no=48, esc_commands=False)
             return string
     return
 
+
 @login_required
 def get_payment_btc_info(request, company):
     """
@@ -885,9 +902,12 @@ def get_payment_btc_info(request, company):
     """
     try:
         c = Company.objects.get(url_name=company)
+        return get_payment_btc_info_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
+
+def get_payment_btc_info_(request, c):
     # there should be bill_id in request.POST
     try:
         bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
@@ -898,13 +918,24 @@ def get_payment_btc_info(request, company):
     extra = {}
 
     if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
-        btc_address = bill.payment.get_btc_address(c.id)
-        btc_amount = bill.payment.get_btc_amount(request.user, c)
+
+        if settings.DEBUG:
+            btc_address = ""
+            btc_amount = ""
+        else:
+            btc_address = bill.payment.get_btc_address(c.id)
+            btc_amount = bill.payment.get_btc_amount(request.user, c)
 
         if btc_address == "":
-            return JsonResponse({'status': 'could_not_get_btc_address', 'message': 'could_not_get_btc_address'})
-        if btc_amount is None:
-            return JsonResponse({'status': 'could_not_get_btc_amount', 'message': 'could_not_get_btc_amount'})
+            if settings.DEBUG:
+                btc_address = "17VP9cu7K75MswYrh2Ue5Ua6Up4ZiMLpYw"
+            else:
+                return JsonResponse({'status': 'could_not_get_btc_address', 'message': 'could_not_get_btc_address'})
+        if not btc_amount:
+            if settings.DEBUG:
+                btc_amount = 0.0000005
+            else:
+                return JsonResponse({'status': 'could_not_get_btc_amount', 'message': 'could_not_get_btc_amount'})
 
         extra['btc_address'] = btc_address
         extra['btc_amount'] = btc_amount
