@@ -26,7 +26,7 @@ Payment = function(g, bill){
         paypal:{
             button: $(".payment-type.paypal", p.dialog),
             section: $(".payment-details.paypal", p.dialog),
-            send_invoice: $('.payment-details #send_paypal_invoice', p.dialog)
+            send_invoice: $('.payment-details.paypal #send_paypal_invoice', p.dialog)
         },
         bitcoin:{
             button: $(".payment-type.bitcoin", p.dialog),
@@ -150,7 +150,7 @@ Payment = function(g, bill){
         }
     };
 
-    p.section.paypal.send_invoice.click(function() {
+    p.items.paypal.send_invoice.click(function() {
         send_data(p.g.urls.paypal_send_invoice, {bill_id: p.data.id}, p.g.csrf_token, function(response) {
             if (response.status == 'ok') {
                 alert('sent invoice');
