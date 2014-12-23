@@ -956,6 +956,7 @@ def send_invoice(request, company):
     """
 
     try:
+        return
         c = Company.objects.get(url_name=company)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
