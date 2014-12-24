@@ -151,14 +151,13 @@ def bill_to_dict(user, company, bill):
         'discount_type': bill.discount_type,
 
         # prices
-        'currency': bill.currency,
         'base': format_number(user, company, bill.base),
         'discount': format_number(user, company, bill.discount),
         'tax': format_number(user, company, bill.tax),
         'total': format_number(user, company, bill.total),
 
         'timestamp': format_date(user, company, bill.timestamp) + " " + format_time(user, company, bill.timestamp),
-        'status': bill.status,
+
 
     }
 
@@ -202,7 +201,11 @@ def bill_to_dict(user, company, bill):
         'total_btc': format_number(user, company, p.total_btc),
         'transaction_datetime': format_date(user, company, p.transaction_datetime),
         'transaction_reference': p.transaction_reference,
+        'payment_info': p.payment_info,
+        'status': p.status
     }
+
+    b['payment'] = payment
 
     return b
 
@@ -574,10 +577,8 @@ def create_bill_(request, c):
         register=bill['register'],  # current settings of the register this bill was created on
         contact=bill['contact'],  # FK on BillContact, copy of the Contact object
         notes=bill['notes'],
-        currency=bill['currency'],
         payment=bill_payment,
         timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
-        status=bill['status'],
         total=grand_total
     )
     db_bill.save()
@@ -990,6 +991,8 @@ def change_payment_type_(request, c):
             if bill_payment.status == g.PAID:
                 return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
 
+            if type not in g.PAYMENT_TYPES:
+                return JsonError(_('Type is invalid'))
             bill_payment.type = type
             bill_payment.save()
 

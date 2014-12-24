@@ -581,7 +581,6 @@ class Bill(SkeletonU, RegisterAbstract):
         decimal_places=g.DECIMAL['currency_decimal_places'],
         null=True, blank=True)
 
-
     total = models.DecimalField(_("Total amount to be paid"),
         max_digits=g.DECIMAL['currency_digits'],
         decimal_places=g.DECIMAL['currency_decimal_places'],
