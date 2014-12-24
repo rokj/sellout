@@ -82,6 +82,10 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/bill/check_bill_status/?$', bill.check_bill_status, name='mobile_check_status'),
     url(r_company + r'/manage/json/bill/change_payment_type?$', bill.change_payment_type, name='mobile_change_payment_type'),
 
+    # bill
+    url(r_company + r'/manage/json/bill/list/?$', bill_management.list_bills, name='mobile_list_bills'),
+    url(r_company + r'/manage/json/bill/print/?$', bill_management.print_bill, name='mobile_print_bill'),
+
     # configuration
     url(r_company + r'/manage/json/config/?$', configuration.get_mobile_config, name='mobile_get_config'),
     url(r_company + r'/manage/json/config/edit?$', configuration.save_company_config, name='mobile_get_config'),
@@ -99,9 +103,6 @@ urlpatterns = patterns('',
     # available discounts list
     # url(r_company + r'/manage/json/discounts/?$', discount.JSON_discounts, name='JSON_discounts'),
 
-    # bill
-    url(r_company + r'/manage/json/bill/list/?$', bill_management.list_bills, name='mobile_list_bills'),
-    url(r_company + r'/manage/json/bill/print/?$', bill_management.print_bill, name='mobile_print_bill'),
 
     # user
     url(r_company + r'/manage/json/users/unlock/?$', users.unlock_session, name='mobile_unlock_session'),

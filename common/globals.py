@@ -108,6 +108,8 @@ PAYMENT_TYPES = (
     (PAYPAL, _("Paypal")),
 )
 
+PAYMENT_TYPE_VALUES = tuple([x[0] for x in PAYMENT_TYPES])
+
 PRINTER_DRIVERS = (
     ("System", _("Default system printer")),
     ("Sellout", _("Sellout serial (must be installed)")),

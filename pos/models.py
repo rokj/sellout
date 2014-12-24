@@ -16,9 +16,6 @@ import random
 
 
 ### company ###
-from payment.models import BillPaymentAbstract, Payment
-
-
 class CompanyAbstract(models.Model):
     # abstract: used in  for Company and BillCompany
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)

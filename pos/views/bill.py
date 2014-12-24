@@ -148,17 +148,17 @@ def bill_to_dict(user, company, bill):
 
         'discount_amount': format_number(user, company, bill.discount_amount),
         'discount_type': bill.discount_type,
+        'currency': bill.payment.currency,
 
         # prices
-        'currency': bill.currency,
         'base': format_number(user, company, bill.base),
         'discount': format_number(user, company, bill.discount),
         'tax': format_number(user, company, bill.tax),
         'total': format_number(user, company, bill.total),
 
         'timestamp': format_date(user, company, bill.timestamp) + " " + format_time(user, company, bill.timestamp),
-        'status': bill.status,
 
+		'status': bill.status
     }
 
     if bill.contact:
@@ -191,6 +191,21 @@ def bill_to_dict(user, company, bill):
         i.append(bill_item_to_dict(user, company, item))
         
     b['items'] = i
+
+    p = bill.payment
+    payment = {
+        'type': p.type,
+        'amount_paid': format_number(user, company, p.amount_paid),
+        'currency': p.currency,
+        'total': format_number(user, company, p.total),
+        'total_btc': format_number(user, company, p.total_btc),
+        'transaction_datetime': format_date(user, company, p.transaction_datetime),
+        'transaction_reference': p.transaction_reference,
+        'payment_info': p.payment_info,
+        'status': p.status
+    }
+
+    b['payment'] = payment
 
     return b
 
@@ -542,6 +557,17 @@ def create_bill_(request, c):
     if existing_bill:
         existing_bill.delete()
 
+
+    bill_payment = Payment(
+        type=g.CASH,
+        total=grand_total,
+        currency=get_company_value(request.user, c, 'pos_currency'),
+        transaction_datetime=datetime.utcnow(),
+        status=g.WAITING,
+        created_by=request.user
+    )
+    bill_payment.save()
+
     # create a new bill
     db_bill = Bill(
         created_by=request.user,
@@ -554,7 +580,6 @@ def create_bill_(request, c):
         notes=bill['notes'],
         timestamp=dtm.utcnow().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
         total=grand_total,
-        type=bill['type'],
         status=bill['status'],
         currency=bill['currency']
     )
@@ -729,18 +754,19 @@ def finish_bill_(request, c, android=False):
         # check payment type
         payment_type = d.get('payment_type')
 
-        if payment_type not in [x[0] for x in g.PAYMENT_TYPES]:
+        if payment_type not in g.PAYMENT_TYPE_VALUES:
             return JsonError(_("Payment type does not exist"))
 
         bill.status = g.PAID
 
         if payment_type == g.CASH or payment_type == g.CREDIT_CARD:
-            bill.type = payment_type
+            bill.payment.type = payment_type
             # payment reference: if paid with bitcoin - btc address, if paid with cash, cash amount given
-            bill.transaction_reference = d.get('payment_reference')
+            bill.payment.transaction_reference = d.get('payment_reference')
     else:
         bill.status = g.CANCELED
 
+    bill.payment.save()
     bill.save()
 
     # if print is requested, return html, otherwise the 'ok' response
@@ -916,12 +942,17 @@ def get_payment_btc_info_(request, c):
             btc_address = ""
             btc_amount = ""
         else:
-            btc_address = bill.get_btc_address(c.id)
-            btc_amount = bill.get_btc_amount(request.user, c)
+            btc_address = bill.payment.get_btc_address(c.id)
+            btc_amount = bill.payment.get_btc_amount(request.user, c)
 
-        if btc_address == "":
+        if btc_address == "" and not btc_amount:
             if settings.DEBUG:
                 btc_address = "17VP9cu7K75MswYrh2Ue5Ua6Up4ZiMLpYw"
+                btc_amount = 0.0000005
+                bill.payment.status = g.PAID
+                bill.payment.amount = 0.0000005
+                bill.payment.save()
+                bill.save()
             else:
                 return JsonResponse({'status': 'could_not_get_btc_address', 'message': 'could_not_get_btc_address'})
         if not btc_amount:
@@ -962,14 +993,19 @@ def change_payment_type_(request, c):
 
     if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
         type = JsonParse(request.POST.get('data')).get('type')
-        if type not in [pt[0] for pt in g.PAYMENT_TYPES]:
-            return JsonResponse({'status': 'error', 'message': 'wrong_payment_type'})
 
-        if bill.status == g.PAID:
-            return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
+        try:
+            bill_payment = Payment.objects.get(id=bill.payment.id)
+            if bill_payment.status == g.PAID:
+                return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
 
-        bill.type = type
-        bill.save()
+            if type not in g.PAYMENT_TYPE_VALUES:
+                return JsonError(_('Type is invalid'))
+            bill_payment.type = type
+            bill_payment.save()
+
+        except BillPayment.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'no_payment_for_bill'})
 
     else:
         return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
