@@ -114,7 +114,6 @@ PRINTER_DRIVERS = (
 
 )
 
-
 # date formats
 # specify all formats for each date:
 #  - regular expression for checking format

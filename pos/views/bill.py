@@ -9,7 +9,6 @@ from django.utils.translation import ugettext as _
 from pytz import timezone
 
 import unidecode
-from payment.models import BillPayment
 from payment.service.Paypal import Paypal
 
 from pos.models import Company, Product, Discount, Register, Contact, \
@@ -192,17 +191,6 @@ def bill_to_dict(user, company, bill):
         i.append(bill_item_to_dict(user, company, item))
         
     b['items'] = i
-
-    p = bill.payment
-    payment = {
-        'type': p.type,
-        'amount_paid': format_number(user, company, p.amount_paid),
-        'currency': p.currency,
-        'total': format_number(user, company, p.total),
-        'total_btc': format_number(user, company, p.total_btc),
-        'transaction_datetime': format_date(user, company, p.transaction_datetime),
-        'transaction_reference': p.transaction_reference,
-    }
 
     return b
 
@@ -394,7 +382,7 @@ def create_bill_(request, c):
     existing_bill = None
     try:
         existing_bill = Bill.objects.get(company=c, id=int(data.get('id')))
-        if existing_bill.payment.status == g.PAID:
+        if existing_bill.status == g.PAID:
             return JsonError(_("This bill has already been paid, editing is not possible"))
     except (ValueError, TypeError):
         pass
@@ -439,11 +427,12 @@ def create_bill_(request, c):
         'user_name': str(request.user),
         'notes': data.get('notes')[:max_field_length(Bill, 'notes')],
 
-        'timestamp': dtm.now(),
-        'type': "Normal",
-        'status': "Unpaid",  # the bill is awaiting payment, a second request on the server will confirm it
+        'type': g.CASH,
+        'status': g.WAITING,
         'items': [],
         'currency': get_company_value(request.user, c, 'pos_currency'),
+
+        'created_by': request.user
     }
 
     r = parse_decimal(request.user, c, data.get('total'))
@@ -553,17 +542,6 @@ def create_bill_(request, c):
     if existing_bill:
         existing_bill.delete()
 
-
-    bill_payment = BillPayment(
-        type=g.CASH,
-        total=grand_total,
-        currency=get_company_value(request.user, c, 'pos_currency'),
-        transaction_datetime=datetime.now(),
-        status=g.WAITING,
-        created_by=request.user
-    )
-    bill_payment.save()
-
     # create a new bill
     db_bill = Bill(
         created_by=request.user,
@@ -574,11 +552,11 @@ def create_bill_(request, c):
         register=bill['register'],  # current settings of the register this bill was created on
         contact=bill['contact'],  # FK on BillContact, copy of the Contact object
         notes=bill['notes'],
-        currency=bill['currency'],
-        payment=bill_payment,
-        timestamp=dtm.now().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
+        timestamp=dtm.utcnow().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
+        total=grand_total,
+        type=bill['type'],
         status=bill['status'],
-        total=grand_total
+        currency=bill['currency']
     )
     db_bill.save()
 
@@ -672,7 +650,7 @@ def delete_unpaid_bill(request, company):
         return JsonError(_("You have no permission to edit bills"))
 
     # check if this bill is really unpaid
-    if bill.status != 'Unpaid':
+    if bill.status == g.PAID:
         return JsonError(_("This bill has already been paid, deleting is not possible"))
 
     # if everything is ok, delete it and send an OK message
@@ -708,7 +686,7 @@ def check_bill_status_(request, c):
             return JsonOk(extra={'paid': True})
         else:
             return JsonOk(extra={'paid': False})
-    if bill.payment.status == g.PAID:
+    if bill.status == g.PAID:
         return JsonOk(extra={'paid': 'true'})
     else:
         return JsonOk(extra={'paid': 'false'})
@@ -754,14 +732,14 @@ def finish_bill_(request, c, android=False):
         if payment_type not in [x[0] for x in g.PAYMENT_TYPES]:
             return JsonError(_("Payment type does not exist"))
 
-        bill.payment.status = g.PAID
+        bill.status = g.PAID
 
         if payment_type == g.CASH or payment_type == g.CREDIT_CARD:
-            bill.payment.type = payment_type
+            bill.type = payment_type
             # payment reference: if paid with bitcoin - btc address, if paid with cash, cash amount given
-            bill.payment.transaction_reference = d.get('payment_reference')
+            bill.transaction_reference = d.get('payment_reference')
     else:
-        bill.payment.status = g.CANCELED
+        bill.status = g.CANCELED
 
     bill.save()
 
@@ -938,8 +916,8 @@ def get_payment_btc_info_(request, c):
             btc_address = ""
             btc_amount = ""
         else:
-            btc_address = bill.payment.get_btc_address(c.id)
-            btc_amount = bill.payment.get_btc_amount(request.user, c)
+            btc_address = bill.get_btc_address(c.id)
+            btc_amount = bill.get_btc_amount(request.user, c)
 
         if btc_address == "":
             if settings.DEBUG:
@@ -984,17 +962,14 @@ def change_payment_type_(request, c):
 
     if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
         type = JsonParse(request.POST.get('data')).get('type')
+        if type not in [pt[0] for pt in g.PAYMENT_TYPES]:
+            return JsonResponse({'status': 'error', 'message': 'wrong_payment_type'})
 
-        try:
-            bill_payment = BillPayment.objects.get(id=bill.payment.id)
-            if bill_payment.status == g.PAID:
-                return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
+        if bill.status == g.PAID:
+            return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
 
-            bill_payment.type = type
-            bill_payment.save()
-
-        except BillPayment.DoesNotExist:
-            return JsonResponse({'status': 'error', 'message': 'no_payment_for_bill'})
+        bill.type = type
+        bill.save()
 
     else:
         return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
@@ -1021,75 +996,68 @@ def send_invoice(request, company):
         return JsonError(_("Bill does not exist or data is invalid"))
 
     if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
-        type = JsonParse(request.POST.get('data')).get('type')
+        if bill.status == g.PAID:
+            return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
 
-        try:
-            bill_payment = BillPayment.objects.get(id=bill.payment.id)
-            if bill_payment.status == g.PAID:
-                return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
+        merchant_info = {
+            'email': c.email,
+            'business_name': c.name,
+            'phone': c.phone,
+            'website': c.website,
+            'address': {
+                'line1': c.street,
+                'city': c.city,
+                'postal_code': c.postcode,
+                'country_code': c.country
+            },
+            'tax_id': c.vat_no
+        }
 
-            merchant_info = {
-                'email': c.email,
-                'business_name': c.name,
-                'phone': c.phone,
-                'website': c.website,
-                'address': {
-                    'line1': c.street,
-                    'city': c.city,
-                    'postal_code': c.postcode,
-                    'country_code': c.country
-                },
-                'tax_id': c.vat_no
+        billing_info_email = get_company_value(request.user, c, 'pos_payment_paypal_address')
+        if billing_info_email == "":
+            billing_info_email = c.email
+
+        billing_info = [
+            {
+                "email": billing_info_email
             }
+        ]
 
-            billing_info_email = get_company_value(request.user, c, 'pos_payment_paypal_address')
-            if billing_info_email == "":
-                billing_info_email = c.email
+        shipping_info = None
+        items = []
 
-            billing_info = [
-                {
-                    "email": billing_info_email
-                }
-            ]
+        bill_date_format = g.DATE_FORMATS[get_company_value(request.user, c, 'pos_date_format')]['django']
+        bill_date = bill.timestamp.strftime(bill_date_format)
 
-            shipping_info = None
-            items = []
+        currency = get_company_value(request.user, c, 'pos_currency')
 
-            bill_date_format = g.DATE_FORMATS[get_company_value(request.user, c, 'pos_date_format')]['django']
-            bill_date = bill.timestamp.strftime(bill_date_format)
+        bill_items = BillItem.objects.filter(bill=bill)
+        for bi in bill_items:
+            try:
+                product = Product.objects.get(id=bi.product_id)
 
-            currency = get_company_value(request.user, c, 'pos_currency')
+                items.append({
+                    'name': product.name,
+                    'description': product.description,
+                    'quantity': bi.quantity,
+                    'unit_price': {
+                        'currency': currency,
+                        'value': bi.base
+                    },
+                    'tax': {
+                        'name': product.tax.name,
+                        'percent': bi.tax_rate
+                    },
+                    'date': bill_date,
+                    'discount': bi.discount
+                })
+            except Product.DoesNotExist:
+                pass
 
-            bill_items = BillItem.objects.filter(bill=bill)
-            for bi in bill_items:
-                try:
-                    product = Product.objects.get(id=bi.product_id)
-
-                    items.append({
-                        'name': product.name,
-                        'description': product.description,
-                        'quantity': bi.quantity,
-                        'unit_price': {
-                            'currency': currency,
-                            'value': bi.base
-                        },
-                        'tax': {
-                            'name': product.tax.name,
-                            'percent': bi.tax_rate
-                        },
-                        'date': bill_date,
-                        'discount': bi.discount
-                    })
-                except Product.DoesNotExist:
-                    pass
-
-            paypal = Paypal()
-            paypal.create_invoice(invoice_id=bill.serial, merchant_info=merchant_info, billing_info=billing_info,
-                                  shipping_info=shipping_info, items=items, invoice_date=bill_date)
-            # paypal.send_in
-
-        except BillPayment.DoesNotExist:
-            return JsonResponse({'status': 'error', 'message': 'no_payment_for_bill'})
+        paypal = Paypal()
+        paypal.create_invoice(invoice_id=bill.serial, merchant_info=merchant_info, billing_info=billing_info,
+                              shipping_info=shipping_info, items=items, invoice_date=bill_date)
+        # paypal.send_in
 
     else:
         return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})

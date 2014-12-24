@@ -13,17 +13,24 @@ from settings import PAYMENT
 import settings
 
 
-class BillPayment(SkeletonU):
+class BillPaymentAbstract(SkeletonU):
     type = models.CharField(_("Payment type"), help_text=_("Payment made with"), default=CASH,
                             choices=tuple([tuple([key, _(key.title())]) for key in [key for key in PAYMENT.keys()]]),
                             max_length=20, null=False, blank=False)
     amount_paid = models.DecimalField(_("Amount paid"), default=0, blank=False, null=False, decimal_places=8,
                                       max_digits=40)
     currency = models.CharField(max_length=3, choices=currency_choices, null=True, blank=True, default="USD")
-    total = models.DecimalField(_("Total amount in EUR for BTC or in currency to be paid"), null=True,
-                                blank=True, decimal_places=DECIMAL['currency_decimal_places'], max_digits=DECIMAL['currency_digits'])
-    total_btc = models.DecimalField(_("Total amount in BTC to be paid"), null=True, blank=True,
-                                decimal_places=DECIMAL['currency_decimal_places'], max_digits=DECIMAL['currency_digits'])
+    total = models.DecimalField(
+        _("Total amount to be paid"),
+        max_digits=DECIMAL['currency_digits'],
+        decimal_places=DECIMAL['currency_decimal_places'],
+        null=True, blank=True)
+    total_btc = models.DecimalField(
+        _("Total amount in BTC to be paid"),
+        max_digits=DECIMAL['currency_digits'],
+        decimal_places=DECIMAL['currency_decimal_places'],
+        null=True, blank=True
+    )
     transaction_datetime = models.DateTimeField(_("Date and time of transaction"), null=True, blank=True)
     transaction_reference = models.CharField(_("Reference for payer"), help_text=_("BTC address or Sklic or unique ID"
                                                                                    "for authorization/cancelation"),
@@ -32,7 +39,8 @@ class BillPayment(SkeletonU):
     status = models.CharField(_("Payment status"), default=WAITING, choices=PAYMENT_STATUS, max_length=30,
                               null=False, blank=False)
 
-    __unicode__ = lambda self:  u'%s %s %s' % (self.type, self.amount_paid, self.status)
+    class Meta:
+        abstract = True
 
     def get_btc_address(self, company_id):
         if self.pk and self.pk is not None:

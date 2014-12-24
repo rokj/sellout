@@ -16,6 +16,9 @@ import random
 
 
 ### company ###
+from payment.models import BillPaymentAbstract
+
+
 class CompanyAbstract(models.Model):
     # abstract: used in  for Company and BillCompany
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
@@ -539,7 +542,7 @@ class BillRegister(SkeletonU, RegisterAbstract):
     register = models.ForeignKey(Register, null=False, blank=False)
 
 
-class Bill(SkeletonU, RegisterAbstract):
+class Bill(SkeletonU, RegisterAbstract, BillPaymentAbstract):
     # inherited fields from: RegisterAbstract, ContactAbstract,
     company = models.ForeignKey(Company, null=False, blank=False)  # also an issuer of the bill
 
@@ -581,24 +584,9 @@ class Bill(SkeletonU, RegisterAbstract):
         decimal_places=g.DECIMAL['currency_decimal_places'],
         null=True, blank=True)
 
-
-    total = models.DecimalField(_("Total amount to be paid"),
-        max_digits=g.DECIMAL['currency_digits'],
-        decimal_places=g.DECIMAL['currency_decimal_places'],
-        null=True, blank=True)
-
     notes = models.CharField(_("Notes"), max_length=1000, null=True, blank=True)
 
-    # payment type and reference: this will be updated after the bill is saved
-    # payment_type = models.CharField(_("Payment type"), max_length=32, choices=g.PAYMENT_TYPES, null=True, blank=True)
-    # payment_reference = models.TextField(_("Payment reference"), null=True, blank=True)
-    payment = models.ForeignKey('payment.BillPayment', null=True, blank=True)
-
     timestamp = models.DateTimeField(_("Date and time of bill creation"), null=False)
-    # status is now in payment
-    # status = models.CharField(_("Bill status"), max_length=20, choices=g.BILL_STATUS, default=g.BILL_STATUS[0][0])
-    # currency is now in payment
-    # currency = models.CharField(_("Currency"), max_length=4)
 
     def __unicode__(self):
         return self.company.name + ": " + str(self.serial)
@@ -608,7 +596,7 @@ class Bill(SkeletonU, RegisterAbstract):
 @receiver(pre_save, sender=Bill)
 def set_serial(instance, **kwargs):
     # set serial number after the bill has been paid;
-    if instance.payment.status == g.PAID and not instance.serial:
+    if instance.status == g.PAID and not instance.serial:
         try:
             # get the second last bill (because the last is this bill without serial)
             last_bill = Bill.objects.only('serial') \

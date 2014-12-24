@@ -19,7 +19,7 @@ import settings
 
 from payment.service.Bitcoin import BitcoinRPC
 
-from payment.models import BillPayment
+from payment.models import Bill
 from common.globals import WAITING, PAID, NOT_ENOUGH_MONEY_ARRIVED, NO_MONEY_ARRIVED
 from django.db.models import Q
 from django.db import connections
@@ -78,47 +78,53 @@ while True:
         transactions = bitcoin_client_rpc.list_since_block(last_checked_block)
 
         for transaction in transactions['transactions']:
+            # POS Bills, POS Bills, POS Bills
+            # POS Bills, POS Bills, POS Bills
+            # POS Bills, POS Bills, POS Bills
             try:
-                payment = BillPayment.objects.get(Q(status=WAITING) | Q(status=NOT_ENOUGH_MONEY_ARRIVED), transaction_reference=transaction['address'], type="bitcoin")
+                bill  = Bill.objects.get(Q(status=WAITING) | Q(status=NOT_ENOUGH_MONEY_ARRIVED), transaction_reference=transaction['address'], type="bitcoin")
 
                 # transaction_reference is bitcoin reference in this case
-                total_received_by_address = bitcoin_client_rpc.get_received_by_address(payment.transaction_reference, confirmations)
+                total_received_by_address = bitcoin_client_rpc.get_received_by_address(bill.transaction_reference, confirmations)
                 total_received_by_address = Decimal(total_received_by_address)
 
                 # we try to get timestamp of payment
                 transaction_datetime = None
 
-                if total_received_by_address > payment.amount_paid:
-                    payment.amount_paid = total_received_by_address
-                    payment.save()
+                if total_received_by_address > bill.amount_paid:
+                    bill.amount_paid = total_received_by_address
+                    bill.save()
 
-                if total_received_by_address >= payment.total_btc:
+                if total_received_by_address >= bill.total_btc:
                     if "time" in transaction:
-                        payment.transaction_datetime = datetime.datetime.fromtimestamp(int(transaction["time"]))
+                        bill.transaction_datetime = datetime.datetime.fromtimestamp(int(transaction["time"]))
 
-                    payment.status = PAID
-                    payment.save()
+                    bill.status = PAID
+                    bill.save()
 
                     if settings.DEBUG:
                         print "Just got payment for "
-                        print BillPayment
+                        print Bill
 
                     # we have this here so I will remember when doing subscriptions
                     # Subscription.extend_subscriptions(payment)
                     # payment.send_payment_confirmation_email()
 
-                if payment.status == WAITING:
-                    datetime_created_with_offset = payment.datetime_created + datetime.timedelta(hours=int(settings.PAYMENT_OFFICER["bitcoin_payment_waiting_interval"]))
+                if bill.status == WAITING:
+                    datetime_created_with_offset = bill.datetime_created + datetime.timedelta(hours=int(settings.PAYMENT_OFFICER["bitcoin_payment_waiting_interval"]))
 
                     if datetime_created_with_offset < datetime.datetime.now():
-                        if payment.amount_paid > 0:
-                            payment.status = NOT_ENOUGH_MONEY_ARRIVED
+                        if bill.amount_paid > 0:
+                            bill.status = NOT_ENOUGH_MONEY_ARRIVED
                         else:
-                            payment.status = NO_MONEY_ARRIVED
+                            bill.status = NO_MONEY_ARRIVED
 
-                        payment.save()
-            except BillPayment.DoesNotExist:
+                        bill.save()
+            except Bill.DoesNotExist:
                 pass
+            # POS Bills, POS Bills, POS Bills
+            # POS Bills, POS Bills, POS Bills
+            # POS Bills, POS Bills, POS Bills
 
         if transactions and last_checked_block != transactions['lastblock']:
             update_last_checked_block(transactions['lastblock'])
