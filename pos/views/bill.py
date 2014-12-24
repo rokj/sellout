@@ -9,6 +9,7 @@ from django.utils.translation import ugettext as _
 from pytz import timezone
 
 import unidecode
+from payment.models import Payment
 from payment.service.Paypal import Paypal
 
 from pos.models import Company, Product, Discount, Register, Contact, \
@@ -557,7 +558,6 @@ def create_bill_(request, c):
     if existing_bill:
         existing_bill.delete()
 
-
     bill_payment = Payment(
         type=g.CASH,
         total=grand_total,
@@ -1004,7 +1004,7 @@ def change_payment_type_(request, c):
             bill_payment.type = type
             bill_payment.save()
 
-        except BillPayment.DoesNotExist:
+        except Payment.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'no_payment_for_bill'})
 
     else:

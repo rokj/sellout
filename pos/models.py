@@ -16,6 +16,9 @@ import random
 
 
 ### company ###
+from payment.models import Payment
+
+
 class CompanyAbstract(models.Model):
     # abstract: used in  for Company and BillCompany
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
@@ -608,6 +611,10 @@ class Bill(SkeletonU, RegisterAbstract):
 
     @property
     def total(self):
+        """
+        total of bill and payment is the same for now, maybe in the future we
+        will have to change it, but for now, porn
+        """""
         return self.payment.total
 
     @total.setter
@@ -621,10 +628,19 @@ class Bill(SkeletonU, RegisterAbstract):
 
     @property
     def status(self):
+        """
+        status of bill and payment is the same for now, maybe in the future we
+        will have to change it, but for now it suffice.
+
+        returns status of bill and payment
+        """
         return self.payment.status
 
     @status.setter
     def status(self, value):
+        """
+        sets status of bill and payment
+        """
         try:
             payment = Payment.objects.get(id=self.payment)
             payment.status = value
