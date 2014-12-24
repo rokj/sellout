@@ -13,7 +13,7 @@ from settings import PAYMENT
 import settings
 
 
-class BillPaymentAbstract(SkeletonU):
+class Payment(SkeletonU):
     type = models.CharField(_("Payment type"), help_text=_("Payment made with"), default=CASH,
                             choices=tuple([tuple([key, _(key.title())]) for key in [key for key in PAYMENT.keys()]]),
                             max_length=20, null=False, blank=False)
@@ -38,9 +38,6 @@ class BillPaymentAbstract(SkeletonU):
     payment_info = models.TextField(_("Info about payment"), blank=True, null=True)
     status = models.CharField(_("Payment status"), default=WAITING, choices=PAYMENT_STATUS, max_length=30,
                               null=False, blank=False)
-
-    class Meta:
-        abstract = True
 
     def get_btc_address(self, company_id):
         if self.pk and self.pk is not None:

@@ -16,7 +16,7 @@ import random
 
 
 ### company ###
-from payment.models import BillPaymentAbstract
+from payment.models import BillPaymentAbstract, Payment
 
 
 class CompanyAbstract(models.Model):
@@ -542,7 +542,7 @@ class BillRegister(SkeletonU, RegisterAbstract):
     register = models.ForeignKey(Register, null=False, blank=False)
 
 
-class Bill(SkeletonU, RegisterAbstract, BillPaymentAbstract):
+class Bill(SkeletonU, RegisterAbstract):
     # inherited fields from: RegisterAbstract, ContactAbstract,
     company = models.ForeignKey(Company, null=False, blank=False)  # also an issuer of the bill
 
@@ -586,11 +586,54 @@ class Bill(SkeletonU, RegisterAbstract, BillPaymentAbstract):
 
     notes = models.CharField(_("Notes"), max_length=1000, null=True, blank=True)
 
+    payment = models.ForeignKey('payment.Payment', null=True, blank=True)
+
+    # this field should be the same value as in payment.status (except when someone paid, and the storno)
+    # status = models.CharField(_("Bill status"), max_length=20, choices=g.BILL_STATUS, default=g.BILL_STATUS[0][0])
+
     timestamp = models.DateTimeField(_("Date and time of bill creation"), null=False)
 
     def __unicode__(self):
         return self.company.name + ": " + str(self.serial)
 
+    @property
+    def currency(self):
+        return self.payment.currency
+
+    @currency.setter
+    def currency(self, value):
+        try:
+            payment = Payment.objects.get(id=self.payment)
+            payment.currency = value
+            payment.save()
+        except Payment.DoesNotExist:
+            pass
+
+    @property
+    def total(self):
+        return self.payment.total
+
+    @total.setter
+    def total(self, value):
+        try:
+            payment = Payment.objects.get(id=self.payment)
+            payment.total = value
+            payment.save()
+        except Payment.DoesNotExist:
+            pass
+
+    @property
+    def status(self):
+        return self.payment.status
+
+    @status.setter
+    def status(self, value):
+        try:
+            payment = Payment.objects.get(id=self.payment)
+            payment.status = value
+            payment.save()
+        except Payment.DoesNotExist:
+            pass
 
 # post-save signal: set bill's serial number
 @receiver(pre_save, sender=Bill)
