@@ -1068,7 +1068,7 @@ def send_invoice(request, company):
                 try:
                     product = Product.objects.get(id=bi.product_id)
 
-                    bi.append({
+                    items.append({
                         'name': product.name,
                         'description': product.description,
                         'quantity': bi.quantity,

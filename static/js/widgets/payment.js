@@ -151,7 +151,7 @@ Payment = function(g, bill){
     };
 
     p.items.paypal.send_invoice.click(function() {
-        send_data(p.g.urls.paypal_send_invoice, {bill_id: p.data.id}, p.g.csrf_token, function(response) {
+        send_data(p.g.urls.send_invoice, {bill_id: p.data.id}, p.g.csrf_token, function(response) {
             if (response.status == 'ok') {
                 alert('sent invoice');
             }
