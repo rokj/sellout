@@ -1,13 +1,15 @@
 # -*- coding: UTF-8 -*-
+from django.utils.translation import ugettext as _
+
 currencies = {
-    "USD": ("United stats dollar", "$"),
-    "EUR": ("Euro", "€"),
-    "JPY": ("Japanese yen", "¥"),
-    "GBP": ("Pound sterling", "£"),
-    "AUD": ("Australian dollar", "$"),
-    "CHF": ("Swiss franc", "Fr"),
-    "CAD": ("Canadian dollar", "$"),
-    "CNY": ("Chinese yuan", "¥"),
+    "USD": (_("United States Dollar"), "$"),
+    "EUR": (_("Euro"), "€"),
+    "JPY": (_("Japanese Yen"), "¥"),
+    "GBP": (_("Pound Sterling"), "£"),
+    "AUD": (_("Australian Dollar"), "$"),
+    "CHF": (_("Swiss Franc"), "Fr"),
+    "CAD": (_("Canadian Dollar"), "$"),
+    "CNY": (_("Chinese Yuan"), "¥"),
 }
 
 default_currency = "USD"

@@ -149,6 +149,7 @@ def bill_to_dict(user, company, bill):
 
         'discount_amount': format_number(user, company, bill.discount_amount),
         'discount_type': bill.discount_type,
+        'currency': bill.payment.currency,
 
         # prices
         'base': format_number(user, company, bill.base),
@@ -673,7 +674,7 @@ def delete_unpaid_bill(request, company):
         return JsonError(_("You have no permission to edit bills"))
 
     # check if this bill is really unpaid
-    if bill.status != 'Unpaid':
+    if bill.payment.status != 'Unpaid':
         return JsonError(_("This bill has already been paid, deleting is not possible"))
 
     # if everything is ok, delete it and send an OK message
@@ -752,7 +753,7 @@ def finish_bill_(request, c, android=False):
         # check payment type
         payment_type = d.get('payment_type')
 
-        if payment_type not in [x[0] for x in g.PAYMENT_TYPES]:
+        if payment_type not in g.PAYMENT_TYPE_VALUES:
             return JsonError(_("Payment type does not exist"))
 
         bill.payment.status = g.PAID
@@ -764,6 +765,7 @@ def finish_bill_(request, c, android=False):
     else:
         bill.payment.status = g.CANCELED
 
+    bill.payment.save()
     bill.save()
 
     # if print is requested, return html, otherwise the 'ok' response
@@ -942,16 +944,16 @@ def get_payment_btc_info_(request, c):
             btc_address = bill.payment.get_btc_address(c.id)
             btc_amount = bill.payment.get_btc_amount(request.user, c)
 
-        if btc_address == "":
+        if btc_address == "" and not btc_amount:
             if settings.DEBUG:
                 btc_address = "17VP9cu7K75MswYrh2Ue5Ua6Up4ZiMLpYw"
+                btc_amount = 0.0000005
+                bill.payment.status = g.PAID
+                bill.payment.amount = 0.0000005
+                bill.payment.save()
+                bill.save()
             else:
                 return JsonResponse({'status': 'could_not_get_btc_address', 'message': 'could_not_get_btc_address'})
-        if not btc_amount:
-            if settings.DEBUG:
-                btc_amount = 0.0000005
-            else:
-                return JsonResponse({'status': 'could_not_get_btc_amount', 'message': 'could_not_get_btc_amount'})
 
         extra['btc_address'] = btc_address
         extra['btc_amount'] = btc_amount
@@ -991,7 +993,9 @@ def change_payment_type_(request, c):
             if bill_payment.status == g.PAID:
                 return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
 
-            if type not in g.PAYMENT_TYPES:
+            print g.PAYMENT_TYPE_VALUES
+            print type
+            if type not in g.PAYMENT_TYPE_VALUES:
                 return JsonError(_('Type is invalid'))
             bill_payment.type = type
             bill_payment.save()
