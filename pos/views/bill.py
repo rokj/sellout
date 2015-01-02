@@ -706,11 +706,15 @@ def check_bill_status_(request, c):
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JsonResponse({'status': 'no_permission', 'message': 'no_permission'})
 
+    # LOL :)
+    """
     if settings.DEBUG:
         if random.randint(0, 9) > 7:
             return JsonOk(extra={'paid': True})
         else:
             return JsonOk(extra={'paid': False})
+    """
+
     if bill.status == g.PAID:
         return JsonOk(extra={'paid': 'true'})
     else:
@@ -1000,7 +1004,8 @@ def change_payment_type_(request, c):
                 return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
 
             if type not in g.PAYMENT_TYPE_VALUES:
-                return JsonError(_('Type is invalid'))
+                return JsonResponse({'status': 'error', 'message': 'invalid_payment_type'})
+
             bill_payment.type = type
             bill_payment.save()
 

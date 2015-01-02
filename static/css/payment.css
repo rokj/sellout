@@ -76,7 +76,30 @@
     
     padding-left: 50px;
     padding-top: 30px;
+    height: 325px;
 }
+
+#payment .status {
+    margin-left: 150px;
+    text-align: center;
+    color: #ff5a6e;
+    text-transform: uppercase;
+    font-size: 24px;
+}
+
+.dot.active {
+   background: #ff5a6e;
+}
+
+.dot {
+    background: rgba(255, 90, 110, 0.25);;
+    height: 8px;
+    width: 8px;
+    border-radius: 12px;
+    margin-right: 5px;
+    display: inline-block;
+}
+
 #payment_details label,
 #payment_details .label{
     text-transform: uppercase;

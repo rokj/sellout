@@ -9,6 +9,7 @@ Payment = function(g, bill){
     p.data = p.bill.data;
 
     p.payment_interval = null; // a reference to timer for bitcoin queries on server
+    p.bitcoin_payment_dots_interval = null;
 
     p.dialog = $("#payment");
     p.items = {
@@ -34,7 +35,10 @@ Payment = function(g, bill){
             section: $(".payment-details.bitcoin", p.dialog),
             btc_qrcode: $(".payment-details.bitcoin .btc-qrcode", p.dialog),
             btc_amount: $(".payment-details.bitcoin .btc-amount", p.dialog),
-            btc_address: $(".payment-details.bitcoin .btc-address", p.dialog)
+            btc_address: $(".payment-details.bitcoin .btc-address", p.dialog),
+            btc_address_container: $(".payment-details.bitcoin .btc-address-container", p.dialog),
+            status: $(".status", p.dialog),
+            status_dots: $(".status .dot", p.dialog)
         },
 
         total: $(".bill-total", p.dialog), // common to all sections (payment types)
@@ -191,10 +195,9 @@ Payment = function(g, bill){
                                 } else if (response.status == 'ok') {
                                     if (response.data.paid == 'true') {
                                         // paid, finish the thing
-                                        alert("paid");
-                                        // TODO
-
                                         clearInterval(p.payment_interval);
+
+
                                     }
                                     else {
                                         // not paid yet, continue polling
@@ -203,6 +206,40 @@ Payment = function(g, bill){
                                 }
                             });
                         }, 2000);
+
+                        p.bitcoin_payment_dots_interval = setInterval(function () {
+                            var active = 0;
+                            var i = 0;
+
+                            p.items.bitcoin.status_dots.each(function () {
+                                if ($(this).hasClass('active')) {
+                                    active = i;
+
+                                    return false;
+                                }
+
+                                i++;
+                            });
+
+                            p.items.bitcoin.status_dots.removeClass("active");
+
+                            if (active == 2) {
+                                active = 0;
+                            } else {
+                                active++;
+                            }
+
+                            var i = 0;
+                            p.items.bitcoin.status_dots.each(function () {
+                                if (active == i) {
+                                    $(this).addClass('active');
+
+                                    return false;
+                                }
+
+                                i++;
+                            });
+                        }, 800);
                     } else {
                         error_message(gettext("Bitcoin payment problem"), gettext("Something went wrong when trying to get information about Bitcoin payment. Try later, or be nice and contact support."))
                     }
