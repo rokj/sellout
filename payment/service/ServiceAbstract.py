@@ -27,6 +27,9 @@ class ServiceAbstract(object):
 
         if response.status_code == requests.codes.ok or response.status_code == requests.codes.created:
             return response
+        else:
+            if settings.DEBUG:
+                print response
 
         if settings.DEBUG:
             subject = "Error when doing request to %s" % (url)

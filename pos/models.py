@@ -16,15 +16,13 @@ import random
 
 
 ### company ###
-from payment.models import Payment
-
 
 class CompanyAbstract(models.Model):
     # abstract: used in  for Company and BillCompany
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
-    street = models.CharField(_("Street address"), max_length=200, null=True, blank=True)
-    postcode = models.CharField(_("Postal code"), max_length=20, null=True, blank=True)
-    city = models.CharField(_("City"), max_length=50, null=True, blank=True)
+    street = models.CharField(_("Street address"), max_length=200, null=False, blank=False)
+    postcode = models.CharField(_("Postal code"), max_length=20, null=False, blank=False)
+    city = models.CharField(_("City"), max_length=50, null=False, blank=False)
     state = models.CharField(_("State"), max_length=50, null=True, blank=True)
     country = models.CharField(max_length=2, choices=country_choices, null=True, blank=True)
     email = models.CharField(_("E-mail address"), max_length=256, null=False, blank=False)
@@ -602,6 +600,8 @@ class Bill(SkeletonU, RegisterAbstract):
 
     @currency.setter
     def currency(self, value):
+        from payment.models import Payment
+
         try:
             payment = Payment.objects.get(id=self.payment)
             payment.currency = value
@@ -619,6 +619,8 @@ class Bill(SkeletonU, RegisterAbstract):
 
     @total.setter
     def total(self, value):
+        from payment.models import Payment
+
         try:
             payment = Payment.objects.get(id=self.payment)
             payment.total = value
@@ -638,6 +640,8 @@ class Bill(SkeletonU, RegisterAbstract):
 
     @status.setter
     def status(self, value):
+        from payment.models import Payment
+
         """
         sets status of bill and payment
         """
@@ -648,11 +652,11 @@ class Bill(SkeletonU, RegisterAbstract):
         except Payment.DoesNotExist:
             pass
 
-# post-save signal: set bill's serial number
+# pre-save signal: set bill's serial number
 @receiver(pre_save, sender=Bill)
 def set_serial(instance, **kwargs):
     # set serial number after the bill has been paid;
-    if instance.status == g.PAID and not instance.serial:
+    if not instance.serial:
         try:
             # get the second last bill (because the last is this bill without serial)
             last_bill = Bill.objects.only('serial') \
@@ -660,7 +664,7 @@ def set_serial(instance, **kwargs):
                             .exclude(serial=None) \
                             .order_by('-serial')[0]
             instance.serial = last_bill.serial + 1
-            instance.timestamp = dtm.datetime.now()
+            instance.timestamp = dtm.datetime.utcnow()
         except:
             instance.serial = 1
 

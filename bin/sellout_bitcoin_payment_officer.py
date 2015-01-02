@@ -19,7 +19,7 @@ import settings
 
 from payment.service.Bitcoin import BitcoinRPC
 
-from payment.models import Bill
+from payment.models import Payment
 from common.globals import WAITING, PAID, NOT_ENOUGH_MONEY_ARRIVED, NO_MONEY_ARRIVED
 from django.db.models import Q
 from django.db import connections
@@ -82,7 +82,7 @@ while True:
             # POS Bills, POS Bills, POS Bills
             # POS Bills, POS Bills, POS Bills
             try:
-                bill  = Bill.objects.get(Q(status=WAITING) | Q(status=NOT_ENOUGH_MONEY_ARRIVED), transaction_reference=transaction['address'], type="bitcoin")
+                payment  = Payment.objects.get(Q(status=WAITING) | Q(status=NOT_ENOUGH_MONEY_ARRIVED), transaction_reference=transaction['address'], type="bitcoin")
 
                 # transaction_reference is bitcoin reference in this case
                 total_received_by_address = bitcoin_client_rpc.get_received_by_address(bill.transaction_reference, confirmations)
@@ -91,36 +91,36 @@ while True:
                 # we try to get timestamp of payment
                 transaction_datetime = None
 
-                if total_received_by_address > bill.amount_paid:
-                    bill.amount_paid = total_received_by_address
-                    bill.save()
+                if total_received_by_address > payment.amount_paid:
+                    payment.amount_paid = total_received_by_address
+                    payment.save()
 
-                if total_received_by_address >= bill.total_btc:
+                if total_received_by_address >= payment.total_btc:
                     if "time" in transaction:
-                        bill.transaction_datetime = datetime.datetime.fromtimestamp(int(transaction["time"]))
+                        payment.transaction_datetime = datetime.datetime.fromtimestamp(int(transaction["time"]))
 
-                    bill.status = PAID
-                    bill.save()
+                    payment.status = PAID
+                    payment.save()
 
                     if settings.DEBUG:
                         print "Just got payment for "
-                        print Bill
+                        print Payment
 
                     # we have this here so I will remember when doing subscriptions
                     # Subscription.extend_subscriptions(payment)
                     # payment.send_payment_confirmation_email()
 
-                if bill.status == WAITING:
-                    datetime_created_with_offset = bill.datetime_created + datetime.timedelta(hours=int(settings.PAYMENT_OFFICER["bitcoin_payment_waiting_interval"]))
+                if payment.status == WAITING:
+                    datetime_created_with_offset = payment.datetime_created + datetime.timedelta(hours=int(settings.PAYMENT_OFFICER["bitcoin_payment_waiting_interval"]))
 
                     if datetime_created_with_offset < datetime.datetime.now():
-                        if bill.amount_paid > 0:
-                            bill.status = NOT_ENOUGH_MONEY_ARRIVED
+                        if payment.amount_paid > 0:
+                            payment.status = NOT_ENOUGH_MONEY_ARRIVED
                         else:
-                            bill.status = NO_MONEY_ARRIVED
+                            payment.status = NO_MONEY_ARRIVED
 
-                        bill.save()
-            except Bill.DoesNotExist:
+                        payment.save()
+            except Payment.DoesNotExist:
                 pass
             # POS Bills, POS Bills, POS Bills
             # POS Bills, POS Bills, POS Bills

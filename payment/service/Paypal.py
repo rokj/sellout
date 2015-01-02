@@ -1,5 +1,6 @@
 import datetime
 import json
+from django.core.serializers.json import DjangoJSONEncoder
 import requests
 from common.models import TemporaryStorage
 from payment.service.ServiceAbstract import ServiceAbstract
@@ -33,7 +34,7 @@ class Paypal(ServiceAbstract):
 
     def _get_token(self):
         try:
-            ts = TemporaryStorage.objects.get(key="paypal_token")
+            ts = TemporaryStorage.objects.get(key="paypal_access")
             value = json.loads(ts.value)
 
             if "expires_in" in value:
@@ -67,7 +68,7 @@ class Paypal(ServiceAbstract):
             try:
                 ts
             except NameError:
-                ts = TemporaryStorage(key="paypal_token", value=value)
+                ts = TemporaryStorage(key="paypal_access", value=value)
 
             ts.value = value
             ts.save()
@@ -195,21 +196,18 @@ class Paypal(ServiceAbstract):
 
         headers = {"Authorization": "Bearer " + token, "Content-Type": "application/json", "Accept": "application/json"}
         data = {
-            "number": invoice_id,
+            "number": str(invoice_id),
             "merchant_info": merchant_info,
             "billing_info": billing_info,
-            "shipping_info": shipping_info,
             "items": items,
             "invoice_date": invoice_date
         }
 
-        print json.dumps(data)
-
-        if True:
-            return False
+        if shipping_info is not None:
+            data["shipping_info"] = shipping_info
 
         response = self._send_request(url=self.create_invoice_url["url"], method=self.create_invoice_url["method"], params={},
-                                      data=json.dumps(data), headers=headers)
+                                      data=json.dumps(data, cls=DjangoJSONEncoder), headers=headers)
 
         if not response:
             return False

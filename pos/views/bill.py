@@ -1,5 +1,7 @@
 from datetime import datetime as dtm, datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_UP
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 
 from common.decorators import login_required
 from django.db.models import FieldDoesNotExist
@@ -579,9 +581,7 @@ def create_bill_(request, c):
         contact=bill['contact'],  # FK on BillContact, copy of the Contact object
         notes=bill['notes'],
         timestamp=dtm.utcnow().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
-        total=grand_total,
-        status=bill['status'],
-        currency=bill['currency']
+        payment=bill_payment
     )
     db_bill.save()
 
@@ -1024,9 +1024,11 @@ def send_invoice(request, company):
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
+    data = JsonParse(request.POST.get('data'))
+
     # there should be bill_id in request.POST
     try:
-        bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
+        bill_id = int(data.get('bill_id'))
         bill = Bill.objects.get(company=c, id=bill_id)
     except (Bill.DoesNotExist, ValueError, TypeError):
         return JsonError(_("Bill does not exist or data is invalid"))
@@ -1037,33 +1039,47 @@ def send_invoice(request, company):
 
         merchant_info = {
             'email': c.email,
-            'business_name': c.name,
-            'phone': c.phone,
-            'website': c.website,
             'address': {
                 'line1': c.street,
                 'city': c.city,
-                'postal_code': c.postcode,
-                'country_code': c.country
+                'country_code': c.country,
+                'state': "XX"
             },
-            'tax_id': c.vat_no
         }
 
-        billing_info_email = get_company_value(request.user, c, 'pos_payment_paypal_address')
-        if billing_info_email == "":
-            billing_info_email = c.email
+        if c.name and c.name != "":
+            merchant_info['business_name'] = c.name
+
+        if c.phone and c.phone != "":
+            merchant_info['phone'] = c.phone
+
+        if c.website and c.website != "":
+            merchant_info['website'] = c.website
+
+        if c.postcode and c.postcode != "":
+            merchant_info['address']['postal_code'] = c.postcode
+
+        if c.vat_no and c.vat_no != "":
+            merchant_info['tax_id'] = c.vat_no
+
+        customer_email = data.get('customer_email')
+
+        try:
+            validate_email(customer_email)
+        except ValidationError:
+            return JsonResponse({'status': 'error', 'message': 'invalid_customer_email'})
 
         billing_info = [
             {
-                "email": billing_info_email
+                "email": customer_email
             }
         ]
 
         shipping_info = None
         items = []
 
-        bill_date_format = g.DATE_FORMATS[get_company_value(request.user, c, 'pos_date_format')]['django']
-        bill_date = bill.timestamp.strftime(bill_date_format)
+        bill_datetime_format = g.DATE_FORMATS[get_company_value(request.user, c, 'pos_date_format')]['python']
+        bill_datetime = bill.timestamp.strftime(bill_datetime_format) + " UTC"
 
         currency = get_company_value(request.user, c, 'pos_currency')
 
@@ -1071,28 +1087,37 @@ def send_invoice(request, company):
         for bi in bill_items:
             try:
                 product = Product.objects.get(id=bi.product_id)
-
-                items.append({
+                item_data = {
                     'name': product.name,
-                    'description': product.description,
-                    'quantity': bi.quantity,
+                    'quantity': bi.quantity.quantize(Decimal('.001'), rounding=ROUND_UP),
                     'unit_price': {
                         'currency': currency,
-                        'value': bi.base
+                        'value': bi.base.quantize(Decimal('.01'), rounding=ROUND_UP)
                     },
                     'tax': {
                         'name': product.tax.name,
-                        'percent': bi.tax_rate
+                        'percent': bi.tax_rate.quantize(Decimal('.001'), rounding=ROUND_UP)
                     },
-                    'date': bill_date,
-                    'discount': bi.discount
-                })
+                    'date': bill_datetime,
+                }
+
+                print item_data
+
+                if product.description and product.description != "":
+                    item_data['description'] = product.description
+
+                if bi.discount and bi.discount is not None:
+                    item_data['discount'] = bi.discount
+
+                items.append(item_data)
+
             except Product.DoesNotExist:
                 pass
 
         paypal = Paypal()
-        paypal.create_invoice(invoice_id=bill.serial, merchant_info=merchant_info, billing_info=billing_info,
-                              shipping_info=shipping_info, items=items, invoice_date=bill_date)
+        if not paypal.create_invoice(invoice_id=bill.serial, merchant_info=merchant_info, billing_info=billing_info,
+                              shipping_info=shipping_info, items=items, invoice_date=bill_datetime):
+            return JsonResponse({'status': 'error', 'message': 'paypal_error'})
         # paypal.send_in
 
     else:
