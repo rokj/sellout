@@ -79,6 +79,15 @@
     height: 325px;
 }
 
+#payment .status .paid {
+    color: #22e693;
+    background: url('/static/icons/ok-payment.png') no-repeat 127px 7px;
+    font-weight: bold;
+    width: 160px;
+    display: inline-block;
+    font-size: 31px;
+}
+
 #payment .status {
     margin-left: 150px;
     text-align: center;
@@ -88,7 +97,7 @@
     display: hidden;
 }
 
-.dot.active {
+#payment .dot.active {
     background: #ff5a6e;
     -webkit-transition: background-color 800ms ease;
     -moz-transition: background-color 800ms ease;
@@ -97,7 +106,7 @@
     transition: background-color 800ms ease;
 }
 
-.dot {
+#payment .dot {
     background: rgba(255, 90, 110, 0.25);;
     height: 8px;
     width: 8px;

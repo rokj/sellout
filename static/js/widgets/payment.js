@@ -37,8 +37,12 @@ Payment = function(g, bill){
             btc_amount: $(".payment-details.bitcoin .btc-amount", p.dialog),
             btc_address: $(".payment-details.bitcoin .btc-address", p.dialog),
             btc_address_container: $(".payment-details.bitcoin .btc-address-container", p.dialog),
-            status: $(".status", p.dialog),
-            status_dots: $(".status .dot", p.dialog)
+            status_dialog: $(".status", p.dialog),
+            status_dots: $(".status .waiting-payment .dot", p.dialog),
+            status: {
+                waiting_payment: $(".status .waiting-payment", p.dialog),
+                paid: $(".status .paid", p.dialog)
+            }
         },
 
         total: $(".bill-total", p.dialog), // common to all sections (payment types)
@@ -57,6 +61,7 @@ Payment = function(g, bill){
         send_data(p.g.urls.change_payment_type, {bill_id: p.data.id, type: section}, p.g.csrf_token, function(response) {
             if (response.status == 'ok') {
                 clearInterval(p.payment_interval);
+                clearInterval(p.bitcoin_payment_dots_interval);
 
                 // first, hide sections
                 p.items.cash.button.removeClass("active");
@@ -167,7 +172,7 @@ Payment = function(g, bill){
         if(show){
             p.items.bitcoin.button.addClass("active");
             p.items.bitcoin.section.show();
-            p.items.bitcoin.status.show();
+            p.items.bitcoin.status_dialog.show();
 
             if(p.payment_interval) clearInterval(p.payment_interval);
 
@@ -197,12 +202,12 @@ Payment = function(g, bill){
                                     if (response.data.paid == 'true') {
                                         // paid, finish the thing
                                         clearInterval(p.payment_interval);
+                                        clearInterval(p.bitcoin_payment_dots_interval);
 
-
-                                    }
-                                    else {
+                                        p.items.bitcoin.status.waiting_payment.hide();
+                                        p.items.bitcoin.status.paid.show();
+                                    } else {
                                         // not paid yet, continue polling
-
                                     }
                                 }
                             });
@@ -246,11 +251,10 @@ Payment = function(g, bill){
                     }
                 }
             });
-        }
-        else{
+        } else {
             p.items.bitcoin.button.removeClass("active");
             p.items.bitcoin.section.hide();
-            p.items.bitcoin.status.hide();
+            p.items.bitcoin.status_dialog.hide();
 
             // enable the print button
         }
