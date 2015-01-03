@@ -167,6 +167,7 @@ Payment = function(g, bill){
         if(show){
             p.items.bitcoin.button.addClass("active");
             p.items.bitcoin.section.show();
+            p.items.bitcoin.status.show();
 
             if(p.payment_interval) clearInterval(p.payment_interval);
 
@@ -249,6 +250,7 @@ Payment = function(g, bill){
         else{
             p.items.bitcoin.button.removeClass("active");
             p.items.bitcoin.section.hide();
+            p.items.bitcoin.status.hide();
 
             // enable the print button
         }
