@@ -172,7 +172,6 @@ Payment = function(g, bill){
         if(show){
             p.items.bitcoin.button.addClass("active");
             p.items.bitcoin.section.show();
-            p.items.bitcoin.status_dialog.show();
 
             if(p.payment_interval) clearInterval(p.payment_interval);
 
@@ -186,6 +185,7 @@ Payment = function(g, bill){
             send_data(p.g.urls.get_payment_btc_info, {bill_id: p.data.id}, p.g.csrf_token, function(response) {
                 if (response.status == 'ok') {
                     if ('data' in response && 'btc_address' in response.data && 'btc_amount' in response.data) {
+                        p.items.bitcoin.status_dialog.show();
                         p.items.bitcoin.btc_address.val(response.data.btc_address);
                         p.items.bitcoin.btc_address.data("value", response.data.btc_address);
                         p.items.bitcoin.btc_amount.html(response.data.btc_amount);
@@ -255,7 +255,6 @@ Payment = function(g, bill){
             p.items.bitcoin.button.removeClass("active");
             p.items.bitcoin.section.hide();
             p.items.bitcoin.status_dialog.hide();
-
             // enable the print button
         }
     };
@@ -310,7 +309,7 @@ Payment = function(g, bill){
                 // send an update with status='Canceled' to the server
                 var data = {
                     bill_id: p.data.id,
-                    status: 'Canceled'
+                    status: 'canceled'
                 };
 
                 send_data(p.g.urls.finish_bill, data, p.g.csrf_token, function(response){
@@ -328,7 +327,7 @@ Payment = function(g, bill){
                 });
             },
             function(){
-                // the dumb user is not sure.
+                p.bind_escape_payment_dialog();
             }
         );
     };
@@ -372,9 +371,19 @@ Payment = function(g, bill){
 
                 // close the dialog
                 p.toggle_dialog(false);
+
+                // remove keyboard bindings
+                window.keyboard.remove('escape-payment-dialog', 'escape');
             }
         });
     };
+
+    p.bind_escape_payment_dialog = function() {
+        window.keyboard.add('escape-payment-dialog', 'escape', function() {
+            window.keyboard.remove('escape-payment-dialog', 'escape');
+            p.items.cancel_button.click();
+        });
+    }
 
     //
     // init
@@ -426,4 +435,8 @@ Payment = function(g, bill){
     // show the details
     if(!p.g.settings.last_payment_type) p.g.settings.last_payment_type = "cash";
     p.switch_section(p.g.settings.last_payment_type);
+
+    if (window.keyboard) {
+        p.bind_escape_payment_dialog();
+    }
 };

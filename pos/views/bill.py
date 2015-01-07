@@ -950,6 +950,7 @@ def get_payment_btc_info_(request, c):
             btc_amount = bill.payment.get_btc_amount(request.user, c)
 
         if btc_address == "" and not btc_amount:
+            """
             if settings.DEBUG:
                 btc_address = "17VP9cu7K75MswYrh2Ue5Ua6Up4ZiMLpYw"
                 btc_amount = 0.0000005
@@ -958,7 +959,9 @@ def get_payment_btc_info_(request, c):
                 bill.payment.save()
                 bill.save()
             else:
-                return JsonResponse({'status': 'could_not_get_btc_address', 'message': 'could_not_get_btc_address'})
+            """
+
+            return JsonResponse({'status': 'could_not_get_btc_address', 'message': 'could_not_get_btc_address'})
         if not btc_amount:
             if settings.DEBUG:
                 btc_amount = 0.0000005

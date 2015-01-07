@@ -502,6 +502,7 @@ $(window).load(function(){
     {% comment %} the payment dialog {% endcomment %}
     <div id="payment" class="hidden">
         <div id="payment_types_menu">
+            <div class="payment-type-text">{% trans "Choose payment type" %}</div>
             <div class="payment-type cash">{% trans 'Cash' %}</div>
             <div class="payment-type credit-card">{% trans 'Credit card' %}</div>
 {#            <div class="payment-type paypal">{% trans 'Paypal' %}</div>#}
@@ -557,7 +558,7 @@ $(window).load(function(){
             </div>
         </div>
 
-        <div class="status">
+        <div class="status hidden">
             <span class="paid hidden">{% trans "Paid" %}
                 <span class="yes"></span>
             </span>

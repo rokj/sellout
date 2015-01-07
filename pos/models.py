@@ -646,7 +646,7 @@ class Bill(SkeletonU, RegisterAbstract):
         sets status of bill and payment
         """
         try:
-            payment = Payment.objects.get(id=self.payment)
+            payment = self.payment
             payment.status = value
             payment.save()
         except Payment.DoesNotExist:
