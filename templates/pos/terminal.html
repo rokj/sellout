@@ -511,19 +511,21 @@ $(window).load(function(){
 
         <div id="payment_details">
             <div class="bill-total-container">
-                <div class="label"> {% trans 'Total' %} {{ currency }} </div>
+                <div class="label"> {% trans 'Total' %}</div>
                 <div class="bill-total"> </div>
             </div>
 
             <div class="payment-details cash hidden">
                 <div class="cash-calc">
                     <div>
-                        <div class="label">{% trans 'Customer paid' %}</div>
+                        <div class="label">{% trans 'Received' %}</div>
                         <input type="text" class="customer-paid" />
+                        <div class="currency_symbol">{{ currency_symbol }}</div>
                     </div>
                     <div class="return-change-container">
-                        <div class="label">{% trans 'Return change' %}</div>
+                        <div class="label">{% trans 'Change due' %}</div>
                         <input type="text" class="return-change" readonly />
+                        <div class="currency_symbol">{{ currency_symbol }}</div>
                     </div>
                 </div>
             </div>
@@ -547,7 +549,7 @@ $(window).load(function(){
                 <div class="btc-qrcode"></div>
 
                 <div class="btc-amount-container">
-                    <div class="label">{% trans 'Total BTC' %}</div>
+                    <div class="label">{% trans 'BTC' %}</div>
                     <div class="btc-amount"></div>
                 </div>
 

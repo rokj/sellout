@@ -8,6 +8,7 @@ from django.core.context_processors import csrf
 
 from django.contrib.auth import logout as django_logout, authenticate
 from django.contrib.auth import login as django_login
+from config import currencies
 from pos.models import Company, Permission
 from pos.views.manage.category import get_all_categories_structured
 from pos.views.manage.company import company_to_dict
@@ -72,6 +73,7 @@ def terminal(request, company):
 
         # template etc.
         'currency': get_company_value(request.user, c, 'pos_currency'),
+        'currency_symbol': currencies.currencies[get_company_value(request.user, c, 'pos_currency')][1],
         'sexes': g.SEXES,
         'countries': country_choices,
         'pin_length': g.PIN_LENGTH,

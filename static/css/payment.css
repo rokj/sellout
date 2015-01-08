@@ -38,23 +38,23 @@
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     
-    height: 50px;
-    line-height: 50px;
+    height: 80px;
+    line-height: 80px;
 }
 
 #payment_types_menu .payment-type.cash {
-    background: url('/static/icons/cash.png') no-repeat 15px 8px;
+    background: url('/static/icons/cash.png') no-repeat 16px 21px;
     background-size: 29px 33px;
 }
 
 #payment_types_menu .payment-type.credit-card {
-    background: url('/static/icons/credit_card.png') no-repeat 12px 11px;
+    background: url('/static/icons/credit_card.png') no-repeat 12px 25px;
     background-size: 36px 26px;
 }
 
 #payment_types_menu .payment-type.bitcoin {
-    background: url('/static/icons/bitcoin.png') no-repeat 12px 11px;
-    background-size: 36px 26px;
+    background: url('/static/icons/bitcoin.png') no-repeat 17px 26px;
+    background-size: 27px 26px;
 }
 
 #payment_types_menu .payment-type-text {
@@ -75,19 +75,20 @@
 
 #payment_types_menu .payment-type.active {
     background-color: #c8c8c8;
+    color: #ffffff;
 }
 
 #payment_types_menu .payment-type.active:after{
     position: absolute;
     top: 0;
-    right: -50px;
+    right: -78px;
     
     width: 0;
     height: 0;
     
     content: "";
     
-    border: 25px solid transparent;
+    border: 39px solid transparent;
     border-left-color: #c8c8c8;
 }
 
@@ -97,9 +98,21 @@
     right: 20px;
 }
 
+#payment_controls button.cancel {
+    background-color: #ff5a6e;
+    margin-right: 37px;
+    width: 103px;
+}
+
+#payment_controls button.print {
+    background-color: #22e693;
+    width: 192px;
+    height: 50px;
+}
+
 #payment_details{
     position: relative;
-    margin-left: 245px; /* the same as #payment_types_menu width */
+    margin-left: 228px; /* the same as #payment_types_menu width */
     
     padding-left: 50px;
     padding-top: 30px;
@@ -145,12 +158,17 @@
 #payment_details label,
 #payment_details .label{
     text-transform: uppercase;
-    font-size: 20px;
+    font-size: 19px;
+}
+
+#payment_details .cash-calc .label {
+    font-size: 17px;
+    color: #7d7d7d;
 }
 
 #payment_details .bill-total-container{
     position: absolute;
-    left: 50px;
+    left: 27px;
     top: 50px;
     height: 50px;
 }
@@ -162,18 +180,33 @@
 
 #payment_details .cash-calc{
     position: absolute;
-    left: 245px;
-    top: 45px;
+    left: 27px;
+    top: 161px;
+    width: 340px
+}
+#payment_details .cash-calc > div {
+    float: left;
+    position: relative;
+}
+
+#payment_details .cash-calc > div:nth-child(2) {
+    margin-left: 10px;
+}
+
+#payment_details .cash-calc > div > .currency_symbol {
+    position: absolute;
+    top: 34px;
+    left: 7px;
+    width: 20px;
+    /* background-color: red; */
+    height: 20px;
+    color: #c8c8c8;
 }
 
 #payment_details .paypal-calc {
     position: absolute;
     left: 245px;
     top: 45px;
-}
-
-#payment_details .return-change-container{
-    margin-top: 30px;
 }
 
 /* bitcoin payment */
@@ -184,16 +217,31 @@
 
 #payment_details .btc-amount-container{
     position: absolute;
-    left: 280px;
+    left: 223px;
     top: 50px;
 }
 
-#payment_details .btc-address-container{
+#payment_details .btc-address-container {
     position: absolute;
     top: 150px;
-    left: 280px;
+    left: 223px;
+}
+
+#payment_details .btc-address-container .label {
+    text-transform: none;
 }
 
 #payment_details .btc-address{
     width: 260px;
+}
+
+#payment_details .customer-paid, #payment_details .return-change {
+    font-size: 18px;
+    color: #000000;
+    text-align: right;
+    padding-right: 6px;
+    width: 145px
+}
+
+#payment_details .return-change {
 }

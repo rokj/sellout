@@ -57,7 +57,6 @@ Payment = function(g, bill){
     //
     p.switch_section = function(section){
         // the last section is stored in g.settings
-
         send_data(p.g.urls.change_payment_type, {bill_id: p.data.id, type: section}, p.g.csrf_token, function(response) {
             if (response.status == 'ok') {
                 clearInterval(p.payment_interval);
@@ -85,10 +84,14 @@ Payment = function(g, bill){
                         p.items.cash.return_box.val("");
 
                         p.items.cash.paid_box.focus();
+
+                        toggle_element(p.items.print_button, true);
                         break;
-                    case "credit-card":
+                    case "credit_card":
                         p.items.credit_card.button.addClass("active");
                         p.items.credit_card.section.show();
+
+                        toggle_element(p.items.print_button, true);
                         break;
                     case "paypal":
                         p.items.paypal.button.addClass("active");
@@ -206,6 +209,8 @@ Payment = function(g, bill){
 
                                         p.items.bitcoin.status.waiting_payment.hide();
                                         p.items.bitcoin.status.paid.show();
+
+                                        toggle_element(p.items.print_button, true);
                                     } else {
                                         // not paid yet, continue polling
                                     }
@@ -327,7 +332,6 @@ Payment = function(g, bill){
                 });
             },
             function(){
-                p.bind_escape_payment_dialog();
             }
         );
     };
@@ -373,7 +377,6 @@ Payment = function(g, bill){
                 p.toggle_dialog(false);
 
                 // remove keyboard bindings
-                window.keyboard.remove('escape-payment-dialog', 'escape');
             }
         });
     };
@@ -391,7 +394,7 @@ Payment = function(g, bill){
     // events:
     // buttons
     p.items.cash.button.unbind().click(function(){ p.switch_section("cash"); });
-    p.items.credit_card.button.unbind().click(function(){ p.switch_section("credit-card"); });
+    p.items.credit_card.button.unbind().click(function(){ p.switch_section("credit_card"); });
     p.items.bitcoin.button.unbind().click(function(){ p.switch_section("bitcoin"); });
     p.items.paypal.button.unbind().click(function(){ p.switch_section("paypal"); });
 
@@ -435,8 +438,4 @@ Payment = function(g, bill){
     // show the details
     if(!p.g.settings.last_payment_type) p.g.settings.last_payment_type = "cash";
     p.switch_section(p.g.settings.last_payment_type);
-
-    if (window.keyboard) {
-        p.bind_escape_payment_dialog();
-    }
 };
