@@ -531,7 +531,7 @@ $(window).load(function(){
             </div>
 
             <div class="payment-details credit-card hidden">
-                but really, something will be here, i promise!
+                <div class="connect-text">{% trans "Connect your POS Terminal" %}</div>
             </div>
 
             <div class="payment-details paypal hidden">
@@ -572,10 +572,10 @@ $(window).load(function(){
         </div>
 
         <div id="payment_controls">
-            <button class="cancel">{% trans 'Cancel' %}</button>
-
-            <button class="print"> {% trans 'Print' %} </button>
+            <button class="print"> {% trans 'Print' %}</button>
         </div>
+
+        <button class="cancel" id="cancel_payment"></button>
     </div>
 
     {% comment %} the bill options dialog - bill notes and discount on total price {% endcomment %}

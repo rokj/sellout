@@ -49,7 +49,7 @@ Payment = function(g, bill){
         shadow: $("#fullscreen_shadow"),
 
         print_button: $(".print", p.dialog),
-        cancel_button: $(".cancel", p.dialog)
+        cancel_button: $("#cancel_payment", p.dialog)
     };
 
     //

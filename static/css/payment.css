@@ -2,7 +2,7 @@
     position: fixed;
     
     width: 800px; /* must be set so that javascript will size the payment dialog */
-    height: 500px; /* -||- */
+    height: 289px; /* -||- */
     
     /* center positioning */
     top: 50%;
@@ -94,7 +94,7 @@
 
 #payment_controls{
     position: absolute;
-    bottom: 20px;
+    bottom: 59px;
     right: 20px;
 }
 
@@ -106,8 +106,8 @@
 
 #payment_controls button.print {
     background-color: #22e693;
-    width: 192px;
-    height: 50px;
+    width: 174px;
+    height: 53px;
 }
 
 #payment_details{
@@ -162,7 +162,7 @@
 }
 
 #payment_details .cash-calc .label {
-    font-size: 17px;
+    font-size: 15px;
     color: #7d7d7d;
 }
 
@@ -190,7 +190,7 @@
 }
 
 #payment_details .cash-calc > div:nth-child(2) {
-    margin-left: 10px;
+    margin-left: 17px;
 }
 
 #payment_details .cash-calc > div > .currency_symbol {
@@ -244,4 +244,18 @@
 }
 
 #payment_details .return-change {
+}
+
+#payment #cancel_payment {
+    background: url('/static/icons/close-thin.png') no-repeat;
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 18px;
+    box-shadow: none;
+    right: 18px;
+}
+
+#payment #cancel_payment:hover {
+    cursor: pointer;
 }
