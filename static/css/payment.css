@@ -2,7 +2,7 @@
     position: fixed;
     
     width: 800px; /* must be set so that javascript will size the payment dialog */
-    height: 289px; /* -||- */
+    height: 333px; /* -||- */
     
     /* center positioning */
     top: 50%;
@@ -120,21 +120,33 @@
 }
 
 #payment .status .paid {
+    /*
     color: #22e693;
     background: url('/static/icons/ok-payment.png') no-repeat 127px 7px;
     font-weight: bold;
     width: 160px;
     display: hidden;
     font-size: 31px;
+    */
+
+    background: url('/static/icons/ok-payment.png') no-repeat 44px 7px;
+    background-position: 75px;
+    font-weight: bold;
+    width: 111px;
+    display: hidden;
+    font-size: 31px;
+    text-align: left;
 }
 
 #payment .status {
-    margin-left: 150px;
     text-align: center;
     color: #ff5a6e;
     text-transform: uppercase;
     font-size: 24px;
     display: hidden;
+    top: 228px;
+    position: absolute;
+    left: 451px;
 }
 
 #payment .dot.active {
@@ -161,6 +173,10 @@
     font-size: 19px;
 }
 
+#payment.cash #payment_details .label, #payment.credit_card #payment_details .label {
+    font-size: 21px !important;
+}
+
 #payment_details .cash-calc .label {
     font-size: 15px;
     color: #7d7d7d;
@@ -173,15 +189,24 @@
     height: 50px;
 }
 
+#payment.cash #payment_details .bill-total-container, #payment.credit_card #payment_details .bill-total-container {
+    left: 207px !important;
+    top: 59px !important;
+}
+
 #payment_details .bill-total,
 #payment_details .btc-amount{
     font-size: 30px;
 }
 
+#payment.cash #payment_details .bill-total, #payment.credit_card #payment_details .bill-total {
+    font-size: 32px !important;
+}
+
 #payment_details .cash-calc{
     position: absolute;
     left: 27px;
-    top: 161px;
+    top: 207px;
     width: 340px
 }
 #payment_details .cash-calc > div {
@@ -212,7 +237,8 @@
 /* bitcoin payment */
 #payment_details .btc-qrcode{
     position: absolute;
-    top: 150px;
+    top: 141px;
+    left: 27px;
 }
 
 #payment_details .btc-amount-container{
@@ -223,7 +249,7 @@
 
 #payment_details .btc-address-container {
     position: absolute;
-    top: 150px;
+    top: 133px;
     left: 223px;
 }
 
@@ -232,7 +258,7 @@
 }
 
 #payment_details .btc-address{
-    width: 260px;
+    width: 270px;
 }
 
 #payment_details .customer-paid, #payment_details .return-change {
@@ -244,6 +270,12 @@
 }
 
 #payment_details .return-change {
+}
+
+#payment_details .connect-text {
+    position: absolute;
+    top: 230px;
+    left: 74px;
 }
 
 #payment #cancel_payment {

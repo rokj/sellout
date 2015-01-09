@@ -943,35 +943,19 @@ def get_payment_btc_info_(request, c):
     if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
 
         if settings.DEBUG:
-            btc_address = ""
-            btc_amount = ""
+            btc_address = "17VP9cu7K75MswYrh2Ue5Ua6Up4ZiMLpYw"
+            btc_amount = 0.0000005
         else:
             btc_address = bill.payment.get_btc_address(c.id)
             btc_amount = bill.payment.get_btc_amount(request.user, c)
 
-        if btc_address == "" and not btc_amount:
-            """
-            if settings.DEBUG:
-                btc_address = "17VP9cu7K75MswYrh2Ue5Ua6Up4ZiMLpYw"
-                btc_amount = 0.0000005
-                bill.payment.status = g.PAID
-                bill.payment.amount = 0.0000005
-                bill.payment.save()
-                bill.save()
-            else:
-            """
-
+        if btc_address == "":
             return JsonResponse({'status': 'could_not_get_btc_address', 'message': 'could_not_get_btc_address'})
         if not btc_amount:
-            if settings.DEBUG:
-                btc_amount = 0.0000005
-            else:
-                return JsonResponse({'status': 'could_not_get_btc_amount', 'message': 'could_not_get_btc_amount'})
+            return JsonResponse({'status': 'could_not_get_btc_amount', 'message': 'could_not_get_btc_amount'})
 
         extra['btc_address'] = btc_address
         extra['btc_amount'] = btc_amount
-
-        print extra
     else:
         return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
 

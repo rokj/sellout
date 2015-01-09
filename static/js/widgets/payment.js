@@ -62,6 +62,13 @@ Payment = function(g, bill){
                 clearInterval(p.payment_interval);
                 clearInterval(p.bitcoin_payment_dots_interval);
 
+                p.dialog.removeClass("cash");
+                p.dialog.removeClass("credit_card");
+                p.dialog.removeClass("bitcoin");
+                p.dialog.removeClass("paypal");
+
+                p.dialog.addClass(section);
+
                 // first, hide sections
                 p.items.cash.button.removeClass("active");
                 p.items.cash.section.hide();
@@ -85,13 +92,13 @@ Payment = function(g, bill){
 
                         p.items.cash.paid_box.focus();
 
-                        toggle_element(p.items.print_button, true);
+                        p.items.print_button.show();
                         break;
                     case "credit_card":
                         p.items.credit_card.button.addClass("active");
                         p.items.credit_card.section.show();
 
-                        toggle_element(p.items.print_button, true);
+                        p.items.print_button.show();
                         break;
                     case "paypal":
                         p.items.paypal.button.addClass("active");
@@ -100,6 +107,7 @@ Payment = function(g, bill){
                     case "bitcoin":
                         p.toggle_bitcoin_section(true);
 
+                        p.items.print_button.hide();
                         break;
                 }
             }
@@ -178,9 +186,6 @@ Payment = function(g, bill){
 
             if(p.payment_interval) clearInterval(p.payment_interval);
 
-            // disable the print button on the dialog
-            toggle_element(p.items.print_button, false);
-
             p.items.bitcoin.btc_qrcode.html("");
             p.items.bitcoin.btc_amount.val("");
             p.items.bitcoin.btc_address.html("");
@@ -193,7 +198,7 @@ Payment = function(g, bill){
                         p.items.bitcoin.btc_address.data("value", response.data.btc_address);
                         p.items.bitcoin.btc_amount.html(response.data.btc_amount);
                         p.items.bitcoin.btc_qrcode.html("");
-                        p.items.bitcoin.btc_qrcode.qrcode({width: 180, height: 160, text: "bitcoin:" + response.data.btc_address + "?amount=" + response.data.btc_amount, background: "#ebebeb"});
+                        p.items.bitcoin.btc_qrcode.qrcode({width: 120, height: 120, text: "bitcoin:" + response.data.btc_address + "?amount=" + response.data.btc_amount, background: "#ebebeb"});
 
                         // set up a timer that will check if the bill has been paid
                         p.payment_interval = setInterval(function () {
