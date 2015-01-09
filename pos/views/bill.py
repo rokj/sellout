@@ -706,7 +706,7 @@ def check_bill_status_(request, c):
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JsonResponse({'status': 'no_permission', 'message': 'no_permission'})
 
-    # LOL :)
+    # LOL :) - not LOL, rok does not understand
     """
     if settings.DEBUG:
         if random.randint(0, 9) > 7:
@@ -770,7 +770,9 @@ def finish_bill_(request, c, android=False):
     else:
         bill.status = g.CANCELED
 
-    bill.payment.save()
+    if bill.payment:
+        bill.payment.save()
+
     bill.save()
 
     # if print is requested, return html, otherwise the 'ok' response
