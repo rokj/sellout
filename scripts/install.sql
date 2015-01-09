@@ -15,10 +15,10 @@ CREATE OR REPLACE FUNCTION bl_insert_user(email CHARACTER VARYING) RETURNS VOID 
     import json
     import psycopg2
 
-    host = '127.0.0.1'
+    host = '10.0.0.35'
     dbname = 'users'
     in_user = 'users'
-    password = 'users'
+    password = 'iQeeLEsw'
     source = 'pos'
 
     plan = plpy.prepare("SELECT username, password, first_name, last_name, email, sex, country, type FROM blusers_blocklogicuser WHERE email = $1", ["text"])
@@ -45,10 +45,10 @@ CREATE OR REPLACE FUNCTION bl_update_user(email CHARACTER VARYING) RETURNS VOID 
     import json
     import psycopg2
 
-    host = '127.0.0.1'
+    host = '10.0.0.35'
     dbname = 'users'
     in_user = 'users'
-    password = 'users'
+    password = 'iQeeLEsw'
     source = 'pos'
 
     plan = plpy.prepare("SELECT username, password, first_name, last_name, email, sex, country, type FROM blusers_blocklogicuser WHERE email = $1", ["text"])

@@ -49,7 +49,7 @@ Payment = function(g, bill){
         shadow: $("#fullscreen_shadow"),
 
         print_button: $(".print", p.dialog),
-        cancel_button: $(".cancel", p.dialog)
+        cancel_button: $("#cancel_payment", p.dialog)
     };
 
     //
@@ -57,11 +57,17 @@ Payment = function(g, bill){
     //
     p.switch_section = function(section){
         // the last section is stored in g.settings
-
         send_data(p.g.urls.change_payment_type, {bill_id: p.data.id, type: section}, p.g.csrf_token, function(response) {
             if (response.status == 'ok') {
                 clearInterval(p.payment_interval);
                 clearInterval(p.bitcoin_payment_dots_interval);
+
+                p.dialog.removeClass("cash");
+                p.dialog.removeClass("credit_card");
+                p.dialog.removeClass("bitcoin");
+                p.dialog.removeClass("paypal");
+
+                p.dialog.addClass(section);
 
                 // first, hide sections
                 p.items.cash.button.removeClass("active");
@@ -85,10 +91,14 @@ Payment = function(g, bill){
                         p.items.cash.return_box.val("");
 
                         p.items.cash.paid_box.focus();
+
+                        p.items.print_button.show();
                         break;
-                    case "credit-card":
+                    case "credit_card":
                         p.items.credit_card.button.addClass("active");
                         p.items.credit_card.section.show();
+
+                        p.items.print_button.show();
                         break;
                     case "paypal":
                         p.items.paypal.button.addClass("active");
@@ -97,6 +107,7 @@ Payment = function(g, bill){
                     case "bitcoin":
                         p.toggle_bitcoin_section(true);
 
+                        p.items.print_button.hide();
                         break;
                 }
             }
@@ -172,12 +183,8 @@ Payment = function(g, bill){
         if(show){
             p.items.bitcoin.button.addClass("active");
             p.items.bitcoin.section.show();
-            p.items.bitcoin.status_dialog.show();
 
             if(p.payment_interval) clearInterval(p.payment_interval);
-
-            // disable the print button on the dialog
-            toggle_element(p.items.print_button, false);
 
             p.items.bitcoin.btc_qrcode.html("");
             p.items.bitcoin.btc_amount.val("");
@@ -186,11 +193,12 @@ Payment = function(g, bill){
             send_data(p.g.urls.get_payment_btc_info, {bill_id: p.data.id}, p.g.csrf_token, function(response) {
                 if (response.status == 'ok') {
                     if ('data' in response && 'btc_address' in response.data && 'btc_amount' in response.data) {
+                        p.items.bitcoin.status_dialog.show();
                         p.items.bitcoin.btc_address.val(response.data.btc_address);
                         p.items.bitcoin.btc_address.data("value", response.data.btc_address);
                         p.items.bitcoin.btc_amount.html(response.data.btc_amount);
                         p.items.bitcoin.btc_qrcode.html("");
-                        p.items.bitcoin.btc_qrcode.qrcode({width: 180, height: 160, text: "bitcoin:" + response.data.btc_address + "?amount=" + response.data.btc_amount, background: "#ebebeb"});
+                        p.items.bitcoin.btc_qrcode.qrcode({width: 120, height: 120, text: "bitcoin:" + response.data.btc_address + "?amount=" + response.data.btc_amount, background: "#ebebeb"});
 
                         // set up a timer that will check if the bill has been paid
                         p.payment_interval = setInterval(function () {
@@ -206,6 +214,8 @@ Payment = function(g, bill){
 
                                         p.items.bitcoin.status.waiting_payment.hide();
                                         p.items.bitcoin.status.paid.show();
+
+                                        toggle_element(p.items.print_button, true);
                                     } else {
                                         // not paid yet, continue polling
                                     }
@@ -255,7 +265,6 @@ Payment = function(g, bill){
             p.items.bitcoin.button.removeClass("active");
             p.items.bitcoin.section.hide();
             p.items.bitcoin.status_dialog.hide();
-
             // enable the print button
         }
     };
@@ -310,7 +319,7 @@ Payment = function(g, bill){
                 // send an update with status='Canceled' to the server
                 var data = {
                     bill_id: p.data.id,
-                    status: 'Canceled'
+                    status: 'canceled'
                 };
 
                 send_data(p.g.urls.finish_bill, data, p.g.csrf_token, function(response){
@@ -328,7 +337,6 @@ Payment = function(g, bill){
                 });
             },
             function(){
-                // the dumb user is not sure.
             }
         );
     };
@@ -372,9 +380,18 @@ Payment = function(g, bill){
 
                 // close the dialog
                 p.toggle_dialog(false);
+
+                // remove keyboard bindings
             }
         });
     };
+
+    p.bind_escape_payment_dialog = function() {
+        window.keyboard.add('escape-payment-dialog', 'escape', function() {
+            window.keyboard.remove('escape-payment-dialog', 'escape');
+            p.items.cancel_button.click();
+        });
+    }
 
     //
     // init
@@ -382,7 +399,7 @@ Payment = function(g, bill){
     // events:
     // buttons
     p.items.cash.button.unbind().click(function(){ p.switch_section("cash"); });
-    p.items.credit_card.button.unbind().click(function(){ p.switch_section("credit-card"); });
+    p.items.credit_card.button.unbind().click(function(){ p.switch_section("credit_card"); });
     p.items.bitcoin.button.unbind().click(function(){ p.switch_section("bitcoin"); });
     p.items.paypal.button.unbind().click(function(){ p.switch_section("paypal"); });
 

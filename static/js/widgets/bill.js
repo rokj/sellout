@@ -376,7 +376,6 @@ Bill = function(g){
             }
             else{
                 p.data = response.data.bill;
-
                 p.payment = new Payment(p.g, p);
             }
         });
