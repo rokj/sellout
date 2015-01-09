@@ -173,7 +173,7 @@
     font-size: 19px;
 }
 
-#payment.cash #payment_details .label, #payment.credit_card #payment_details .label {
+#payment.cash #payment_details .bill-total-container .label, #payment.credit_card #payment_details .bill-total-container .label {
     font-size: 21px !important;
 }
 
