@@ -706,12 +706,14 @@ def check_bill_status_(request, c):
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JsonResponse({'status': 'no_permission', 'message': 'no_permission'})
 
-    # LOL :)
+    # LOL :) - not LOL, rok does not understand - omg, omg, se eno tako...
+    """
     if settings.DEBUG:
-        if random.randint(0, 9) > 0:
+        if random.randint(0, 9) > 7:
             return JsonOk(extra={'paid': True})
         else:
             return JsonOk(extra={'paid': False})
+    """
 
     if bill.status == g.PAID:
         return JsonOk(extra={'paid': 'true'})

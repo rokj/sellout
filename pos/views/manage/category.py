@@ -60,6 +60,10 @@ def validate_category(user, company, data, category=None):
         except (ValueError, TypeError, Category.DoesNotExist, KeyError):
             parent_category = None
 
+        if category and parent_category:
+            if not validate_parent(category, parent_category):
+                return {'status': False, 'data': None, 'message': _("A category cannot be its own child")}
+
         form.cleaned_data['parent'] = parent_category
         form.parent = parent_category
 
@@ -72,6 +76,8 @@ def validate_category(user, company, data, category=None):
 def validate_parent(category, parent):
     if not parent:
         return True  # topmost categories don't need this
+    elif category.id == parent.id:
+        return False
 
     categories = Category.objects.filter(parent=category)
     for c in categories:

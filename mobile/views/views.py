@@ -55,7 +55,6 @@ def mobile_get_cut(request, company_id):
 
     return JsonResponse(result)
 
-
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
 def mobile_accept_invitation(request):
