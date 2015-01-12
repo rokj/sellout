@@ -14,6 +14,21 @@ SUBJECT = "Bitstamp price ..."
 
 DESIRED_DIFFERENCE = 4 # in percent
 
+def coinbase_conversion_rate():
+    response = requests.get("http://finance.yahoo.com/d/quotes.csv?e=.csv&f=c4l1&s=EURUSD=X")
+
+    result = None
+
+    try:
+        for line in response.iter_lines():
+            result = line.split(",")[1]
+
+            break
+    except Exception:
+        pass
+
+    return result
+
 def bitstamp_conversion_rate():
     response = requests.get("https://www.bitstamp.net/api/eur_usd/")
 
@@ -48,13 +63,15 @@ def send_email(_from, to, subject, message):
 urls = {
 #   "mtgox_btceur": "http://data.mtgox.com/api/2/BTCEUR/money/ticker_fast",
 #   "mtgox_btcusd": "http://data.mtgox.com/api/2/BTCUSD/money/ticker_fast",
-    "bitstamp_btcusd": "https://www.bitstamp.net/api/ticker/"
+#   "bitstamp_btcusd": "https://www.bitstamp.net/api/ticker/",
+    "coinbase_btcusd": "https://api.coinbase.com/v1/prices/sell"
 }
 
 price = {
     "mtgox_btceur": 0,
     "mtgox_btcusd": 0,
     "bitstamp_btcusd": 0,
+    "coinbase_btcusd": 0
 }
 
 headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'application/json, text/javascript, */*; q=0.01', 'User-Agent': 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
@@ -102,6 +119,11 @@ def update_btc_price(currency, price, datetime_updated=None):
 for exchange, url in urls.iteritems():
     response = requests.get(url, data={}, headers=headers, verify=False)
 
+    if exchange == "bitstamp_btcusd":
+        conversion_rate = bitstamp_conversion_rate()
+    elif exchange == "coinbase_btcusd":
+        conversion_rate = coinbase_conversion_rate()
+
     if response.status_code == 200:
         datetime_updated = datetime.datetime.utcnow()
 
@@ -133,4 +155,4 @@ for exchange, url in urls.iteritems():
                 update_btc_price("coinbase_1_eurbtc", price["coinbase_1_eurbtc"], datetime_updated)
                 print "coinbase_1_eurbtc: %s" % price["coinbase_1_eurbtc"]
 
-                break                
+                break
