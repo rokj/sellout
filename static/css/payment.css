@@ -120,22 +120,14 @@
 }
 
 #payment .status .paid {
-    /*
-    color: #22e693;
-    background: url('/static/icons/ok-payment.png') no-repeat 127px 7px;
-    font-weight: bold;
-    width: 160px;
-    display: hidden;
-    font-size: 31px;
-    */
-
     background: url('/static/icons/ok-payment.png') no-repeat 44px 7px;
-    background-position: 75px;
+    background-position: 81px;
     font-weight: bold;
-    width: 111px;
-    display: hidden;
+    width: 126px;
     font-size: 31px;
     text-align: left;
+    color: #22e693;
+    display: hidden;
 }
 
 #payment .status {

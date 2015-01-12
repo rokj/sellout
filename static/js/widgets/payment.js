@@ -207,13 +207,19 @@ Payment = function(g, bill){
                                     // something went wrong
                                     alert(response.message);
                                 } else if (response.status == 'ok') {
-                                    if (response.data.paid == 'true') {
+                                    if (response.data.paid == true) {
                                         // paid, finish the thing
                                         clearInterval(p.payment_interval);
                                         clearInterval(p.bitcoin_payment_dots_interval);
 
                                         p.items.bitcoin.status.waiting_payment.hide();
-                                        p.items.bitcoin.status.paid.show();
+                                        p.items.bitcoin.status.paid.css('display', 'block');
+                                        p.items.print_button.show();
+                                        p.items.cash.button.unbind();
+                                        p.items.credit_card.button.unbind();
+                                        p.items.cash.button.addClass('disabled');
+                                        p.items.credit_card.button.addClass('disabled');
+
 
                                         toggle_element(p.items.print_button, true);
                                     } else {
