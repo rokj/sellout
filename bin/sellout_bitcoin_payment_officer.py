@@ -85,7 +85,7 @@ while True:
                 payment  = Payment.objects.get(Q(status=WAITING) | Q(status=NOT_ENOUGH_MONEY_ARRIVED), transaction_reference=transaction['address'], type="bitcoin")
 
                 # transaction_reference is bitcoin reference in this case
-                total_received_by_address = bitcoin_client_rpc.get_received_by_address(bill.transaction_reference, confirmations)
+                total_received_by_address = bitcoin_client_rpc.get_received_by_address(payment.transaction_reference, confirmations)
                 total_received_by_address = Decimal(total_received_by_address)
 
                 # we try to get timestamp of payment

@@ -111,10 +111,26 @@ for exchange, url in urls.iteritems():
             if u"last" in response:
                 last_price = Decimal(response["last"])
                 update_btc_price("bitstamp_1_btcusd", last_price, datetime_updated)
+                print "bitstamp_1_btcusd: %s" % last_price
 
                 price["bitstamp_1_usdbtc"] = Decimal(str(1/(last_price))).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
                 update_btc_price("bitstamp_1_usdbtc", price["bitstamp_1_usdbtc"], datetime_updated)
+                print "bitstamp_1_usdbtc: %s" % price["bitstamp_1_usdbtc"]
 
                 conversion_rate = bitstamp_conversion_rate()
                 price["bitstamp_1_eurbtc"] = Decimal(str(1/(last_price/Decimal(conversion_rate["sell"])))).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
                 update_btc_price("bitstamp_1_eurbtc", price["bitstamp_1_eurbtc"], datetime_updated)
+                print "bitstamp_1_eurbtc: %s" % price["bitstamp_1_eurbtc"]
+
+        elif exchange == "coinbase_btcusd":
+            if u"btc" in response and u"subtotal" in response and "amount" in response["subtotal"]:
+                last_price = Decimal(response["subtotal"]["amount"])
+
+                update_btc_price("coinbase_1_eurbtc", last_price, datetime_updated)
+                print "coinbase_1_btcusd: %s" % last_price
+
+                price["coinbase_1_eurbtc"] = Decimal(str(1/(last_price/Decimal(conversion_rate)))).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
+                update_btc_price("coinbase_1_eurbtc", price["coinbase_1_eurbtc"], datetime_updated)
+                print "coinbase_1_eurbtc: %s" % price["coinbase_1_eurbtc"]
+
+                break                
