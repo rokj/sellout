@@ -227,10 +227,30 @@
 }
 
 /* bitcoin payment */
-#payment_details .btc-qrcode{
+#payment_details .btc-qrcode {
     position: absolute;
     top: 141px;
     left: 27px;
+}
+
+#payment_details .btc-qrcode:hover {
+    cursor: pointer;
+}
+
+div.bigger-btc-qrcode {
+    background-color: #ffffff;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -200px;
+    margin-top: -200px;
+    width: 400px;
+    height: 400px;
+    border: 2px #ffffff solid;
+    border-radius: 2px;
+    -moz-border-radius: 2px;
+    display: hidden;
+    z-index: 15001;
 }
 
 #payment_details .btc-amount-container{

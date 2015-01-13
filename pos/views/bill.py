@@ -941,7 +941,6 @@ def get_payment_btc_info_(request, c):
     extra = {}
 
     if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
-
         if settings.DEBUG and 'tomaz' in globals():
             btc_address = "17VP9cu7K75MswYrh2Ue5Ua6Up4ZiMLpYw"
             btc_amount = 0.01

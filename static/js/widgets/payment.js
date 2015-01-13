@@ -10,8 +10,11 @@ Payment = function(g, bill){
 
     p.payment_interval = null; // a reference to timer for bitcoin queries on server
     p.bitcoin_payment_dots_interval = null;
+    p.btc_qrcode_text = "";
 
+    p.body = $("body");
     p.dialog = $("#payment");
+
     p.items = {
         cash:{
              button: $(".payment-type.cash", p.dialog),
@@ -34,6 +37,7 @@ Payment = function(g, bill){
             button: $(".payment-type.bitcoin", p.dialog),
             section: $(".payment-details.bitcoin", p.dialog),
             btc_qrcode: $(".payment-details.bitcoin .btc-qrcode", p.dialog),
+            bigger_btc_qrcode: $("div.bigger-btc-qrcode"),
             btc_amount: $(".payment-details.bitcoin .btc-amount", p.dialog),
             btc_address: $(".payment-details.bitcoin .btc-address", p.dialog),
             btc_address_container: $(".payment-details.bitcoin .btc-address-container", p.dialog),
@@ -198,7 +202,22 @@ Payment = function(g, bill){
                         p.items.bitcoin.btc_address.data("value", response.data.btc_address);
                         p.items.bitcoin.btc_amount.html(response.data.btc_amount);
                         p.items.bitcoin.btc_qrcode.html("");
-                        p.items.bitcoin.btc_qrcode.qrcode({width: 120, height: 120, text: "bitcoin:" + response.data.btc_address + "?amount=" + response.data.btc_amount, background: "#ebebeb"});
+
+                        p.btc_qrcode_text = "bitcoin:" + response.data.btc_address + "?amount=" + response.data.btc_amount;
+                        p.items.bitcoin.btc_qrcode.qrcode({width: 120, height: 120, text: p.btc_qrcode_text, background: "#ebebeb"});
+
+                        p.items.bitcoin.btc_qrcode.unbind().click(function() {
+                            p.items.bitcoin.bigger_btc_qrcode.html("");
+                            p.items.shadow
+                                .css("z-index", window.last_dialog_zindex)
+                                .hide()
+                                .appendTo(p.body)
+                                .fadeIn(function() {
+                                    p.items.bitcoin.bigger_btc_qrcode.qrcode({width: 400, height: 400, text: p.btc_qrcode_text, background: "#ebebeb"});
+                                    p.items.bitcoin.bigger_btc_qrcode.removeClass("hidden");
+                                    p.bind_bigger_qrcode_dialog();
+                                });
+                        });
 
                         // set up a timer that will check if the bill has been paid
                         p.payment_interval = setInterval(function () {
@@ -219,7 +238,6 @@ Payment = function(g, bill){
                                         p.items.credit_card.button.unbind();
                                         p.items.cash.button.addClass('disabled');
                                         p.items.credit_card.button.addClass('disabled');
-
 
                                         toggle_element(p.items.print_button, true);
                                     } else {
@@ -396,6 +414,31 @@ Payment = function(g, bill){
         window.keyboard.add('escape-payment-dialog', 'escape', function() {
             window.keyboard.remove('escape-payment-dialog', 'escape');
             p.items.cancel_button.click();
+        });
+    }
+
+    p.close_bigger_qrcode = function() {
+        window.keyboard.remove('escape-bigger-qrcode-dialog', 'escape');
+        window.keyboard.remove('escape-bigger-qrcode-dialog', 'enter');
+        p.body.unbind();
+
+        p.items.shadow.fadeOut("fast", function(){
+            p.items.shadow.remove();
+            p.items.bitcoin.bigger_btc_qrcode.addClass("hidden");
+        });
+    }
+
+    p.bind_bigger_qrcode_dialog = function() {
+        window.keyboard.add('escape-bigger-qrcode-dialog', 'escape', function() {
+            p.close_bigger_qrcode();
+        });
+
+        window.keyboard.add('escape-bigger-qrcode-dialog', 'enter', function() {
+            p.close_bigger_qrcode();
+        });
+
+        p.body.click(function() {
+            p.close_bigger_qrcode();
         });
     }
 
