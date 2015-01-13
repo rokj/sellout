@@ -103,8 +103,7 @@ while True:
                     payment.save()
 
                     if settings.DEBUG:
-                        print "Just got payment for "
-                        print Payment
+                        print "Just got payment of %s btcs" % (payment.amount_paid)
 
                     # we have this here so I will remember when doing subscriptions
                     # Subscription.extend_subscriptions(payment)

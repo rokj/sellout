@@ -226,7 +226,7 @@ Payment = function(g, bill){
                                     // something went wrong
                                     alert(response.message);
                                 } else if (response.status == 'ok') {
-                                    if (response.data.paid == true) {
+                                    if (response.data.paid == 'true') {
                                         // paid, finish the thing
                                         clearInterval(p.payment_interval);
                                         clearInterval(p.bitcoin_payment_dots_interval);
@@ -238,6 +238,7 @@ Payment = function(g, bill){
                                         p.items.credit_card.button.unbind();
                                         p.items.cash.button.addClass('disabled');
                                         p.items.credit_card.button.addClass('disabled');
+                                        p.close_bigger_qrcode();
 
                                         toggle_element(p.items.print_button, true);
                                     } else {
