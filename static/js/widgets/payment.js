@@ -452,6 +452,8 @@ Payment = function(g, bill){
     p.items.credit_card.button.unbind().click(function(){ p.switch_section("credit_card"); });
     p.items.bitcoin.button.unbind().click(function(){ p.switch_section("bitcoin"); });
     p.items.paypal.button.unbind().click(function(){ p.switch_section("paypal"); });
+    p.items.cash.button.removeClass('disabled');
+    p.items.credit_card.button.removeClass('disabled');
 
     // set total text
     p.items.total.text(p.data.total);
