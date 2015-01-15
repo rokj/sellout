@@ -9,7 +9,7 @@ body{
 }
 
 body.locked-session {
-    background-color: rgba(0, 0, 0, 0.84);
+    background-color: rgba(0, 0, 0, 0.9);
 }
 
 h1{
