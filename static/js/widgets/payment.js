@@ -107,6 +107,7 @@ Payment = function(g, bill){
                     case "paypal":
                         p.items.paypal.button.addClass("active");
                         p.items.paypal.section.show();
+                        p.items.print_button.hide();
                         break;
                     case "bitcoin":
                         p.toggle_bitcoin_section(true);
@@ -204,7 +205,7 @@ Payment = function(g, bill){
                         p.items.bitcoin.btc_qrcode.html("");
 
                         p.btc_qrcode_text = "bitcoin:" + response.data.btc_address + "?amount=" + response.data.btc_amount;
-                        p.items.bitcoin.btc_qrcode.qrcode({width: 120, height: 120, text: p.btc_qrcode_text, background: "#ebebeb"});
+                        p.items.bitcoin.btc_qrcode.qrcode({width: 150, height: 150, text: p.btc_qrcode_text, background: "#ebebeb"});
 
                         p.items.bitcoin.btc_qrcode.unbind().click(function() {
                             p.items.bitcoin.bigger_btc_qrcode.html("");
@@ -236,8 +237,10 @@ Payment = function(g, bill){
                                         p.items.print_button.show();
                                         p.items.cash.button.unbind();
                                         p.items.credit_card.button.unbind();
+                                        p.items.paypal.button.unbind();
                                         p.items.cash.button.addClass('disabled');
                                         p.items.credit_card.button.addClass('disabled');
+                                        p.items.paypal.button.addClass('disabled');
                                         p.close_bigger_qrcode();
 
                                         toggle_element(p.items.print_button, true);

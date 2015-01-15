@@ -2,7 +2,7 @@
     position: fixed;
     
     width: 800px; /* must be set so that javascript will size the payment dialog */
-    height: 333px; /* -||- */
+    height: 419px; /* -||- */
     
     /* center positioning */
     top: 50%;
@@ -57,6 +57,11 @@
     background-size: 27px 26px;
 }
 
+#payment_types_menu .payment-type.paypal {
+    background: url('/static/icons/paypal.png') no-repeat 17px 26px;
+    background-size: 27px 26px;
+}
+
 #payment_types_menu .payment-type-text {
     padding-left: 20px;
     font-size: 13px;
@@ -107,7 +112,9 @@
 #payment_controls button.print {
     background-color: #22e693;
     width: 174px;
-    height: 53px;
+    height: 70px;
+    font-weight: bold;
+    font-size: 24px;
 }
 
 #payment_details{
@@ -136,7 +143,7 @@
     text-transform: uppercase;
     font-size: 24px;
     display: hidden;
-    top: 228px;
+    top: 305px;
     position: absolute;
     left: 451px;
 }
@@ -165,8 +172,10 @@
     font-size: 19px;
 }
 
-#payment.cash #payment_details .bill-total-container .label, #payment.credit_card #payment_details .bill-total-container .label {
-    font-size: 21px !important;
+#payment.cash #payment_details .bill-total-container .label,
+#payment.credit_card #payment_details .bill-total-container .label,
+#payment.paypal #payment_details .bill-total-container .label {
+    font-size: 31px !important;
 }
 
 #payment_details .cash-calc .label {
@@ -177,13 +186,15 @@
 #payment_details .bill-total-container{
     position: absolute;
     left: 27px;
-    top: 50px;
+    top: 72px;
     height: 50px;
 }
 
-#payment.cash #payment_details .bill-total-container, #payment.credit_card #payment_details .bill-total-container {
+#payment.cash #payment_details .bill-total-container,
+#payment.credit_card #payment_details .bill-total-container,
+#payment.paypal #payment_details .bill-total-container {
     left: 207px !important;
-    top: 59px !important;
+    top: 95px !important;
 }
 
 #payment_details .bill-total,
@@ -191,16 +202,24 @@
     font-size: 30px;
 }
 
-#payment.cash #payment_details .bill-total, #payment.credit_card #payment_details .bill-total {
-    font-size: 32px !important;
+#payment.cash #payment_details .bill-total,
+#payment.credit_card #payment_details .bill-total,
+#payment.paypal #payment_details .bill-total {
+    font-size: 46px !important;
 }
 
 #payment_details .cash-calc{
     position: absolute;
     left: 27px;
-    top: 207px;
+    top: 283px;
     width: 340px
 }
+
+#payment_details #send_paypal_invoice {
+    padding: 12px;
+    margin-left: 25px;
+}
+
 #payment_details .cash-calc > div {
     float: left;
     position: relative;
@@ -222,14 +241,14 @@
 
 #payment_details .paypal-calc {
     position: absolute;
-    left: 245px;
-    top: 45px;
+    left: 134px;
+    top: 249px;
 }
 
 /* bitcoin payment */
 #payment_details .btc-qrcode {
     position: absolute;
-    top: 141px;
+    top: 184px;
     left: 27px;
 }
 
@@ -256,12 +275,12 @@ div.bigger-btc-qrcode {
 #payment_details .btc-amount-container{
     position: absolute;
     left: 223px;
-    top: 50px;
+    top: 72px;
 }
 
 #payment_details .btc-address-container {
     position: absolute;
-    top: 133px;
+    top: 178px;
     left: 223px;
 }
 
@@ -286,7 +305,7 @@ div.bigger-btc-qrcode {
 
 #payment_details .connect-text {
     position: absolute;
-    top: 230px;
+    top: 309px;
     left: 74px;
 }
 
