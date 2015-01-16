@@ -1025,11 +1025,15 @@ def send_invoice(request, company):
         return JsonError(_("Bill does not exist or data is invalid"))
 
     if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
+        company_paypal_address = get_company_value(request.user, c, 'pos_payment_paypal_address')
+        if company_paypal_address == "":
+            company_paypal_address = c.email
+
         if bill.status == g.PAID:
             return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
 
         merchant_info = {
-            'email': c.email,
+            'email': company_paypal_address,
             'address': {
                 'line1': c.street,
                 'city': c.city,
