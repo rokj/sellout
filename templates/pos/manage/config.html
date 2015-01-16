@@ -83,6 +83,15 @@ $(document).ready(function(){
             <span class="help-text">{{ form.payment_paypal_address.help_text }}</span>
             {{ form.payment_paypal_address }}
         </div>
+
+        <div class="form-field no-label">
+            <div class="split-cell first">
+                <input type="button" id="static_cancel" value="{% trans 'Cancel' %}" class="hoverable" />
+            </div>
+            <div class="split-cell last">
+                <input type="submit" value="{% trans 'Save' %}" class="hoverable" />
+            </div>
+        </div>
     </div>
 
     <div class="management-column">
@@ -104,16 +113,6 @@ $(document).ready(function(){
             {{ form.display_breadcrumbs.label_tag }}
             {{ form.display_breadcrumbs }}
         </div>
-
-        <div class="form-field no-label">
-            <div class="split-cell first">
-                <input type="button" id="static_cancel" value="{% trans 'Cancel' %}" class="hoverable" />
-            </div>
-            <div class="split-cell last">
-                <input type="submit" value="{% trans 'Save' %}" class="hoverable" />
-            </div>
-        </div>
-
     </div>
 </form>
 
