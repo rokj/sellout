@@ -220,6 +220,18 @@
     margin-left: 25px;
 }
 
+#payment_details #customer_email {
+    border: 2px solid transparent;
+}
+
+#payment_details #customer_email.error {
+    border: 2px solid #ff0000;
+}
+
+#payment_details #send_paypal_invoice:hover {
+    cursor: pointer;
+}
+
 #payment_details .cash-calc > div {
     float: left;
     position: relative;

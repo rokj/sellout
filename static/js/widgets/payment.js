@@ -11,6 +11,7 @@ Payment = function(g, bill){
     p.payment_interval = null; // a reference to timer for bitcoin queries on server
     p.bitcoin_payment_dots_interval = null;
     p.btc_qrcode_text = "";
+    p.paypal_enabled = false;
 
     p.body = $("body");
     p.dialog = $("#payment");
@@ -177,6 +178,16 @@ Payment = function(g, bill){
     };
 
     p.items.paypal.send_invoice.click(function() {
+        p.items.paypal.customer_email.removeClass("error");
+
+        var email = p.items.paypal.customer_email.val();
+
+        if (! email_valid(email)) {
+            p.items.paypal.customer_email.addClass("error");
+
+            return false;
+        }
+
         send_data(p.g.urls.send_invoice, {bill_id: p.data.id, customer_email: p.items.paypal.customer_email.val()}, p.g.csrf_token, function(response) {
             if (response.status == 'ok') {
                 alert('sent invoice');
