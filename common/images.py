@@ -1,7 +1,7 @@
 from StringIO import StringIO
-from PIL import ImageOps
+import ImageOps
 from django.core.files.base import ContentFile
-from PIL import Image
+import Image
 import re
 from django.core.files.uploadedfile import SimpleUploadedFile
 
