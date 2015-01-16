@@ -17,7 +17,7 @@ from common.functions import JsonParse, has_permission, no_permission_view, Json
 from common import globals as g
 from common.functions import get_random_string, get_terminal_url
 
-import Image
+from PIL import Image
 import base64
 import unidecode
 import re
