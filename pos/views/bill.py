@@ -1094,8 +1094,6 @@ def send_invoice(request, company):
                     'date': bill_datetime,
                 }
 
-                print item_data
-
                 if product.description and product.description != "":
                     item_data['description'] = product.description
 
@@ -1108,10 +1106,17 @@ def send_invoice(request, company):
                 pass
 
         paypal = Paypal()
+
         if not paypal.create_invoice(invoice_id=bill.serial, merchant_info=merchant_info, billing_info=billing_info,
                               shipping_info=shipping_info, items=items, invoice_date=bill_datetime):
-            return JsonResponse({'status': 'error', 'message': 'paypal_error'})
-        # paypal.send_in
+            return JsonResponse({'status': 'error', 'message': 'could_not_create_invoice'})
+
+        payment = bill.payment
+        payment.transaction_reference = paypal.response["id"]
+        payment.save()
+
+        if not paypal.send_invoice():
+            return JsonResponse({'status': 'error', 'message': 'could_not_send_invoice'})
 
     else:
         return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})

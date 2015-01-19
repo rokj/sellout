@@ -32,7 +32,7 @@ Payment = function(g, bill){
             button: $(".payment-type.paypal", p.dialog),
             section: $(".payment-details.paypal", p.dialog),
             customer_email: $('.payment-details.paypal #customer_email', p.dialog),
-            send_invoice: $('.payment-details.paypal #send_paypal_invoice', p.dialog)
+            send_invoice_button: $('.payment-details.paypal #send_paypal_invoice', p.dialog)
         },
         bitcoin:{
             button: $(".payment-type.bitcoin", p.dialog),
@@ -177,7 +177,7 @@ Payment = function(g, bill){
         }
     };
 
-    p.items.paypal.send_invoice.click(function() {
+    p.items.paypal.send_invoice_button.click(function() {
         p.items.paypal.customer_email.removeClass("error");
 
         var email = p.items.paypal.customer_email.val();
@@ -190,7 +190,10 @@ Payment = function(g, bill){
 
         send_data(p.g.urls.send_invoice, {bill_id: p.data.id, customer_email: p.items.paypal.customer_email.val()}, p.g.csrf_token, function(response) {
             if (response.status == 'ok') {
-                alert('sent invoice');
+                p.items.paypal.send_invoice_button.hide();
+                p.items.paypal.customer_email.hide();
+            } else {
+                error_message(gettext("Paypal error"), gettext("Something went wrong when we were connecting with paypal. Try again later, or use other payment option."))
             }
         });
     });
@@ -231,36 +234,7 @@ Payment = function(g, bill){
                                 });
                         });
 
-                        // set up a timer that will check if the bill has been paid
-                        p.payment_interval = setInterval(function () {
-                            send_data(p.g.urls.check_bill_status, {bill_id: p.data.id}, p.g.csrf_token, function (response) {
-                                if (response.status != 'ok') {
-                                    // something went wrong
-                                    alert(response.message);
-                                } else if (response.status == 'ok') {
-                                    if (response.data.paid == 'true') {
-                                        // paid, finish the thing
-                                        clearInterval(p.payment_interval);
-                                        clearInterval(p.bitcoin_payment_dots_interval);
-
-                                        p.items.bitcoin.status.waiting_payment.hide();
-                                        p.items.bitcoin.status.paid.css('display', 'block');
-                                        p.items.print_button.show();
-                                        p.items.cash.button.unbind();
-                                        p.items.credit_card.button.unbind();
-                                        p.items.paypal.button.unbind();
-                                        p.items.cash.button.addClass('disabled');
-                                        p.items.credit_card.button.addClass('disabled');
-                                        p.items.paypal.button.addClass('disabled');
-                                        p.close_bigger_qrcode();
-
-                                        toggle_element(p.items.print_button, true);
-                                    } else {
-                                        // not paid yet, continue polling
-                                    }
-                                }
-                            });
-                        }, 2000);
+                        p.start_payment_checker();
 
                         p.bitcoin_payment_dots_interval = setInterval(function () {
                             var active = 0;
@@ -318,6 +292,41 @@ Payment = function(g, bill){
             p.items.shadow.fadeOut("fast");
         }
     };
+
+    p.start_payment_checker = function() {
+        // set up a timer that will check if the bill has been paid
+        p.payment_interval = setInterval(function () {
+            send_data(p.g.urls.check_bill_status, {bill_id: p.data.id}, p.g.csrf_token, function (response) {
+                if (response.status != 'ok') {
+                    // something went wrong
+                    alert(response.message);
+                } else if (response.status == 'ok') {
+                    alert('paid');
+
+                    if (response.data.paid == 'true') {
+                        // paid, finish the thing
+                        clearInterval(p.payment_interval);
+                        clearInterval(p.bitcoin_payment_dots_interval);
+
+                        p.items.bitcoin.status.waiting_payment.hide();
+                        p.items.bitcoin.status.paid.css('display', 'block');
+                        p.items.print_button.show();
+                        p.items.cash.button.unbind();
+                        p.items.credit_card.button.unbind();
+                        p.items.paypal.button.unbind();
+                        p.items.cash.button.addClass('disabled');
+                        p.items.credit_card.button.addClass('disabled');
+                        p.items.paypal.button.addClass('disabled');
+                        p.close_bigger_qrcode();
+
+                        toggle_element(p.items.print_button, true);
+                    } else {
+                        // not paid yet, continue polling
+                    }
+                }
+            });
+        }, 2000);
+    }
 
     p.print = function(html){
         // decide what to do depending on user's print settings
@@ -468,6 +477,9 @@ Payment = function(g, bill){
     p.items.paypal.button.unbind().click(function(){ p.switch_section("paypal"); });
     p.items.cash.button.removeClass('disabled');
     p.items.credit_card.button.removeClass('disabled');
+    p.items.paypal.customer_email.val("");
+    p.items.paypal.send_invoice_button.show();
+    p.items.paypal.customer_email.show();
 
     // set total text
     p.items.total.text(p.data.total);

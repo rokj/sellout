@@ -30,7 +30,6 @@ r_manage = g.MISC['management_url']
 urlpatterns = patterns('',
     #token registration for api devices
     url(r_manage + '/' + r'api-token-auth/$', authtoken_views.obtain_auth_token),  # TODO
-
     #
     # MANAGEMENT:
     #

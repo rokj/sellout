@@ -25,7 +25,10 @@ class ServiceAbstract(object):
             else:
                 response = requests.post(url, params=params, data=data, headers=headers)
 
-        if response.status_code == requests.codes.ok or response.status_code == requests.codes.created:
+        if response.status_code == requests.codes.ok or \
+            response.status_code == requests.codes.created or \
+            response.status_code == requests.codes.accepted:
+
             return response
         else:
             if settings.DEBUG:
