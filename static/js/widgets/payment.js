@@ -13,6 +13,7 @@ Payment = function(g, bill){
     p.btc_qrcode_text = "";
     p.paypal_enabled = false;
     p.waiting_payment = false;
+    p.status = '';
 
     p.body = $("body");
     p.dialog = $("#payment");
@@ -277,6 +278,8 @@ Payment = function(g, bill){
                         p.items.print_button.show();
                         p.items.status.addClass("paid");
 
+                        p.status = 'paid';
+
                         toggle_element(p.items.print_button, true);
                     } else {
                         // not paid yet, continue polling
@@ -353,6 +356,13 @@ Payment = function(g, bill){
     };
 
     p.cancel = function(){
+        if (p.status == 'paid') {
+            p.g.objects.bill.clear();
+            p.toggle_dialog(false);
+
+            return false;
+        }
+
         confirmation_dialog(
             gettext("Confirm cancellation"),
             gettext("Are you sure you want to cancel this bill?"),
