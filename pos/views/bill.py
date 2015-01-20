@@ -203,7 +203,8 @@ def bill_to_dict(user, company, bill):
         'total': format_number(user, company, p.total),
         'total_btc': format_number(user, company, p.total_btc),
         'transaction_datetime': format_date(user, company, p.transaction_datetime),
-        'transaction_reference': p.transaction_reference,
+        'btc_transaction_reference': p.btc_transaction_reference,
+        'paypal_transaction_reference': p.paypal_transaction_reference,
         'payment_info': p.payment_info,
         'status': p.status
     }
@@ -766,7 +767,9 @@ def finish_bill_(request, c, android=False):
         if payment_type == g.CASH or payment_type == g.CREDIT_CARD:
             bill.payment.type = payment_type
             # payment reference: if paid with bitcoin - btc address, if paid with cash, cash amount given
-            bill.payment.transaction_reference = d.get('payment_reference')
+            # tole bols, da gre v payment_info, oz. bo kar moglo it, k zdej se je transaction_reference spremenil
+            # (hehe spremenil, a stekas?:) ... se je spremenil v btc_transaction_reference in paypal_transaction_reference
+            # bill.payment.transaction_reference = d.get('payment_reference')
     else:
         bill.status = g.CANCELED
 
@@ -1114,7 +1117,7 @@ def send_invoice(request, company):
             return JsonResponse({'status': 'error', 'message': 'could_not_create_invoice'})
 
         payment = bill.payment
-        payment.transaction_reference = paypal.response["id"]
+        payment.paypal_transaction_reference = paypal.response["id"]
         payment.save()
 
         if not paypal.send_invoice():

@@ -247,7 +247,7 @@ Payment = function(g, bill){
             send_data(p.g.urls.check_bill_status, {bill_id: p.data.id}, p.g.csrf_token, function (response) {
                 if (response.status != 'ok') {
                     // something went wrong
-                    alert(response.message);
+                    // alert(response.message);
                 } else if (response.status == 'ok') {
                     if (response.data.paid == 'true') {
                         // paid, finish the thing
