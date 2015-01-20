@@ -707,11 +707,13 @@ def check_bill_status_(request, c):
         return JsonResponse({'status': 'no_permission', 'message': 'no_permission'})
 
     # LOL :) - not LOL, rok does not understand - omg, omg, se eno tako..
+    """
     if settings.DEBUG:
         if random.randint(0, 9) > 0:
             return JsonOk(extra={'paid': 'true'})
         else:
             return JsonOk(extra={'paid': 'false'})
+    """
 
     if bill.status == g.PAID:
         return JsonOk(extra={'paid': 'true'})

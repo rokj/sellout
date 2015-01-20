@@ -76,9 +76,9 @@ price = {
 
 headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'application/json, text/javascript, */*; q=0.01', 'User-Agent': 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
 
-bitcoin_db_hostname = '10.0.0.35'
+bitcoin_db_hostname = '127.0.0.1'
 bitcoin_db_username = 'bitcoin'
-bitcoin_db_password = 'RuerGFFu'
+bitcoin_db_password = 'bitcoin'
 bitcoin_db_database = 'bitcoin'
 
 def update_btc_price(currency, price, datetime_updated=None):

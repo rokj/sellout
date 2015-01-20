@@ -103,6 +103,11 @@
     right: 20px;
 }
 
+#payment.paypal #payment_controls {
+    bottom: 59px;
+    right: 101px;
+}
+
 #payment_controls button.cancel {
     background-color: #ff5a6e;
     margin-right: 37px;
@@ -115,6 +120,10 @@
     height: 70px;
     font-weight: bold;
     font-size: 24px;
+}
+
+#payment_controls button.print:hover {
+    cursor: pointer;
 }
 
 #payment_details{
@@ -146,6 +155,15 @@
     top: 305px;
     position: absolute;
     left: 451px;
+}
+
+#payment.paypal .status {
+    left: 377px;
+}
+
+#payment.paypal .status.paid {
+    left: 341px;
+    top: 303px;
 }
 
 #payment .dot.active {
