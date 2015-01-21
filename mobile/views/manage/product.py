@@ -81,7 +81,7 @@ def mobile_get_products(request, company_id):
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
-    if not has_permission(request.user, c, 'tax', 'view'):
+    if not has_permission(request.user, c, 'product', 'view'):
         return JsonError(_("You have no permission to view taxes"))
 
     products = Product.objects.filter(company=c)
@@ -92,27 +92,13 @@ def mobile_get_products(request, company_id):
 
     return JsonResponse(r, safe=False)
 
+
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated,))
-def mobile_get_product_discounts(request, company_id):
+def mobile_toggle_favorite(request, company_id):
     try:
         c = Company.objects.get(id=company_id)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
-    if not has_permission(request.user, c, 'tax', 'list'):
-        return JsonError(_("You have no permission to view taxes"))
-
-    products = Product.objects.filter(company=c)
-
-    r = []
-    for p in products:
-        r.append(product_to_dict(request.user, p, android=True))
-
-    return JsonResponse(r)
-
-
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def mobile_toggle_favorite(request, company):
-    return toggle_favorite_(request, company)
+    return toggle_favorite_(request, c)

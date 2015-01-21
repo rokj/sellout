@@ -195,23 +195,23 @@ def bill_to_dict(user, company, bill):
         
     b['items'] = i
 
-    p = bill.payment
-    payment = {
-        'type': p.type,
-        'amount_paid': format_number(user, company, p.amount_paid),
-        'currency': p.currency,
-        'total': format_number(user, company, p.total),
-        'total_btc': format_number(user, company, p.total_btc),
-        'transaction_datetime': format_date(user, company, p.transaction_datetime),
-        'transaction_reference': p.transaction_reference,
-        'payment_info': p.payment_info,
-        'status': p.status
-    }
-
-    b['payment'] = payment
+    b['payment'] = payment_to_dict(user, company, bill.payment)
 
     return b
 
+
+def payment_to_dict(user, company, payment):
+    return {
+        'type': payment.type,
+        'amount_paid': format_number(user, company, payment.amount_paid),
+        'currency': payment.currency,
+        'total': format_number(user, company, payment.total),
+        'total_btc': format_number(user, company, payment.total_btc),
+        'transaction_datetime': format_date(user, company, payment.transaction_datetime),
+        'transaction_reference': payment.transaction_reference,
+        'payment_info': payment.payment_info,
+        'status': payment.status
+    }
 
 def create_printable_bill(user, company, bill, receipt_format=None, esc=False):
     # get the template and some other details
@@ -766,7 +766,8 @@ def finish_bill_(request, c, android=False):
         if payment_type == g.CASH or payment_type == g.CREDIT_CARD:
             bill.payment.type = payment_type
             # payment reference: if paid with bitcoin - btc address, if paid with cash, cash amount given
-            bill.payment.transaction_reference = d.get('payment_reference')
+            bill.payment.transaction_reference = None
+            bill.payment.payment_info = d.get('payment_info')
     else:
         bill.status = g.CANCELED
 
@@ -779,6 +780,7 @@ def finish_bill_(request, c, android=False):
     if d.get('print'):
         if android:
             return JsonResponse({'status': 'ok',
+                                 'bill_payment': payment_to_dict(request.user, c, bill.payment),
                                  'print': esc_format(request.user, c, bill, bill.register.receipt_format, esc_commands=True)})
         else:
             return JsonResponse({'status': 'ok',
