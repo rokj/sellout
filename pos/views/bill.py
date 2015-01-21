@@ -208,7 +208,8 @@ def payment_to_dict(user, company, payment):
         'total': format_number(user, company, payment.total),
         'total_btc': format_number(user, company, payment.total_btc),
         'transaction_datetime': format_date(user, company, payment.transaction_datetime),
-        'transaction_reference': payment.transaction_reference,
+        'btc_transaction_reference': payment.btc_transaction_reference,
+        'paypal_transaction_reference': payment.paypal_transaction_reference,
         'payment_info': payment.payment_info,
         'status': payment.status
     }
