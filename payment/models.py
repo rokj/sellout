@@ -32,23 +32,25 @@ class Payment(SkeletonU):
         null=True, blank=True
     )
     transaction_datetime = models.DateTimeField(_("Date and time of transaction"), null=True, blank=True)
-    transaction_reference = models.CharField(_("Reference for payer"), help_text=_("BTC address or Sklic or unique ID"
-                                                                                   "for authorization/cancelation"),
+    btc_transaction_reference = models.CharField(_("BTC transaction reference"), help_text=_("BTC address"),
                                            max_length=150, blank=True, null=True, unique=True)
+    paypal_transaction_reference = models.CharField(_("Paypal transaction reference"), help_text=_("Its actually paypal invoice id"),
+                                           max_length=150, blank=True, null=True, unique=True)
+
     payment_info = models.TextField(_("Info about payment"), blank=True, null=True)
     status = models.CharField(_("Payment status"), default=WAITING, choices=PAYMENT_STATUS, max_length=30,
                               null=False, blank=False)
 
     def get_btc_address(self, company_id):
         if self.pk and self.pk is not None:
-            if self.transaction_reference is not None and self.transaction_reference != "":
-                return self.transaction_reference
+            if self.btc_transaction_reference is not None and self.btc_transaction_reference != "":
+                return self.btc_transaction_reference
             else:
                 bitcoin_rpc = BitcoinRPC(settings.PAYMENT['bitcoin']['host'], settings.PAYMENT['bitcoin']['port'],
                                          settings.PAYMENT['bitcoin']['rpcuser'], settings.PAYMENT['bitcoin']['rpcpassword'])
                 address = bitcoin_rpc.get_new_address(settings.PAYMENT['bitcoin']['account_prefix'] + str(company_id))
 
-                self.transaction_reference = address
+                self.btc_transaction_reference = address
                 self.save()
 
                 return address

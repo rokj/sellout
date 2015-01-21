@@ -14,6 +14,21 @@ SUBJECT = "Bitstamp price ..."
 
 DESIRED_DIFFERENCE = 4 # in percent
 
+def coinbase_conversion_rate():
+    response = requests.get("http://finance.yahoo.com/d/quotes.csv?e=.csv&f=c4l1&s=EURUSD=X")
+
+    result = None
+
+    try:
+        for line in response.iter_lines():
+            result = line.split(",")[1]
+
+            break
+    except Exception:
+        pass
+
+    return result
+
 def bitstamp_conversion_rate():
     response = requests.get("https://www.bitstamp.net/api/eur_usd/")
 
@@ -48,13 +63,15 @@ def send_email(_from, to, subject, message):
 urls = {
 #   "mtgox_btceur": "http://data.mtgox.com/api/2/BTCEUR/money/ticker_fast",
 #   "mtgox_btcusd": "http://data.mtgox.com/api/2/BTCUSD/money/ticker_fast",
-    "bitstamp_btcusd": "https://www.bitstamp.net/api/ticker/"
+#   "bitstamp_btcusd": "https://www.bitstamp.net/api/ticker/",
+    "coinbase_btcusd": "https://api.coinbase.com/v1/prices/sell"
 }
 
 price = {
     "mtgox_btceur": 0,
     "mtgox_btcusd": 0,
     "bitstamp_btcusd": 0,
+    "coinbase_btcusd": 0
 }
 
 headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'application/json, text/javascript, */*; q=0.01', 'User-Agent': 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
@@ -102,6 +119,11 @@ def update_btc_price(currency, price, datetime_updated=None):
 for exchange, url in urls.iteritems():
     response = requests.get(url, data={}, headers=headers, verify=False)
 
+    if exchange == "bitstamp_btcusd":
+        conversion_rate = bitstamp_conversion_rate()
+    elif exchange == "coinbase_btcusd":
+        conversion_rate = coinbase_conversion_rate()
+
     if response.status_code == 200:
         datetime_updated = datetime.datetime.utcnow()
 
@@ -109,12 +131,32 @@ for exchange, url in urls.iteritems():
 
         if exchange == "bitstamp_btcusd":
             if u"last" in response:
+                print datetime.datetime.now()
+
                 last_price = Decimal(response["last"])
                 update_btc_price("bitstamp_1_btcusd", last_price, datetime_updated)
+                print "bitstamp_1_btcusd: %s" % last_price
 
                 price["bitstamp_1_usdbtc"] = Decimal(str(1/(last_price))).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
                 update_btc_price("bitstamp_1_usdbtc", price["bitstamp_1_usdbtc"], datetime_updated)
+                print "bitstamp_1_usdbtc: %s" % price["bitstamp_1_usdbtc"]
 
-                conversion_rate = bitstamp_conversion_rate()
                 price["bitstamp_1_eurbtc"] = Decimal(str(1/(last_price/Decimal(conversion_rate["sell"])))).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
                 update_btc_price("bitstamp_1_eurbtc", price["bitstamp_1_eurbtc"], datetime_updated)
+                print "bitstamp_1_eurbtc: %s" % price["bitstamp_1_eurbtc"]
+
+        elif exchange == "coinbase_btcusd":
+            if u"btc" in response and u"subtotal" in response and "amount" in response["subtotal"]:
+                print datetime.datetime.now()
+
+                last_price = Decimal(response["subtotal"]["amount"])
+                update_btc_price("coinbase_1_btcusd", last_price, datetime_updated)
+                print "coinbase_1_btcusd: %s" % last_price
+
+                price["coinbase_1_usdbtc"] = Decimal(str(1/(last_price))).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
+                update_btc_price("coinbase_1_usdbtc", price["coinbase_1_usdbtc"], datetime_updated)
+                print "coinbase_1_usdbtc: %s" % price["coinbase_1_usdbtc"]
+
+                price["coinbase_1_eurbtc"] = Decimal(str(1/(last_price/Decimal(conversion_rate)))).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
+                update_btc_price("coinbase_1_eurbtc", price["coinbase_1_eurbtc"], datetime_updated)
+                print "coinbase_1_eurbtc: %s" % price["coinbase_1_eurbtc"]

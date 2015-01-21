@@ -459,6 +459,9 @@
             p.items.edit_discounts.unbind().click(function(){
                 mass_discount.toggle_dialog(true);
             });
+
+            // by default we show everything
+            p.items.search_button.click();
         };
 
 
@@ -1419,6 +1422,7 @@
                     .unbind()
                     .prop("disabled", true);
         }
+
     });
     </script>
 {% endblock %}
@@ -1640,11 +1644,12 @@
                 <div class="form-field">
                     {% comment %} save/cancel buttons {% endcomment %}
                     <div class="split-cell first">
-                        <input type="button" id="edit_product_save" value="{% trans 'Save' %}" class="ok hoverable"/>
-                    </div>
-                    <div class="split-cell last">
                         <input type="button" id="edit_product_cancel" value="{% trans 'Cancel' %}"
                                class="cancel hoverable"/>
+                    </div>
+
+                    <div class="split-cell last">
+                        <input type="button" id="edit_product_save" value="{% trans 'Save' %}" class="ok hoverable"/>
                     </div>
 
                     <div class="cleared"></div>

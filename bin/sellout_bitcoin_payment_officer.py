@@ -82,10 +82,10 @@ while True:
             # POS Bills, POS Bills, POS Bills
             # POS Bills, POS Bills, POS Bills
             try:
-                payment  = Payment.objects.get(Q(status=WAITING) | Q(status=NOT_ENOUGH_MONEY_ARRIVED), transaction_reference=transaction['address'], type="bitcoin")
+                payment  = Payment.objects.get(Q(status=WAITING) | Q(status=NOT_ENOUGH_MONEY_ARRIVED), btc_transaction_reference=transaction['address'], type="bitcoin")
 
                 # transaction_reference is bitcoin reference in this case
-                total_received_by_address = bitcoin_client_rpc.get_received_by_address(bill.transaction_reference, confirmations)
+                total_received_by_address = bitcoin_client_rpc.get_received_by_address(payment.btc_transaction_reference, confirmations)
                 total_received_by_address = Decimal(total_received_by_address)
 
                 # we try to get timestamp of payment
@@ -103,8 +103,7 @@ while True:
                     payment.save()
 
                     if settings.DEBUG:
-                        print "Just got payment for "
-                        print Payment
+                        print "Just got payment of %s btcs" % (payment.amount_paid)
 
                     # we have this here so I will remember when doing subscriptions
                     # Subscription.extend_subscriptions(payment)

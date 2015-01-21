@@ -191,7 +191,7 @@ MISC = {
     'site_title': 'webpos',
     'management_url': 'admin',  # must not be empty!
                                 # (to differentiate between company and management sites)
-    'max_upload_image_size': 1*2**20,  # 2 megabytes
+    'max_upload_image_size': 20*2**20,  # 2 megabytes
     'image_format': 'png',  # all images will be saved in this format
     'image_upload_formats': 'jpg|jpeg|gif|png|bmp|tiff',  # supported image formats (as regex "options")
     'discounts_per_page': 12,

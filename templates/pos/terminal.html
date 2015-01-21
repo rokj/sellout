@@ -286,7 +286,7 @@ $(window).load(function(){
                 <div id="bill_summary">
                     <div class="total bill-border-top bill-border-bottom">
                         <p class="total">{# placeholder, this is #}-</p>
-                        {% trans "Fakin total" %}:
+                        {% trans "Total" %}:
                     </div>
                 </div>
 
@@ -505,7 +505,7 @@ $(window).load(function(){
             <div class="payment-type-text">{% trans "Choose payment type" %}</div>
             <div class="payment-type cash">{% trans 'Cash' %}</div>
             <div class="payment-type credit-card">{% trans 'Credit card' %}</div>
-{#            <div class="payment-type paypal">{% trans 'Paypal' %}</div>#}
+            <div class="payment-type paypal">{% trans 'Paypal' %}</div>
             <div class="payment-type bitcoin">{% trans 'Bitcoin' %}</div>
         </div>
 
@@ -657,5 +657,6 @@ $(window).load(function(){
 
     <div class="fullscreen shadow hidden" id="fullscreen_shadow"></div>
 
+    <div class="bigger-btc-qrcode hidden"></div>
 {% endblock %}
 

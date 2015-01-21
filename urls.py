@@ -2,11 +2,13 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
 from blusers import views as blusers_views
-from web import views as web_views
+from payment.views import paypal_ipn_handler
 
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    url(r'^paypal-ipn-handler/$', paypal_ipn_handler, name='paypal-ipn-handler'),  # login function (url not visibles)
+
     # admin
     url(r'^admin/', include(admin.site.urls)),
 

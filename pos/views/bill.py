@@ -706,13 +706,13 @@ def check_bill_status_(request, c):
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JsonResponse({'status': 'no_permission', 'message': 'no_permission'})
 
-    # LOL :) - not LOL, rok does not understand
+    # LOL :) - not LOL, rok does not understand - omg, omg, se eno tako..
     """
     if settings.DEBUG:
-        if random.randint(0, 9) > 7:
-            return JsonOk(extra={'paid': True})
+        if random.randint(0, 9) > 0:
+            return JsonOk(extra={'paid': 'true'})
         else:
-            return JsonOk(extra={'paid': False})
+            return JsonOk(extra={'paid': 'false'})
     """
 
     if bill.status == g.PAID:
@@ -766,14 +766,13 @@ def finish_bill_(request, c, android=False):
         if payment_type == g.CASH or payment_type == g.CREDIT_CARD:
             bill.payment.type = payment_type
             # payment reference: if paid with bitcoin - btc address, if paid with cash, cash amount given
-            bill.payment.transaction_reference = None
-            bill.payment.payment_info = d.get('payment_info')
+            # tole bols, da gre v payment_info, oz. bo kar moglo it, k zdej se je transaction_reference spremenil
+            # (hehe spremenil, a stekas?:) ... se je spremenil v btc_transaction_reference in paypal_transaction_reference
+            # bill.payment.transaction_reference = d.get('payment_reference')
     else:
         bill.status = g.CANCELED
 
-    if bill.payment:
-        bill.payment.save()
-
+    bill.payment.save()
     bill.save()
 
     # if print is requested, return html, otherwise the 'ok' response
@@ -945,10 +944,9 @@ def get_payment_btc_info_(request, c):
     extra = {}
 
     if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
-
-        if settings.DEBUG:
+        if settings.DEBUG and 'tomaz' in globals():
             btc_address = "17VP9cu7K75MswYrh2Ue5Ua6Up4ZiMLpYw"
-            btc_amount = 0.0000005
+            btc_amount = 0.01
         else:
             btc_address = bill.payment.get_btc_address(c.id)
             btc_amount = bill.payment.get_btc_amount(request.user, c)
@@ -1030,11 +1028,15 @@ def send_invoice(request, company):
         return JsonError(_("Bill does not exist or data is invalid"))
 
     if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
+        company_paypal_address = get_company_value(request.user, c, 'pos_payment_paypal_address')
+        if company_paypal_address == "":
+            company_paypal_address = c.email
+
         if bill.status == g.PAID:
             return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
 
         merchant_info = {
-            'email': c.email,
+            'email': company_paypal_address,
             'address': {
                 'line1': c.street,
                 'city': c.city,
@@ -1097,8 +1099,6 @@ def send_invoice(request, company):
                     'date': bill_datetime,
                 }
 
-                print item_data
-
                 if product.description and product.description != "":
                     item_data['description'] = product.description
 
@@ -1111,10 +1111,17 @@ def send_invoice(request, company):
                 pass
 
         paypal = Paypal()
+
         if not paypal.create_invoice(invoice_id=bill.serial, merchant_info=merchant_info, billing_info=billing_info,
                               shipping_info=shipping_info, items=items, invoice_date=bill_datetime):
-            return JsonResponse({'status': 'error', 'message': 'paypal_error'})
-        # paypal.send_in
+            return JsonResponse({'status': 'error', 'message': 'could_not_create_invoice'})
+
+        payment = bill.payment
+        payment.paypal_transaction_reference = paypal.response["id"]
+        payment.save()
+
+        if not paypal.send_invoice():
+            return JsonResponse({'status': 'error', 'message': 'could_not_send_invoice'})
 
     else:
         return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})
