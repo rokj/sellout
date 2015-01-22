@@ -5,6 +5,7 @@ import requests
 from common.globals import PAID
 from pos.models import Bill
 import settings
+import logging
 
 
 class AfterResponse(HttpResponse):
@@ -12,6 +13,7 @@ class AfterResponse(HttpResponse):
     kudos: http://stackoverflow.com/questions/4313508/execute-code-in-django-after-response-has-been-sent-to-the-client
     """
     request = None
+    logger = logging.getLogger(__name__)
 
     def close(self):
         super(AfterResponse, self).close()
@@ -27,10 +29,16 @@ class AfterResponse(HttpResponse):
             else:
                 url = settings.PAYMENT['paypal']['live_ipn_endpoint']
 
+            self.logger.debug("Let us try to validate IPN message.")
+
             response = requests.post(url, data=data)
 
             if response and response.status_code == requests.codes.ok:
+                self.logger.debug("Just got response for IPN message.")
+
                 if response.text == "VERIFIED":
+                    self.logger.debug("IPN message valid.")
+
                     invoice_number = self.request.POST.get('invoice_number', '')
                     invoice_id = self.request.POST.get('invoice_id', '')
                     payment_status = self.request.POST.get('payment_status', '')
