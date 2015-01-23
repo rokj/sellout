@@ -125,7 +125,6 @@ Payment = function(g, bill){
                         break;
                     case "bitcoin":
                         p.toggle_bitcoin_section(true);
-
                         p.items.print_button.hide();
                         break;
                 }
@@ -184,6 +183,7 @@ Payment = function(g, bill){
         if(show){
             p.items.bitcoin.button.addClass("active");
             p.items.bitcoin.section.show();
+            p.items.status.waiting_payment.show();
 
             if(p.payment_interval) clearInterval(p.payment_interval);
 
@@ -276,7 +276,7 @@ Payment = function(g, bill){
                         p.items.status.waiting_payment.hide();
                         p.items.status.paid.css('display', 'block');
                         p.items.print_button.show();
-                        p.items.status.addClass("paid");
+                        // p.items.status.addClass("paid");
 
                         p.status = 'paid';
 
@@ -481,9 +481,12 @@ Payment = function(g, bill){
     p.items.paypal.button.unbind().click(function(){ p.switch_section("paypal"); });
     p.items.cash.button.removeClass('disabled');
     p.items.credit_card.button.removeClass('disabled');
+    p.items.paypal.button.removeClass('disabled');
     p.items.paypal.customer_email.val("");
     p.items.paypal.send_invoice_button.show();
     p.items.paypal.customer_email.show();
+    p.items.status.waiting_payment.hide();
+    p.items.status.paid.css('display', 'none');
 
     // set total text
     p.items.total.text(p.data.total);
