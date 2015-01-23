@@ -68,8 +68,7 @@ class AfterResponse(HttpResponse):
                         payment = bill.payment
 
                         if payment.paypal_transaction_reference == invoice_id and payment_status == 'Completed':
-                            if settings.DEBUG:
-                                print "Just got payment with total %s and transactions reference %s" % (str(payment.total), payment.paypal_transaction_reference)
+                            self.logger.debug("Just got PAYPAL payment with total %s and transaction reference %s" % (str(payment.total), payment.paypal_transaction_reference))
 
                             payment.status = PAID
                             payment.save()
