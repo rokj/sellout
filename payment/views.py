@@ -34,10 +34,10 @@ class AfterResponse(HttpResponse):
             response = requests.post(url, data=data)
 
             if response and response.status_code == requests.codes.ok:
-                self.logger.debug("Just got response for IPN message.")
+                self.logger.debug("Just got OK response for IPN message.")
 
                 if response.text == "VERIFIED":
-                    self.logger.debug("IPN message valid.")
+                    self.logger.debug("IPN message VALID.")
 
                     invoice_number = self.request.POST.get('invoice_number', '')
                     invoice_id = self.request.POST.get('invoice_id', '')
@@ -58,6 +58,10 @@ class AfterResponse(HttpResponse):
                             payment.save()
                     except Bill.DoesNotExist:
                         raise Http404
+                else:
+                    self.logger.debug("IPN NOT VALID.")
+            else:
+                self.logger.debug("Could not get OK response for IPN message.")
 
 
     def set_request(self, request):
