@@ -11,6 +11,7 @@ import psycopg2
 
 import time
 import datetime
+import logging
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webpos.settings")
