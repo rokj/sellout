@@ -28,6 +28,8 @@ bitcoin_db_key = 'sellout_last_checked_block'
 
 confirmations = 0
 
+logger = logging.getLogger(__name__)
+
 def get_last_checked_block():
     cursor = connections['bitcoin'].cursor()
 
@@ -98,12 +100,11 @@ while True:
                 if total_received_by_address >= payment.total_btc:
                     if "time" in transaction:
                         payment.transaction_datetime = datetime.datetime.fromtimestamp(int(transaction["time"]))
+                    
+                    logger.debug("Just got BITCOIN payment with total %s and total btc %s and transaction reference %s" % (str(payment.total), str(payment.total_btc), payment.btc_transaction_reference))
 
                     payment.status = PAID
                     payment.save()
-
-                    if settings.DEBUG:
-                        print "Just got payment of %s btcs" % (payment.amount_paid)
 
                     # we have this here so I will remember when doing subscriptions
                     # Subscription.extend_subscriptions(payment)
