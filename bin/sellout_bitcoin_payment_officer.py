@@ -11,6 +11,7 @@ import psycopg2
 
 import time
 import datetime
+import logging
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webpos.settings")
@@ -27,6 +28,8 @@ from django.db import connections
 bitcoin_db_key = 'sellout_last_checked_block'
 
 confirmations = 0
+
+logger = logging.getLogger(__name__)
 
 def get_last_checked_block():
     cursor = connections['bitcoin'].cursor()
@@ -82,10 +85,10 @@ while True:
             # POS Bills, POS Bills, POS Bills
             # POS Bills, POS Bills, POS Bills
             try:
-                payment  = Payment.objects.get(Q(status=WAITING) | Q(status=NOT_ENOUGH_MONEY_ARRIVED), transaction_reference=transaction['address'], type="bitcoin")
+                payment  = Payment.objects.get(Q(status=WAITING) | Q(status=NOT_ENOUGH_MONEY_ARRIVED), btc_transaction_reference=transaction['address'], type="bitcoin")
 
                 # transaction_reference is bitcoin reference in this case
-                total_received_by_address = bitcoin_client_rpc.get_received_by_address(payment.transaction_reference, confirmations)
+                total_received_by_address = bitcoin_client_rpc.get_received_by_address(payment.btc_transaction_reference, confirmations)
                 total_received_by_address = Decimal(total_received_by_address)
 
                 # we try to get timestamp of payment
@@ -98,12 +101,11 @@ while True:
                 if total_received_by_address >= payment.total_btc:
                     if "time" in transaction:
                         payment.transaction_datetime = datetime.datetime.fromtimestamp(int(transaction["time"]))
+                    
+                    logger.debug("Just got BITCOIN payment with total %s and total btc %s and transaction reference %s" % (str(payment.total), str(payment.total_btc), payment.btc_transaction_reference))
 
                     payment.status = PAID
                     payment.save()
-
-                    if settings.DEBUG:
-                        print "Just got payment of %s btcs" % (payment.amount_paid)
 
                     # we have this here so I will remember when doing subscriptions
                     # Subscription.extend_subscriptions(payment)

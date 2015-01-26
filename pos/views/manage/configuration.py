@@ -57,7 +57,7 @@ class ConfigForm(forms.Form):
     decimal_separator = forms.CharField(max_length=1, required=True)
     decimal_places = forms.ChoiceField(choices=decimal_places_choices, required=True)
     payment_bitcoin_address = forms.CharField(help_text=_("where bitcoins will be resend from our bitcoin wallet after user sends bitcoins (after 3 confirmations)"), max_length=34, required=False)
-    payment_paypal_address = forms.CharField(label=_('Paypal email address'), help_text=_("where funds will be send when using paypal payment method"), max_length=34, required=False)
+    payment_paypal_address = forms.CharField(label=_('Paypal email address'), help_text=_("where funds will be sent to when using paypal payment method; this MUST be PAYPAL VERIFIED BUSINESS account"), max_length=34, required=False)
 
     def clean_decimal_places(self):
         data = self.cleaned_data['decimal_places']

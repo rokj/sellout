@@ -195,23 +195,24 @@ def bill_to_dict(user, company, bill):
         
     b['items'] = i
 
-    p = bill.payment
-    payment = {
-        'type': p.type,
-        'amount_paid': format_number(user, company, p.amount_paid),
-        'currency': p.currency,
-        'total': format_number(user, company, p.total),
-        'total_btc': format_number(user, company, p.total_btc),
-        'transaction_datetime': format_date(user, company, p.transaction_datetime),
-        'transaction_reference': p.transaction_reference,
-        'payment_info': p.payment_info,
-        'status': p.status
-    }
-
-    b['payment'] = payment
+    b['payment'] = payment_to_dict(user, company, bill.payment)
 
     return b
 
+
+def payment_to_dict(user, company, payment):
+    return {
+        'type': payment.type,
+        'amount_paid': format_number(user, company, payment.amount_paid),
+        'currency': payment.currency,
+        'total': format_number(user, company, payment.total),
+        'total_btc': format_number(user, company, payment.total_btc),
+        'transaction_datetime': format_date(user, company, payment.transaction_datetime),
+        'btc_transaction_reference': payment.btc_transaction_reference,
+        'paypal_transaction_reference': payment.paypal_transaction_reference,
+        'payment_info': payment.payment_info,
+        'status': payment.status
+    }
 
 def create_printable_bill(user, company, bill, receipt_format=None, esc=False):
     # get the template and some other details
@@ -706,13 +707,13 @@ def check_bill_status_(request, c):
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JsonResponse({'status': 'no_permission', 'message': 'no_permission'})
 
-    # LOL :) - not LOL, rok does not understand - omg, omg, se eno tako...
+    # LOL :) - not LOL, rok does not understand - omg, omg, se eno tako..
     """
     if settings.DEBUG:
-        if random.randint(0, 9) > 7:
-            return JsonOk(extra={'paid': True})
+        if random.randint(0, 9) > 0:
+            return JsonOk(extra={'paid': 'true'})
         else:
-            return JsonOk(extra={'paid': False})
+            return JsonOk(extra={'paid': 'false'})
     """
 
     if bill.status == g.PAID:
@@ -766,7 +767,9 @@ def finish_bill_(request, c, android=False):
         if payment_type == g.CASH or payment_type == g.CREDIT_CARD:
             bill.payment.type = payment_type
             # payment reference: if paid with bitcoin - btc address, if paid with cash, cash amount given
-            bill.payment.transaction_reference = d.get('payment_reference')
+            # tole bols, da gre v payment_info, oz. bo kar moglo it, k zdej se je transaction_reference spremenil
+            # (hehe spremenil, a stekas?:) ... se je spremenil v btc_transaction_reference in paypal_transaction_reference
+            # bill.payment.transaction_reference = d.get('payment_reference')
     else:
         bill.status = g.CANCELED
 
@@ -777,6 +780,7 @@ def finish_bill_(request, c, android=False):
     if d.get('print'):
         if android:
             return JsonResponse({'status': 'ok',
+                                 'bill_payment': payment_to_dict(request.user, c, bill.payment),
                                  'print': esc_format(request.user, c, bill, bill.register.receipt_format, esc_commands=True)})
         else:
             return JsonResponse({'status': 'ok',
@@ -1025,11 +1029,15 @@ def send_invoice(request, company):
         return JsonError(_("Bill does not exist or data is invalid"))
 
     if bill.company == c and has_permission(request.user, c, 'bill', 'edit'):
+        company_paypal_address = get_company_value(request.user, c, 'pos_payment_paypal_address')
+        if company_paypal_address == "":
+            company_paypal_address = c.email
+
         if bill.status == g.PAID:
             return JsonResponse({'status': 'error', 'message': 'bill_payment_already_paid'})
 
         merchant_info = {
-            'email': c.email,
+            'email': company_paypal_address,
             'address': {
                 'line1': c.street,
                 'city': c.city,
@@ -1092,8 +1100,6 @@ def send_invoice(request, company):
                     'date': bill_datetime,
                 }
 
-                print item_data
-
                 if product.description and product.description != "":
                     item_data['description'] = product.description
 
@@ -1106,10 +1112,17 @@ def send_invoice(request, company):
                 pass
 
         paypal = Paypal()
+
         if not paypal.create_invoice(invoice_id=bill.serial, merchant_info=merchant_info, billing_info=billing_info,
                               shipping_info=shipping_info, items=items, invoice_date=bill_datetime):
-            return JsonResponse({'status': 'error', 'message': 'paypal_error'})
-        # paypal.send_in
+            return JsonResponse({'status': 'error', 'message': 'could_not_create_invoice'})
+
+        payment = bill.payment
+        payment.paypal_transaction_reference = paypal.response["id"]
+        payment.save()
+
+        if not paypal.send_invoice():
+            return JsonResponse({'status': 'error', 'message': 'could_not_send_invoice'})
 
     else:
         return JsonResponse({'status': 'error', 'message': 'trying_to_compromise'})

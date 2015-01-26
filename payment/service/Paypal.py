@@ -9,15 +9,27 @@ from django.utils.translation import ugettext as _
 
 
 class Paypal(ServiceAbstract):
-    token_url = {"method": "POST", "url": settings.PAYMENT["paypal"]["url"] + "/v1/oauth2/token"}
-    payment_url = {"method": "POST", "url": settings.PAYMENT["paypal"]["url"] + "/v1/payments/payment"}
-    create_invoice_url = {"method": "POST", "url": settings.PAYMENT["paypal"]["url"] + "/v1/invoicing/invoices"}
+    token_url = {"method": "POST"}
+    payment_url = {"method": "POST"}
+    create_invoice_url = {"method": "POST"}
+    send_invoice_url = {"method": "POST"}
 
     response = None
 
     def __init__(self):
         self.client_id = settings.PAYMENT["paypal"]["client_id"]
         self.secret = settings.PAYMENT["paypal"]["secret"]
+
+        if settings.DEBUG:
+            self.token_url["url"] = settings.PAYMENT["paypal"]["sandbox_api_url"] + "/v1/oauth2/token"
+            self.payment_url["url"] = settings.PAYMENT["paypal"]["sandbox_api_url"] + "/v1/payments/payment"
+            self.create_invoice_url["url"] =  settings.PAYMENT["paypal"]["sandbox_api_url"] + "/v1/invoicing/invoices"
+            self.send_invoice_url["url"] = settings.PAYMENT["paypal"]["sandbox_api_url"] + "/v1/invoicing/invoices/%s/send"
+        else:
+            self.token_url["url"] = settings.PAYMENT["paypal"]["live_api_url"] + "/v1/oauth2/token"
+            self.payment_url["url"] = settings.PAYMENT["paypal"]["live_api_url"] + "/v1/payments/payment"
+            self.create_invoice_url["url"] =  settings.PAYMENT["paypal"]["live_api_url"] + "/v1/invoicing/invoices"
+            self.send_invoice_url["url"] = settings.PAYMENT["paypal"]["live_api_url"] + "/v1/invoicing/invoices/%s/send"
 
     def _try_to_get_token(self):
         token = None
@@ -214,11 +226,29 @@ class Paypal(ServiceAbstract):
 
         self.response = response.json()
 
-        if "id" not in self.response or "number" not in self.response or "uri" not in self.response or "status" not in self.response:
+        if "id" not in self.response or "number" not in self.response or "status" not in self.response or self.response["status"] != "DRAFT":
             if settings.DEBUG:
                 print self.response
                 pass
 
             return False
+
+        return True
+
+
+    def send_invoice(self):
+        token = self._try_to_get_token()
+
+        if not token:
+            return False
+
+        headers = {"Authorization": "Bearer " + token, "Content-Type": "application/json", "Accept": "application/json"}
+
+        invoice_id = self.response["id"]
+        url = self.send_invoice_url["url"] % (invoice_id)
+
+        response = self._send_request(url=url, method=self.send_invoice_url["method"], params={}, data={}, headers=headers)
+        if response.status_code == requests.codes.accepted:
+            return True
 
         return False

@@ -9,8 +9,11 @@ Payment = function(g, bill){
     p.data = p.bill.data;
 
     p.payment_interval = null; // a reference to timer for bitcoin queries on server
-    p.bitcoin_payment_dots_interval = null;
+    p.payment_dots_interval = null;
     p.btc_qrcode_text = "";
+    p.paypal_enabled = false;
+    p.waiting_payment = false;
+    p.status = '';
 
     p.body = $("body");
     p.dialog = $("#payment");
@@ -30,8 +33,9 @@ Payment = function(g, bill){
         paypal:{
             button: $(".payment-type.paypal", p.dialog),
             section: $(".payment-details.paypal", p.dialog),
+            paypal_calc: $(".payment-details.paypal .paypal-calc", p.dialog),
             customer_email: $('.payment-details.paypal #customer_email', p.dialog),
-            send_invoice: $('.payment-details.paypal #send_paypal_invoice', p.dialog)
+            send_invoice_button: $('.payment-details.paypal #send_paypal_invoice', p.dialog)
         },
         bitcoin:{
             button: $(".payment-type.bitcoin", p.dialog),
@@ -40,13 +44,14 @@ Payment = function(g, bill){
             bigger_btc_qrcode: $("div.bigger-btc-qrcode"),
             btc_amount: $(".payment-details.bitcoin .btc-amount", p.dialog),
             btc_address: $(".payment-details.bitcoin .btc-address", p.dialog),
-            btc_address_container: $(".payment-details.bitcoin .btc-address-container", p.dialog),
-            status_dialog: $(".status", p.dialog),
-            status_dots: $(".status .waiting-payment .dot", p.dialog),
-            status: {
-                waiting_payment: $(".status .waiting-payment", p.dialog),
-                paid: $(".status .paid", p.dialog)
-            }
+            btc_address_container: $(".payment-details.bitcoin .btc-address-container", p.dialog)
+        },
+
+        status_dialog: $(".status", p.dialog),
+        status_dots: $(".status .waiting-payment .dot", p.dialog),
+        status: {
+            waiting_payment: $(".status .waiting-payment", p.dialog),
+            paid: $(".status .paid", p.dialog)
         },
 
         total: $(".bill-total", p.dialog), // common to all sections (payment types)
@@ -64,7 +69,7 @@ Payment = function(g, bill){
         send_data(p.g.urls.change_payment_type, {bill_id: p.data.id, type: section}, p.g.csrf_token, function(response) {
             if (response.status == 'ok') {
                 clearInterval(p.payment_interval);
-                clearInterval(p.bitcoin_payment_dots_interval);
+                clearInterval(p.payment_dots_interval);
 
                 p.dialog.removeClass("cash");
                 p.dialog.removeClass("credit_card");
@@ -107,10 +112,19 @@ Payment = function(g, bill){
                     case "paypal":
                         p.items.paypal.button.addClass("active");
                         p.items.paypal.section.show();
+                        p.items.print_button.hide();
+
+                        if (p.waiting_payment) {
+                            p.items.paypal.paypal_calc.hide();
+                            p.items.status_dialog.show();
+                            p.items.status_dialog.removeClass("hidden");
+                            p.items.status.waiting_payment.show();
+                            p.start_dots_interval();
+                            p.start_payment_interval();
+                        }
                         break;
                     case "bitcoin":
                         p.toggle_bitcoin_section(true);
-
                         p.items.print_button.hide();
                         break;
                 }
@@ -122,50 +136,12 @@ Payment = function(g, bill){
         if(show){
             p.items.paypal.button.addClass("active");
             p.items.paypal.section.show();
+            p.items.paypal.paypal_calc.show();
 
             if(p.payment_interval) clearInterval(p.payment_interval);
 
             // disable the print button on the dialog
             toggle_element(p.items.print_button, false);
-
-            /*
-            send_data(p.g.urls.get_payment_btc_info, {bill_id: p.data.id}, p.g.csrf_token, function(response) {
-                if (response.status == 'ok') {
-                    if ('data' in response && 'btc_address' in response.data && 'btc_amount' in response.data) {
-                        p.items.bitcoin.btc_address.val(response.data.btc_address);
-                        p.items.bitcoin.btc_address.data("value", response.data.btc_address);
-                        p.items.bitcoin.btc_amount.html(response.data.btc_amount);
-                        p.items.bitcoin.btc_qrcode.html("");
-                        p.items.bitcoin.btc_qrcode.qrcode({width: 180, height: 160, text: "bitcoin:" + response.data.btc_address + "?amount=" + response.data.btc_amount, background: "#ebebeb"});
-
-                        // set up a timer that will check if the bill has been paid
-                        p.payment_interval = setInterval(function () {
-                            send_data(p.g.urls.check_bill_status, {bill_id: p.data.id}, p.g.csrf_token, function (response) {
-                                if (response.status != 'ok') {
-                                    // something went wrong
-                                    alert(response.message);
-                                } else if (response.status == 'ok') {
-                                    if (response.data.paid == 'true') {
-                                        // paid, finish the thing
-                                        alert("paid");
-                                        // TODO
-
-                                        clearInterval(p.payment_interval);
-                                    }
-                                    else {
-                                        // not paid yet, continue polling
-
-                                    }
-                                }
-                                console.log(response);
-                            });
-                        }, 2000);
-                    } else {
-                        error_message(gettext("Bitcoin payment problem"), gettext("Something went wrong when trying to get information about Bitcoin payment. Try later, or be nice and contact support."))
-                    }
-                }
-            });
-            */
         }
         else{
             p.items.paypal.button.removeClass("active");
@@ -175,10 +151,30 @@ Payment = function(g, bill){
         }
     };
 
-    p.items.paypal.send_invoice.click(function() {
+    p.items.paypal.send_invoice_button.click(function() {
+        var email = p.items.paypal.customer_email.val();
+
+        if (! email_valid(email)) {
+            p.items.paypal.customer_email.addClass("error");
+
+            return false;
+        }
+
+        p.items.paypal.customer_email.removeClass("error");
+
         send_data(p.g.urls.send_invoice, {bill_id: p.data.id, customer_email: p.items.paypal.customer_email.val()}, p.g.csrf_token, function(response) {
             if (response.status == 'ok') {
-                alert('sent invoice');
+                p.waiting_payment = true;
+
+                p.items.paypal.paypal_calc.hide();
+                p.items.status_dialog.show();
+                p.items.status_dialog.removeClass("hidden");
+                p.items.status.waiting_payment.show();
+
+                p.start_payment_interval();
+                p.start_dots_interval();
+            } else {
+                error_message(gettext("Paypal error"), gettext("Something went wrong when we were connecting with paypal. Try again later, or use other payment option."))
             }
         });
     });
@@ -187,6 +183,7 @@ Payment = function(g, bill){
         if(show){
             p.items.bitcoin.button.addClass("active");
             p.items.bitcoin.section.show();
+            p.items.status.waiting_payment.show();
 
             if(p.payment_interval) clearInterval(p.payment_interval);
 
@@ -197,14 +194,14 @@ Payment = function(g, bill){
             send_data(p.g.urls.get_payment_btc_info, {bill_id: p.data.id}, p.g.csrf_token, function(response) {
                 if (response.status == 'ok') {
                     if ('data' in response && 'btc_address' in response.data && 'btc_amount' in response.data) {
-                        p.items.bitcoin.status_dialog.show();
+                        p.items.status_dialog.show();
                         p.items.bitcoin.btc_address.val(response.data.btc_address);
                         p.items.bitcoin.btc_address.data("value", response.data.btc_address);
                         p.items.bitcoin.btc_amount.html(response.data.btc_amount);
                         p.items.bitcoin.btc_qrcode.html("");
 
                         p.btc_qrcode_text = "bitcoin:" + response.data.btc_address + "?amount=" + response.data.btc_amount;
-                        p.items.bitcoin.btc_qrcode.qrcode({width: 120, height: 120, text: p.btc_qrcode_text, background: "#ebebeb"});
+                        p.items.bitcoin.btc_qrcode.qrcode({width: 150, height: 150, text: p.btc_qrcode_text, background: "#ebebeb"});
 
                         p.items.bitcoin.btc_qrcode.unbind().click(function() {
                             p.items.bitcoin.bigger_btc_qrcode.html("");
@@ -219,68 +216,8 @@ Payment = function(g, bill){
                                 });
                         });
 
-                        // set up a timer that will check if the bill has been paid
-                        p.payment_interval = setInterval(function () {
-                            send_data(p.g.urls.check_bill_status, {bill_id: p.data.id}, p.g.csrf_token, function (response) {
-                                if (response.status != 'ok') {
-                                    // something went wrong
-                                    alert(response.message);
-                                } else if (response.status == 'ok') {
-                                    if (response.data.paid == 'true') {
-                                        // paid, finish the thing
-                                        clearInterval(p.payment_interval);
-                                        clearInterval(p.bitcoin_payment_dots_interval);
-
-                                        p.items.bitcoin.status.waiting_payment.hide();
-                                        p.items.bitcoin.status.paid.css('display', 'block');
-                                        p.items.print_button.show();
-                                        p.items.cash.button.unbind();
-                                        p.items.credit_card.button.unbind();
-                                        p.items.cash.button.addClass('disabled');
-                                        p.items.credit_card.button.addClass('disabled');
-                                        p.close_bigger_qrcode();
-
-                                        toggle_element(p.items.print_button, true);
-                                    } else {
-                                        // not paid yet, continue polling
-                                    }
-                                }
-                            });
-                        }, 2000);
-
-                        p.bitcoin_payment_dots_interval = setInterval(function () {
-                            var active = 0;
-                            var i = 0;
-
-                            p.items.bitcoin.status_dots.each(function () {
-                                if ($(this).hasClass('active')) {
-                                    active = i;
-
-                                    return false;
-                                }
-
-                                i++;
-                            });
-
-                            p.items.bitcoin.status_dots.removeClass("active");
-
-                            if (active == 2) {
-                                active = 0;
-                            } else {
-                                active++;
-                            }
-
-                            var i = 0;
-                            p.items.bitcoin.status_dots.each(function () {
-                                if (active == i) {
-                                    $(this).addClass('active');
-
-                                    return false;
-                                }
-
-                                i++;
-                            });
-                        }, 800);
+                        p.start_payment_interval();
+                        p.start_dots_interval();
                     } else {
                         error_message(gettext("Bitcoin payment problem"), gettext("Something went wrong when trying to get information about Bitcoin payment. Try later, or be nice and contact support."))
                     }
@@ -289,7 +226,7 @@ Payment = function(g, bill){
         } else {
             p.items.bitcoin.button.removeClass("active");
             p.items.bitcoin.section.hide();
-            p.items.bitcoin.status_dialog.hide();
+            p.items.status_dialog.hide();
             // enable the print button
         }
     };
@@ -303,6 +240,89 @@ Payment = function(g, bill){
             p.dialog.hide();
             p.items.shadow.fadeOut("fast");
         }
+    };
+
+    p.start_payment_interval = function() {
+        // set up a timer that will check if the bill has been paid
+        p.payment_interval = setInterval(function () {
+            send_data(p.g.urls.check_bill_status, {bill_id: p.data.id}, p.g.csrf_token, function (response) {
+                if (response.status != 'ok') {
+                    // something went wrong
+                    // alert(response.message);
+                } else if (response.status == 'ok') {
+                    if (response.data.paid == 'true') {
+                        // paid, finish the thing
+                        clearInterval(p.payment_interval);
+                        clearInterval(p.payment_dots_interval);
+
+                        if (p.g.settings.last_payment_type == "bitcoin") {
+                            p.items.cash.button.unbind();
+                            p.items.credit_card.button.unbind();
+                            p.items.paypal.button.unbind();
+                            p.items.cash.button.addClass('disabled');
+                            p.items.credit_card.button.addClass('disabled');
+                            p.items.paypal.button.addClass('disabled');
+                            p.close_bigger_qrcode();
+                        } else if (p.g.settings.last_payment_type == "paypal") {
+                            p.items.cash.button.unbind();
+                            p.items.credit_card.button.unbind();
+                            p.items.paypal.button.unbind();
+                            p.items.bitcoin.button.unbind();
+                            p.items.cash.button.addClass('disabled');
+                            p.items.credit_card.button.addClass('disabled');
+                            p.items.bitcoin.button.addClass('disabled');
+                        }
+
+                        p.items.status.waiting_payment.hide();
+                        p.items.status.paid.css('display', 'block');
+                        p.items.print_button.show();
+                        // p.items.status.addClass("paid");
+
+                        p.status = 'paid';
+
+                        toggle_element(p.items.print_button, true);
+                    } else {
+                        // not paid yet, continue polling
+                    }
+                }
+            });
+        }, 2000);
+    };
+
+    p.start_dots_interval = function() {
+        p.payment_dots_interval = setInterval(function () {
+            var active = 0;
+            var i = 0;
+
+            p.items.status_dots.each(function () {
+                if ($(this).hasClass('active')) {
+                    active = i;
+
+                    return false;
+                }
+
+                i++;
+            });
+
+            p.items.status_dots.removeClass("active");
+
+            if (active == 2) {
+                active = 0;
+            } else {
+                active++;
+            }
+
+            var i = 0;
+            p.items.status_dots.each(function () {
+                if (active == i) {
+                    $(this).addClass('active');
+
+                    return false;
+                }
+
+                i++;
+            });
+        }, 800);
     };
 
     p.print = function(html){
@@ -336,6 +356,13 @@ Payment = function(g, bill){
     };
 
     p.cancel = function(){
+        if (p.status == 'paid') {
+            p.g.objects.bill.clear();
+            p.toggle_dialog(false);
+
+            return false;
+        }
+
         confirmation_dialog(
             gettext("Confirm cancellation"),
             gettext("Are you sure you want to cancel this bill?"),
@@ -454,6 +481,12 @@ Payment = function(g, bill){
     p.items.paypal.button.unbind().click(function(){ p.switch_section("paypal"); });
     p.items.cash.button.removeClass('disabled');
     p.items.credit_card.button.removeClass('disabled');
+    p.items.paypal.button.removeClass('disabled');
+    p.items.paypal.customer_email.val("");
+    p.items.paypal.send_invoice_button.show();
+    p.items.paypal.customer_email.show();
+    p.items.status.waiting_payment.hide();
+    p.items.status.paid.css('display', 'none');
 
     // set total text
     p.items.total.text(p.data.total);
