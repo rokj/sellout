@@ -64,6 +64,7 @@ class Company(SkeletonU, CompanyAbstract):
     class Meta:
         verbose_name_plural = _("Companies")
 
+
 ### category ###
 class Category(SkeletonU):
     company = models.ForeignKey(Company, null=False, blank=False)

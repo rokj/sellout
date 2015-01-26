@@ -50,7 +50,7 @@ def image_dimensions(size):
         sorl_string = <width>x<height> (for use in templates)
     """
     if size not in g.IMAGE_DIMENSIONS:
-        return None # an exception will be raised on access
+        return None  # an exception will be raised on access
 
     dim = g.IMAGE_DIMENSIONS[size]
 

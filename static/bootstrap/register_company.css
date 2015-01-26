@@ -21,6 +21,10 @@ body{
     
 }
 
+#logo_placeholder .help-text{
+    max-width: 300px;
+}
+
 #logo_placeholder img{
     width: 50px;
     margin-right: 10px;
@@ -36,10 +40,11 @@ body{
     background-color: #ffffff;
     border-top: 2px solid #dddddd;
     height: 40px;
-    line-height: 32px;
+    line-height: 40px;
     padding-left: 10px;
 
     cursor: not-allowed;
+    color: #646464;
 }
 
 .row .url-name .help-text{
