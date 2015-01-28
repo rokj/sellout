@@ -81,6 +81,8 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/bill/get_btc_price/?$', bill.get_payment_btc_info, name='mobile_add_bill'),
     url(r_company + r'/manage/json/bill/check_bill_status/?$', bill.check_bill_status, name='mobile_check_status'),
     url(r_company + r'/manage/json/bill/change_payment_type?$', bill.change_payment_type, name='mobile_change_payment_type'),
+    url(r_company + r'/manage/json/bill/paypal-send-invoice/$', bill.send_invoice, name='mobile_send_invoice'),
+
 
     # bill
     url(r_company + r'/manage/json/bill/list/?$', bill_management.list_bills, name='mobile_list_bills'),
