@@ -1015,7 +1015,7 @@ def send_invoice(request, company):
 
     try:
         c = Company.objects.get(url_name=company)
-        send_invoice_(request, c)
+        return send_invoice_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
