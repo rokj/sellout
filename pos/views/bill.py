@@ -1007,7 +1007,6 @@ def change_payment_type_(request, c):
 
     return JsonOk()
 
-
 @login_required
 def send_invoice(request, company):
     """
@@ -1016,8 +1015,12 @@ def send_invoice(request, company):
 
     try:
         c = Company.objects.get(url_name=company)
+        return send_invoice_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
+
+@login_required
+def send_invoice_(request, c):
 
     data = JsonParse(request.POST.get('data'))
 
