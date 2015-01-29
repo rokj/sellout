@@ -656,6 +656,7 @@ class Bill(SkeletonU, RegisterAbstract):
 @receiver(pre_save, sender=Bill)
 def set_serial(instance, **kwargs):
     # set serial number after the bill has been paid;
+
     if not instance.serial:
         try:
             # get the second last bill (because the last is this bill without serial)
