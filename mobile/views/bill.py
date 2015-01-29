@@ -90,7 +90,7 @@ def get_payment_btc_info(request, company_id):
 def check_bill_status(request, company_id):
     try:
         c = Company.objects.get(id=company_id)
-        return check_bill_status_(request, c)
+        return check_bill_status_(request, c, android=True)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
 
