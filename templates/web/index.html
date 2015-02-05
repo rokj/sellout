@@ -57,8 +57,10 @@
                 login_forms_container: $("#login_forms_container"),
                 more_button: $("#more"),
                 more_section: $("#meet_section"),
-
-                login_form: $("#login_form")
+                navbar: $(".navbar"),
+                login_form: $("#login_form"),
+                welcome_section: $("#welcome_section"),
+                beta_stripe: $("#beta_stripe")
             };
 
             // resizing and repositioning
@@ -77,6 +79,9 @@
             function position_login_form(){
                 // show the form and move it below the button
                 var button_pos = items.open_login_form.offset();
+
+                if (!button_pos) return;
+
                 var button_size = {
                     width: items.open_login_form.width(),
                     height: items.open_login_form.height()
@@ -157,8 +162,12 @@
 {% block navbar_buttons %}
     <ul class="nav navbar-nav navbar-right">
         <li><a class="custom nav-button extra-font" href="#pricing">{% trans 'Pricing' %}</a></li>
-        <li><a class="custom nav-button extra-font" href="{% url 'web:sign_up' %}">{% trans 'Sign up' %}</a></li>
-        <li><a class="custom nav-button extra-font fake" href="#"><div id="open_login_form">{% trans 'Login' %}</div></a></li>
+        {% if user.is_authenticated %}
+            <li><a class="custom nav-button extra-font" href="{% url 'web:select_company' %}"><span id="enter_select_company">{% trans 'Enter' %}</span></a></li>
+        {% else %}
+            <li><a class="custom nav-button extra-font" href="{% url 'web:sign_up' %}">{% trans 'Sign up' %}</a></li>
+            <li><a class="custom nav-button extra-font fake" href="#"><span id="open_login_form">{% trans 'Login' %}</span></a></li>
+        {% endif %}
     </ul>
 {% endblock %}
 
@@ -269,6 +278,7 @@
             <div class="row">
                 <div class="col col-md-6 v-center">
                     <div id="budget_container" class="center-block">
+                        <div class="akcija-small">{% trans "Free until in beta" %}</div>
                         <div class="budget-display">
                             <div class="budget-price extra-font bold">7<span class="euro">&euro;</span></div>
                             {% trans 'Per month' %}
@@ -437,6 +447,8 @@
                 <div class="col col-md-6 col-sm-6 col-xs-12">
                     <h3 class="dark-fg">{% trans 'Packages & Pricing' %}</h3>
                     <div id="payment_options_boxes"> {# payment options #}
+                        <div class="akcija-big">{% trans "Free until in beta" %}</div>
+
                         <div class="payment-option-nowrap">
                             <div class="payment-option">
                                 <div class="payment-duration"> {% trans '1 month' %}</div>

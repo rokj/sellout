@@ -218,3 +218,26 @@ select{
     background-color: #22e693;
     margin-left: 30px;
 }
+
+
+#beta_stripe {
+    position: absolute;
+    left: 152px;
+    top: -3px;
+    height: 49px;
+    line-height: 30px;
+    width: 103px;
+    /* background-color: #000000; */
+    color: #ffffff;
+    text-transform: uppercase;
+    font-weight: bold;
+    text-align: center;
+    font-size: 15px;
+    padding: 0px 3px 0px 3px;
+    margin: 3px;
+    /* -ms-transform: rotate(45deg); */
+    /* -webkit-transform: rotate(45deg); */
+    /* transform: rotate(45deg); */
+    display: block;
+    background: url('/static/images/index/beta_stripe.png') no-repeat transparent;
+}
