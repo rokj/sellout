@@ -195,7 +195,25 @@ def bill_to_dict(user, company, bill):
         
     b['items'] = i
 
+<<<<<<< HEAD
     b['payment'] = payment_to_dict(user, company, bill.payment)
+=======
+    p = bill.payment
+    payment = {
+        'type': p.type,
+        'amount_paid': format_number(user, company, p.amount_paid),
+        'currency': p.currency,
+        'total': format_number(user, company, p.total),
+        'total_btc': format_number(user, company, p.total_btc),
+        'transaction_datetime': format_date(user, company, p.transaction_datetime),
+        'btc_transaction_reference': p.btc_transaction_reference,
+        'paypal_transaction_reference': p.paypal_transaction_reference,
+        'payment_info': p.payment_info,
+        'status': p.status
+    }
+
+    b['payment'] = payment
+>>>>>>> c412d84ce928686d18ede5cf4813515cfd18696d
 
     return b
 
@@ -208,8 +226,7 @@ def payment_to_dict(user, company, payment):
         'total': format_number(user, company, payment.total),
         'total_btc': format_number(user, company, payment.total_btc),
         'transaction_datetime': format_date(user, company, payment.transaction_datetime),
-        'btc_transaction_reference': payment.btc_transaction_reference,
-        'paypal_transaction_reference': payment.paypal_transaction_reference,
+        'transaction_reference': payment.transaction_reference,
         'payment_info': payment.payment_info,
         'status': payment.status
     }
@@ -696,7 +713,7 @@ def check_bill_status(request, company):
         return JsonError(_("Company does not exist"))
 
 
-def check_bill_status_(request, c, android=False):
+def check_bill_status_(request, c):
     # there should be bill_id in request.POST
     try:
         bill_id = int(JsonParse(request.POST.get('data')).get('bill_id'))
@@ -717,10 +734,7 @@ def check_bill_status_(request, c, android=False):
     """
 
     if bill.status == g.PAID:
-        if android:
-            return JsonOk(extra={'paid': 'true', 'print': esc_format(request.user, c, bill, bill.register.receipt_format, esc_commands=True)})
-        else:
-            return JsonOk(extra={'paid': 'true'})
+        return JsonOk(extra={'paid': 'true'})
     else:
         return JsonOk(extra={'paid': 'false'})
 
@@ -770,9 +784,14 @@ def finish_bill_(request, c, android=False):
         if payment_type == g.CASH or payment_type == g.CREDIT_CARD:
             bill.payment.type = payment_type
             # payment reference: if paid with bitcoin - btc address, if paid with cash, cash amount given
+<<<<<<< HEAD
+            bill.payment.transaction_reference = None
+            bill.payment.payment_info = d.get('payment_info')
+=======
             # tole bols, da gre v payment_info, oz. bo kar moglo it, k zdej se je transaction_reference spremenil
             # (hehe spremenil, a stekas?:) ... se je spremenil v btc_transaction_reference in paypal_transaction_reference
             # bill.payment.transaction_reference = d.get('payment_reference')
+>>>>>>> c412d84ce928686d18ede5cf4813515cfd18696d
     else:
         bill.status = g.CANCELED
 
@@ -1010,6 +1029,7 @@ def change_payment_type_(request, c):
 
     return JsonOk()
 
+
 @login_required
 def send_invoice(request, company):
     """
@@ -1018,13 +1038,8 @@ def send_invoice(request, company):
 
     try:
         c = Company.objects.get(url_name=company)
-        return send_invoice_(request, c)
     except Company.DoesNotExist:
         return JsonError(_("Company does not exist"))
-
-
-@login_required
-def send_invoice_(request, c):
 
     data = JsonParse(request.POST.get('data'))
 
