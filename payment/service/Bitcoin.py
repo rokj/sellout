@@ -1,6 +1,10 @@
-from bitcoinrpc.authproxy import AuthServiceProxy
+from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
+import settings
+import logging
 
 class BitcoinRPC():
+    logger = logging.getLogger(__name__)
+
     def __init__(self, rpchost = None, rpcport = None, rpcuser = None, rpcpassword = None):
         self._rpchost = rpchost
         self._rpcport = rpcport
@@ -69,8 +73,40 @@ class BitcoinRPC():
     def rpcpassword(self):
         del self._rpcpassword
 
+    def increase_keypool_size(self):
+        try:
+            self.access.walletpassphrase(settings.PAYMENT['bitcoin']['walletpassphrase'], settings.PAYMENT['bitcoin']['walletpassphrase_timeout'])
+            self.access.keypoolrefill()
+            self.logger.info("Just refilled bitcoin keypool size.")
+        except JSONRPCException, e:
+            print str(e.error.message)
+
+            self.logger.error("Could not increase bitcoin keypool size.")
+
+    def check_keypool_size(self):
+        try:
+            info = self.access.getinfo()
+
+            if info and 'keypoolsize' in info:
+                if int(info['keypoolsize']) < settings.PAYMENT['bitcoin'] ['minimum_keypoolsize']:
+                    self.increase_keypool_size()
+
+
+
+        except JSONRPCException, e:
+            print str(e.error.message)
+
     def get_new_address(self, account):
-        return self.access.getnewaddress(account)
+        address = ""
+
+        self.check_keypool_size()
+
+        try:
+            address = self.access.getnewaddress(account)
+        except JSONRPCException, e:
+            print str(e.error.message)
+
+        return address
 
     def get_received_by_address(self, address, minconf=1):
         return self.access.getreceivedbyaddress(address, minconf)

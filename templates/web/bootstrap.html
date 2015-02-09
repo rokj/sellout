@@ -47,10 +47,11 @@
 <nav class="navbar navbar-default navbar-fixed-top custom sellout-background" role="navigation">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a class="navbar-brand" href="http://www.sellout.biz">
+            <a class="navbar-brand" href="{% url 'web:index' %}">
                 <img src="{% static 'icons/logo_white.png' %}" alt="Sellout" id="logo" />
             </a>
         </div>
+        <div id="beta_stripe"></div>
         <div id="navbar">
             {% block navbar_buttons %}{% endblock %}
         </div>

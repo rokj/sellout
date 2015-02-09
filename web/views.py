@@ -51,6 +51,7 @@ def index(request):
         next = request.GET.get('next')
 
     context = {
+        'user': request.user,
         'action': action,
         'next': next,
         'login_message': message,
