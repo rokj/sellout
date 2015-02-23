@@ -1,6 +1,7 @@
 {% extends 'web/bootstrap.html' %}
 {% load static %}
 {% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 
 {% block title %}{{ site_title }}{% endblock %}
 
@@ -302,7 +303,7 @@
                     <p><a href="#pricing" class="dark-bg">{% trans 'Check out other offers' %}</a></p>
 
                     <div class="footnote">
-                        {% trans '* The term Register refers to digital register in Sellout application, not an actual piece of harware.' %}
+                        * {% trans "The term Register refers to digital register in Sellout application, not an actual piece of hardware." %}
                     </div>
                 </div>
             </div>
@@ -314,9 +315,11 @@
             <div class="row">
                 <div class="col col-md-6 v-center">
                     <h3>{% trans 'Simple and fast, with no setup' %}</h3>
-                    <p>Forget long lasting software installations,
+                    <p>{% blocktrans %}
+                        Forget long lasting software installations,
                         Sellout requires no setup.
                         All you need is a web browser or a smart phone and basic internet connection.
+                        {% endblocktrans %}
                     </p>
                 </div><!--
                 --><div class="col col-md-6 v-center">
@@ -346,7 +349,7 @@
                          alt="{% trans 'Payment types' %}" />
                 </div><!--
                 --><div class="col col-md-6 v-center">
-                    <h3>{% trans 'Cash. Credit card. Bitcoin.' %}</h3>
+                    <h3>{% trans 'Cash. Credit card. Paypal. Bitcoin.' %}</h3>
                     <p>{% blocktrans %}
                         From good old banknotes to digital currency,
                         Sellout lets you accept any type of payment.
@@ -369,7 +372,7 @@
                             </div>
                         </div>
                         <h4>{% trans 'Cloud-based' %}</h4>
-                        <p>{% trans 'Any time, any place, sellout is always available. <br />Never lose your data.' %}
+                        <p>{% trans 'Any time, any place, Sellout is always available. <br />Never lose your data.' %}
                         </p>
                     </div>
 
@@ -433,9 +436,10 @@
         <div class="container">
             <div class="reading-text">
                 <h3>{% trans 'The perfect partner.' %}</h3>
-                <p>Sellout is for anyone who runs a profitable business and needs to regularly issue invoices.
-                    It is ideal for freelancers, small companies and start-ups.</p>
-                <p>Ease up your everyday life.</p>
+                <p>{% blocktrans %}Sellout is for anyone who runs a profitable business and needs to regularly issue invoices.
+                    It is ideal for freelancers, small companies and start-ups.
+                    {% endblocktrans %}</p>
+                <p>{% trans 'Ease up your everyday life.' %}</p>
             </div>
         </div>
     </section>
@@ -503,7 +507,7 @@
     <section id="banner_section">
         <div class="container">
             <input type="button" value="{% trans 'Register' %}" class="register-shortcut" />
-            <h3>{% trans 'Start your <b>FREE</b> ... until in beta!' %}</h3>
+            <h3>{% trans 'Start your <b>FREE</b> ... while in beta!' %}</h3>
         </div>
     </section>
 
@@ -511,9 +515,15 @@
         <div class="container">
             <div class="row">
                 <div class="col col-md-2 col-sm-6 col-xs-12">
-                    <img src="{% static 'images/index/logo-text.png' %}"
-                        alt="Sellout logo"
-                        id="footer_logo" />
+                    {% if LANGUAGE_CODE == "en" %}
+                        <img src="{% static 'images/index/logo-text.png' %}"
+                            alt="Sellout logo"
+                            id="footer_logo" />
+                    {% elif LANGUAGE_CODE == "si" %}
+                        <img src="{% static 'images/index/logo-text.png' %}"
+                            alt="Sellout logo"
+                            id="footer_logo" />
+                    {% endif %}
                 </div>
 
                 <div class="col col-md-4 col-sm-6 col-xs-12">

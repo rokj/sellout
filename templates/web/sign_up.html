@@ -29,71 +29,71 @@
 
                     <div class="col-md-4">
                         <div class="form-field">
+                            {{ user_form.first_name.label_tag }}
+                            {{ user_form.first_name }}
                             <div class="field-errors">
                                 {{ user_form.first_name.errors }}
                             </div>
-                            {{ user_form.first_name.label_tag }}
-                            {{ user_form.first_name }}
                         </div>
 
                         <div class="form-field">
+                            {{ user_form.last_name.label_tag }}
+                            {{ user_form.last_name }}
                             <div class="field-errors">
                                 {{ user_form.last_name.errors }}
                             </div>
-                            {{ user_form.last_name.label_tag }}
-                            {{ user_form.last_name }}
                         </div>
 
                         <div class="form-field">
+                            {{ user_form.email.label_tag }}
+                            {{ user_form.email }}
                             <div class="field-errors">
                                 {{ user_form.email.errors }}
                             </div>
-                            {{ user_form.email.label_tag }}
-                            {{ user_form.email }}
                         </div>
 
                         <div class="form-field">
+                            {{ user_form.country.label_tag }}
+                            {{ user_form.country }}
                             <div class="field-errors">
                                 {{ user_form.country.errors }}
                             </div>
-                            {{ user_form.country.label_tag }}
-                            {{ user_form.country }}
                         </div>
                     </div>
 
                     <div class="col-md-4">
                         <div class="form-field">
+                            {{ user_form.sex.label_tag }}
+                            {{ user_form.sex }}
                             <div class="field-errors">
                                 {{ user_form.sex.errors }}
                             </div>
-                            {{ user_form.sex.label_tag }}
-                            {{ user_form.sex }}
                         </div>
 
                         <div class="form-field">
+                            {{ user_form.password1.label_tag }}
+                            {{ user_form.password1 }}
                             <div class="field-errors">
                                 {{ user_form.password1.errors }}
                             </div>
-                            {{ user_form.password1.label_tag }}
-                            {{ user_form.password1 }}
                         </div>
 
                         <div class="form-field">
+                            {{ user_form.password2.label_tag }}
+                            {{ user_form.password2 }}
                             <div class="field-errors">
                                 {{ user_form.password2.errors }}
                             </div>
-                            {{ user_form.password2.label_tag }}
-                            {{ user_form.password2 }}
                         </div>
 
                         <div class="form-field captcha">
+                            {# use a custom captcha label tag #}
+                            {% comment %}{{ user_form.captcha.label_tag }}{% endcomment %}
+                            <label for="id_captcha">{% trans 'Please solve this riddle to prove that you are human:' %}</label>
+                            {{ user_form.captcha }}
                             <div class="field-errors">
                                 {{ user_form.captcha.errors }}
                             </div>
-                            {# use a custom captcha label tag #}
-                            {% comment %}{{ user_form.captcha.label_tag }}{% endcomment %}
-                            <label for="id_captcha">{% trans 'Please solve this ridiculous riddle to prove you are human:' %}</label>
-                            {{ user_form.captcha }}
                         </div>
 
                         <div class="form-field submit">

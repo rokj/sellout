@@ -1,0 +1,4450 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-02-18 17:49+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: action/models.py:32
+msgid "Additional data"
+msgstr ""
+
+#: action/models.py:35
+msgid "Reference for an action"
+msgstr ""
+
+#: blusers/admin.py:66
+msgid "Personal info"
+msgstr ""
+
+#: blusers/admin.py:67
+msgid "Permissions"
+msgstr ""
+
+#: blusers/admin.py:69
+msgid "Important dates"
+msgstr ""
+
+#: blusers/forms.py:24 blusers/forms.py:77 common/globals.py:95
+#: templates/pos/manage/users.html:269 templates/pos/terminal.html:449
+#: templates/pos/terminal.html.py:478 templates/pos/unlock_content.html:32
+#: templates/support/search_high.html:56 templates/support/search_low.html:59
+msgid "E-mail"
+msgstr "E-mail"
+
+#: blusers/forms.py:25 blusers/forms.py:78
+msgid ""
+"Required field. 75 characters or fewer. Letters, digits and @/./+/-/_ "
+"characters only."
+msgstr ""
+
+#: blusers/forms.py:26 blusers/forms.py:79
+msgid "This value may contain only letters, digits and characters @/./+/-/_."
+msgstr ""
+
+#: blusers/forms.py:27 blusers/forms.py:86 blusers/forms.py:87
+#: blusers/forms.py:172 blusers/forms.py:173
+#: blusers/templates/blusers/reset_password.html:27
+#: blusers/templates/blusers/settings.html:527
+#: templates/pos/unlock_content.html:35
+msgid "Password"
+msgstr "Geslo"
+
+#: blusers/forms.py:52
+msgid "Enter new password"
+msgstr "Vnesi novo geslo"
+
+#: blusers/forms.py:55
+msgid "Enter new password again"
+msgstr "Vnesi novo geslo še enkrat"
+
+#: blusers/forms.py:61
+msgid "Passwords do not match."
+msgstr "Gesli se ne ujemata."
+
+#: blusers/forms.py:65
+msgid "Invalid password reset key"
+msgstr "Napačen ključ za ponastavitev gesla"
+
+#: blusers/forms.py:80 pos/models.py:418 templates/pos/terminal.html:444
+msgid "First name"
+msgstr "Ime"
+
+#: blusers/forms.py:81
+msgid "Required field. 30 characters or fewer. Letters only and numbers only."
+msgstr "Obvezno polje. 30 znakov ali manj. Dovoljene so samo črke in številke."
+
+#: blusers/forms.py:82 blusers/forms.py:85 blusers/forms.py:170
+msgid "This value may contain only letters and numbers."
+msgstr "To polje lahko vsebuje samo črke in številke."
+
+#: blusers/forms.py:83 blusers/forms.py:168 pos/models.py:419
+#: templates/pos/terminal.html:445
+msgid "Last name"
+msgstr "Priimek"
+
+#: blusers/forms.py:84 blusers/forms.py:169
+msgid "Required field. 30 characters or fewer. Letters and numbers only."
+msgstr ""
+
+#: blusers/forms.py:88 blusers/forms.py:174
+msgid "Password confirmation"
+msgstr "Ponovno geslo"
+
+#: blusers/forms.py:89 blusers/forms.py:175
+msgid "Enter the same password as above, for verification."
+msgstr ""
+
+#: blusers/forms.py:92 blusers/forms.py:178
+msgid "Your photo"
+msgstr ""
+
+#: blusers/forms.py:108 blusers/forms.py:192
+msgid "Invalid old password."
+msgstr ""
+
+#: blusers/forms.py:118 blusers/forms.py:121 blusers/forms.py:202
+#: blusers/forms.py:205
+msgid "The two password fields didn't match."
+msgstr "Gesli se ne ujemata."
+
+#: blusers/forms.py:134
+msgid ""
+"User with this email already exists. Maybe you should just try to login."
+msgstr ""
+"Uporabnik s tem e-mailom že obstaja. Poskusi najprej samo prijaviti."
+
+#: blusers/forms.py:171
+msgid "Last"
+msgstr ""
+
+#: blusers/models.py:26
+msgid "Male or female"
+msgstr ""
+
+#: blusers/models.py:27
+msgid "Lost password reset key or activation key"
+msgstr ""
+
+#: blusers/models.py:126
+msgid "Image name"
+msgstr ""
+
+#: blusers/models.py:127
+msgid "Image description"
+msgstr ""
+
+#: blusers/models.py:130
+msgid "Original filename"
+msgstr ""
+
+#: blusers/templates/blusers/reset_password.html:8
+#: templates/web/recover_password.html:54
+msgid "Reset password"
+msgstr ""
+
+#: blusers/templates/blusers/reset_password.html:12
+msgid "New password set!"
+msgstr ""
+
+#: blusers/templates/blusers/reset_password.html:13
+#, python-format
+msgid "Click <a href=\"%(url)s\">here</a> to login."
+msgstr ""
+
+#: blusers/templates/blusers/reset_password.html:30
+msgid "Password one more time"
+msgstr ""
+
+#: blusers/templates/blusers/reset_password.html:35
+msgid "Set new password"
+msgstr ""
+
+#: blusers/templates/blusers/reset_password.html:36
+#: templates/web/index.html:170 templates/web/sign_up_message.html:41
+msgid "Login"
+msgstr "Prijava"
+
+#: blusers/templates/blusers/reset_password.html:36
+#: templates/web/index.html:509 templates/web/sign_up.html:101
+msgid "Register"
+msgstr "Registriraj"
+
+#: blusers/templates/blusers/settings.html:117
+#: blusers/templates/blusers/settings.html:142
+#: subscription/templates/subscription/subscription.html:693
+#: subscription/templates/subscription/subscription_copy.html:169
+msgid "Something went wrong, contact support."
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:135
+msgid "Wrong current password."
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:137
+msgid "New passwords should match each other."
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:139
+#, python-format
+msgid ""
+"Password should be at least 6 characters long and can contain digits, "
+"letters and following @#$%%^&+="
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:438
+#: subscription/templates/subscription/subscription_copy.html:383
+msgid "Profile"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:449
+msgid "Change photo"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:458
+#: blusers/templates/blusers/settings.html:475
+msgid "you"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:461
+msgid "You are signed with google account."
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:470
+#: blusers/templates/blusers/settings.html:482 common/globals.py:83
+#: common/globals.py:322
+msgid "Male"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:470
+#: blusers/templates/blusers/settings.html:483 common/globals.py:84
+#: common/globals.py:323
+msgid "Female"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:489
+#: blusers/templates/blusers/settings.html:501
+msgid "your company"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:496
+msgid "I am a taxpayer"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:496
+msgid "I am not a taxpayer"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:502 pos/models.py:22
+#: pos/models.py:417 subscription/templates/subscription/subscription.html:935
+msgid "Company name"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:503
+#: subscription/templates/subscription/subscription.html:939
+msgid "Company address"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:504
+#: subscription/templates/subscription/subscription.html:947
+msgid "Company postcode"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:505
+#: subscription/templates/subscription/subscription.html:943
+msgid "Company city"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:506
+msgid "Company country"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:507
+#: subscription/templates/subscription/subscription.html:958
+msgid "Tax ID number"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:508
+#: subscription/templates/subscription/subscription.html:962
+msgid "Taxpayer"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:509
+msgid "Company website"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:514
+#: templates/pos/manage/categories.html:313
+#: templates/pos/manage/contacts.html:124
+#: templates/pos/manage/contacts.html:125
+#: templates/pos/manage/contacts.html:178
+#: templates/pos/manage/contacts.html:179
+#: templates/pos/manage/discounts.html:125
+#: templates/pos/manage/discounts.html:126 templates/pos/manage/users.html:212
+#: templates/pos/manage/users.html:213
+msgid "Edit"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:515
+#: blusers/templates/blusers/settings.html:548
+#: subscription/templates/subscription/subscriptions.html:444
+#: templates/pos/manage/category.html:100
+#: templates/pos/manage/company.html:313 templates/pos/manage/config.html:89
+#: templates/pos/manage/contact.html:151 templates/pos/manage/discount.html:92
+#: templates/pos/manage/personal.html:71
+#: templates/pos/manage/products.html:1657
+#: templates/pos/manage/register.html:76 templates/pos/manage/user.html:45
+#: templates/pos/manage/users.html:253 templates/pos/manage/users.html:254
+#: templates/pos/terminal.html:487 templates/pos/terminal.html.py:679
+#: templates/support/ask.html:23
+msgid "Cancel"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:515
+#: blusers/templates/blusers/settings.html:549
+msgid "Update"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:530
+msgid "Current password"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:535
+msgid "New password"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:540
+msgid "New password one more time"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:545
+msgid "Change password"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:552
+msgid "Password changed successfully!"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:561 pos/models.py:29
+msgid "Website"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:565
+msgid "Prefered language"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:579
+msgid "Date format"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:592
+msgid "First day of week"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:596
+msgid "Sunday"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:599
+msgid "Monday"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:606
+msgid "Location also in task time"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:609 common/globals.py:326
+#: pos/views/manage/company.py:172 pos/views/manage/discount.py:117
+#: pos/views/manage/register.py:91 pos/views/manage/register.py:92
+#: subscription/templates/subscription/subscription_copy.html:204
+#: subscription/templates/subscription/subscriptions.html:352
+#: templates/pos/manage/discounts.html:164 templates/support/question.html:27
+#: templates/support/question_list.html:24
+#: templates/support/search_results.html:47
+#: templates/support/supportbase.html:43
+msgid "Yes"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:612 common/globals.py:326
+#: pos/views/manage/company.py:172 pos/views/manage/discount.py:117
+#: pos/views/manage/register.py:91 pos/views/manage/register.py:92
+#: subscription/templates/subscription/subscription_copy.html:209
+#: templates/pos/manage/discounts.html:166
+#: templates/support/supportbase.html:44
+msgid "No"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:617
+#: templates/pos/large_receipt.html:50 templates/pos/manage/registers.html:28
+msgid "Location"
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:618
+msgid ""
+"This icon will appear in task details and task times if you say yes here."
+msgstr ""
+
+#: blusers/templates/blusers/settings.html:628
+msgid "Upload"
+msgstr ""
+
+#: blusers/views.py:109
+msgid "No access_token provided."
+msgstr ""
+
+#: blusers/views.py:116 blusers/views.py:120 blusers/views.py:123
+#: blusers/views.py:125 blusers/views.py:131 blusers/views.py:134
+#: blusers/views.py:136
+msgid "Something went wrong."
+msgstr ""
+
+#: blusers/views.py:118
+msgid "Token is invalid"
+msgstr ""
+
+#: blusers/views.py:141 blusers/views.py:143
+msgid "Already registered via normal"
+msgstr ""
+
+#: blusers/views.py:201
+msgid "Something went wrong during login with google"
+msgstr ""
+
+#: blusers/views.py:240 templates/web/sign_up_message.html:9
+msgid "Registration successful"
+msgstr ""
+
+#: blusers/views.py:281 web/views.py:246
+msgid "Recover lost password"
+msgstr ""
+
+#: blusers/views.py:359
+msgid "wrong credentials"
+msgstr ""
+
+#: blusers/views.py:369
+msgid "wrong login"
+msgstr ""
+
+#: blusers/views.py:376 mobile/views/manage/users.py:41
+msgid "User authentication failed."
+msgstr ""
+
+#: common/decorators.py:23 pos/views/terminal.py:191
+msgid "This session is locked"
+msgstr ""
+
+#: common/decorators.py:43
+msgid "You are not logged in"
+msgstr ""
+
+#: common/functions.py:38
+#: subscription/templates/subscription/subscription.html:1079
+#: templates/pos/error.html:6 templates/pos/terminal.html:60
+msgid "Error"
+msgstr ""
+
+#: common/functions.py:153 common/functions.py:381
+msgid "Invalid number format"
+msgstr ""
+
+#: common/functions.py:218 templates/pos/no_permission.html:5
+msgid "Permission denied"
+msgstr ""
+
+#: common/functions.py:242 pos/views/manage/users.py:115
+#: pos/views/manage/users.py:136
+msgid "Company not found"
+msgstr ""
+
+#: common/functions.py:253
+msgid "No id specified."
+msgstr ""
+
+#: common/functions.py:359
+msgid "Invalid date format"
+msgstr ""
+
+#: common/globals.py:36
+msgid "Piece"
+msgstr ""
+
+#: common/globals.py:59
+msgid "Hour"
+msgstr ""
+
+#: common/globals.py:60
+msgid "Other"
+msgstr ""
+
+#: common/globals.py:71
+msgid "Percentage"
+msgstr ""
+
+#: common/globals.py:72
+msgid "Absolute value"
+msgstr ""
+
+#: common/globals.py:77 templates/pos/manage/contacts.html:115
+#: templates/pos/manage/contacts.html:116 templates/pos/terminal.html:439
+msgid "Individual"
+msgstr ""
+
+#: common/globals.py:78 templates/pos/base.html:135
+#: templates/pos/manage/company.html:174 templates/pos/manage/config.html:20
+#: templates/pos/manage/contacts.html:169
+#: templates/pos/manage/contacts.html:170 templates/pos/terminal.html:438
+msgid "Company"
+msgstr ""
+
+#: common/globals.py:79
+msgid "None"
+msgstr ""
+
+#: common/globals.py:85
+msgid "Undisclosed"
+msgstr ""
+
+#: common/globals.py:89
+msgid "Full page (Letter/A4)"
+msgstr ""
+
+#: common/globals.py:90
+msgid "Thermal (80mm)"
+msgstr ""
+
+#: common/globals.py:94
+msgid "Printed"
+msgstr ""
+
+#: common/globals.py:105 templates/pos/terminal.html:537
+msgid "Cash"
+msgstr ""
+
+#: common/globals.py:106 templates/pos/terminal.html:538
+msgid "Credit card"
+msgstr ""
+
+#: common/globals.py:107 templates/pos/terminal.html:540
+msgid "Bitcoin"
+msgstr ""
+
+#: common/globals.py:108
+#: subscription/templates/subscription/subscription_copy.html:426
+#: templates/pos/terminal.html:539
+msgid "Paypal"
+msgstr ""
+
+#: common/globals.py:114
+msgid "Default system printer"
+msgstr ""
+
+#: common/globals.py:115
+msgid "Sellout serial (must be installed)"
+msgstr ""
+
+#: common/globals.py:212
+msgid "Guest"
+msgstr ""
+
+#: common/globals.py:213 pos/views/bill.py:358 pos/views/bill.py:916
+#: templates/pos/large_receipt.html:43 templates/pos/small_receipt.html:118
+msgid "Cashier"
+msgstr ""
+
+#: common/globals.py:214
+msgid "Seller"
+msgstr ""
+
+#: common/globals.py:215
+msgid "Manager"
+msgstr ""
+
+#: common/globals.py:216
+msgid "Admin"
+msgstr ""
+
+#: common/globals.py:276
+msgid "Accepted"
+msgstr ""
+
+#: common/globals.py:277
+msgid "Declined"
+msgstr ""
+
+#: common/globals.py:278 common/globals.py:315 common/globals.py:340
+msgid "Waiting"
+msgstr ""
+
+#: common/globals.py:279 common/globals.py:316 common/globals.py:343
+#: common/globals.py:355
+#: subscription/templates/subscription/subscriptions.html:529
+msgid "Canceled"
+msgstr ""
+
+#: common/globals.py:280
+msgid "Seen"
+msgstr ""
+
+#: common/globals.py:289 templates/pos/manage/users.html:126
+msgid "Invite"
+msgstr ""
+
+#: common/globals.py:290
+msgid "Notification"
+msgstr ""
+
+#: common/globals.py:304
+msgid "Master BL users table"
+msgstr ""
+
+#: common/globals.py:305
+msgid "Blocklogic mail"
+msgstr ""
+
+#: common/globals.py:306
+msgid "Normal"
+msgstr ""
+
+#: common/globals.py:307
+msgid "Google"
+msgstr ""
+
+#: common/globals.py:341
+msgid "Approved"
+msgstr ""
+
+#: common/globals.py:342 common/globals.py:354 templates/pos/terminal.html:595
+msgid "Paid"
+msgstr ""
+
+#: common/globals.py:344
+msgid "No money arrived"
+msgstr ""
+
+#: common/globals.py:345
+msgid "Not enough money arrived"
+msgstr ""
+
+#: common/globals.py:346
+msgid "Free"
+msgstr ""
+
+#: common/globals.py:347
+msgid "First time"
+msgstr ""
+
+#: common/globals.py:353
+msgid "Awaiting payment"
+msgstr ""
+
+#: config/currencies.py:5
+msgid "United States Dollar"
+msgstr ""
+
+#: config/currencies.py:6
+msgid "Euro"
+msgstr ""
+
+#: config/currencies.py:7
+msgid "Japanese Yen"
+msgstr ""
+
+#: config/currencies.py:8
+msgid "Pound Sterling"
+msgstr ""
+
+#: config/currencies.py:9
+msgid "Australian Dollar"
+msgstr ""
+
+#: config/currencies.py:10
+msgid "Swiss Franc"
+msgstr ""
+
+#: config/currencies.py:11
+msgid "Canadian Dollar"
+msgstr ""
+
+#: config/currencies.py:12
+msgid "Chinese Yuan"
+msgstr ""
+
+#: mobile/views/bill.py:37 mobile/views/bill.py:46 mobile/views/bill.py:74
+#: mobile/views/bill.py:85 mobile/views/bill.py:95 mobile/views/bill.py:105
+#: mobile/views/bill.py:115 mobile/views/manage/bill.py:18
+#: mobile/views/manage/bill.py:111 mobile/views/manage/category.py:25
+#: mobile/views/manage/category.py:41 mobile/views/manage/category.py:62
+#: mobile/views/manage/category.py:94 mobile/views/manage/category.py:125
+#: mobile/views/manage/company.py:18 mobile/views/manage/company.py:28
+#: mobile/views/manage/configuration.py:17
+#: mobile/views/manage/configuration.py:44 mobile/views/manage/contact.py:20
+#: mobile/views/manage/contact.py:49 mobile/views/manage/contact.py:97
+#: mobile/views/manage/contact.py:145 mobile/views/manage/discount.py:21
+#: mobile/views/manage/discount.py:41 mobile/views/manage/discount.py:70
+#: mobile/views/manage/discount.py:118 mobile/views/manage/discount.py:155
+#: mobile/views/manage/product.py:32 mobile/views/manage/product.py:42
+#: mobile/views/manage/product.py:53 mobile/views/manage/product.py:63
+#: mobile/views/manage/product.py:73 mobile/views/manage/product.py:82
+#: mobile/views/manage/product.py:102 mobile/views/manage/register.py:17
+#: mobile/views/manage/register.py:51 mobile/views/manage/register.py:82
+#: mobile/views/manage/register.py:116 mobile/views/manage/tax.py:16
+#: mobile/views/manage/tax.py:29 mobile/views/manage/tax.py:40
+#: mobile/views/manage/tax.py:50 mobile/views/manage/users.py:21
+#: mobile/views/manage/users.py:33 mobile/views/views.py:23
+#: mobile/views/views.py:35 pos/views/bill.py:383 pos/views/bill.py:642
+#: pos/views/bill.py:663 pos/views/bill.py:696 pos/views/bill.py:737
+#: pos/views/bill.py:802 pos/views/bill.py:937 pos/views/bill.py:980
+#: pos/views/bill.py:1023 pos/views/manage/category.py:186
+#: pos/views/manage/category.py:347 pos/views/manage/contact.py:323
+#: pos/views/manage/discount.py:44 pos/views/manage/product.py:167
+#: pos/views/manage/product.py:195 pos/views/manage/product.py:505
+#: pos/views/manage/product.py:568 pos/views/manage/product.py:637
+#: pos/views/manage/product.py:675 pos/views/manage/product.py:707
+#: pos/views/manage/tax.py:115 pos/views/manage/tax.py:167
+#: pos/views/manage/tax.py:201 pos/views/manage/users.py:64
+#: pos/views/manage/users.py:243 pos/views/terminal.py:110
+#: pos/views/terminal.py:135 pos/views/terminal.py:185 sync/views.py:28
+msgid "Company does not exist"
+msgstr ""
+
+#: mobile/views/bill.py:50 pos/views/bill.py:646
+msgid "You have no permission to view bills"
+msgstr ""
+
+#: mobile/views/bill.py:60
+msgid "Multiple active bills found"
+msgstr ""
+
+#: mobile/views/manage/bill.py:22 mobile/views/manage/bill.py:115
+#: pos/views/manage/bill.py:45
+msgid "You have no permission to view bills."
+msgstr ""
+
+#: mobile/views/manage/bill.py:126 pos/views/bill.py:672 pos/views/bill.py:816
+msgid "Bill does not exist"
+msgstr ""
+
+#: mobile/views/manage/category.py:45
+msgid "You have no permission to view categories"
+msgstr ""
+
+#: mobile/views/manage/category.py:65 mobile/views/manage/category.py:97
+#: mobile/views/manage/contact.py:101 pos/views/manage/product.py:574
+#: pos/views/manage/product.py:681
+msgid "You have no permission to edit products"
+msgstr ""
+
+#: mobile/views/manage/category.py:104
+msgid "Category does not exsist"
+msgstr ""
+
+#: mobile/views/manage/company.py:31
+msgid "edit company details"
+msgstr ""
+
+#: mobile/views/manage/configuration.py:21
+#: mobile/views/manage/configuration.py:48
+#: pos/views/manage/configuration.py:86 pos/views/manage/configuration.py:128
+msgid "You have no permission to edit system configuration."
+msgstr ""
+
+#: mobile/views/manage/contact.py:24 pos/views/manage/contact.py:327
+#: pos/views/manage/product.py:174 pos/views/manage/product.py:201
+msgid "You have no permission to view products"
+msgstr ""
+
+#: mobile/views/manage/contact.py:53 pos/views/manage/product.py:511
+msgid "You have no permission to add products"
+msgstr ""
+
+#: mobile/views/manage/contact.py:109
+msgid "Contact doest not exist"
+msgstr ""
+
+#: mobile/views/manage/contact.py:149
+msgid "delete contacts"
+msgstr ""
+
+#: mobile/views/manage/contact.py:157
+msgid "Contact does not exist"
+msgstr ""
+
+#: mobile/views/manage/discount.py:24 mobile/views/manage/discount.py:46
+#: mobile/views/manage/product.py:85 mobile/views/views.py:38
+msgid "You have no permission to view taxes"
+msgstr ""
+
+#: mobile/views/manage/discount.py:53 mobile/views/manage/discount.py:81
+msgid "Discount does not exist"
+msgstr ""
+
+#: mobile/views/manage/discount.py:56
+msgid "You have no permission to delete discounts."
+msgstr ""
+
+#: mobile/views/manage/discount.py:74
+msgid "edit discounts"
+msgstr ""
+
+#: mobile/views/manage/discount.py:85
+msgid "failed"
+msgstr ""
+
+#: mobile/views/manage/discount.py:122
+msgid "add discounts"
+msgstr ""
+
+#: mobile/views/manage/discount.py:159
+msgid "view discounts"
+msgstr ""
+
+#: mobile/views/manage/register.py:23
+msgid "You have no permission to view registers"
+msgstr ""
+
+#: mobile/views/manage/register.py:55 mobile/views/manage/register.py:86
+msgid "You have no permission to edit registers"
+msgstr ""
+
+#: mobile/views/manage/register.py:93
+msgid "Register does not exists"
+msgstr ""
+
+#: mobile/views/manage/register.py:118 pos/views/manage/register.py:196
+msgid "You have no permission to delete registers"
+msgstr ""
+
+#: mobile/views/manage/register.py:118 pos/views/manage/register.py:196
+msgid "Could not delete register"
+msgstr ""
+
+#: mobile/views/manage/users.py:67 pos/views/terminal.py:249
+msgid "Authentication failed"
+msgstr ""
+
+#: payment/models.py:17
+#: subscription/templates/subscription/subscriptions.html:512
+msgid "Payment type"
+msgstr ""
+
+#: payment/models.py:17
+msgid "Payment made with"
+msgstr ""
+
+#: payment/models.py:20
+msgid "Amount paid"
+msgstr ""
+
+#: payment/models.py:24
+msgid "Total amount to be paid"
+msgstr ""
+
+#: payment/models.py:29
+msgid "Total amount in BTC to be paid"
+msgstr ""
+
+#: payment/models.py:34
+msgid "Date and time of transaction"
+msgstr ""
+
+#: payment/models.py:35
+msgid "BTC transaction reference"
+msgstr ""
+
+#: payment/models.py:35
+msgid "BTC address"
+msgstr ""
+
+#: payment/models.py:37
+msgid "Paypal transaction reference"
+msgstr ""
+
+#: payment/models.py:37
+msgid "Its actually paypal invoice id"
+msgstr ""
+
+#: payment/models.py:40
+msgid "Info about payment"
+msgstr ""
+
+#: payment/models.py:41
+msgid "Payment status"
+msgstr ""
+
+#: payment/service/Paypal.py:127
+#, python-format
+msgid "Subscription for %s month/s for timebits.com"
+msgstr ""
+
+#: payment/service/Paypal.py:139
+msgid ""
+"You selected paypal as payment. When you approve payment, you will be "
+"redirect back to the site."
+msgstr ""
+
+#: pos/models.py:23 templates/pos/terminal.html:450
+#: templates/pos/terminal.html.py:469
+msgid "Street address"
+msgstr ""
+
+#: pos/models.py:24 subscription/templates/subscription/subscription.html:1011
+#: subscription/templates/subscription/subscriptions.html:557
+msgid "Postal code"
+msgstr ""
+
+#: pos/models.py:25 pos/models.py:424
+#: subscription/templates/subscription/subscription.html:1015
+#: subscription/templates/subscription/subscriptions.html:561
+#: templates/pos/terminal.html:454 templates/pos/terminal.html.py:471
+msgid "City"
+msgstr ""
+
+#: pos/models.py:26 pos/models.py:425 templates/pos/terminal.html:455
+#: templates/pos/terminal.html.py:474
+msgid "State"
+msgstr ""
+
+#: pos/models.py:28 pos/models.py:427
+msgid "E-mail address"
+msgstr ""
+
+#: pos/models.py:30
+msgid "Phone number"
+msgstr ""
+
+#: pos/models.py:31
+msgid "VAT exemption number"
+msgstr ""
+
+#: pos/models.py:33
+msgid "Tax payer"
+msgstr ""
+
+#: pos/models.py:44
+msgid "Company name, used in URL address"
+msgstr ""
+
+#: pos/models.py:47 templates/web/register_company.html:112
+msgid "Logo"
+msgstr ""
+
+#: pos/models.py:51
+msgid "Receipt logo"
+msgstr ""
+
+#: pos/models.py:55 pos/models.py:585 templates/pos/manage/products.html:1464
+#: templates/pos/terminal.html:510 templates/pos/terminal.html.py:669
+msgid "Notes"
+msgstr ""
+
+#: pos/models.py:65
+msgid "Companies"
+msgstr ""
+
+#: pos/models.py:71
+msgid "Category name"
+msgstr ""
+
+#: pos/models.py:72 templates/pos/manage/discounts.html:142
+#: templates/pos/manage/products.html:1461
+#: templates/pos/manage/products.html:1545 templates/pos/terminal.html:658
+msgid "Description"
+msgstr ""
+
+#: pos/models.py:84 pos/views/manage/category.py:227
+#: templates/pos/base.html:126 templates/pos/manage/categories.html:291
+msgid "Categories"
+msgstr ""
+
+#: pos/models.py:125
+msgid "Discount description"
+msgstr ""
+
+#: pos/models.py:126 templates/pos/manage/products.html:1711
+msgid "Code"
+msgstr ""
+
+#: pos/models.py:127
+msgid "Discount type"
+msgstr ""
+
+#: pos/models.py:129 pos/views/bill.py:311 pos/views/bill.py:867
+#: pos/views/manage/bill.py:29
+#: subscription/templates/subscription/subscriptions.html:511
+#: templates/pos/large_receipt.html:71 templates/pos/manage/discounts.html:154
+#: templates/pos/manage/tax.html:295 templates/pos/small_receipt.html:53
+#: templates/pos/terminal.html:659
+msgid "Amount"
+msgstr ""
+
+#: pos/models.py:141
+#: subscription/templates/subscription/subscriptions.html:366
+msgid "Start date"
+msgstr ""
+
+#: pos/models.py:142
+msgid "End date"
+msgstr ""
+
+#: pos/models.py:143
+msgid "Enabled"
+msgstr ""
+
+#: pos/models.py:178
+msgid "Tax amount"
+msgstr ""
+
+#: pos/models.py:180
+#: subscription/templates/subscription/subscription.html:1003
+#: subscription/templates/subscription/subscriptions.html:549
+#: templates/pos/large_receipt.html:66 templates/pos/manage/products.html:1458
+#: templates/pos/manage/products.html:1540 templates/pos/manage/users.html:190
+#: templates/pos/terminal.html:234 templates/pos/terminal.html.py:467
+msgid "Name"
+msgstr ""
+
+#: pos/models.py:181
+msgid "Use by default when creating new products"
+msgstr ""
+
+#: pos/models.py:184 templates/pos/base.html:129
+#: templates/pos/manage/products.html:1201
+#: templates/pos/manage/products.html:1510 templates/pos/manage/tax.html:275
+msgid "Taxes"
+msgstr ""
+
+#: pos/models.py:192 templates/pos/manage/products.html:1452
+#: templates/pos/manage/products.html:1552 templates/pos/terminal.html:270
+msgid "Product code"
+msgstr ""
+
+#: pos/models.py:193
+msgid "Store's internal product number"
+msgstr ""
+
+#: pos/models.py:194
+msgid "Product name"
+msgstr ""
+
+#: pos/models.py:195
+msgid "Product description"
+msgstr ""
+
+#: pos/models.py:196
+msgid "Notes (only for internal use)"
+msgstr ""
+
+#: pos/models.py:197
+msgid "Product unit type"
+msgstr ""
+
+#: pos/models.py:199
+msgid "Number of items left in stock"
+msgstr ""
+
+#: pos/models.py:216
+msgid "Icon"
+msgstr ""
+
+#: pos/models.py:374
+msgid "Order of discount on a product"
+msgstr ""
+
+#: pos/models.py:402
+msgid "Price per unit, excluding tax"
+msgstr ""
+
+#: pos/models.py:408
+msgid "Purchase price per unit, excluding tax"
+msgstr ""
+
+#: pos/models.py:415
+msgid "Type of contact"
+msgstr ""
+
+#: pos/models.py:421 templates/pos/terminal.html:461
+msgid "Date of birth"
+msgstr ""
+
+#: pos/models.py:422
+msgid "Street and house number"
+msgstr ""
+
+#: pos/models.py:423
+msgid "Post code/ZIP"
+msgstr ""
+
+#: pos/models.py:428
+msgid "Telephone number"
+msgstr ""
+
+#: pos/models.py:429
+msgid "VAT identification number"
+msgstr ""
+
+#: pos/models.py:508
+msgid "Name of cash register"
+msgstr ""
+
+#: pos/models.py:509
+msgid "Receipt format"
+msgstr ""
+
+#: pos/models.py:511
+msgid "Receipt type"
+msgstr ""
+
+#: pos/models.py:512
+msgid "Print logo on thermal receipts"
+msgstr ""
+
+#: pos/models.py:513
+msgid "Location of this register"
+msgstr ""
+
+#: pos/models.py:514
+msgid "Print location of register"
+msgstr ""
+
+#: pos/models.py:522
+msgid "Printer driver"
+msgstr ""
+
+#: pos/models.py:523
+msgid "Device id"
+msgstr ""
+
+#: pos/models.py:556
+msgid "Bill number, unique over all company's bills"
+msgstr ""
+
+#: pos/models.py:559
+msgid "Discount on the whole bill (absolute or relative)"
+msgstr ""
+
+#: pos/models.py:564
+msgid "Type of discount"
+msgstr ""
+
+#: pos/models.py:570
+msgid "Sub total"
+msgstr ""
+
+#: pos/models.py:575
+msgid "Discount, sum of all discounts"
+msgstr ""
+
+#: pos/models.py:580
+msgid "Tax amount, absolute value, sum of all items' taxes"
+msgstr ""
+
+#: pos/models.py:592
+msgid "Date and time of bill creation"
+msgstr ""
+
+#: pos/models.py:678
+msgid "Bill notes"
+msgstr ""
+
+#: pos/models.py:679
+msgid ""
+"Notes for this item, shown on bill (like expiration date or serial number)"
+msgstr ""
+
+#: pos/models.py:687
+msgid "Base price (for single item), without tax and discounts"
+msgstr ""
+
+#: pos/models.py:692 pos/views/bill.py:311 pos/views/bill.py:867
+#: templates/pos/large_receipt.html:69
+msgid "Quantity"
+msgstr ""
+
+#: pos/models.py:697
+msgid "Tax in percent, copied from product's tax rate"
+msgstr ""
+
+#: pos/models.py:708
+msgid "Base price, multiplied by quantity"
+msgstr ""
+
+#: pos/models.py:713
+msgid "Discount, absolute value, sum of all valid discounts on this item"
+msgstr ""
+
+#: pos/models.py:718
+msgid "Base price minus discounts"
+msgstr ""
+
+#: pos/models.py:723
+msgid "Tax amount, absolute value"
+msgstr ""
+
+#: pos/models.py:728
+msgid "Total price, including taxes, discounts and multiplied by quantity"
+msgstr ""
+
+#: pos/urls.py:38
+msgid "/company"
+msgstr ""
+
+#: pos/urls.py:39
+msgid "/upload-color-logo"
+msgstr ""
+
+#: pos/urls.py:40
+msgid "/upload-monochrome-logo"
+msgstr ""
+
+#: pos/urls.py:42
+msgid "/company-settings"
+msgstr ""
+
+#: pos/urls.py:44
+msgid "/categories"
+msgstr ""
+
+#: pos/urls.py:45
+msgid "/category/add"
+msgstr ""
+
+#: pos/urls.py:46
+msgid "/category/edit"
+msgstr ""
+
+#: pos/urls.py:47
+msgid "/category/delete"
+msgstr ""
+
+#: pos/urls.py:49
+msgid "/contacts"
+msgstr ""
+
+#: pos/urls.py:50
+msgid "/contact/add"
+msgstr ""
+
+#: pos/urls.py:51
+msgid "/contact/edit"
+msgstr ""
+
+#: pos/urls.py:52
+msgid "/contact/delete"
+msgstr ""
+
+#: pos/urls.py:54
+msgid "/discounts"
+msgstr ""
+
+#: pos/urls.py:55
+msgid "/discount/add"
+msgstr ""
+
+#: pos/urls.py:56
+msgid "/discount/edit"
+msgstr ""
+
+#: pos/urls.py:57
+msgid "/discount/delete"
+msgstr ""
+
+#: pos/urls.py:59
+msgid "/taxes"
+msgstr ""
+
+#: pos/urls.py:64
+msgid "/registers"
+msgstr ""
+
+#: pos/urls.py:65
+msgid "/register/add"
+msgstr ""
+
+#: pos/urls.py:66
+msgid "/register/edit"
+msgstr ""
+
+#: pos/urls.py:67
+msgid "/register/delete"
+msgstr ""
+
+#: pos/urls.py:70
+msgid "/products"
+msgstr ""
+
+#: pos/urls.py:79
+msgid "/users"
+msgstr ""
+
+#: pos/urls.py:80
+msgid "/users/edit"
+msgstr ""
+
+#: pos/urls.py:81
+msgid "/users/delete"
+msgstr ""
+
+#: pos/urls.py:83
+msgid "/users/invite"
+msgstr ""
+
+#: pos/urls.py:84
+msgid "/users/delete-invitation"
+msgstr ""
+
+#: pos/urls.py:87
+msgid "/bills"
+msgstr ""
+
+#: pos/urls.py:90
+msgid "/user-settings"
+msgstr ""
+
+#: pos/views/bill.py:238
+msgid "Unsupported bill format"
+msgstr ""
+
+#: pos/views/bill.py:288 pos/views/bill.py:301 pos/views/bill.py:843
+#: pos/views/bill.py:856 templates/pos/large_receipt.html:21
+#: templates/pos/large_receipt.html:32 templates/pos/small_receipt.html:18
+#: templates/pos/small_receipt.html:32 templates/pos/terminal.html:468
+msgid "VAT"
+msgstr ""
+
+#: pos/views/bill.py:305 pos/views/bill.py:860
+#: templates/pos/large_receipt.html:57 templates/pos/small_receipt.html:38
+msgid "Bill No."
+msgstr ""
+
+#: pos/views/bill.py:311 pos/views/bill.py:867
+#: subscription/templates/subscription/subscription_copy.html:403
+#: templates/pos/large_receipt.html:67 templates/pos/manage/products.html:1470
+#: templates/pos/manage/products.html:1706 templates/pos/small_receipt.html:49
+#: templates/pos/terminal.html:240
+msgid "Price"
+msgstr ""
+
+#: pos/views/bill.py:311 pos/views/bill.py:867
+#: templates/pos/large_receipt.html:68 templates/pos/small_receipt.html:52
+#: templates/pos/terminal.html:246 templates/pos/terminal.html.py:329
+msgid "Discount"
+msgstr ""
+
+#: pos/views/bill.py:330 pos/views/bill.py:338 pos/views/bill.py:887
+#: pos/views/bill.py:896
+#: subscription/templates/subscription/subscription_copy.html:439
+#: templates/pos/large_receipt.html:83 templates/pos/large_receipt.html:132
+#: templates/pos/small_receipt.html:91 templates/pos/terminal.html:250
+#: templates/pos/terminal.html.py:310 templates/pos/terminal.html:545
+msgid "Total"
+msgstr ""
+
+#: pos/views/bill.py:338 pos/views/bill.py:896
+#: templates/pos/large_receipt.html:129 templates/pos/small_receipt.html:88
+msgid "Rate"
+msgstr ""
+
+#: pos/views/bill.py:338 pos/views/bill.py:896
+#: templates/pos/large_receipt.html:130 templates/pos/small_receipt.html:89
+msgid "Subtotal"
+msgstr ""
+
+#: pos/views/bill.py:338 pos/views/bill.py:896
+#: templates/pos/large_receipt.html:131
+#: templates/pos/manage/products.html:1467
+#: templates/pos/manage/products.html:1562
+#: templates/pos/manage/products.html:1696 templates/pos/small_receipt.html:90
+#: templates/pos/terminal.html:243 templates/pos/terminal.html.py:641
+msgid "Tax"
+msgstr ""
+
+#: pos/views/bill.py:352 pos/views/bill.py:910
+msgid "Sum"
+msgstr ""
+
+#: pos/views/bill.py:388
+msgid "(Item: "
+msgstr ""
+
+#: pos/views/bill.py:393
+msgid "You have no permission to create bills"
+msgstr ""
+
+#: pos/views/bill.py:398
+msgid "No data received"
+msgstr ""
+
+#: pos/views/bill.py:405
+msgid "This bill has already been paid, editing is not possible"
+msgstr ""
+
+#: pos/views/bill.py:423
+msgid "Invalid register specified."
+msgstr ""
+
+#: pos/views/bill.py:434
+msgid "Invalid contact"
+msgstr ""
+
+#: pos/views/bill.py:459
+msgid "Invalid grand total value"
+msgstr ""
+
+#: pos/views/bill.py:469
+msgid "Product with this id does not exist"
+msgstr ""
+
+#: pos/views/bill.py:474
+msgid "Invalid quantity value"
+msgstr ""
+
+#: pos/views/bill.py:477
+msgid "Cannot add an item with zero or negative quantity"
+msgstr ""
+
+#: pos/views/bill.py:523
+msgid "The discount is not active"
+msgstr ""
+
+#: pos/views/bill.py:525
+msgid "Chosen discount does not exist or is not valid"
+msgstr ""
+
+#: pos/views/bill.py:530 pos/views/bill.py:534 pos/views/bill.py:552
+msgid "Invalid discount amount"
+msgstr ""
+
+#: pos/views/bill.py:548
+msgid "Invalid base price"
+msgstr ""
+
+#: pos/views/bill.py:549
+msgid "Invalid quantity"
+msgstr ""
+
+#: pos/views/bill.py:550 pos/views/manage/product.py:474
+msgid "Invalid tax rate"
+msgstr ""
+
+#: pos/views/bill.py:551
+msgid "Invalid batch price"
+msgstr ""
+
+#: pos/views/bill.py:553
+msgid "Invalid net price"
+msgstr ""
+
+#: pos/views/bill.py:554
+msgid "Invalid tax amount"
+msgstr ""
+
+#: pos/views/bill.py:555
+msgid "Invalid total"
+msgstr ""
+
+#: pos/views/bill.py:670
+msgid "Invalid bill id"
+msgstr ""
+
+#: pos/views/bill.py:676 pos/views/bill.py:745
+msgid "You have no permission to edit bills"
+msgstr ""
+
+#: pos/views/bill.py:680
+msgid "This bill has already been paid, deleting is not possible"
+msgstr ""
+
+#: pos/views/bill.py:705 pos/views/bill.py:946 pos/views/bill.py:989
+#: pos/views/bill.py:1036
+msgid "Bill does not exist or data is invalid"
+msgstr ""
+
+#: pos/views/bill.py:751 pos/views/manage/contact.py:479
+#: pos/views/manage/product.py:713 pos/views/manage/users.py:72
+#: pos/views/manage/users.py:150 pos/views/manage/users.py:255
+msgid "No data in request"
+msgstr ""
+
+#: pos/views/bill.py:757
+msgid "No bill found"
+msgstr ""
+
+#: pos/views/bill.py:766
+msgid "Payment type does not exist"
+msgstr ""
+
+#: pos/views/bill.py:810
+msgid "Missing required data"
+msgstr ""
+
+#: pos/views/manage/bill.py:29
+msgid "Number"
+msgstr ""
+
+#: pos/views/manage/bill.py:29
+msgid "Date"
+msgstr ""
+
+#: pos/views/manage/bill.py:30
+msgid "Descending"
+msgstr ""
+
+#: pos/views/manage/bill.py:30
+msgid "Ascending"
+msgstr ""
+
+#: pos/views/manage/bill.py:140 templates/pos/base.html:132
+#: templates/pos/manage/bills.html:42
+msgid "Bills"
+msgstr ""
+
+#: pos/views/manage/category.py:65 pos/views/manage/category.py:210
+msgid "A category cannot be its own child"
+msgstr ""
+
+#: pos/views/manage/category.py:221
+msgid "You have no permission to view categories."
+msgstr ""
+
+#: pos/views/manage/category.py:241
+msgid "You have no permission to add categories."
+msgstr ""
+
+#: pos/views/manage/category.py:255
+msgid "You have no permission to add to this category."
+msgstr ""
+
+#: pos/views/manage/category.py:268 templates/pos/manage/categories.html:296
+#: templates/pos/manage/category.html:44
+msgid "Add category"
+msgstr ""
+
+#: pos/views/manage/category.py:306
+msgid "You have no permission to edit categories."
+msgstr ""
+
+#: pos/views/manage/category.py:335 templates/pos/manage/category.html:46
+msgid "Edit category"
+msgstr ""
+
+#: pos/views/manage/category.py:353
+msgid "You have no permission to delete categories"
+msgstr ""
+
+#: pos/views/manage/category.py:361
+msgid "You have no permission to delete this category"
+msgstr ""
+
+#: pos/views/manage/category.py:363
+msgid "No category specified"
+msgstr ""
+
+#: pos/views/manage/category.py:366
+msgid "Cannot delete category with subcategories"
+msgstr ""
+
+#: pos/views/manage/category.py:370
+msgid "There are products in this category, it cannot be deleted"
+msgstr ""
+
+#: pos/views/manage/category.py:376
+msgid "Category could not be deleted"
+msgstr ""
+
+#: pos/views/manage/company.py:193 pos/views/manage/company.py:212
+msgid "Url of the company is invalid or exists already."
+msgstr ""
+
+#: pos/views/manage/company.py:206
+msgid "You have no permission to edit this company"
+msgstr ""
+
+#: pos/views/manage/company.py:217 pos/views/manage/product.py:371
+msgid "No name entered"
+msgstr ""
+
+#: pos/views/manage/company.py:219 pos/views/manage/product.py:373
+#: pos/views/manage/tax.py:52
+msgid "Name too long"
+msgstr ""
+
+#: pos/views/manage/company.py:222
+msgid "No email entered"
+msgstr ""
+
+#: pos/views/manage/company.py:321
+msgid "Registration"
+msgstr ""
+
+#: pos/views/manage/company.py:337
+msgid "You have no permission to edit company details."
+msgstr ""
+
+#: pos/views/manage/company.py:345
+msgid "Company details"
+msgstr ""
+
+#: pos/views/manage/company.py:385 pos/views/manage/company.py:427
+msgid "No file sent"
+msgstr ""
+
+#: pos/views/manage/company.py:458
+msgid "Color logo does not exist"
+msgstr ""
+
+#: pos/views/manage/configuration.py:59
+msgid ""
+"where bitcoins will be resend from our bitcoin wallet after user sends "
+"bitcoins (after 3 confirmations)"
+msgstr ""
+
+#: pos/views/manage/configuration.py:60
+msgid "Paypal email address"
+msgstr ""
+
+#: pos/views/manage/configuration.py:60
+msgid ""
+"where funds will be sent to when using paypal payment method; this MUST be "
+"PAYPAL VERIFIED BUSINESS account"
+msgstr ""
+
+#: pos/views/manage/configuration.py:74
+msgid "In boxes"
+msgstr ""
+
+#: pos/views/manage/configuration.py:74
+msgid "In lines"
+msgstr ""
+
+#: pos/views/manage/configuration.py:115
+msgid "System configuration"
+msgstr ""
+
+#: pos/views/manage/configuration.py:152 templates/pos/manage/user.html:16
+#: templates/web/user_profile.html:12
+msgid "User settings"
+msgstr ""
+
+#: pos/views/manage/contact.py:80
+msgid "No type specified"
+msgstr ""
+
+#: pos/views/manage/contact.py:82
+msgid "Wrong contact type"
+msgstr ""
+
+#: pos/views/manage/contact.py:88
+msgid "No first name"
+msgstr ""
+
+#: pos/views/manage/contact.py:90
+msgid "First name too long"
+msgstr ""
+
+#: pos/views/manage/contact.py:94
+msgid "No last name"
+msgstr ""
+
+#: pos/views/manage/contact.py:96
+msgid "Last name too long"
+msgstr ""
+
+#: pos/views/manage/contact.py:100
+msgid "Wrong sex"
+msgstr ""
+
+#: pos/views/manage/contact.py:106
+msgid "Wrong format of date of birth"
+msgstr ""
+
+#: pos/views/manage/contact.py:115
+msgid "No company name"
+msgstr ""
+
+#: pos/views/manage/contact.py:118
+msgid "Company name too long"
+msgstr ""
+
+#: pos/views/manage/contact.py:127
+msgid "Email address too long"
+msgstr ""
+
+#: pos/views/manage/contact.py:129
+msgid "Email address too short"
+msgstr ""
+
+#: pos/views/manage/contact.py:137
+msgid "Invalid email address"
+msgstr ""
+
+#: pos/views/manage/contact.py:144
+msgid "Country does not exist"
+msgstr ""
+
+#: pos/views/manage/contact.py:158
+msgid "Street address too long"
+msgstr ""
+
+#: pos/views/manage/contact.py:162
+msgid "Post code too long"
+msgstr ""
+
+#: pos/views/manage/contact.py:166
+msgid "City name too long"
+msgstr ""
+
+#: pos/views/manage/contact.py:170
+msgid "State name too long"
+msgstr ""
+
+#: pos/views/manage/contact.py:174
+msgid "Phone number too long"
+msgstr ""
+
+#: pos/views/manage/contact.py:178
+msgid "VAT number too long"
+msgstr ""
+
+#: pos/views/manage/contact.py:262
+msgid "You have no permission to view contacts."
+msgstr ""
+
+#: pos/views/manage/contact.py:309 templates/pos/base.html:131
+#: templates/pos/manage/contacts.html:15
+msgid "Contacts"
+msgstr ""
+
+#: pos/views/manage/contact.py:341
+msgid "You have no permission to add contacts."
+msgstr ""
+
+#: pos/views/manage/contact.py:351
+msgid "Add contact"
+msgstr ""
+
+#: pos/views/manage/contact.py:403
+msgid "You have no permission to edit contacts."
+msgstr ""
+
+#: pos/views/manage/contact.py:408
+msgid "Edit contact"
+msgstr ""
+
+#: pos/views/manage/contact.py:457
+msgid "You have no permission to delete contacts"
+msgstr ""
+
+#: pos/views/manage/contact.py:458
+msgid "Could not delete contact"
+msgstr ""
+
+#: pos/views/manage/contact.py:470
+msgid "Company does not exist."
+msgstr ""
+
+#: pos/views/manage/contact.py:474
+msgid "You have no permission to add contacts"
+msgstr ""
+
+#: pos/views/manage/contact.py:512 pos/views/manage/contact.py:536
+msgid "Saving contact failed"
+msgstr ""
+
+#: pos/views/manage/discount.py:48
+msgid "You have no permission to view discounts"
+msgstr ""
+
+#: pos/views/manage/discount.py:126
+msgid "Discount with this code already exists"
+msgstr ""
+
+#: pos/views/manage/discount.py:134
+msgid "Search text"
+msgstr ""
+
+#: pos/views/manage/discount.py:148
+msgid "You have no permission to view discounts."
+msgstr ""
+
+#: pos/views/manage/discount.py:200 templates/pos/base.html:128
+#: templates/pos/manage/discounts.html:19
+#: templates/pos/manage/products.html:1278
+#: templates/pos/manage/products.html:1513
+#: templates/pos/manage/products.html:1624 templates/pos/terminal.html:647
+msgid "Discounts"
+msgstr ""
+
+#: pos/views/manage/discount.py:216
+msgid "You have no permission to add discounts."
+msgstr ""
+
+#: pos/views/manage/discount.py:219 templates/pos/manage/discount.html:19
+msgid "Add discount"
+msgstr ""
+
+#: pos/views/manage/discount.py:263 pos/views/manage/discount.py:281
+msgid "You have no permission to edit discounts."
+msgstr ""
+
+#: pos/views/manage/discount.py:266 templates/pos/manage/discount.html:21
+msgid "Edit discount"
+msgstr ""
+
+#: pos/views/manage/discount.py:311
+msgid "You have no permission to delete discounts"
+msgstr ""
+
+#: pos/views/manage/discount.py:312
+msgid "Could not delete discount: "
+msgstr ""
+
+#: pos/views/manage/manage.py:22
+msgid "You have no permission to manage POS settings."
+msgstr ""
+
+#: pos/views/manage/manage.py:25 support/parameters.py:8
+#: templates/pos/base.html:121 templates/web/select_company.html:47
+msgid "Management"
+msgstr ""
+
+#: pos/views/manage/product.py:111
+msgid "You have no permission to view products."
+msgstr ""
+
+#: pos/views/manage/product.py:115
+msgid ""
+"There are no taxes defined. Please go to tax management and define them."
+msgstr ""
+
+#: pos/views/manage/product.py:119
+msgid ""
+"There are no categories defined, please go to category management to define "
+"them."
+msgstr ""
+
+#: pos/views/manage/product.py:134 templates/pos/base.html:127
+#: templates/pos/manage/products.html:1431
+msgid "Products"
+msgstr ""
+
+#: pos/views/manage/product.py:179 pos/views/manage/product.py:182
+msgid "No product specified"
+msgstr ""
+
+#: pos/views/manage/product.py:356
+msgid "Wrong product id"
+msgstr ""
+
+#: pos/views/manage/product.py:364
+msgid "Cannot edit product: it does not exist"
+msgstr ""
+
+#: pos/views/manage/product.py:367
+msgid "You have no permission to edit this product"
+msgstr ""
+
+#: pos/views/manage/product.py:380
+msgid "There is already a product with that name"
+msgstr ""
+
+#: pos/views/manage/product.py:381
+msgid "code"
+msgstr ""
+
+#: pos/views/manage/product.py:386
+msgid "No category assigned"
+msgstr ""
+
+#: pos/views/manage/product.py:392
+msgid "Selected category does not exist"
+msgstr ""
+
+#: pos/views/manage/product.py:397
+msgid "Price too long"
+msgstr ""
+
+#: pos/views/manage/product.py:401
+msgid "Check price notation"
+msgstr ""
+
+#: pos/views/manage/product.py:407
+msgid "Purchase price too long"
+msgstr ""
+
+#: pos/views/manage/product.py:412
+msgid "Check purchase price notation"
+msgstr ""
+
+#: pos/views/manage/product.py:418
+msgid "Invalid unit type"
+msgstr ""
+
+#: pos/views/manage/product.py:426
+msgid "Image upload failed"
+msgstr ""
+
+#: pos/views/manage/product.py:437
+msgid "No code entered"
+msgstr ""
+
+#: pos/views/manage/product.py:440
+msgid "Code too long"
+msgstr ""
+
+#: pos/views/manage/product.py:448
+msgid "A product with this code already exists: "
+msgstr ""
+
+#: pos/views/manage/product.py:456
+msgid "Shortcut too long"
+msgstr ""
+
+#: pos/views/manage/product.py:462
+msgid "A product with this shortcut already exists: "
+msgstr ""
+
+#: pos/views/manage/product.py:483
+msgid "Stock number too big"
+msgstr ""
+
+#: pos/views/manage/product.py:488
+msgid "Check stock notation"
+msgstr ""
+
+#: pos/views/manage/product.py:493
+msgid "Stock cannot be negative"
+msgstr ""
+
+#: pos/views/manage/product.py:543
+msgid "Error while setting purchase price"
+msgstr ""
+
+#: pos/views/manage/product.py:549
+msgid "Error while setting sell price"
+msgstr ""
+
+#: pos/views/manage/product.py:583 pos/views/manage/product.py:651
+#: pos/views/manage/product.py:693
+msgid "Product does not exist"
+msgstr ""
+
+#: pos/views/manage/product.py:643
+msgid "You have no permission to delete products"
+msgstr ""
+
+#: pos/views/manage/product.py:687 templates/pos/manage/products.html:935
+msgid "Invalid data"
+msgstr ""
+
+#: pos/views/manage/product.py:717
+msgid "No products selected"
+msgstr ""
+
+#: pos/views/manage/product.py:728 pos/views/manage/tax.py:139
+#: pos/views/manage/tax.py:217
+msgid "Tax does not exist"
+msgstr ""
+
+#: pos/views/manage/product.py:741 pos/views/manage/product.py:753
+msgid "Discount does not exist or is not valid"
+msgstr ""
+
+#: pos/views/manage/product.py:769
+msgid "Unsupported mass edit action"
+msgstr ""
+
+#: pos/views/manage/register.py:70
+msgid "Device with this id already exists"
+msgstr ""
+
+#: pos/views/manage/register.py:102
+msgid "You have no permission to view registers."
+msgstr ""
+
+#: pos/views/manage/register.py:106 templates/pos/base.html:130
+msgid "Cash Registers"
+msgstr ""
+
+#: pos/views/manage/register.py:124
+msgid "You have no permission to add registers."
+msgstr ""
+
+#: pos/views/manage/register.py:129
+msgid "Add register"
+msgstr ""
+
+#: pos/views/manage/register.py:161
+msgid "You have no permission to edit registers."
+msgstr ""
+
+#: pos/views/manage/register.py:166
+msgid "Edit register"
+msgstr ""
+
+#: pos/views/manage/tax.py:60
+msgid "Wrong number format for amount"
+msgstr ""
+
+#: pos/views/manage/tax.py:63
+msgid "No amount entered"
+msgstr ""
+
+#: pos/views/manage/tax.py:92
+msgid "You have no permission to view taxes."
+msgstr ""
+
+#: pos/views/manage/tax.py:99
+msgid "Manage Tax Rates"
+msgstr ""
+
+#: pos/views/manage/tax.py:120 pos/views/manage/tax.py:173
+#: pos/views/manage/tax.py:206 templates/pos/manage/tax.html:181
+msgid "You have no permission to edit taxes"
+msgstr ""
+
+#: pos/views/manage/tax.py:126 pos/views/manage/tax.py:178
+msgid "No data sent"
+msgstr ""
+
+#: pos/views/manage/tax.py:155 pos/views/manage/tax.py:190
+msgid "Could not save tax; "
+msgstr ""
+
+#: pos/views/manage/tax.py:185
+msgid "A product is using this tax - it cannot be deleted"
+msgstr ""
+
+#: pos/views/manage/tax.py:211
+msgid "No tax specified"
+msgstr ""
+
+#: pos/views/manage/users.py:28
+msgid "You have no permission to view users' settings."
+msgstr ""
+
+#: pos/views/manage/users.py:50 templates/pos/base.html:136
+#: templates/pos/manage/users.html:176
+msgid "Users"
+msgstr ""
+
+#: pos/views/manage/users.py:76 pos/views/manage/users.py:247
+msgid "You have no permission to edit users"
+msgstr ""
+
+#: pos/views/manage/users.py:82
+msgid "This user does not exist"
+msgstr ""
+
+#: pos/views/manage/users.py:86
+msgid "This permission type does not exist"
+msgstr ""
+
+#: pos/views/manage/users.py:89
+msgid "Wrong pin length."
+msgstr ""
+
+#: pos/views/manage/users.py:95
+msgid "You cannot change permission of the last admin of this company."
+msgstr ""
+
+#: pos/views/manage/users.py:99
+msgid ""
+"This PIN has already been assigned to a user from this company. Please "
+"choose a different one."
+msgstr ""
+
+#: pos/views/manage/users.py:118
+msgid "You have no permissions to remove users"
+msgstr ""
+
+#: pos/views/manage/users.py:125
+msgid "The user does not exist"
+msgstr ""
+
+#: pos/views/manage/users.py:140
+msgid "You have no permissions to invite users"
+msgstr ""
+
+#: pos/views/manage/users.py:176
+msgid "User with this email is already member of the group: "
+msgstr ""
+
+#: pos/views/manage/users.py:232
+msgid "Invitation to join company on Sellout.biz"
+msgstr ""
+
+#: pos/views/manage/users.py:261
+msgid "Invite does not exist"
+msgstr ""
+
+#: pos/views/terminal.py:34
+msgid "You have no permission to use terminal."
+msgstr ""
+
+#: pos/views/terminal.py:96
+msgid "Data error"
+msgstr ""
+
+#: pos/views/terminal.py:197
+msgid "You have no permission for this company"
+msgstr ""
+
+#: pos/views/terminal.py:219
+msgid "Wrong PIN"
+msgstr ""
+
+#: pos/views/terminal.py:227
+msgid "Not implemented"
+msgstr ""
+
+#: pos/views/terminal.py:229
+msgid "Unknown unlock type"
+msgstr ""
+
+#: pos/views/terminal.py:235
+msgid "This user is not active."
+msgstr ""
+
+#: subscription/models.py:21
+msgid "Subscription status"
+msgstr ""
+
+#: subscription/models.py:31
+msgid "Subscription can be also paid for email"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:85
+#: subscription/templates/subscription/subscription.html:90
+#: subscription/templates/subscription/subscription.html:95
+#: subscription/templates/subscription/subscription.html:100
+msgid ""
+"This field is required. It can contain letters, digits, spaces, commas and "
+"dashes."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:106
+msgid "This field can only contain letters, digits, spaces, commas and dashes."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:142
+#: subscription/templates/subscription/subscription_copy.html:70
+msgid "is not a valid email"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:218
+#: subscription/templates/subscription/subscription_copy.html:191
+msgid "Yourself"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:822
+#: subscription/templates/subscription/subscription_copy.html:383
+#: subscription/templates/subscription/subscriptions.html:345
+#: templates/web/select_company.html:113
+msgid "Subscriptions"
+msgstr "Naročnine"
+
+#: subscription/templates/subscription/subscription.html:828
+msgid ""
+"You can extend subscription by choosing one of the following payment options."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:830
+msgid ""
+"Your subscription period has expired. Use following form to subscribe to use "
+"this service."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:838
+msgid "number of users"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:839
+msgid "time period"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:840
+msgid "total amount"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:841
+msgid "payment type"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:842
+msgid "additional info"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:848
+msgid "just me"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:852
+msgid "me and others"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:856
+msgid "just others"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:861
+msgid "Enter email addresses, separated by comma."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:866
+msgid "I would like to subscribe for "
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:868
+#: subscription/templates/subscription/subscription.html:887
+#: subscription/templates/subscription/subscription_copy.html:404
+#: subscription/templates/subscription/subscription_copy.html:416
+#: templates/web/index.html:458
+msgid "1 month"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:869
+#: subscription/templates/subscription/subscription.html:890
+#: subscription/templates/subscription/subscription_copy.html:405
+#: subscription/templates/subscription/subscription_copy.html:417
+#: templates/web/index.html:462
+msgid "2 months"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:870
+#: subscription/templates/subscription/subscription.html:893
+#: subscription/templates/subscription/subscription_copy.html:406
+#: subscription/templates/subscription/subscription_copy.html:418
+#: templates/web/index.html:466
+msgid "3 months"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:871
+#: subscription/templates/subscription/subscription.html:896
+#: subscription/templates/subscription/subscription_copy.html:419
+#: templates/web/index.html:473
+msgid "6 months"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:872
+#: subscription/templates/subscription/subscription.html:899
+msgid "12 months"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:876
+msgid "Check prices"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:881
+msgid "Subscription price list"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:906
+#, python-format
+msgid ""
+"You are paying subscription from <span class=\"from\">%(from)s</span> until "
+"<span class=\"until\">%(until)s</span>."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:912
+msgid "total price"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:916
+#: subscription/templates/subscription/subscription.html:917
+msgid "transaction fee"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:921
+msgid "I would like to pay with"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:929
+msgid "Include my company details in the invoice."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:954
+#: subscription/templates/subscription/subscription.html:1019
+#: subscription/templates/subscription/subscriptions.html:565
+msgid "Country"
+msgstr "Država"
+
+#: subscription/templates/subscription/subscription.html:969
+#: templates/web/index.html:328
+msgid "Subscribe"
+msgstr "Prijavi"
+
+#: subscription/templates/subscription/subscription.html:973
+msgid "Choose the number of users you wish to subscribe for."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:973
+msgid "NOTE: Price per user depends on subscription time period."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:974
+msgid "Choose the time period you wish to subscribe for."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:975
+msgid "Total amount to be paid."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:976
+msgid "Choose your type of payment."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:977
+msgid "Choose this option to add your company details."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:987
+msgid ""
+"<span class=\"uppercase\">You subscribed to timebits for <span class=\"period"
+"\"></span> <span class=\"user\"></span>. <br /> You used <span class="
+"\"payment-method\">bitcoin</span> as payment option.<br /></span><span class="
+"\"important\">Send <span class=\"total-btc-price\"></span> (<span class="
+"\"total\"></span>&euro;) to the following address within 1 hour:<br /><span "
+"class=\"btc-address\"></span><br /> <br />After that time you will have to "
+"subscribe one more time."
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:1007
+#: subscription/templates/subscription/subscriptions.html:553
+msgid "Address"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:1023
+#: subscription/templates/subscription/subscriptions.html:569
+msgid "IBAN"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:1027
+#: subscription/templates/subscription/subscriptions.html:573
+msgid "Ref. Number"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:1033
+msgid ""
+"<span class=\"uppercase\">You subscribed to timebits for <span class=\"period"
+"\"></span> <span class=\"user\"></span>. <br /> You used <span class="
+"\"payment-method\">sepa</span> as payment option.<br /></span><span class="
+"\"important\">Send total amount of <span class=\"total\"></span> to the "
+"following bank account:<br /></span><table id=\"copy_sepa_address\"></table>"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:1048
+msgid "Warning"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:1055
+msgid "You will be paying subscriptions also for:"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:1058
+msgid "yourself"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:1061
+msgid "That will cost you a total of <span class='total'></total>. Proceed?"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:1067
+#: subscription/templates/subscription/subscriptions.html:678
+msgid "yes"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:1067
+#: subscription/templates/subscription/subscriptions.html:678
+msgid "no"
+msgstr ""
+
+#: subscription/templates/subscription/subscription.html:1097
+msgid "Close this window"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:252
+msgid "Bank account"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:312
+msgid ""
+"For some reason could not get price in BTC and so you cannot make payment. "
+"Try again later or contatct support if you think that this is really too "
+"much."
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:383
+msgid "Groups"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:386
+#, python-format
+msgid ""
+"Paying subscription from <span class=\"from\">%(from)s</span> until <span "
+"class=\"until\">%(until)s</span>"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:391
+msgid "Paying just for me"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:394
+msgid "Paying for me and for others"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:397
+msgid "Paying just for others"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:403
+msgid "Subscription period"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:407
+msgid "6 months (1 month discount)"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:408
+msgid "whole year (2 months discount)"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:415
+msgid "Paying subscription for"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:420
+msgid "whole year"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:424
+msgid "Will use"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:427
+msgid "SEPA"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:428
+msgid "Bitcoins"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:429
+msgid "for payment"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:433
+msgid ""
+"Write emails or groups of people you want to pay for also (excluding you)"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:448
+msgid ""
+"Send <span id=\"btc_price\" name=\"btc_price\" class=\"btc-price\"></span> "
+"(<span id=\"price\"></span>) to address <span id=\"btc_address\"></span> "
+"within 1 hour."
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:448
+msgid ""
+"We will wait then a little bit more, buf after a day or so, you will have to "
+"make payment one more time."
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:453
+msgid ""
+"Send <span id=\"price\"></span> to following bank account: <br /> <span id="
+"\"sepa_address\"></span>"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:453
+msgid "Reference number"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:459
+#: subscription/templates/subscription/successful_payment.html:16
+msgid "Back to subscriptions"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:462
+msgid "You will be paying also for the people with the following emails:"
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:467
+msgid "...with total amount of "
+msgstr ""
+
+#: subscription/templates/subscription/subscription_copy.html:469
+msgid "Do you agree?"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:351
+msgid "Would you like to extend subscription for you or for others?"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:358
+msgid "Running"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:376
+msgid "Expiration date"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:386
+msgid "Days left"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:402
+msgid "Waiting payment subscriptions"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:408
+#: subscription/templates/subscription/subscriptions.html:464
+msgid "Time period"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:409
+msgid "Paying for"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:410
+msgid "Payment"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:421
+#: subscription/templates/subscription/subscriptions.html:475
+msgid "month"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:423
+#: subscription/templates/subscription/subscriptions.html:477
+msgid "months"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:431
+msgid "Me"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:441
+msgid "waiting"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:456
+#: subscription/views.py:67
+msgid "My subscriptions"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:465
+msgid "Info"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:490
+msgid "View payment"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:502
+msgid "My payments"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:510
+msgid "Payment ID"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:513
+msgid "Payment date"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:531
+msgid "Almost paid status"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:582
+msgid ""
+"<span class=\"uppercase\">You subscribed to timebits for <span class=\"period"
+"\"></span> <span class=\"start-expiration-date\">(<span class=\"start-date"
+"\"></span> - <span class=\"expiration-date\"></span>)</span><span class="
+"\"user\"></span>. <br /> You used <span class=\"payment-method\">bitcoin</"
+"span> as payment option, but we did not receive payment yet.<br /></"
+"span><span class=\"important\">Send <span class=\"total-btc-price\"></span> "
+"(<span class=\"total\"></span>&euro;) to the following address within 1 hour:"
+"<br /><span class=\"btc-address\"></span><br /> <br />After that time you "
+"will have to subscribe one more time.</span>"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:586
+msgid ""
+"<span class=\"uppercase\">You subscribed to timebits for <span class=\"period"
+"\"></span> <span class=\"start-expiration-date\">(<span class=\"start-date"
+"\"></span> - <span class=\"expiration-date\"></span>)</span><span class="
+"\"user\"></span>. <br /> You used <span class=\"payment-method\">bitcoin</"
+"span> as payment option.<br /></span><span class=\"important\">You have sent "
+"<span class=\"total-btc-price\"></span> BTC (<span class=\"total\"></"
+"span>&euro;) to the following address:<br /><span class=\"btc-address\"></"
+"span></span>"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:597
+#: subscription/templates/subscription/subscriptions.html:618
+#: subscription/templates/subscription/subscriptions.html:639
+msgid "Invoice"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:605
+msgid ""
+"<span class=\"uppercase\">You subscribed to timebits for <span class=\"period"
+"\"></span>  <span class=\"start-expiration-date\">(<span class=\"start-date"
+"\"></span> - <span class=\"expiration-date\"></span>)</span><span class="
+"\"user\"></span>. <br /> You used <span class=\"payment-method\">sepa</span> "
+"as payment option, but we did not receive payment yet.<br /></span><span "
+"class=\"important\">Send total amount of <span class=\"total\"></span><span "
+"class=\"euro\">&euro;</span> to the following bank account:<br /></"
+"span><table id=\"copy_sepa_address\"></table>"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:609
+msgid ""
+"<span class=\"uppercase\">You subscribed to timebits for <span class=\"period"
+"\"></span>  <span class=\"start-expiration-date\">(<span class=\"start-date"
+"\"></span> - <span class=\"expiration-date\"></span>)</span><span class="
+"\"user\"></span>. <br /> You used <span class=\"payment-method\">sepa</span> "
+"as payment option.<br /></span><span class=\"important\">You paid <span "
+"class=\"total\"></span><span class=\"euro\">&euro;</span>.</span>"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:626
+msgid ""
+"<span class=\"uppercase\">You subscribed to timebits for <span class=\"period"
+"\"></span> (<span class=\"start-date\"></span> - <span class=\"expiration-"
+"date\"></span>)<span class=\"user\"></span>. <br /> You used <span class="
+"\"payment-method\">paypal</span> as payment option, but we did not receive "
+"payment yet.<br /></span><span class=\"important\">Follow <a href=\"\" class="
+"\"paypal-payment-link\">this link</a> to make payment.</span>"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:630
+msgid ""
+"<span class=\"uppercase\">You subscribed to timebits for <span class=\"period"
+"\"></span> (<span class=\"start-date\"></span> - <span class=\"expiration-"
+"date\"></span>)<span class=\"user\"></span>. <br /> You used <span class="
+"\"payment-method\">paypal</span> as payment option.<br /></span><span class="
+"\"important\">You paid <span class=\"total\"></span><span class=\"euro"
+"\">&euro;</span>.</span>"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:647
+msgid ""
+"<span class=\"uppercase\">Since this is the first time you have subscribed "
+"to timebits, you got one subscription for free. It is valid for <span class="
+"\"period\"></span> (<span class=\"start-date\"></span> - <span class="
+"\"expiration-date\"></span>).</span>"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:657
+msgid ""
+"<span class=\"uppercase\">You have got timebits subscription for free from "
+"<span class=\"user\"></span>for <span class=\"period\"></span> (<span class="
+"\"start-date\"></span> - <span class=\"expiration-date\"></span>).</span>"
+msgstr ""
+
+#: subscription/templates/subscription/subscriptions.html:673
+msgid "Are you sure you want to cancel the payment?"
+msgstr ""
+
+#: subscription/views.py:112
+msgid "Subscription payment"
+msgstr ""
+
+#: support/forms.py:21
+msgid "Choose a category"
+msgstr ""
+
+#: support/models.py:12 templates/pos/manage/products.html:1447
+#: templates/pos/manage/products.html:1569
+#: templates/pos/manage/products.html:1691
+msgid "Category"
+msgstr ""
+
+#: support/models.py:13
+msgid "Title"
+msgstr ""
+
+#: support/models.py:14 templates/support/search_results.html:20
+msgid "Question"
+msgstr ""
+
+#: support/models.py:24
+msgid "Up votes"
+msgstr ""
+
+#: support/models.py:25
+msgid "Down votes"
+msgstr ""
+
+#: support/models.py:26 support/models.py:73
+msgid "Timestamp"
+msgstr ""
+
+#: support/models.py:74
+msgid "Accepted answer"
+msgstr ""
+
+#: support/parameters.py:6
+msgid "Subscriptions and payment"
+msgstr ""
+
+#: support/parameters.py:7 templates/pos/terminal.html:186
+#: templates/web/select_company.html:44
+msgid "Terminal"
+msgstr ""
+
+#: support/parameters.py:9
+msgid "Bills and Printing"
+msgstr ""
+
+#: support/parameters.py:10
+msgid "Bugs and other issues"
+msgstr ""
+
+#: support/parameters.py:11
+msgid "Android app"
+msgstr ""
+
+#: support/views.py:68 support/views.py:126
+#: templates/support/search_high.html:6 templates/web/select_company.html:126
+msgid "Support"
+msgstr "Pomoč"
+
+#: support/views.py:153
+msgid "Frequently Asked Questions"
+msgstr ""
+
+#: support/views.py:233
+msgid "Ask a question"
+msgstr ""
+
+#: support/views.py:250
+msgid "Not enough data"
+msgstr ""
+
+#: support/views.py:256
+msgid "Question does not exist"
+msgstr ""
+
+#: support/views.py:260
+msgid "You already voted on this question"
+msgstr ""
+
+#: support/views.py:283
+msgid "No comment specified"
+msgstr ""
+
+#: support/views.py:289
+msgid "Comment does not exist"
+msgstr ""
+
+#: support/views.py:293
+msgid "This question already has an answer"
+msgstr ""
+
+#: support/views.py:309
+msgid "Question not found"
+msgstr ""
+
+#: support/views.py:313
+msgid "You cannot delete this question"
+msgstr ""
+
+#: support/views.py:327
+msgid "Comment not found"
+msgstr ""
+
+#: support/views.py:331
+msgid "You cannot delete this comment"
+msgstr ""
+
+#: templates/email/email_template.html:17 templates/email/email_template.txt:7
+msgid "Kind regards,"
+msgstr ""
+
+#: templates/email/email_template.txt:8
+msgid "the Sellout team"
+msgstr ""
+
+#: templates/email/email_verification.html:5
+#: templates/email/invitation_for_non_registered_users.html:5
+#: templates/email/invitation_for_non_registered_users.txt:5
+#: templates/email/invitation_for_registered_users.html:5
+#: templates/email/invitation_for_registered_users.txt:4
+#: templates/email/lost_password.html:5 templates/email/lost_password.txt:4
+msgid "Hi!"
+msgstr ""
+
+#: templates/email/email_verification.html:7
+msgid ""
+"To activate your account on sellout.biz, please click click on the following "
+"link:"
+msgstr ""
+
+#: templates/email/email_verification.html:8
+msgid "Activate"
+msgstr ""
+
+#: templates/email/invitation_for_non_registered_users.html:7
+#: templates/email/invitation_for_non_registered_users.txt:7
+#: templates/email/invitation_for_registered_users.html:7
+#: templates/email/invitation_for_registered_users.txt:6
+msgid "You have been invited to join a company on sellout.biz: "
+msgstr ""
+
+#: templates/email/invitation_for_non_registered_users.html:9
+msgid "But first you have to register by clicking on the following link: "
+msgstr ""
+
+#: templates/email/invitation_for_non_registered_users.html:10
+msgid "sign up on sellout.biz"
+msgstr ""
+
+#: templates/email/invitation_for_non_registered_users.txt:9
+msgid "But first you have to register on the following link: "
+msgstr ""
+
+#: templates/email/invitation_for_registered_users.html:9
+#: templates/email/invitation_for_registered_users.txt:8
+msgid ""
+"You can accept or decline this invitation by logging in Sellout application."
+msgstr ""
+
+#: templates/email/invitation_for_registered_users.html:10
+#: templates/web/index.html:227
+msgid "Log in"
+msgstr "Prijava"
+
+#: templates/email/lost_password.html:7
+msgid "To recover your password, please follow this link: "
+msgstr ""
+
+#: templates/email/lost_password.html:8
+msgid "recover password"
+msgstr ""
+
+#: templates/email/lost_password.txt:6
+msgid "To recover your password please click on the following link: "
+msgstr ""
+
+#: templates/pos/base.html:110 templates/pos/terminal.html:354
+#: templates/support/search_low.html:29
+msgid "Home"
+msgstr ""
+
+#: templates/pos/base.html:111 templates/pos/terminal.html:191
+msgid "Switch User"
+msgstr ""
+
+#: templates/pos/base.html:113 templates/web/select_company.html:26
+msgid "Log Out"
+msgstr ""
+
+#: templates/pos/base.html:134 templates/pos/manage/company.html:179
+#: templates/pos/manage/config.html:16
+msgid "Configuration"
+msgstr ""
+
+#: templates/pos/large_receipt.html:138
+msgctxt "Tax rates table footer"
+msgid "Sum"
+msgstr ""
+
+#: templates/pos/locked.html:7
+msgid "The page is locked"
+msgstr ""
+
+#: templates/pos/manage/bills.html:29
+msgid "Viewing Bill No.:"
+msgstr ""
+
+#: templates/pos/manage/bills.html:47 templates/pos/manage/contacts.html:41
+#: templates/pos/manage/discounts.html:32
+#: templates/pos/manage/products.html:1441
+msgctxt "form title"
+msgid "Search"
+msgstr ""
+
+#: templates/pos/manage/bills.html:57
+msgid "Bill issue date: from"
+msgstr ""
+
+#: templates/pos/manage/bills.html:62 templates/pos/manage/bills.html.py:95
+msgid "To:"
+msgstr ""
+
+#: templates/pos/manage/bills.html:81
+msgctxt "bill search form"
+msgid "Bill no."
+msgstr ""
+
+#: templates/pos/manage/bills.html:90
+msgid "Amount: from"
+msgstr ""
+
+#: templates/pos/manage/bills.html:126 templates/pos/manage/contacts.html:66
+#: templates/pos/manage/discounts.html:73
+msgid "Clear results"
+msgstr ""
+
+#: templates/pos/manage/bills.html:132 templates/pos/manage/contacts.html:60
+#: templates/pos/manage/discounts.html:67
+#: templates/pos/manage/products.html:1494
+msgctxt "submit button label"
+msgid "Search"
+msgstr ""
+
+#: templates/pos/manage/bills.html:144 templates/pos/manage/discounts.html:86
+msgid "Results found: "
+msgstr ""
+
+#: templates/pos/manage/bills.html:152 templates/pos/manage/bills.html:153
+#: templates/pos/manage/discounts.html:94
+#: templates/pos/manage/discounts.html:95
+msgctxt "Paginator page button"
+msgid "Back"
+msgstr ""
+
+#: templates/pos/manage/bills.html:156 templates/pos/manage/discounts.html:98
+msgid "Page"
+msgstr ""
+
+#: templates/pos/manage/bills.html:156 templates/pos/manage/discounts.html:98
+msgid "of"
+msgstr ""
+
+#: templates/pos/manage/bills.html:163 templates/pos/manage/bills.html:164
+#: templates/pos/manage/discounts.html:105
+#: templates/pos/manage/discounts.html:106
+msgctxt "Paginator page button"
+msgid "Forward"
+msgstr ""
+
+#: templates/pos/manage/bills.html:169
+msgid "Recent bills"
+msgstr ""
+
+#: templates/pos/manage/bills.html:176
+msgctxt "bill management"
+msgid "No."
+msgstr ""
+
+#: templates/pos/manage/bills.html:177
+msgctxt "bill management"
+msgid "User"
+msgstr ""
+
+#: templates/pos/manage/bills.html:178
+msgctxt "bill management"
+msgid "Issue date"
+msgstr ""
+
+#: templates/pos/manage/bills.html:179
+msgctxt "bill management"
+msgid "Contact name"
+msgstr ""
+
+#: templates/pos/manage/bills.html:180
+msgctxt "bill management"
+msgid "Total"
+msgstr ""
+
+#: templates/pos/manage/bills.html:181
+msgctxt "bill management"
+msgid "Items"
+msgstr ""
+
+#: templates/pos/manage/bills.html:198 templates/pos/manage/bills.html:199
+#: templates/pos/receipt_template.html:52
+#: templates/pos/receipt_template.html:53 templates/pos/terminal.html:606
+#: templates/web/index.html:336
+msgid "Print"
+msgstr "Natisni"
+
+#: templates/pos/manage/categories.html:149
+msgctxt "confirmation dialog title"
+msgid "Delete category"
+msgstr ""
+
+#: templates/pos/manage/categories.html:150
+msgid "Are you sure you want to delete category"
+msgstr ""
+
+#: templates/pos/manage/categories.html:295
+msgid "Add a new top-level category"
+msgstr ""
+
+#: templates/pos/manage/categories.html:312
+msgid "Add subcategory"
+msgstr ""
+
+#: templates/pos/manage/categories.html:314
+#: templates/pos/manage/contacts.html:134
+#: templates/pos/manage/contacts.html:135
+#: templates/pos/manage/contacts.html:188
+#: templates/pos/manage/contacts.html:189
+#: templates/pos/manage/discounts.html:133
+#: templates/pos/manage/discounts.html:134
+#: templates/pos/manage/registers.html:48
+#: templates/pos/manage/registers.html:49 templates/pos/manage/users.html:220
+#: templates/pos/manage/users.html:221 templates/pos/terminal.html:519
+#: templates/support/question.html:93
+msgid "Delete"
+msgstr ""
+
+#: templates/pos/manage/categories.html:315
+msgid "View products"
+msgstr ""
+
+#: templates/pos/manage/category.html:52
+msgid "In category"
+msgstr ""
+
+#: templates/pos/manage/category.html:103
+#: templates/pos/manage/company.html:316 templates/pos/manage/config.html:92
+#: templates/pos/manage/contact.html:147 templates/pos/manage/discount.html:95
+#: templates/pos/manage/personal.html:65
+#: templates/pos/manage/products.html:1662
+#: templates/pos/manage/register.html:79 templates/pos/manage/user.html:48
+#: templates/pos/terminal.html:330 templates/pos/terminal.html.py:488
+#: templates/pos/terminal.html:683
+msgid "Save"
+msgstr ""
+
+#: templates/pos/manage/company.html:98
+msgid "Error while uploading a new logo"
+msgstr ""
+
+#: templates/pos/manage/company.html:125
+msgid "Error while deleting logo"
+msgstr ""
+
+#: templates/pos/manage/company.html:151
+msgid "Error while creating logo"
+msgstr ""
+
+#: templates/pos/manage/company.html:192
+msgid "Color logo"
+msgstr ""
+
+#: templates/pos/manage/company.html:193
+msgid "For web and full-page bill prints"
+msgstr ""
+
+#: templates/pos/manage/company.html:200 templates/pos/manage/company.html:224
+#: templates/pos/manage/products.html:1530
+msgid "Remove image"
+msgstr ""
+
+#: templates/pos/manage/company.html:204 templates/pos/manage/company.html:226
+msgid "Click to change logo"
+msgstr ""
+
+#: templates/pos/manage/company.html:211
+msgid "Monochrome logo"
+msgstr ""
+
+#: templates/pos/manage/company.html:212
+msgid "For thermal printers"
+msgstr ""
+
+#: templates/pos/manage/company.html:219
+msgctxt "monochrome logo button"
+msgid "Auto-create"
+msgstr ""
+
+#: templates/pos/manage/contact.html:23
+msgid "Add contact: Individual"
+msgstr ""
+
+#: templates/pos/manage/contact.html:25
+msgid "Add contact: Company"
+msgstr ""
+
+#: templates/pos/manage/contact.html:29
+msgid "Edit contact: Individual"
+msgstr ""
+
+#: templates/pos/manage/contact.html:31
+msgid "Edit contact: Company"
+msgstr ""
+
+#: templates/pos/manage/contacts.html:21
+msgid "Add Contact"
+msgstr ""
+
+#: templates/pos/manage/contacts.html:27
+msgid "company"
+msgstr ""
+
+#: templates/pos/manage/contacts.html:32
+msgid "individual"
+msgstr ""
+
+#: templates/pos/manage/contacts.html:97
+#: templates/support/search_results.html:8
+msgid "Search results"
+msgstr ""
+
+#: templates/pos/manage/contacts.html:103
+#: templates/pos/manage/products.html:342
+#: templates/support/search_results.html:15
+msgid "No results found"
+msgstr ""
+
+#: templates/pos/manage/contacts.html:139
+msgctxt "contact type"
+msgid "Individual"
+msgstr ""
+
+#: templates/pos/manage/contacts.html:193
+msgctxt "contact type"
+msgid "Company"
+msgstr ""
+
+#: templates/pos/manage/discounts.html:23
+msgid "Add Discount"
+msgstr ""
+
+#: templates/pos/manage/discounts.html:111
+msgid "Recent discounts"
+msgstr ""
+
+#: templates/pos/manage/discounts.html:131
+msgid "Delete discount: "
+msgstr ""
+
+#: templates/pos/manage/discounts.html:146
+msgid "Starts"
+msgstr ""
+
+#: templates/pos/manage/discounts.html:150
+msgid "Ends"
+msgstr ""
+
+#: templates/pos/manage/discounts.html:161
+msgid "Active"
+msgstr ""
+
+#: templates/pos/manage/discounts.html:174
+msgid "No discounts found."
+msgstr ""
+
+#: templates/pos/manage/manage.html:29
+msgctxt "delete confirmation dialog text"
+msgid "Are you sure?"
+msgstr ""
+
+#: templates/pos/manage/manage.html:35
+msgid "Could not delete object"
+msgstr ""
+
+#: templates/pos/manage/manage.html:66 templates/pos/manage/manage.html:70
+#: templates/pos/manage/manage.html:71
+msgid "Go to terminal"
+msgstr ""
+
+#: templates/pos/manage/manage.html:82
+msgid "Choose what you want to manage from this menu."
+msgstr ""
+
+#: templates/pos/manage/products.html:88
+msgid "No image"
+msgstr ""
+
+#: templates/pos/manage/products.html:168
+msgid "No date limits"
+msgstr ""
+
+#: templates/pos/manage/products.html:171
+msgid "from"
+msgstr ""
+
+#: templates/pos/manage/products.html:172
+msgid "to"
+msgstr ""
+
+#: templates/pos/manage/products.html:176
+msgid "inactive"
+msgstr ""
+
+#: templates/pos/manage/products.html:189
+msgid "No products found"
+msgstr ""
+
+#: templates/pos/manage/products.html:346
+msgid "Results found"
+msgstr ""
+
+#: templates/pos/manage/products.html:383
+msgid "Search failed"
+msgstr ""
+
+#: templates/pos/manage/products.html:501
+msgid "Favorite could not be set"
+msgstr ""
+
+#: templates/pos/manage/products.html:517
+msgctxt "confirmation dialog title"
+msgid "Are you sure?"
+msgstr ""
+
+#: templates/pos/manage/products.html:518
+msgid "Delete product "
+msgstr ""
+
+#: templates/pos/manage/products.html:524
+msgid "Error deleting product"
+msgstr ""
+
+#: templates/pos/manage/products.html:681
+msgid "Cancel editing"
+msgstr ""
+
+#: templates/pos/manage/products.html:682
+msgid "All changes you made to this product will be lost. Continue?"
+msgstr ""
+
+#: templates/pos/manage/products.html:815
+#: templates/pos/manage/products.html:825
+msgid "Error while uploading image"
+msgstr ""
+
+#: templates/pos/manage/products.html:816
+msgid "Wrong file type for the uploaded image!"
+msgstr ""
+
+#: templates/pos/manage/products.html:826
+msgid "File too large, maximum size for upload is"
+msgstr ""
+
+#: templates/pos/manage/products.html:936
+msgid "Please check product price"
+msgstr ""
+
+#: templates/pos/manage/products.html:951
+#: templates/pos/manage/products.html:966
+msgid "Error saving product"
+msgstr ""
+
+#: templates/pos/manage/products.html:1043
+msgid "Edit product"
+msgstr ""
+
+#: templates/pos/manage/products.html:1044
+#: templates/pos/manage/products.html:1433
+msgid "Add product"
+msgstr ""
+
+#: templates/pos/manage/products.html:1223
+msgid "Error while setting tax"
+msgstr ""
+
+#: templates/pos/manage/products.html:1224
+msgid "Please select a valid tax for your products"
+msgstr ""
+
+#: templates/pos/manage/products.html:1239
+msgid "Setting tax failed"
+msgstr ""
+
+#: templates/pos/manage/products.html:1329
+msgid "Error while setting discount"
+msgstr ""
+
+#: templates/pos/manage/products.html:1444
+msgctxt "search products"
+msgid "Enter query"
+msgstr ""
+
+#: templates/pos/manage/products.html:1455
+#: templates/pos/manage/products.html:1614
+#: templates/pos/manage/products.html:1716
+msgid "Shortcut"
+msgstr ""
+
+#: templates/pos/manage/products.html:1473
+msgid "Discount code"
+msgstr ""
+
+#: templates/pos/manage/products.html:1481
+msgid "Advanced"
+msgstr ""
+
+#: templates/pos/manage/products.html:1485
+msgid "Basic"
+msgstr ""
+
+#: templates/pos/manage/products.html:1507
+msgid "Edit all results"
+msgstr ""
+
+#: templates/pos/manage/products.html:1575
+msgid "Stock"
+msgstr ""
+
+#: templates/pos/manage/products.html:1580
+msgid "Unit"
+msgstr ""
+
+#: templates/pos/manage/products.html:1589
+msgid "Purchase price"
+msgstr ""
+
+#: templates/pos/manage/products.html:1594
+msgid "per"
+msgstr ""
+
+#: templates/pos/manage/products.html:1602
+msgid "Sell price (excl. tax)"
+msgstr ""
+
+#: templates/pos/manage/products.html:1606
+msgid "Sell price (incl. tax)"
+msgstr ""
+
+#: templates/pos/manage/products.html:1625
+msgid ""
+"\n"
+"                        Drag to reorder. Total discount will be calculated "
+"in the same order as shown here.\n"
+"                    "
+msgstr ""
+
+#: templates/pos/manage/products.html:1637
+msgid "Total price"
+msgstr ""
+
+#: templates/pos/manage/products.html:1641
+msgid "Profit"
+msgstr ""
+
+#: templates/pos/manage/products.html:1649
+msgid "Private notes"
+msgstr ""
+
+#: templates/pos/manage/products.html:1676
+msgid "Favorite this product: it will be displayed by default in terminal"
+msgstr ""
+
+#: templates/pos/manage/products.html:1738
+msgid "Change all products's tax in current search results to selected"
+msgstr ""
+
+#: templates/pos/manage/products.html:1739
+msgid "Apply to all"
+msgstr ""
+
+#: templates/pos/manage/products.html:1751
+msgid "Add this discount to all current search results"
+msgstr ""
+
+#: templates/pos/manage/products.html:1752
+msgid "Add to current results"
+msgstr ""
+
+#: templates/pos/manage/products.html:1758
+msgid "Remove this discount from all current search results"
+msgstr ""
+
+#: templates/pos/manage/products.html:1759
+msgid "Remove from all"
+msgstr ""
+
+#: templates/pos/manage/products.html:1764
+msgid "Remove all discounts from all products in current search results"
+msgstr ""
+
+#: templates/pos/manage/products.html:1766
+msgid "Clear all discounts"
+msgstr ""
+
+#: templates/pos/manage/register.html:14
+msgctxt "page title"
+msgid "Add register"
+msgstr ""
+
+#: templates/pos/manage/register.html:16
+msgctxt "page title"
+msgid "Edit register"
+msgstr ""
+
+#: templates/pos/manage/registers.html:9
+msgid "Registers"
+msgstr ""
+
+#: templates/pos/manage/registers.html:14
+msgid "Add Register"
+msgstr ""
+
+#: templates/pos/manage/registers.html:25
+msgid "Register Name"
+msgstr ""
+
+#: templates/pos/manage/registers.html:26
+msgid "Receipt Format"
+msgstr ""
+
+#: templates/pos/manage/registers.html:27
+msgid "Receipt Type"
+msgstr ""
+
+#: templates/pos/manage/registers.html:45
+msgid "Delete register: "
+msgstr ""
+
+#: templates/pos/manage/tax.html:90
+msgid "Could not delete tax"
+msgstr ""
+
+#: templates/pos/manage/tax.html:120
+msgctxt "confirmation dialog title"
+msgid "Delete taxx"
+msgstr ""
+
+#: templates/pos/manage/tax.html:121
+msgid "Are you sure you want to delete this tax?"
+msgstr ""
+
+#: templates/pos/manage/tax.html:148
+msgid "Saving tax failed"
+msgstr ""
+
+#: templates/pos/manage/tax.html:180
+msgid "Cannot edit tax"
+msgstr ""
+
+#: templates/pos/manage/tax.html:263
+msgid "Could not set default tax"
+msgstr ""
+
+#: templates/pos/manage/tax.html:279
+msgid "Add Tax"
+msgstr ""
+
+#: templates/pos/manage/tax.html:283
+msgid "Choose default tax"
+msgstr ""
+
+#: templates/pos/manage/tax.html:285
+msgid "This will be chosen by default when adding new products"
+msgstr ""
+
+#: templates/pos/manage/tax.html:294
+msgid "Name (optional)"
+msgstr ""
+
+#: templates/pos/manage/users.html:41
+msgid "Saving failed"
+msgstr ""
+
+#: templates/pos/manage/users.html:60
+msgid "Edit permission"
+msgstr ""
+
+#: templates/pos/manage/users.html:62
+msgid "OK"
+msgstr ""
+
+#: templates/pos/manage/users.html:84
+msgid "This not a valid email address:"
+msgstr ""
+
+#: templates/pos/manage/users.html:101
+msgid "Inviting users failed"
+msgstr ""
+
+#: templates/pos/manage/users.html:125 templates/pos/manage/users.html:179
+msgid "Invite users"
+msgstr ""
+
+#: templates/pos/manage/users.html:142
+msgid "Delete invitation?"
+msgstr ""
+
+#: templates/pos/manage/users.html:143
+msgid ""
+"The users that have not responded yet will no longer see it and will not be "
+"able to join this company."
+msgstr ""
+
+#: templates/pos/manage/users.html:151
+msgid "Could not delete invitation"
+msgstr ""
+
+#: templates/pos/manage/users.html:185
+msgid "Users in this company"
+msgstr ""
+
+#: templates/pos/manage/users.html:191 templates/pos/manage/users.html:305
+msgid "PIN"
+msgstr ""
+
+#: templates/pos/manage/users.html:192 templates/pos/manage/users.html:270
+#: templates/pos/manage/users.html:310
+msgid "Permission"
+msgstr ""
+
+#: templates/pos/manage/users.html:217
+msgid "Remove user: "
+msgstr ""
+
+#: templates/pos/manage/users.html:229
+msgid "Invite history"
+msgstr ""
+
+#: templates/pos/manage/users.html:235
+msgid "Sent by"
+msgstr ""
+
+#: templates/pos/manage/users.html:236
+msgid "Sent to"
+msgstr ""
+
+#: templates/pos/manage/users.html:237
+msgid "Date sent"
+msgstr ""
+
+#: templates/pos/manage/users.html:238
+msgid "Status"
+msgstr ""
+
+#: templates/pos/manage/users.html:260
+msgid "There are no pending invites."
+msgstr ""
+
+#: templates/pos/receipt_template.html:8
+msgctxt "Bill viewing page title"
+msgid "Bill No."
+msgstr ""
+
+#: templates/pos/small_receipt.html:27
+msgid "Client"
+msgstr ""
+
+#: templates/pos/small_receipt.html:50 templates/pos/terminal.html:237
+msgid "Qty"
+msgstr ""
+
+#: templates/pos/small_receipt.html:78
+msgctxt "Receipt footer text"
+msgid "Total"
+msgstr ""
+
+#: templates/pos/small_receipt.html:107
+msgctxt "tax rates table footer"
+msgid "Sum"
+msgstr ""
+
+#: templates/pos/terminal.html:28
+msgid "Out of stock"
+msgstr ""
+
+#: templates/pos/terminal.html:66
+msgid ""
+"Javascript function localStorage is not supported. Please update your "
+"browser."
+msgstr ""
+
+#: templates/pos/terminal.html:194
+msgid "Lock"
+msgstr ""
+
+#: templates/pos/terminal.html:197
+msgid "Leave"
+msgstr ""
+
+#: templates/pos/terminal.html:209
+msgid "Loading"
+msgstr ""
+
+#: templates/pos/terminal.html:228
+msgid "Invoice for: "
+msgstr ""
+
+#: templates/pos/terminal.html:261
+msgid "Remove"
+msgstr ""
+
+#: templates/pos/terminal.html:262
+msgid "Remove product from bill"
+msgstr ""
+
+#: templates/pos/terminal.html:267
+msgctxt "More button in bill item"
+msgid "More"
+msgstr ""
+
+#: templates/pos/terminal.html:276
+msgid "No more in stock"
+msgstr ""
+
+#: templates/pos/terminal.html:318
+msgctxt "Create bill button text"
+msgid "Finish"
+msgstr ""
+
+#: templates/pos/terminal.html:323
+msgctxt "bill options button text"
+msgid "Bill..."
+msgstr ""
+
+#: templates/pos/terminal.html:328
+msgid "Select client"
+msgstr ""
+
+#: templates/pos/terminal.html:331 templates/pos/terminal.html.py:514
+msgid "Load"
+msgstr ""
+
+#: templates/pos/terminal.html:332 templates/pos/terminal.html.py:485
+msgid "Clear"
+msgstr ""
+
+#: templates/pos/terminal.html:344
+msgid "Drag to resize bill"
+msgstr ""
+
+#: templates/pos/terminal.html:355
+msgid "Home (show favorites)"
+msgstr ""
+
+#: templates/pos/terminal.html:360 templates/support/search_low.html:24
+#: templates/support/search_low.html:25 templates/web/lost_password.html:52
+#: templates/web/recover_password.html:58
+#: templates/web/register_company.html:236 templates/web/user_profile.html:36
+msgid "Back"
+msgstr ""
+
+#: templates/pos/terminal.html:361
+msgid "Back to parent category"
+msgstr ""
+
+#: templates/pos/terminal.html:398
+msgid "Stuff"
+msgstr ""
+
+#: templates/pos/terminal.html:404
+msgid "Change register"
+msgstr ""
+
+#: templates/pos/terminal.html:411
+msgid "Search"
+msgstr ""
+
+#: templates/pos/terminal.html:413
+msgctxt "Search button text"
+msgid "Go"
+msgstr ""
+
+#: templates/pos/terminal.html:429
+msgid "Which register have you logged on to?"
+msgstr ""
+
+#: templates/pos/terminal.html:431
+msgid "Go"
+msgstr ""
+
+#: templates/pos/terminal.html:451 templates/pos/terminal.html.py:470
+msgid "Post code"
+msgstr ""
+
+#: templates/pos/terminal.html:460 templates/pos/terminal.html.py:479
+msgid "Phone"
+msgstr ""
+
+#: templates/pos/terminal.html:496
+msgid "Add a note to this bill (optional)"
+msgstr ""
+
+#: templates/pos/terminal.html:508
+msgid "Time"
+msgstr ""
+
+#: templates/pos/terminal.html:509
+msgid "Items #"
+msgstr ""
+
+#: templates/pos/terminal.html:515
+msgid "Load this bill to terminal"
+msgstr ""
+
+#: templates/pos/terminal.html:520
+msgid "Delete this bill from the list"
+msgstr ""
+
+#: templates/pos/terminal.html:536
+msgid "Choose payment type"
+msgstr ""
+
+#: templates/pos/terminal.html:552
+msgid "Received"
+msgstr ""
+
+#: templates/pos/terminal.html:557
+msgid "Change due"
+msgstr ""
+
+#: templates/pos/terminal.html:565
+msgid "Connect your POS Terminal"
+msgstr ""
+
+#: templates/pos/terminal.html:571
+msgid "Customer email"
+msgstr ""
+
+#: templates/pos/terminal.html:574
+msgid "Send invoice"
+msgstr ""
+
+#: templates/pos/terminal.html:583
+msgid "BTC"
+msgstr ""
+
+#: templates/pos/terminal.html:588
+msgid "Send bitcoins to this address"
+msgstr ""
+
+#: templates/pos/terminal.html:598
+msgid "Waiting payment"
+msgstr ""
+
+#: templates/pos/terminal.html:617
+msgid " Discount (applied to bill's total) "
+msgstr ""
+
+#: templates/pos/terminal.html:629
+msgid "Notes on this bill"
+msgstr ""
+
+#: templates/pos/terminal.html:675
+msgid "Explode"
+msgstr ""
+
+#: templates/pos/unlock_content.html:3
+msgid "Enter PIN"
+msgstr ""
+
+#: templates/pos/unlock_content.html:30
+msgid "Enter e-mail and password:"
+msgstr ""
+
+#: templates/pos/unlock_content.html:39
+msgid "Switch"
+msgstr ""
+
+#: templates/pos/unlock_content.html:44
+msgid "Use e-mail and password instead"
+msgstr ""
+
+#: templates/pos/unlock_content.html:45
+msgid "Use PIN"
+msgstr ""
+
+#: templates/pos/unlock_content.html:49
+msgid "Log in with username and password"
+msgstr ""
+
+#: templates/support/ask.html:11
+msgid "Ask a new question"
+msgstr ""
+
+#: templates/support/ask.html:22 templates/support/question.html:115
+#: templates/web/user_profile.html:40
+msgid "Submit"
+msgstr ""
+
+#: templates/support/faq.html:38
+msgid "No questions/answers in this category."
+msgstr ""
+
+#: templates/support/index.html:13
+msgid "Latest questions"
+msgstr ""
+
+#: templates/support/index.html:19 templates/support/index.html.py:32
+msgid "No questions in this category"
+msgstr ""
+
+#: templates/support/pagination.html:15 templates/support/pagination.html:16
+msgid "Previous page"
+msgstr ""
+
+#: templates/support/pagination.html:19
+msgid "Current page"
+msgstr ""
+
+#: templates/support/pagination.html:20
+msgid "All pages"
+msgstr ""
+
+#: templates/support/pagination.html:27 templates/support/pagination.html:28
+msgid "Next page"
+msgstr ""
+
+#: templates/support/question.html:12 templates/support/question_list.html:10
+#: templates/support/search_results.html:23
+msgid "Answered"
+msgstr ""
+
+#: templates/support/question.html:13 templates/support/question_list.html:9
+#: templates/support/search_results.html:21
+msgid "Rating"
+msgstr ""
+
+#: templates/support/question.html:14 templates/support/question_list.html:8
+#: templates/support/search_results.html:22
+msgid "Comments"
+msgstr ""
+
+#: templates/support/question.html:37
+msgid "Vote up"
+msgstr ""
+
+#: templates/support/question.html:43
+msgid "Vote down"
+msgstr ""
+
+#: templates/support/question.html:63 templates/support/question.html.py:64
+msgid "Delete this question"
+msgstr ""
+
+#: templates/support/question.html:81
+msgid "This is the accepted answer"
+msgstr ""
+
+#: templates/support/question.html:82
+msgid "Answer"
+msgstr ""
+
+#: templates/support/question.html:86 templates/web/select_company.html:90
+msgid "Accept"
+msgstr ""
+
+#: templates/support/question.html:107
+msgid "Add your comment"
+msgstr ""
+
+#: templates/support/question.html:120
+msgid "You have to be logged in to add comments."
+msgstr ""
+
+#: templates/support/search_high.html:8
+msgid ""
+"Welcome to our support center. Use the search form, check our F.A.Q. or send "
+"us an e-mail."
+msgstr ""
+
+#: templates/support/search_high.html:32 templates/support/search_low.html:39
+msgid "Community"
+msgstr ""
+
+#: templates/support/search_high.html:44 templates/support/search_low.html:49
+msgid "F.A.Q."
+msgstr ""
+
+#: templates/support/search_results.html:10
+msgid "Questions found"
+msgstr ""
+
+#: templates/web/index.html:165
+msgid "Pricing"
+msgstr "Cena"
+
+#: templates/web/index.html:167
+msgid "Enter"
+msgstr "Vstopi"
+
+#: templates/web/index.html:169 templates/web/index.html.py:292
+#: web/views.py:134
+msgid "Sign up"
+msgstr "Registracija"
+
+#: templates/web/index.html:209
+msgid "Login failed. Check your user name and password."
+msgstr ""
+
+#: templates/web/index.html:211
+msgid ""
+"You registered with Google. Please use the google login button below to log "
+"in."
+msgstr ""
+
+#: templates/web/index.html:214
+msgid ""
+"Your account is inactive.\n"
+"                                Search your e-mail inbox (and spam folder) "
+"for the activation mail.\n"
+"                                If you did not receive the activation mail, "
+"use the forgotten password form below.\n"
+"                                If thi still doesn't work for you, please "
+"contact support.\n"
+"                            "
+msgstr ""
+
+#: templates/web/index.html:231
+msgid "Lost password?"
+msgstr "Pozabljeno geslo?"
+
+#: templates/web/index.html:240
+msgid "En dober slogan."
+msgstr ""
+
+#: templates/web/index.html:241
+msgid "Cloud Point Of Sale application"
+msgstr "Prodajno mesto v oblaku"
+
+#: templates/web/index.html:244
+msgid "Find out more"
+msgstr "Preveri več"
+
+#: templates/web/index.html:249
+msgid "Meet Sellout,"
+msgstr "Spoznaj spletno blagajno,"
+
+#: templates/web/index.html:254
+msgid ""
+"\n"
+"                         a new cloud-based multiplatform Point of Sale "
+"application\n"
+"                            that makes issuing invoices easier than ever.\n"
+"                    "
+msgstr ""
+"\n"
+"                         prodajno mesto v oblaku,\n"
+"spletna in mobilna aplikacija, kjer je izdajanje računov preprosto in "
+"hitro.\n"
+"                                                "
+
+#: templates/web/index.html:258
+msgid ""
+"It combines register, inventory and management.\n"
+"                    "
+msgstr ""
+"Vse kar potrebujete za izdajanje računov, na enem mestu.\n"
+"                    "
+
+#: templates/web/index.html:266
+msgid ""
+"\n"
+"                        It offers a simple user friendly and fast software "
+"system to help\n"
+"                        you grow your business in no time.\n"
+"                    "
+msgstr ""
+"\n"
+"                       Enostavna uporaba in pripravljeno za prodajo že v "
+"nekaj minutah, vam omogoča hitro poslovanje in povečanje prodaje.\n"
+"                    "
+
+#: templates/web/index.html:269
+msgid ""
+"\n"
+"                        Set up an account and start selling. All you need is "
+"an Internet connection.</p>\n"
+"                    "
+msgstr ""
+"\n"
+"                        Nastavite račun in lahko začnete prodajati takoj. "
+"Vse kar potrebujete je internetna povezava.</p>\n"
+"                    "
+
+#: templates/web/index.html:282 templates/web/index.html.py:454
+msgid "Free while in beta"
+msgstr "Za sedaj, brezplačno"
+
+#: templates/web/index.html:285
+msgid "Per month"
+msgstr "na mesec"
+
+#: templates/web/index.html:288 templates/web/index.html.py:489
+msgid "Unlimited registers"
+msgstr "Neskončno blagajn"
+
+#: templates/web/index.html:289 templates/web/index.html.py:490
+msgid "Unlimited products"
+msgstr "Neskončno produktov"
+
+#: templates/web/index.html:290
+msgid "Unlimited contacts"
+msgstr "Neskončno kontaktov"
+
+#: templates/web/index.html:298
+msgid "Seriously low prices"
+msgstr "Nizka cena"
+
+#: templates/web/index.html:299
+msgid ""
+"\n"
+"                        Get started from as low as 7&euro; per month.<br />\n"
+"                        It doesn't get much better than this.\n"
+"                    "
+msgstr ""
+"\n"
+"                        Že za 7&euro; na mesec, na spletu ali mobilnem "
+"telefonu.<br />\n"
+"                        Bolje, hitreje in ceneje.\n"
+"                    "
+
+#: templates/web/index.html:303
+msgid "Check out other offers"
+msgstr "Preveri še ostalo ponudbo"
+
+#: templates/web/index.html:306
+#, fuzzy
+#| msgid ""
+#| "* The term Register refers to digital register in Sellout application, "
+#| "not an actual piece of hardware."
+msgid ""
+"The term Register refers to digital register in Sellout application, not an "
+"actual piece of hardware."
+msgstr ""
+"Beseda blagajna se nanaša na virtualno blagajno v aplikaciji in ne na "
+"dejansko strojno opremo."
+
+#: templates/web/index.html:317
+msgid "Simple and fast, with no setup"
+msgstr "Preprosto in hitro, vse preko spleta"
+
+#: templates/web/index.html:318
+msgid ""
+"\n"
+"                        Forget long lasting software installations,\n"
+"                        Sellout requires no setup.\n"
+"                        All you need is a web browser or a smart phone and "
+"basic internet connection.\n"
+"                        "
+msgstr ""
+"\n"
+"                        Pozabite na dolgotrajne namestitvene procese,\n"
+"                        Nobenih namestitev in dolgotrajnih nastavitev.\n"
+"                        Vse kar potrebujete je spletnih brskalnik ali "
+"pametni telefon/pametno tablico in internetno povezavo.\n"
+"                        "
+
+#: templates/web/index.html:332
+msgid "Add"
+msgstr "Dodaj"
+
+#: templates/web/index.html:349
+msgid "Payment types"
+msgstr ""
+
+#: templates/web/index.html:352
+msgid "Cash. Credit card. Paypal. Bitcoin."
+msgstr "Denar. Kreditna kartica. Paypal. Bitcoin."
+
+#: templates/web/index.html:353
+msgid ""
+"\n"
+"                        From good old banknotes to digital currency,\n"
+"                        Sellout lets you accept any type of payment.\n"
+"                        Increase your earning potential now.\n"
+"                    "
+msgstr ""
+"\n"
+"                        Od papirnatega denarja, pa vse do novodobnih "
+"plačilnih metod,\n"
+"                        Sellout omogoča sprejemanje vseh,\n"
+"                        s tem pa povečujete vaš prodajni potencial.\n"
+"                    "
+
+#: templates/web/index.html:367
+msgid "We are all about possibilities."
+msgstr "Raznolikost v vseh pogledih"
+
+#: templates/web/index.html:374
+msgid "Cloud-based"
+msgstr "Vse v oblaku"
+
+#: templates/web/index.html:375
+msgid ""
+"Any time, any place, Sellout is always available. <br />Never lose your data."
+msgstr ""
+"Kadarkoli, kjerkoli, Sellout je vedno dostopen. <br />Vedno varno shranjeni "
+"podatki."
+
+#: templates/web/index.html:385
+msgid "Any hardware support"
+msgstr "Podpora za večino strojne opreme"
+
+#: templates/web/index.html:386
+msgid "Use it on any kind of device. <br/>Print to any kind of printer."
+msgstr ""
+"Uporabljate lahko na skoraj vseh napravah. <br />Tiskanje na katerkoli "
+"printer."
+
+#: templates/web/index.html:395
+msgid "Multiple platforms"
+msgstr "Številne platforme"
+
+#: templates/web/index.html:396
+msgid ""
+"Works as web, mobile and tablet app. <br />All you need is a browser and a "
+"Wi-Fi."
+msgstr ""
+"Deluje kot spletna, mobilna in tablična aplikacija. <br />Vse kar "
+"potrebujete, je brskalnik in Wi-Fi povezavo."
+
+#: templates/web/index.html:407
+msgid "Multiple terminals"
+msgstr "Več terminalnov"
+
+#: templates/web/index.html:408
+msgid ""
+"Switch between terminals with different preferences,<br />all on a single "
+"device."
+msgstr ""
+"Menjava med terminal z različnimi nastavitvami,<br />vse na eni napravi."
+
+#: templates/web/index.html:417
+msgid "Multiple permission profiles"
+msgstr "Več profilov dostopa"
+
+#: templates/web/index.html:418
+msgid "Define who has access to what.<br />Keep your company information safe."
+msgstr ""
+"Nastavite do dostopa do kam.<br />Pomembne informacije tako ostanejo varne."
+
+#: templates/web/index.html:427
+msgid "Customizable"
+msgstr "Prilagodljiv"
+
+#: templates/web/index.html:428
+msgid ""
+"Set the layout of terminal and printed receipts <br /> to satisfy your "
+"requirements."
+msgstr "Izgled računov in terminala nastavite,<br />da zadovolji vašemuokusu."
+
+#: templates/web/index.html:438
+msgid "The perfect partner."
+msgstr "Popoln partner"
+
+#: templates/web/index.html:439
+msgid ""
+"Sellout is for anyone who runs a profitable business and needs to regularly "
+"issue invoices.\n"
+"                    It is ideal for freelancers, small companies and start-"
+"ups.\n"
+"                    "
+msgstr ""
+"Spletna blagajna je za vsakogar, ki donosno posluje in rednoizdaja račune.\n"
+"                    Spletna blagajna je idealna za samostojne podjetnike, "
+"majhna podjetja, starup-e in srednja velika podjetja.                    "
+
+#: templates/web/index.html:442
+msgid "Ease up your everyday life."
+msgstr "Poenostavite vaše vsakodnevno poslovanje."
+
+#: templates/web/index.html:452
+msgid "Packages & Pricing"
+msgstr "Paketi & Cena"
+
+#: templates/web/index.html:478
+msgid "1 year"
+msgstr "1 leto"
+
+#: templates/web/index.html:486
+msgid "What you get"
+msgstr "Kaj dobite"
+
+#: templates/web/index.html:491
+msgid "Unlimited customers"
+msgstr "Neomejeno število stran v sistemu"
+
+#: templates/web/index.html:492
+msgid "Free mobile app"
+msgstr "Brezplačna mobilna aplikacija"
+
+#: templates/web/index.html:493
+msgid "Free email support"
+msgstr "Brezplačno elektronsko podporo"
+
+#: templates/web/index.html:499 templates/web/index.html.py:501
+msgid "Payment options"
+msgstr "Podprta plačilna sredstva"
+
+#: templates/web/index.html:510
+msgid "Start your <b>FREE</b> ... while in beta!"
+msgstr "Preizkusite <b>brezplačno</b>"
+
+#: templates/web/index.html:531
+msgid "About"
+msgstr "O nas"
+
+#: templates/web/index.html:532
+msgid "Press kit"
+msgstr ""
+
+#: templates/web/index.html:535
+msgid "Terms & conditions"
+msgstr ""
+
+#: templates/web/index.html:536
+msgid "Privacy"
+msgstr ""
+
+#: templates/web/index.html:544
+msgid "Join us on Facebook"
+msgstr ""
+
+#: templates/web/index.html:550
+msgid "Follow us on Twitter"
+msgstr ""
+
+#: templates/web/index.html:556
+msgid "Subscribe to us on Youtube"
+msgstr ""
+
+#: templates/web/index.html:562
+msgid "Add us on LinkedIn"
+msgstr "Dodaje nas na LinkedIn-u"
+
+#: templates/web/index.html:567
+msgid "Tracking time on projects?"
+msgstr "Imate evidenco nad delovnim časom?"
+
+#: templates/web/index.html:568
+msgid "Try Timebits!"
+msgstr "Preizkusite Timebits!"
+
+#: templates/web/index.html:576
+msgctxt "A product of Blocklogic"
+msgid "A product of "
+msgstr "Izdelek podjetja "
+
+#: templates/web/index.html:581
+#, fuzzy
+#| msgid "Copyright 2015. All rights reserved."
+msgid "Copyright 2014. All rights reserved."
+msgstr "Vse pravice pridržane."
+
+#: templates/web/lost_password.html:30 templates/web/recover_password.html:30
+#: web/views.py:193
+msgid "Lost password"
+msgstr "Pozabljeno geslo"
+
+#: templates/web/lost_password.html:41
+msgid "Enter your e-mail:"
+msgstr "Vnesi e-mail:"
+
+#: templates/web/lost_password.html:48
+msgid "Send request"
+msgstr "Pošlji"
+
+#: templates/web/register_company.html:77
+msgid "Register a new company"
+msgstr "Registriraj novo podjetje"
+
+#: templates/web/register_company.html:78
+msgid ""
+"\n"
+"                Enter details about your company. These will be printed on "
+"bills you will issue\n"
+"                and for paying Sellout subscriptions.\n"
+"            "
+msgstr ""
+"\n"
+"                Vnesi podatke o podjetju. Ti bodo bili natisnjeni na račun\n"
+"                in pri plačilu naročnine za spletno blagajno.\n"
+"            "
+
+#: templates/web/register_company.html:119
+msgid ""
+"\n"
+"                                You will upload your company's logo after "
+"registration.\n"
+"                                Find your company settings in management "
+"menu.\n"
+"                            "
+msgstr ""
+"\n"
+"                                Logo podjetja boš lahko prenesl/a pouspešni "
+"registraciji.\n"
+"                                Poišči nastavitve za podjetje v meniju za "
+"upravljanje.\n"
+"                            "
+
+#: templates/web/register_company.html:132
+msgid ""
+"Your POS system will be accessible at this address.\n"
+"                                It can consist of characters, numbers and "
+"dashes only.\n"
+"                                You can make up your own or choose from the "
+"suggestions.\n"
+"                                It can be changed later."
+msgstr ""
+
+#: templates/web/register_company.html:145
+msgid "Available names:"
+msgstr ""
+
+#: templates/web/register_company.html:156
+msgid "Official e-mail address of the company"
+msgstr ""
+
+#: templates/web/register_company.html:241
+msgid "Create"
+msgstr ""
+
+#: templates/web/select_company.html:38
+msgid "Your companies"
+msgstr "Tvoja podjetja"
+
+#: templates/web/select_company.html:63
+msgid "You are not part of any company yet."
+msgstr ""
+
+#: templates/web/select_company.html:64
+msgid "Create your own company or wait for an invite."
+msgstr ""
+
+#: templates/web/select_company.html:70
+msgid "Add Company"
+msgstr "Dodaj podjetje"
+
+#: templates/web/select_company.html:79
+msgid "Your notifications"
+msgstr "Obvestila"
+
+#: templates/web/select_company.html:87
+msgid "You have been invited to join a company: "
+msgstr ""
+
+#: templates/web/select_company.html:91
+msgid "Decline"
+msgstr ""
+
+#: templates/web/select_company.html:98
+msgid "You have no unseen notifications."
+msgstr "Nimaš obvestil, ki jih še nisi pregledal."
+
+#: templates/web/select_company.html:107
+msgid "Your settings"
+msgstr "Nastavitve"
+
+#: templates/web/select_company.html:110
+msgid "User profile"
+msgstr "Profil uporabnika"
+
+#: templates/web/select_company.html:116
+msgid "Support center"
+msgstr "Pomoč in podpora"
+
+#: templates/web/select_company.html:119
+msgid "Run tutorial"
+msgstr "Tutor"
+
+#: templates/web/select_company.html:127
+msgid "Go to support center"
+msgstr "Pomoč in podpora"
+
+#: templates/web/sign_up.html:23
+msgid "Join the future in <br/>retail business."
+msgstr "Pridruži se prihodnosti v <br />podjetništvu."
+
+#: templates/web/sign_up.html:25
+msgid "Register for free."
+msgstr "Brezplačna registracija."
+
+#: templates/web/sign_up.html:96
+msgid "Please solve this riddle to prove that you are human:"
+msgstr "Prosim, reši tole uganko, da dokažeš, da si res človek za tem računalnikom:"
+
+#: templates/web/sign_up_message.html:11
+msgid "Activation successful"
+msgstr ""
+
+#: templates/web/sign_up_message.html:13
+msgid "Activation failed"
+msgstr ""
+
+#: templates/web/sign_up_message.html:15 templates/web/sign_up_message.html:17
+#: templates/web/sign_up_message.html:19
+msgid "User exists"
+msgstr ""
+
+#: templates/web/sign_up_message.html:34
+msgid "Registration successful."
+msgstr ""
+
+#: templates/web/sign_up_message.html:35
+msgid "Check your e-mail inbox for confirmation link."
+msgstr ""
+
+#: templates/web/sign_up_message.html:36 templates/web/sign_up_message.html:45
+#: templates/web/sign_up_message.html:50 templates/web/sign_up_message.html:55
+msgid "Back to home page"
+msgstr ""
+
+#: templates/web/sign_up_message.html:39
+msgid "Activation successful."
+msgstr ""
+
+#: templates/web/sign_up_message.html:40
+msgid "You can now login."
+msgstr ""
+
+#: templates/web/sign_up_message.html:44
+msgid "Activation failed (wrong key?)"
+msgstr ""
+
+#: templates/web/sign_up_message.html:48
+msgid ""
+" You are already registered on one of blocklogic sites with Google account.\n"
+"                    Please log in by clicking the google login button on "
+"home page."
+msgstr ""
+
+#: templates/web/sign_up_message.html:53
+msgid ""
+" Looks like you are already a member of a Blocklogic product.\n"
+"                    Use the login form to log in."
+msgstr ""
+
+#: web/views.py:83
+msgid "Select company"
+msgstr ""
+
+#: web/views.py:203
+msgid "Invalid e-mail"
+msgstr ""
+
+#: web/views.py:208
+msgid ""
+"You have registered with google account. Try signing in by clicking on "
+"'google login' button in login form."
+msgstr ""
+
+#: web/views.py:213
+msgid ""
+"Your password reset key has been sent to your e-mail, please check your "
+"inbox."
+msgstr ""
+
+#: web/views.py:217
+msgid "A user with this e-mail does not exist"
+msgstr ""
+
+#: web/views.py:219
+msgid "Unknown error occured. Please contact support."
+msgstr ""
+
+msgid "This field is required."
+msgstr "To polje je obvezno."
