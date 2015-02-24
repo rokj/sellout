@@ -61,7 +61,8 @@
                 navbar: $(".navbar"),
                 login_form: $("#login_form"),
                 welcome_section: $("#welcome_section"),
-                beta_stripe: $("#beta_stripe")
+                beta_stripe: $("#beta_stripe"),
+                more_icon: $("#more_icon")
             };
 
             // resizing and repositioning
@@ -154,6 +155,12 @@
                 toggle_login_form(true);
             }
 
+            items.more_button.mouseenter(function() {
+                items.more_icon.addClass("hover");
+            }).mouseleave(function() {
+                items.more_icon.removeClass("hover");
+            });
+
             match_url();
             $(window).on('hashchange', match_url);
         });
@@ -242,6 +249,7 @@
         </div>
 
         <input type="button" value="{% trans 'Find out more' %}" id="more" class="extra-font buttons" />
+        <img src="{% static 'icons/arrow_white_down.png' %}" alt="{% trans "More" %}" id="more_icon" />
     </section>
 
     <section id="meet_section">
@@ -281,7 +289,7 @@
                     <div id="budget_container" class="center-block">
                         <div class="akcija-small">{% trans "Free while in beta" %}</div>
                         <div class="budget-display">
-                            <div class="budget-price extra-font bold">7<span class="euro">&euro;</span></div>
+                            <div class="budget-price extra-font bold">20<span class="euro">&euro;</span></div>
                             {% trans 'Per month' %}
                         </div>
 {#                        <div class="budget-drawer"> {% trans 'One user' %} </div>#}
@@ -456,27 +464,27 @@
                         <div class="payment-option-nowrap">
                             <div class="payment-option">
                                 <div class="payment-duration"> {% trans '1 month' %}</div>
-                                <div class="payment-price">7 &euro;</div>
+                                <div class="payment-price">20 &euro;</div>
                             </div>
                             <div class="payment-option">
                                 <div class="payment-duration"> {% trans '2 months' %} </div>
-                                <div class="payment-price">13 &euro;</div>
+                                <div class="payment-price">38 &euro;</div>
                             </div>
                             <div class="payment-option">
                                 <div class="payment-duration"> {% trans '3 months' %} </div>
-                                <div class="payment-price">19 &euro;</div>
+                                <div class="payment-price">55 &euro;</div>
                             </div>
                         </div>
 
                         <div class="payment-option-nowrap">
                             <div class="payment-option">
                                 <div class="payment-duration"> {% trans '6 months' %} </div>
-                                <div class="payment-price">37 &euro;</div>
+                                <div class="payment-price">100 &euro;</div>
                             </div>
 
                             <div class="payment-option">
                                 <div class="payment-duration"> {% trans '1 year' %} </div>
-                                <div class="payment-price">73 &euro;</div>
+                                <div class="payment-price">166 &euro;</div>
                             </div>
                         </div>
                     </div>

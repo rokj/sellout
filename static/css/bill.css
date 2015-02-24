@@ -449,10 +449,10 @@ button.more{
     font-size: 20px;
 }
 
-#finish_the_bill{ left: 0; }
+#finish_the_bill{ right: 0; }
 #finish_the_bill button{ background-color: #22e693; }
 
-#bill_options{ right: 0; }
+#bill_options{ left: 0; }
 
 /* bill options dialog */
 #bill_options_dialog{
