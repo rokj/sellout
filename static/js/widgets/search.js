@@ -187,6 +187,10 @@ Search = function(g){
         p.g.objects.products.show_products(p.favorites);
     };
 
+    p.show_all_products = function(){
+        p.g.objects.products.show_all_products();
+    };
+
     p.search = function(add_to_bill){
         if(p.query_timeout){
             clearTimeout(p.query_timeout);

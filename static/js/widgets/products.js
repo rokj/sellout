@@ -6,6 +6,8 @@ Products = function(g){
     p.products = []; // a list of all product objects
     p.products_by_id = {}; // a dictionary {id:<product reference>}
 
+    p.all_ids = [];
+
     p.items = {
         container: $("#products")
     };
@@ -101,6 +103,10 @@ Products = function(g){
         p.shown_products = ids;
     };
 
+    p.show_all_products = function(){
+        p.show_products(p.all_ids);
+    };
+
     p.refresh = function(){
         if(p.shown_products){
             // there are products to show, just re-show them
@@ -133,6 +139,7 @@ Products = function(g){
         product = new Product(p, p.g.data.products[i]);
 
         p.products.push(product);
+        p.all_ids.push(p.g.data.products[i].id);
         p.products_by_id[p.g.data.products[i].id] = product;
     }
 

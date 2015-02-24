@@ -1,0 +1,40 @@
+{% extends "pos/manage/manage.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block section_head %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/management/discounts.css' %}" />
+<script type="text/javascript">
+    $(document).ready(function(){
+        // append datepicker to form ids:
+        $("#id_start_date, #id_end_date").datepicker({
+            dateFormat:"{{ date_format_js|escapejs }}"
+        });
+    });
+</script>
+{% endblock %}
+
+{% block status_bar_title %}
+    {% trans 'Stats' %}
+{% endblock %}
+
+{% block manage_content %}
+    <h2>{% trans 'Recent Earnings' %}</h2>
+    <table>
+        {% for e in earnings %}
+            <tr>
+                <td>asdf</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <h2>{% trans 'Top-selling Products' %}</h2>
+    <table>
+        {% for p in products %}
+            <tr>
+                <td>asdf</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
+

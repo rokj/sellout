@@ -52,15 +52,25 @@
 }
 
 .no-breadcrumbs #category_button_favorites,
-.no-breadcrumbs #category_button_back{
+.no-breadcrumbs #category_button_back,
+.no-breadcrumbs #category_button_home{
     float:left;
     width: 60px;
     height: 60px;
     text-align: center;
 }
 
-.no-breadcrumbs #category_button_favorites{
+.no-breadcrumbs #category_button_home{
     background-color: #646464;
+}
+
+.no-breadcrumbs #category_button_home img{
+    position: relative;
+    top: 12px;
+}
+
+.no-breadcrumbs #category_button_favorites{
+    background-color: #969696;
 }
 
 .no-breadcrumbs #category_button_favorites img{
