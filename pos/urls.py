@@ -12,6 +12,7 @@ from pos.views.manage import category
 from pos.views.manage import product
 from pos.views.manage import contact
 from pos.views.manage import discount
+from pos.views.manage import stats
 from pos.views.manage import tax
 from pos.views.manage import configuration
 from pos.views.manage import register
@@ -55,6 +56,10 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + _('/discount/add') + '/$', discount.add_discount, name='add_discount'),
     url(r_company + '/' + r_manage + _('/discount/edit') + '/(?P<discount_id>\d+)/$', discount.edit_discount, name='edit_discount'),
     url(r_company + '/' + r_manage + _('/discount/delete') + '/$', discount.delete_discount, name='delete_discount'),
+
+    # stats
+    url(r_company + '/' + r_manage + _('/stats') + '/$', stats.stats, name='stats'),
+
     # taxes
     url(r_company + '/' + r_manage + _('/taxes') + '/$', tax.list_taxes, name='list_taxes'),  # template view
     url(r_company + '/' + r_manage + '/json/tax/edit/?$', tax.edit_tax, name='edit_tax'),  # get all taxes in a json list

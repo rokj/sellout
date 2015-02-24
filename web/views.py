@@ -24,8 +24,11 @@ import settings
 def index(request):
     message = None
     next = None
-
     action = ''
+
+    # if the user is already logged in, redirect to select_company
+    if request.user.is_authenticated():
+        return redirect('web:select_company')
 
     if request.method == 'POST':
         action = 'login'
@@ -280,7 +283,7 @@ def handle_invitation(request, reference, user_response):
             company=action.company,
             permission=permission
         )
-        new_permission.create_pin(False)
+        # new_permission.create_pin(False)
         new_permission.save()
 
     # else: if the invite was declined, just update its status (which must be done anyway)

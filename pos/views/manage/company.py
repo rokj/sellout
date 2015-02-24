@@ -303,8 +303,8 @@ def register_company(request):
             )
             default_permission.save()
 
-            # assign pin number
-            default_permission.create_pin()
+            ## assign pin number
+            #default_permission.create_pin()
 
             return redirect('pos:terminal', company=form.cleaned_data['url_name'])  # home page
     else:
