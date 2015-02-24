@@ -27,3 +27,15 @@ div.ad p{
 div.ad p:first-child{
     color: #969696;
 }
+
+div.field-errors ul.errorlist {
+    padding: 0px;
+    maring: 0px;
+    padding-top: 2px;
+}
+
+div.field-errors ul.errorlist li {
+    /*font-weight: bold;*/
+    list-style: none;
+    text-align: center;
+}

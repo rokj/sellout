@@ -1,7 +1,8 @@
 {% load i18n %}
 {% load static %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -48,7 +49,11 @@
     <div class="container-fluid">
         <div class="navbar-header">
             <a class="navbar-brand" href="{% url 'web:index' %}">
-                <img src="{% static 'icons/logo_white.png' %}" alt="Sellout" id="logo" />
+                {% if LANGUAGE_CODE == "en" %}
+                    <img src="{% static 'icons/logo_white.png' %}" alt="Sellout" id="logo" />
+                {% elif LANGUAGE_CODE == "si" %}
+                    <img src="{% static 'icons/logo_white.png' %}" alt="Spletna blagajna" id="logo" />
+                {% endif %}
             </a>
         </div>
         <div id="beta_stripe"></div>
