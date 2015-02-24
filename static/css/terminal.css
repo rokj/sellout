@@ -190,7 +190,9 @@ div#selector{
     position: relative;
     background-color: #00bbda;
     white-space: nowrap;
-    text-align: center;
+    /*text-align: center;*/
+    text-align: left;
+    padding-left: 37%;
     height: 50px;
     width: 100%;
 }
