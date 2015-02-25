@@ -87,7 +87,9 @@ blocks:
             {# the logo: green/black in management, black/white in terminal #}
             {# thie is the 'terminal' version #}
             <div id="logo" class="nolink">
-                <img src="{% static 'icons/logo_white.png' %}" alt="" />
+                <a href="{% url 'pos:terminal' company.url_name %}" title="{% trans 'Terminal' %}">
+                    <img src="{% static 'icons/logo_white.png' %}" alt="" />
+                </a>
             </div>
         {% endblock %}
 

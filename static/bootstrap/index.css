@@ -39,6 +39,9 @@
     border: 2px solid #ffffff;
     padding: 5px 20px;
     position: relative;
+    border-radius: 2px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
 }
 
 #login_forms_container{
@@ -167,10 +170,54 @@ section {
     position: absolute;
     left: 50%;
     width: 150px;
-    height: 32px;
+    height: 35px;
     margin-left: -75px;
     bottom: 30px;
+
+    border: solid 2px;
+    border-radius: 3px;
+    background: transparent;
 }
+
+#more_icon {
+    position: absolute;
+    left: 50%;
+    margin-left: -11px;
+    bottom: 9px;
+
+    -webkit-transition: opacity 0.7s ease-in-out;
+    -moz-transition: opacity 0.7s ease-in-out;
+    transition: opacity 0.7s ease-in-out;
+}
+
+#more_icon.hover {
+    opacity: 0.7;
+    animation: move_more_icon 0.7s;
+    -moz-animation: move_more_icon 0.7s; /* Firefox */
+    -webkit-animation: move_more_icon 0.7s; /* Safari and Chrome */
+    animation-fill-mode:forwards;
+    animation-iteration-count: 1;
+    -webkit-animation-iteration-count: 1;
+    -webkit-animation-fill-mode: forwards;
+}
+
+@keyframes move_more_icon
+{
+    from { bottom: 9px;}
+    to { bottom: 4px; }
+}
+
+@-moz-keyframes move_more_icon
+{
+    from { bottom: 9px;}
+    to { bottom: 4px; }
+}
+
+@-webkit-keyframes move_more_icon
+{
+    from { bottom: 9px; }
+    to { bottom: 4px; }
+}​
 
 /* meet sellout */
 #meet_section {

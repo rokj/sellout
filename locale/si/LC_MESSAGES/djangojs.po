@@ -1,0 +1,545 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-02-23 18:54+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: admin/js/SelectFilter2.js:45
+#, c-format
+msgid "Available %s"
+msgstr ""
+
+#: admin/js/SelectFilter2.js:46
+#, c-format
+msgid ""
+"This is the list of available %s. You may choose some by selecting them in "
+"the box below and then clicking the \"Choose\" arrow between the two boxes."
+msgstr ""
+
+#: admin/js/SelectFilter2.js:53
+#, c-format
+msgid "Type into this box to filter down the list of available %s."
+msgstr ""
+
+#: admin/js/SelectFilter2.js:57
+msgid "Filter"
+msgstr ""
+
+#: admin/js/SelectFilter2.js:61
+msgid "Choose all"
+msgstr ""
+
+#: admin/js/SelectFilter2.js:61
+#, c-format
+msgid "Click to choose all %s at once."
+msgstr ""
+
+#: admin/js/SelectFilter2.js:67
+msgid "Choose"
+msgstr ""
+
+#: admin/js/SelectFilter2.js:69
+msgid "Remove"
+msgstr ""
+
+#: admin/js/SelectFilter2.js:75
+#, c-format
+msgid "Chosen %s"
+msgstr ""
+
+#: admin/js/SelectFilter2.js:76
+#, c-format
+msgid ""
+"This is the list of chosen %s. You may remove some by selecting them in the "
+"box below and then clicking the \"Remove\" arrow between the two boxes."
+msgstr ""
+
+#: admin/js/SelectFilter2.js:80
+msgid "Remove all"
+msgstr ""
+
+#: admin/js/SelectFilter2.js:80
+#, c-format
+msgid "Click to remove all chosen %s at once."
+msgstr ""
+
+#: admin/js/actions.js:18 admin/js/actions.min.js:1
+msgid "%(sel)s of %(cnt)s selected"
+msgid_plural "%(sel)s of %(cnt)s selected"
+msgstr[0] ""
+msgstr[1] ""
+
+#: admin/js/actions.js:109 admin/js/actions.min.js:5
+msgid ""
+"You have unsaved changes on individual editable fields. If you run an "
+"action, your unsaved changes will be lost."
+msgstr ""
+
+#: admin/js/actions.js:121 admin/js/actions.min.js:5
+msgid ""
+"You have selected an action, but you haven't saved your changes to "
+"individual fields yet. Please click OK to save. You'll need to re-run the "
+"action."
+msgstr ""
+
+#: admin/js/actions.js:123 admin/js/actions.min.js:6
+msgid ""
+"You have selected an action, and you haven't made any changes on individual "
+"fields. You're probably looking for the Go button rather than the Save "
+"button."
+msgstr ""
+
+#: admin/js/admin/DateTimeShortcuts.js:49
+#: admin/js/admin/DateTimeShortcuts.js:85
+msgid "Now"
+msgstr ""
+
+#: admin/js/admin/DateTimeShortcuts.js:53
+msgid "Clock"
+msgstr ""
+
+#: admin/js/admin/DateTimeShortcuts.js:81
+msgid "Choose a time"
+msgstr ""
+
+#: admin/js/admin/DateTimeShortcuts.js:86
+msgid "Midnight"
+msgstr ""
+
+#: admin/js/admin/DateTimeShortcuts.js:87
+msgid "6 a.m."
+msgstr ""
+
+#: admin/js/admin/DateTimeShortcuts.js:88
+msgid "Noon"
+msgstr ""
+
+#: admin/js/admin/DateTimeShortcuts.js:92
+#: admin/js/admin/DateTimeShortcuts.js:204 static/js/widgets/bill.js:426
+#: static/js/widgets/bill.js.c:1355
+msgid "Cancel"
+msgstr ""
+
+#: admin/js/admin/DateTimeShortcuts.js:144
+#: admin/js/admin/DateTimeShortcuts.js:197
+msgid "Today"
+msgstr ""
+
+#: admin/js/admin/DateTimeShortcuts.js:148
+msgid "Calendar"
+msgstr ""
+
+#: admin/js/admin/DateTimeShortcuts.js:195
+msgid "Yesterday"
+msgstr ""
+
+#: admin/js/admin/DateTimeShortcuts.js:199
+msgid "Tomorrow"
+msgstr ""
+
+#: admin/js/calendar.js:26
+msgid ""
+"January February March April May June July August September October November "
+"December"
+msgstr ""
+
+#: admin/js/calendar.js:27
+msgid "S M T W T F S"
+msgstr ""
+
+#: admin/js/collapse.js:8 admin/js/collapse.js.c:19 admin/js/collapse.min.js:1
+msgid "Show"
+msgstr ""
+
+#: admin/js/collapse.js:15 admin/js/collapse.min.js:1
+msgid "Hide"
+msgstr ""
+
+#: static/js/common.js:140 static/js/widgets/unlock.js:112
+msgid "OK"
+msgstr ""
+
+#: static/js/common.js:145
+msgid "Yes"
+msgstr ""
+
+#: static/js/common.js:146
+msgid "No"
+msgstr ""
+
+#: static/js/common.js:159
+msgid "File too large"
+msgstr ""
+
+#: static/js/common.js:160
+msgid "Maximum file size is"
+msgstr ""
+
+#: static/js/tutorial.js:213
+msgid "Help"
+msgstr ""
+
+#: static/js/tutorial.js:214
+msgid ""
+"In case you want to take this tutorial again, look for this icon on your "
+"dashboard: "
+msgstr ""
+
+#: static/js/tutorial.js:219
+msgid "Got it"
+msgstr ""
+
+#: static/js/tutorial.js:393
+msgid "Hello!"
+msgstr ""
+
+#: static/js/tutorial.js:394
+msgid ""
+"Thank you for choosing Sellout! This guide will show you the basic features "
+"and will also help you complete the first setup."
+msgstr ""
+
+#: static/js/tutorial.js:399
+msgid "Begin!"
+msgstr ""
+
+#: static/js/tutorial.js:404
+msgid "Your companies"
+msgstr ""
+
+#: static/js/tutorial.js:405
+msgid "Tole nucas. nared novo ali pocakaj, da te en majstr povabi."
+msgstr ""
+
+#: static/js/tutorial.js:409 static/js/tutorial.js.c:442
+#: static/js/tutorial.js:519 static/js/tutorial.js.c:531
+#: static/js/tutorial.js:545
+msgid "Back"
+msgstr ""
+
+#: static/js/tutorial.js:410
+msgid "Next"
+msgstr ""
+
+#: static/js/tutorial.js:415
+msgid "Your notifications"
+msgstr ""
+
+#: static/js/tutorial.js:416
+msgid ""
+"Kle te povabjo in ti zaratschunajo. Zdej pa nared firmo ali potschakej na "
+"invajt."
+msgstr ""
+
+#: static/js/tutorial.js:426
+msgid "Add, Search, Sort"
+msgstr ""
+
+#: static/js/tutorial.js:427
+msgid "Use these buttons to organise your tasks."
+msgstr ""
+
+#: static/js/tutorial.js:432 static/js/tutorial.js.c:508
+#: static/js/tutorial.js:520 static/js/tutorial.js.c:532
+msgid "Next tip"
+msgstr ""
+
+#: static/js/tutorial.js:437
+msgid "New Task"
+msgstr ""
+
+#: static/js/tutorial.js:438
+msgid ""
+"Name your task and save it. You can add other parameters too if you like. "
+"Click the green tick when you are done."
+msgstr ""
+
+#: static/js/tutorial.js:463
+msgid "Add Time"
+msgstr ""
+
+#: static/js/tutorial.js:464
+msgid ""
+"When you already have a task, you keep adding times to it as long as you "
+"work on it. <br/><br/>"
+msgstr ""
+
+#: static/js/tutorial.js:481
+msgid "Shortcuts"
+msgstr ""
+
+#: static/js/tutorial.js:482
+msgid ""
+"Try using mousewheel on time and date boxes. You also don't have to type "
+"separators "
+msgstr ""
+
+#: static/js/tutorial.js:500
+msgid "StartStop feature"
+msgstr ""
+
+#: static/js/tutorial.js:501
+msgid ""
+"You have entered a time entry by entering times and dates by hand. But if "
+"you want "
+msgstr ""
+
+#: static/js/tutorial.js:513
+msgid "Groups"
+msgstr ""
+
+#: static/js/tutorial.js:514
+msgid ""
+"All your projects and tasks are stored in a group. You can edit its name, "
+"make new ones and invite "
+msgstr ""
+
+#: static/js/tutorial.js:525
+msgid "User Account"
+msgstr ""
+
+#: static/js/tutorial.js:526
+msgid ""
+"Here you will find your account details, all subscriptions, group management "
+"and other settings. "
+msgstr ""
+
+#: static/js/tutorial.js:537
+msgid "That's it!"
+msgstr ""
+
+#: static/js/tutorial.js:538
+msgid "We are at the end of the tour. <br/><br/>"
+msgstr ""
+
+#: static/js/tutorial.js:546
+msgid "Close"
+msgstr ""
+
+#: static/js/widgets/bill.js:361
+msgid "Cannot create bill"
+msgstr ""
+
+#: static/js/widgets/bill.js:362
+msgid "The bill is empty"
+msgstr ""
+
+#: static/js/widgets/bill.js:373
+msgid "Could not create bill"
+msgstr ""
+
+#: static/js/widgets/bill.js:400
+msgid "Save Bill"
+msgstr ""
+
+#: static/js/widgets/bill.js:404 static/js/widgets/bill.js.c:517
+#: static/js/widgets/bill.js:1354
+msgid "Save"
+msgstr ""
+
+#: static/js/widgets/bill.js:413
+msgid "Saving bill failed"
+msgstr ""
+
+#: static/js/widgets/bill.js:443
+msgid "Loading bills failed"
+msgstr ""
+
+#: static/js/widgets/bill.js:473
+msgid "Delete this bill?"
+msgstr ""
+
+#: static/js/widgets/bill.js:479
+msgid "Deleting bill failed"
+msgstr ""
+
+#: static/js/widgets/bill.js:504
+msgid "Load bill"
+msgstr ""
+
+#: static/js/widgets/bill.js:514
+msgid "The current bill is not saved"
+msgstr ""
+
+#: static/js/widgets/bill.js:515
+msgid "Do you wish to save or clear it?"
+msgstr ""
+
+#: static/js/widgets/bill.js:521
+msgid "Clear"
+msgstr ""
+
+#: static/js/widgets/bill.js:566
+msgid "Confirm bill clear"
+msgstr ""
+
+#: static/js/widgets/bill.js:567
+msgid "Are you sure you want to clear bill? All items will be removed."
+msgstr ""
+
+#: static/js/widgets/bill.js:675
+msgid "Invalid quantity"
+msgstr ""
+
+#: static/js/widgets/bill.js:679 static/js/widgets/bill.js.c:1368
+msgid "Wrong number format"
+msgstr ""
+
+#: static/js/widgets/bill.js:695
+msgid "Quantity cannot be zero or less"
+msgstr ""
+
+#: static/js/widgets/bill.js:828
+msgid "Remove bill item"
+msgstr ""
+
+#: static/js/widgets/bill.js:829
+msgid "Remove bill item: %(name)s?"
+msgstr ""
+
+#: static/js/widgets/bill.js:1036
+msgid "Wrong item format"
+msgstr ""
+
+#: static/js/widgets/bill.js:1037
+msgid "Please check discount number format"
+msgstr ""
+
+#: static/js/widgets/bill.js:1275
+msgid "Invalid discount"
+msgstr ""
+
+#: static/js/widgets/bill.js:1276
+msgid "Please check discount format and type"
+msgstr ""
+
+#: static/js/widgets/bill.js:1297
+msgid "Confirm explode"
+msgstr ""
+
+#: static/js/widgets/bill.js:1298
+msgid ""
+"You have made changes to this item that will not be saved to the new item. "
+"Continue?"
+msgstr ""
+
+#: static/js/widgets/bill.js:1353
+msgid "Bill options"
+msgstr "Možnosti na računu"
+
+#: static/js/widgets/bill.js:1369
+msgid "Please check discount amount"
+msgstr "Prosim, preveri popust"
+
+#: static/js/widgets/categories.js:25
+msgid "Categories"
+msgstr "Kategorije"
+
+#: static/js/widgets/categories.js:26
+msgid "Favorite products"
+msgstr "Priljubljeni artikli"
+
+#: static/js/widgets/categories.js:29
+msgid "Products in this category"
+msgstr "Artikli v tej kategoriji"
+
+#: static/js/widgets/categories.js:30
+msgid "Subcategories"
+msgstr "Podkategorije"
+
+#: static/js/widgets/categories.js:31
+msgid "No Subcategories"
+msgstr "Ni podkategorij"
+
+#: static/js/widgets/contacts.js:118
+msgid "Select contact"
+msgstr "Izberi kontakt"
+
+#: static/js/widgets/contacts.js:314
+msgid "Saving contact failed"
+msgstr "Nisem uspel shraniti kontakta"
+
+#: static/js/widgets/payment.js:177
+msgid "Paypal error"
+msgstr ""
+
+#: static/js/widgets/payment.js:177
+msgid ""
+"Something went wrong when we were connecting with paypal. Try again later, "
+"or use other payment option."
+msgstr ""
+
+#: static/js/widgets/payment.js:222
+msgid "Bitcoin payment problem"
+msgstr ""
+
+#: static/js/widgets/payment.js:222
+msgid ""
+"Something went wrong when trying to get information about Bitcoin payment. "
+"Try later, or be nice and contact support."
+msgstr ""
+
+#: static/js/widgets/payment.js:367
+msgid "Confirm cancellation"
+msgstr ""
+
+#: static/js/widgets/payment.js:368
+msgid "Are you sure you want to cancel this bill?"
+msgstr ""
+
+#: static/js/widgets/payment.js:380
+msgid "Could not update bill status"
+msgstr ""
+
+#: static/js/widgets/payment.js:422
+msgid "Could not save bill"
+msgstr ""
+
+#: static/js/widgets/products.js:14
+msgid "No products found"
+msgstr "Ni najdenih artiklov"
+
+#: static/js/widgets/terminal.js:202
+msgid "Register is required"
+msgstr ""
+
+#: static/js/widgets/terminal.js:203
+msgid "There are no registers defined, please add one"
+msgstr ""
+
+#: static/js/widgets/terminal.js:206
+msgid "Go"
+msgstr ""
+
+#: static/js/widgets/terminal.js:240
+msgid "Register could not be set"
+msgstr ""
+
+#: static/js/widgets/terminal.js:241
+msgid "There was an error while setting your register, "
+msgstr ""
+
+#: static/js/widgets/terminal.js:276
+msgid "Choose a register"
+msgstr ""
+
+#: static/js/widgets/unlock.js:109
+msgid "Could not unlock"
+msgstr ""
+
+#: static/js/widgets/unlock.js:168
+msgid "Locking failed"
+msgstr ""
