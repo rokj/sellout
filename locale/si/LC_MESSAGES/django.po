@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-24 15:10+0100\n"
+"POT-Creation-Date: 2015-02-25 14:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -501,7 +501,7 @@ msgstr ""
 msgid "Individual"
 msgstr ""
 
-#: common/globals.py:78 templates/pos/base.html:136
+#: common/globals.py:78 templates/pos/base.html:138
 #: templates/pos/manage/company.html:174 templates/pos/manage/config.html:20
 #: templates/pos/manage/contacts.html:169
 #: templates/pos/manage/contacts.html:170 templates/pos/terminal.html:444
@@ -964,7 +964,7 @@ msgid "Description"
 msgstr ""
 
 #: pos/models.py:85 pos/views/manage/category.py:227
-#: templates/pos/base.html:126 templates/pos/manage/categories.html:291
+#: templates/pos/base.html:128 templates/pos/manage/categories.html:291
 msgid "Categories"
 msgstr "Kategorije"
 
@@ -1019,7 +1019,7 @@ msgstr "Naziv"
 msgid "Use by default when creating new products"
 msgstr ""
 
-#: pos/models.py:185 templates/pos/base.html:129
+#: pos/models.py:185 templates/pos/base.html:131
 #: templates/pos/manage/products.html:1201
 #: templates/pos/manage/products.html:1510 templates/pos/manage/tax.html:275
 msgid "Taxes"
@@ -1509,7 +1509,7 @@ msgstr ""
 msgid "Ascending"
 msgstr ""
 
-#: pos/views/manage/bill.py:140 templates/pos/base.html:132
+#: pos/views/manage/bill.py:140 templates/pos/base.html:134
 #: templates/pos/manage/bills.html:42
 msgid "Bills"
 msgstr "Računi"
@@ -1725,7 +1725,7 @@ msgstr ""
 msgid "You have no permission to view contacts."
 msgstr ""
 
-#: pos/views/manage/contact.py:309 templates/pos/base.html:131
+#: pos/views/manage/contact.py:309 templates/pos/base.html:133
 #: templates/pos/manage/contacts.html:15
 msgid "Contacts"
 msgstr "Kontakti"
@@ -1782,7 +1782,7 @@ msgstr ""
 msgid "You have no permission to view discounts."
 msgstr ""
 
-#: pos/views/manage/discount.py:200 templates/pos/base.html:128
+#: pos/views/manage/discount.py:200 templates/pos/base.html:130
 #: templates/pos/manage/discounts.html:19
 #: templates/pos/manage/products.html:1278
 #: templates/pos/manage/products.html:1513
@@ -1819,7 +1819,7 @@ msgid "You have no permission to manage POS settings."
 msgstr ""
 
 #: pos/views/manage/manage.py:25 support/parameters.py:8
-#: templates/pos/base.html:121 templates/web/select_company.html:47
+#: templates/pos/base.html:123 templates/web/select_company.html:47
 msgid "Management"
 msgstr "Nastaviteve"
 
@@ -1838,7 +1838,7 @@ msgid ""
 "them."
 msgstr ""
 
-#: pos/views/manage/product.py:134 templates/pos/base.html:127
+#: pos/views/manage/product.py:134 templates/pos/base.html:129
 #: templates/pos/manage/products.html:1431
 msgid "Products"
 msgstr "Artikli/storitve"
@@ -1977,7 +1977,7 @@ msgstr ""
 msgid "You have no permission to view registers."
 msgstr ""
 
-#: pos/views/manage/register.py:106 templates/pos/base.html:130
+#: pos/views/manage/register.py:106 templates/pos/base.html:132
 msgid "Cash Registers"
 msgstr "Tiskalniki"
 
@@ -2038,7 +2038,7 @@ msgstr ""
 msgid "You have no permission to view users' settings."
 msgstr ""
 
-#: pos/views/manage/users.py:50 templates/pos/base.html:137
+#: pos/views/manage/users.py:50 templates/pos/base.html:139
 #: templates/pos/manage/users.html:176
 msgid "Users"
 msgstr "Uporabniki"
@@ -2707,8 +2707,8 @@ msgstr ""
 msgid "Subscriptions and payment"
 msgstr ""
 
-#: support/parameters.py:7 templates/pos/terminal.html:186
-#: templates/web/select_company.html:44
+#: support/parameters.py:7 templates/pos/base.html:98
+#: templates/pos/terminal.html:186 templates/web/select_company.html:44
 msgid "Terminal"
 msgstr ""
 
@@ -2846,24 +2846,24 @@ msgstr ""
 msgid "To recover your password please click on the following link: "
 msgstr ""
 
-#: templates/pos/base.html:110 templates/pos/terminal.html:354
+#: templates/pos/base.html:112 templates/pos/terminal.html:354
 #: templates/pos/terminal.html.py:355 templates/support/search_low.html:29
 msgid "Home"
 msgstr "Domov"
 
-#: templates/pos/base.html:111 templates/pos/terminal.html:191
+#: templates/pos/base.html:113 templates/pos/terminal.html:191
 msgid "Switch User"
 msgstr "Zamenjaj uporabnika"
 
-#: templates/pos/base.html:113 templates/web/select_company.html:26
+#: templates/pos/base.html:115 templates/web/select_company.html:26
 msgid "Log Out"
 msgstr "Odjava"
 
-#: templates/pos/base.html:133 templates/pos/manage/stats.html:18
+#: templates/pos/base.html:135 templates/pos/manage/stats.html:18
 msgid "Stats"
 msgstr ""
 
-#: templates/pos/base.html:135 templates/pos/manage/company.html:179
+#: templates/pos/base.html:137 templates/pos/manage/company.html:179
 #: templates/pos/manage/config.html:16
 msgid "Configuration"
 msgstr "Konfiguracija"
@@ -3926,12 +3926,16 @@ msgid "Lost password?"
 msgstr "Pozabljeno geslo?"
 
 #: templates/web/index.html:247
-msgid "En dober slogan."
-msgstr ""
+#, fuzzy
+#| msgid "The perfect partner."
+msgid "Your perfect business partner."
+msgstr "Vaš popoln poslovni partner."
 
 #: templates/web/index.html:248
-msgid "Cloud Point Of Sale application"
-msgstr "Prodajno mesto v oblaku"
+#, fuzzy
+#| msgid "Cloud Point Of Sale application"
+msgid "Cloud Point Of Sale application."
+msgstr "Spletna in mobilna blagajna s skladiščem."
 
 #: templates/web/index.html:251
 msgid "Find out more"
@@ -4017,9 +4021,16 @@ msgid "Seriously low prices"
 msgstr "Nizka cena"
 
 #: templates/web/index.html:307
+#, fuzzy
+#| msgid ""
+#| "\n"
+#| "                        Get started from as low as 20&euro; per month."
+#| "<br />\n"
+#| "                        It doesn't get much better than this.\n"
+#| "                    "
 msgid ""
 "\n"
-"                        Get started from as low as 20&euro; per month.<br />\n"
+"                        Get started from as low as 7&euro; per month.<br />\n"
 "                        It doesn't get much better than this.\n"
 "                    "
 msgstr ""

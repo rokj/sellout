@@ -188,27 +188,36 @@ div#selector{
 
 .terminal-menu > button.open-menu{
     position: relative;
-    background-color: #00bbda;
+    background-color: #008cff;
     white-space: nowrap;
-    /*text-align: center;*/
-    text-align: left;
-    padding-left: 37%;
+    text-align: center;
+    /*text-align: left;*/
+    /*padding-left: 37%;*/
     height: 50px;
     width: 100%;
 }
 
-.terminal-menu > button > img{
+.terminal-menu > button > span.buttons {
     position: absolute;
-    top: 50%;
-    right: 16px;
+    top: -4px;
+    right: 3px;
     display: inline-block;
     height: 14px;
     margin-top: -7px;
 }
 
+.terminal-menu > button > span.buttons > .circle {
+    width: 3px;
+    height: 3px;
+    border: 1px solid #FFFFFF;
+    display: inline-block;
+    border-radius: 2px;
+    margin-right: 1px;
+}
+
 .terminal-menu button.terminal-menu-item{
     width: 100%;
-    background-color: #00bbda;
+    background-color: #008cff;
     border-bottom: 1px solid #ffffff;
     box-shadow: none;
     height: 45px;
