@@ -3,15 +3,15 @@
 {% load i18n %}
 
 {% block section_head %}
-<link type="text/css" rel="stylesheet" href="{% static 'css/management/discounts.css' %}" />
-<script type="text/javascript">
-    $(document).ready(function(){
-        // append datepicker to form ids:
-        $("#id_start_date, #id_end_date").datepicker({
-            dateFormat:"{{ date_format_js|escapejs }}"
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/discounts.css' %}"/>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            // append datepicker to form ids:
+            $(".date").datepicker({
+                dateFormat: "{{ date_format_js|escapejs }}"
+            });
         });
-    });
-</script>
+    </script>
 {% endblock %}
 
 {% block status_bar_title %}
@@ -19,22 +19,50 @@
 {% endblock %}
 
 {% block manage_content %}
-    <h2>{% trans 'Recent Earnings' %}</h2>
-    <table>
-        {% for e in earnings %}
+    <form method="get" action=".">
+        <h2>{% trans 'Recent Earnings' %}</h2>
+        <table>
             <tr>
-                <td>asdf</td>
-            </tr>
-        {% endfor %}
-    </table>
+                <td></td>
+                <td>{% trans 'Today' %}</td>
+                <td>{% trans 'Yesterday' %}</td>
+                <td>{% trans 'This week' %}</td>
+                <td>{% trans 'This month' %}</td>
+                <td>
+                    <input type="text" class="date from" name="earnings_from" placeholder="{% trans 'From:' %}" value="{{ earnings_from }}"/>
+                    <input type="text" class="date to" name="earnings_to" placeholder="{% trans 'To:' %}" value="{{ earnings_to }}" />
 
-    <h2>{% trans 'Top-selling Products' %}</h2>
-    <table>
-        {% for p in products %}
-            <tr>
-                <td>asdf</td>
+                    <div class="update-dates">
+                        <input type="submit" value="OK">
+                    </div>
+                </td>
             </tr>
-        {% endfor %}
-    </table>
+            <tr>
+                <td>{% trans 'Income' %}</td>
+                <td>{{ earnings.today.income }}</td>
+                <td>{{ earnings.yesterday.income }}</td>
+                <td>{{ earnings.week.income }}</td>
+                <td>{{ earnings.month.income }}</td>
+                <td>{{ earnings.custom.income }}</td>
+            </tr>
+            <tr>
+                <td>{% trans 'Profit' %}</td>
+                <td>{{ earnings.today.profit }}</td>
+                <td>{{ earnings.yesterday.profit }}</td>
+                <td>{{ earnings.week.profit }}</td>
+                <td>{{ earnings.month.profit }}</td>
+                <td>{{ earnings.custom.profit }}</td>
+            </tr>
+        </table>
+
+        <h2>{% trans 'Top-selling Products' %}</h2>
+        <table>
+            {% for p in products %}
+                <tr>
+                    <td>asdf</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </form>
 {% endblock %}
 

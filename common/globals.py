@@ -225,20 +225,20 @@ PERMISSIONS = {
         'edit': (),
         },
     'cashier': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register','stats',),
         'edit': ('bill', 'terminal', 'contact'),  # cashiers must write bills
         },
     'seller': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register','stats',),
         'edit': ('bill', 'product', 'terminal', 'manage', 'contact',),
         },
     'manager': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register','stats',),
         'edit': ('category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register',),
         },
     'admin': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user',),
-        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user','stats',),
+        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user','stats',),
         },
 }
 

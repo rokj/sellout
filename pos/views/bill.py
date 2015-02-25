@@ -387,7 +387,6 @@ def create_bill_(request, c):
     def item_error(message, product):
         return JsonError(message + " " + _("(Item" + ": ") + product.name + ")")
 
-
     # check permissions
     if not has_permission(request.user, c, 'bill', 'edit'):
         return JsonError(_("You have no permission to create bills"))
@@ -451,6 +450,12 @@ def create_bill_(request, c):
         'items': [],
         'currency': get_company_value(request.user, c, 'pos_currency'),
 
+        # numbers...
+        'base': Decimal(0),
+        'discount': Decimal(0),
+        'tax': Decimal(0),
+        'total': Decimal(0),
+
         'created_by': request.user
     }
 
@@ -458,7 +463,7 @@ def create_bill_(request, c):
     if not r['success'] or r['number'] <= Decimal('0'):
         return JsonError(_("Invalid grand total value"))
     else:
-        grand_total = r['number']
+        bill['total'] = r['number']
 
     # validate items
     for i in data.get('items'):
@@ -553,6 +558,10 @@ def create_bill_(request, c):
             item['net'] = parse_decimal_exc(request.user, c, i.get('net'), message=_("Invalid net price"))
             item['tax'] = parse_decimal_exc(request.user, c, i.get('tax'), message=_("Invalid tax amount"))
             item['total'] = parse_decimal_exc(request.user, c, i.get('total'), message=_("Invalid total"))
+
+            bill['base'] += item['batch']
+            bill['discount'] += item['discount']
+            bill['tax'] += item['tax']
         except ValueError as e:
             return item_error(e.message, product)
 
@@ -563,7 +572,7 @@ def create_bill_(request, c):
 
     bill_payment = Payment(
         type=g.CASH,
-        total=grand_total,
+        total=bill['total'],
         currency=get_company_value(request.user, c, 'pos_currency'),
         transaction_datetime=datetime.utcnow(),
         status=g.WAITING,
@@ -582,7 +591,11 @@ def create_bill_(request, c):
         contact=bill['contact'],  # FK on BillContact, copy of the Contact object
         notes=bill['notes'],
         timestamp=dtm.utcnow().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
-        payment=bill_payment
+        payment=bill_payment,
+
+        base=bill['base'],
+        discount=bill['discount'],
+        tax=bill['tax']
     )
     db_bill.save()
 
