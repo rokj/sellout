@@ -3594,7 +3594,6 @@ msgid "Invoice for: "
 msgstr ""
 
 #: templates/pos/terminal.html:234
-#, fuzzy
 #| msgid "Products"
 msgid "Product"
 msgstr "Artikel"
@@ -3622,7 +3621,6 @@ msgid "Finish"
 msgstr "Potrdi"
 
 #: templates/pos/terminal.html:323
-#, fuzzy
 #| msgid "Bills"
 msgctxt "bill options button text"
 msgid "Bill"
@@ -3926,13 +3924,11 @@ msgid "Lost password?"
 msgstr "Pozabljeno geslo?"
 
 #: templates/web/index.html:247
-#, fuzzy
 #| msgid "The perfect partner."
 msgid "Your perfect business partner."
 msgstr "Vaš popoln poslovni partner."
 
 #: templates/web/index.html:248
-#, fuzzy
 #| msgid "Cloud Point Of Sale application"
 msgid "Cloud Point Of Sale application."
 msgstr "Spletna in mobilna blagajna s skladiščem."
@@ -4021,7 +4017,6 @@ msgid "Seriously low prices"
 msgstr "Nizka cena"
 
 #: templates/web/index.html:307
-#, fuzzy
 #| msgid ""
 #| "\n"
 #| "                        Get started from as low as 20&euro; per month."
@@ -4045,7 +4040,6 @@ msgid "Check out other offers"
 msgstr "Preveri še ostalo ponudbo"
 
 #: templates/web/index.html:314
-#, fuzzy
 #| msgid ""
 #| "* The term Register refers to digital register in Sellout application, "
 #| "not an actual piece of hardware."
@@ -4268,7 +4262,6 @@ msgid "A product of "
 msgstr "Izdelek podjetja "
 
 #: templates/web/index.html:589
-#, fuzzy
 #| msgid "Copyright 2015. All rights reserved."
 msgid "Copyright 2014. All rights reserved."
 msgstr "Vse pravice pridržane."
