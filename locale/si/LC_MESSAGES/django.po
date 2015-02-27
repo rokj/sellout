@@ -4481,5 +4481,5 @@ msgstr ""
 #~ msgid "Support center"
 #~ msgstr "Pomoč in podpora"
 
-#~ msgid "This field is required."
-#~ msgstr "To polje je obvezno."
+msgid "This field is required."
+msgstr "To polje je obvezno."
