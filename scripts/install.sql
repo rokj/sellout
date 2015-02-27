@@ -11,7 +11,7 @@ CREATE LANGUAGE plpythonu;
 DROP FUNCTION bl_insert_user(email CHARACTER VARYING) CASCADE;
 DROP FUNCTION bl_update_user(email CHARACTER VARYING) CASCADE;
 
-CREATE OR REPLACE FUNCTION bl_insert_user(email CHARACTER VARYING) RETURNS VOID AS $bl_insert_user_function$
+CREATE OR REPLACE FUNCTION bl_insert_user(email CHARACTER VARYING, source CHARACTER VARYING) RETURNS VOID AS $bl_insert_user_function$
     import json
     import psycopg2
 
@@ -19,7 +19,6 @@ CREATE OR REPLACE FUNCTION bl_insert_user(email CHARACTER VARYING) RETURNS VOID 
     dbname = 'users'
     in_user = 'users'
     password = 'iQeeLEsw'
-    source = 'pos'
 
     plan = plpy.prepare("SELECT username, password, first_name, last_name, email, sex, country, type FROM blusers_blocklogicuser WHERE email = $1", ["text"])
     result1 = plpy.execute(plan, [email])
@@ -41,7 +40,7 @@ CREATE OR REPLACE FUNCTION bl_insert_user(email CHARACTER VARYING) RETURNS VOID 
 
 $bl_insert_user_function$ LANGUAGE plpythonu;
 
-CREATE OR REPLACE FUNCTION bl_update_user(email CHARACTER VARYING) RETURNS VOID AS $bl_update_user_function$
+CREATE OR REPLACE FUNCTION bl_update_user(email CHARACTER VARYING, source CHARACTER VARYING) RETURNS VOID AS $bl_update_user_function$
     import json
     import psycopg2
 
@@ -49,7 +48,6 @@ CREATE OR REPLACE FUNCTION bl_update_user(email CHARACTER VARYING) RETURNS VOID 
     dbname = 'users'
     in_user = 'users'
     password = 'iQeeLEsw'
-    source = 'pos'
 
     plan = plpy.prepare("SELECT username, password, first_name, last_name, email, sex, country, type FROM blusers_blocklogicuser WHERE email = $1", ["text"])
     rows = plpy.execute(plan, [email])

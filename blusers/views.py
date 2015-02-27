@@ -137,6 +137,15 @@ def google_login_or_register(request, mobile=False):
 
     try:
         bluser = BlocklogicUser.objects.get(email=r["email"])
+
+        if bluser.first_name != r["given_name"] or bluser.last_name != r["family_name"] or bluser.sex != r["gender"]:
+            bluser.first_name = r["given_name"]
+            bluser.last_name = r["family_name"]
+            bluser.sex = r["gender"]
+            bluser.save()
+
+            bluser.update_user_profile()
+
         if bluser.type != GOOGLE and not mobile:
             return JsonError("already_registered_via_normal", _("Already registered via normal"))
         elif bluser.type != GOOGLE and mobile:
@@ -145,11 +154,13 @@ def google_login_or_register(request, mobile=False):
     except BlocklogicUser.DoesNotExist:
         # we do not have user in our db, so we add register/new one
         # print r
+        try:
+            gender = r["gender"]
+        except KeyError:
+            gender = g.MALE
 
-        bluser = BlocklogicUser(email=r["email"], first_name=r["given_name"], last_name=r["family_name"], sex=r["gender"],
+        bluser = BlocklogicUser(email=r["email"], first_name=r["given_name"], last_name=r["family_name"], sex=gender,
                                 type="google")
-
-
         bluser.save()
 
         key = ""
@@ -162,6 +173,8 @@ def google_login_or_register(request, mobile=False):
 
         bluser.password_reset_key = key
         bluser.save()
+
+        bluser.update_user_profile()
 
         group = bluser.homegroup
 
@@ -201,8 +214,7 @@ def google_login_or_register(request, mobile=False):
     return JsonError("error", _("Something went wrong during login with google"))
 
 
-def try_register(user_form, user_profile_form=None):
-    """ this is not a view """
+def try_register(user_form, user_profile_form):
     new_user = user_form.save()
     new_user.set_password(user_form.cleaned_data['password1'])
 
@@ -223,9 +235,8 @@ def try_register(user_form, user_profile_form=None):
     new_user.password_reset_key = key
     new_user.type = 'normal'
     new_user.is_active = False
-    #new_user.update_password(user_form.cleaned_data['password1'])
-    new_user.update_password()
     new_user.save()
+    new_user.update_user_profile()
 
     # TODO: add the free subscription on register
     # add_free_subscription(new_user)

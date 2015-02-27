@@ -2,7 +2,7 @@
 
 import os
 from django.db import models
-from django.db import connections
+from django.db import connections, connection
 from django.db import transaction
 
 from django.contrib.auth.models import User
@@ -118,6 +118,20 @@ class BlocklogicUser(AbstractUser, Skeleton):
                            [self.password, settings.SITE_URL, self.email])
 
         conn.commit()
+
+    def update_user_profile(self):
+        """
+        Updates user profile in master users DB.
+        """
+
+        cursor = connection.cursor()
+        try:
+            cursor.callproc('bl_update_user', [self.email, settings.SITE_URL])
+        finally:
+            cursor.close()
+
+        transaction.commit_unless_managed()
+
 
 
 class UserImage(SkeletonU):
