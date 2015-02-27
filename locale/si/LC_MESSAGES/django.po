@@ -4483,3 +4483,6 @@ msgstr ""
 
 msgid "This field is required."
 msgstr "To polje je obvezno."
+
+msgid "Invalid CAPTCHA"
+msgstr "Nisi pravilno zračunal/a"
