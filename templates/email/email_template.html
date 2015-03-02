@@ -7,6 +7,11 @@
     <meta charset="UTF-8">
     <title>{{ title }}</title>
     <style type="text/css">
+        p:nth-child(1) {
+            padding-top: 0px;
+            margin-top: 0px;
+        }
+
         p.signature {
             color: #646464;
         }
@@ -16,6 +21,6 @@
     {% block content %}{% endblock %}
     <p class="signature">{% trans 'Kind regards,' %}<br />
 
-    <a href="http://www.sellout.biz">{% trans 'Sellout team'%}</a></p>
+    {% trans 'Sellout team'%}</p>
 </body>
 </html>
