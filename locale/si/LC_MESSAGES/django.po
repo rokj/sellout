@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-25 14:24+0100\n"
+"POT-Creation-Date: 2015-02-27 15:26+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -137,15 +137,15 @@ msgstr ""
 msgid "Lost password reset key or activation key"
 msgstr ""
 
-#: blusers/models.py:126
+#: blusers/models.py:140
 msgid "Image name"
 msgstr ""
 
-#: blusers/models.py:127
+#: blusers/models.py:141
 msgid "Image description"
 msgstr ""
 
-#: blusers/models.py:130
+#: blusers/models.py:144
 msgid "Original filename"
 msgstr ""
 
@@ -413,31 +413,31 @@ msgstr ""
 msgid "Token is invalid"
 msgstr ""
 
-#: blusers/views.py:141 blusers/views.py:143
+#: blusers/views.py:150 blusers/views.py:152
 msgid "Already registered via normal"
 msgstr ""
 
-#: blusers/views.py:201
+#: blusers/views.py:214
 msgid "Something went wrong during login with google"
 msgstr ""
 
-#: blusers/views.py:240 templates/web/sign_up_message.html:9
+#: blusers/views.py:246 templates/web/sign_up_message.html:9
 msgid "Registration successful"
-msgstr ""
+msgstr "Registracija uspela"
 
-#: blusers/views.py:281 web/views.py:249
+#: blusers/views.py:287 web/views.py:249
 msgid "Recover lost password"
 msgstr ""
 
-#: blusers/views.py:359
+#: blusers/views.py:365
 msgid "wrong credentials"
 msgstr ""
 
-#: blusers/views.py:369
+#: blusers/views.py:375
 msgid "wrong login"
 msgstr ""
 
-#: blusers/views.py:376 mobile/views/manage/users.py:41
+#: blusers/views.py:382 mobile/views/manage/users.py:41
 msgid "User authentication failed."
 msgstr ""
 
@@ -558,7 +558,7 @@ msgstr ""
 msgid "Guest"
 msgstr ""
 
-#: common/globals.py:213 pos/views/bill.py:358 pos/views/bill.py:916
+#: common/globals.py:213 pos/views/bill.py:358 pos/views/bill.py:929
 #: templates/pos/large_receipt.html:43 templates/pos/small_receipt.html:118
 msgid "Cashier"
 msgstr ""
@@ -703,10 +703,10 @@ msgstr ""
 #: mobile/views/manage/tax.py:29 mobile/views/manage/tax.py:40
 #: mobile/views/manage/tax.py:50 mobile/views/manage/users.py:21
 #: mobile/views/manage/users.py:33 mobile/views/views.py:23
-#: mobile/views/views.py:35 pos/views/bill.py:383 pos/views/bill.py:642
-#: pos/views/bill.py:663 pos/views/bill.py:696 pos/views/bill.py:737
-#: pos/views/bill.py:802 pos/views/bill.py:937 pos/views/bill.py:980
-#: pos/views/bill.py:1023 pos/views/manage/category.py:186
+#: mobile/views/views.py:35 pos/views/bill.py:383 pos/views/bill.py:655
+#: pos/views/bill.py:676 pos/views/bill.py:709 pos/views/bill.py:750
+#: pos/views/bill.py:815 pos/views/bill.py:950 pos/views/bill.py:993
+#: pos/views/bill.py:1036 pos/views/manage/category.py:186
 #: pos/views/manage/category.py:347 pos/views/manage/contact.py:323
 #: pos/views/manage/discount.py:44 pos/views/manage/product.py:167
 #: pos/views/manage/product.py:195 pos/views/manage/product.py:505
@@ -719,7 +719,7 @@ msgstr ""
 msgid "Company does not exist"
 msgstr ""
 
-#: mobile/views/bill.py:50 pos/views/bill.py:646
+#: mobile/views/bill.py:50 pos/views/bill.py:659
 msgid "You have no permission to view bills"
 msgstr ""
 
@@ -732,7 +732,7 @@ msgstr ""
 msgid "You have no permission to view bills."
 msgstr ""
 
-#: mobile/views/manage/bill.py:126 pos/views/bill.py:672 pos/views/bill.py:816
+#: mobile/views/manage/bill.py:126 pos/views/bill.py:685 pos/views/bill.py:829
 msgid "Bill does not exist"
 msgstr ""
 
@@ -980,14 +980,14 @@ msgstr ""
 msgid "Discount type"
 msgstr ""
 
-#: pos/models.py:130 pos/views/bill.py:311 pos/views/bill.py:867
+#: pos/models.py:130 pos/views/bill.py:311 pos/views/bill.py:880
 #: pos/views/manage/bill.py:29
 #: subscription/templates/subscription/subscriptions.html:511
 #: templates/pos/large_receipt.html:71 templates/pos/manage/discounts.html:154
 #: templates/pos/manage/tax.html:295 templates/pos/small_receipt.html:53
 #: templates/pos/terminal.html:665
 msgid "Amount"
-msgstr ""
+msgstr "Znesek"
 
 #: pos/models.py:142
 #: subscription/templates/subscription/subscriptions.html:366
@@ -1167,7 +1167,7 @@ msgstr ""
 msgid "Base price (for single item), without tax and discounts"
 msgstr ""
 
-#: pos/models.py:693 pos/views/bill.py:311 pos/views/bill.py:867
+#: pos/models.py:693 pos/views/bill.py:311 pos/views/bill.py:880
 #: templates/pos/large_receipt.html:69
 msgid "Quantity"
 msgstr ""
@@ -1320,19 +1320,19 @@ msgstr ""
 msgid "Unsupported bill format"
 msgstr ""
 
-#: pos/views/bill.py:288 pos/views/bill.py:301 pos/views/bill.py:843
-#: pos/views/bill.py:856 templates/pos/large_receipt.html:21
+#: pos/views/bill.py:288 pos/views/bill.py:301 pos/views/bill.py:856
+#: pos/views/bill.py:869 templates/pos/large_receipt.html:21
 #: templates/pos/large_receipt.html:32 templates/pos/small_receipt.html:18
 #: templates/pos/small_receipt.html:32 templates/pos/terminal.html:474
 msgid "VAT"
 msgstr ""
 
-#: pos/views/bill.py:305 pos/views/bill.py:860
+#: pos/views/bill.py:305 pos/views/bill.py:873
 #: templates/pos/large_receipt.html:57 templates/pos/small_receipt.html:38
 msgid "Bill No."
 msgstr ""
 
-#: pos/views/bill.py:311 pos/views/bill.py:867
+#: pos/views/bill.py:311 pos/views/bill.py:880
 #: subscription/templates/subscription/subscription_copy.html:403
 #: templates/pos/large_receipt.html:67 templates/pos/manage/products.html:1470
 #: templates/pos/manage/products.html:1706 templates/pos/small_receipt.html:49
@@ -1340,14 +1340,14 @@ msgstr ""
 msgid "Price"
 msgstr "Cena"
 
-#: pos/views/bill.py:311 pos/views/bill.py:867
+#: pos/views/bill.py:311 pos/views/bill.py:880
 #: templates/pos/large_receipt.html:68 templates/pos/small_receipt.html:52
 #: templates/pos/terminal.html:246 templates/pos/terminal.html.py:329
 msgid "Discount"
 msgstr ""
 
-#: pos/views/bill.py:330 pos/views/bill.py:338 pos/views/bill.py:887
-#: pos/views/bill.py:896
+#: pos/views/bill.py:330 pos/views/bill.py:338 pos/views/bill.py:900
+#: pos/views/bill.py:909
 #: subscription/templates/subscription/subscription_copy.html:439
 #: templates/pos/large_receipt.html:83 templates/pos/large_receipt.html:132
 #: templates/pos/small_receipt.html:91 templates/pos/terminal.html:250
@@ -1355,17 +1355,17 @@ msgstr ""
 msgid "Total"
 msgstr "Skupaj"
 
-#: pos/views/bill.py:338 pos/views/bill.py:896
+#: pos/views/bill.py:338 pos/views/bill.py:909
 #: templates/pos/large_receipt.html:129 templates/pos/small_receipt.html:88
 msgid "Rate"
 msgstr ""
 
-#: pos/views/bill.py:338 pos/views/bill.py:896
+#: pos/views/bill.py:338 pos/views/bill.py:909
 #: templates/pos/large_receipt.html:130 templates/pos/small_receipt.html:89
 msgid "Subtotal"
 msgstr ""
 
-#: pos/views/bill.py:338 pos/views/bill.py:896
+#: pos/views/bill.py:338 pos/views/bill.py:909
 #: templates/pos/large_receipt.html:131
 #: templates/pos/manage/products.html:1467
 #: templates/pos/manage/products.html:1562
@@ -1374,122 +1374,122 @@ msgstr ""
 msgid "Tax"
 msgstr "Davek"
 
-#: pos/views/bill.py:352 pos/views/bill.py:910
+#: pos/views/bill.py:352 pos/views/bill.py:923
 msgid "Sum"
-msgstr ""
+msgstr "Skupno"
 
 #: pos/views/bill.py:388
 msgid "(Item: "
 msgstr ""
 
-#: pos/views/bill.py:393
+#: pos/views/bill.py:392
 msgid "You have no permission to create bills"
 msgstr ""
 
-#: pos/views/bill.py:398
+#: pos/views/bill.py:397
 msgid "No data received"
 msgstr ""
 
-#: pos/views/bill.py:405
+#: pos/views/bill.py:404
 msgid "This bill has already been paid, editing is not possible"
 msgstr ""
 
-#: pos/views/bill.py:423
+#: pos/views/bill.py:422
 msgid "Invalid register specified."
 msgstr ""
 
-#: pos/views/bill.py:434
+#: pos/views/bill.py:433
 msgid "Invalid contact"
 msgstr ""
 
-#: pos/views/bill.py:459
+#: pos/views/bill.py:464
 msgid "Invalid grand total value"
 msgstr ""
 
-#: pos/views/bill.py:469
+#: pos/views/bill.py:474
 msgid "Product with this id does not exist"
 msgstr ""
 
-#: pos/views/bill.py:474
+#: pos/views/bill.py:479
 msgid "Invalid quantity value"
 msgstr ""
 
-#: pos/views/bill.py:477
+#: pos/views/bill.py:482
 msgid "Cannot add an item with zero or negative quantity"
 msgstr ""
 
-#: pos/views/bill.py:523
+#: pos/views/bill.py:528
 msgid "The discount is not active"
 msgstr ""
 
-#: pos/views/bill.py:525
+#: pos/views/bill.py:530
 msgid "Chosen discount does not exist or is not valid"
 msgstr ""
 
-#: pos/views/bill.py:530 pos/views/bill.py:534 pos/views/bill.py:552
+#: pos/views/bill.py:535 pos/views/bill.py:539 pos/views/bill.py:557
 msgid "Invalid discount amount"
 msgstr ""
 
-#: pos/views/bill.py:548
+#: pos/views/bill.py:553
 msgid "Invalid base price"
 msgstr ""
 
-#: pos/views/bill.py:549
+#: pos/views/bill.py:554
 msgid "Invalid quantity"
 msgstr ""
 
-#: pos/views/bill.py:550 pos/views/manage/product.py:474
+#: pos/views/bill.py:555 pos/views/manage/product.py:474
 msgid "Invalid tax rate"
 msgstr ""
 
-#: pos/views/bill.py:551
+#: pos/views/bill.py:556
 msgid "Invalid batch price"
 msgstr ""
 
-#: pos/views/bill.py:553
+#: pos/views/bill.py:558
 msgid "Invalid net price"
 msgstr ""
 
-#: pos/views/bill.py:554
+#: pos/views/bill.py:559
 msgid "Invalid tax amount"
 msgstr ""
 
-#: pos/views/bill.py:555
+#: pos/views/bill.py:560
 msgid "Invalid total"
 msgstr ""
 
-#: pos/views/bill.py:670
+#: pos/views/bill.py:683
 msgid "Invalid bill id"
 msgstr ""
 
-#: pos/views/bill.py:676 pos/views/bill.py:745
+#: pos/views/bill.py:689 pos/views/bill.py:758
 msgid "You have no permission to edit bills"
 msgstr ""
 
-#: pos/views/bill.py:680
+#: pos/views/bill.py:693
 msgid "This bill has already been paid, deleting is not possible"
 msgstr ""
 
-#: pos/views/bill.py:705 pos/views/bill.py:946 pos/views/bill.py:989
-#: pos/views/bill.py:1036
+#: pos/views/bill.py:718 pos/views/bill.py:959 pos/views/bill.py:1002
+#: pos/views/bill.py:1049
 msgid "Bill does not exist or data is invalid"
 msgstr ""
 
-#: pos/views/bill.py:751 pos/views/manage/contact.py:479
+#: pos/views/bill.py:764 pos/views/manage/contact.py:479
 #: pos/views/manage/product.py:713 pos/views/manage/users.py:72
 #: pos/views/manage/users.py:150 pos/views/manage/users.py:255
 msgid "No data in request"
 msgstr ""
 
-#: pos/views/bill.py:757
+#: pos/views/bill.py:770
 msgid "No bill found"
 msgstr ""
 
-#: pos/views/bill.py:766
+#: pos/views/bill.py:779
 msgid "Payment type does not exist"
 msgstr ""
 
-#: pos/views/bill.py:810
+#: pos/views/bill.py:823
 msgid "Missing required data"
 msgstr ""
 
@@ -1995,6 +1995,15 @@ msgstr ""
 
 #: pos/views/manage/register.py:166
 msgid "Edit register"
+msgstr ""
+
+#: pos/views/manage/stats.py:25
+msgid "You have no permission to view stats"
+msgstr ""
+
+#: pos/views/manage/stats.py:97 templates/pos/base.html:135
+#: templates/pos/manage/stats.html:18
+msgid "Stats"
 msgstr ""
 
 #: pos/views/manage/tax.py:60
@@ -2795,10 +2804,13 @@ msgid "Hi!"
 msgstr ""
 
 #: templates/email/email_verification.html:7
+#| msgid ""
+#| "To activate your account on {{ site_url }}, please click click on the "
+#| "following link:"
 msgid ""
-"To activate your account on sellout.biz, please click click on the following "
+"To activate your account on {{ site_url }}, please click on the following "
 "link:"
-msgstr ""
+msgstr "Za aktivacijo računa na {{ site_url }}, klikni na "
 
 #: templates/email/email_verification.html:8
 msgid "Activate"
@@ -2859,10 +2871,6 @@ msgstr "Zamenjaj uporabnika"
 msgid "Log Out"
 msgstr "Odjava"
 
-#: templates/pos/base.html:135 templates/pos/manage/stats.html:18
-msgid "Stats"
-msgstr ""
-
 #: templates/pos/base.html:137 templates/pos/manage/company.html:179
 #: templates/pos/manage/config.html:16
 msgid "Configuration"
@@ -2893,6 +2901,7 @@ msgid "Bill issue date: from"
 msgstr ""
 
 #: templates/pos/manage/bills.html:62 templates/pos/manage/bills.html.py:95
+#: templates/pos/manage/stats.html:33
 msgid "To:"
 msgstr ""
 
@@ -3338,7 +3347,7 @@ msgstr ""
 msgid "Total price"
 msgstr ""
 
-#: templates/pos/manage/products.html:1641
+#: templates/pos/manage/products.html:1641 templates/pos/manage/stats.html:49
 msgid "Profit"
 msgstr ""
 
@@ -3416,11 +3425,37 @@ msgstr ""
 msgid "Delete register: "
 msgstr ""
 
-#: templates/pos/manage/stats.html:22
+#: templates/pos/manage/stats.html:23
 msgid "Recent Earnings"
 msgstr ""
 
-#: templates/pos/manage/stats.html:31
+#: templates/pos/manage/stats.html:27
+msgid "Today"
+msgstr ""
+
+#: templates/pos/manage/stats.html:28
+msgid "Yesterday"
+msgstr ""
+
+#: templates/pos/manage/stats.html:29
+msgid "This week"
+msgstr ""
+
+#: templates/pos/manage/stats.html:30
+#, fuzzy
+#| msgid "Per month"
+msgid "This month"
+msgstr "na mesec"
+
+#: templates/pos/manage/stats.html:32
+msgid "From:"
+msgstr ""
+
+#: templates/pos/manage/stats.html:41
+msgid "Income"
+msgstr ""
+
+#: templates/pos/manage/stats.html:58
 msgid "Top-selling Products"
 msgstr ""
 
@@ -3594,7 +3629,6 @@ msgid "Invoice for: "
 msgstr ""
 
 #: templates/pos/terminal.html:234
-#| msgid "Products"
 msgid "Product"
 msgstr "Artikel"
 
@@ -3621,7 +3655,6 @@ msgid "Finish"
 msgstr "Potrdi"
 
 #: templates/pos/terminal.html:323
-#| msgid "Bills"
 msgctxt "bill options button text"
 msgid "Bill"
 msgstr "Računi"
@@ -3924,12 +3957,10 @@ msgid "Lost password?"
 msgstr "Pozabljeno geslo?"
 
 #: templates/web/index.html:247
-#| msgid "The perfect partner."
 msgid "Your perfect business partner."
 msgstr "Vaš popoln poslovni partner."
 
 #: templates/web/index.html:248
-#| msgid "Cloud Point Of Sale application"
 msgid "Cloud Point Of Sale application."
 msgstr "Spletna in mobilna blagajna s skladiščem."
 
@@ -4017,12 +4048,6 @@ msgid "Seriously low prices"
 msgstr "Nizka cena"
 
 #: templates/web/index.html:307
-#| msgid ""
-#| "\n"
-#| "                        Get started from as low as 20&euro; per month."
-#| "<br />\n"
-#| "                        It doesn't get much better than this.\n"
-#| "                    "
 msgid ""
 "\n"
 "                        Get started from as low as 7&euro; per month.<br />\n"
@@ -4040,9 +4065,6 @@ msgid "Check out other offers"
 msgstr "Preveri še ostalo ponudbo"
 
 #: templates/web/index.html:314
-#| msgid ""
-#| "* The term Register refers to digital register in Sellout application, "
-#| "not an actual piece of hardware."
 msgid ""
 "The term Register refers to digital register in Sellout application, not an "
 "actual piece of hardware."
@@ -4076,7 +4098,7 @@ msgstr "Dodaj"
 
 #: templates/web/index.html:357
 msgid "Payment types"
-msgstr ""
+msgstr "Možnosti plačila"
 
 #: templates/web/index.html:360
 msgid "Cash. Credit card. Paypal. Bitcoin."
@@ -4230,11 +4252,11 @@ msgstr ""
 
 #: templates/web/index.html:544
 msgid "Privacy"
-msgstr ""
+msgstr "Zasebnost"
 
 #: templates/web/index.html:552
 msgid "Join us on Facebook"
-msgstr ""
+msgstr "Pridruži se nam na Facebook-u"
 
 #: templates/web/index.html:558
 msgid "Follow us on Twitter"
@@ -4262,7 +4284,6 @@ msgid "A product of "
 msgstr "Izdelek podjetja "
 
 #: templates/web/index.html:589
-#| msgid "Copyright 2015. All rights reserved."
 msgid "Copyright 2014. All rights reserved."
 msgstr "Vse pravice pridržane."
 
@@ -4324,15 +4345,15 @@ msgstr ""
 
 #: templates/web/register_company.html:145
 msgid "Available names:"
-msgstr ""
+msgstr "Imena na voljo:"
 
 #: templates/web/register_company.html:156
 msgid "Official e-mail address of the company"
-msgstr ""
+msgstr "Primarni e-mail naslov podjetja"
 
 #: templates/web/register_company.html:241
 msgid "Create"
-msgstr ""
+msgstr "Ustvari"
 
 #: templates/web/select_company.html:38
 msgid "Your companies"
@@ -4340,11 +4361,11 @@ msgstr "Tvoja podjetja"
 
 #: templates/web/select_company.html:63
 msgid "You are not part of any company yet."
-msgstr ""
+msgstr "Nisi še član nobenega podjetja."
 
 #: templates/web/select_company.html:64
 msgid "Create your own company or wait for an invite."
-msgstr ""
+msgstr "Ustvari profil svojega podjetja, ali počakaj na povabilo."
 
 #: templates/web/select_company.html:70
 msgid "Add Company"
@@ -4356,11 +4377,11 @@ msgstr "Obvestila"
 
 #: templates/web/select_company.html:87
 msgid "You have been invited to join a company: "
-msgstr ""
+msgstr "Povabljen/a si, da se pridružiš sledečemu podjetju:"
 
 #: templates/web/select_company.html:91
 msgid "Decline"
-msgstr ""
+msgstr "Zavrni"
 
 #: templates/web/select_company.html:98
 msgid "You have no unseen notifications."
@@ -4392,46 +4413,45 @@ msgstr "Brezplačna registracija."
 
 #: templates/web/sign_up.html:93
 msgid "Please solve this riddle to prove that you are human:"
-msgstr ""
-"Prosim, reši tole uganko, da dokažeš, da si res človek za tem računalnikom:"
+msgstr "Reši tole uganko, da dokažeš, da si res človek za tem računalnikom:"
 
 #: templates/web/sign_up_message.html:11
 msgid "Activation successful"
-msgstr ""
+msgstr "Aktivacija računa uspela"
 
 #: templates/web/sign_up_message.html:13
 msgid "Activation failed"
-msgstr ""
+msgstr "Aktivacija računa ni uspela"
 
 #: templates/web/sign_up_message.html:15 templates/web/sign_up_message.html:17
 #: templates/web/sign_up_message.html:19
 msgid "User exists"
-msgstr ""
+msgstr "Uporabnik že obstaja"
 
 #: templates/web/sign_up_message.html:34
 msgid "Registration successful."
-msgstr ""
+msgstr "Registracija uspela."
 
 #: templates/web/sign_up_message.html:35
 msgid "Check your e-mail inbox for confirmation link."
-msgstr ""
+msgstr "Preveri svoj e-poštni nabiralnik, za aktivacijsko povezavo."
 
 #: templates/web/sign_up_message.html:36 templates/web/sign_up_message.html:45
 #: templates/web/sign_up_message.html:50 templates/web/sign_up_message.html:55
 msgid "Back to home page"
-msgstr ""
+msgstr "Nazaj na prvo stran"
 
 #: templates/web/sign_up_message.html:39
 msgid "Activation successful."
-msgstr ""
+msgstr "Aktivacija uspela."
 
 #: templates/web/sign_up_message.html:40
 msgid "You can now login."
-msgstr ""
+msgstr "Sedaj se lahko prijaviš."
 
 #: templates/web/sign_up_message.html:44
 msgid "Activation failed (wrong key?)"
-msgstr ""
+msgstr "Aktivacija računa ni uspela (napačen ključ?)"
 
 #: templates/web/sign_up_message.html:48
 msgid ""
@@ -4439,50 +4459,61 @@ msgid ""
 "                    Please log in by clicking the google login button on "
 "home page."
 msgstr ""
+"Si se že registriral/a na eno izmed blocklogic stran z Google uporabniškim "
+"računom.\n"
+"                    Prijaviš se lahko z Googlovim računom, če klikneš na "
+"Google gumb navhodni strani."
 
 #: templates/web/sign_up_message.html:53
 msgid ""
 " Looks like you are already a member of a Blocklogic product.\n"
 "                    Use the login form to log in."
 msgstr ""
+" Izgleda, da že uporabljaš Blocklogic produkt nekje drugje.\n"
+"                    Lahko se prijaviš z istim uporabniškim imenom in geslom "
+"tudi na to stran."
 
 #: web/views.py:86
 msgid "Select company"
-msgstr ""
+msgstr "Izberi podjetje"
 
 #: web/views.py:206
 msgid "Invalid e-mail"
-msgstr ""
+msgstr "Napačen e-mail"
 
 #: web/views.py:211
 msgid ""
 "You have registered with google account. Try signing in by clicking on "
 "'google login' button in login form."
 msgstr ""
+"Registrirala si se z Googlovim uporabniškim računom. Poskusi se najprej"
+"prijaviti s pomočjo Googla."
 
 #: web/views.py:216
 msgid ""
 "Your password reset key has been sent to your e-mail, please check your "
 "inbox."
 msgstr ""
+"Ključ za ponovno nastavitev gesla je bil glih poslan po e-mailu. Preveri"
+"svoj e-poštni nabiralnik."
 
 #: web/views.py:220
 msgid "A user with this e-mail does not exist"
-msgstr ""
+msgstr "Uporabnik s tem e-mail-om ne obstaja"
 
 #: web/views.py:222
 msgid "Unknown error occured. Please contact support."
-msgstr ""
+msgstr "Nepričakovana napaka. Prosimo te, obvesti nas"
 
-#~ msgctxt "bill options button text"
-#~ msgid "Bill..."
-#~ msgstr "Račun..."
+msgctxt "bill options button text"
+msgid "Bill..."
+msgstr "Račun..."
 
-#~ msgid "Support center"
-#~ msgstr "Pomoč in podpora"
+msgid "Support center"
+msgstr "Pomoč in podpora"
 
 msgid "This field is required."
 msgstr "To polje je obvezno."
 
 msgid "Invalid CAPTCHA"
-msgstr "Nisi pravilno zračunal/a"
+msgstr "Nisi pravilno izračunal/a"

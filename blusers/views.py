@@ -214,15 +214,9 @@ def google_login_or_register(request, mobile=False):
     return JsonError("error", _("Something went wrong during login with google"))
 
 
-def try_register(user_form, user_profile_form):
+def try_register(user_form):
     new_user = user_form.save()
     new_user.set_password(user_form.cleaned_data['password1'])
-
-    if user_profile_form:
-        user_profile = user_profile_form.save(commit=False)
-        user_profile.user = new_user
-        user_profile.created_by = new_user
-        user_profile.save()
 
     key = ""
     while key == "":
@@ -246,6 +240,7 @@ def try_register(user_form, user_profile_form):
     # put the stuff in template, then render it to string and send it via email
     mail_context = {
         'url': settings.SITE_URL + activation_url,
+        'site_url': settings.SITE_URL,
     }
 
     subject = settings.EMAIL_SUBJECT_PREFIX + " " + _("Registration successful")

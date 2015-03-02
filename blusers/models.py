@@ -126,7 +126,7 @@ class BlocklogicUser(AbstractUser, Skeleton):
 
         cursor = connection.cursor()
         try:
-            cursor.callproc('bl_update_user', [self.email, settings.SITE_URL])
+            cursor.callproc('bl_update_user', [self.email, settings.PROJECT_ID])
         finally:
             cursor.close()
 
