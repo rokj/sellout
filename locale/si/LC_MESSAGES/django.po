@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-02 22:29+0100\n"
+"POT-Creation-Date: 2015-03-02 22:56+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -425,19 +425,19 @@ msgstr ""
 msgid "Registration successful"
 msgstr "Registracija uspela"
 
-#: blusers/views.py:288 web/views.py:249
+#: blusers/views.py:287 web/views.py:249
 msgid "Recover lost password"
 msgstr ""
 
-#: blusers/views.py:366
+#: blusers/views.py:365
 msgid "wrong credentials"
 msgstr ""
 
-#: blusers/views.py:376
+#: blusers/views.py:375
 msgid "wrong login"
 msgstr ""
 
-#: blusers/views.py:383 mobile/views/manage/users.py:41
+#: blusers/views.py:382 mobile/views/manage/users.py:41
 msgid "User authentication failed."
 msgstr ""
 
