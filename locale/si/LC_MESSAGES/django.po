@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-27 15:26+0100\n"
+"POT-Creation-Date: 2015-03-02 22:29+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -425,19 +425,19 @@ msgstr ""
 msgid "Registration successful"
 msgstr "Registracija uspela"
 
-#: blusers/views.py:287 web/views.py:249
+#: blusers/views.py:288 web/views.py:249
 msgid "Recover lost password"
 msgstr ""
 
-#: blusers/views.py:365
+#: blusers/views.py:366
 msgid "wrong credentials"
 msgstr ""
 
-#: blusers/views.py:375
+#: blusers/views.py:376
 msgid "wrong login"
 msgstr ""
 
-#: blusers/views.py:382 mobile/views/manage/users.py:41
+#: blusers/views.py:383 mobile/views/manage/users.py:41
 msgid "User authentication failed."
 msgstr ""
 
@@ -2788,11 +2788,11 @@ msgstr ""
 
 #: templates/email/email_template.html:17 templates/email/email_template.txt:7
 msgid "Kind regards,"
-msgstr ""
+msgstr "Lep pozdrav,"
 
-#: templates/email/email_template.txt:8
-msgid "the Sellout team"
-msgstr ""
+#: templates/email/email_template.html:19 templates/email/email_template.txt:8
+msgid "Sellout team"
+msgstr "Sellout ekipa"
 
 #: templates/email/email_verification.html:5
 #: templates/email/invitation_for_non_registered_users.html:5
@@ -2801,20 +2801,31 @@ msgstr ""
 #: templates/email/invitation_for_registered_users.txt:4
 #: templates/email/lost_password.html:5 templates/email/lost_password.txt:4
 msgid "Hi!"
-msgstr ""
+msgstr "Živjo!"
 
 #: templates/email/email_verification.html:7
-#| msgid ""
-#| "To activate your account on {{ site_url }}, please click click on the "
-#| "following link:"
+#, python-format
 msgid ""
-"To activate your account on {{ site_url }}, please click on the following "
-"link:"
-msgstr "Za aktivacijo računa na {{ site_url }}, klikni na "
+"To activate your account on %(site_url)s, please click on the following link:"
+msgstr ""
+"Za aktivacijo računa na spletni strani %(site_url)s, klikni na naslednjo "
+"povezavo:"
 
 #: templates/email/email_verification.html:8
 msgid "Activate"
+msgstr "Aktiviraj"
+
+#: templates/email/email_verification.txt:6
+#, python-format
+msgid ""
+"Hi!\n"
+"\n"
+"To activate your account on %(site_url)s, please click on the following link:"
 msgstr ""
+"Živjo!\n"
+"\n"
+"Za aktivacijo računa na spletni strani %(site_url)s, klikni na naslednjo "
+"povezavo:"
 
 #: templates/email/invitation_for_non_registered_users.html:7
 #: templates/email/invitation_for_non_registered_users.txt:7
@@ -3442,8 +3453,6 @@ msgid "This week"
 msgstr ""
 
 #: templates/pos/manage/stats.html:30
-#, fuzzy
-#| msgid "Per month"
 msgid "This month"
 msgstr "na mesec"
 
@@ -4486,16 +4495,16 @@ msgid ""
 "You have registered with google account. Try signing in by clicking on "
 "'google login' button in login form."
 msgstr ""
-"Registrirala si se z Googlovim uporabniškim računom. Poskusi se najprej"
-"prijaviti s pomočjo Googla."
+"Registrirala si se z Googlovim uporabniškim računom. Poskusi se "
+"najprejprijaviti s pomočjo Googla."
 
 #: web/views.py:216
 msgid ""
 "Your password reset key has been sent to your e-mail, please check your "
 "inbox."
 msgstr ""
-"Ključ za ponovno nastavitev gesla je bil glih poslan po e-mailu. Preveri"
-"svoj e-poštni nabiralnik."
+"Ključ za ponovno nastavitev gesla je bil glih poslan po e-mailu. Preverisvoj "
+"e-poštni nabiralnik."
 
 #: web/views.py:220
 msgid "A user with this e-mail does not exist"
@@ -4505,15 +4514,15 @@ msgstr "Uporabnik s tem e-mail-om ne obstaja"
 msgid "Unknown error occured. Please contact support."
 msgstr "Nepričakovana napaka. Prosimo te, obvesti nas"
 
-msgctxt "bill options button text"
-msgid "Bill..."
-msgstr "Račun..."
+#~ msgctxt "bill options button text"
+#~ msgid "Bill..."
+#~ msgstr "Račun..."
 
-msgid "Support center"
-msgstr "Pomoč in podpora"
+#~ msgid "Support center"
+#~ msgstr "Pomoč in podpora"
 
-msgid "This field is required."
-msgstr "To polje je obvezno."
+#~ msgid "This field is required."
+#~ msgstr "To polje je obvezno."
 
-msgid "Invalid CAPTCHA"
-msgstr "Nisi pravilno izračunal/a"
+#~ msgid "Invalid CAPTCHA"
+#~ msgstr "Nisi pravilno izračunal/a"

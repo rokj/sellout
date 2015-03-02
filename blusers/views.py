@@ -249,7 +249,6 @@ def try_register(user_form):
     message_text = render_to_string('email/email_verification.txt', mail_context)
 
     if settings.DEBUG:
-        print "sending register email"
         print message_text
         print message_html
     else:
@@ -282,6 +281,7 @@ def send_reactivation_key(request, bluser):
     # put the stuff in template, then render it to string and send it via email
     mail_context = {
         'url': settings.SITE_URL + reactivation_url,
+        'site_url': settings.SITE_URL,
     }
 
     subject = settings.EMAIL_SUBJECT_PREFIX + " " + _("Recover lost password")

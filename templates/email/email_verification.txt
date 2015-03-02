@@ -2,8 +2,9 @@
 {% load i18n %}
 
 {% block content %}
-Hi!
 
-To activate your account on {{ site_url }}, please click on the following link:
+{% blocktrans with site_url=site_url %}Hi!
+
+To activate your account on {{ site_url }}, please click on the following link:{% endblocktrans %}
 {{ url }}
 {% endblock %}
