@@ -2809,7 +2809,7 @@ msgid "Hi!"
 msgstr "Živjo!"
 
 #: templates/email/email_verification.html:7
-#, fuzzy, python-format
+#, python-format
 #| msgid ""
 #| "To activate your account on %(site_url)s, please click on the following "
 #| "link:"
@@ -2821,7 +2821,6 @@ msgstr ""
 "povezavo:"
 
 #: templates/email/email_verification.html:8
-#, fuzzy
 #| msgid "Activate"
 msgid "activate"
 msgstr "Aktiviraj"
