@@ -83,7 +83,7 @@
 
     <section class="custom">
         <div class="container">
-            <form action="{% url 'web:register_company' %}" method="post"
+            <form class="register-company" action="{% url 'web:register_company' %}" method="post"
                   {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
                 {% csrf_token %}
 
@@ -108,7 +108,7 @@
                         {# logo: it cannot be uploaded before the company is created; #}
                         {# show a placeholder image with a note on this #}
                         <div class="fake-label">
-                            {% trans 'Logo' %}
+                            &nbsp;
                         </div>
 
                         <div id="logo_placeholder">

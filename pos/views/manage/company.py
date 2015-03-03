@@ -168,6 +168,14 @@ class CompanyForm(forms.ModelForm):
                     'website',
                     'notes', ]
 
+        labels = {
+            'name': _('Company name'),
+            'url_name': _("Company name, used in URL address"),
+            'street': _("Street address"),
+            'country': _("Country"),
+            'city': _("City"),
+        }
+
         widgets = {
             'tax_payer': forms.Select(choices=((True, _("Yes")), (False, _("No"))))
         }

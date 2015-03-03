@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-23 18:54+0100\n"
+"POT-Creation-Date: 2015-03-03 16:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -444,23 +444,29 @@ msgstr "Možnosti na računu"
 msgid "Please check discount amount"
 msgstr "Prosim, preveri popust"
 
-#: static/js/widgets/categories.js:25
-msgid "Categories"
-msgstr "Kategorije"
-
-#: static/js/widgets/categories.js:26
-msgid "Favorite products"
-msgstr "Priljubljeni artikli"
-
-#: static/js/widgets/categories.js:29
+#: static/js/widgets/categories.js:33
 msgid "Products in this category"
 msgstr "Artikli v tej kategoriji"
 
-#: static/js/widgets/categories.js:30
+#: static/js/widgets/categories.js:37
+#, fuzzy
+#| msgid "Favorite products"
+msgid "All products"
+msgstr "Priljubljeni artikli"
+
+#: static/js/widgets/categories.js:39 static/js/widgets/categories.js.c:44
+msgid "Categories"
+msgstr "Kategorije"
+
+#: static/js/widgets/categories.js:42
+msgid "Favorite products"
+msgstr "Priljubljeni artikli"
+
+#: static/js/widgets/categories.js:48
 msgid "Subcategories"
 msgstr "Podkategorije"
 
-#: static/js/widgets/categories.js:31
+#: static/js/widgets/categories.js:49
 msgid "No Subcategories"
 msgstr "Ni podkategorij"
 
@@ -508,21 +514,23 @@ msgstr ""
 msgid "Could not save bill"
 msgstr ""
 
-#: static/js/widgets/products.js:14
+#: static/js/widgets/products.js:16
 msgid "No products found"
 msgstr "Ni najdenih artiklov"
 
 #: static/js/widgets/terminal.js:202
-msgid "Register is required"
-msgstr ""
+#| msgid "Register is required"
+msgid "Printer is required"
+msgstr "Tiskalnik ni nastavljen"
 
 #: static/js/widgets/terminal.js:203
-msgid "There are no registers defined, please add one"
-msgstr ""
+#| msgid "There are no registers defined, please add one"
+msgid "There are no printers defined, please add one"
+msgstr "Pred uporabo je potrebno nastaviti tiskalnik"
 
 #: static/js/widgets/terminal.js:206
 msgid "Go"
-msgstr ""
+msgstr "Pojdi"
 
 #: static/js/widgets/terminal.js:240
 msgid "Register could not be set"

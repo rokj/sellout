@@ -11,7 +11,7 @@
 {% block extra_button %}
     <a class="extra-button"
        href="{% url 'pos:add_register' company.url_name %}">
-        {% trans 'Add Register' %}
+        {% trans 'Add printer' %}
     </a>
 {% endblock %}
 
@@ -22,7 +22,7 @@
             <thead>
                 {# include: register name, receipt format and type, and location #}
                 <tr>
-                    <td class="name">{% trans 'Register Name' %}</td>
+                    <td class="name">{% trans 'Printer Name' %}</td>
                     <td class="format">{% trans 'Receipt Format' %}</td>
                     <td class="type">{% trans 'Receipt Type' %}</td>
                     <td class="location">{% trans 'Location' %}</td>

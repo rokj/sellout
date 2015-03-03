@@ -24,7 +24,7 @@ class CompanyAbstract(models.Model):
     postcode = models.CharField(_("Postal code"), max_length=20, null=False, blank=False)
     city = models.CharField(_("City"), max_length=50, null=False, blank=False)
     state = models.CharField(_("State"), max_length=50, null=True, blank=True)
-    country = models.CharField(max_length=2, choices=country_choices, null=True, blank=True)
+    country = models.CharField(_("Country"), max_length=2, choices=country_choices, null=True, blank=True)
     email = models.CharField(_("E-mail address"), max_length=256, null=False, blank=False)
     website = models.CharField(_("Website"), max_length=256, null=True, blank=True)
     phone = models.CharField(_("Phone number"), max_length=30, null=True, blank=True)
@@ -506,13 +506,13 @@ def delete_permission_cache(**kwargs):
 
 ### register (till) ###
 class RegisterAbstract(models.Model):
-    name = models.CharField(_("Name of cash register"), max_length=50, null=False, blank=False)
+    name = models.CharField(_("Name of the printer"), max_length=50, null=False, blank=False)
     receipt_format = models.CharField(_("Receipt format"), max_length=32, choices=g.RECEIPT_FORMATS, null=False,
                                       blank=False)
     receipt_type = models.CharField(_("Receipt type"), max_length=32, choices=g.RECEIPT_TYPES, null=False)
     print_logo = models.BooleanField(_("Print logo on thermal receipts"), blank=False, default=True)
-    location = models.TextField(_("Location of this register"), max_length=120, null=True, blank=True)
-    print_location = models.BooleanField(_("Print location of register"), blank=False, default=True)
+    location = models.TextField(_("Location of printer"), max_length=120, null=True, blank=True)
+    print_location = models.BooleanField(_("Print location of printer"), blank=False, default=True)
 
     class Meta:
         abstract = True

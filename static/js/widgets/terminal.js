@@ -199,8 +199,8 @@ Terminal = function(g){
         // if there are no registers defined, send user to create one
         if(p.g.data.registers.length == 0){
             custom_dialog(
-                gettext("Register is required"),
-                gettext("There are no registers defined, please add one"),
+                gettext("Printer is required"),
+                gettext("There are no printers defined, please add one"),
                 400,
                 {
                     ok: gettext("Go"),

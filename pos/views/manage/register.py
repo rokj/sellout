@@ -121,12 +121,12 @@ def add_register(request, company):
 
     # check permissions: needs to be manager
     if not has_permission(request.user, c, 'register', 'edit'):
-        return no_permission_view(request, c, _("You have no permission to add registers."))
+        return no_permission_view(request, c, _("You have no permission to add printers."))
 
     context = {
         'add': True,
         'company': c,
-        'title': _("Add register"),
+        'title': _("Add printer"),
         'site_title': g.MISC['site_title'],
         'date_format_js': get_date_format(request.user, c, 'js')
     }
