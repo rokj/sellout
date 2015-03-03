@@ -2817,7 +2817,7 @@ msgid ""
 "To activate your account on <a href=\"%(site_url)s\">%(site_url)s</a>, "
 "please click on the following link:"
 msgstr ""
-"Za aktivacijo računa na spletni strani %(site_url)s, klikni na naslednjo "
+"Za aktivacijo računa na spletni strani <a href=\"%(site_url)s\">%(site_url)s</a>, klikni na naslednjo "
 "povezavo:"
 
 #: templates/email/email_verification.html:8
