@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-02 22:56+0100\n"
+"POT-Creation-Date: 2015-03-03 12:30+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -215,36 +215,36 @@ msgstr ""
 #: blusers/templates/blusers/settings.html:458
 #: blusers/templates/blusers/settings.html:475
 msgid "you"
-msgstr ""
+msgstr "ti"
 
 #: blusers/templates/blusers/settings.html:461
 msgid "You are signed with google account."
-msgstr ""
+msgstr "Prijavljen/a si z Googlovim računom."
 
 #: blusers/templates/blusers/settings.html:470
 #: blusers/templates/blusers/settings.html:482 common/globals.py:83
 #: common/globals.py:322
 msgid "Male"
-msgstr ""
+msgstr "Moški"
 
 #: blusers/templates/blusers/settings.html:470
 #: blusers/templates/blusers/settings.html:483 common/globals.py:84
 #: common/globals.py:323
 msgid "Female"
-msgstr ""
+msgstr "Ženska"
 
 #: blusers/templates/blusers/settings.html:489
 #: blusers/templates/blusers/settings.html:501
 msgid "your company"
-msgstr ""
+msgstr "tvoje podjetje"
 
 #: blusers/templates/blusers/settings.html:496
 msgid "I am a taxpayer"
-msgstr ""
+msgstr "Sem davčni zavezanec"
 
 #: blusers/templates/blusers/settings.html:496
 msgid "I am not a taxpayer"
-msgstr ""
+msgstr "Nisem davčni zavezanec"
 
 #: blusers/templates/blusers/settings.html:502 pos/models.py:22
 #: pos/models.py:418 subscription/templates/subscription/subscription.html:935
@@ -282,7 +282,7 @@ msgstr ""
 
 #: blusers/templates/blusers/settings.html:509
 msgid "Company website"
-msgstr ""
+msgstr "Spletna stran podjetja"
 
 #: blusers/templates/blusers/settings.html:514
 #: templates/pos/manage/categories.html:313
@@ -294,7 +294,7 @@ msgstr ""
 #: templates/pos/manage/discounts.html:126 templates/pos/manage/users.html:212
 #: templates/pos/manage/users.html:213
 msgid "Edit"
-msgstr ""
+msgstr "Uredi"
 
 #: blusers/templates/blusers/settings.html:515
 #: blusers/templates/blusers/settings.html:548
@@ -309,40 +309,40 @@ msgstr ""
 #: templates/pos/terminal.html:493 templates/pos/terminal.html.py:685
 #: templates/support/ask.html:23
 msgid "Cancel"
-msgstr ""
+msgstr "Prekliči"
 
 #: blusers/templates/blusers/settings.html:515
 #: blusers/templates/blusers/settings.html:549
 msgid "Update"
-msgstr ""
+msgstr "Ponastavi"
 
 #: blusers/templates/blusers/settings.html:530
 msgid "Current password"
-msgstr ""
+msgstr "Trenutno geslo"
 
 #: blusers/templates/blusers/settings.html:535
 msgid "New password"
-msgstr ""
+msgstr "Novo geslo"
 
 #: blusers/templates/blusers/settings.html:540
 msgid "New password one more time"
-msgstr ""
+msgstr "Novo geslo še enkrat"
 
 #: blusers/templates/blusers/settings.html:545
 msgid "Change password"
-msgstr ""
+msgstr "Spremeni geslo"
 
 #: blusers/templates/blusers/settings.html:552
 msgid "Password changed successfully!"
-msgstr ""
+msgstr "Geslo uspešno spremenjeno"
 
 #: blusers/templates/blusers/settings.html:561 pos/models.py:29
 msgid "Website"
-msgstr ""
+msgstr "Spletna stran"
 
 #: blusers/templates/blusers/settings.html:565
 msgid "Prefered language"
-msgstr ""
+msgstr "Jezik"
 
 #: blusers/templates/blusers/settings.html:579
 msgid "Date format"
@@ -2786,11 +2786,11 @@ msgstr ""
 msgid "You cannot delete this comment"
 msgstr ""
 
-#: templates/email/email_template.html:17 templates/email/email_template.txt:7
+#: templates/email/email_template.html:22 templates/email/email_template.txt:7
 msgid "Kind regards,"
 msgstr "Lep pozdrav,"
 
-#: templates/email/email_template.html:19 templates/email/email_template.txt:8
+#: templates/email/email_template.html:24 templates/email/email_template.txt:8
 msgid "Sellout team"
 msgstr "Sellout ekipa"
 
@@ -2804,15 +2804,21 @@ msgid "Hi!"
 msgstr "Živjo!"
 
 #: templates/email/email_verification.html:7
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "To activate your account on %(site_url)s, please click on the following "
+#| "link:"
 msgid ""
-"To activate your account on %(site_url)s, please click on the following link:"
+"To activate your account on <a href=\"%(site_url)s\">%(site_url)s</a>, "
+"please click on the following link:"
 msgstr ""
 "Za aktivacijo računa na spletni strani %(site_url)s, klikni na naslednjo "
 "povezavo:"
 
 #: templates/email/email_verification.html:8
-msgid "Activate"
+#, fuzzy
+#| msgid "Activate"
+msgid "activate"
 msgstr "Aktiviraj"
 
 #: templates/email/email_verification.txt:6
@@ -4514,15 +4520,15 @@ msgstr "Uporabnik s tem e-mail-om ne obstaja"
 msgid "Unknown error occured. Please contact support."
 msgstr "Nepričakovana napaka. Prosimo te, obvesti nas"
 
-msgctxt "bill options button text"
-msgid "Bill..."
-msgstr "Račun..."
+#~ msgctxt "bill options button text"
+#~ msgid "Bill..."
+#~ msgstr "Račun..."
 
-msgid "Support center"
-msgstr "Pomoč in podpora"
+#~ msgid "Support center"
+#~ msgstr "Pomoč in podpora"
 
-msgid "This field is required."
-msgstr "To polje je obvezno."
+#~ msgid "This field is required."
+#~ msgstr "To polje je obvezno."
 
-msgid "Invalid CAPTCHA"
-msgstr "Nisi pravilno izračunal/a"
+#~ msgid "Invalid CAPTCHA"
+#~ msgstr "Nisi pravilno izračunal/a"
