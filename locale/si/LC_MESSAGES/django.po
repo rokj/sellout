@@ -2225,7 +2225,7 @@ msgstr ""
 #: subscription/templates/subscription/subscription_copy.html:416
 #: templates/web/index.html:466
 msgid "1 month"
-msgstr ""
+msgstr "1 mesec"
 
 #: subscription/templates/subscription/subscription.html:869
 #: subscription/templates/subscription/subscription.html:890
@@ -2233,7 +2233,7 @@ msgstr ""
 #: subscription/templates/subscription/subscription_copy.html:417
 #: templates/web/index.html:470
 msgid "2 months"
-msgstr ""
+msgstr "2 meseca"
 
 #: subscription/templates/subscription/subscription.html:870
 #: subscription/templates/subscription/subscription.html:893
@@ -2241,19 +2241,19 @@ msgstr ""
 #: subscription/templates/subscription/subscription_copy.html:418
 #: templates/web/index.html:474
 msgid "3 months"
-msgstr ""
+msgstr "3 meseci"
 
 #: subscription/templates/subscription/subscription.html:871
 #: subscription/templates/subscription/subscription.html:896
 #: subscription/templates/subscription/subscription_copy.html:419
 #: templates/web/index.html:481
 msgid "6 months"
-msgstr ""
+msgstr "6 mesecev"
 
 #: subscription/templates/subscription/subscription.html:872
 #: subscription/templates/subscription/subscription.html:899
 msgid "12 months"
-msgstr ""
+msgstr "12 mesecev"
 
 #: subscription/templates/subscription/subscription.html:876
 msgid "Check prices"
@@ -4514,15 +4514,15 @@ msgstr "Uporabnik s tem e-mail-om ne obstaja"
 msgid "Unknown error occured. Please contact support."
 msgstr "Nepričakovana napaka. Prosimo te, obvesti nas"
 
-#~ msgctxt "bill options button text"
-#~ msgid "Bill..."
-#~ msgstr "Račun..."
+msgctxt "bill options button text"
+msgid "Bill..."
+msgstr "Račun..."
 
-#~ msgid "Support center"
-#~ msgstr "Pomoč in podpora"
+msgid "Support center"
+msgstr "Pomoč in podpora"
 
-#~ msgid "This field is required."
-#~ msgstr "To polje je obvezno."
+msgid "This field is required."
+msgstr "To polje je obvezno."
 
-#~ msgid "Invalid CAPTCHA"
-#~ msgstr "Nisi pravilno izračunal/a"
+msgid "Invalid CAPTCHA"
+msgstr "Nisi pravilno izračunal/a"
