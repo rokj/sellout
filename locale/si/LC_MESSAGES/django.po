@@ -530,11 +530,11 @@ msgstr ""
 
 #: common/globals.py:89
 msgid "Full page (Letter/A4)"
-msgstr ""
+msgstr "Celotna stran (pismo/A4)"
 
 #: common/globals.py:90
 msgid "Thermal (80mm)"
-msgstr ""
+msgstr "Termični (80mm)"
 
 #: common/globals.py:94
 msgid "Printed"
@@ -542,11 +542,11 @@ msgstr ""
 
 #: common/globals.py:105 templates/pos/terminal.html:543
 msgid "Cash"
-msgstr ""
+msgstr "Denar"
 
 #: common/globals.py:106 templates/pos/terminal.html:544
 msgid "Credit card"
-msgstr ""
+msgstr "Kreditna kartica"
 
 #: common/globals.py:107 templates/pos/terminal.html:546
 msgid "Bitcoin"
@@ -560,7 +560,7 @@ msgstr ""
 
 #: common/globals.py:114
 msgid "Default system printer"
-msgstr ""
+msgstr "Privzet sistemski printer"
 
 #: common/globals.py:115
 msgid "Sellout serial (must be installed)"
@@ -2382,12 +2382,12 @@ msgstr ""
 #: subscription/templates/subscription/subscription.html:1067
 #: subscription/templates/subscription/subscriptions.html:678
 msgid "yes"
-msgstr ""
+msgstr "da"
 
 #: subscription/templates/subscription/subscription.html:1067
 #: subscription/templates/subscription/subscriptions.html:678
 msgid "no"
-msgstr ""
+msgstr "ne"
 
 #: subscription/templates/subscription/subscription.html:1097
 msgid "Close this window"

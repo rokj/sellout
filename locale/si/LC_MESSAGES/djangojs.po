@@ -162,11 +162,11 @@ msgstr ""
 
 #: admin/js/collapse.js:8 admin/js/collapse.js.c:19 admin/js/collapse.min.js:1
 msgid "Show"
-msgstr ""
+msgstr "Prikaži"
 
 #: admin/js/collapse.js:15 admin/js/collapse.min.js:1
 msgid "Hide"
-msgstr ""
+msgstr "Skrij"
 
 #: static/js/common.js:140 static/js/widgets/unlock.js:112
 msgid "OK"
@@ -174,19 +174,19 @@ msgstr ""
 
 #: static/js/common.js:145
 msgid "Yes"
-msgstr ""
+msgstr "Da"
 
 #: static/js/common.js:146
 msgid "No"
-msgstr ""
+msgstr "Ne"
 
 #: static/js/common.js:159
 msgid "File too large"
-msgstr ""
+msgstr "Datoteka je prevelika"
 
 #: static/js/common.js:160
 msgid "Maximum file size is"
-msgstr ""
+msgstr "Največja dovoljenja velikost datoteke je"
 
 #: static/js/tutorial.js:213
 msgid "Help"
