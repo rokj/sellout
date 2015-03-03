@@ -87,8 +87,8 @@ class BlocklogicUserForm(forms.ModelForm):
     password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput, required=False)
     password2 = forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput,
                                 help_text=_("Enter the same password as above, for verification."), required=False)
-    country = forms.ChoiceField(choices=countries.country_choices, required=True)
-    sex = forms.CharField(required=True, widget=forms.Select(choices=SEX, attrs={'class': 'sex'}))
+    country = forms.ChoiceField(label=_("Country"), choices=countries.country_choices, required=True)
+    sex = forms.CharField(label=_("Sex"), required=True, widget=forms.Select(choices=SEX, attrs={'class': 'sex'}))
     images = forms.FileField(label=_("Your photo"), required=False)
 
     captcha = CaptchaField()
