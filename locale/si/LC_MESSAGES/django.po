@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-03 16:34+0100\n"
+"POT-Creation-Date: 2015-03-05 14:11+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,8 +38,8 @@ msgid "Important dates"
 msgstr ""
 
 #: blusers/forms.py:24 blusers/forms.py:77 common/globals.py:95
-#: templates/pos/manage/users.html:269 templates/pos/terminal.html:455
-#: templates/pos/terminal.html.py:484 templates/pos/unlock_content.html:32
+#: templates/pos/manage/users.html:269 templates/pos/terminal.html:456
+#: templates/pos/terminal.html.py:485 templates/pos/unlock_content.html:32
 #: templates/support/search_high.html:56 templates/support/search_low.html:59
 msgid "E-mail"
 msgstr "E-mail"
@@ -78,7 +78,7 @@ msgstr "Gesli se ne ujemata."
 msgid "Invalid password reset key"
 msgstr "Napačen ključ za ponastavitev gesla"
 
-#: blusers/forms.py:80 pos/models.py:419 templates/pos/terminal.html:450
+#: blusers/forms.py:80 pos/models.py:419 templates/pos/terminal.html:451
 msgid "First name"
 msgstr "Ime"
 
@@ -91,7 +91,7 @@ msgid "This value may contain only letters and numbers."
 msgstr "To polje lahko vsebuje samo črke in številke."
 
 #: blusers/forms.py:83 blusers/forms.py:168 pos/models.py:420
-#: templates/pos/terminal.html:451
+#: templates/pos/terminal.html:452
 msgid "Last name"
 msgstr "Priimek"
 
@@ -318,7 +318,7 @@ msgstr "Uredi"
 #: templates/pos/manage/products.html:1657
 #: templates/pos/manage/register.html:76 templates/pos/manage/user.html:45
 #: templates/pos/manage/users.html:253 templates/pos/manage/users.html:254
-#: templates/pos/terminal.html:493 templates/pos/terminal.html.py:685
+#: templates/pos/terminal.html:494 templates/pos/terminal.html.py:686
 #: templates/support/ask.html:23
 msgid "Cancel"
 msgstr "Prekliči"
@@ -509,14 +509,14 @@ msgid "Absolute value"
 msgstr ""
 
 #: common/globals.py:77 templates/pos/manage/contacts.html:115
-#: templates/pos/manage/contacts.html:116 templates/pos/terminal.html:445
+#: templates/pos/manage/contacts.html:116 templates/pos/terminal.html:446
 msgid "Individual"
 msgstr ""
 
 #: common/globals.py:78 templates/pos/base.html:138
 #: templates/pos/manage/company.html:174 templates/pos/manage/config.html:20
 #: templates/pos/manage/contacts.html:169
-#: templates/pos/manage/contacts.html:170 templates/pos/terminal.html:444
+#: templates/pos/manage/contacts.html:170 templates/pos/terminal.html:445
 msgid "Company"
 msgstr "Podjetje"
 
@@ -540,21 +540,21 @@ msgstr "Termični (80mm)"
 msgid "Printed"
 msgstr ""
 
-#: common/globals.py:105 templates/pos/terminal.html:543
+#: common/globals.py:105 templates/pos/terminal.html:544
 msgid "Cash"
 msgstr "Denar"
 
-#: common/globals.py:106 templates/pos/terminal.html:544
+#: common/globals.py:106 templates/pos/terminal.html:545
 msgid "Credit card"
 msgstr "Kreditna kartica"
 
-#: common/globals.py:107 templates/pos/terminal.html:546
+#: common/globals.py:107 templates/pos/terminal.html:547
 msgid "Bitcoin"
 msgstr ""
 
 #: common/globals.py:108
 #: subscription/templates/subscription/subscription_copy.html:426
-#: templates/pos/terminal.html:545
+#: templates/pos/terminal.html:546
 msgid "Paypal"
 msgstr ""
 
@@ -564,7 +564,7 @@ msgstr "Privzet sistemski printer"
 
 #: common/globals.py:115
 msgid "Sellout serial (must be installed)"
-msgstr ""
+msgstr "Serijski tiskalnik (mora biti nameščen)"
 
 #: common/globals.py:212
 msgid "Guest"
@@ -637,7 +637,7 @@ msgstr ""
 msgid "Approved"
 msgstr ""
 
-#: common/globals.py:342 common/globals.py:354 templates/pos/terminal.html:601
+#: common/globals.py:342 common/globals.py:354 templates/pos/terminal.html:602
 msgid "Paid"
 msgstr ""
 
@@ -907,7 +907,7 @@ msgid ""
 msgstr ""
 
 #: pos/models.py:23 pos/views/manage/company.py:174
-#: templates/pos/terminal.html:456 templates/pos/terminal.html.py:475
+#: templates/pos/terminal.html:457 templates/pos/terminal.html.py:476
 msgid "Street address"
 msgstr "Naslov"
 
@@ -919,12 +919,12 @@ msgstr "Poštna številka"
 #: pos/models.py:25 pos/models.py:425 pos/views/manage/company.py:176
 #: subscription/templates/subscription/subscription.html:1015
 #: subscription/templates/subscription/subscriptions.html:561
-#: templates/pos/terminal.html:460 templates/pos/terminal.html.py:477
+#: templates/pos/terminal.html:461 templates/pos/terminal.html.py:478
 msgid "City"
 msgstr "Mesto/Kraj"
 
-#: pos/models.py:26 pos/models.py:426 templates/pos/terminal.html:461
-#: templates/pos/terminal.html.py:480
+#: pos/models.py:26 pos/models.py:426 templates/pos/terminal.html:462
+#: templates/pos/terminal.html.py:481
 msgid "State"
 msgstr "Pokrajina"
 
@@ -957,7 +957,7 @@ msgid "Receipt logo"
 msgstr "Logo na računu"
 
 #: pos/models.py:55 pos/models.py:586 templates/pos/manage/products.html:1464
-#: templates/pos/terminal.html:516 templates/pos/terminal.html.py:675
+#: templates/pos/terminal.html:517 templates/pos/terminal.html.py:676
 msgid "Notes"
 msgstr "Dodatno besedilo"
 
@@ -971,7 +971,7 @@ msgstr ""
 
 #: pos/models.py:73 templates/pos/manage/discounts.html:142
 #: templates/pos/manage/products.html:1461
-#: templates/pos/manage/products.html:1545 templates/pos/terminal.html:664
+#: templates/pos/manage/products.html:1545 templates/pos/terminal.html:665
 msgid "Description"
 msgstr ""
 
@@ -997,7 +997,7 @@ msgstr ""
 #: subscription/templates/subscription/subscriptions.html:511
 #: templates/pos/large_receipt.html:71 templates/pos/manage/discounts.html:154
 #: templates/pos/manage/tax.html:295 templates/pos/small_receipt.html:53
-#: templates/pos/terminal.html:665
+#: templates/pos/terminal.html:666
 msgid "Amount"
 msgstr "Znesek"
 
@@ -1023,7 +1023,7 @@ msgstr ""
 #: subscription/templates/subscription/subscriptions.html:549
 #: templates/pos/large_receipt.html:66 templates/pos/manage/products.html:1458
 #: templates/pos/manage/products.html:1540 templates/pos/manage/users.html:190
-#: templates/pos/terminal.html:473
+#: templates/pos/terminal.html:474
 msgid "Name"
 msgstr "Naziv"
 
@@ -1086,7 +1086,7 @@ msgstr ""
 msgid "Type of contact"
 msgstr ""
 
-#: pos/models.py:422 templates/pos/terminal.html:467
+#: pos/models.py:422 templates/pos/terminal.html:468
 msgid "Date of birth"
 msgstr "Rojstni datum"
 
@@ -1107,8 +1107,9 @@ msgid "VAT identification number"
 msgstr "Davčna številka"
 
 #: pos/models.py:509
-msgid "Name of the printer"
-msgstr "Ime tiskalnika"
+#| msgid "Name of the printer"
+msgid "Name of the register"
+msgstr "Ime blagajne"
 
 #: pos/models.py:510
 msgid "Receipt format"
@@ -1123,16 +1124,19 @@ msgid "Print logo on thermal receipts"
 msgstr "Natisni logo na račun"
 
 #: pos/models.py:514
-msgid "Location of printer"
+#| msgid "Location of printer"
+msgid "Location of register"
 msgstr "Lokacija tisklanika"
 
 #: pos/models.py:515
-msgid "Print location of printer"
-msgstr "Natisni lokacijo tiskalnika"
+#| msgid "Print location of printer"
+msgid "Print location of register"
+msgstr "Natisni lokacijo blagajne"
 
 #: pos/models.py:523
-msgid "Printer driver"
-msgstr "Gonilnik tiskalnika"
+#| msgid "Print"
+msgid "Printer"
+msgstr "Natisni"
 
 #: pos/models.py:524
 msgid "Device id"
@@ -1335,7 +1339,7 @@ msgstr ""
 #: pos/views/bill.py:288 pos/views/bill.py:301 pos/views/bill.py:856
 #: pos/views/bill.py:869 templates/pos/large_receipt.html:21
 #: templates/pos/large_receipt.html:32 templates/pos/small_receipt.html:18
-#: templates/pos/small_receipt.html:32 templates/pos/terminal.html:474
+#: templates/pos/small_receipt.html:32 templates/pos/terminal.html:475
 msgid "VAT"
 msgstr ""
 
@@ -1363,7 +1367,7 @@ msgstr ""
 #: subscription/templates/subscription/subscription_copy.html:439
 #: templates/pos/large_receipt.html:83 templates/pos/large_receipt.html:132
 #: templates/pos/small_receipt.html:91 templates/pos/terminal.html:250
-#: templates/pos/terminal.html.py:310 templates/pos/terminal.html:551
+#: templates/pos/terminal.html.py:310 templates/pos/terminal.html:552
 msgid "Total"
 msgstr "Skupaj"
 
@@ -1382,7 +1386,7 @@ msgstr ""
 #: templates/pos/manage/products.html:1467
 #: templates/pos/manage/products.html:1562
 #: templates/pos/manage/products.html:1696 templates/pos/small_receipt.html:90
-#: templates/pos/terminal.html:243 templates/pos/terminal.html.py:647
+#: templates/pos/terminal.html:243 templates/pos/terminal.html.py:648
 msgid "Tax"
 msgstr "Davek"
 
@@ -1798,7 +1802,7 @@ msgstr ""
 #: templates/pos/manage/discounts.html:19
 #: templates/pos/manage/products.html:1278
 #: templates/pos/manage/products.html:1513
-#: templates/pos/manage/products.html:1624 templates/pos/terminal.html:653
+#: templates/pos/manage/products.html:1624 templates/pos/terminal.html:654
 msgid "Discounts"
 msgstr "Popusti"
 
@@ -1991,13 +1995,13 @@ msgstr ""
 
 #: pos/views/manage/register.py:106 templates/pos/base.html:132
 msgid "Cash Registers"
-msgstr "Tiskalniki"
+msgstr "Denarne blagajne"
 
 #: pos/views/manage/register.py:124
 msgid "You have no permission to add printers."
 msgstr ""
 
-#: pos/views/manage/register.py:129 templates/pos/manage/registers.html:14
+#: pos/views/manage/register.py:129
 msgid "Add printer"
 msgstr "Dodaj tiskalnik"
 
@@ -2007,7 +2011,7 @@ msgstr ""
 
 #: pos/views/manage/register.py:166
 msgid "Edit register"
-msgstr ""
+msgstr "Uredi blagajno"
 
 #: pos/views/manage/stats.py:25
 msgid "You have no permission to view stats"
@@ -3009,7 +3013,7 @@ msgstr ""
 
 #: templates/pos/manage/bills.html:198 templates/pos/manage/bills.html:199
 #: templates/pos/receipt_template.html:52
-#: templates/pos/receipt_template.html:53 templates/pos/terminal.html:612
+#: templates/pos/receipt_template.html:53 templates/pos/terminal.html:613
 #: templates/web/index.html:344
 msgid "Print"
 msgstr "Natisni"
@@ -3040,7 +3044,7 @@ msgstr "Dodaj podkategorijo"
 #: templates/pos/manage/discounts.html:134
 #: templates/pos/manage/registers.html:48
 #: templates/pos/manage/registers.html:49 templates/pos/manage/users.html:220
-#: templates/pos/manage/users.html:221 templates/pos/terminal.html:525
+#: templates/pos/manage/users.html:221 templates/pos/terminal.html:526
 #: templates/support/question.html:93
 msgid "Delete"
 msgstr "Zbriši"
@@ -3059,8 +3063,8 @@ msgstr "V kategoriji"
 #: templates/pos/manage/personal.html:65
 #: templates/pos/manage/products.html:1662
 #: templates/pos/manage/register.html:79 templates/pos/manage/user.html:48
-#: templates/pos/terminal.html:330 templates/pos/terminal.html.py:494
-#: templates/pos/terminal.html:689
+#: templates/pos/terminal.html:330 templates/pos/terminal.html.py:495
+#: templates/pos/terminal.html:690
 msgid "Save"
 msgstr "Shrani"
 
@@ -3413,22 +3417,31 @@ msgid "Clear all discounts"
 msgstr ""
 
 #: templates/pos/manage/register.html:14
+#| msgid "Add printer"
 msgctxt "page title"
-msgid "Add printer"
-msgstr ""
+msgid "Add register"
+msgstr "Dodaj blagajno"
 
 #: templates/pos/manage/register.html:16
+#| msgctxt "page title"
+#| msgid "Edit printer"
 msgctxt "page title"
-msgid "Edit printer"
-msgstr "Uredi tisklanik"
+msgid "Edit register"
+msgstr "Uredi blagajno"
 
 #: templates/pos/manage/registers.html:9
 msgid "Registers"
-msgstr "Tiskalniki"
+msgstr "Blagajne"
+
+#: templates/pos/manage/registers.html:14
+#| msgid "Add printer"
+msgid "Add register"
+msgstr "Dodaj tiskalnik"
 
 #: templates/pos/manage/registers.html:25
-msgid "Printer Name"
-msgstr "Ime tiskalnika"
+#| msgid "Register"
+msgid "Register Name"
+msgstr "Registriraj"
 
 #: templates/pos/manage/registers.html:26
 msgid "Receipt Format"
@@ -3678,11 +3691,11 @@ msgstr "Računi"
 msgid "Select client"
 msgstr "Izberi stranko"
 
-#: templates/pos/terminal.html:331 templates/pos/terminal.html.py:520
+#: templates/pos/terminal.html:331 templates/pos/terminal.html.py:521
 msgid "Load"
 msgstr "Naloži"
 
-#: templates/pos/terminal.html:332 templates/pos/terminal.html.py:491
+#: templates/pos/terminal.html:332 templates/pos/terminal.html.py:492
 msgid "Clear"
 msgstr "Izbriši"
 
@@ -3705,14 +3718,6 @@ msgstr "Nazaj"
 msgid "Back to parent category"
 msgstr "Nazaj na nadkategorijo"
 
-#: templates/pos/terminal.html:404
-msgid "Stuff"
-msgstr ""
-
-#: templates/pos/terminal.html:410
-msgid "Change register"
-msgstr ""
-
 #: templates/pos/terminal.html:417
 msgid "Search"
 msgstr ""
@@ -3723,86 +3728,86 @@ msgid "Go"
 msgstr "Poišči"
 
 #: templates/pos/terminal.html:435
-msgid "Which register have you logged on to?"
+msgid "Which register would you like to use?"
 msgstr ""
 
-#: templates/pos/terminal.html:437
+#: templates/pos/terminal.html:438
 msgid "Go"
 msgstr "Pojdi"
 
-#: templates/pos/terminal.html:457 templates/pos/terminal.html.py:476
+#: templates/pos/terminal.html:458 templates/pos/terminal.html.py:477
 msgid "Post code"
 msgstr ""
 
-#: templates/pos/terminal.html:466 templates/pos/terminal.html.py:485
+#: templates/pos/terminal.html:467 templates/pos/terminal.html.py:486
 msgid "Phone"
 msgstr ""
 
-#: templates/pos/terminal.html:502
+#: templates/pos/terminal.html:503
 msgid "Add a note to this bill (optional)"
 msgstr ""
 
-#: templates/pos/terminal.html:514
+#: templates/pos/terminal.html:515
 msgid "Time"
 msgstr ""
 
-#: templates/pos/terminal.html:515
+#: templates/pos/terminal.html:516
 msgid "Items #"
 msgstr ""
 
-#: templates/pos/terminal.html:521
+#: templates/pos/terminal.html:522
 msgid "Load this bill to terminal"
 msgstr ""
 
-#: templates/pos/terminal.html:526
+#: templates/pos/terminal.html:527
 msgid "Delete this bill from the list"
 msgstr ""
 
-#: templates/pos/terminal.html:542
+#: templates/pos/terminal.html:543
 msgid "Choose payment type"
 msgstr ""
 
-#: templates/pos/terminal.html:558
+#: templates/pos/terminal.html:559
 msgid "Received"
 msgstr ""
 
-#: templates/pos/terminal.html:563
+#: templates/pos/terminal.html:564
 msgid "Change due"
 msgstr ""
 
-#: templates/pos/terminal.html:571
+#: templates/pos/terminal.html:572
 msgid "Connect your POS Terminal"
 msgstr ""
 
-#: templates/pos/terminal.html:577
+#: templates/pos/terminal.html:578
 msgid "Customer email"
 msgstr ""
 
-#: templates/pos/terminal.html:580
+#: templates/pos/terminal.html:581
 msgid "Send invoice"
 msgstr ""
 
-#: templates/pos/terminal.html:589
+#: templates/pos/terminal.html:590
 msgid "BTC"
 msgstr ""
 
-#: templates/pos/terminal.html:594
+#: templates/pos/terminal.html:595
 msgid "Send bitcoins to this address"
 msgstr ""
 
-#: templates/pos/terminal.html:604
+#: templates/pos/terminal.html:605
 msgid "Waiting payment"
 msgstr ""
 
-#: templates/pos/terminal.html:623
+#: templates/pos/terminal.html:624
 msgid " Discount (applied to bill's total) "
 msgstr ""
 
-#: templates/pos/terminal.html:635
+#: templates/pos/terminal.html:636
 msgid "Notes on this bill"
 msgstr ""
 
-#: templates/pos/terminal.html:681
+#: templates/pos/terminal.html:682
 msgid "Explode"
 msgstr ""
 
@@ -4519,6 +4524,12 @@ msgstr "Uporabnik s tem e-mail-om ne obstaja"
 #: web/views.py:222
 msgid "Unknown error occured. Please contact support."
 msgstr "Nepričakovana napaka. Prosimo te, obvesti nas"
+
+#~ msgid "Printer driver"
+#~ msgstr "Gonilnik tiskalnika"
+
+#~ msgid "Printer Name"
+#~ msgstr "Ime tiskalnika"
 
 #~ msgctxt "bill options button text"
 #~ msgid "Bill..."

@@ -506,13 +506,13 @@ def delete_permission_cache(**kwargs):
 
 ### register (till) ###
 class RegisterAbstract(models.Model):
-    name = models.CharField(_("Name of the printer"), max_length=50, null=False, blank=False)
+    name = models.CharField(_("Name of the register"), max_length=50, null=False, blank=False)
     receipt_format = models.CharField(_("Receipt format"), max_length=32, choices=g.RECEIPT_FORMATS, null=False,
                                       blank=False)
     receipt_type = models.CharField(_("Receipt type"), max_length=32, choices=g.RECEIPT_TYPES, null=False)
     print_logo = models.BooleanField(_("Print logo on thermal receipts"), blank=False, default=True)
-    location = models.TextField(_("Location of printer"), max_length=120, null=True, blank=True)
-    print_location = models.BooleanField(_("Print location of printer"), blank=False, default=True)
+    location = models.TextField(_("Location of register"), max_length=120, null=True, blank=True)
+    print_location = models.BooleanField(_("Print location of register"), blank=False, default=True)
 
     class Meta:
         abstract = True
@@ -520,7 +520,7 @@ class RegisterAbstract(models.Model):
 
 class Register(SkeletonU, RegisterAbstract):
     company = models.ForeignKey(Company, null=False, blank=False)
-    printer_driver = models.CharField(_("Printer driver"), max_length=50, null=False, choices=g.PRINTER_DRIVERS)
+    printer_driver = models.CharField(_("Printer"), max_length=50, null=False, choices=g.PRINTER_DRIVERS)
     device_id = models.CharField(_("Device id"), max_length=128, null=True, blank=True)
 
 
