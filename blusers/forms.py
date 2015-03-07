@@ -164,6 +164,7 @@ class BlocklogicUserForm(forms.ModelForm):
     def set_request(self, request):
         self.request = request
 
+
 class BlocklogicUserChangeForm(forms.ModelForm):
     last_name = forms.RegexField(label=_("Last name"), required=True, max_length=30, regex=FIRST_LAST_NAME_REGEX,
                                  help_text=_("Required field. 30 characters or fewer. Letters and numbers only."),
