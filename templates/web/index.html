@@ -244,8 +244,8 @@
 
     <section id="welcome_section" class="full-height">
         <div class="container-fluid">
-            <h1 class="text-center">{% trans 'Your perfect business partner.' %}</h1>
-            <h3 class="text-center">{% trans 'Cloud Point Of Sale application.' %}</h3>
+            <h1 class="text-center">{% trans 'Cloud Point Of Sale application.' %}</h1>
+            <h2 class="text-center">{% trans 'Your perfect business partner.' %}</h2>
         </div>
 
         <input type="button" value="{% trans 'Find out more' %}" id="more" class="extra-font buttons" />
@@ -308,7 +308,7 @@
                         Get started from as low as 7&euro; per month.<br />
                         It doesn't get much better than this.
                     {% endblocktrans %}</p>
-                    <p><a href="#pricing" class="dark-bg">{% trans 'Check out other offers' %}</a></p>
+                    <p><a href="#pricing" class="dark-bg pricing">{% trans 'Check out other offers' %}</a></p>
 
                     <div class="footnote">
                         * {% trans "The term Register refers to digital register in Sellout application, not an actual piece of hardware." %}
@@ -357,7 +357,7 @@
                          alt="{% trans 'Payment types' %}" />
                 </div><!--
                 --><div class="col col-md-6 v-center">
-                    <h3>{% trans 'Cash. Credit card. Paypal. Bitcoin.' %}</h3>
+                    <h3>{% trans 'Cash. Credit card.' %}<br />Paypal. Bitcoin.</h3>
                     <p>{% blocktrans %}
                         From good old banknotes to digital currency,
                         Sellout lets you accept any type of payment.
@@ -440,14 +440,63 @@
         </div>
     </section>
 
-    <section id="partner_section" >
+{#    <section id="partner_section" >#}
+{#        <div class="container">#}
+{#            <div class="reading-text">#}
+{#                <h3>{% trans 'The perfect partner.' %}</h3>#}
+{#                <p>{% blocktrans %}Sellout is for anyone who runs a profitable business and needs to regularly issue invoices.#}
+{#                    It is ideal for freelancers, small companies and start-ups.#}
+{#                    {% endblocktrans %}</p>#}
+{#                <p>{% trans 'Ease up your everyday life.' %}</p>#}
+{#            </div>#}
+{#        </div>#}
+{#    </section>#}
+
+    <section id="hardware_support_section">
         <div class="container">
-            <div class="reading-text">
-                <h3>{% trans 'The perfect partner.' %}</h3>
-                <p>{% blocktrans %}Sellout is for anyone who runs a profitable business and needs to regularly issue invoices.
-                    It is ideal for freelancers, small companies and start-ups.
-                    {% endblocktrans %}</p>
-                <p>{% trans 'Ease up your everyday life.' %}</p>
+            <div class="row">
+                <div class="col col-md-6">
+                    <div class="center-block supported-hardware-text">
+                        <h3 class="dark-fg">{% trans 'Supported hardware' %}</h3>
+                        <p class="dark-fg">{% blocktrans %}We also offer buying thermal printers, <br />
+                            which we support for printing invoices.
+                            {% endblocktrans %}</p>
+                        <p><a href="#pricing" class="supported-hardware">{% trans 'Check out supported hardware' %}</a></p>
+                    </div>
+                </div>
+
+                <div class="col col-md-6 v-center">
+                    <div class="text-center">
+                        <img src="{% static 'icons/index_printer_icon.png' %}" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="google_play_section">
+        <div class="container">
+            <div class="row">
+                <div class="col col-md-6">
+                    <div class="center-block google-play-text">
+                        <h3 class="dark-fg">{% trans 'Mobile application' %}</h3>
+                        <p class="dark-fg">{% blocktrans %}You do not have a computer? Do not worry!<br /> <br/>
+                            We also developed Android mobile application, <br />
+                            and you can get it by clicking following icon.
+                            {% endblocktrans %}</p>
+                        <p>
+                            <a target="_blank" class="google-play" href="https://play.google.com/store/apps/details?id=net.blocklogic.pos"><img src="{% static 'icons/google_play.png' %}" alt="google play" /></a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col col-md-6 v-center">
+                    <div class="text-center">
+                        <a target="_blank" class="google-play" href="https://play.google.com/store/apps/details?id=net.blocklogic.pos">
+                            <img class="mobile-screenshot" src="{% static 'images/index/index_screenshots.png' %}" />
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
