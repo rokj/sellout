@@ -6,9 +6,11 @@ from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 
 import requests
+from rest_framework.decorators import api_view
 from action.functions import action_to_dict
 from action.models import Action
 from bl_auth import User
+from blusers.forms import BlocklogicUserForm
 
 from common.functions import JsonParse, JsonError, get_random_string, send_email, JsonOk, min_password_requirments
 from common.globals import GOOGLE
@@ -96,6 +98,35 @@ def login(request, data):
             pass
 
     return message, next
+
+
+@api_view(['POST'])
+def mobile_register(request):
+    if request.method == 'POST':
+        user_form = BlocklogicUserForm(request.POST)
+        user_form.is_mobile = True
+        user_form.set_request(request)
+        # user_profile_form = UserProfileForm(request.POST)
+
+        if user_form.is_valid(): # and user_profile_form.is_valid():
+            email = user_form.cleaned_data['email']
+
+            if User.exists(email):
+
+                if User.type(email) == "google":
+                    return JsonError('error', _("You are already registered on one of Blocklogic sites with Google account. Please use the Google login button below."))
+                elif User.type(email) == "normal":
+                    return JsonError('error', _("You are already registered on one of Blocklogic sites. Try using that username."))
+
+                return JsonError('user-exists', )
+            # common function with web
+            try_register(user_form) #), user_profile_form)
+
+            return JsonResponse({'status': "created"})
+        else:
+            return JsonError(message='register failed')
+
+    return JsonResponse({'error': "should not happen"})
 
 
 def google_login_or_register(request, mobile=False):

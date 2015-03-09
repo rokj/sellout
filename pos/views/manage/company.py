@@ -285,6 +285,34 @@ def company_to_dict(user, company, android=False, with_config=False):
     return c
 
 
+def mobile_register_company(request):
+    if request.method == 'POST':
+
+        form = CompanyForm(request.POST, request.FILES)
+        if form.is_valid():
+
+            company = form.save(False)
+            company.created_by = request.user
+            form.save()
+
+            # add 'admin' permissions for the user that registered this company
+            default_permission = Permission(
+                created_by=request.user,
+
+                user=request.user,
+                company=company,
+                permission='admin',
+            )
+            default_permission.save()
+
+            return JsonOk(extra=company_to_dict(request.user, company, True, True))
+
+        else:
+            return JsonError(message='register failed')
+
+    return JsonResponse({'error': "should not happen"})
+
+
 # registration
 @login_required
 def register_company(request):

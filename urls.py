@@ -21,7 +21,7 @@ urlpatterns = patterns('',
     url(r'^pos/sync/', include('sync.urls', namespace='sync')),
 
     # mobile
-    # url(r'^' + 'mobile-register/$', blusers_views.mobile_register, name="mobile_register"),  # mobile registration
+    url(r'^' + 'mobile-register/$', blusers_views.mobile_register, name="mobile_register"),  # mobile registration
     url(r'^' + 'mobile-login/(?P<backend>[\w-]+)$', blusers_views.obtain_auth_token, name="mobile-login"),
     url(r'^' + 'mobile/', include('mobile.urls', namespace="mobile")),
     # the captcha app
