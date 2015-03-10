@@ -2,6 +2,7 @@ from django.core.files import File
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from rest_framework.decorators import api_view
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
@@ -285,6 +286,7 @@ def company_to_dict(user, company, android=False, with_config=False):
     return c
 
 
+@api_view(['POST'])
 def mobile_register_company(request):
     if request.method == 'POST':
 

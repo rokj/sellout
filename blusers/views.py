@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view
 from action.functions import action_to_dict
 from action.models import Action
 from bl_auth import User
-from blusers.forms import BlocklogicUserForm
+from blusers.forms import BlocklogicUserForm, BlocklogicUserBaseForm
 
 from common.functions import JsonParse, JsonError, get_random_string, send_email, JsonOk, min_password_requirments
 from common.globals import GOOGLE
@@ -103,7 +103,7 @@ def login(request, data):
 @api_view(['POST'])
 def mobile_register(request):
     if request.method == 'POST':
-        user_form = BlocklogicUserForm(request.POST)
+        user_form = BlocklogicUserBaseForm(request.POST)
         user_form.is_mobile = True
         user_form.set_request(request)
         # user_profile_form = UserProfileForm(request.POST)
