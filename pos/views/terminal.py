@@ -121,11 +121,7 @@ def lock_session_(request, c):
 
     if request.is_ajax():
         # tell javascript if there's no pin set
-        no_pin = None
-        if not request.user.get_permission(c).pin:
-            no_pin = 'no-pin'
-
-        return JsonOk(extra=no_pin)
+        return JsonResponse({'status': 'ok', 'no_pin': request.user.get_permission(c).pin is None})
     else:
         return redirect('pos:locked_session', company=c.url_name)
 
@@ -216,9 +212,15 @@ def switch_user_(request, c):
         return {'status': 'error', 'message': "Invalid request data", 'company': c}
 
     if data.get('unlock_type') == 'pin':
-        # get a user from current company by entered pin
+        # if there's no pin entered, set the current user's pin
+        pin = int(data['pin'])
+
+        if not current_permission.pin:
+            if not current_permission.create_pin(custom_pin=pin):
+                return {'status': 'error', 'message': _("Wrong PIN format")}
+
+        # get a user from current company by entered pin;
         try:
-            pin = int(data['pin'])
             switched_permission = Permission.objects.get(company=c, pin=pin)
             switched_user = switched_permission.user
         except (Permission.DoesNotExist, TypeError, ValueError):

@@ -98,14 +98,20 @@
 }
 
 #no_pin_message{
-    color: #f7f7f7;
-    padding: 5px;
-    text-align: center;
-    
-    position: absolute;
-    top: -70px;
-    left: -100px;
+    color: #646464;
+    padding: 10px;
+    text-align: left;
 
-    height: 100px;
-    width: 500px;
+    position: absolute;
+    top: 0;
+    left: 100%;
+
+    width: 200px;
+    background-color: #f7f7f7;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+    display: none;
+}
+
+#no_pin_message.visible {
+    display: block;
 }
