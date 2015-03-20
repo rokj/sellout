@@ -2,6 +2,7 @@ from django.core.files import File
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from rest_framework.decorators import api_view
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
@@ -168,6 +169,14 @@ class CompanyForm(forms.ModelForm):
                     'website',
                     'notes', ]
 
+        labels = {
+            'name': _('Company name'),
+            'url_name': _("Company name, used in URL address"),
+            'street': _("Street address"),
+            'country': _("Country"),
+            'city': _("City"),
+        }
+
         widgets = {
             'tax_payer': forms.Select(choices=((True, _("Yes")), (False, _("No"))))
         }
@@ -275,6 +284,35 @@ def company_to_dict(user, company, android=False, with_config=False):
         pass
 
     return c
+
+
+@api_view(['POST'])
+def mobile_register_company(request):
+    if request.method == 'POST':
+
+        form = CompanyForm(request.POST, request.FILES)
+        if form.is_valid():
+
+            company = form.save(False)
+            company.created_by = request.user
+            form.save()
+
+            # add 'admin' permissions for the user that registered this company
+            default_permission = Permission(
+                created_by=request.user,
+
+                user=request.user,
+                company=company,
+                permission='admin',
+            )
+            default_permission.save()
+
+            return JsonOk(extra=company_to_dict(request.user, company, True, True))
+
+        else:
+            return JsonError(message='register failed')
+
+    return JsonResponse({'error': "should not happen"})
 
 
 # registration

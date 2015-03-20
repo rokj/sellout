@@ -11,15 +11,14 @@ CREATE LANGUAGE plpythonu;
 DROP FUNCTION bl_insert_user(email CHARACTER VARYING) CASCADE;
 DROP FUNCTION bl_update_user(email CHARACTER VARYING) CASCADE;
 
-CREATE OR REPLACE FUNCTION bl_insert_user(email CHARACTER VARYING) RETURNS VOID AS $bl_insert_user_function$
+CREATE OR REPLACE FUNCTION bl_insert_user(email CHARACTER VARYING, source CHARACTER VARYING) RETURNS VOID AS $bl_insert_user_function$
     import json
     import psycopg2
 
-    host = '10.0.0.35'
+    host = '127.0.0.1'
     dbname = 'users'
     in_user = 'users'
-    password = 'iQeeLEsw'
-    source = 'pos'
+    password = 'users'
 
     plan = plpy.prepare("SELECT username, password, first_name, last_name, email, sex, country, type FROM blusers_blocklogicuser WHERE email = $1", ["text"])
     result1 = plpy.execute(plan, [email])
@@ -41,15 +40,15 @@ CREATE OR REPLACE FUNCTION bl_insert_user(email CHARACTER VARYING) RETURNS VOID 
 
 $bl_insert_user_function$ LANGUAGE plpythonu;
 
-CREATE OR REPLACE FUNCTION bl_update_user(email CHARACTER VARYING) RETURNS VOID AS $bl_update_user_function$
+CREATE OR REPLACE FUNCTION bl_update_user(email CHARACTER VARYING, source CHARACTER VARYING) RETURNS VOID AS $bl_update_user_function$
     import json
     import psycopg2
+    import logging
 
-    host = '10.0.0.35'
+    host = '127.0.0.1'
     dbname = 'users'
     in_user = 'users'
-    password = 'iQeeLEsw'
-    source = 'pos'
+    password = 'users'
 
     plan = plpy.prepare("SELECT username, password, first_name, last_name, email, sex, country, type FROM blusers_blocklogicuser WHERE email = $1", ["text"])
     rows = plpy.execute(plan, [email])
@@ -65,10 +64,11 @@ CREATE OR REPLACE FUNCTION bl_update_user(email CHARACTER VARYING) RETURNS VOID 
         if result and len(result) > 0:
             cursor.execute("UPDATE users SET data = %s, password = %s, type = %s, datetime_updated = NOW(), updated_by = %s WHERE email = %s", [json.dumps(data), rows[0]['password'], rows[0]['type'], source, email])
         else:
-            plan = plpy.prepare("SELECT bl_insert_user($1)", ["text"])
-            plpy.execute(plan, [email,])
+            plan = plpy.prepare("SELECT bl_insert_user($1, $2)", ["text", "text"])
+            plpy.execute(plan, [email, source])
 
-        conn.commit()
-        conn.close()
+        if conn:
+            conn.commit()
+            conn.close()
 
 $bl_update_user_function$ LANGUAGE plpythonu;

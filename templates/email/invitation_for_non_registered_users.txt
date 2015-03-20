@@ -4,7 +4,7 @@
 
 {% trans 'Hi!' %}
 
-{% trans 'You have been invited to join a company on sellout.biz: '%} {{ company_name }}
+{% trans 'You have been invited to join a company on'%} {{ site_url }}: {{ company_name }}
 
 {% trans 'But first you have to register on the following link: ' %} {{ register_url }}
 

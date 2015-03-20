@@ -23,7 +23,7 @@ Terminal = function(g){
         controls: $("#controls"),
         controls_options_button: $("button.open-menu", "#controls_more"),
         controls_options_menu: $("#controls_menu"),
-        controls_change_register: $(".terminal-menu-item.change-register", "#controls_more"),
+        controls_change_register: $(".change-register", "#controls_more"),
 
         registers_dialog: $("#registers"),
         registers_list: $("#registers_list"),
@@ -199,7 +199,7 @@ Terminal = function(g){
         // if there are no registers defined, send user to create one
         if(p.g.data.registers.length == 0){
             custom_dialog(
-                gettext("Register is required"),
+                gettext("Register required"),
                 gettext("There are no registers defined, please add one"),
                 400,
                 {
@@ -267,13 +267,19 @@ Terminal = function(g){
             p.items.registers_list.empty();
 
             for(i = 0; i < p.g.data.registers.length; i++){
-                p.items.registers_list.append(
-                    $("<option>", { value: p.g.data.registers[i].id }).text(p.g.data.registers[i].name)
-                );
+                if (p.g.data.registers[i].id == id) {
+                    p.items.registers_list.append(
+                        $("<option>", { value: p.g.data.registers[i].id, selected: "selected"}).text(p.g.data.registers[i].name)
+                    );
+                } else {
+                    p.items.registers_list.append(
+                        $("<option>", { value: p.g.data.registers[i].id}).text(p.g.data.registers[i].name)
+                    );
+                }
             }
 
             // show the registers dialog
-            custom_dialog(gettext("Choose a register"),
+            custom_dialog(gettext("Choose a printer"),
                 p.items.registers_dialog, 400, null);
         }
     };
@@ -347,7 +353,7 @@ Terminal = function(g){
     }, 1000);
 
     // controls menu
-    p.items.controls_options_button.simpleMenu(p.items.controls_options_menu);
+    // p.items.controls_options_button.simpleMenu(p.items.controls_options_menu);
 
     // controls menu items
     p.items.controls_change_register.unbind().click(function(){

@@ -15,9 +15,11 @@
 
 <style type="text/css">
 .item-val.quantity input[type='text']{
-    background-image: url("{% static 'icons/quantity_background.png' %}");
-    background-position: center center;
-    background-repeat: no-repeat;
+{#    background-image: url("{% static 'icons/quantity_background.png' %}");#}
+{#    background-position: center center;#}
+{#    background-repeat: no-repeat;#}
+    background-color: #f7f7f7;
+    width: 41px;
 }
 
 .details-box button.remove-item-discount{
@@ -299,7 +301,7 @@ $(window).load(function(){
                     <div class="register-button-container terminal-menu" id="bill_options">
                         <button class="open-menu">
                             {% trans 'Bill' context 'bill options button text' %}
-                            <img src="{% static 'icons/arrow_white_up.png' %}" alt="" />
+                            <span class="buttons"><span class="circle"></span><span class="circle"></span><span class="circle"></span></span>
                         </button>
 
                         <div id="bill_options_menu" class="terminal-menu-items">
@@ -374,16 +376,16 @@ $(window).load(function(){
             <div> {# for margins and position: absolute #}
 
                 <div id="controls_more" class="terminal-menu">
-                    <button class="open-menu">
-                        {% trans 'Stuff' %}
-                        <img src="{% static 'icons/arrow_white_up.png' %}" alt="" />
+                    <button class="open-menu change-register">
+                        <img src="{% static 'icons/print_set_icon.png' %}" />
+                        <span class="text"></span>
                     </button>
 
-                    <div id="controls_menu" class="terminal-menu-items">
-                        <button class="terminal-menu-item change-register">
-                            {% trans 'Change register' %}<br/>
-                        </button>
-                    </div>
+{#                    <div id="controls_menu" class="terminal-menu-items">#}
+{#                        <button class="terminal-menu-item change-register">#}
+{#                            {% trans 'Change printer' %}<br/>#}
+{#                        </button>#}
+{#                    </div>#}
                 </div>
 
                 <div class="bill-border-top"></div>
@@ -405,8 +407,9 @@ $(window).load(function(){
 
     {% comment %} the dialog for selecting register on login {% endcomment %}
     <div id="registers" class="hidden">
-        {% trans 'Which register have you logged on to?' %}
+        {% trans 'Which register would you like to use?' %}
         <select id="registers_list"> {# filled by javascript #} </select>
+        <br />
         <input type="button" value="{% trans 'Go' %}" id="select_register"/>
     </div>
 

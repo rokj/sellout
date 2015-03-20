@@ -86,6 +86,8 @@ CREATE OR REPLACE FUNCTION update_django_users() RETURNS TRIGGER AS $update_djan
     pos_in_user = 'pos'
     pos_password = 'pos'
 
+    conn = None
+
     if TD['new']['updated_by'] == 'taskmanager':
         go = 'pos'
     elif TD['new']['updated_by'] == 'pos':
@@ -98,20 +100,21 @@ CREATE OR REPLACE FUNCTION update_django_users() RETURNS TRIGGER AS $update_djan
         conn = psycopg2.connect("host=" + pos_host + " dbname=" + pos_dbname + " user=" + pos_in_user + " password=" + pos_password)
         cursor = conn.cursor()
 
-    if go != '':
+    if go != '' and cursor:
         user_data = json.loads(TD['new']['data'])
 
         cursor.execute("SELECT email FROM blusers_blocklogicuser WHERE email = %s", [TD['new']['email']])
         result = cursor.fetchone()
 
         if result:
-          cursor.execute("UPDATE blusers_blocklogicuser SET first_name = %s, last_name = %s, password = %s, datetime_updated = NOW() WHERE email = %s", [user_data['first_name'], user_data['last_name'], TD['new']['password'], TD['new']['email']])
-          if 'sex' in user_data:
-              cursor.execute("UPDATE blusers_blocklogicuser SET sex = %s WHERE email = %s", [user_data['sex'],  TD['new']['email']])
-          if 'country' in user_data:
-              cursor.execute("UPDATE blusers_blocklogicuser SET country = %s WHERE email = %s", [user_data['country'],  TD['new']['email']])
+            cursor.execute("UPDATE blusers_blocklogicuser SET first_name = %s, last_name = %s, password = %s, datetime_updated = NOW() WHERE email = %s", [user_data['first_name'], user_data['last_name'], TD['new']['password'], TD['new']['email']])
+            if 'sex' in user_data:
+                cursor.execute("UPDATE blusers_blocklogicuser SET sex = %s WHERE email = %s", [user_data['sex'],  TD['new']['email']])
+            if 'country' in user_data:
+                cursor.execute("UPDATE blusers_blocklogicuser SET country = %s WHERE email = %s", [user_data['country'],  TD['new']['email']])
 
-    conn.commit()
+    if conn:
+        conn.commit()
 
 $update_django_users_trigger$ LANGUAGE plpythonu;
 

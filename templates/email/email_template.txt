@@ -5,6 +5,6 @@
 {% block content %}{% endblock %}
 
 {% trans 'Kind regards,' %}
-{% trans 'the Sellout team' %}
+{% trans 'Sellout team' %}
 
 http://www.sellout.biz

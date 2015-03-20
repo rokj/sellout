@@ -64,7 +64,9 @@ class ResetPasswordForm(forms.Form):
         if not BlocklogicUser.objects.filter(password_reset_key=self.cleaned_data['key']).exists():
             raise forms.ValidationError(_("Invalid password reset key"))
 
-class BlocklogicUserForm(forms.ModelForm):
+
+
+class BlocklogicUserBaseForm(forms.ModelForm):
     """
     So we do not really want to fuck around with overriding methods and iterating
     and changing passed arguments in super class, so we KISS and do it this way.
@@ -87,11 +89,9 @@ class BlocklogicUserForm(forms.ModelForm):
     password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput, required=False)
     password2 = forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput,
                                 help_text=_("Enter the same password as above, for verification."), required=False)
-    country = forms.ChoiceField(choices=countries.country_choices, required=True)
-    sex = forms.CharField(required=True, widget=forms.Select(choices=SEX, attrs={'class': 'sex'}))
+    country = forms.ChoiceField(label=_("Country"), choices=countries.country_choices, required=True)
+    sex = forms.CharField(label=_("Sex"), required=True, widget=forms.Select(choices=SEX, attrs={'class': 'sex'}))
     images = forms.FileField(label=_("Your photo"), required=False)
-
-    captcha = CaptchaField()
 
     registration = True
     is_mobile = False
@@ -164,6 +164,9 @@ class BlocklogicUserForm(forms.ModelForm):
     def set_request(self, request):
         self.request = request
 
+class BlocklogicUserForm(BlocklogicUserBaseForm):
+    captcha = CaptchaField()
+
 class BlocklogicUserChangeForm(forms.ModelForm):
     last_name = forms.RegexField(label=_("Last name"), required=True, max_length=30, regex=FIRST_LAST_NAME_REGEX,
                                  help_text=_("Required field. 30 characters or fewer. Letters and numbers only."),
@@ -173,7 +176,7 @@ class BlocklogicUserChangeForm(forms.ModelForm):
     password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput, required=False)
     password2 = forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput,
                                 help_text=_("Enter the same password as above, for verification."), required=False)
-    country = forms.ChoiceField(choices=countries.country_choices, required=True)
+    country = forms.ChoiceField(label=("Country"), choices=countries.country_choices, required=True)
     sex = forms.CharField(required=True, max_length=6, widget=forms.RadioSelect(choices=SEX, attrs={'class': 'sex'}))
     images = forms.FileField(label=_("Your photo"), required=False)
 

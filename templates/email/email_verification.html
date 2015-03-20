@@ -4,6 +4,6 @@
 {% block content %}
     <p>{% trans 'Hi!' %}</p>
 
-    <p>{% trans 'To activate your account on sellout.biz, please click click on the following link:' %}</p>
-    <p><a href="{{ url }}">{% trans 'Activate' %}</a></p>
+    <p>{% blocktrans with site_url=site_url %}To activate your account on <a href="{{ site_url }}">{{ site_url }}</a>, please click on the following link:{% endblocktrans %}<br/>
+    <a href="{{ url }}">{% trans 'activate' %}</a></p>
 {% endblock %}

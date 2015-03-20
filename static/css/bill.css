@@ -454,6 +454,10 @@ button.more{
 
 #bill_options{ left: 0; }
 
+#bill_options .simple-menu-button {
+    background-color: #008cff;
+}
+
 /* bill options dialog */
 #bill_options_dialog{
     background-color: #f7f7f7;

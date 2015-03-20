@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-23 18:54+0100\n"
+"POT-Creation-Date: 2015-03-05 14:11+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -162,11 +162,11 @@ msgstr ""
 
 #: admin/js/collapse.js:8 admin/js/collapse.js.c:19 admin/js/collapse.min.js:1
 msgid "Show"
-msgstr ""
+msgstr "Prikaži"
 
 #: admin/js/collapse.js:15 admin/js/collapse.min.js:1
 msgid "Hide"
-msgstr ""
+msgstr "Skrij"
 
 #: static/js/common.js:140 static/js/widgets/unlock.js:112
 msgid "OK"
@@ -174,19 +174,19 @@ msgstr ""
 
 #: static/js/common.js:145
 msgid "Yes"
-msgstr ""
+msgstr "Da"
 
 #: static/js/common.js:146
 msgid "No"
-msgstr ""
+msgstr "Ne"
 
 #: static/js/common.js:159
 msgid "File too large"
-msgstr ""
+msgstr "Datoteka je prevelika"
 
 #: static/js/common.js:160
 msgid "Maximum file size is"
-msgstr ""
+msgstr "Največja dovoljenja velikost datoteke je"
 
 #: static/js/tutorial.js:213
 msgid "Help"
@@ -444,23 +444,28 @@ msgstr "Možnosti na računu"
 msgid "Please check discount amount"
 msgstr "Prosim, preveri popust"
 
-#: static/js/widgets/categories.js:25
-msgid "Categories"
-msgstr "Kategorije"
-
-#: static/js/widgets/categories.js:26
-msgid "Favorite products"
-msgstr "Priljubljeni artikli"
-
-#: static/js/widgets/categories.js:29
+#: static/js/widgets/categories.js:33
 msgid "Products in this category"
 msgstr "Artikli v tej kategoriji"
 
-#: static/js/widgets/categories.js:30
+#: static/js/widgets/categories.js:37
+#| msgid "Favorite products"
+msgid "All products"
+msgstr "Priljubljeni artikli"
+
+#: static/js/widgets/categories.js:39 static/js/widgets/categories.js.c:44
+msgid "Categories"
+msgstr "Kategorije"
+
+#: static/js/widgets/categories.js:42
+msgid "Favorite products"
+msgstr "Priljubljeni artikli"
+
+#: static/js/widgets/categories.js:48
 msgid "Subcategories"
 msgstr "Podkategorije"
 
-#: static/js/widgets/categories.js:31
+#: static/js/widgets/categories.js:49
 msgid "No Subcategories"
 msgstr "Ni podkategorij"
 
@@ -508,33 +513,35 @@ msgstr ""
 msgid "Could not save bill"
 msgstr ""
 
-#: static/js/widgets/products.js:14
+#: static/js/widgets/products.js:16
 msgid "No products found"
 msgstr "Ni najdenih artiklov"
 
 #: static/js/widgets/terminal.js:202
-msgid "Register is required"
-msgstr ""
+#| msgid "Printer is required"
+msgid "Register required"
+msgstr "Nastavi blagajno"
 
 #: static/js/widgets/terminal.js:203
+#| msgid "There are no printers defined, please add one"
 msgid "There are no registers defined, please add one"
-msgstr ""
+msgstr "Pred uporabo je potrebno nastaviti blagajno"
 
 #: static/js/widgets/terminal.js:206
 msgid "Go"
-msgstr ""
+msgstr "Pojdi"
 
 #: static/js/widgets/terminal.js:240
 msgid "Register could not be set"
-msgstr ""
+msgstr "Napaka pri nastavljanju blagajne"
 
 #: static/js/widgets/terminal.js:241
 msgid "There was an error while setting your register, "
 msgstr ""
 
-#: static/js/widgets/terminal.js:276
-msgid "Choose a register"
-msgstr ""
+#: static/js/widgets/terminal.js:285
+msgid "Choose a printer"
+msgstr "Izberi tiskalnik"
 
 #: static/js/widgets/unlock.js:109
 msgid "Could not unlock"

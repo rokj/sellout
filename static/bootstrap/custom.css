@@ -43,6 +43,7 @@ button.navbar-toggle {
 
 .sellout-background {
     background-color: rgba(35,230,147,0.8);
+    box-shadow: 0 1px 5px 0 rgba(0,0,0,0.2) !important;
 }
 
 .btn {

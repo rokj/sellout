@@ -23,6 +23,7 @@ body{
 
 #logo_placeholder .help-text{
     max-width: 300px;
+    line-height: 17px;
 }
 
 #logo_placeholder img{
@@ -47,8 +48,30 @@ body{
     color: #646464;
 }
 
+#id_url_name {
+    padding-left: 0px;
+}
+
 .row .url-name .help-text{
     max-width: 600px;
+}
+
+.register-company input[type=submit] {
+    max-width: 300px;
+}
+
+
+.register-company .cancel {
+    max-width: 300px;
+    width: 100%;
+    display: block;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top: 10px;
+    text-transform: uppercase;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
 }
 
 #suggestion_list_container{

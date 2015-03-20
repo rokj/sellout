@@ -32,6 +32,7 @@ div.field-errors ul.errorlist {
     padding: 0px;
     maring: 0px;
     padding-top: 2px;
+    clear: both;
 }
 
 div.field-errors ul.errorlist li {

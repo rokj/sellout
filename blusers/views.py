@@ -6,9 +6,11 @@ from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 
 import requests
+from rest_framework.decorators import api_view
 from action.functions import action_to_dict
 from action.models import Action
 from bl_auth import User
+from blusers.forms import BlocklogicUserForm, BlocklogicUserBaseForm
 
 from common.functions import JsonParse, JsonError, get_random_string, send_email, JsonOk, min_password_requirments
 from common.globals import GOOGLE
@@ -98,6 +100,35 @@ def login(request, data):
     return message, next
 
 
+@api_view(['POST'])
+def mobile_register(request):
+    if request.method == 'POST':
+        user_form = BlocklogicUserBaseForm(request.POST)
+        user_form.is_mobile = True
+        user_form.set_request(request)
+        # user_profile_form = UserProfileForm(request.POST)
+
+        if user_form.is_valid(): # and user_profile_form.is_valid():
+            email = user_form.cleaned_data['email']
+
+            if User.exists(email):
+
+                if User.type(email) == "google":
+                    return JsonError('error', _("You are already registered on one of Blocklogic sites with Google account. Please use the Google login button below."))
+                elif User.type(email) == "normal":
+                    return JsonError('error', _("You are already registered on one of Blocklogic sites. Try using that username."))
+
+                return JsonError('user-exists', )
+            # common function with web
+            try_register(user_form) #), user_profile_form)
+
+            return JsonResponse({'status': "created"})
+        else:
+            return JsonError(message='register failed')
+
+    return JsonResponse({'error': "should not happen"})
+
+
 def google_login_or_register(request, mobile=False):
     """ log the user in;
         if successful, redirect to the index page
@@ -137,6 +168,15 @@ def google_login_or_register(request, mobile=False):
 
     try:
         bluser = BlocklogicUser.objects.get(email=r["email"])
+
+        if bluser.first_name != r["given_name"] or bluser.last_name != r["family_name"] or bluser.sex != r["gender"]:
+            bluser.first_name = r["given_name"]
+            bluser.last_name = r["family_name"]
+            bluser.sex = r["gender"]
+            bluser.save()
+
+            bluser.update_user_profile()
+
         if bluser.type != GOOGLE and not mobile:
             return JsonError("already_registered_via_normal", _("Already registered via normal"))
         elif bluser.type != GOOGLE and mobile:
@@ -145,11 +185,13 @@ def google_login_or_register(request, mobile=False):
     except BlocklogicUser.DoesNotExist:
         # we do not have user in our db, so we add register/new one
         # print r
+        try:
+            gender = r["gender"]
+        except KeyError:
+            gender = g.MALE
 
-        bluser = BlocklogicUser(email=r["email"], first_name=r["given_name"], last_name=r["family_name"], sex=r["gender"],
+        bluser = BlocklogicUser(email=r["email"], first_name=r["given_name"], last_name=r["family_name"], sex=gender,
                                 type="google")
-
-
         bluser.save()
 
         key = ""
@@ -162,6 +204,8 @@ def google_login_or_register(request, mobile=False):
 
         bluser.password_reset_key = key
         bluser.save()
+
+        bluser.update_user_profile()
 
         group = bluser.homegroup
 
@@ -201,16 +245,9 @@ def google_login_or_register(request, mobile=False):
     return JsonError("error", _("Something went wrong during login with google"))
 
 
-def try_register(user_form, user_profile_form=None):
-    """ this is not a view """
+def try_register(user_form):
     new_user = user_form.save()
     new_user.set_password(user_form.cleaned_data['password1'])
-
-    if user_profile_form:
-        user_profile = user_profile_form.save(commit=False)
-        user_profile.user = new_user
-        user_profile.created_by = new_user
-        user_profile.save()
 
     key = ""
     while key == "":
@@ -223,9 +260,8 @@ def try_register(user_form, user_profile_form=None):
     new_user.password_reset_key = key
     new_user.type = 'normal'
     new_user.is_active = False
-    #new_user.update_password(user_form.cleaned_data['password1'])
-    new_user.update_password()
     new_user.save()
+    new_user.update_user_profile()
 
     # TODO: add the free subscription on register
     # add_free_subscription(new_user)
@@ -235,6 +271,7 @@ def try_register(user_form, user_profile_form=None):
     # put the stuff in template, then render it to string and send it via email
     mail_context = {
         'url': settings.SITE_URL + activation_url,
+        'site_url': settings.SITE_URL,
     }
 
     subject = settings.EMAIL_SUBJECT_PREFIX + " " + _("Registration successful")
@@ -243,7 +280,6 @@ def try_register(user_form, user_profile_form=None):
     message_text = render_to_string('email/email_verification.txt', mail_context)
 
     if settings.DEBUG:
-        print "sending register email"
         print message_text
         print message_html
     else:
@@ -276,6 +312,7 @@ def send_reactivation_key(request, bluser):
     # put the stuff in template, then render it to string and send it via email
     mail_context = {
         'url': settings.SITE_URL + reactivation_url,
+        'site_url': settings.SITE_URL,
     }
 
     subject = settings.EMAIL_SUBJECT_PREFIX + " " + _("Recover lost password")
