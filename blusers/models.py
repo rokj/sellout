@@ -119,6 +119,13 @@ class BlocklogicUser(AbstractUser, Skeleton):
 
         conn.commit()
 
+    def get_permission(self, company):
+        from pos.models import Permission
+        try:
+            return Permission.objects.get(user=self, company=company)
+        except Permission.DoesNotExist:
+            return None
+
 
 class UserImage(SkeletonU):
     from common.functions import ImagePath

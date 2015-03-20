@@ -120,7 +120,12 @@ def lock_session_(request, c):
     request.session.modified = True
 
     if request.is_ajax():
-        return JsonOk()
+        # tell javascript if there's no pin set
+        no_pin = None
+        if not request.user.get_permission(c).pin:
+            no_pin = 'no-pin'
+
+        return JsonOk(extra=no_pin)
     else:
         return redirect('pos:locked_session', company=c.url_name)
 
@@ -135,6 +140,7 @@ def locked_session(request, company):
         return JsonError(_("Company does not exist"))
 
     context = {
+        'no_pin': request.user.get_permission(c).pin is None,
         'company': c,
         'pin_length': g.PIN_LENGTH,
         'message': '',
@@ -192,7 +198,7 @@ def switch_user_(request, c):
 
     # check if the user belongs to this company
     try:
-        current_permission = Permission.objects.get(company=c, user=request.user)
+        current_permission = request.user.get_permission(c)
     except Permission.DoesNotExist:
         return {'status': 'error', 'message': _("You have no permission for this company"), 'company': c}
 

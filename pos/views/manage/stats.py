@@ -36,7 +36,10 @@ def stats(request, company):
             billset = billset.filter(timestamp__lte=end_date)
 
         if billset.count() == 0:
-            return Decimal(0)
+            return {
+                'income': format_number(request.user, c, Decimal(0)),
+                'profit': format_number(request.user, c, Decimal(0)),
+            }
 
         income = billset.aggregate(Sum('payment__total'))['payment__total__sum']
 
