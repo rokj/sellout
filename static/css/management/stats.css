@@ -1,0 +1,43 @@
+table{
+max-width: 100% !important;
+}
+
+input[type='image']{
+    background-color: #dddddd;
+    padding: 3px;
+    display: block;
+    float: left;
+
+}
+
+input.date{
+    width: 80px;
+    display: block;
+    float: left;
+    margin-right: 5px;
+}
+input{
+    position: relative;
+    top: -3px;    
+}
+
+
+td.custom {
+    min-width: 190px;
+}
+
+
+ .top-product-name {
+    color: #646464;
+ }
+
+.top-product-code {
+    font-size: 80%;
+    color: #969696;
+}
+
+.top-product-quantity {
+    float: left;
+    font-size: 150%;
+    margin-right: 20px;
+}
