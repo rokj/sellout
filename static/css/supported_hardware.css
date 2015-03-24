@@ -51,5 +51,17 @@ section#hardware_section h1 {
 }
 
 .printer.row {
-    padding-bottom: 3%;
+    padding-bottom: 5%;
+    padding-top: 5%;
+    border-bottom: 1px solid #FFFFFF;
+}
+
+.printer.row:last-child {
+    border: none;
+}
+
+.additional-info.buttons {
+    float: left;
+    clear: both;
+    margin-left: 15px;
 }
