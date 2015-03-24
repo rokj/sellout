@@ -332,10 +332,6 @@ div.step-connector{
     position: relative;
 }
 
-#payment_type_image{
-
-}
-
 /* possibilities */
 .possibility-image-container{
     height: 100px;
@@ -544,6 +540,10 @@ div.payment-price{
     #footer_section .col {
         text-align: center;
     }
+}
+
+div#payment_options_boxes {
+    min-width: 558px;
 }
 
 div#payment_options_boxes .akcija-big {

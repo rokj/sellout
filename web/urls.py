@@ -29,6 +29,8 @@ urlpatterns = patterns('',
     url(r'^user-profile/$', views.user_profile, name='user_profile'),
     url(r'^select-company/$', views.select_company, name='select_company'),
 
+    url(r'^supported-hardware/$', views.supported_hardware, name='supported-hardware'),
+
     # index
     url(r'^$', views.index, name='index'),
 )

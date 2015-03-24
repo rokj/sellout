@@ -168,15 +168,7 @@
 {% endblock %}
 
 {% block navbar_buttons %}
-    <ul class="nav navbar-nav navbar-right">
-        <li><a class="custom nav-button extra-font" href="#pricing">{% trans 'Pricing' %}</a></li>
-        {% if user.is_authenticated %}
-            <li><a class="custom nav-button extra-font" href="{% url 'web:select_company' %}"><span id="enter_select_company">{% trans 'Enter' %}</span></a></li>
-        {% else %}
-            <li><a class="custom nav-button extra-font" href="{% url 'web:sign_up' %}">{% trans 'Sign up' %}</a></li>
-            <li><a class="custom nav-button extra-font fake" href="#"><span id="open_login_form">{% trans 'Login' %}</span></a></li>
-        {% endif %}
-    </ul>
+    {% include "web/navbar_buttons.html" %}
 {% endblock %}
 
 {% block content %}
@@ -461,13 +453,15 @@
                         <p class="dark-fg">{% blocktrans %}We also offer buying thermal printers, <br />
                             which we support for printing invoices.
                             {% endblocktrans %}</p>
-                        <p><a href="#pricing" class="supported-hardware">{% trans 'Check out supported hardware' %}</a></p>
+                        <p><a href="{% url 'web:supported-hardware' %}" class="supported-hardware">{% trans 'Check out supported hardware' %}</a></p>
                     </div>
                 </div>
 
                 <div class="col col-md-6 v-center">
                     <div class="text-center">
-                        <img src="{% static 'icons/index_printer_icon.png' %}" />
+                        <a href="{% url 'web:supported-hardware' %}" class="">
+                            <img src="{% static 'icons/index_printer_icon.png' %}" />
+                        </a>
                     </div>
                 </div>
             </div>
@@ -585,6 +579,7 @@
 
                 <div class="col col-md-4 col-sm-6 col-xs-12">
                     <ul>
+                        <li><a href="" class="contact">{% trans 'Contact' %}</a></li>
                         <li><a href="#">{% trans 'About' %}</a></li>
                         <li><a href="#">{% trans 'Press kit' %}</a></li>
                     </ul>
@@ -628,15 +623,5 @@
         </div>
     </section>
 
-    <section id="signature_section">
-        <div class="container">
-            {% trans 'A product of ' context 'A product of Blocklogic' %}
-            <a href="http://www.blocklogic.net" target="_blank">
-            <img id="blocklogic_logo"
-                 src="{% static 'images/index/blocklogic_logo_small.png' %}" alt="blocklogic logo" />
-            </a>.
-            {% trans 'Copyright 2014. All rights reserved.' %}
-        </div>
-    </section>
-
+    {% include "web/signature.html" %}
 {% endblock %}

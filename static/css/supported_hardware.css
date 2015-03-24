@@ -1,0 +1,55 @@
+section#hardware_section {
+    color: rgba(66, 66, 66, 0.82);
+}
+
+section#hardware_section {
+    padding-top: 7%;
+    margin-top: 0px;
+}
+
+section#hardware_section h1 {
+    color: rgba(66, 66, 66, 0.82);
+    padding-bottom: 5%;
+    font-size: 40px;
+    /*text-transform: uppercase;*/
+    font-weight: bold;
+}
+
+.printer .header {
+    color: #008cff;
+    font-weight: bold;
+    padding-bottom: 5%;
+}
+
+.specs {
+    padding-top: 3%;
+}
+
+.specs .strong {
+    font-weight: bold;
+}
+
+.printer .image {
+    position: relative;
+}
+
+.printer .image .price {
+    position: absolute;
+    color: #FFFFFF;
+    background-color: rgba(35,230,147,0.8);
+    width: 61px;
+    height: 61px;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 30px;
+    -webkit-border-radius: 30px;
+    -moz-border-radius: 30px;
+    line-height: 61px;
+    font-size: 16px;
+    top: 19px;
+    left: 359px;
+}
+
+.printer.row {
+    padding-bottom: 3%;
+}

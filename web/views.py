@@ -65,6 +65,50 @@ def index(request):
     return render(request, "web/index.html", context)
 
 
+def index(request):
+    message = None
+    next = None
+    action = ''
+
+    # if the user is already logged in, redirect to select_company
+    if request.user.is_authenticated():
+        return redirect('web:select_company')
+
+    if request.method == 'POST':
+        action = 'login'
+
+        if request.POST.get('next', '') != '':
+            next = request.POST.get('next')
+
+        login_form = LoginForm(request.POST)
+
+        if login_form.is_valid():
+            from blusers.views import login
+            message, next = login(request, login_form.cleaned_data)
+
+            if message == 'logged-in':
+                return redirect('web:select_company')
+    else:
+        login_form = LoginForm()
+
+    if request.GET.get('next') != '' and request.GET.get('next') != reverse('web:logout'):
+        next = request.GET.get('next')
+
+    context = {
+        'user': request.user,
+        'action': action,
+        'next': next,
+        'login_message': message,
+        'login_form': login_form,
+        'client_id': settings.GOOGLE_API['client_id'],
+        'site_title': g.SITE_TITLE,
+        'STATIC_URL': settings.STATIC_URL,
+        'GOOGLE_API': settings.GOOGLE_API
+    }
+
+    return render(request, "web/index.html", context)
+
+
 @login_required_nolocking
 def select_company(request):
     """ show current user's companies and a list of invites. """
@@ -123,6 +167,8 @@ def sign_up(request):
 
             # registration succeeded, return to login page
             return sign_up_message(request, 'registration-successful')
+        else:
+            print user_form.errors.as_data()
     else:
         user_form = BlocklogicUserForm()
 
@@ -311,3 +357,6 @@ def user_profile(request):
     }
 
     return render(request, 'web/user_profile.html', context)
+
+def supported_hardware(request):
+    return render(request, 'web/supported_hardware.html')
