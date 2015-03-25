@@ -1833,7 +1833,7 @@ msgstr ""
 #: pos/views/manage/manage.py:25 support/parameters.py:8
 #: templates/pos/base.html:123 templates/web/select_company.html:47
 msgid "Management"
-msgstr "Nastaviteve"
+msgstr "Nastavitve"
 
 #: pos/views/manage/product.py:111
 msgid "You have no permission to view products."

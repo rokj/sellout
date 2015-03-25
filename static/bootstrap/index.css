@@ -377,6 +377,10 @@ div.step-connector{
     text-align: left;
 }
 
+#pricing_section div.row .col:first-child {
+    width: 48%;
+}
+
 div.payment-option-nowrap{
     white-space: nowrap;
     display: inline;
@@ -582,6 +586,7 @@ section#budget_section div.footnote {
 
 section#hardware_support_section div.supported-hardware-text {
     width: 240px;
+    height: 188px;
 }
 
 section#google_play_section div.google-play-text {
