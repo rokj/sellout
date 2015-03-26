@@ -62,7 +62,9 @@
                 login_form: $("#login_form"),
                 welcome_section: $("#welcome_section"),
                 beta_stripe: $("#beta_stripe"),
-                more_icon: $("#more_icon")
+                more_icon: $("#more_icon"),
+                contact: $("section#contact"),
+                contact_link: $("a.contact")
             };
 
             // resizing and repositioning
@@ -137,6 +139,10 @@
 
             items.more_button.click(function(){
                 $("body").animate({scrollTop: items.more_section.offset().top}, "fast");
+            });
+
+            items.contact_link.click(function() {
+                show_contact_dialog();
             });
 
             // url checking
@@ -579,7 +585,7 @@
 
                 <div class="col col-md-4 col-sm-6 col-xs-12">
                     <ul>
-                        <li><a href="" class="contact">{% trans 'Contact' %}</a></li>
+                        <li><a href="#contact" class="contact">{% trans 'Contact' %}</a></li>
                         <li><a href="#">{% trans 'About' %}</a></li>
                         <li><a href="#">{% trans 'Press kit' %}</a></li>
                     </ul>
@@ -624,4 +630,5 @@
     </section>
 
     {% include "web/signature.html" %}
+    {% include "web/contact.html" %}
 {% endblock %}

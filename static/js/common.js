@@ -628,3 +628,42 @@ Keyboard = function(){
         }
     });
 };
+
+close_contact_dialog = function() {
+    var shadow = $(".fullscreen-shadow");
+    var contact = $("section#contact");
+
+    shadow.remove();
+
+    shadow.fadeOut("fast", function(){
+        shadow.remove();
+    });
+
+    contact.hide();
+
+    // window.keyboard.remove(ok_message);
+    // window.keyboard.remove(cancel_message);
+};
+
+function show_contact_dialog() {
+    var shadow = $("<div>", {'class': 'fullscreen-shadow'});
+    var close_contact = $("section#contact .close-btn");
+    var contact = $("section#contact");
+    var body = $("body");
+
+    // the new pop-up is above everything older
+    window.last_dialog_zindex += 1;
+
+    shadow
+        .css("z-index", window.last_dialog_zindex)
+        .hide()
+        .appendTo(body)
+        .fadeIn(function() {
+            contact.css("z-index", window.last_dialog_zindex+1);
+            // TODO:
+            // contact show input boxes
+            contact.show();
+        });
+
+    close_contact.unbind().click(close_contact_dialog);
+}

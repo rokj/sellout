@@ -824,12 +824,7 @@ Item = function(bill, product) {
     p.items.delete_button.click(function(e){
         e.stopPropagation();
 
-        confirmation_dialog(
-            gettext("Remove bill item"), // message title
-            interpolate(gettext("Remove bill item: %(name)s?"), {name: p.data.name}, true),
-            function(){ p.bill.remove_item(p); },
-            null
-        );
+        p.bill.remove_item(p);
     });
 
     // more button
