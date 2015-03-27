@@ -400,13 +400,16 @@ def send_contact_message(request):
     subject = _('Message from website')
     message = d.get('message')
 
+    message_html = message.replace("\r\n", "<br />")
+    message_html = message_html.replace("\n", "<br />")
+
     if settings.DEBUG:
         print "We are sending email with subject:"
         print subject
         print "and message:"
         print message
     else:
-        send_email(settings.EMAIL_FROM, [settings.CONTACT_EMAIL], None, subject, '', message)
+        send_email(settings.EMAIL_FROM, [settings.CONTACT_EMAIL], None, subject, message, message_html)
 
     return JsonResponse({
             'status': 'ok'
