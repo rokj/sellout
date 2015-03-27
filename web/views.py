@@ -406,7 +406,7 @@ def send_contact_message(request):
         print "and message:"
         print message
     else:
-        send_email(settings.EMAIL_FROM, [settings.CONTACT_EMAIL], None, subject, message, message)
+        send_email(settings.EMAIL_FROM, [settings.CONTACT_EMAIL], None, subject, '', message)
 
     return JsonResponse({
             'status': 'ok'
