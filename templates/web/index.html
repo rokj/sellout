@@ -12,6 +12,8 @@
     <link href="{% static 'css/fonts/fonts.css' %}" rel="stylesheet" />
     <link href="{% static 'css/fonts/montserrat.css' %}" rel="stylesheet" />
 
+    <script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+
     <style type="text/css">
         {# styles that require {% static %} urls and stuff (to avoid hardcoding) #}
         #welcome_section { background-image: url("{% static 'images/index/bg-welcome.jpg' %}"); }
@@ -65,6 +67,11 @@
                 more_icon: $("#more_icon"),
                 contact: $("section#contact"),
                 contact_link: $("a.contact")
+            };
+
+            var g = {
+                csrf_token: "{{ csrf_token }}",
+                send_message_url: "{% url "web:send-contact-message" %}"
             };
 
             // resizing and repositioning
@@ -141,16 +148,14 @@
                 $("body").animate({scrollTop: items.more_section.offset().top}, "fast");
             });
 
-            items.contact_link.click(function() {
-                show_contact_dialog();
-            });
-
             // url checking
             function match_url(){
                 switch(get_url_hash()){
                     case 'login':
                         toggle_login_form(true);
                         break;
+                    case 'contact':
+                        items.contact_link.click();
                     default:
                         break;
                 }
@@ -165,6 +170,10 @@
                 items.more_icon.addClass("hover");
             }).mouseleave(function() {
                 items.more_icon.removeClass("hover");
+            });
+
+            items.contact_link.click(function() {
+                var contact_form = new ContactForm(g);
             });
 
             match_url();

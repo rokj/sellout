@@ -629,41 +629,110 @@ Keyboard = function(){
     });
 };
 
-close_contact_dialog = function() {
-    var shadow = $(".fullscreen-shadow");
-    var contact = $("section#contact");
+ContactForm = function(g) {
+    var p = this;
 
-    shadow.remove();
+    p.g = g;
 
-    shadow.fadeOut("fast", function(){
-        shadow.remove();
+    p.shadow = $("<div>", {'class': 'fullscreen-shadow'});
+    p.contact = $("section#contact");
+    p.close_contact = $("section#contact .close-btn");
+    p.body = $("body");
+
+    p.items = {
+        email: $("#email"),
+        first_last_name: $("#first_last_name"),
+        message: $("#message"),
+        response_ok: $("div.response h3.ok"),
+        response_error: $("div.response h3.error"),
+        info_data: $("div.info-data"),
+        title: $("section#contact h3.title"),
+        send_message: $("section#contact button#send_message")
+    };
+
+    //
+    // methods
+    //
+    p.reset_inputs = function() {
+        p.items.email.val("");
+        p.items.first_last_name.val("");
+        p.items.message.val("");
+    };
+
+    p.items.send_message.click(function() {
+        var data = {
+            email: p.items.email.val(),
+            first_last_name: p.items.first_last_name.val(),
+            message: p.items.message.val()
+        };
+
+        if (! email_valid(data.email)) {
+            // p.items.response_error.show();
+            p.items.email.val(gettext("Email must be valid"));
+            p.items.email.css("color", "red");
+            p.items.email.focus(function() {
+                p.items.email.val("");
+                p.items.email.unbind();
+                p.items.email.css("color", "#555555");
+            });
+
+            return;
+        }
+
+        p.items.info_data.hide();
+        p.items.title.hide();
+        p.items.send_message.hide();
+
+        send_data(p.g.send_message_url, data, p.g.csrf_token, function(response) {
+            if (response && response.status == 'ok') {
+                p.items.response_ok.show();
+                p.items.title.text("");
+            } else {
+                p.items.response_error.show();
+            }
+        });
     });
 
-    contact.hide();
+    p.close_contact_dialog = function() {
+        p.shadow.remove();
 
-    // window.keyboard.remove(ok_message);
-    // window.keyboard.remove(cancel_message);
-};
-
-function show_contact_dialog() {
-    var shadow = $("<div>", {'class': 'fullscreen-shadow'});
-    var close_contact = $("section#contact .close-btn");
-    var contact = $("section#contact");
-    var body = $("body");
-
-    // the new pop-up is above everything older
-    window.last_dialog_zindex += 1;
-
-    shadow
-        .css("z-index", window.last_dialog_zindex)
-        .hide()
-        .appendTo(body)
-        .fadeIn(function() {
-            contact.css("z-index", window.last_dialog_zindex+1);
-            // TODO:
-            // contact show input boxes
-            contact.show();
+        p.shadow.fadeOut("fast", function(){
+            p.shadow.remove();
         });
 
-    close_contact.unbind().click(close_contact_dialog);
-}
+        p.contact.hide();
+
+        window.keyboard.remove('escape-send-contact-message', 'escape');
+    };
+
+    p.show_contact_dialog = function() {
+        // the new pop-up is above everything older
+        window.last_dialog_zindex += 1;
+
+        p.shadow
+            .css("z-index", window.last_dialog_zindex)
+            .hide()
+            .appendTo(p.body)
+            .fadeIn(function() {
+                p.contact.css("z-index", window.last_dialog_zindex+1);
+                // TODO:
+                // contact show input boxes
+                p.contact.show();
+            });
+
+        window.keyboard.add('escape-send-contact-message', 'escape', function() {
+            p.close_contact.click();
+        });
+
+        p.close_contact.unbind().click(p.close_contact_dialog);
+    };
+
+    p.items.title.text(gettext("Ask us anything"));
+    p.items.title.show();
+    p.items.info_data.show();
+    p.items.send_message.show();
+    p.items.response_ok.hide();
+    p.items.response_error.hide();
+    p.reset_inputs();
+    p.show_contact_dialog();
+};

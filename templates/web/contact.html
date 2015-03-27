@@ -1,32 +1,35 @@
 {% load i18n %}
 {% load static %}
 
-<script type="text/javascript">
-    $(window).load(function() {
-        $("#send_message").click(function() {
-            alert('sdfdsf');
-        });
-    });
-</script>
-
 <section id="contact">
     <form role="form">
         <button type="button" class="close-btn hoverable"></button>
 
-        <h3>{% trans "Send message" %}</h3>
+        <h3 class="title">{% trans "Ask us anything" %}</h3>
 
-        <div class="form-group">
-            <label for="first_last_name">{% trans "First and last name" %}:</label>
-            <input type="text" class="form-control" id="first_last_name" {% if user.is_authenticated %} readonly{% endif %} value="{% if user.is_authenticated %}{{ user.first_name }} {{ user.last_name }}{% endif %}">
+        <div class="response">
+            <h3 class="ok">{% trans 'Message sent successfully!' %}</h3>
+
+            <h3 class="error">
+                <span class="msg">{% trans "There was error sending message. Try again or send email to " %}<span class="email"></span>.</span><br />
+                <span class="response-message"></span>
+            </h3>
         </div>
-        <div class="form-group">
-            <label for="email">{% trans "Email" %}</label>
-            <input type="email" class="form-control" id="email" {% if user.is_authenticated %} readonly{% endif %} value="{% if user.is_authenticated %}{{ user.email }}{% endif %}">
-        </div>
-        <div class="form-group">
-            <label for="message">{% trans "Message" %}</label>
-            <textarea rows="6" cols="44" class="" id="message">
-            </textarea>
+
+        <div class="info-data">
+            <div class="form-group">
+                <label for="first_last_name">{% trans "Name" %}:</label>
+                <input type="text" class="form-control" id="first_last_name" {% if user.is_authenticated %} readonly{% endif %} value="{% if user.is_authenticated %}{{ user.first_name }} {{ user.last_name }}{% endif %}">
+            </div>
+            <div class="form-group">
+                <label for="email">{% trans "Email" %}</label>
+                <input type="email" class="form-control" id="email" {% if user.is_authenticated %} readonly{% endif %} value="{% if user.is_authenticated %}{{ user.email }}{% endif %}">
+            </div>
+            <div class="form-group">
+                <label for="message">{% trans "Message" %}</label>
+                <textarea rows="6" class="" id="message">
+                </textarea>
+            </div>
         </div>
 
         <button type="button" id="send_message" class="btn btn-default">{% trans "Send" %}</button>

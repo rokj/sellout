@@ -13,6 +13,7 @@ from blusers.views import try_register, unset_language, send_reactivation_key
 from django.contrib.auth.decorators import login_required as login_required_nolocking
 from django.contrib.auth import logout as django_logout
 from action.models import Action
+from common.functions import send_email, JSON_parse
 
 import common.globals as g
 from config.functions import get_user_value, set_user_value
@@ -357,6 +358,59 @@ def user_profile(request):
     }
 
     return render(request, 'web/user_profile.html', context)
+
+def send_contact_message(request):
+    if not request.is_ajax():
+        return JsonResponse({
+                'status': 'not_ajax',
+        })
+
+    d = JSON_parse(request.POST.get('data'))
+
+    if not d:
+        return JsonResponse({'status': 'error', 'message': _("No data in request")})
+
+    if "email" not in d:
+        return JsonResponse({
+                'status': 'no_email',
+        })
+
+    if "first_last_name" not in d:
+        return JsonResponse({
+                'status': 'no_first_name',
+        })
+
+    if "email" not in d:
+        return JsonResponse({
+                'status': 'no_email',
+        })
+
+    if "message" not in d:
+        return JsonResponse({
+                'status': 'no_message',
+        })
+
+    try:
+        validate_email(d.get('email'))
+    except ValidationError:
+        return JsonResponse({
+                'status': 'not_valid_email',
+        })
+
+    subject = _('Message from website')
+    message = d.get('message')
+
+    if settings.DEBUG:
+        print "We are sending email with subject:"
+        print subject
+        print "and message:"
+        print message
+    else:
+        send_email(settings.EMAIL_FROM, [settings.CONTACT_EMAIL], None, subject, message, message)
+
+    return JsonResponse({
+            'status': 'ok'
+    })
 
 def supported_hardware(request):
     return render(request, 'web/supported_hardware.html')

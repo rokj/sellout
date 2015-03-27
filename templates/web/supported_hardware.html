@@ -13,10 +13,21 @@
     <link href="{% static 'css/fonts/fonts.css' %}" rel="stylesheet" />
     <link href="{% static 'css/fonts/montserrat.css' %}" rel="stylesheet" />
 
+    <script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+
     <script type="text/javascript">
     $(window).load(function() {
+        var g = {
+            csrf_token: "{{ csrf_token }}",
+            send_message_url: "{% url "web:send-contact-message" %}"
+        };
+
         $("span#open_login_form").click(function() {
             window.location.href = "{% url 'web:index' %}#login";
+        });
+
+        $(".additional-info.buttons").click(function() {
+            var contact_form = new ContactForm(g);
         });
     });
     </script>
@@ -75,4 +86,5 @@
     </section>
 
     {% include "web/signature.html" %}
+    {% include "web/contact.html" %}
 {% endblock %}

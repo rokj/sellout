@@ -612,19 +612,36 @@ section#google_play_section img.mobile-screenshot {
 section#contact {
     display: none;
     position: fixed;
-    width: 390px;
-    height: 485px;
+    width: 330px;
+    /*height: 485px;*/
     left: 50%;
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
     -webkit-transform: translateX(-50%) translateY(-50%);
-    background-color: rgba(35,230,147,0.96);
-    padding: 15px 30px 0px 30px;
+    background-color: #e6e6e6;
+    padding: 15px 30px 30px 30px;
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.5);
+}
+
+section#contact h3:first-child {
+    margin-bottom: 6px;
+}
+
+section#contact h3.title {
+    color: #646464;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 section#contact #message {
-    resize: none;
-    max-height: 160px;
+    /*resize: none;*/
+    width: 100%;
+}
+
+section#contact #send_message {
+    background-color: #22e693;
+    border: none;
+    width: 100%;
 }
 
 section#contact .close-btn {
@@ -641,4 +658,21 @@ section#contact .close-btn {
     background-color: transparent;
     border: none;
     box-shadow: none;
+}
+
+section#contact div.response .ok {
+    color: #646464;
+}
+
+section#contact div.response .error {
+    color: rgb(253, 91, 91);
+}
+
+section#contact div.response .error .email {
+    color: #FFFFFF;
+    text-decoration: underline;
+}
+
+section#contact label {
+    text-transform: capitalize;
 }
