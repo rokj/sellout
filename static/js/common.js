@@ -694,8 +694,6 @@ ContactForm = function(g) {
     });
 
     p.close_contact_dialog = function() {
-        p.shadow.remove();
-
         p.shadow.fadeOut("fast", function(){
             p.shadow.remove();
         });
