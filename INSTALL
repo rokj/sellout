@@ -1,5 +1,16 @@
-To install:
-    - pip install sorl-thumbnail==11.12.1b (starejse verzije ne delajo z django 1.7)
-    - rest-framework (?)
-    - memcached
-    - django-simple-captcha
+To install you need:
+--------------------
+pip install sorl-thumbnail==11.12.1b # (starejse verzije ne delajo z django 1.7)
+pip install -I djangorestframework==2.3.12
+pip install python-memcached django-memcached
+pip install django-simple-captcha
+pip install psycopg2
+pip install easy_thumbnails
+pip install requests
+pip install unidecode
+pip install django-social-auth python-social-auth
+pip install pytz
+pip install jsonrpc
+
+Additionaly you have to manually install:
+python-bitcoinrpc
