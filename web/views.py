@@ -157,9 +157,9 @@ def sign_up(request):
 
             if User.exists(email):
                 if User.type(email) == "google":
-                    sign_up_message(request, 'user-exists-google')
+                    return sign_up_message(request, 'user-exists-google')
                 elif User.type(email) == "normal":
-                    sign_up_message(request, 'user-exists-normal')
+                    return sign_up_message(request, 'user-exists-normal')
                 else:
                     return sign_up_message(request, 'user-exists')
 
