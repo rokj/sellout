@@ -207,7 +207,7 @@ def google_login_or_register(request, mobile=False):
 
         bluser.update_user_profile()
 
-        group = bluser.homegroup
+        # group = bluser.homegroup
 
         # add_free_subscription(bluser)
 
