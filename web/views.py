@@ -13,12 +13,57 @@ from blusers.views import try_register, unset_language, send_reactivation_key
 from django.contrib.auth.decorators import login_required as login_required_nolocking
 from django.contrib.auth import logout as django_logout
 from action.models import Action
+from common.functions import send_email, JSON_parse
 
 import common.globals as g
 from config.functions import get_user_value, set_user_value
 from pos.models import Permission
 
 import settings
+
+
+def index(request):
+    message = None
+    next = None
+    action = ''
+
+    # if the user is already logged in, redirect to select_company
+    if request.user.is_authenticated():
+        return redirect('web:select_company')
+
+    if request.method == 'POST':
+        action = 'login'
+
+        if request.POST.get('next', '') != '':
+            next = request.POST.get('next')
+
+        login_form = LoginForm(request.POST)
+
+        if login_form.is_valid():
+            from blusers.views import login
+            message, next = login(request, login_form.cleaned_data)
+
+            if message == 'logged-in':
+                return redirect('web:select_company')
+    else:
+        login_form = LoginForm()
+
+    if request.GET.get('next') != '' and request.GET.get('next') != reverse('web:logout'):
+        next = request.GET.get('next')
+
+    context = {
+        'user': request.user,
+        'action': action,
+        'next': next,
+        'login_message': message,
+        'login_form': login_form,
+        'client_id': settings.GOOGLE_API['client_id'],
+        'site_title': g.SITE_TITLE,
+        'STATIC_URL': settings.STATIC_URL,
+        'GOOGLE_API': settings.GOOGLE_API
+    }
+
+    return render(request, "web/index.html", context)
 
 
 def index(request):
@@ -112,9 +157,9 @@ def sign_up(request):
 
             if User.exists(email):
                 if User.type(email) == "google":
-                    sign_up_message(request, 'user-exists-google')
+                    return sign_up_message(request, 'user-exists-google')
                 elif User.type(email) == "normal":
-                    sign_up_message(request, 'user-exists-normal')
+                    return sign_up_message(request, 'user-exists-normal')
                 else:
                     return sign_up_message(request, 'user-exists')
 
@@ -123,6 +168,8 @@ def sign_up(request):
 
             # registration succeeded, return to login page
             return sign_up_message(request, 'registration-successful')
+        else:
+            print user_form.errors.as_data()
     else:
         user_form = BlocklogicUserForm()
 
@@ -311,3 +358,62 @@ def user_profile(request):
     }
 
     return render(request, 'web/user_profile.html', context)
+
+def send_contact_message(request):
+    if not request.is_ajax():
+        return JsonResponse({
+                'status': 'not_ajax',
+        })
+
+    d = JSON_parse(request.POST.get('data'))
+
+    if not d:
+        return JsonResponse({'status': 'error', 'message': _("No data in request")})
+
+    if "email" not in d:
+        return JsonResponse({
+                'status': 'no_email',
+        })
+
+    if "first_last_name" not in d:
+        return JsonResponse({
+                'status': 'no_first_name',
+        })
+
+    if "email" not in d:
+        return JsonResponse({
+                'status': 'no_email',
+        })
+
+    if "message" not in d:
+        return JsonResponse({
+                'status': 'no_message',
+        })
+
+    try:
+        validate_email(d.get('email'))
+    except ValidationError:
+        return JsonResponse({
+                'status': 'not_valid_email',
+        })
+
+    subject = _('Message from website')
+    message = d.get('message')
+
+    message_html = message.replace("\r\n", "<br />")
+    message_html = message_html.replace("\n", "<br />")
+
+    if settings.DEBUG:
+        print "We are sending email with subject:"
+        print subject
+        print "and message:"
+        print message
+    else:
+        send_email(settings.EMAIL_FROM, [settings.CONTACT_EMAIL], None, subject, message, message_html)
+
+    return JsonResponse({
+            'status': 'ok'
+    })
+
+def supported_hardware(request):
+    return render(request, 'web/supported_hardware.html')

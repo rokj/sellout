@@ -96,3 +96,22 @@
 #id_submit{
     width: 150px;
 }
+
+#no_pin_message{
+    color: #646464;
+    padding: 10px;
+    text-align: left;
+
+    position: absolute;
+    top: 0;
+    left: 100%;
+
+    width: 200px;
+    background-color: #f7f7f7;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+    display: none;
+}
+
+#no_pin_message.visible {
+    display: block;
+}

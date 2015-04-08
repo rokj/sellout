@@ -613,3 +613,6 @@ def calculate_btc_price(currency="EUR", price=0):
     btc_price = Decimal(rows[0][0])*Decimal(price)
 
     return Decimal(btc_price).quantize(Decimal('0.00000001'), rounding=ROUND_DOWN)
+
+def JSON_parse(string_data):
+    return json.loads(string_data)

@@ -36,6 +36,9 @@
     </script>
 </head>
 <body class="locked-session">
+{% if no_pin %}
+    NO PIN MADAFAKA
+{% endif %}
     {% include 'pos/unlock_content.html' %}
 </body>
 </html>

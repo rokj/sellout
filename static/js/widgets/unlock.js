@@ -21,6 +21,9 @@ UnlockScreen = function(unlock_url, csrf_token, ajax, g){
         email: $("#id_email"),
         password: $("#id_password"),
 
+        no_pin_message: $("#no_pin_message"),
+
+
         /* only for ajax lock */
         lock_shadow: $("#lock_shadow"),
         lock_content: $("#unlock_dialog_container")
@@ -172,6 +175,10 @@ UnlockScreen = function(unlock_url, csrf_token, ajax, g){
                     // lock the screen
                     p.toggle_screen(true);
                     window.session_locked = true;
+
+                    // show/hide the 'no-pin-set' message
+                    if(response.no_pin) p.items.no_pin_message.addClass("visible");
+                    else p.items.no_pin_message.removeClass("visible");
                 }
             });
         });

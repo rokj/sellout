@@ -119,6 +119,13 @@ class BlocklogicUser(AbstractUser, Skeleton):
 
         conn.commit()
 
+    def get_permission(self, company):
+        from pos.models import Permission
+        try:
+            return Permission.objects.get(user=self, company=company)
+        except Permission.DoesNotExist:
+            return None
+
     def update_user_profile(self):
         """
         Updates user profile in master users DB.
@@ -131,8 +138,6 @@ class BlocklogicUser(AbstractUser, Skeleton):
             cursor.close()
 
         transaction.commit_unless_managed()
-
-
 
 class UserImage(SkeletonU):
     from common.functions import ImagePath

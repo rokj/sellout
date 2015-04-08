@@ -332,10 +332,6 @@ div.step-connector{
     position: relative;
 }
 
-#payment_type_image{
-
-}
-
 /* possibilities */
 .possibility-image-container{
     height: 100px;
@@ -379,6 +375,10 @@ div.step-connector{
 #pricing_section h3,
 #pricing_section ul{
     text-align: left;
+}
+
+#pricing_section div.row .col:first-child {
+    width: 48%;
 }
 
 div.payment-option-nowrap{
@@ -546,6 +546,10 @@ div.payment-price{
     }
 }
 
+div#payment_options_boxes {
+    min-width: 558px;
+}
+
 div#payment_options_boxes .akcija-big {
     text-transform: uppercase;
     background: url('/static/images/index/akcija_trak_02.png') no-repeat;
@@ -582,6 +586,7 @@ section#budget_section div.footnote {
 
 section#hardware_support_section div.supported-hardware-text {
     width: 240px;
+    height: 188px;
 }
 
 section#google_play_section div.google-play-text {
@@ -602,4 +607,72 @@ section#google_play_section a.google-play, section#google_play_section a.google-
 section#google_play_section img.mobile-screenshot {
     width: 530px;
     height: 320px;
+}
+
+section#contact {
+    display: none;
+    position: fixed;
+    width: 330px;
+    /*height: 485px;*/
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    background-color: #e6e6e6;
+    padding: 15px 30px 30px 30px;
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.5);
+}
+
+section#contact h3:first-child {
+    margin-bottom: 6px;
+}
+
+section#contact h3.title {
+    color: #646464;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+section#contact #message {
+    /*resize: none;*/
+    width: 100%;
+}
+
+section#contact #send_message {
+    background-color: #22e693;
+    border: none;
+    width: 100%;
+}
+
+section#contact .close-btn {
+    display: block;
+    position: absolute;
+    top: 7px;
+    right: 6px;
+
+    background-image: url("/static/icons/close-thin.png");
+    width: 24px;
+    height: 24px;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+section#contact div.response .ok {
+    color: #646464;
+}
+
+section#contact div.response .error {
+    color: rgb(253, 91, 91);
+}
+
+section#contact div.response .error .email {
+    color: #FFFFFF;
+    text-decoration: underline;
+}
+
+section#contact label {
+    text-transform: capitalize;
 }

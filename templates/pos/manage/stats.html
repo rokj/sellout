@@ -3,7 +3,7 @@
 {% load i18n %}
 
 {% block section_head %}
-    <link type="text/css" rel="stylesheet" href="{% static 'css/management/discounts.css' %}"/>
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/stats.css' %}"/>
     <script type="text/javascript">
         $(document).ready(function(){
             // append datepicker to form ids:
@@ -22,46 +22,86 @@
     <form method="get" action=".">
         <h2>{% trans 'Recent Earnings' %}</h2>
         <table>
-            <tr>
-                <td></td>
-                <td>{% trans 'Today' %}</td>
-                <td>{% trans 'Yesterday' %}</td>
-                <td>{% trans 'This week' %}</td>
-                <td>{% trans 'This month' %}</td>
-                <td>
-                    <input type="text" class="date from" name="earnings_from" placeholder="{% trans 'From:' %}" value="{{ earnings_from }}"/>
-                    <input type="text" class="date to" name="earnings_to" placeholder="{% trans 'To:' %}" value="{{ earnings_to }}" />
-
-                    <div class="update-dates">
-                        <input type="submit" value="OK">
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>{% trans 'Income' %}</td>
-                <td>{{ earnings.today.income }}</td>
-                <td>{{ earnings.yesterday.income }}</td>
-                <td>{{ earnings.week.income }}</td>
-                <td>{{ earnings.month.income }}</td>
-                <td>{{ earnings.custom.income }}</td>
-            </tr>
-            <tr>
-                <td>{% trans 'Profit' %}</td>
-                <td>{{ earnings.today.profit }}</td>
-                <td>{{ earnings.yesterday.profit }}</td>
-                <td>{{ earnings.week.profit }}</td>
-                <td>{{ earnings.month.profit }}</td>
-                <td>{{ earnings.custom.profit }}</td>
-            </tr>
+            <thead>
+                <tr>
+                    <td></td>
+                    <td>{% trans 'Today' %}</td>
+                    <td>{% trans 'Yesterday' %}</td>
+                    <td>{% trans 'This week' %}</td>
+                    <td>{% trans 'This month' %}</td>
+                    <td class="custom">
+                        <input type="text" class="date from" name="earnings_from" placeholder="{% trans 'From:' %}" value="{{ earnings_from }}"/>
+                        <input type="text" class="date to" name="earnings_to" placeholder="{% trans 'To:' %}" value="{{ earnings_to }}" />
+                        <input type="image" value="OK" alt="{% trans 'Submit' %}" src="{% static 'icons/refresh.png' %}" />
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{% trans 'Income' %}</td>
+                    <td>{{ earnings.today.income }}</td>
+                    <td>{{ earnings.yesterday.income }}</td>
+                    <td>{{ earnings.week.income }}</td>
+                    <td>{{ earnings.month.income }}</td>
+                    <td>{{ earnings.custom.income }}</td>
+                </tr>
+                <tr>
+                    <td>{% trans 'Profit' %}</td>
+                    <td>{{ earnings.today.profit }}</td>
+                    <td>{{ earnings.yesterday.profit }}</td>
+                    <td>{{ earnings.week.profit }}</td>
+                    <td>{{ earnings.month.profit }}</td>
+                    <td>{{ earnings.custom.profit }}</td>
+                </tr>
+            </tbody>
         </table>
 
         <h2>{% trans 'Top-selling Products' %}</h2>
         <table>
+            <thead>
+                <tr>
+                    <td>{% trans 'All time' %}</td>
+                    <td>{% trans 'Yesterday' %}</td>
+                    <td>{% trans 'This week' %}</td>
+                    <td>{% trans 'This month' %}</td>
+                    <td class="custom">
+                        <input type="text" class="date from" name="products_from" placeholder="{% trans 'From:' %}" value="{{ products_from }}"/>
+                        <input type="text" class="date to" name="products_to" placeholder="{% trans 'To:' %}" value="{{ products_to }}" />
+                        <input type="image" value="OK" alt="{% trans 'Submit' %}" src="{% static 'icons/refresh.png' %}" />
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
             {% for p in products %}
                 <tr>
-                    <td>asdf</td>
+                    <td>
+                        <div class="top-product-quantity">{{ p.all_time.sold_quantity|floatformat|default:'' }}</div>
+                        <div class="top-product-name">{{ p.all_time.name|default:'' }}</div>
+                        <div class="top-product-code">{{ p.all_time.code|default:'' }}</div>
+                    </td>
+                    <td>
+                        <div class="top-product-quantity">{{ p.yesterday|floatformat|default:'' }}</div>
+                        <div class="top-product-name">{{ p.yesterday|default:'' }}</div>
+                        <div class="top-product-code">{{ p.yesterday|default:'' }}</div>
+                    </td>
+                    <td>
+                        <div class="top-product-quantity">{{ p.week.sold_quantity|floatformat|default:'' }}</div>
+                        <div class="top-product-name">{{ p.week.name|default:'' }}</div>
+                        <div class="top-product-code">{{ p.week.code|default:'' }}</div>
+                    </td>
+                    <td>
+                        <div class="top-product-quantity">{{ p.month.sold_quantity|floatformat|default:'' }}</div>
+                        <div class="top-product-name">{{ p.month.name|default:'' }}</div>
+                        <div class="top-product-code">{{ p.month.code|default:'' }}</div>
+                    </td>
+                    <td>
+                        <div class="top-product-quantity">{{ p.custom.sold_quantity|floatformat|default:'' }}</div>
+                        <div class="top-product-name">{{ p.custom.name|default:'' }}</div>
+                        <div class="top-product-code">{{ p.custom.code|default:'' }}</div>
+                    </td>
                 </tr>
             {% endfor %}
+            </tbody>
         </table>
     </form>
 {% endblock %}

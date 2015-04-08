@@ -1,0 +1,12 @@
+{% load i18n %}
+
+<ul class="nav navbar-nav navbar-right">
+    <li><a class="custom nav-button extra-font" href="{% url 'web:index' %}#pricing">{% trans 'Pricing' %}</a></li>
+
+    {% if user.is_authenticated %}
+        <li><a class="custom nav-button extra-font" href="{% url 'web:select_company' %}"><span id="enter_select_company">{% trans 'Enter' %}</span></a></li>
+    {% else %}
+        <li><a class="custom nav-button extra-font" href="{% url 'web:sign_up' %}">{% trans 'Sign up' %}</a></li>
+        <li><a class="custom nav-button extra-font fake" href="#"><span id="open_login_form">{% trans 'Login' %}</span></a></li>
+    {% endif %}
+</ul>

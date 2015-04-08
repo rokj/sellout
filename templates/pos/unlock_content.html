@@ -4,6 +4,10 @@
 <div id="unlock_dialog_container" class="hidden">
     {% if message %}<div id="unlock_message">{{ message }}</div>{% endif %}
 
+    <div id="no_pin_message" {% if no_pin %}class="visible"{% endif %}>
+        {% trans "You haven't set your PIN yet. You can do it here or log in and go to management/users." %}
+    </div>
+
     <div id="pin_container" class="container">
         <input id="pin" class="large-input"
                type="password" maxlength="{{ pin_length }}" />

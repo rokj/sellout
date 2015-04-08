@@ -1,0 +1,13 @@
+{% load i18n %}
+{% load static %}
+
+<section id="signature_section">
+    <div class="container">
+        {% trans 'A product of ' context 'A product of Blocklogic' %}
+        <a href="http://www.blocklogic.net" target="_blank">
+        <img id="blocklogic_logo"
+             src="{% static 'images/index/blocklogic_logo_small.png' %}" alt="blocklogic logo" />
+        </a>.
+        {% trans 'Copyright 2015. All rights reserved.' %}
+    </div>
+</section>

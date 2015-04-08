@@ -120,7 +120,8 @@ def lock_session_(request, c):
     request.session.modified = True
 
     if request.is_ajax():
-        return JsonOk()
+        # tell javascript if there's no pin set
+        return JsonResponse({'status': 'ok', 'no_pin': request.user.get_permission(c).pin is None})
     else:
         return redirect('pos:locked_session', company=c.url_name)
 
@@ -135,6 +136,7 @@ def locked_session(request, company):
         return JsonError(_("Company does not exist"))
 
     context = {
+        'no_pin': request.user.get_permission(c).pin is None,
         'company': c,
         'pin_length': g.PIN_LENGTH,
         'message': '',
@@ -192,7 +194,7 @@ def switch_user_(request, c):
 
     # check if the user belongs to this company
     try:
-        current_permission = Permission.objects.get(company=c, user=request.user)
+        current_permission = request.user.get_permission(c)
     except Permission.DoesNotExist:
         return {'status': 'error', 'message': _("You have no permission for this company"), 'company': c}
 
@@ -210,9 +212,15 @@ def switch_user_(request, c):
         return {'status': 'error', 'message': "Invalid request data", 'company': c}
 
     if data.get('unlock_type') == 'pin':
-        # get a user from current company by entered pin
+        # if there's no pin entered, set the current user's pin
+        pin = int(data['pin'])
+
+        if not current_permission.pin:
+            if not current_permission.create_pin(custom_pin=pin):
+                return {'status': 'error', 'message': _("Wrong PIN format")}
+
+        # get a user from current company by entered pin;
         try:
-            pin = int(data['pin'])
             switched_permission = Permission.objects.get(company=c, pin=pin)
             switched_user = switched_permission.user
         except (Permission.DoesNotExist, TypeError, ValueError):

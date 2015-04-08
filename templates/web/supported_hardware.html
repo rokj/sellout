@@ -1,0 +1,90 @@
+{% extends 'web/bootstrap.html' %}
+{% load static %}
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block title %}{{ site_title }}{% endblock %}
+
+{% block head %}
+    <link href="{% static 'bootstrap/index.css?1' %}" rel="stylesheet" />
+    <link href="{% static 'css/supported_hardware.css' %}" rel="stylesheet" />
+
+    {# custom fonts #}
+    <link href="{% static 'css/fonts/fonts.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/fonts/montserrat.css' %}" rel="stylesheet" />
+
+    <script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+
+    <script type="text/javascript">
+    $(window).load(function() {
+        var g = {
+            csrf_token: "{{ csrf_token }}",
+            send_message_url: "{% url "web:send-contact-message" %}"
+        };
+
+        $("span#open_login_form").click(function() {
+            window.location.href = "{% url 'web:index' %}#login";
+        });
+
+        $(".additional-info.buttons").click(function() {
+            var contact_form = new ContactForm(g);
+        });
+    });
+    </script>
+{% endblock %}
+
+{% block navbar_buttons %}
+    {% include "web/navbar_buttons.html" %}
+{% endblock %}
+
+
+{% block content %}
+    <section id="hardware_section" class="full-height">
+        <div class="container container-fluid">
+            <div class="row">
+                <h1 class="text-center">{% trans "Choose your printer" %}</h1>
+            </div>
+
+            <div class="printer epson row">
+                <div class="col-md-6">
+                    <div class="header">Epson TM-T88V printer</div>
+                    <div class="description">{% trans "Epson’s mPOS-friendly TM-T88V is the industry’s leading POS thermal printer. It is fast, reliable, easy to configure and supports all the leading mobile operating systems including iOS, Android and Windows. It features fast printing up to 300mm/second, best-in-class reliability, multiple ease-of-use features, dual interfaces and print options that reduce paper usage up to 30%." %}</div>
+                    <div class="specs">
+                        <span class="strong">{% trans "Print speed" %}</span> {% trans "300mm/second graphics and text" %}<br/>
+                        <span class="strong">{% trans "Paper dimensions" %}</span> 80mm<br/>
+                        <span class="strong">{% trans "Overall dimensions" %}</span> 145 x 195 x 148mm
+                    </div>
+                </div>
+
+                <div class="col-md-6 image">
+                    <img src="{% static 'images/site/tmot88v.png' %}" />
+                    <div class="price">300 €</div>
+                </div>
+
+                <input type="button" value="{% trans "Request additional info" %}" class="additional-info buttons extra-font bold">
+            </div>
+
+            <div class="printer no-name row">
+                <div class="col-md-6">
+                    <div class="header">Mini printer</div>
+                    <div class="description">{% trans "Mini portable lightweight printer (SUP80M2-B), ready to use for small shops, restaurants and those selling on the street." %}</div>
+                    <div class="specs">
+                        <span class="strong">{% trans "Print speed" %}</span> {% trans "90mm/second" %}<br/>
+                        <span class="strong">{% trans "Paper dimensions" %}</span> 72mm<br/>
+                        <span class="strong">{% trans "Overall dimensions" %}</span> 103.8 x 100 x 46mm
+                    </div>
+                </div>
+
+                <div class="col-md-6 image">
+                    <img src="{% static 'images/site/mini-portable-printer.png' %}" />
+                    <div class="price">120 €</div>
+                </div>
+
+                <input type="button" value="{% trans "Request additional info" %}" class="additional-info buttons extra-font bold">
+            </div>
+        </div>
+    </section>
+
+    {% include "web/signature.html" %}
+    {% include "web/contact.html" %}
+{% endblock %}
