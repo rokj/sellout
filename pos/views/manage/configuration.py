@@ -78,6 +78,8 @@ class ConfigForm(forms.Form):
             raise ValidationError(_('The format string must contain the bill number placeholder') +
                                     ': ' + g.BILL_SERIAL_FORMAT_PLACEHOLDER, code='no_serial_placeholder')
 
+        return format
+
 class UserForm(forms.Form):
     button_sizes = [(key, key) for key, value in g.PRODUCT_BUTTON_DIMENSIONS.iteritems()]
 
