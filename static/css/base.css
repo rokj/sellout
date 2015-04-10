@@ -77,8 +77,8 @@ label, .custom-label{
 .form-field .help-text {
     color: #999999;
     display: block;
-    text-transform: lowercase;
-    font-size: 10px;
+    font-size: 11px;
+    margin-top: 5px;
 }
 
 .custom-label.description{
