@@ -207,8 +207,7 @@ def google_login_or_register(request, mobile=False):
 
         bluser.update_user_profile()
 
-        group = bluser.homegroup
-
+        # group = bluser.homegroup
         # add_free_subscription(bluser)
 
     user = django_authenticate(username=r["email"], password='', type=GOOGLE)
@@ -219,9 +218,8 @@ def google_login_or_register(request, mobile=False):
             set_user_value(bluser, 'google_access_token', d["access_token"])
             set_language(request)
 
-        group = user.homegroup
-
-        data = {'status': 'ok', 'redirect_url': reverse('web:home', kwargs={'group_id': group.id, 'section': 'home'}), 'user_id': user.id}
+        # group = user.homegroup # do we need this?
+        data = {'status': 'ok', 'redirect_url': reverse('web:home', kwargs={'section': 'home'}), 'user_id': user.id}
 
         if len(user.images.all()) == 0:
             picture_url = r['picture']

@@ -91,8 +91,6 @@ class BitcoinRPC():
                 if int(info['keypoolsize']) < settings.PAYMENT['bitcoin'] ['minimum_keypoolsize']:
                     self.increase_keypool_size()
 
-
-
         except JSONRPCException, e:
             print str(e.error.message)
 
