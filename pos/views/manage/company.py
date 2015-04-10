@@ -259,23 +259,30 @@ def company_to_dict(user, company, android=False, with_config=False):
         c['notes'] = company.notes
 
         if company.color_logo:
-            if android:
-                with open(company.color_logo.path, "rb") as image_file:
-                    encoded_string = base64.b64encode(image_file.read())
-                c['color_logo'] = encoded_string
-            else:
-                c['color_logo_url'] = company.color_logo.url
+            try:
+                if android:
+                    with open(company.color_logo.path, "rb") as image_file:
+                        encoded_string = base64.b64encode(image_file.read())
+                    c['color_logo'] = encoded_string
+                else:
+                    c['color_logo_url'] = company.color_logo.url
+            except:
+                pass
+
         else:
             c['color_logo'] = None
             c['color_logo_url'] = None
 
         if company.monochrome_logo:
-            if android:
-                with open(company.monochrome_logo.path, "rb") as image_file:
-                    encoded_string = base64.b64encode(image_file.read())
-                c['monochrome_logo'] = encoded_string
-            else:
-                c['monochrome_logo_url'] = company.monochrome_logo.url
+            try:
+                if android:
+                    with open(company.monochrome_logo.path, "rb") as image_file:
+                        encoded_string = base64.b64encode(image_file.read())
+                    c['monochrome_logo'] = encoded_string
+                else:
+                    c['monochrome_logo_url'] = company.monochrome_logo.url
+            except:
+                pass
         else:
             c['monochrome_logo_url'] = None
             c['monochrome_logo'] = None
