@@ -8,9 +8,7 @@ from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
-from pytz import timezone
 
-import unidecode
 from payment.models import Payment
 from payment.service.Paypal import Paypal
 
@@ -146,6 +144,7 @@ def bill_to_dict(user, company, bill):
         'user_id': bill.user_id,
         'user_name': bill.user_name,
 
+        'formatted_serial': bill.formatted_serial,
         'serial': bill.serial,
         'notes': bill.notes,
 
@@ -160,8 +159,6 @@ def bill_to_dict(user, company, bill):
         'total': format_number(user, company, bill.total),
 
         'timestamp': format_date(user, company, bill.timestamp) + " " + format_time(user, company, bill.timestamp),
-
-		'status': bill.status
     }
 
     if bill.contact:
@@ -211,7 +208,7 @@ def payment_to_dict(user, company, payment):
         'btc_transaction_reference': payment.btc_transaction_reference,
         'paypal_transaction_reference': payment.paypal_transaction_reference,
         'payment_info': payment.payment_info,
-        'status': payment.status
+        'status': payment.get_status_display()
     }
 
 def create_printable_bill(user, company, bill, receipt_format=None, esc=False):
@@ -459,6 +456,21 @@ def create_bill_(request, c):
         'created_by': request.user
     }
 
+    # timestamp
+    try:
+        # timestamp: send in an array of number:
+        # [year, month, day, hour, minute, second]
+        tn = [int(n) for n in data.get('timestamp')]
+        bill['timestamp'] = dtm(year=tn[0],
+                                month=tn[1],
+                                day=tn[2],
+                                hour=tn[3],
+                                minute=tn[4],
+                                second=tn[5])
+
+    except (ValueError, TypeError):
+        return JsonError(_("Invalid timestamp"))
+
     r = parse_decimal(request.user, c, data.get('total'))
     if not r['success'] or r['number'] <= Decimal('0'):
         return JsonError(_("Invalid grand total value"))
@@ -590,7 +602,8 @@ def create_bill_(request, c):
         register=bill['register'],  # current settings of the register this bill was created on
         contact=bill['contact'],  # FK on BillContact, copy of the Contact object
         notes=bill['notes'],
-        timestamp=dtm.utcnow().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
+        #timestamp=dtm.utcnow().replace(tzinfo=timezone(get_company_value(request.user, c, 'pos_timezone'))),
+        timestamp=bill['timestamp'],
         payment=bill_payment,
 
         base=bill['base'],

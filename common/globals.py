@@ -354,3 +354,5 @@ BILL_STATUS = (
     (PAID, _("Paid")),
     (CANCELED, _("Canceled")),
 )
+
+BILL_SERIAL_FORMAT_PLACEHOLDER = '{s}'

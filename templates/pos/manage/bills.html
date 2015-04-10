@@ -78,8 +78,17 @@
 
             <div class="form-field">
                 <div class="error">{{ filter_form.id.errors }}</div>
-                <label for="id_id">{% trans 'Bill no.' context 'bill search form' %}</label>
-                {{ filter_form.id }}
+                <div class="error">{{ filter_form.status.errors }}</div>
+
+                <div class="split-cell first bottom-space">
+                    <label for="id_id">{% trans 'Bill no.' context 'bill search form' %}</label>
+                    {{ filter_form.id }}
+                </div>
+
+                <div class="split-cell last">
+                    <label for="id_status">{% trans 'Status:' %}</label>
+                    {{ filter_form.status }}
+                </div>
             </div>
 
             <div class="form-field">
@@ -173,7 +182,8 @@
             <table id="bills_container">
                 <thead class="bill-list header">
                     <tr>
-                        <td class="column serial">{% trans 'No.' context 'bill management' %}</td>
+                        <td class="column serial">{% trans 'Serial' context 'bill management' %}</td>
+                        <td class="column status">{% trans 'Status' context 'bill management' %}</td>
                         <td class="column user">{% trans 'User' context 'bill management' %}</td>
                         <td class="column date">{% trans 'Issue date' context 'bill management' %}</td>
                         <td class="column contact">{% trans 'Contact name' context 'bill management' %}</td>
@@ -186,7 +196,8 @@
                 <tbody>
                     {% for bill in bills %}
                         <tr class="bill-list item">
-                            <td class="column serial">{{ bill.serial }}</td>
+                            <td class="column serial">{{ bill.formatted_serial }}</td>
+                            <td class="column status">{{ bill.payment.status }}</td>
                             <td class="column user">{{ bill.user_name }}</td>
                             <td class="column date">{{ bill.timestamp }}</td>
                             <td class="column contact">{{ bill.contact.name }}</td>

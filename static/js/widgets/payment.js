@@ -312,7 +312,7 @@ Payment = function(g, bill){
                 active++;
             }
 
-            var i = 0;
+            i = 0;
             p.items.status_dots.each(function () {
                 if (active == i) {
                     $(this).addClass('active');
@@ -427,6 +427,12 @@ Payment = function(g, bill){
                 // everything is OK, print the thing
                 p.print(response.bill);
 
+                // printing on local bluetooth serial printer
+                /*send_data('http://127.0.0.1:8081', { receipt: response.bill }, function(response){
+                    console.log(response);
+                });*/
+
+
                 // the deal is finished. clear all stuff and create a new bill
                 p.g.objects.bill.clear();
 
@@ -443,7 +449,7 @@ Payment = function(g, bill){
             window.keyboard.remove('escape-payment-dialog', 'escape');
             p.items.cancel_button.click();
         });
-    }
+    };
 
     p.close_bigger_qrcode = function() {
         window.keyboard.remove('escape-bigger-qrcode-dialog', 'escape');
@@ -454,7 +460,7 @@ Payment = function(g, bill){
             p.items.shadow.remove();
             p.items.bitcoin.bigger_btc_qrcode.addClass("hidden");
         });
-    }
+    };
 
     p.bind_bigger_qrcode_dialog = function() {
         window.keyboard.add('escape-bigger-qrcode-dialog', 'escape', function() {
@@ -468,7 +474,7 @@ Payment = function(g, bill){
         p.body.click(function() {
             p.close_bigger_qrcode();
         });
-    }
+    };
 
     //
     // init

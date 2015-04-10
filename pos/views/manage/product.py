@@ -489,8 +489,9 @@ def validate_product(user, company, data):
     else:
         data['stock'] = ret['number']
         # it cannot be negative
-        if data['stock'] < decimal.Decimal('0'):
-            return r(False, _("Stock cannot be negative"))
+        # EDIT: stock can be negative
+        #if data['stock'] < decimal.Decimal('0'):
+        #    return r(False, _("Stock cannot be negative"))
         
     return {'status': True, 'data': data}
 

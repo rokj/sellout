@@ -297,6 +297,12 @@ Bill = function(g){
         if(p.data && !isNaN(p.data.id)) id = p.data.id;
         else id = -1;
 
+        // timestamp: send an array of numbers: year, month, day, hour, minute, second
+        var d = new Date();
+        var timestamp = [d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()];
+
+        console.log(timestamp);
+
         // issuer: the current company, in view
 
         // contact:
@@ -336,6 +342,7 @@ Bill = function(g){
         // put everything in a neat object
         return {
             id: id,
+            timestamp: timestamp,
             contact: contact,
             register_id: register_id,
 

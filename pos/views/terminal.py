@@ -45,9 +45,6 @@ def terminal(request, company):
         'bill_width': get_user_value(request.user, 'pos_interface_bill_width'),
         'display_breadcrumbs': False, # get_user_value(request.user, 'pos_display_breadcrumbs'), (currently hardcodedly disabled)
         'product_display': get_user_value(request.user, 'pos_product_display'),
-        # registers and printers
-        #'printer_port': get_value(request.user, 'pos_printer_port'),
-        'printer_driver': 'system',
     }
 
     data = {
