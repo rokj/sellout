@@ -38,7 +38,7 @@ def set_serial(instance, **kwargs):
 
         # format the serial
         from config.functions import get_company_value
-        format_string = get_company_value(instance.created_by, instance.issuer, 'pos_bill_serial_format')
+        format_string = get_company_value(instance.created_by, instance.company, 'pos_bill_serial_format')
         formatted_serial = instance.timestamp.strftime(format_string)
 
         formatted_serial = formatted_serial.replace(g.BILL_SERIAL_FORMAT_PLACEHOLDER, str(instance.serial))
