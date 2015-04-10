@@ -25,16 +25,15 @@ def set_serial(instance, **kwargs):
     # set serial number after the bill has been paid;
 
     if not instance.serial:
-        try:
-            # get the second last bill (because the last is this bill without serial)
-            last_bill = Bill.objects.only('serial') \
-                            .filter(company=instance.company) \
-                            .exclude(serial=None) \
-                            .order_by('-serial')[0]
-            instance.serial = last_bill.serial + 1
-            instance.timestamp = dtm.datetime.utcnow()
-        except:
+        last_bill = Bill.objects.only('serial') \
+                                .filter(company=instance.company) \
+                                .exclude(serial=None) \
+                                .order_by('-serial')
+
+        if last_bill.count() == 0:
             instance.serial = 1
+        else:
+            instance.serial = last_bill[0].serial + 1
 
         # format the serial
         from config.functions import get_company_value
