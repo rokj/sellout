@@ -571,7 +571,8 @@
             p.items.price.text(p.data.price);
 
             p.items.category = $(".product-category", p.items.container);
-            p.items.category.text(p.data.category);
+            if(p.data.category) p.items.category.text(p.data.category);
+            else p.items.category.text("[No category]");
 
             p.items.tax = $(".product-tax", p.items.container);
             p.items.tax.text(p.data.tax);
@@ -1081,6 +1082,7 @@
                 p.items.unit_sel.append(o);
             }
             p.items.unit_sel.unbind().change(p.update_unit_types);
+            p.items.unit_sel.val(p.data.unit_type);
 
             // purchase price
             p.items.purchase_price.val(p.data.purchase_price);
@@ -1495,6 +1497,11 @@
                 <div class="cleared"></div>
             </div>
         </div>
+
+        <div>
+            <h3>{% trans 'Options' %}</h3>
+            <a href="{% url 'pos:import_xls' company.url_name %}" id="import_link">{% trans 'Import Excel file...' %}</a>
+        </div>
     </div>
 
     <div class="content">
@@ -1755,4 +1762,3 @@
         </div>
     </div>
 {% endblock %}
-

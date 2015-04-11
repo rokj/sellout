@@ -381,17 +381,18 @@ def validate_product(user, company, data):
                     " (" + _("code") + ": " + p[0].code + ")")
     data['name'] = data['name'].strip()
     
-    # category: must be present and must exist
+    # category: leave null if it doesn't exist
     if not data.get('category_id'):
-        return r(False, _("No category assigned"))
+        data['category'] = None
+        data['category_id'] = None
+        # return r(False, _("No category assigned"))
     else:
         try:
             data['category_id'] = int(data['category_id'])
             data['category'] = Category.objects.get(id=data['category_id'], company=company)
         except Category.DoesNotExist:
             return r(False, _("Selected category does not exist"))
-    
-    
+
     # price
     if len(data['price']) > g.DECIMAL['currency_digits']+1:
         return r(False, _("Price too long"))
@@ -411,12 +412,11 @@ def validate_product(user, company, data):
             if not ret['success']:
                 return r(False, _("Check purchase price notation"))
             data['purchase_price'] = ret['number']
-    
-    
+
     # unit type (probably doesn't need checking
-    if not data['unit_type'] in dict(g.UNITS):
+    if not (data['unit_type'] in g.UNIT_CODES):
         return r(False, _("Invalid unit type"))
-        
+
     # image:
     if data['change_image'] == True:
         if 'image' in data and data['image']:  # a new image has been uploaded
@@ -472,9 +472,7 @@ def validate_product(user, company, data):
         tax = Tax.objects.get(id=int(data['tax_id']))
     except:
         return r(False, _("Invalid tax rate"))
-    
-    
-    
+
     del data['tax_id']
     data['tax'] = tax
     
@@ -507,7 +505,6 @@ def create_product(request, company):
 
 
 def create_product_(request, c, android=False):
-    # sellers can add product
     if not has_permission(request.user, c, 'product', 'edit'):
         return JsonError(_("You have no permission to add products"))
 
@@ -531,6 +528,7 @@ def create_product_(request, c, android=False):
         private_notes=data.get('private_notes'),
         stock=data.get('stock'),
         tax=data.get('tax'),
+        unit_type=data.get('unit_type')
     )
     product.save()
     
@@ -769,3 +767,17 @@ def mass_edit(request, company):
     else:
         return JsonError(_("Unsupported mass edit action"))
 
+
+@login_required
+def import_xls(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+    # permissions for adding products
+    if not has_permission(request.user, c, 'product', 'edit'):
+        return JsonError(_("You have no permission to add products"))
+
+    from xlsimport.xlsimport import xls_import
+    xls_import('/home/nejc/Blocklogic/projects/webpos/xlsimport/example.xlsx', c, request.user)

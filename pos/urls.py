@@ -21,6 +21,8 @@ from pos.views.manage import users
 
 from pos.views import bill as terminal_bill
 
+import xlsimport
+
 ### common URL prefixes: ###
 # company's site: /pos/blocklogic
 # readable pattern: (?P<company>[\w-]{1,30})
@@ -79,6 +81,8 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + '/json/products/edit/$', product.edit_product, name='edit_product'),  # edit (save) product - json
     url(r_company + '/' + r_manage + '/json/products/delete/$', product.delete_product, name='delete_product'),  # edit (save) product - json
     url(r_company + '/' + r_manage + '/json/products/mass-edit/$', product.mass_edit, name='mass_edit'),  # edit (save) product - json
+
+    url(r_company + '/' + r_manage + '/json/products/import/$', product.import_xls, name='import_xls'),
 
     # users
     url(r_company + '/' + r_manage + _('/users') + '/$', users.list_users, name='list_users'),
