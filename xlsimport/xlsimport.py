@@ -87,10 +87,13 @@ def xls_import(filename, company, user):
         icol = 4
         cell = value(irow, icol)
 
-        try:
-            category = Category.objects.get(company=company, name=cell)
-        except Category.DoesNotExist:
+        if Category.objects.filter(company=company, name=cell).count() > 0:
+            # if there are multiple categories with the same name, take the first by id
+            # this should be the parent
+            category = Category.objects.filter(company=company, name=cell).order_by('id')[0]
+        else:
             category = None
+            info(_("Category not found, none assigned"), name, irow, icol)
 
         # Stock
         icol = 5
@@ -108,6 +111,7 @@ def xls_import(filename, company, user):
 
         if cell not in g.UNIT_CODES:
             unit_type = g.UNIT_CODES[0]  # take a default
+            info(_("No unit type matched, default taken"), name, irow, icol)
         else:
             unit_type = cell
 

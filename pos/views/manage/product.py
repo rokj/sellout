@@ -86,8 +86,8 @@ def product_to_dict(user, company, product, android=False):
         ret['category'] = product.category.name
         ret['category_id'] = product.category.id
     else:
-        ret['category'] = None
-        ret['category_id'] = None
+        ret['category'] = g.NO_CATEGORY_NAME
+        ret['category_id'] = -1
 
     ret['code'] = product.code
     ret['shortcut'] = product.shortcut
@@ -115,8 +115,23 @@ def products(request, company):
         return error(request, c, _("There are no taxes defined. Please go to tax management and define them."))
 
     # if there are no categories defined, throw an error
-    if Category.objects.filter(company=c).count() == 0:
-        return error(request, c, _("There are no categories defined, please go to category management to define them."))
+    # [this is no longer required since category on product isn't required either]
+    # if Category.objects.filter(company=c).count() == 0:
+    #    return error(request, c, _("There are no categories defined, please go to category management to define them."))
+
+    # list of categories: one additional 'category': no category set, that is 'None'
+    categories = get_all_categories(c, json=True)
+    categories.append({
+        'id': -1,
+        'name': g.NO_CATEGORY_NAME,
+        'description': "",
+        'parent_id': None,
+
+        'color': g.CATEGORY_COLORS[0],  # the default
+        'breadcrumbs': g.NO_CATEGORY_NAME,
+        'path': g.NO_CATEGORY_NAME,
+        'level': 0
+    })
 
     # fields that need to be limited in length:
     lengths = {
@@ -135,7 +150,7 @@ def products(request, company):
         'site_title': g.MISC['site_title'],
         # lists
         'taxes': JsonStringify(get_all_taxes(request.user, c)),
-        'categories': JsonStringify(get_all_categories(c, json=True)),
+        'categories': JsonStringify(categories),
         'units': JsonStringify(g.UNITS),
         'discounts': JsonStringify(get_all_discounts(request.user, c)),
         # urls for ajax calls
@@ -241,10 +256,15 @@ def search_products_(request, c, android=False):
     else:
         filter_by_description = False
         
-    # category_filter
+    # category_filter: filter by category or only products with no category, or don't filter at all
     if criteria.get('category_filter'):
         filter_by_category = True
-        products = products.filter(category__id__in=get_subcategories(int(criteria.get('category_filter')), data=[]))
+        category_id = int(criteria.get('category_filter'))
+
+        if category_id == -1:
+            products = products.filter(category=None)
+        else:
+            products = products.filter(category__id__in=get_subcategories(category_id, data=[]))
     else:
         filter_by_category = False
         
@@ -355,7 +375,6 @@ def validate_product(user, company, data):
         # this shouldn't happen
         return r(False, _("Wrong product id"))
     
-    
     if data['id'] != -1:
         # check if product belongs to this company and if he has the required permissions
         try:
@@ -383,13 +402,17 @@ def validate_product(user, company, data):
     
     # category: leave null if it doesn't exist
     if not data.get('category_id'):
-        data['category'] = None
-        data['category_id'] = None
-        # return r(False, _("No category assigned"))
+        return r(False, _("No category assigned"))
     else:
         try:
-            data['category_id'] = int(data['category_id'])
-            data['category'] = Category.objects.get(id=data['category_id'], company=company)
+            category_id = int(data['category_id'])
+
+            if category_id == -1:
+                data['category_id'] = None
+                data['category'] = None
+            else:
+                data['category_id'] = category_id
+                data['category'] = Category.objects.get(id=data['category_id'], company=company)
         except Category.DoesNotExist:
             return r(False, _("Selected category does not exist"))
 
@@ -589,6 +612,7 @@ def edit_product_(request, c, android=False):
     
     # update product:
     product.name = data.get('name')
+    product.category = data.get('category')
     product.unit_type = data.get('unit_type')
     product.code = data.get('code')
     product.shortcut = data.get('shortcut')

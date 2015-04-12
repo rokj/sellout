@@ -279,6 +279,10 @@ function display_number(number, separator, decimal_places){
     else return '';
 }
 
+function display_exact_number(number, separator){
+    return number.toString().replace('.', separator);
+}
+
 // a few number shortcuts
 function dn(number, g){
     return display_number(number, g.config.separator, g.config.decimal_places);

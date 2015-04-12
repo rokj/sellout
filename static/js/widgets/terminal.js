@@ -10,7 +10,7 @@ Terminal = function(g){
         left_column: $("#left_column"),
         bill_container: $("#bill_container"),
 
-        till: $("#till"),
+        till: $("#register"),
         bill_header: $("#bill_header"),
 
         splitter: $("#splitter"),
