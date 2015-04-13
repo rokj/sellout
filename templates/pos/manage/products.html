@@ -6,6 +6,18 @@
     <script type="text/javascript" src="{% static 'js/jquery.customfileinput.js' %}"></script>
 
     <style type="text/css">
+        .import-button {
+            display: block;
+            width: 40px;
+            height: 40px;
+            background-image: url('{% static 'icons/import.png' %}');
+            background-color: rgba(0,0,0,0);
+            background-position: center center;
+
+            position: absolute;
+            left: -40px;
+        }
+
         #edit_product_image {
             /* some data directly from view */
             width: {{ image_dimensions.0 }}px;
@@ -27,6 +39,10 @@
         /* button backgrounds: other styling is in management/products.css */
         .product-edit-button {
             background-image: url('{% static 'icons/edit_black.png' %}');
+        }
+
+        .product-copy-button {
+            background-image: url('{% static 'icons/copy_product.png' %}');
         }
 
         .product-delete-button {
@@ -541,6 +557,17 @@
                 );
             };
 
+            p.copy_product = function(){
+                var new_data = $.extend(true, p.data);
+
+                // data that should not be duplicated
+                new_data.id = -1; // a new product
+                new_data.name = '';
+                new_data.code = '';
+                new_data.shortcut = '';
+
+                new ProductDetails(new_data);
+            };
 
             //
             // init
@@ -590,6 +617,7 @@
 
             // bind buttons
             p.items.edit_button = $(".product-edit-button", p.items.container);
+            p.items.copy_button = $(".product-copy-button", p.items.container);
             p.items.delete_button = $(".product-delete-button", p.items.container);
             p.items.favorite_button = $(".product-favorite-button", p.items.container);
 
@@ -601,11 +629,13 @@
                     p.details = new ProductDetails(p.data);
                 });
 
+                // copy button
+                p.items.copy_button.prop('disabled', false);
+                p.items.copy_button.unbind().click(p.copy_product);
+
                 // delete button
                 p.items.delete_button.prop('disabled', false);
-                p.items.delete_button.unbind().click(function(){
-                    p.delete_product();
-                });
+                p.items.delete_button.unbind().click(p.delete_product);
 
                 // favorite button
                 p.items.favorite_button.prop('disabled', false);
@@ -614,6 +644,7 @@
             else{
                 // just disable everything
                 p.items.edit_button.prop('disabled', true);
+                p.items.copy_button.prop('disabled', true);
                 p.items.delete_button.prop('disabled', true);
                 p.items.favorite_button.prop('disabled', true);
             }
@@ -1054,17 +1085,19 @@
             // tax
             tax_select(p.items.tax_sel, p.data.tax_id, false);
 
-            // category
-            if(p.data.id == -1){
-                // a new product: use last category
-                categories_autocomplete(p.items.category, null);
-
-                if(last_chosen_category != null)
-                    p.items.category.val(categories_by_id[last_chosen_category]);
+            // category:
+            // if there's a category assigned, use that;
+            // if there's no category assigned and we're adding a new product, use the last chosen category
+            if(p.data.category_id){
+                categories_autocomplete(p.items.category, p.data.category_id);
             }
             else{
-                // editing an existing product, use its category
-                categories_autocomplete(p.items.category, p.data.category_id);
+                if(p.data.id == -1){ // we're adding a new product
+                    categories_autocomplete(p.items.category, last_chosen_category);
+                }
+                else{
+                    categories_autocomplete(p.items.category, null);
+                }
             }
 
             // stock
@@ -1081,6 +1114,7 @@
                 p.items.unit_sel.append(o);
             }
             p.items.unit_sel.unbind().change(p.update_unit_types);
+            p.items.unit_sel.val(p.data.unit_type);
 
             // purchase price
             p.items.purchase_price.val(p.data.purchase_price);
@@ -1429,7 +1463,13 @@
 
 {% block status_bar_title %}{% trans 'Products' %}{% endblock %}
 
-{% block extra_button %}<a id="add_product" class="extra-button">{% trans 'Add product' %}</a>{% endblock %}
+{% block extra_button %}
+    <a href="{% url 'pos:import_xls' company.url_name %}"
+       class="import-button no-shadow hoverable"
+       title="{% trans 'Import products from excel file' %}">&nbsp;</a>
+
+    <a id="add_product" class="extra-button">{% trans 'Add product' %}</a>
+{% endblock %}
 
 
 {% block manage_content %}
@@ -1663,8 +1703,12 @@
                 <div class="product-management">
                     <button class="product-controls product-favorite-button no-shadow hoverable"
                             title="{% trans 'Favorite this product: it will be displayed by default in terminal' %}"></button>
-                    <button class="product-controls product-edit-button no-shadow hoverable"></button>
-                    <button class="product-controls product-delete-button no-shadow hoverable"></button>
+                    <button class="product-controls product-edit-button no-shadow hoverable"
+                            title="{% trans 'Edit this product' %}"></button>
+                    <button class="product-controls product-copy-button no-shadow hoverable"
+                            title="{% trans 'Create a new product with details from this one' %}"></button>
+                    <button class="product-controls product-delete-button no-shadow hoverable"
+                            title="{% trans 'Delete this product' %}"></button>
                 </div>
 
                 <p class="product-name"></p>
@@ -1755,4 +1799,3 @@
         </div>
     </div>
 {% endblock %}
-

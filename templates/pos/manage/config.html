@@ -9,6 +9,23 @@ $(document).ready(function(){
     $("img.currency").click(function(){
         $("#id_currency").val($(this).attr("data-character"));
     });
+
+    $("a.fake").click(function(e){
+        e.preventDefault();
+    });
+
+
+    var help_text = $("#help_text");
+    var help_text_trigger = $("#help_text_trigger");
+    var help_text_close = $("#help_text_close");
+
+    help_text_trigger.click(function(){
+        help_text.toggleClass("hidden");
+    });
+
+    help_text_close.click(function(){
+        help_text.addClass("hidden");
+    });
 });
 </script>
 {% endblock %}
@@ -73,7 +90,58 @@ $(document).ready(function(){
             {{ form.bill_serial_format }}
 
             {% comment %} special note about bill formatting {% endcomment %}
+            <div class="help-popup-parent">
+                <a href="#" class="help-text fake" id="help_text_trigger">
+                    {% trans "What does this mean?" context 'bill formatting help text' %}
+                </a>
 
+                <div class="help-popup hidden" id="help_text">
+                    <img src="{% static 'icons/close-thin.png' %}" id="help_text_close"
+                         class="custom-dialog-close-button help-text-close"/>
+
+                    <h3>{% trans "Bill numbering format" context 'bill formatting help text' %}</h3>
+                    <p>
+                        {% trans "Every new bill will be assigned a unique number using these rules." context 'bill formatting help text' %}
+                        {% trans "These characters will be replaced by the following:" context 'bill formatting help text' %}
+                    </p>
+
+                    <ul>
+                        <li><span class="code">{s}</span> -
+                            {% trans "the current sequential bill number; this is required." context 'bill formatting help text' %}</li>
+                        <li><span class="code">%Y</span> -
+                            {% trans "current year" context 'bill formatting help text' %}</li>
+                        <li><span class="code">%m</span> -
+                            {% trans "current month with leading zeros" context 'bill formatting help text' %}
+                        </li>
+                        <li>{% trans "for more formatters see" context 'bill formatting help text' %}
+                            <a href="https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior" target="_blank">
+                                {% trans "this reference" context 'bill formatting help text' %}
+                            </a>
+                        </li>
+                    </ul>
+
+                    <h3>{% trans "Examples" context 'bill formatting help text' %}</h3>
+                    <p>{% trans "For example, the following bill is the 26th bill created on November 2nd, 2016." context 'bill formatting help text' %}</p>
+                    <ul>
+                        <li>
+                            <span class="code">{s}</span>
+                            {% trans "will be translated to" context 'bill formatting help text' %}
+                            <span class="code">26</span>
+                        </li>
+                        <li>
+                            <span class="code">%Y-{s}</span>
+                            {% trans "will be translated to" context 'bill formatting help text' %}
+                            <span class="code">2016-26</span>
+                        </li>
+                        <li>
+                            <span class="code">%Y%m:{s}</span>
+                            {% trans "will be translated to" context 'bill formatting help text' %}
+                            <span class="code">201511:26</span>
+                        </li>
+                    </ul>
+                    <p>{% trans "Note, bill number begins with 1 and is never reset." context 'bill formatting help text' %}</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -81,15 +149,15 @@ $(document).ready(function(){
         <div class="form-field">
             <div class="error">{{ form.payment_bitcoin_address.errors }}</div>
             {{ form.payment_bitcoin_address.label_tag }}
-            <span class="help-text">{{ form.payment_bitcoin_address.help_text }}</span>
             {{ form.payment_bitcoin_address }}
+            <span class="help-text">{{ form.payment_bitcoin_address.help_text }}</span>
         </div>
 
         <div class="form-field">
             <div class="error">{{ form.payment_bitcoin_address.errors }}</div>
             {{ form.payment_paypal_address.label_tag }}
-            <span class="help-text">{{ form.payment_paypal_address.help_text }}</span>
             {{ form.payment_paypal_address }}
+            <span class="help-text">{{ form.payment_paypal_address.help_text }}</span>
         </div>
 
         <div class="form-field no-label">
