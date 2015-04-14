@@ -28,10 +28,10 @@ def xls_import(filename, company, user):
         err(_("Opening the file failed"))
         return status
 
-    def value(ir, ic):
+    def value(ir, ic, product_name=None):
         # returns cell value at specified row/column, formatted as text
         if book.cell_type(ir, ic) != xlrd.XL_CELL_TEXT:
-            info(_("Cell value is not formatted as text"), None, ir, ic)
+            info(_("Cell value is not formatted as text"), product_name, ir, ic)
 
         return unicode(book.cell_value(ir, ic)).strip()
 
@@ -57,13 +57,13 @@ def xls_import(filename, company, user):
         # Description
         # doesn't need checking
         icol = 1
-        cell = value(irow, icol)
+        cell = value(irow, icol, product_name=name)
 
         description = cell
 
         # Code
         icol = 2
-        cell = value(irow, icol)
+        cell = value(irow, icol, product_name=name)
 
         code = cell
         if Product.objects.filter(company=company, code=code).exists():
@@ -71,7 +71,7 @@ def xls_import(filename, company, user):
 
         # Tax (number only, check if tax exists in database)
         icol = 3
-        cell = value(irow, icol)
+        cell = value(irow, icol, product_name=name)
 
         tax = None
         tax_amount = decimal.Decimal(1)
@@ -85,7 +85,7 @@ def xls_import(filename, company, user):
 
         # Category (match by name or set no category to a product)
         icol = 4
-        cell = value(irow, icol)
+        cell = value(irow, icol, product_name=name)
 
         if Category.objects.filter(company=company, name=cell).count() > 0:
             # if there are multiple categories with the same name, take the first by id
@@ -97,7 +97,7 @@ def xls_import(filename, company, user):
 
         # Stock
         icol = 5
-        cell = value(irow, icol)
+        cell = value(irow, icol, product_name=name)
 
         stock = None
         try:
@@ -107,7 +107,7 @@ def xls_import(filename, company, user):
 
         # Unit (anything that doesn't match the unit types list defaults to 'Piece')
         icol = 6
-        cell = value(irow, icol)
+        cell = value(irow, icol, product_name=name)
 
         if cell not in g.UNIT_CODES:
             unit_type = g.UNIT_CODES[0]  # take a default
@@ -117,7 +117,7 @@ def xls_import(filename, company, user):
 
         # Purchase price
         icol = 7
-        cell = value(irow, icol)
+        cell = value(irow, icol, product_name=name)
 
         purchase_price = None
         try:
@@ -127,7 +127,7 @@ def xls_import(filename, company, user):
 
         # Sell price without tax
         icol = 8
-        cell = value(irow, icol)
+        cell = value(irow, icol, product_name=name)
 
         try:
             price_without_tax = decimal.Decimal(cell)
@@ -137,7 +137,7 @@ def xls_import(filename, company, user):
 
         # Sell price with tax
         icol = 9
-        cell = value(irow, icol)
+        cell = value(irow, icol, product_name=name)
 
         try:
             price_with_tax = decimal.Decimal(cell)
@@ -153,13 +153,13 @@ def xls_import(filename, company, user):
 
         # Shortcut
         icol = 10
-        cell = value(irow, icol)
+        cell = value(irow, icol, product_name=name)
 
         shortcut = cell
 
         # Private notes
         icol = 11
-        cell = value(irow, icol)
+        cell = value(irow, icol, product_name=name)
 
         notes = cell
 
