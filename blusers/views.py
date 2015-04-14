@@ -220,8 +220,10 @@ def google_login_or_register(request, mobile=False):
             set_language(request)
 
         group = user.homegroup
-
-        data = {'status': 'ok', 'redirect_url': reverse('web:home', kwargs={'group_id': group.id, 'section': 'home'}), 'user_id': user.id}
+        if mobile:
+            data = {'status': 'ok', 'user_id': user.id}
+        else:
+            data = {'status': 'ok', 'redirect_url': reverse('web:home', kwargs={'group_id': group.id, 'section': 'home'}), 'user_id': user.id}
 
         if len(user.images.all()) == 0:
             picture_url = r['picture']
