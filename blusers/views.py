@@ -216,7 +216,7 @@ def google_login_or_register(request, mobile=False):
     if user is not None:
         if not mobile:
             django_login(request, user)
-            set_user_value(bluser, 'google_access_token', d["access_token"])
+            set_user_value(bluser, 'google_access_token_' + settings.SITE_URL, d["access_token"])
             set_language(request)
 
         if mobile:
