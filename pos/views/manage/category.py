@@ -5,6 +5,7 @@ from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django import forms
 from django.http import Http404, HttpResponseRedirect, JsonResponse
+from common.globals import CATEGORY_COLORS
 
 from pos.models import Company, Category, Product
 from common.functions import JsonError, JsonParse, JsonOk,  \
@@ -41,6 +42,29 @@ def category_to_dict(c, android=False):
     else:
         r['product_cunt'] = c.product_count
         r['level'] = c.category_level
+
+    return r
+
+
+def no_category_to_dict(company, android=False):
+
+    r = {
+        'id': -1,
+        'name': _("No category"),
+        'description': "",
+        'parent_id': None,
+
+        'color': CATEGORY_COLORS[0],
+        'breadcrumbs': _("No category"),
+        'path': -1,
+    }
+
+    if not android:
+        r['add_child_url'] = reverse('pos:add_category', kwargs={'company': company.url_name, 'parent_id': -1})
+        # r['edit_url'] = reverse('pos:edit_category', kwargs={'company': c.company.url_name, 'category_id': c.id})
+    else:
+        # r['product_cunt'] = len(Product.objects.filter(company=company, category=None)) # no need
+        r['level'] = 0
 
     return r
 
@@ -88,7 +112,7 @@ def validate_parent(category, parent):
     return True
 
 
-def get_all_categories(company, category=None, sort='name', data=None, level=0, json=False):
+def get_all_categories(company, category=None, sort='name', data=None, level=0, json=False, android=False):
     """ return a 'flat' list of all categories (converted to dictionaries/json) """
 
     #def category_to_dict(c, level): # c = Category object # currently not needed
@@ -100,6 +124,7 @@ def get_all_categories(company, category=None, sort='name', data=None, level=0, 
 
     if data is None:
         data = []
+        data.append(no_category_to_dict(company, android))
 
     if category:
         c = category
@@ -149,6 +174,7 @@ def get_all_categories_structured(company, category=None, data=None, sort='name'
     """ return a structured list of all categories of given company """
     if data is None:
         data = []
+        data.append(no_category_to_dict(company, android))
 
     if not category:
         # list all categories that have no parent
