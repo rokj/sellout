@@ -76,7 +76,6 @@
         <div class="container">
             <h2>{% trans 'Your notifications' %}</h2>
             {% if actions %}
-                <div class="container">
                 <table id="actions">
                     {% for a in actions %}
                         <div class="action-container table-row">
@@ -91,7 +90,6 @@
                         </div>
                     {% endfor %}
                 </table>
-                </div>
             {% else %}
                 <p class="no-text">{% trans 'You have no unseen notifications.' %}</p>
             {% endif %}
