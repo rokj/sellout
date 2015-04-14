@@ -144,7 +144,7 @@ class UserImage(SkeletonU):
 
     name = models.CharField(_('Image name'), max_length=100, blank=False, null=False)
     description = models.CharField(_('Image description'), max_length=255, blank=True, null=True)
-    image = models.ImageField(upload_to=ImagePath(DIRS['users_image_dir'], "users", "blusers_userimage"), null=False)
+    image = models.ImageField(upload_to=ImagePath(DIRS['users_image_dir'], "blusers_userimage", "image"), null=False)
     #image = models.ImageField(upload_to="static/img/users", null=False)
     original_filename = models.CharField(_('Original filename'), max_length=255, blank=True, null=True)
 

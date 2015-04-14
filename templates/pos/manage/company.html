@@ -17,7 +17,10 @@
 }
 
 #color_logo_container { position: absolute; }
-#default_color_logo { background-image: url("{% static 'images/company_placeholder_color.png' %}"); /* the default background image */ }
+#default_color_logo {
+    background-image: url("{% static 'images/company_placeholder_color.png' %}"); /* the default background image */
+    cursor: pointer;
+}
 
 #remove_color_logo, #remove_monochrome_logo{
     left: {{ color_logo_dimensions.0 }}px;
@@ -25,6 +28,7 @@
 
 #default_monochrome_logo{
     background-image: url("{% static 'images/company_placeholder_monochrome.png' %}"); /* the default background image */
+    cursor: pointer;
 }
 
 .image-buttons{
@@ -39,6 +43,7 @@
 }
 
 #monochrome_logo_container{
+    cursor: default;
     width:{{ monochrome_logo_dimensions.0 }}px;
     height:{{ monochrome_logo_dimensions.1 }}px;
 }
@@ -202,9 +207,34 @@ $(document).ready(function(){
                 <div id="color_logo_container" class="hoverable"></div>
                 <input type="file" id="id_color_logo" class="hoverable" title="{% trans 'Click to change logo' %}" />
             </div>
-
         </div>
 
+        <div class="form-field">
+            <div class="error">{{ form.name.errors }}</div>
+            {{ form.name.label_tag }}
+            {{ form.name }}
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.email.errors }}</div>
+            {{ form.email.label_tag }}
+            {{ form.email }}
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.website.errors }}</div>
+            {{ form.website.label_tag }}
+            {{ form.website }}
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.url_name.errors }}</div>
+            {{ form.url_name.label_tag }}
+            {{ pos_url }}{{ form.url_name }}
+        </div>
+    </div>
+
+    <div class="management-column">
         {# monochrome logo: image, auto-create button and browse button #}
         <div class="images">
             <h2 class="custom-label">{% trans 'Monochrome logo' %}</h2>
@@ -231,41 +261,25 @@ $(document).ready(function(){
         </div>
 
         <div class="form-field">
-            <div class="error">{{ form.name.errors }}</div>
-            {{ form.name.label_tag }}
-            {{ form.name }}
-        </div>
-
-    </div>
-    <div class="management-column">
-        <div class="form-field">
-            <div class="error">{{ form.url_name.errors }}</div>
-            {{ form.url_name.label_tag }}
-            {{ pos_url }}{{ form.url_name }}
-        </div>
-
-        <div class="form-field">
-            <div class="error">{{ form.vat_no.errors }}</div>
-            {{ form.vat_no.label_tag }}
-            {{ form.vat_no }}
-        </div>
-
-        <div class="form-field">
             <div class="error">{{ form.street.errors }}</div>
             {{ form.street.label_tag }}
             {{ form.street }}
         </div>
 
         <div class="form-field">
-            <div class="error">{{ form.postcode.errors }}</div>
-            {{ form.postcode.label_tag }}
-            {{ form.postcode }}
-        </div>
+            <div class="split-cell first">
+                <div class="error">{{ form.postcode.errors }}</div>
+                {{ form.postcode.label_tag }}
+                {{ form.postcode }}
+            </div>
 
-        <div class="form-field">
-            <div class="error">{{ form.city.errors }}</div>
-            {{ form.city.label_tag }}
-            {{ form.city }}
+            <div class="split-cell last">
+                <div class="error">{{ form.city.errors }}</div>
+                {{ form.city.label_tag }}
+                {{ form.city }}
+            </div>
+
+            <div class="cleared"></div>
         </div>
 
         <div class="form-field">
@@ -283,6 +297,18 @@ $(document).ready(function(){
 
     <div class="management-column">
         <div class="form-field">
+            <div class="error">{{ form.vat_no.errors }}</div>
+            {{ form.vat_no.label_tag }}
+            {{ form.vat_no }}
+        </div>
+
+        <div class="form-field">
+            <div class="error">{{ form.tax_payer.errors }}</div>
+            {{ form.tax_payer.label_tag }}
+            {{ form.tax_payer }}
+        </div>
+
+        <div class="form-field">
             <div class="error">{{ form.phone.errors }}</div>
             {{ form.phone.label_tag }}
             {{ form.phone }}
@@ -292,18 +318,6 @@ $(document).ready(function(){
             <div class="error">{{ form.notes.errors }}</div>
             {{ form.notes.label_tag }}
             {{ form.notes }}
-        </div>
-
-        <div class="form-field">
-            <div class="error">{{ form.email.errors }}</div>
-            {{ form.email.label_tag }}
-            {{ form.email }}
-        </div>
-
-        <div class="form-field">
-            <div class="error">{{ form.website.errors }}</div>
-            {{ form.website.label_tag }}
-            {{ form.website }}
         </div>
 
         <div class="form-field no-label">

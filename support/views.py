@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.translation import ugettext as _
-from common.functions import site_title, JsonParse
+from common.functions import JsonParse
 from django.contrib.auth.decorators import login_required as login_required_nolocking
 
 from models import Question, Comment, Vote, Faq
@@ -66,7 +66,7 @@ def index(request, category=None):
         'search_form': SearchForm(),
 
         'title': _("Support"),
-        'site_title': site_title(),
+        'site_title': g.SITE_TITLE,
     }
 
     return render(request, 'support/index.html', c)
@@ -124,7 +124,7 @@ def search(request):
         'search_form': form,
         'categories': p.CATEGORIES,
         'title': _("Support"),
-        'site_title': site_title(),
+        'site_title': g.SITE_TITLE,
     }
 
     return render(request, 'support/search_results.html', c)
@@ -200,7 +200,7 @@ def question(request, question_id):
         'logged_in': logged_in,
 
         'title': q.title,
-        'site_title': site_title(),
+        'site_title': g.SITE_TITLE,
     }
 
     return render(request, 'support/question.html', c)
@@ -231,7 +231,7 @@ def ask(request):
         'categories': p.CATEGORIES,
 
         'title': _("Ask a question"),
-        'site_title': site_title(),
+        'site_title': g.SITE_TITLE,
     }
 
     return render(request, 'support/ask.html', c)

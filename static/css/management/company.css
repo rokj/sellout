@@ -33,3 +33,15 @@ div.error{
     z-index: 1; /* so that default logo will be above it */
     background-color: #ffffff;
 }
+
+#monochrome_passepartout div {
+    cursor: default;
+}
+
+#id_monochrome_logo {
+    cursor: pointer !important;
+}
+
+#id_notes {
+    height: 206px;
+}

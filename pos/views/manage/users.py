@@ -119,12 +119,14 @@ def delete_permission(request, company):
 
     # id is in request.POST in JSON format
     try:
-        permission = Permission.objects.get(int(JsonParse(request.POST.get('data')).get('permission_id')), company=c)
-
-    except (Permission.DoesNotExist, ValueError):
+        permission_id = int(JsonParse(request.POST.get('data')).get('id'))
+        permission = Permission.objects.get(id=permission_id, company=c)
+        permission.delete()
+        
+        return JsonOk()
+    except (Permission.DoesNotExist, ValueError, TypeError):
         return JsonError(_("The user does not exist"))
 
-    # TODO: finish the shiat
 
 
 @login_required

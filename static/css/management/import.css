@@ -9,3 +9,21 @@
 .container-content {
     margin-left: 30px;
 }
+
+.import-info-message {
+    color: #646464;
+}
+
+.import-error-message {
+    color: #ec5449;
+}
+
+.text-right {
+    text-align: right;
+}
+
+input[type='submit'] {
+    display: inlin-block;
+    width: 50%;
+    margin-top: 15px;
+}
