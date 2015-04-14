@@ -43,7 +43,7 @@ def mobile_JSON_categories(request, company_id):
     # permissions
     if not has_permission(request.user, c, 'category', 'view'):
         return JsonError(_("You have no permission to view categories"))
-    data = get_all_categories(c, android=True)
+    data = get_all_categories(c, android=True, no_category=True)
 
     # return all categories' data in JSON format
     return JsonOk(extra=data, safe=False)

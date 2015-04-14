@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from common.decorators import login_required
 from pos.models import Company, Category, Product, Tax, Discount, Contact, Register
 from pos.views.manage.category import category_to_dict
+from pos.views.manage.company import company_to_dict
 from pos.views.manage.contact import contact_to_dict
 from pos.views.manage.discount import discount_to_dict
 from pos.views.manage.product import product_to_dict
@@ -92,6 +93,8 @@ def mobile_sync_db(request, company_id):
         except Register.DoesNotExist:
             ret['register'] = None
 
+        ret['company'] = company_to_dict(request.user, company, android=True, with_config=True)
+
     elif seq < last_key:
 
         ret['updated'] = False
@@ -130,6 +133,8 @@ def mobile_sync_db(request, company_id):
                     r = Register.objects.get(id=seq_item.object_id)
                     item_ret['item'] = register_to_dict(request.user, company, r)
 
+                elif seq_item.model == 'Company':
+                    item_ret['item'] = company_to_dict(request.user, company, android=True, with_config=True)
 
             items.append(item_ret)
 

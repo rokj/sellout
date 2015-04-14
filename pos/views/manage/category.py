@@ -112,7 +112,7 @@ def validate_parent(category, parent):
     return True
 
 
-def get_all_categories(company, category=None, sort='name', data=None, level=0, json=False, android=False):
+def get_all_categories(company, category=None, sort='name', data=None, level=0, json=False, android=False, no_category=False):
     """ return a 'flat' list of all categories (converted to dictionaries/json) """
 
     #def category_to_dict(c, level): # c = Category object # currently not needed
@@ -124,7 +124,8 @@ def get_all_categories(company, category=None, sort='name', data=None, level=0, 
 
     if data is None:
         data = []
-        data.append(no_category_to_dict(company, android))
+        if no_category:
+            data.append(no_category_to_dict(company, android))
 
     if category:
         c = category
@@ -170,11 +171,12 @@ def get_subcategories(category_id, sort='name', data=None):
     return data
 
 
-def get_all_categories_structured(company, category=None, data=None, sort='name', level=0, android=False):
+def get_all_categories_structured(company, category=None, data=None, sort='name', level=0, android=False, no_category=False):
     """ return a structured list of all categories of given company """
     if data is None:
         data = []
-        data.append(no_category_to_dict(company, android))
+        if no_category:
+            data.append(no_category_to_dict(company, android))
 
     if not category:
         # list all categories that have no parent
