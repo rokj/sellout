@@ -11,11 +11,10 @@
 
             // image position
             // make the whole thing as wide as the button
-            $(this).css("left", 0);
-            $(this).css("top", 0);
-
             $(this).width(image_obj.width());
             $(this).height(image_obj.height());
+            $(this).css("top", image_obj.position().top);
+            $(this).css("left", image_obj.position().left);
         });
     };
 }(jQuery));

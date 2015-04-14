@@ -248,6 +248,7 @@ def company_to_dict(user, company, android=False, with_config=False):
         'phone': company.phone,
         'vat_no': company.vat_no,
         'website': company.website,
+        'tax_payer': company.tax_payer,
     }
 
     if with_config:
@@ -375,12 +376,12 @@ def register_company(request):
 def edit_company(request, company):
     # get company, it must exist
     c = get_object_or_404(Company, url_name=company)
-        
+
     # check if the user has permission to change it
     # only admins can change company details
     if not has_permission(request.user, c, 'company', 'edit'):
         return no_permission_view(request, c, _("You have no permission to edit company details."))
-    
+
     context = {
         'company': c,
         'color_logo_dimensions': g.IMAGE_DIMENSIONS['color_logo'],
@@ -391,6 +392,8 @@ def edit_company(request, company):
         'site_title': g.MISC['site_title'],
         'pos_url': get_terminal_url(request),
     }
+
+    print get_terminal_url(request)
     
     if request.method == 'POST':
         # submit data

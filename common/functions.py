@@ -383,25 +383,12 @@ class CustomDecimalField(forms.CharField):
             return r['number']
 
 
-
-
 def get_terminal_url(request):
-# future store url: same as this page's, excluding what's after the
+    # future store url: same as this page's, excluding what's after the
     # g.MISC['management_url'] string
     # blocklogic.net/pos/app/register-company >> blocklogic.net/pos/company-name
     full_url = request.build_absolute_uri()
     return full_url[:full_url.rfind(g.MISC['management_url'] + '/')]
-
-
-def redirect_to_selected_company(user, ajax=False):
-    from pos.models import Company
-
-    selected_company = user.selected_company
-
-    return redirect('pos:terminal', company=Company.objects.get(pk=int(selected_company).url_name))
-
-    # if ajax:
-        # return reverse('web:home', kwargs={'group_id': group.id, 'section': 'home'})
 
 
 @deconstructible
@@ -437,17 +424,6 @@ class ImagePath(object):
 
         # instance.original_filename = filename
         return '%s/%s' % (self.path, random_filename + ext)
-
-
-def redirect_to_subscriptions(ajax=False):
-    if ajax:
-        return reverse('subscription:new')
-
-    return redirect('subscription:new')
-
-
-def site_title():
-    return g.SITE_TITLE
 
 
 def send_email(sender, to=None, bcc=None, subject=None, txt=None, html=None, attachment=None):
