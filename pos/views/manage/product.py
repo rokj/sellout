@@ -792,16 +792,3 @@ def mass_edit(request, company):
         return JsonError(_("Unsupported mass edit action"))
 
 
-@login_required
-def import_xls(request, company):
-    try:
-        c = Company.objects.get(url_name=company)
-    except Company.DoesNotExist:
-        return JsonError(_("Company does not exist"))
-
-    # permissions for adding products
-    if not has_permission(request.user, c, 'product', 'edit'):
-        return JsonError(_("You have no permission to add products"))
-
-    from xlsimport.xlsimport import xls_import
-    xls_import('/home/nejc/Blocklogic/projects/webpos/xlsimport/example.xlsx', c, request.user)

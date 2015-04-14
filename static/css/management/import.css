@@ -1,0 +1,29 @@
+.import-success {
+    color: #22e693;
+}
+
+.import-fail {
+    color: #ec5449;
+}
+
+.container-content {
+    margin-left: 30px;
+}
+
+.import-info-message {
+    color: #646464;
+}
+
+.import-error-message {
+    color: #ec5449;
+}
+
+.text-right {
+    text-align: right;
+}
+
+input[type='submit'] {
+    display: inlin-block;
+    width: 50%;
+    margin-top: 15px;
+}

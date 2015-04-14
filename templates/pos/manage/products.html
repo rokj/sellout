@@ -1537,7 +1537,7 @@
         </div>
     </div>
 
-    <div class="content">
+    <div id="products_container">
         <div id="results_info">
             <div id="results_count"></div>
 
@@ -1555,7 +1555,109 @@
 
         <div id="products_list"></div>
 
-        {% comment %} a template for editing/adding product (dialog) {% endcomment %}
+        {% comment %} a template for viewing products {% endcomment %}
+        <div id="product_details_template" class="hidden">
+            <div class="title">
+                <div class="product-management">
+                    <button class="product-controls product-favorite-button no-shadow hoverable"
+                            title="{% trans 'Favorite this product: it will be displayed by default in terminal' %}"></button>
+                    <button class="product-controls product-edit-button no-shadow hoverable"
+                            title="{% trans 'Edit this product' %}"></button>
+                    <button class="product-controls product-copy-button no-shadow hoverable"
+                            title="{% trans 'Create a new product with details from this one' %}"></button>
+                    <button class="product-controls product-delete-button no-shadow hoverable"
+                            title="{% trans 'Delete this product' %}"></button>
+                </div>
+
+                <p class="product-name"></p>
+                <input type="hidden" class="product-id"/>
+            </div>
+
+            <table class="details">
+
+                <tr>
+                    <td colspan="2" class="padded"> {# category #}
+                        <p class="product-category"></p>
+
+                        <p class="details-label">{% trans 'Category' %}</p>
+                    </td>
+                    <td class="padded"> {# tax #}
+                        <p class="product-tax"></p>
+
+                        <p class="details-label">{% trans 'Tax' %}</p>
+                    </td>
+                    <td rowspan="2" class="product-image">
+                        {# product image #}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="padded"> {# price #}
+                        <p class="product-price"></p>
+
+                        <p class="details-label">{% trans 'Price' %}</p>
+                    </td>
+                    <td class="padded"> {# code #}
+                        <p class="product-code"></p>
+
+                        <p class="details-label">{% trans 'Code' %}</p>
+                    </td>
+                    <td class="padded"> {# shortcut #}
+                        <p class="product-shortcut"></p>
+
+                        <p class="details-label">{% trans 'Shortcut' %}</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+    {% comment %} a dummy div for creating new products {% endcomment %}
+    <div id="new_product_dummy"></div>
+
+    {% comment %} dialogs for mass editing taxes and discounts {% endcomment %}
+    <div id="mass_tax_edit_dialog" class="mass-dialog hidden">
+        <div>
+            <select class="taxes"></select>
+        </div>
+
+        <div>
+            <input type="button"
+                   class="ok hoverable"
+                   title="{% blocktrans %}Change all products's tax in current search results to selected{% endblocktrans %}"
+                   value="{% trans 'Apply to all' %}" />
+        </div>
+    </div>
+
+    <div id="mass_discount_edit_dialog" class="mass-dialog hidden">
+        <div>
+            <select class="discounts"></select>
+        </div>
+
+        <div>
+            <input type="button"
+                   class="add-discount ok hoverable"
+                   title="{% blocktrans %}Add this discount to all current search results{% endblocktrans %}"
+                   value="{% trans 'Add to current results' %}" />
+        </div>
+
+        <div>
+            <input type="button"
+                   class="remove-discount cancel hoverable"
+                   title="{% blocktrans %}Remove this discount from all current search results{% endblocktrans %}"
+                   value="{% trans 'Remove from all' %}" />
+        </div>
+
+        <div class="clear-discounts-container">
+            <a class="clear-discounts fake" href="#"
+               title="{% blocktrans %}Remove all discounts from all products in current search results{% endblocktrans %}">
+                <img src="{% static 'icons/delete_red.png' %}" alt="" />
+                {% trans 'Clear all discounts' %}
+            </a>
+        </div>
+    </div>
+
+    {% comment %} a template for editing/adding product (dialog) {% endcomment %}
         <div id="dialog_shadow"></div>
         <div id="edit_dialog" class="hidden">
             <h2 id="edit_dialog_title">{# content by js #}</h2>
@@ -1696,106 +1798,4 @@
                 </div>
             </div>
         </div>
-
-        {% comment %} a template for viewing products {% endcomment %}
-        <div id="product_details_template" class="hidden">
-            <div class="title">
-                <div class="product-management">
-                    <button class="product-controls product-favorite-button no-shadow hoverable"
-                            title="{% trans 'Favorite this product: it will be displayed by default in terminal' %}"></button>
-                    <button class="product-controls product-edit-button no-shadow hoverable"
-                            title="{% trans 'Edit this product' %}"></button>
-                    <button class="product-controls product-copy-button no-shadow hoverable"
-                            title="{% trans 'Create a new product with details from this one' %}"></button>
-                    <button class="product-controls product-delete-button no-shadow hoverable"
-                            title="{% trans 'Delete this product' %}"></button>
-                </div>
-
-                <p class="product-name"></p>
-                <input type="hidden" class="product-id"/>
-            </div>
-
-            <table class="details">
-
-                <tr>
-                    <td colspan="2" class="padded"> {# category #}
-                        <p class="product-category"></p>
-
-                        <p class="details-label">{% trans 'Category' %}</p>
-                    </td>
-                    <td class="padded"> {# tax #}
-                        <p class="product-tax"></p>
-
-                        <p class="details-label">{% trans 'Tax' %}</p>
-                    </td>
-                    <td rowspan="2" class="product-image">
-                        {# product image #}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="padded"> {# price #}
-                        <p class="product-price"></p>
-
-                        <p class="details-label">{% trans 'Price' %}</p>
-                    </td>
-                    <td class="padded"> {# code #}
-                        <p class="product-code"></p>
-
-                        <p class="details-label">{% trans 'Code' %}</p>
-                    </td>
-                    <td class="padded"> {# shortcut #}
-                        <p class="product-shortcut"></p>
-
-                        <p class="details-label">{% trans 'Shortcut' %}</p>
-                    </td>
-                </tr>
-            </table>
-        </div>
-
-    </div>
-
-    {% comment %} a dummy div for creating new products {% endcomment %}
-    <div id="new_product_dummy"></div>
-
-    {% comment %} dialogs for mass editing taxes and discounts {% endcomment %}
-    <div id="mass_tax_edit_dialog" class="mass-dialog hidden">
-        <div>
-            <select class="taxes"></select>
-        </div>
-
-        <div>
-            <input type="button"
-                   class="ok hoverable"
-                   title="{% blocktrans %}Change all products's tax in current search results to selected{% endblocktrans %}"
-                   value="{% trans 'Apply to all' %}" />
-        </div>
-    </div>
-
-    <div id="mass_discount_edit_dialog" class="mass-dialog hidden">
-        <div>
-            <select class="discounts"></select>
-        </div>
-
-        <div>
-            <input type="button"
-                   class="add-discount ok hoverable"
-                   title="{% blocktrans %}Add this discount to all current search results{% endblocktrans %}"
-                   value="{% trans 'Add to current results' %}" />
-        </div>
-
-        <div>
-            <input type="button"
-                   class="remove-discount cancel hoverable"
-                   title="{% blocktrans %}Remove this discount from all current search results{% endblocktrans %}"
-                   value="{% trans 'Remove from all' %}" />
-        </div>
-
-        <div class="clear-discounts-container">
-            <a class="clear-discounts fake" href="#"
-               title="{% blocktrans %}Remove all discounts from all products in current search results{% endblocktrans %}">
-                <img src="{% static 'icons/delete_red.png' %}" alt="" />
-                {% trans 'Clear all discounts' %}
-            </a>
-        </div>
-    </div>
 {% endblock %}

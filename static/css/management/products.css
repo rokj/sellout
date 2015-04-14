@@ -1,3 +1,13 @@
+#products_container {
+    position: fixed;
+    left: 360px;
+    top: 40px;
+    bottom: 0;
+    right: 0;
+    overflow: auto;
+    padding-top: 70px;
+}
+
 #filter_form input[type='text'],
 #filter_form select{
     width: 100%; /* the padding, defined in managebase.css */
@@ -29,7 +39,7 @@
 .negative-profit{
     color:white;
     font-weight:bold;
-    background-color:red;
+    background-color: #ec5449;
     padding:2px;
 }
 
