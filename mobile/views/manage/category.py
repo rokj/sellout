@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from pos.models import Company, Category
 from pos.views.manage.category import validate_category, \
-    get_all_categories_structured, category_to_dict, validate_parent, delete_category
+    get_all_categories_structured, category_to_dict, validate_parent, delete_category, get_all_categories
 from common.functions import JsonError, JsonParse, JsonOk, \
     has_permission
 from common import globals as g
@@ -43,11 +43,7 @@ def mobile_JSON_categories(request, company_id):
     # permissions
     if not has_permission(request.user, c, 'category', 'view'):
         return JsonError(_("You have no permission to view categories"))
-    data = []
-    category = Category.objects.filter(company=c)
-
-    for c in category:
-        data.append(category_to_dict(c, android=True))
+    data = get_all_categories(c, android=True)
 
     # return all categories' data in JSON format
     return JsonOk(extra=data, safe=False)
