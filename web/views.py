@@ -354,7 +354,7 @@ def decline_invitation(request, reference):
 @login_required_nolocking
 def user_profile(request):
     context = {
-
+        'user': request.user
     }
 
     return render(request, 'web/user_profile.html', context)
