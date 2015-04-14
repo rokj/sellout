@@ -154,6 +154,7 @@ def set_serial_delete(instance, **kwargs):
 @receiver(post_save, sender=Tax)
 @receiver(post_save, sender=Discount)
 @receiver(post_save, sender=Register)
+@receiver(post_save, sender=Company)
 def set_serial_save(instance, created, **kwargs):
     signal_change(instance, created, action='save', **kwargs)
 
