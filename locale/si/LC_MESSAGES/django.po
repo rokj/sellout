@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-10 18:04+0200\n"
+"POT-Creation-Date: 2015-04-11 16:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,7 +78,7 @@ msgstr "Gesli se ne ujemata."
 msgid "Invalid password reset key"
 msgstr "Napačen ključ za ponastavitev gesla"
 
-#: blusers/forms.py:82 pos/models.py:419 templates/pos/terminal.html:453
+#: blusers/forms.py:82 pos/models.py:418 templates/pos/terminal.html:453
 msgid "First name"
 msgstr "Ime"
 
@@ -90,7 +90,7 @@ msgstr "Obvezno polje. 30 znakov ali manj. Dovoljene so samo črke in številke.
 msgid "This value may contain only letters and numbers."
 msgstr "To polje lahko vsebuje samo črke in številke."
 
-#: blusers/forms.py:85 blusers/forms.py:171 pos/models.py:420
+#: blusers/forms.py:85 blusers/forms.py:171 pos/models.py:419
 #: templates/pos/terminal.html:454
 msgid "Last name"
 msgstr "Priimek"
@@ -107,7 +107,7 @@ msgstr "Ponovno geslo"
 msgid "Enter the same password as above, for verification."
 msgstr ""
 
-#: blusers/forms.py:92 pos/models.py:27 pos/views/manage/company.py:176
+#: blusers/forms.py:92 pos/models.py:26 pos/views/manage/company.py:176
 #: subscription/templates/subscription/subscription.html:954
 #: subscription/templates/subscription/subscription.html:1019
 #: subscription/templates/subscription/subscriptions.html:565
@@ -257,8 +257,8 @@ msgstr "Sem davčni zavezanec"
 msgid "I am not a taxpayer"
 msgstr "Nisem davčni zavezanec"
 
-#: blusers/templates/blusers/settings.html:502 pos/models.py:22
-#: pos/models.py:418 pos/views/manage/company.py:173
+#: blusers/templates/blusers/settings.html:502 pos/models.py:21
+#: pos/models.py:417 pos/views/manage/company.py:173
 #: subscription/templates/subscription/subscription.html:935
 msgid "Company name"
 msgstr "Ime podjetja"
@@ -312,7 +312,7 @@ msgstr "Uredi"
 #: blusers/templates/blusers/settings.html:548
 #: subscription/templates/subscription/subscriptions.html:444
 #: templates/pos/manage/category.html:100
-#: templates/pos/manage/company.html:313 templates/pos/manage/config.html:89
+#: templates/pos/manage/company.html:313 templates/pos/manage/config.html:98
 #: templates/pos/manage/contact.html:151 templates/pos/manage/discount.html:92
 #: templates/pos/manage/personal.html:71
 #: templates/pos/manage/products.html:1657
@@ -348,7 +348,7 @@ msgstr "Spremeni geslo"
 msgid "Password changed successfully!"
 msgstr "Geslo uspešno spremenjeno"
 
-#: blusers/templates/blusers/settings.html:561 pos/models.py:29
+#: blusers/templates/blusers/settings.html:561 pos/models.py:28
 msgid "Website"
 msgstr "Spletna stran"
 
@@ -469,7 +469,7 @@ msgstr ""
 msgid "User authentication failed."
 msgstr ""
 
-#: common/decorators.py:23 pos/views/terminal.py:193
+#: common/decorators.py:23 pos/views/terminal.py:190
 msgid "This session is locked"
 msgstr ""
 
@@ -586,7 +586,7 @@ msgstr "Serijski tiskalnik (mora biti nameščen)"
 msgid "Guest"
 msgstr ""
 
-#: common/globals.py:213 pos/views/bill.py:358 pos/views/bill.py:929
+#: common/globals.py:213 pos/views/bill.py:355 pos/views/bill.py:942
 #: templates/pos/large_receipt.html:43 templates/pos/small_receipt.html:118
 msgid "Cashier"
 msgstr ""
@@ -731,27 +731,27 @@ msgstr ""
 #: mobile/views/manage/tax.py:29 mobile/views/manage/tax.py:40
 #: mobile/views/manage/tax.py:50 mobile/views/manage/users.py:21
 #: mobile/views/manage/users.py:33 mobile/views/views.py:23
-#: mobile/views/views.py:35 pos/views/bill.py:383 pos/views/bill.py:655
-#: pos/views/bill.py:676 pos/views/bill.py:709 pos/views/bill.py:750
-#: pos/views/bill.py:815 pos/views/bill.py:950 pos/views/bill.py:993
-#: pos/views/bill.py:1036 pos/views/manage/category.py:186
+#: mobile/views/views.py:35 pos/views/bill.py:380 pos/views/bill.py:668
+#: pos/views/bill.py:689 pos/views/bill.py:722 pos/views/bill.py:763
+#: pos/views/bill.py:828 pos/views/bill.py:963 pos/views/bill.py:1006
+#: pos/views/bill.py:1049 pos/views/manage/category.py:186
 #: pos/views/manage/category.py:347 pos/views/manage/contact.py:323
 #: pos/views/manage/discount.py:44 pos/views/manage/product.py:167
-#: pos/views/manage/product.py:195 pos/views/manage/product.py:505
-#: pos/views/manage/product.py:568 pos/views/manage/product.py:637
-#: pos/views/manage/product.py:675 pos/views/manage/product.py:707
+#: pos/views/manage/product.py:195 pos/views/manage/product.py:506
+#: pos/views/manage/product.py:569 pos/views/manage/product.py:638
+#: pos/views/manage/product.py:676 pos/views/manage/product.py:708
 #: pos/views/manage/stock.py:167 pos/views/manage/stock.py:195
 #: pos/views/manage/stock.py:505 pos/views/manage/stock.py:568
 #: pos/views/manage/stock.py:637 pos/views/manage/stock.py:675
 #: pos/views/manage/stock.py:707 pos/views/manage/tax.py:115
 #: pos/views/manage/tax.py:167 pos/views/manage/tax.py:201
 #: pos/views/manage/users.py:64 pos/views/manage/users.py:243
-#: pos/views/terminal.py:110 pos/views/terminal.py:136
-#: pos/views/terminal.py:187 sync/views.py:28
+#: pos/views/terminal.py:107 pos/views/terminal.py:133
+#: pos/views/terminal.py:184 sync/views.py:28
 msgid "Company does not exist"
 msgstr ""
 
-#: mobile/views/bill.py:50 pos/views/bill.py:659
+#: mobile/views/bill.py:50 pos/views/bill.py:672
 msgid "You have no permission to view bills"
 msgstr ""
 
@@ -760,11 +760,11 @@ msgid "Multiple active bills found"
 msgstr ""
 
 #: mobile/views/manage/bill.py:22 mobile/views/manage/bill.py:115
-#: pos/views/manage/bill.py:45
+#: pos/views/manage/bill.py:47
 msgid "You have no permission to view bills."
 msgstr ""
 
-#: mobile/views/manage/bill.py:126 pos/views/bill.py:685 pos/views/bill.py:829
+#: mobile/views/manage/bill.py:126 pos/views/bill.py:698 pos/views/bill.py:842
 msgid "Bill does not exist"
 msgstr ""
 
@@ -773,8 +773,8 @@ msgid "You have no permission to view categories"
 msgstr ""
 
 #: mobile/views/manage/category.py:65 mobile/views/manage/category.py:97
-#: mobile/views/manage/contact.py:101 pos/views/manage/product.py:574
-#: pos/views/manage/product.py:681 pos/views/manage/stock.py:574
+#: mobile/views/manage/contact.py:101 pos/views/manage/product.py:575
+#: pos/views/manage/product.py:682 pos/views/manage/stock.py:574
 #: pos/views/manage/stock.py:681
 msgid "You have no permission to edit products"
 msgstr ""
@@ -789,7 +789,7 @@ msgstr ""
 
 #: mobile/views/manage/configuration.py:21
 #: mobile/views/manage/configuration.py:48
-#: pos/views/manage/configuration.py:86 pos/views/manage/configuration.py:128
+#: pos/views/manage/configuration.py:99 pos/views/manage/configuration.py:142
 msgid "You have no permission to edit system configuration."
 msgstr ""
 
@@ -799,7 +799,7 @@ msgstr ""
 msgid "You have no permission to view products"
 msgstr ""
 
-#: mobile/views/manage/contact.py:53 pos/views/manage/product.py:511
+#: mobile/views/manage/contact.py:53 pos/views/manage/product.py:512
 #: pos/views/manage/stock.py:511
 msgid "You have no permission to add products"
 msgstr ""
@@ -865,7 +865,7 @@ msgstr ""
 msgid "Could not delete register"
 msgstr ""
 
-#: mobile/views/manage/users.py:67 pos/views/terminal.py:257
+#: mobile/views/manage/users.py:67 pos/views/terminal.py:254
 msgid "Authentication failed"
 msgstr ""
 
@@ -929,94 +929,94 @@ msgid ""
 "redirect back to the site."
 msgstr ""
 
-#: pos/models.py:23 pos/views/manage/company.py:175
+#: pos/models.py:22 pos/views/manage/company.py:175
 #: templates/pos/terminal.html:459 templates/pos/terminal.html.py:478
 msgid "Street address"
 msgstr "Naslov"
 
-#: pos/models.py:24 subscription/templates/subscription/subscription.html:1011
+#: pos/models.py:23 subscription/templates/subscription/subscription.html:1011
 #: subscription/templates/subscription/subscriptions.html:557
 msgid "Postal code"
 msgstr "Poštna številka"
 
-#: pos/models.py:25 pos/models.py:425 pos/views/manage/company.py:177
+#: pos/models.py:24 pos/models.py:424 pos/views/manage/company.py:177
 #: subscription/templates/subscription/subscription.html:1015
 #: subscription/templates/subscription/subscriptions.html:561
 #: templates/pos/terminal.html:463 templates/pos/terminal.html.py:480
 msgid "City"
 msgstr "Mesto/Kraj"
 
-#: pos/models.py:26 pos/models.py:426 templates/pos/terminal.html:464
+#: pos/models.py:25 pos/models.py:425 templates/pos/terminal.html:464
 #: templates/pos/terminal.html.py:483
 msgid "State"
 msgstr "Pokrajina"
 
-#: pos/models.py:28 pos/models.py:428
+#: pos/models.py:27 pos/models.py:427
 msgid "E-mail address"
 msgstr "E-mail naslov"
 
-#: pos/models.py:30
+#: pos/models.py:29
 msgid "Phone number"
 msgstr "Telefonska številka"
 
-#: pos/models.py:31
+#: pos/models.py:30
 msgid "VAT exemption number"
 msgstr "Davčna številka"
 
-#: pos/models.py:33
+#: pos/models.py:32
 msgid "Tax payer"
 msgstr "Davčni zavezanec"
 
-#: pos/models.py:44 pos/views/manage/company.py:174
+#: pos/models.py:43 pos/views/manage/company.py:174
 msgid "Company name, used in URL address"
 msgstr "Ime podjetja, ki se bo uporabljaljo v URL naslovu"
 
-#: pos/models.py:47
+#: pos/models.py:46
 msgid "Logo"
 msgstr "Logotip"
 
-#: pos/models.py:51
+#: pos/models.py:50
 msgid "Receipt logo"
 msgstr "Logo na računu"
 
-#: pos/models.py:55 pos/models.py:586 templates/pos/manage/products.html:1464
+#: pos/models.py:54 pos/models.py:579 templates/pos/manage/products.html:1464
 #: templates/pos/terminal.html:519 templates/pos/terminal.html.py:678
 msgid "Notes"
 msgstr "Dodatno besedilo"
 
-#: pos/models.py:65
+#: pos/models.py:64
 msgid "Companies"
 msgstr ""
 
-#: pos/models.py:72
+#: pos/models.py:71
 msgid "Category name"
 msgstr ""
 
-#: pos/models.py:73 templates/pos/manage/discounts.html:142
+#: pos/models.py:72 templates/pos/manage/discounts.html:142
 #: templates/pos/manage/products.html:1461
 #: templates/pos/manage/products.html:1545 templates/pos/terminal.html:667
 msgid "Description"
 msgstr ""
 
-#: pos/models.py:85 pos/views/manage/category.py:227
+#: pos/models.py:84 pos/views/manage/category.py:227
 #: templates/pos/base.html:129 templates/pos/manage/categories.html:291
 msgid "Categories"
 msgstr "Kategorije"
 
-#: pos/models.py:126
+#: pos/models.py:125
 msgid "Discount description"
 msgstr ""
 
-#: pos/models.py:127 templates/pos/manage/products.html:1711
+#: pos/models.py:126 templates/pos/manage/products.html:1711
 msgid "Code"
 msgstr ""
 
-#: pos/models.py:128
+#: pos/models.py:127
 msgid "Discount type"
 msgstr ""
 
-#: pos/models.py:130 pos/views/bill.py:311 pos/views/bill.py:880
-#: pos/views/manage/bill.py:29
+#: pos/models.py:129 pos/views/bill.py:308 pos/views/bill.py:893
+#: pos/views/manage/bill.py:32
 #: subscription/templates/subscription/subscriptions.html:511
 #: templates/pos/large_receipt.html:71 templates/pos/manage/discounts.html:154
 #: templates/pos/manage/tax.html:295 templates/pos/small_receipt.html:53
@@ -1024,24 +1024,24 @@ msgstr ""
 msgid "Amount"
 msgstr "Znesek"
 
-#: pos/models.py:142
+#: pos/models.py:141
 #: subscription/templates/subscription/subscriptions.html:366
 msgid "Start date"
 msgstr ""
 
-#: pos/models.py:143
+#: pos/models.py:142
 msgid "End date"
 msgstr ""
 
-#: pos/models.py:144
+#: pos/models.py:143
 msgid "Enabled"
 msgstr ""
 
-#: pos/models.py:179
+#: pos/models.py:178
 msgid "Tax amount"
 msgstr ""
 
-#: pos/models.py:181
+#: pos/models.py:180
 #: subscription/templates/subscription/subscription.html:1003
 #: subscription/templates/subscription/subscriptions.html:549
 #: templates/pos/large_receipt.html:66 templates/pos/manage/products.html:1458
@@ -1050,184 +1050,188 @@ msgstr ""
 msgid "Name"
 msgstr "Naziv"
 
-#: pos/models.py:182
+#: pos/models.py:181
 msgid "Use by default when creating new products"
 msgstr ""
 
-#: pos/models.py:185 templates/pos/base.html:132
+#: pos/models.py:184 templates/pos/base.html:132
 #: templates/pos/manage/products.html:1201
 #: templates/pos/manage/products.html:1510 templates/pos/manage/tax.html:275
 msgid "Taxes"
 msgstr "Davki"
 
-#: pos/models.py:193 templates/pos/manage/products.html:1452
+#: pos/models.py:192 templates/pos/manage/products.html:1452
 #: templates/pos/manage/products.html:1552 templates/pos/terminal.html:272
 msgid "Product code"
 msgstr ""
 
-#: pos/models.py:194
+#: pos/models.py:193
 msgid "Store's internal product number"
 msgstr ""
 
-#: pos/models.py:195
+#: pos/models.py:194
 msgid "Product name"
 msgstr ""
 
-#: pos/models.py:196
+#: pos/models.py:195
 msgid "Product description"
 msgstr ""
 
-#: pos/models.py:197
+#: pos/models.py:196
 msgid "Notes (only for internal use)"
 msgstr ""
 
-#: pos/models.py:198
+#: pos/models.py:197
 msgid "Product unit type"
 msgstr ""
 
-#: pos/models.py:200
+#: pos/models.py:199
 msgid "Number of items left in stock"
 msgstr ""
 
-#: pos/models.py:217
+#: pos/models.py:216
 msgid "Icon"
 msgstr ""
 
-#: pos/models.py:375
+#: pos/models.py:374
 msgid "Order of discount on a product"
 msgstr ""
 
-#: pos/models.py:403
+#: pos/models.py:402
 msgid "Price per unit, excluding tax"
 msgstr ""
 
-#: pos/models.py:409
+#: pos/models.py:408
 msgid "Purchase price per unit, excluding tax"
 msgstr ""
 
-#: pos/models.py:416
+#: pos/models.py:415
 msgid "Type of contact"
 msgstr ""
 
-#: pos/models.py:422 templates/pos/terminal.html:470
+#: pos/models.py:421 templates/pos/terminal.html:470
 msgid "Date of birth"
 msgstr "Rojstni datum"
 
-#: pos/models.py:423
+#: pos/models.py:422
 msgid "Street and house number"
 msgstr "Naslov in hišna številka"
 
-#: pos/models.py:424
+#: pos/models.py:423
 msgid "Post code/ZIP"
 msgstr "Poštna številka"
 
-#: pos/models.py:429
+#: pos/models.py:428
 msgid "Telephone number"
 msgstr "Telefonska številka"
 
-#: pos/models.py:430
+#: pos/models.py:429
 msgid "VAT identification number"
 msgstr "Davčna številka"
 
-#: pos/models.py:509
+#: pos/models.py:497
 msgid "Name of the register"
 msgstr "Ime blagajne"
 
-#: pos/models.py:510
+#: pos/models.py:498
 msgid "Receipt format"
 msgstr "Format računa"
 
-#: pos/models.py:512
+#: pos/models.py:500
 msgid "Receipt type"
 msgstr "Tip računa"
 
-#: pos/models.py:513
+#: pos/models.py:501
 msgid "Print logo on thermal receipts"
 msgstr "Natisni logo na račun"
 
-#: pos/models.py:514
+#: pos/models.py:502
 msgid "Location of register"
 msgstr "Lokacija tisklanika"
 
-#: pos/models.py:515
+#: pos/models.py:503
 msgid "Print location of register"
 msgstr "Natisni lokacijo blagajne"
 
-#: pos/models.py:523
+#: pos/models.py:511
 msgid "Printer"
 msgstr "Natisni"
 
-#: pos/models.py:524
+#: pos/models.py:512
 msgid "Device id"
 msgstr "ID naprave"
 
-#: pos/models.py:557
+#: pos/models.py:546
 msgid "Bill number, unique over all company's bills"
 msgstr ""
 
-#: pos/models.py:560
+#: pos/models.py:550
+msgid "Bill serial number, including pre/postfixes"
+msgstr ""
+
+#: pos/models.py:553
 msgid "Discount on the whole bill (absolute or relative)"
 msgstr ""
 
-#: pos/models.py:565
+#: pos/models.py:558
 msgid "Type of discount"
 msgstr ""
 
-#: pos/models.py:571
+#: pos/models.py:564
 msgid "Sub total"
 msgstr ""
 
-#: pos/models.py:576
+#: pos/models.py:569
 msgid "Discount, sum of all discounts"
 msgstr ""
 
-#: pos/models.py:581
+#: pos/models.py:574
 msgid "Tax amount, absolute value, sum of all items' taxes"
 msgstr ""
 
-#: pos/models.py:593
+#: pos/models.py:586
 msgid "Date and time of bill creation"
 msgstr ""
 
-#: pos/models.py:679
+#: pos/models.py:655
 msgid "Bill notes"
 msgstr ""
 
-#: pos/models.py:680
+#: pos/models.py:656
 msgid ""
 "Notes for this item, shown on bill (like expiration date or serial number)"
 msgstr ""
 
-#: pos/models.py:688
+#: pos/models.py:664
 msgid "Base price (for single item), without tax and discounts"
 msgstr ""
 
-#: pos/models.py:693 pos/views/bill.py:311 pos/views/bill.py:880
+#: pos/models.py:669 pos/views/bill.py:308 pos/views/bill.py:893
 #: templates/pos/large_receipt.html:69
 msgid "Quantity"
 msgstr ""
 
-#: pos/models.py:698
+#: pos/models.py:674
 msgid "Tax in percent, copied from product's tax rate"
 msgstr ""
 
-#: pos/models.py:709
+#: pos/models.py:685
 msgid "Base price, multiplied by quantity"
 msgstr ""
 
-#: pos/models.py:714
+#: pos/models.py:690
 msgid "Discount, absolute value, sum of all valid discounts on this item"
 msgstr ""
 
-#: pos/models.py:719
+#: pos/models.py:695
 msgid "Base price minus discounts"
 msgstr ""
 
-#: pos/models.py:724
+#: pos/models.py:700
 msgid "Tax amount, absolute value"
 msgstr ""
 
-#: pos/models.py:729
+#: pos/models.py:705
 msgid "Total price, including taxes, discounts and multiplied by quantity"
 msgstr ""
 
@@ -1351,23 +1355,23 @@ msgstr ""
 msgid "/user-settings"
 msgstr ""
 
-#: pos/views/bill.py:238
+#: pos/views/bill.py:235
 msgid "Unsupported bill format"
 msgstr ""
 
-#: pos/views/bill.py:288 pos/views/bill.py:301 pos/views/bill.py:856
-#: pos/views/bill.py:869 templates/pos/large_receipt.html:21
+#: pos/views/bill.py:285 pos/views/bill.py:298 pos/views/bill.py:869
+#: pos/views/bill.py:882 templates/pos/large_receipt.html:21
 #: templates/pos/large_receipt.html:32 templates/pos/small_receipt.html:18
 #: templates/pos/small_receipt.html:32 templates/pos/terminal.html:477
 msgid "VAT"
-msgstr ""
+msgstr "ID DDV"
 
-#: pos/views/bill.py:305 pos/views/bill.py:873
-#: templates/pos/large_receipt.html:57 templates/pos/small_receipt.html:38
+#: pos/views/bill.py:302 pos/views/bill.py:886
+#: templates/pos/large_receipt.html:57
 msgid "Bill No."
 msgstr ""
 
-#: pos/views/bill.py:311 pos/views/bill.py:880
+#: pos/views/bill.py:308 pos/views/bill.py:893
 #: subscription/templates/subscription/subscription_copy.html:403
 #: templates/pos/large_receipt.html:67 templates/pos/manage/products.html:1470
 #: templates/pos/manage/products.html:1706 templates/pos/small_receipt.html:49
@@ -1375,178 +1379,188 @@ msgstr ""
 msgid "Price"
 msgstr "Cena"
 
-#: pos/views/bill.py:311 pos/views/bill.py:880
+#: pos/views/bill.py:308 pos/views/bill.py:893
 #: templates/pos/large_receipt.html:68 templates/pos/small_receipt.html:52
 #: templates/pos/terminal.html:248 templates/pos/terminal.html.py:331
 msgid "Discount"
 msgstr ""
 
-#: pos/views/bill.py:330 pos/views/bill.py:338 pos/views/bill.py:900
-#: pos/views/bill.py:909
+#: pos/views/bill.py:327 pos/views/bill.py:335 pos/views/bill.py:913
+#: pos/views/bill.py:922
 #: subscription/templates/subscription/subscription_copy.html:439
 #: templates/pos/large_receipt.html:83 templates/pos/large_receipt.html:132
-#: templates/pos/small_receipt.html:91 templates/pos/terminal.html:252
-#: templates/pos/terminal.html.py:312 templates/pos/terminal.html:554
+#: templates/pos/terminal.html:252 templates/pos/terminal.html.py:312
+#: templates/pos/terminal.html:554
 msgid "Total"
 msgstr "Skupaj"
 
-#: pos/views/bill.py:338 pos/views/bill.py:909
+#: pos/views/bill.py:335 pos/views/bill.py:922
 #: templates/pos/large_receipt.html:129 templates/pos/small_receipt.html:88
 msgid "Rate"
-msgstr ""
+msgstr "DDV%"
 
-#: pos/views/bill.py:338 pos/views/bill.py:909
+#: pos/views/bill.py:335 pos/views/bill.py:922
 #: templates/pos/large_receipt.html:130 templates/pos/small_receipt.html:89
 msgid "Subtotal"
-msgstr ""
+msgstr "Neto"
 
-#: pos/views/bill.py:338 pos/views/bill.py:909
+#: pos/views/bill.py:335 pos/views/bill.py:922
 #: templates/pos/large_receipt.html:131
 #: templates/pos/manage/products.html:1467
 #: templates/pos/manage/products.html:1562
 #: templates/pos/manage/products.html:1696 templates/pos/small_receipt.html:90
 #: templates/pos/terminal.html:245 templates/pos/terminal.html.py:650
 msgid "Tax"
-msgstr "Davek"
+msgstr "DDV"
 
-#: pos/views/bill.py:352 pos/views/bill.py:923
+#: pos/views/bill.py:349 pos/views/bill.py:936
 msgid "Sum"
 msgstr "Skupno"
 
-#: pos/views/bill.py:388
+#: pos/views/bill.py:385
 msgid "(Item: "
 msgstr ""
 
-#: pos/views/bill.py:392
+#: pos/views/bill.py:389
 msgid "You have no permission to create bills"
 msgstr ""
 
-#: pos/views/bill.py:397
+#: pos/views/bill.py:394
 msgid "No data received"
 msgstr ""
 
-#: pos/views/bill.py:404
+#: pos/views/bill.py:401
 msgid "This bill has already been paid, editing is not possible"
 msgstr ""
 
-#: pos/views/bill.py:422
+#: pos/views/bill.py:419
 msgid "Invalid register specified."
 msgstr ""
 
-#: pos/views/bill.py:433
+#: pos/views/bill.py:430
 msgid "Invalid contact"
 msgstr ""
 
-#: pos/views/bill.py:464
+#: pos/views/bill.py:472
+#, fuzzy
+#| msgid "Invalid e-mail"
+msgid "Invalid timestamp"
+msgstr "Napačen e-mail"
+
+#: pos/views/bill.py:476
 msgid "Invalid grand total value"
 msgstr ""
 
-#: pos/views/bill.py:474
+#: pos/views/bill.py:486
 msgid "Product with this id does not exist"
 msgstr ""
 
-#: pos/views/bill.py:479
+#: pos/views/bill.py:491
 msgid "Invalid quantity value"
 msgstr ""
 
-#: pos/views/bill.py:482
+#: pos/views/bill.py:494
 msgid "Cannot add an item with zero or negative quantity"
 msgstr ""
 
-#: pos/views/bill.py:528
+#: pos/views/bill.py:540
 msgid "The discount is not active"
 msgstr ""
 
-#: pos/views/bill.py:530
+#: pos/views/bill.py:542
 msgid "Chosen discount does not exist or is not valid"
 msgstr ""
 
-#: pos/views/bill.py:535 pos/views/bill.py:539 pos/views/bill.py:557
+#: pos/views/bill.py:547 pos/views/bill.py:551 pos/views/bill.py:569
 msgid "Invalid discount amount"
 msgstr ""
 
-#: pos/views/bill.py:553
+#: pos/views/bill.py:565
 msgid "Invalid base price"
 msgstr ""
 
-#: pos/views/bill.py:554
+#: pos/views/bill.py:566
 msgid "Invalid quantity"
 msgstr ""
 
-#: pos/views/bill.py:555 pos/views/manage/product.py:474
+#: pos/views/bill.py:567 pos/views/manage/product.py:474
 #: pos/views/manage/stock.py:474
 msgid "Invalid tax rate"
 msgstr ""
 
-#: pos/views/bill.py:556
+#: pos/views/bill.py:568
 msgid "Invalid batch price"
 msgstr ""
 
-#: pos/views/bill.py:558
+#: pos/views/bill.py:570
 msgid "Invalid net price"
 msgstr ""
 
-#: pos/views/bill.py:559
+#: pos/views/bill.py:571
 msgid "Invalid tax amount"
 msgstr ""
 
-#: pos/views/bill.py:560
+#: pos/views/bill.py:572
 msgid "Invalid total"
 msgstr ""
 
-#: pos/views/bill.py:683
+#: pos/views/bill.py:696
 msgid "Invalid bill id"
 msgstr ""
 
-#: pos/views/bill.py:689 pos/views/bill.py:758
+#: pos/views/bill.py:702 pos/views/bill.py:771
 msgid "You have no permission to edit bills"
 msgstr ""
 
-#: pos/views/bill.py:693
+#: pos/views/bill.py:706
 msgid "This bill has already been paid, deleting is not possible"
 msgstr ""
 
-#: pos/views/bill.py:718 pos/views/bill.py:959 pos/views/bill.py:1002
-#: pos/views/bill.py:1049
+#: pos/views/bill.py:731 pos/views/bill.py:972 pos/views/bill.py:1015
+#: pos/views/bill.py:1062
 msgid "Bill does not exist or data is invalid"
 msgstr ""
 
-#: pos/views/bill.py:764 pos/views/manage/contact.py:479
-#: pos/views/manage/product.py:713 pos/views/manage/stock.py:713
+#: pos/views/bill.py:777 pos/views/manage/contact.py:479
+#: pos/views/manage/product.py:714 pos/views/manage/stock.py:713
 #: pos/views/manage/users.py:72 pos/views/manage/users.py:150
 #: pos/views/manage/users.py:255 web/views.py:371
 msgid "No data in request"
 msgstr ""
 
-#: pos/views/bill.py:770
+#: pos/views/bill.py:783
 msgid "No bill found"
 msgstr ""
 
-#: pos/views/bill.py:779
+#: pos/views/bill.py:792
 msgid "Payment type does not exist"
 msgstr ""
 
-#: pos/views/bill.py:823
+#: pos/views/bill.py:836
 msgid "Missing required data"
 msgstr ""
 
-#: pos/views/manage/bill.py:29
+#: pos/views/manage/bill.py:19
+msgid "Any"
+msgstr ""
+
+#: pos/views/manage/bill.py:32
 msgid "Number"
 msgstr ""
 
-#: pos/views/manage/bill.py:29
+#: pos/views/manage/bill.py:32
 msgid "Date"
 msgstr ""
 
-#: pos/views/manage/bill.py:30
+#: pos/views/manage/bill.py:33
 msgid "Descending"
 msgstr ""
 
-#: pos/views/manage/bill.py:30
+#: pos/views/manage/bill.py:33
 msgid "Ascending"
 msgstr ""
 
-#: pos/views/manage/bill.py:140 templates/pos/base.html:135
+#: pos/views/manage/bill.py:147 templates/pos/base.html:135
 #: templates/pos/manage/bills.html:42
 msgid "Bills"
 msgstr "Računi"
@@ -1646,35 +1660,39 @@ msgstr ""
 msgid "Color logo does not exist"
 msgstr ""
 
-#: pos/views/manage/configuration.py:59
+#: pos/views/manage/configuration.py:63
 msgid ""
 "where bitcoins will be resend from our bitcoin wallet after user sends "
 "bitcoins (after 3 confirmations)"
 msgstr ""
 
-#: pos/views/manage/configuration.py:60
+#: pos/views/manage/configuration.py:64
 msgid "Paypal email address"
 msgstr ""
 
-#: pos/views/manage/configuration.py:60
+#: pos/views/manage/configuration.py:64
 msgid ""
 "where funds will be sent to when using paypal payment method; this MUST be "
 "PAYPAL VERIFIED BUSINESS account"
 msgstr ""
 
-#: pos/views/manage/configuration.py:74
+#: pos/views/manage/configuration.py:78
+msgid "The format string must contain the bill number placeholder"
+msgstr ""
+
+#: pos/views/manage/configuration.py:87
 msgid "In boxes"
 msgstr ""
 
-#: pos/views/manage/configuration.py:74
+#: pos/views/manage/configuration.py:87
 msgid "In lines"
 msgstr ""
 
-#: pos/views/manage/configuration.py:115
+#: pos/views/manage/configuration.py:129
 msgid "System configuration"
 msgstr ""
 
-#: pos/views/manage/configuration.py:152 templates/pos/manage/user.html:16
+#: pos/views/manage/configuration.py:166 templates/pos/manage/user.html:16
 #: templates/web/user_profile.html:12
 msgid "User settings"
 msgstr "Nastavitve uporabnika"
@@ -1966,48 +1984,44 @@ msgstr ""
 msgid "Check stock notation"
 msgstr ""
 
-#: pos/views/manage/product.py:493 pos/views/manage/stock.py:493
-msgid "Stock cannot be negative"
-msgstr ""
-
-#: pos/views/manage/product.py:543 pos/views/manage/stock.py:543
+#: pos/views/manage/product.py:544 pos/views/manage/stock.py:543
 msgid "Error while setting purchase price"
 msgstr ""
 
-#: pos/views/manage/product.py:549 pos/views/manage/stock.py:549
+#: pos/views/manage/product.py:550 pos/views/manage/stock.py:549
 msgid "Error while setting sell price"
 msgstr ""
 
-#: pos/views/manage/product.py:583 pos/views/manage/product.py:651
-#: pos/views/manage/product.py:693 pos/views/manage/stock.py:583
+#: pos/views/manage/product.py:584 pos/views/manage/product.py:652
+#: pos/views/manage/product.py:694 pos/views/manage/stock.py:583
 #: pos/views/manage/stock.py:651 pos/views/manage/stock.py:693
 msgid "Product does not exist"
 msgstr ""
 
-#: pos/views/manage/product.py:643 pos/views/manage/stock.py:643
+#: pos/views/manage/product.py:644 pos/views/manage/stock.py:643
 msgid "You have no permission to delete products"
 msgstr ""
 
-#: pos/views/manage/product.py:687 pos/views/manage/stock.py:687
+#: pos/views/manage/product.py:688 pos/views/manage/stock.py:687
 #: templates/pos/manage/products.html:935
 msgid "Invalid data"
 msgstr ""
 
-#: pos/views/manage/product.py:717 pos/views/manage/stock.py:717
+#: pos/views/manage/product.py:718 pos/views/manage/stock.py:717
 msgid "No products selected"
 msgstr ""
 
-#: pos/views/manage/product.py:728 pos/views/manage/stock.py:728
+#: pos/views/manage/product.py:729 pos/views/manage/stock.py:728
 #: pos/views/manage/tax.py:139 pos/views/manage/tax.py:217
 msgid "Tax does not exist"
 msgstr ""
 
-#: pos/views/manage/product.py:741 pos/views/manage/product.py:753
+#: pos/views/manage/product.py:742 pos/views/manage/product.py:754
 #: pos/views/manage/stock.py:741 pos/views/manage/stock.py:753
 msgid "Discount does not exist or is not valid"
 msgstr ""
 
-#: pos/views/manage/product.py:769 pos/views/manage/stock.py:769
+#: pos/views/manage/product.py:770 pos/views/manage/stock.py:769
 msgid "Unsupported mass edit action"
 msgstr ""
 
@@ -2043,9 +2057,13 @@ msgstr "Uredi blagajno"
 msgid "You have no permission to view stats"
 msgstr ""
 
-#: pos/views/manage/stats.py:176 templates/pos/base.html:136
+#: pos/views/manage/stats.py:174 templates/pos/base.html:136
 #: templates/pos/manage/stats.html:18
 msgid "Stats"
+msgstr ""
+
+#: pos/views/manage/stock.py:493
+msgid "Stock cannot be negative"
 msgstr ""
 
 #: pos/views/manage/tax.py:60
@@ -2148,31 +2166,31 @@ msgstr ""
 msgid "You have no permission to use terminal."
 msgstr ""
 
-#: pos/views/terminal.py:96
+#: pos/views/terminal.py:93
 msgid "Data error"
 msgstr ""
 
-#: pos/views/terminal.py:199
+#: pos/views/terminal.py:196
 msgid "You have no permission for this company"
 msgstr ""
 
-#: pos/views/terminal.py:220
+#: pos/views/terminal.py:217
 msgid "Wrong PIN format"
 msgstr ""
 
-#: pos/views/terminal.py:227
+#: pos/views/terminal.py:224
 msgid "Wrong PIN"
 msgstr ""
 
-#: pos/views/terminal.py:235
+#: pos/views/terminal.py:232
 msgid "Not implemented"
 msgstr ""
 
-#: pos/views/terminal.py:237
+#: pos/views/terminal.py:234
 msgid "Unknown unlock type"
 msgstr ""
 
-#: pos/views/terminal.py:243
+#: pos/views/terminal.py:240
 msgid "This user is not active."
 msgstr ""
 
@@ -2959,93 +2977,106 @@ msgstr "Išči"
 msgid "Bill issue date: from"
 msgstr ""
 
-#: templates/pos/manage/bills.html:62 templates/pos/manage/bills.html.py:95
+#: templates/pos/manage/bills.html:62 templates/pos/manage/bills.html:104
 #: templates/pos/manage/stats.html:34 templates/pos/manage/stats.html.py:69
 msgid "To:"
 msgstr ""
 
-#: templates/pos/manage/bills.html:81
+#: templates/pos/manage/bills.html:84
 msgctxt "bill search form"
 msgid "Bill no."
 msgstr ""
 
-#: templates/pos/manage/bills.html:90
+#: templates/pos/manage/bills.html:89
+#, fuzzy
+#| msgid "State"
+msgid "Status:"
+msgstr "Pokrajina"
+
+#: templates/pos/manage/bills.html:99
 msgid "Amount: from"
 msgstr ""
 
-#: templates/pos/manage/bills.html:126 templates/pos/manage/contacts.html:66
+#: templates/pos/manage/bills.html:135 templates/pos/manage/contacts.html:66
 #: templates/pos/manage/discounts.html:73
 msgid "Clear results"
 msgstr ""
 
-#: templates/pos/manage/bills.html:132 templates/pos/manage/contacts.html:60
+#: templates/pos/manage/bills.html:141 templates/pos/manage/contacts.html:60
 #: templates/pos/manage/discounts.html:67
 #: templates/pos/manage/products.html:1494
 msgctxt "submit button label"
 msgid "Search"
 msgstr ""
 
-#: templates/pos/manage/bills.html:144 templates/pos/manage/discounts.html:86
+#: templates/pos/manage/bills.html:153 templates/pos/manage/discounts.html:86
 msgid "Results found: "
 msgstr ""
 
-#: templates/pos/manage/bills.html:152 templates/pos/manage/bills.html:153
+#: templates/pos/manage/bills.html:161 templates/pos/manage/bills.html:162
 #: templates/pos/manage/discounts.html:94
 #: templates/pos/manage/discounts.html:95
 msgctxt "Paginator page button"
 msgid "Back"
 msgstr ""
 
-#: templates/pos/manage/bills.html:156 templates/pos/manage/discounts.html:98
+#: templates/pos/manage/bills.html:165 templates/pos/manage/discounts.html:98
 msgid "Page"
 msgstr ""
 
-#: templates/pos/manage/bills.html:156 templates/pos/manage/discounts.html:98
+#: templates/pos/manage/bills.html:165 templates/pos/manage/discounts.html:98
 msgid "of"
 msgstr ""
 
-#: templates/pos/manage/bills.html:163 templates/pos/manage/bills.html:164
+#: templates/pos/manage/bills.html:172 templates/pos/manage/bills.html:173
 #: templates/pos/manage/discounts.html:105
 #: templates/pos/manage/discounts.html:106
 msgctxt "Paginator page button"
 msgid "Forward"
 msgstr ""
 
-#: templates/pos/manage/bills.html:169
+#: templates/pos/manage/bills.html:178
 msgid "Recent bills"
 msgstr ""
 
-#: templates/pos/manage/bills.html:176
+#: templates/pos/manage/bills.html:185
 msgctxt "bill management"
-msgid "No."
+msgid "Serial"
 msgstr ""
 
-#: templates/pos/manage/bills.html:177
+#: templates/pos/manage/bills.html:186
+#, fuzzy
+#| msgid "State"
+msgctxt "bill management"
+msgid "Status"
+msgstr "Pokrajina"
+
+#: templates/pos/manage/bills.html:187
 msgctxt "bill management"
 msgid "User"
 msgstr ""
 
-#: templates/pos/manage/bills.html:178
+#: templates/pos/manage/bills.html:188
 msgctxt "bill management"
 msgid "Issue date"
 msgstr ""
 
-#: templates/pos/manage/bills.html:179
+#: templates/pos/manage/bills.html:189
 msgctxt "bill management"
 msgid "Contact name"
 msgstr ""
 
-#: templates/pos/manage/bills.html:180
+#: templates/pos/manage/bills.html:190
 msgctxt "bill management"
 msgid "Total"
 msgstr "Skupaj"
 
-#: templates/pos/manage/bills.html:181
+#: templates/pos/manage/bills.html:191
 msgctxt "bill management"
 msgid "Items"
 msgstr ""
 
-#: templates/pos/manage/bills.html:198 templates/pos/manage/bills.html:199
+#: templates/pos/manage/bills.html:209 templates/pos/manage/bills.html:210
 #: templates/pos/receipt_template.html:52
 #: templates/pos/receipt_template.html:53 templates/pos/terminal.html:615
 #: templates/web/index.html:353
@@ -3092,7 +3123,7 @@ msgid "In category"
 msgstr "V kategoriji"
 
 #: templates/pos/manage/category.html:103
-#: templates/pos/manage/company.html:316 templates/pos/manage/config.html:92
+#: templates/pos/manage/company.html:316 templates/pos/manage/config.html:101
 #: templates/pos/manage/contact.html:147 templates/pos/manage/discount.html:95
 #: templates/pos/manage/personal.html:65
 #: templates/pos/manage/products.html:1662
@@ -3655,23 +3686,22 @@ msgstr ""
 msgid "Client"
 msgstr ""
 
+#: templates/pos/small_receipt.html:38
+msgid "Bill"
+msgstr "Račun"
+
 #: templates/pos/small_receipt.html:50 templates/pos/terminal.html:239
 msgid "Qty"
-msgstr "Št."
+msgstr "Količina"
 
-#: templates/pos/small_receipt.html:78
+#: templates/pos/small_receipt.html:78 templates/pos/small_receipt.html:91
 msgctxt "Receipt footer text"
 msgid "Total"
-msgstr "Skupaj"
-
-#: templates/pos/small_receipt.html:107
-msgctxt "tax rates table footer"
-msgid "Sum"
-msgstr ""
+msgstr "Bruto"
 
 #: templates/pos/terminal.html:30
 msgid "Out of stock"
-msgstr ""
+msgstr "Ni na zalogi"
 
 #: templates/pos/terminal.html:68
 msgid ""
@@ -4671,6 +4701,10 @@ msgstr "Nepričakovana napaka. Prosimo te, obvesti nas"
 #: web/views.py:400
 msgid "Message from website"
 msgstr ""
+
+#~ msgctxt "tax rates table footer"
+#~ msgid "Sum"
+#~ msgstr "Seštevek"
 
 #~ msgid "Cash. Credit card. Paypal. Bitcoin."
 #~ msgstr "Gotovina. Kreditna kartica. Paypal. Bitcoin."

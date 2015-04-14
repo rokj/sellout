@@ -344,7 +344,9 @@ Payment = function(g, bill){
                 // create some fine html graphics
                 // create a HTML receipt and issue javascript print() method and that's it
                 receipt.html(html);
-                receipt.printThis();
+                var myWindow = window.open("", "MsgWindow");
+                myWindow.document.write(html);
+                // receipt.printThis();
                 break;
             default:
                 alert("Printer driver not implemented: " +

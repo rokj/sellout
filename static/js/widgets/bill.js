@@ -301,8 +301,6 @@ Bill = function(g){
         var d = new Date();
         var timestamp = [d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()];
 
-        console.log(timestamp);
-
         // issuer: the current company, in view
 
         // contact:
