@@ -33,7 +33,7 @@ DECIMAL = {
 # unit types
 # unicode superscripts: ² ³ (replacing ^* with <sup>*</sup> does not work for <select>)
 UNITS = (
-    ("Piece", _("Piece")),
+    ("Piece", _("Piece")),  # the first is the default
     ("g", "g"),
     ("dag", "dag"),
     ("kg", "kg"),
@@ -59,6 +59,7 @@ UNITS = (
     ("h", _("Hour")),
     ("other", _("Other")),
 )
+UNIT_CODES = [x[0] for x in UNITS]
 
 # products
 SEARCH_RESULTS = {
@@ -263,6 +264,8 @@ CATEGORY_COLORS = [  # choices for category.color
     '5ad2fa',
 ]
 
+NO_CATEGORY_NAME = _("[No Category]")
+
 ###
 ### actions
 ###
@@ -354,3 +357,5 @@ BILL_STATUS = (
     (PAID, _("Paid")),
     (CANCELED, _("Canceled")),
 )
+
+BILL_SERIAL_FORMAT_PLACEHOLDER = '{s}'

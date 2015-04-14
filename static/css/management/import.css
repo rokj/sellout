@@ -1,0 +1,11 @@
+.import-success {
+    color: #22e693;
+}
+
+.import-fail {
+    color: #ec5449;
+}
+
+.container-content {
+    margin-left: 30px;
+}

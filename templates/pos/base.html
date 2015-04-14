@@ -102,9 +102,10 @@ blocks:
                 {# store-related stuff #}
                 {% if company %}
                     <li><a href="{% url 'web:select_company' %}">{% trans 'Home' %}</a></li>
-                <li><a href="{% url 'pos:lock_session' company.url_name %}" id="switch_user">{% trans 'Switch User' %}</a></li>
+                    <li><a href="{% url 'web:user_profile' %}">{% trans 'Settings' %}</a></li>
+                    <li><a href="{% url 'pos:lock_session' company.url_name %}" id="switch_user">{% trans 'Switch user' %}</a></li>
                 {% endif %}
-                <li><a href="{% url 'web:logout' %}">{% trans 'Log Out' %}</a></li>
+                <li><a href="{% url 'web:logout' %}">{% trans 'Log out' %}</a></li>
             </ul>
         </div>
 

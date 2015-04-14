@@ -219,7 +219,6 @@ def google_login_or_register(request, mobile=False):
             set_user_value(bluser, 'google_access_token', d["access_token"])
             set_language(request)
 
-        group = user.homegroup
         if mobile:
             data = {'status': 'ok', 'user_id': user.id}
         else:

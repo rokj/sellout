@@ -16,7 +16,6 @@ import random
 
 
 ### company ###
-
 class CompanyAbstract(models.Model):
     # abstract: used in  for Company and BillCompany
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
@@ -493,17 +492,6 @@ class Permission(SkeletonU):
         return "%04d"%(self.pin % 10000)
 
 
-@receiver(pre_save, sender=Permission)
-@receiver(pre_delete, sender=Permission)
-def delete_permission_cache(**kwargs):
-    """ deletes cached permissions on save or delete """
-    from common.functions import permission_cache_key
-    from django.core.cache import cache
-    
-    ckey = permission_cache_key(kwargs['instance'].user, kwargs['instance'].company)
-    cache.delete(ckey)
-
-
 ### register (till) ###
 class RegisterAbstract(models.Model):
     name = models.CharField(_("Name of the register"), max_length=50, null=False, blank=False)
@@ -554,7 +542,12 @@ class Bill(SkeletonU, RegisterAbstract):
     user_id = models.IntegerField(null=False)
     user_name = models.CharField(max_length=64, null=False)
 
+    # serial number: a sequential bill number, unique for a company
     serial = models.IntegerField(_("Bill number, unique over all company's bills"), null=True)  # will be updated in post_save signal
+
+    # formatted serial number: added prefixes and postfixes, string format is in config;
+    # gets assigned after save
+    formatted_serial = models.TextField(_("Bill serial number, including pre/postfixes"), null=True)
 
     # discount applied to whole bill
     discount_amount = models.DecimalField(_("Discount on the whole bill (absolute or relative)"),
@@ -653,23 +646,6 @@ class Bill(SkeletonU, RegisterAbstract):
         except Payment.DoesNotExist:
             pass
 
-# pre-save signal: set bill's serial number
-@receiver(pre_save, sender=Bill)
-def set_serial(instance, **kwargs):
-    # set serial number after the bill has been paid;
-
-    if not instance.serial:
-        try:
-            # get the second last bill (because the last is this bill without serial)
-            last_bill = Bill.objects.only('serial') \
-                            .filter(company=instance.company) \
-                            .exclude(serial=None) \
-                            .order_by('-serial')[0]
-            instance.serial = last_bill.serial + 1
-            instance.timestamp = dtm.datetime.utcnow()
-        except:
-            instance.serial = 1
-
 
 class BillItem(SkeletonU, ProductAbstract): # include all data from Product
     bill = models.ForeignKey(Bill)
@@ -739,117 +715,4 @@ class BillItemDiscount(SkeletonU, DiscountAbstract):
     # inherits everything from DiscountAbstract
     bill_item = models.ForeignKey(BillItem)
 
-
-### track changes:
-# company
-@receiver(post_save, sender=Company)
-def company_updated(instance, **kwargs):
-    from common.functions import compare_objects, copy_data
-
-    # get the last saved object from that table and see if anything has changed
-    last_object = BillCompany.objects.filter(company=instance).order_by('-datetime_created')[:1]
-
-    if len(last_object) > 0:
-        last_object = last_object[0]
-        if compare_objects(last_object, instance) is True:
-            # there are no changes, there's nothing to be done
-            return
-
-    # something has changed, create a new copy of instance in model
-    # create a new BillCompany
-    bill_company = BillCompany(
-        created_by=instance.created_by,
-        company=instance
-    )
-
-    copy_data(instance, bill_company)
-    bill_company.save()
-
-
-# register
-@receiver(post_save, sender=Register)
-def register_updated(instance, **kwargs):  # see comments for company_updated
-    from common.functions import compare_objects, copy_data
-
-    last_object = BillRegister.objects.filter(register=instance).order_by('-datetime_updated')[:1]
-
-    if len(last_object) > 0:
-        last_object = last_object[0]
-        if compare_objects(last_object, instance) is True:
-            return
-
-    bill_register = BillRegister(
-        created_by=instance.created_by,
-        register=instance
-    )
-    copy_data(instance, bill_register)
-    bill_register.save()
-
-
-# contact
-@receiver(post_save, sender=Contact)
-def contact_updated(instance, **kwargs):
-    from common.functions import compare_objects, copy_data
-
-    last_object = BillContact.objects.filter(contact=instance).order_by('-datetime_updated')[:1]
-
-    if len(last_object) > 0:
-        last_object = last_object[0]
-        if compare_objects(last_object, instance) is True:
-            return
-
-    bill_contact = BillContact(
-        contact=instance,
-        created_by=instance.created_by
-    )
-    copy_data(instance, bill_contact)
-    bill_contact.save()
-
-
-### synchonization
-def signal_change(instance, created, action, **kwargs):
-    from sync.models import Sync
-    if not instance.company:
-        return
-
-    sync_objects = Sync.objects.only('seq')\
-        .filter(company=instance.company).order_by('-seq')
-
-    last_key = 0
-
-    if len(sync_objects) > 0:
-        last_key = sync_objects[0].seq
-
-    try:
-        object = Sync.objects.get(company=instance.company, object_id=instance.id, model=instance.__class__.__name__)
-        object.seq = last_key+1
-        object.action = action
-        object.save()
-    except Sync.DoesNotExist:
-        sync = Sync(company=instance.company,
-                    action=action,
-                    model=instance.__class__.__name__,
-                    object_id=instance.id,
-                    seq=last_key+1)
-        sync.save()
-
-
-@receiver(post_delete, sender=Category)
-@receiver(post_delete, sender=Product)
-@receiver(post_delete, sender=Contact)
-@receiver(post_delete, sender=Tax)
-@receiver(post_delete, sender=Discount)
-@receiver(post_delete, sender=Register)
-def set_serial_delete(instance, **kwargs):
-    signal_change(instance, False, action='delete', **kwargs)
-
-
-@receiver(post_save, sender=Category)
-@receiver(post_save, sender=Product)
-@receiver(post_save, sender=Contact)
-@receiver(post_save, sender=Tax)
-@receiver(post_save, sender=Discount)
-@receiver(post_save, sender=Register)
-def set_serial_save(instance, created, **kwargs):
-    signal_change(instance, created, action='save', **kwargs)
-
+import signals

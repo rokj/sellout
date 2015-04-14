@@ -73,7 +73,7 @@ def stats(request, company):
         else:
             earnings_to = r['date']
 
-        if earnings_from > earnings_to:
+        if earnings_from and earnings_to and earnings_from > earnings_to:
             earnings_from = None
             earnings_to = None
 
@@ -130,7 +130,7 @@ def stats(request, company):
         else:
             products_to = r['date']
 
-        if products_from > products_to:
+        if products_from and products_to and products_from > products_to:
             products_from = None
             products_to = None
 
@@ -160,8 +160,6 @@ def stats(request, company):
             'month': products_data['month'][i],
             'custom': products_data['custom'][i],
         })
-
-    print products
 
     context = {
         'company': c,

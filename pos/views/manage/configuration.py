@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
@@ -56,6 +57,9 @@ class ConfigForm(forms.Form):
     currency = forms.ChoiceField(choices=currency_choices, required=True)
     decimal_separator = forms.CharField(max_length=1, required=True)
     decimal_places = forms.ChoiceField(choices=decimal_places_choices, required=True)
+
+    bill_serial_format = forms.CharField(max_length=32, required=True)
+
     payment_bitcoin_address = forms.CharField(help_text=_("where bitcoins will be resend from our bitcoin wallet after user sends bitcoins (after 3 confirmations)"), max_length=34, required=False)
     payment_paypal_address = forms.CharField(label=_('Paypal email address'), help_text=_("where funds will be sent to when using paypal payment method; this MUST be PAYPAL VERIFIED BUSINESS account"), max_length=34, required=False)
 
@@ -66,6 +70,15 @@ class ConfigForm(forms.Form):
             return int(data)
         except:
             return 2
+
+    def clean_bill_serial_format(self):
+        format = self.cleaned_data['bill_serial_format']
+
+        if g.BILL_SERIAL_FORMAT_PLACEHOLDER not in format:
+            raise ValidationError(_('The format string must contain the bill number placeholder') +
+                                    ': ' + g.BILL_SERIAL_FORMAT_PLACEHOLDER, code='no_serial_placeholder')
+
+        return format
 
 class UserForm(forms.Form):
     button_sizes = [(key, key) for key, value in g.PRODUCT_BUTTON_DIMENSIONS.iteritems()]
@@ -99,6 +112,7 @@ def company_settings(request, company):
         'decimal_places': get_company_value(request.user, c, 'pos_decimal_places'),
         'payment_bitcoin_address': get_company_value(request.user, c, 'pos_payment_bitcoin_address'),
         'payment_paypal_address': get_company_value(request.user, c, 'pos_payment_paypal_address'),
+        'bill_serial_format': get_company_value(request.user, c, 'pos_bill_serial_format')
     }
 
     if request.method == 'POST':

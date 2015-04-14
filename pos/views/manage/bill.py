@@ -16,21 +16,23 @@ from common import globals as g
 
 
 class BillSearchForm(CompanyUserForm):
+    payment_status_choices = [('', _("Any"))] + list(g.BILL_STATUS)
+
     # search bill by:
     issued_from = CustomDateField(max_length=10, required=False)
     issued_to = CustomDateField(max_length=20, required=False)
     item_code = forms.CharField(max_length=max_field_length(Product, 'code'), required=False)
     contact = forms.CharField(max_length=128, required=False)
-    id = forms.IntegerField(min_value=1, required=False)
+    serial = forms.CharField(required=False)
+    status = forms.ChoiceField(choices=payment_status_choices, required=False, initial=PAID)
     amount_from = CustomDecimalField(max_length=g.DECIMAL['currency_digits'], required=False)
     amount_to = CustomDecimalField(max_length=g.DECIMAL['currency_digits'], required=False)
     user_name = forms.CharField(max_length=128, required=False)
 
-    sort_by = forms.ChoiceField(choices=(("id", _("Number")), ("date", _("Date")), ("amount", _("Amount")),))
+    sort_by = forms.ChoiceField(choices=(("serial", _("Number")), ("date", _("Date")), ("amount", _("Amount")),))
     sort_order = forms.ChoiceField(choices=(("desc", _("Descending")), ("asc", _("Ascending")),))
 
     page = forms.IntegerField(required=False, widget=forms.HiddenInput)
-
 
 
 ###
@@ -55,7 +57,7 @@ def list_bills(request, company):
         # decide which way to order the results
         # this is the fake switch statement that is missing in python for no obvious reason
         ordering = {
-            'id': 'serial',
+            'serial': 'serial',
             'date': 'timestamp',
             'amount': 'total'
         }
@@ -63,7 +65,7 @@ def list_bills(request, company):
         if form.cleaned_data.get('sort_order') == 'desc':
             order = '-' + order
 
-        bills = Bill.objects.filter(company=c, payment__status=PAID).order_by(order)
+        bills = Bill.objects.filter(company=c).order_by(order)
 
         # filter by whatever is in the form:
         # issue date: from
@@ -91,11 +93,16 @@ def list_bills(request, company):
                     bills.filter(contact__last_name__icontains=t) | \
                     bills.filter(contact__company_name__icontains=t)
 
-
         # bill number
-        t = form.cleaned_data.get('id')
+        t = form.cleaned_data.get('serial')
+        print t
         if t:
-            bills = bills.filter(serial=t)
+            bills = bills.filter(formatted_serial__icontains=t)
+
+        # status
+        t = form.cleaned_data.get('status')
+        if t:
+            bills = bills.filter(payment__status=t)
 
         # amount: from
         t = form.cleaned_data.get('amount_from')
@@ -118,7 +125,7 @@ def list_bills(request, company):
         form = BillSearchForm(data=None, user=request.user, company=c)
         page = 1
 
-        bills = Bill.objects.filter(company=c, payment__status=PAID).order_by('-timestamp')[:N]
+        bills = Bill.objects.filter(company=c).order_by('-timestamp')[:N]
 
     # format all bills manually
     bills = [bill_to_dict(request.user, c, b) for b in bills]

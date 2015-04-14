@@ -297,6 +297,10 @@ Bill = function(g){
         if(p.data && !isNaN(p.data.id)) id = p.data.id;
         else id = -1;
 
+        // timestamp: send an array of numbers: year, month, day, hour, minute, second
+        var d = new Date();
+        var timestamp = [d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()];
+
         // issuer: the current company, in view
 
         // contact:
@@ -336,6 +340,7 @@ Bill = function(g){
         // put everything in a neat object
         return {
             id: id,
+            timestamp: timestamp,
             contact: contact,
             register_id: register_id,
 
@@ -622,8 +627,8 @@ Item = function(bill, product) {
         p.items.name.text(p.data.name);
         p.items.code.text(p.data.code);
 
-        // quantity
-        p.items.qty.val(dn(p.data.quantity, p.g));
+        // quantity: never round numbers
+        p.items.qty.val(display_exact_number(p.data.quantity, p.g.config.separator));
 
         // batch price
         p.items.price.text(dn(p.data.batch, p.g));
@@ -681,7 +686,8 @@ Item = function(bill, product) {
         }
 
         // round to set precision
-        q = q.round(p.g.config.decimal_places);
+        // wtf! of course not. this is user input
+        //q = q.round(p.g.config.decimal_places);
 
         // check if there's enough of it in stock
         // this has been disabled

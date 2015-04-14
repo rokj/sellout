@@ -35,7 +35,10 @@ company_defaults = {
     # billing and calculation defaults
     'pos_decimal_places': 2,  # default decimal places for display
     'pos_payment_bitcoin_address': '',
-    'pos_payment_paypal_address': '' 
+    'pos_payment_paypal_address': '',
+
+    # strftime() format string, {s} - bill serial
+    'pos_bill_serial_format': '%Y-' + g.BILL_SERIAL_FORMAT_PLACEHOLDER,
 }
 
 user_defaults = {

@@ -86,8 +86,8 @@ def product_to_dict(user, company, product, android=False):
         ret['category'] = product.category.name
         ret['category_id'] = product.category.id
     else:
-        ret['category'] = None
-        ret['category_id'] = None
+        ret['category'] = g.NO_CATEGORY_NAME
+        ret['category_id'] = -1
 
     ret['code'] = product.code
     ret['shortcut'] = product.shortcut
@@ -115,8 +115,23 @@ def products(request, company):
         return error(request, c, _("There are no taxes defined. Please go to tax management and define them."))
 
     # if there are no categories defined, throw an error
-    if Category.objects.filter(company=c).count() == 0:
-        return error(request, c, _("There are no categories defined, please go to category management to define them."))
+    # [this is no longer required since category on product isn't required either]
+    # if Category.objects.filter(company=c).count() == 0:
+    #    return error(request, c, _("There are no categories defined, please go to category management to define them."))
+
+    # list of categories: one additional 'category': no category set, that is 'None'
+    categories = get_all_categories(c, json=True)
+    categories.append({
+        'id': -1,
+        'name': g.NO_CATEGORY_NAME,
+        'description': "",
+        'parent_id': None,
+
+        'color': g.CATEGORY_COLORS[0],  # the default
+        'breadcrumbs': g.NO_CATEGORY_NAME,
+        'path': g.NO_CATEGORY_NAME,
+        'level': 0
+    })
 
     # fields that need to be limited in length:
     lengths = {
@@ -135,7 +150,7 @@ def products(request, company):
         'site_title': g.MISC['site_title'],
         # lists
         'taxes': JsonStringify(get_all_taxes(request.user, c)),
-        'categories': JsonStringify(get_all_categories(c, json=True)),
+        'categories': JsonStringify(categories),
         'units': JsonStringify(g.UNITS),
         'discounts': JsonStringify(get_all_discounts(request.user, c)),
         # urls for ajax calls
@@ -241,10 +256,15 @@ def search_products_(request, c, android=False):
     else:
         filter_by_description = False
         
-    # category_filter
+    # category_filter: filter by category or only products with no category, or don't filter at all
     if criteria.get('category_filter'):
         filter_by_category = True
-        products = products.filter(category__id__in=get_subcategories(int(criteria.get('category_filter')), data=[]))
+        category_id = int(criteria.get('category_filter'))
+
+        if category_id == -1:
+            products = products.filter(category=None)
+        else:
+            products = products.filter(category__id__in=get_subcategories(category_id, data=[]))
     else:
         filter_by_category = False
         
@@ -355,7 +375,6 @@ def validate_product(user, company, data):
         # this shouldn't happen
         return r(False, _("Wrong product id"))
     
-    
     if data['id'] != -1:
         # check if product belongs to this company and if he has the required permissions
         try:
@@ -381,17 +400,22 @@ def validate_product(user, company, data):
                     " (" + _("code") + ": " + p[0].code + ")")
     data['name'] = data['name'].strip()
     
-    # category: must be present and must exist
+    # category: leave null if it doesn't exist
     if not data.get('category_id'):
         return r(False, _("No category assigned"))
     else:
         try:
-            data['category_id'] = int(data['category_id'])
-            data['category'] = Category.objects.get(id=data['category_id'], company=company)
+            category_id = int(data['category_id'])
+
+            if category_id == -1:
+                data['category_id'] = None
+                data['category'] = None
+            else:
+                data['category_id'] = category_id
+                data['category'] = Category.objects.get(id=data['category_id'], company=company)
         except Category.DoesNotExist:
             return r(False, _("Selected category does not exist"))
-    
-    
+
     # price
     if len(data['price']) > g.DECIMAL['currency_digits']+1:
         return r(False, _("Price too long"))
@@ -411,12 +435,11 @@ def validate_product(user, company, data):
             if not ret['success']:
                 return r(False, _("Check purchase price notation"))
             data['purchase_price'] = ret['number']
-    
-    
+
     # unit type (probably doesn't need checking
-    if not data['unit_type'] in dict(g.UNITS):
+    if not (data['unit_type'] in g.UNIT_CODES):
         return r(False, _("Invalid unit type"))
-        
+
     # image:
     if data['change_image'] == True:
         if 'image' in data and data['image']:  # a new image has been uploaded
@@ -472,9 +495,7 @@ def validate_product(user, company, data):
         tax = Tax.objects.get(id=int(data['tax_id']))
     except:
         return r(False, _("Invalid tax rate"))
-    
-    
-    
+
     del data['tax_id']
     data['tax'] = tax
     
@@ -489,8 +510,9 @@ def validate_product(user, company, data):
     else:
         data['stock'] = ret['number']
         # it cannot be negative
-        if data['stock'] < decimal.Decimal('0'):
-            return r(False, _("Stock cannot be negative"))
+        # EDIT: stock can be negative
+        #if data['stock'] < decimal.Decimal('0'):
+        #    return r(False, _("Stock cannot be negative"))
         
     return {'status': True, 'data': data}
 
@@ -506,7 +528,6 @@ def create_product(request, company):
 
 
 def create_product_(request, c, android=False):
-    # sellers can add product
     if not has_permission(request.user, c, 'product', 'edit'):
         return JsonError(_("You have no permission to add products"))
 
@@ -530,6 +551,7 @@ def create_product_(request, c, android=False):
         private_notes=data.get('private_notes'),
         stock=data.get('stock'),
         tax=data.get('tax'),
+        unit_type=data.get('unit_type')
     )
     product.save()
     
@@ -590,6 +612,7 @@ def edit_product_(request, c, android=False):
     
     # update product:
     product.name = data.get('name')
+    product.category = data.get('category')
     product.unit_type = data.get('unit_type')
     product.code = data.get('code')
     product.shortcut = data.get('shortcut')
@@ -767,4 +790,5 @@ def mass_edit(request, company):
 
     else:
         return JsonError(_("Unsupported mass edit action"))
+
 

@@ -3,9 +3,10 @@
 /*                      */
 .no-breadcrumbs #products_scroll_outer {
     position: absolute;
+    top: 160px; /* top position: heights of #parents_scroll_outer + #children_scroll_outer + #products_title */
+    left:0;
+    right: 0;
     bottom: 0;
-    /* top position: heights of #parents_scroll_outer + #children_scroll_outer + #products_title */
-    top: 160px;
 }
 
 #products_scroll_inner {

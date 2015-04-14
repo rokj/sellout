@@ -4,6 +4,8 @@
 $("a.fake.paginator").unbind().click(function(e){
     e.preventDefault();
 
+    if($(this).hasClass("disabled")) return;
+
     var page_obj = $("#id_page");
     var page = parseInt(page_obj.val());
 

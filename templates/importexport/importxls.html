@@ -1,0 +1,95 @@
+{% extends "pos/manage/manage.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block section_head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/import.css' %}"/>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+
+        });
+    </script>
+{% endblock %}
+
+{% block status_bar_title %}
+    {% trans 'Import products from Excel' %}
+{% endblock %}
+
+{% block manage_content %}
+    <div class="left-column">
+        <h2>{% trans 'Upload an Excel file' %}</h2>
+
+        <form method="post" action="." enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="error">{{ form.non_field_errors }}</div>
+
+            <div class="form-field">
+                <div class="error">{{ form.xlsfile.errors }}</div>
+                {{ form.xlsfile.label_tag }}
+                {{ form.xlsfile }}
+            </div>
+
+            <div class="form-field">
+                <div class="split-cell first">&nbsp;</div>
+                <div class="split-cell last">
+                    <input type="submit" value="{% trans 'Import' %}">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="content">
+        <div class="container">
+            {% if results %}
+                {# an object with results has been returned; show what's inside #}
+                {% if results.success %}
+                    <h2 class="import-success">{% trans 'Import Successful' %}</h2>
+                {% else %}
+                    <h2 class="import-fail">{% trans 'Import failed' %}</h2>
+                {% endif %}
+
+                <table class="import-messages">
+                    <thead>
+                        <tr>
+                            <td>{% trans 'Message' %}</td>
+                            <td>{% trans 'Product name' %}</td>
+                            <td>{% trans 'Row' %}</td>
+                            <td>{% trans 'Column' %}</td>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for message in results.error_messages %}
+                        <tr class="import-error-message">
+                            {# message | product name | row | column #}
+                            <td>{{ message.message|default:'' }}</td>
+                            <td>{{ message.name|default:'' }}</td>
+                            <td>{{ message.row|default:'' }}</td>
+                            <td>{{ message.column|default:'' }}</td>
+                        </tr>
+                    {% endfor %}
+                    {% for message in results.info_messages %}
+                         <tr class="import-info-message">
+                            {# message | product name | row | column #}
+                            <td>{{ message.message|default:'' }}</td>
+                            <td>{{ message.name|default:'' }}</td>
+                            <td>{{ message.row|default:'' }}</td>
+                            <td>{{ message.column|default:'' }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <h2>{% trans 'Instructions' context 'import' %}</h2>
+                <p>{% trans 'You can import an Excel file containing all important data about your products.' context 'import' %}</p>
+                <p>{% trans 'The file should be in .xls or .xlsx format with columns and data as specified in the specification file: ' context 'import' %}</p>
+                {# TODO: choose the right import file based on language #}
+                <p><a href="{% static 'import/si_sl/sellout-import-specification.xls' %}">{% trans 'Sellout Import Specification' %}</a></p>
+                <p>{% trans 'Also check the example file:' context 'import' %}</p>
+                <p><a href="{% static 'import/si_sl/sellout-import-example.xls' %}">{% trans 'Sellout Import Specification' %}</a></p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
