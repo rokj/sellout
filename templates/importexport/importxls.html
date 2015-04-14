@@ -31,11 +31,8 @@
                 {{ form.xlsfile }}
             </div>
 
-            <div class="form-field">
-                <div class="split-cell first">&nbsp;</div>
-                <div class="split-cell last">
-                    <input type="submit" value="{% trans 'Import' %}">
-                </div>
+            <div class="text-right">
+                <input type="submit" value="{% trans 'Import' %}">
             </div>
         </form>
     </div>
@@ -88,7 +85,14 @@
                 {# TODO: choose the right import file based on language #}
                 <p><a href="{% static 'import/si_sl/sellout-import-specification.xls' %}">{% trans 'Sellout Import Specification' %}</a></p>
                 <p>{% trans 'Also check the example file:' context 'import' %}</p>
-                <p><a href="{% static 'import/si_sl/sellout-import-example.xls' %}">{% trans 'Sellout Import Specification' %}</a></p>
+                <p><a href="{% static 'import/si_sl/sellout-import-example.xls' %}">{% trans 'Sellout Import Example' %}</a></p>
+                <p>{% trans 'Before importing, make sure you have the following:' %}</p>
+                <ul>
+                    <li>{% trans 'Defined categories for new products; if those do not exist, you will have to assign them later manually' %}</li>
+                    <li>{% trans 'Taxes; import will fail if taxes with the same amount are not defined' %}</li>
+                    <li>{% trans 'Correct formatting of XLS file' %}</li>
+                </ul>
+                <p>{% trans 'After import, check your products in product management.' %}</p>
             {% endif %}
         </div>
     </div>

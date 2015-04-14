@@ -30,8 +30,9 @@ def xls_import(filename, company, user):
 
     def value(ir, ic, product_name=None):
         # returns cell value at specified row/column, formatted as text
-        if book.cell_type(ir, ic) != xlrd.XL_CELL_TEXT:
-            info(_("Cell value is not formatted as text"), product_name, ir, ic)
+        #if book.cell_type(ir, ic) != xlrd.XL_CELL_TEXT:
+        # this is obviously not working since nothing is formatted as text at all
+        #    info(_("Cell value is not formatted as text"), product_name, ir, ic)
 
         return unicode(book.cell_value(ir, ic)).strip()
 
