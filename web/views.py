@@ -104,7 +104,8 @@ def index(request):
         'client_id': settings.GOOGLE_API['client_id'],
         'site_title': g.SITE_TITLE,
         'STATIC_URL': settings.STATIC_URL,
-        'GOOGLE_API': settings.GOOGLE_API
+        'GOOGLE_API': settings.GOOGLE_API,
+        'SITE_URL': settings.SITE_URL
     }
 
     return render(request, "web/index.html", context)
