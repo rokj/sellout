@@ -113,11 +113,16 @@ def contact_updated(instance, **kwargs):
 ### synchonization
 def signal_change(instance, created, action, **kwargs):
     from sync.models import Sync
-    if not instance.company:
+    if instance.company:
+        company = instance.company
+    elif isinstance(instance, Company):
+        company = instance
+    else:
+        # Should not happen
         return
 
     sync_objects = Sync.objects.only('seq')\
-        .filter(company=instance.company).order_by('-seq')
+        .filter(company=company).order_by('-seq')
 
     last_key = 0
 
@@ -125,12 +130,12 @@ def signal_change(instance, created, action, **kwargs):
         last_key = sync_objects[0].seq
 
     try:
-        object = Sync.objects.get(company=instance.company, object_id=instance.id, model=instance.__class__.__name__)
+        object = Sync.objects.get(company=company, object_id=instance.id, model=instance.__class__.__name__)
         object.seq = last_key+1
         object.action = action
         object.save()
     except Sync.DoesNotExist:
-        sync = Sync(company=instance.company,
+        sync = Sync(company=company,
                     action=action,
                     model=instance.__class__.__name__,
                     object_id=instance.id,
