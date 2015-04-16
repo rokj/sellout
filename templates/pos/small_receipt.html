@@ -14,7 +14,7 @@
 
             <div class="details">
                 {{ bill.issuer.street }}, {{ bill.issuer.postcode }} {{ bill.issuer.city }}<br/>
-                {{ bill.issuer.state }} {{ bill.issuer.country }} <br/>
+                {{ bill.issuer.state }} {{ bill.issuer.country_name }} <br/>
                 {% trans 'VAT' %}: {{ bill.issuer.vat_no }}
                 {{ bill.issuer.website }}
             </div>

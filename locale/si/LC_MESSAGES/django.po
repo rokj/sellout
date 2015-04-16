@@ -589,7 +589,7 @@ msgstr ""
 #: common/globals.py:213 pos/views/bill.py:355 pos/views/bill.py:942
 #: templates/pos/large_receipt.html:43 templates/pos/small_receipt.html:118
 msgid "Cashier"
-msgstr ""
+msgstr "Prodajalec"
 
 #: common/globals.py:214
 msgid "Seller"
@@ -1383,7 +1383,7 @@ msgstr "Cena"
 #: templates/pos/large_receipt.html:68 templates/pos/small_receipt.html:52
 #: templates/pos/terminal.html:248 templates/pos/terminal.html.py:331
 msgid "Discount"
-msgstr ""
+msgstr "Popust"
 
 #: pos/views/bill.py:327 pos/views/bill.py:335 pos/views/bill.py:913
 #: pos/views/bill.py:922
