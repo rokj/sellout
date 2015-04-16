@@ -1884,13 +1884,13 @@ msgstr ""
 #: pos/views/manage/product.py:115 pos/views/manage/stock.py:115
 msgid ""
 "There are no taxes defined. Please go to tax management and define them."
-msgstr ""
+msgstr "Ni nastavljenih nobenih davkov. Pojdi v urejanje davkov in jih nekaj naredi."
 
 #: pos/views/manage/product.py:119 pos/views/manage/stock.py:119
 msgid ""
 "There are no categories defined, please go to category management to define "
 "them."
-msgstr ""
+msgstr "Ni nastavljenjih nobenih kategorij. Pojdi v urejanje kategorij in jih nekaj nastavi."
 
 #: pos/views/manage/product.py:134 pos/views/manage/stock.py:134
 #: templates/pos/base.html:130 templates/pos/manage/products.html:1431
@@ -1900,7 +1900,7 @@ msgstr "Artikli/storitve"
 #: pos/views/manage/product.py:179 pos/views/manage/product.py:182
 #: pos/views/manage/stock.py:179 pos/views/manage/stock.py:182
 msgid "No product specified"
-msgstr ""
+msgstr "Ni definiranih nobenih artiklov/storitev"
 
 #: pos/views/manage/product.py:356 pos/views/manage/stock.py:356
 msgid "Wrong product id"
