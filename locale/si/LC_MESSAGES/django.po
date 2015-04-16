@@ -3567,39 +3567,39 @@ msgstr ""
 
 #: templates/pos/manage/tax.html:148
 msgid "Saving tax failed"
-msgstr ""
+msgstr "Davka ni bilo mogoče shraniti"
 
 #: templates/pos/manage/tax.html:180
 msgid "Cannot edit tax"
-msgstr ""
+msgstr "Ni možno urejati davka"
 
 #: templates/pos/manage/tax.html:263
 msgid "Could not set default tax"
-msgstr ""
+msgstr "Neuspešno nastavljanje privzetega davka"
 
 #: templates/pos/manage/tax.html:279
 msgid "Add Tax"
-msgstr ""
+msgstr "Dodaj davek"
 
 #: templates/pos/manage/tax.html:283
 msgid "Choose default tax"
-msgstr ""
+msgstr "Izberi privzet davek"
 
 #: templates/pos/manage/tax.html:285
 msgid "This will be chosen by default when adding new products"
-msgstr ""
+msgstr "Ta bo izbran privzeto, ob dodajanju novega artikla/storitve"
 
 #: templates/pos/manage/tax.html:294
 msgid "Name (optional)"
-msgstr ""
+msgstr "Ime (opcijsko)"
 
 #: templates/pos/manage/users.html:41
 msgid "Saving failed"
-msgstr ""
+msgstr "Neuspešno shranjevanje"
 
 #: templates/pos/manage/users.html:60
 msgid "Edit permission"
-msgstr ""
+msgstr "Uredi dovoljenja"
 
 #: templates/pos/manage/users.html:62
 msgid "OK"
