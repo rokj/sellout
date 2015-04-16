@@ -1063,7 +1063,7 @@ msgstr "Davki"
 #: pos/models.py:192 templates/pos/manage/products.html:1452
 #: templates/pos/manage/products.html:1552 templates/pos/terminal.html:272
 msgid "Product code"
-msgstr ""
+msgstr "Koda artikla/storitve"
 
 #: pos/models.py:193
 msgid "Store's internal product number"
@@ -3287,7 +3287,7 @@ msgstr ""
 
 #: templates/pos/manage/products.html:189
 msgid "No products found"
-msgstr ""
+msgstr "Ne obstaja še noben artikel/produkt"
 
 #: templates/pos/manage/products.html:346
 msgid "Results found"
@@ -3372,25 +3372,25 @@ msgstr ""
 #: templates/pos/manage/products.html:1444
 msgctxt "search products"
 msgid "Enter query"
-msgstr ""
+msgstr "Vnesi text"
 
 #: templates/pos/manage/products.html:1455
 #: templates/pos/manage/products.html:1614
 #: templates/pos/manage/products.html:1716
 msgid "Shortcut"
-msgstr ""
+msgstr "Bližnjica"
 
 #: templates/pos/manage/products.html:1473
 msgid "Discount code"
-msgstr ""
+msgstr "Koda popusta"
 
 #: templates/pos/manage/products.html:1481
 msgid "Advanced"
-msgstr ""
+msgstr "Napredno"
 
 #: templates/pos/manage/products.html:1485
 msgid "Basic"
-msgstr ""
+msgstr "Osnovno"
 
 #: templates/pos/manage/products.html:1507
 msgid "Edit all results"
@@ -3788,7 +3788,7 @@ msgstr "Nazaj na nadkategorijo"
 
 #: templates/pos/terminal.html:419
 msgid "Search"
-msgstr ""
+msgstr "Išči"
 
 #: templates/pos/terminal.html:421
 msgctxt "Search button text"
