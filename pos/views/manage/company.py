@@ -333,8 +333,6 @@ def register_company(request):
         # submit data
         form = CompanyForm(request.POST, request.FILES)
         if form.is_valid():
-            print request.user
-
             company = form.save(False)
             company.created_by = request.user
             form.save()

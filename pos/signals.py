@@ -113,7 +113,8 @@ def contact_updated(instance, **kwargs):
 ### synchonization
 def signal_change(instance, created, action, **kwargs):
     from sync.models import Sync
-    if instance.company:
+
+    if hasattr(instance, 'company'):
         company = instance.company
     elif isinstance(instance, Company):
         company = instance
