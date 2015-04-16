@@ -21,11 +21,19 @@ from common.functions import calculate_btc_price, get_random_string
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webpos.settings")
 
-print "We do some tests, right?"
-print "Grosuplje p0wah!"
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
-# tests = ['calculate_btc_price', 'btc_address', 'create_company']
-tests = ['create_user', 'create_company']
+print bcolors.WARNING + "We do some tests, right?" + bcolors.ENDC
+print bcolors.OKGREEN + bcolors.BOLD + "Grosuplje p0wah!" + bcolors.ENDC
+print
 
 ### TESTS ###
 ### TESTS ###
@@ -46,7 +54,7 @@ def encoded_dict(in_dict):
 # now real tests
 try:
     ### btc price ###
-    if "calculate_btc_price" in tests:
+    if "calculate_btc_price" in settings.TESTS:
         print "---"
         print "Will try to calculate BTC price..."
         btc_price = calculate_btc_price("EUR", 0.5)
@@ -55,7 +63,7 @@ try:
         print
 
     ### btc address ###
-    if "btc_address" in tests:
+    if "btc_address" in settings.TESTS:
         print "---"
         print "Will try to get new BTC address..."
         bitcoin_rpc = BitcoinRPC(settings.PAYMENT['bitcoin']['host'], settings.PAYMENT['bitcoin']['port'], settings.PAYMENT['bitcoin']['rpcuser'], settings.PAYMENT['bitcoin']['rpcpassword'])
@@ -64,7 +72,7 @@ try:
         print "---"
         print
 
-    if "create_user" in tests:
+    if "create_user" in settings.TESTS:
         print "---"
         print "Will try create new user with email rok.jaklic@gmail.com..."
 
@@ -119,7 +127,7 @@ try:
 
 
     ### creating company ###
-    if "create_company" in tests:
+    if "create_company" in settings.TESTS:
         print "---"
         print "Will try create new company Neko podjetje d.o.o...."
 
