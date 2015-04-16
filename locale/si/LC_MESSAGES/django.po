@@ -506,19 +506,19 @@ msgstr ""
 
 #: common/globals.py:36
 msgid "Piece"
-msgstr ""
+msgstr "Kos"
 
 #: common/globals.py:59
 msgid "Hour"
-msgstr ""
+msgstr "Ura"
 
 #: common/globals.py:60
 msgid "Other"
-msgstr ""
+msgstr "Ostalo"
 
 #: common/globals.py:71
 msgid "Percentage"
-msgstr ""
+msgstr "Procent"
 
 #: common/globals.py:72
 msgid "Absolute value"
@@ -802,11 +802,11 @@ msgstr ""
 #: mobile/views/manage/contact.py:53 pos/views/manage/product.py:512
 #: pos/views/manage/stock.py:511
 msgid "You have no permission to add products"
-msgstr ""
+msgstr "Nimaš dovoljenja za dodajanje artiklov/storitev"
 
 #: mobile/views/manage/contact.py:109
 msgid "Contact doest not exist"
-msgstr ""
+msgstr "Kontakt ne obstaja"
 
 #: mobile/views/manage/contact.py:149
 msgid "delete contacts"
@@ -814,7 +814,7 @@ msgstr ""
 
 #: mobile/views/manage/contact.py:157
 msgid "Contact does not exist"
-msgstr ""
+msgstr "Kontakt ne obstaja"
 
 #: mobile/views/manage/discount.py:24 mobile/views/manage/discount.py:46
 #: mobile/views/manage/product.py:85 mobile/views/views.py:38
@@ -1099,11 +1099,11 @@ msgstr ""
 
 #: pos/models.py:402
 msgid "Price per unit, excluding tax"
-msgstr ""
+msgstr "Cena po kosu, brez davka"
 
 #: pos/models.py:408
 msgid "Purchase price per unit, excluding tax"
-msgstr ""
+msgstr "Nakupna cena po kosu, brez davka"
 
 #: pos/models.py:415
 msgid "Type of contact"
@@ -2334,7 +2334,7 @@ msgstr ""
 
 #: subscription/templates/subscription/subscription.html:912
 msgid "total price"
-msgstr ""
+msgstr "Končna cena"
 
 #: subscription/templates/subscription/subscription.html:916
 #: subscription/templates/subscription/subscription.html:917
@@ -2742,15 +2742,15 @@ msgstr ""
 #: templates/pos/manage/products.html:1569
 #: templates/pos/manage/products.html:1691
 msgid "Category"
-msgstr ""
+msgstr "Kategorija"
 
 #: support/models.py:13
 msgid "Title"
-msgstr ""
+msgstr "Naslov"
 
 #: support/models.py:14 templates/support/search_results.html:20
 msgid "Question"
-msgstr ""
+msgstr "Vprašanje"
 
 #: support/models.py:24
 msgid "Up votes"
@@ -3287,15 +3287,15 @@ msgstr ""
 
 #: templates/pos/manage/products.html:189
 msgid "No products found"
-msgstr "Ne obstaja še noben artikel/produkt"
+msgstr "Ni vnešenega še nobenega artikla/storitve"
 
 #: templates/pos/manage/products.html:346
 msgid "Results found"
-msgstr ""
+msgstr "Najdenih"
 
 #: templates/pos/manage/products.html:383
 msgid "Search failed"
-msgstr ""
+msgstr "Iskanje ni uspelo"
 
 #: templates/pos/manage/products.html:501
 msgid "Favorite could not be set"
@@ -3304,11 +3304,11 @@ msgstr ""
 #: templates/pos/manage/products.html:517
 msgctxt "confirmation dialog title"
 msgid "Are you sure?"
-msgstr ""
+msgstr "Si prepričan/a?"
 
 #: templates/pos/manage/products.html:518
 msgid "Delete product "
-msgstr ""
+msgstr "Izbriši artikel/storitev"
 
 #: templates/pos/manage/products.html:524
 msgid "Error deleting product"
@@ -3346,12 +3346,12 @@ msgstr ""
 
 #: templates/pos/manage/products.html:1043
 msgid "Edit product"
-msgstr ""
+msgstr "Uredi artikel"
 
 #: templates/pos/manage/products.html:1044
 #: templates/pos/manage/products.html:1433
 msgid "Add product"
-msgstr ""
+msgstr "Dodaj artikel"
 
 #: templates/pos/manage/products.html:1223
 msgid "Error while setting tax"
@@ -3398,19 +3398,19 @@ msgstr ""
 
 #: templates/pos/manage/products.html:1575
 msgid "Stock"
-msgstr ""
+msgstr "Zaloga"
 
 #: templates/pos/manage/products.html:1580
 msgid "Unit"
-msgstr ""
+msgstr "Enota"
 
 #: templates/pos/manage/products.html:1589
 msgid "Purchase price"
-msgstr ""
+msgstr "Nakupna cena"
 
 #: templates/pos/manage/products.html:1594
 msgid "per"
-msgstr ""
+msgstr "po"
 
 #: templates/pos/manage/products.html:1602
 msgid "Sell price (excl. tax)"
@@ -3427,18 +3427,22 @@ msgid ""
 "in the same order as shown here.\n"
 "                    "
 msgstr ""
+"\n"
+"Povleci za spremembo vrstnega reda. Celoten popust bo bil izračunan "
+"v istem vrstnem redu, kot je prikazano tukaj.\n"
+"                    "
 
 #: templates/pos/manage/products.html:1637
 msgid "Total price"
-msgstr ""
+msgstr "Končna cena"
 
 #: templates/pos/manage/products.html:1641 templates/pos/manage/stats.html:49
 msgid "Profit"
-msgstr ""
+msgstr "Zaslužek"
 
 #: templates/pos/manage/products.html:1649
 msgid "Private notes"
-msgstr ""
+msgstr "Interne opombe"
 
 #: templates/pos/manage/products.html:1676
 msgid "Favorite this product: it will be displayed by default in terminal"
