@@ -731,7 +731,7 @@ Item = function(bill, product) {
             bill_notes: p.data.bill_notes,
 
             base: dn(p.data.base, p.g),
-            quantity: dn(p.data.quantity, p.g),
+            quantity: display_exact_number(p.data.quantity, p.g.config.separator), // !never round quantity
             tax_rate: dn(p.data.tax_rate, p.g),
 
             batch: dn(p.data.batch, p.g),

@@ -85,17 +85,22 @@
     border-bottom: 0.5mm solid black;
     overflow: hidden;
     width: 100%;
+    margin-bottom: 1mm;
+}
+
+.receipt-80mm .receipt-items .items-body {
+    margin-bottom: 3mm;
+    margin-top: 3mm;
 }
 
 .receipt-80mm .receipt-items .receipt-row{
     width: 100%;
     clear: both;
     overflow: hidden;
-    margin-bottom: 1mm;
 }
 
 .receipt-80mm .receipt-row *{
-    float: left;
+    float: right;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -107,17 +112,16 @@
 }
 .receipt-80mm .second-row{
     width: 100%;
-    padding: 1px 0px 1px 0px;
 }
 
 /* cells */
 .receipt-80mm .receipt-items .item-name{
     text-align: left;
-    width: 25%;
+    width: 100%;
 }
 
 .receipt-80mm .receipt-items .item-price{
-    width: 13%;
+    width: 35%;
     text-align: right;
 }
 
@@ -130,12 +134,11 @@
 .receipt-80mm .receipt-items .item-unit{
     text-align: left;
     width: 10%;
-    padding-left: 1mm;
     box-sizing: border-box;
 }
 
 .receipt-80mm .receipt-items .item-discount{
-    width: 13%;
+    width: 15%;
     text-align: right;
 }
 
@@ -153,9 +156,8 @@
     clear: both;
     border-top: 0.5mm solid black;
     border-bottom: 0.5mm solid black;
-    
-    padding-top: 3mm;
-    padding-bottom: 3mm;
+    padding-top: 1mm;
+    padding-bottom: 1mm;
 }
 
 .receipt-80mm .receipt-items .items-footer .receipt-total-text{
@@ -178,7 +180,7 @@
 .receipt-80mm .receipt-items .items-footer .receipt-total{
     text-align: right;
     font-weight: bold;
-    margin-right: 6%; /* the width of .item-tax column */
+    margin-right: 5%; /* the width of .item-tax column */
 }
 
 .receipt-80mm .receipt-cashier{
