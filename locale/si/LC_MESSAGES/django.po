@@ -1602,7 +1602,7 @@ msgstr ""
 
 #: pos/views/manage/category.py:363
 msgid "No category specified"
-msgstr ""
+msgstr "Nastavi kategorijo"
 
 #: pos/views/manage/category.py:366
 msgid "Cannot delete category with subcategories"
@@ -1956,11 +1956,11 @@ msgstr ""
 
 #: pos/views/manage/product.py:437 pos/views/manage/stock.py:437
 msgid "No code entered"
-msgstr ""
+msgstr "Vnesi kodo"
 
 #: pos/views/manage/product.py:440 pos/views/manage/stock.py:440
 msgid "Code too long"
-msgstr ""
+msgstr "Koda predolga"
 
 #: pos/views/manage/product.py:448 pos/views/manage/stock.py:448
 msgid "A product with this code already exists: "
@@ -3337,7 +3337,7 @@ msgstr ""
 
 #: templates/pos/manage/products.html:936
 msgid "Please check product price"
-msgstr ""
+msgstr "Nastavi ceno artikla/storitve"
 
 #: templates/pos/manage/products.html:951
 #: templates/pos/manage/products.html:966
@@ -3691,7 +3691,7 @@ msgstr "Račun"
 
 #: templates/pos/small_receipt.html:50 templates/pos/terminal.html:239
 msgid "Qty"
-msgstr "Količina"
+msgstr "Kol"
 
 #: templates/pos/small_receipt.html:78 templates/pos/small_receipt.html:91
 msgctxt "Receipt footer text"
@@ -3837,23 +3837,23 @@ msgstr ""
 
 #: templates/pos/terminal.html:545
 msgid "Choose payment type"
-msgstr ""
+msgstr "Izberi način plačila"
 
 #: templates/pos/terminal.html:561
 msgid "Received"
-msgstr ""
+msgstr "Prejel"
 
 #: templates/pos/terminal.html:566
 msgid "Change due"
-msgstr ""
+msgstr "Vračilo"
 
 #: templates/pos/terminal.html:574
 msgid "Connect your POS Terminal"
-msgstr ""
+msgstr "Poveži POS terminal"
 
 #: templates/pos/terminal.html:580
 msgid "Customer email"
-msgstr ""
+msgstr "Email stranke"
 
 #: templates/pos/terminal.html:583
 msgid "Send invoice"

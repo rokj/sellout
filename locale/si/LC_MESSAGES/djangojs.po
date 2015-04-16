@@ -331,24 +331,24 @@ msgstr ""
 
 #: static/js/widgets/bill.js:361
 msgid "Cannot create bill"
-msgstr ""
+msgstr "Ne morem narediti računa"
 
 #: static/js/widgets/bill.js:362
 msgid "The bill is empty"
-msgstr ""
+msgstr "Nič na računu"
 
 #: static/js/widgets/bill.js:373
 msgid "Could not create bill"
-msgstr ""
+msgstr "Ne morem narediti računa"
 
 #: static/js/widgets/bill.js:400
 msgid "Save Bill"
-msgstr ""
+msgstr "Shrani račun"
 
 #: static/js/widgets/bill.js:404 static/js/widgets/bill.js.c:517
 #: static/js/widgets/bill.js:1354
 msgid "Save"
-msgstr ""
+msgstr "Shrani"
 
 #: static/js/widgets/bill.js:413
 msgid "Saving bill failed"
