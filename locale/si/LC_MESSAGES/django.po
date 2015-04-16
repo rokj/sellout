@@ -990,13 +990,13 @@ msgstr ""
 
 #: pos/models.py:71
 msgid "Category name"
-msgstr ""
+msgstr "Ime kategorije"
 
 #: pos/models.py:72 templates/pos/manage/discounts.html:142
 #: templates/pos/manage/products.html:1461
 #: templates/pos/manage/products.html:1545 templates/pos/terminal.html:667
 msgid "Description"
-msgstr ""
+msgstr "Opis"
 
 #: pos/models.py:84 pos/views/manage/category.py:227
 #: templates/pos/base.html:129 templates/pos/manage/categories.html:291
@@ -1005,15 +1005,15 @@ msgstr "Kategorije"
 
 #: pos/models.py:125
 msgid "Discount description"
-msgstr ""
+msgstr "Opis popusta"
 
 #: pos/models.py:126 templates/pos/manage/products.html:1711
 msgid "Code"
-msgstr ""
+msgstr "Koda"
 
 #: pos/models.py:127
 msgid "Discount type"
-msgstr ""
+msgstr "Tip popusta"
 
 #: pos/models.py:129 pos/views/bill.py:308 pos/views/bill.py:893
 #: pos/views/manage/bill.py:32
@@ -1442,10 +1442,8 @@ msgid "Invalid contact"
 msgstr ""
 
 #: pos/views/bill.py:472
-#, fuzzy
-#| msgid "Invalid e-mail"
 msgid "Invalid timestamp"
-msgstr "Napačen e-mail"
+msgstr "Napačna ura"
 
 #: pos/views/bill.py:476
 msgid "Invalid grand total value"
@@ -1584,19 +1582,19 @@ msgstr ""
 #: pos/views/manage/category.py:268 templates/pos/manage/categories.html:296
 #: templates/pos/manage/category.html:44
 msgid "Add category"
-msgstr ""
+msgstr "Dodaj kategorijo"
 
 #: pos/views/manage/category.py:306
 msgid "You have no permission to edit categories."
-msgstr ""
+msgstr "Nimaš dovoljenja za urejanje kategorije"
 
 #: pos/views/manage/category.py:335 templates/pos/manage/category.html:46
 msgid "Edit category"
-msgstr ""
+msgstr "Uredi kategorijo"
 
 #: pos/views/manage/category.py:353
 msgid "You have no permission to delete categories"
-msgstr ""
+msgstr "Nimaš dovoljenja za izbris kategorije"
 
 #: pos/views/manage/category.py:361
 msgid "You have no permission to delete this category"
@@ -2988,19 +2986,17 @@ msgid "Bill no."
 msgstr ""
 
 #: templates/pos/manage/bills.html:89
-#, fuzzy
-#| msgid "State"
 msgid "Status:"
-msgstr "Pokrajina"
+msgstr "Status:"
 
 #: templates/pos/manage/bills.html:99
 msgid "Amount: from"
-msgstr ""
+msgstr "Cena: od"
 
 #: templates/pos/manage/bills.html:135 templates/pos/manage/contacts.html:66
 #: templates/pos/manage/discounts.html:73
 msgid "Clear results"
-msgstr ""
+msgstr "Pobriši"
 
 #: templates/pos/manage/bills.html:141 templates/pos/manage/contacts.html:60
 #: templates/pos/manage/discounts.html:67
@@ -3045,11 +3041,10 @@ msgid "Serial"
 msgstr ""
 
 #: templates/pos/manage/bills.html:186
-#, fuzzy
 #| msgid "State"
 msgctxt "bill management"
 msgid "Status"
-msgstr "Pokrajina"
+msgstr "Status"
 
 #: templates/pos/manage/bills.html:187
 msgctxt "bill management"
@@ -4316,7 +4311,6 @@ msgid "Mobile application"
 msgstr "Spletna in mobilna blagajna."
 
 #: templates/web/index.html:494
-#, fuzzy
 #| msgid ""
 #| "\n"
 #| "                                You will upload your company's logo after "
@@ -4331,11 +4325,10 @@ msgid ""
 "                            and you can get it by clicking following icon.\n"
 "                            "
 msgstr ""
-"\n"
-"                                Logo podjetja boš lahko prenesl/a pouspešni "
-"registraciji.\n"
-"                                Poišči nastavitve za podjetje v meniju za "
-"upravljanje.\n"
+"Nimaš računalnika? Ne skrbi!<br /> <br/>\n"
+"                            Razvili smo tudi mobilno aplikacijo, "
+"<br />\n"
+"                            ki si jo lahko preneseš na svojo na napravo že s klikom na naslednjo ikono.\n"
 "                            "
 
 #: templates/web/index.html:520
@@ -4702,46 +4695,46 @@ msgstr "Nepričakovana napaka. Prosimo te, obvesti nas"
 msgid "Message from website"
 msgstr ""
 
-#~ msgctxt "tax rates table footer"
-#~ msgid "Sum"
-#~ msgstr "Seštevek"
+msgctxt "tax rates table footer"
+msgid "Sum"
+msgstr "Seštevek"
 
-#~ msgid "Cash. Credit card. Paypal. Bitcoin."
-#~ msgstr "Gotovina. Kreditna kartica. Paypal. Bitcoin."
+msgid "Cash. Credit card. Paypal. Bitcoin."
+msgstr "Gotovina. Kreditna kartica. Paypal. Bitcoin."
 
-#~ msgid "The perfect partner."
-#~ msgstr "Popoln partner"
+msgid "The perfect partner."
+msgstr "Popoln partner"
 
-#~ msgid ""
-#~ "Sellout is for anyone who runs a profitable business and needs to "
-#~ "regularly issue invoices.\n"
-#~ "                    It is ideal for freelancers, small companies and "
-#~ "start-ups.\n"
-#~ "                    "
-#~ msgstr ""
-#~ "Spletna blagajna je za vsakogar, ki donosno posluje in rednoizdaja "
-#~ "račune.\n"
-#~ "                    Spletna blagajna je idealna za samostojne podjetnike, "
-#~ "majhna podjetja, starup-e in srednja velika podjetja.                    "
+msgid ""
+"Sellout is for anyone who runs a profitable business and needs to "
+"regularly issue invoices.\n"
+"                    It is ideal for freelancers, small companies and "
+"start-ups.\n"
+"                    "
+msgstr ""
+"Spletna blagajna je za vsakogar, ki donosno posluje in rednoizdaja "
+"račune.\n"
+"                    Spletna blagajna je idealna za samostojne podjetnike, "
+"majhna podjetja, starup-e in srednja velika podjetja.                    "
 
-#~ msgid "Ease up your everyday life."
-#~ msgstr "Poenostavite vaše vsakodnevno poslovanje."
+msgid "Ease up your everyday life."
+msgstr "Poenostavite vaše vsakodnevno poslovanje."
 
-#~ msgid "Printer driver"
-#~ msgstr "Gonilnik tiskalnika"
+msgid "Printer driver"
+msgstr "Gonilnik tiskalnika"
 
-#~ msgid "Printer Name"
-#~ msgstr "Ime tiskalnika"
+msgid "Printer Name"
+msgstr "Ime tiskalnika"
 
-#~ msgctxt "bill options button text"
-#~ msgid "Bill..."
-#~ msgstr "Račun..."
+msgctxt "bill options button text"
+msgid "Bill..."
+msgstr "Račun..."
 
-#~ msgid "Support center"
-#~ msgstr "Pomoč in podpora"
+msgid "Support center"
+msgstr "Pomoč in podpora"
 
-#~ msgid "This field is required."
-#~ msgstr "To polje je obvezno."
+msgid "This field is required."
+msgstr "To polje je obvezno."
 
-#~ msgid "Invalid CAPTCHA"
-#~ msgstr "Nisi pravilno izračunal/a"
+msgid "Invalid CAPTCHA"
+msgstr "Nisi pravilno izračunal/a"
