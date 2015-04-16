@@ -33,6 +33,8 @@ urlpatterns = patterns('',
 
     url(r'^send-contact-message', views.send_contact_message, name='send-contact-message'),
 
+    url(r'^robots.txt$', views.robots, name='robots'),
+
     # index
     url(r'^$', views.index, name='index'),
 )
