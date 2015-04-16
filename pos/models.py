@@ -542,12 +542,14 @@ class Bill(SkeletonU, RegisterAbstract):
     user_id = models.IntegerField(null=False)
     user_name = models.CharField(max_length=64, null=False)
 
-    # serial number: a sequential bill number, unique for a company
-    serial = models.IntegerField(_("Bill number, unique over all company's bills"), null=True)  # will be updated in post_save signal
+    # serial number: consists of two parts: prefix and number;
+    # prefix is dependent on current settings (g.BILL_FORMAT_OPTIONS choice),
+    # serial is unique among bills with the same prefix
+    serial_prefix = models.CharField(max_length=32, choices=g.BILL_FORMAT_OPTIONS)
+    serial_number = models.IntegerField(_("Bill number, unique over all company's bills with the same prefix"),
+                                        null=True)  # will be updated in post_save signal
 
-    # formatted serial number: added prefixes and postfixes, string format is in config;
-    # gets assigned after save
-    formatted_serial = models.TextField(_("Bill serial number, including pre/postfixes"), null=True)
+    serial = models.CharField(max_length=64, null=True)  # serial_prefix + serial_number, for easier searching
 
     # discount applied to whole bill
     discount_amount = models.DecimalField(_("Discount on the whole bill (absolute or relative)"),

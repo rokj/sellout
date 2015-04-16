@@ -77,12 +77,12 @@
             </div>
 
             <div class="form-field">
-                <div class="error">{{ filter_form.id.errors }}</div>
-                <div class="error">{{ filter_form.status.errors }}</div>
+                <div class="error">{{ filter_form.serial.errors }}</div>
+                <div class="error">{{ filter_form.serial.errors }}</div>
 
                 <div class="split-cell first bottom-space">
                     <label for="id_id">{% trans 'Bill no.' context 'bill search form' %}</label>
-                    {{ filter_form.id }}
+                    {{ filter_form.serial }}
                 </div>
 
                 <div class="split-cell last">
@@ -196,7 +196,7 @@
                 <tbody>
                     {% for bill in bills %}
                         <tr class="bill-list item">
-                            <td class="column serial">{{ bill.formatted_serial }}</td>
+                            <td class="column serial">{{ bill.serial}}</td>
                             <td class="column status">{{ bill.payment.status }}</td>
                             <td class="column user">{{ bill.user_name }}</td>
                             <td class="column date">{{ bill.timestamp }}</td>

@@ -22,26 +22,34 @@ def delete_permission_cache(**kwargs):
 # pre-save signal: set bill's serial number
 @receiver(pre_save, sender=Bill)
 def set_serial(instance, **kwargs):
+    if instance.serial:
+        return
+
     # set serial number after the bill has been paid;
+    from config.functions import get_company_value
 
-    if not instance.serial:
-        last_bill = Bill.objects.only('serial') \
-                                .filter(company=instance.company) \
-                                .exclude(serial=None) \
-                                .order_by('-serial')
+    # check the prefix of bills
+    bill_format = get_company_value(instance.created_by, instance.company, 'pos_bill_serial_format')
+    if bill_format == 's':
+        prefix = ''
+    elif bill_format == 'yyyy-s':
+        prefix = str(instance.timestamp.year) + '-'
+    elif bill_format == 'yyyy-m-s':
+        prefix = str(instance.timestamp.year) + '-' + str(instance.timestamp.month+1) + '-'
+    else:
+        raise ValueError("Unknown bill prefix type")
 
-        if last_bill.count() == 0:
-            instance.serial = 1
-        else:
-            instance.serial = last_bill[0].serial + 1
+    # find bills that match the prefix
+    last_bill = Bill.objects.filter(company=instance.company, serial_prefix=prefix)
+    if last_bill.exists():
+        # use the serial from the last matching bill and add 1
+        serial_number = last_bill.order_by('-serial_number')[0].serial_number + 1
+    else:
+        serial_number = 1
 
-        # format the serial
-        from config.functions import get_company_value
-        format_string = get_company_value(instance.created_by, instance.company, 'pos_bill_serial_format')
-        formatted_serial = instance.timestamp.strftime(format_string)
-
-        formatted_serial = formatted_serial.replace(g.BILL_SERIAL_FORMAT_PLACEHOLDER, str(instance.serial))
-        instance.formatted_serial = formatted_serial
+    instance.serial_number = serial_number
+    instance.serial_prefix = prefix
+    instance.serial = prefix + str(serial_number)
 
 
 # track changes:

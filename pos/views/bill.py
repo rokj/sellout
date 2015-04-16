@@ -144,8 +144,9 @@ def bill_to_dict(user, company, bill):
         'user_id': bill.user_id,
         'user_name': bill.user_name,
 
-        'formatted_serial': bill.formatted_serial,
         'serial': bill.serial,
+        'serial_prefix': bill.serial_prefix,
+        'serial_number': bill.serial_number,
         'notes': bill.notes,
 
         'discount_amount': format_number(user, company, bill.discount_amount),

@@ -358,4 +358,8 @@ BILL_STATUS = (
     (CANCELED, _("Canceled")),
 )
 
-BILL_SERIAL_FORMAT_PLACEHOLDER = '{s}'
+BILL_FORMAT_OPTIONS = (  # the first is the default
+    ("yyyy-s", _("Year and serial, resets every year")),
+    ("s", _("Serial only, never resets")),
+    ("yyyy-m-s", _("Year, month and serial, resets every month")),
+)

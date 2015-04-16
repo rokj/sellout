@@ -6,26 +6,21 @@
 <link type="text/css" rel="stylesheet" href="{% static 'css/management/config.css' %}" />
 <script type="text/javascript">
 $(document).ready(function(){
-    $("img.currency").click(function(){
-        $("#id_currency").val($(this).attr("data-character"));
-    });
-
     $("a.fake").click(function(e){
         e.preventDefault();
     });
 
+    var format_choice = $("#id_bill_serial_format");
+    var example_container = $("#bill_format_example");
 
-    var help_text = $("#help_text");
-    var help_text_trigger = $("#help_text_trigger");
-    var help_text_close = $("#help_text_close");
+    function update_example(){
+        $(".example", example_container).hide();
+        console.log(".example[data-format='" + format_choice.val() + "']");
+        $(".example[data-format='" + format_choice.val() + "']").show();
+    }
 
-    help_text_trigger.click(function(){
-        help_text.toggleClass("hidden");
-    });
-
-    help_text_close.click(function(){
-        help_text.addClass("hidden");
-    });
+    update_example();
+    format_choice.change(update_example);
 });
 </script>
 {% endblock %}
@@ -89,58 +84,26 @@ $(document).ready(function(){
             {{ form.bill_serial_format.label_tag }}
             {{ form.bill_serial_format }}
 
-            {% comment %} special note about bill formatting {% endcomment %}
-            <div class="help-popup-parent">
-                <a href="#" class="help-text fake" id="help_text_trigger">
-                    {% trans "What does this mean?" context 'bill formatting help text' %}
-                </a>
-
-                <div class="help-popup hidden" id="help_text">
-                    <img src="{% static 'icons/close-thin.png' %}" id="help_text_close"
-                         class="custom-dialog-close-button help-text-close"/>
-
-                    <h3>{% trans "Bill numbering format" context 'bill formatting help text' %}</h3>
-                    <p>
-                        {% trans "Every new bill will be assigned a unique number using these rules." context 'bill formatting help text' %}
-                        {% trans "These characters will be replaced by the following:" context 'bill formatting help text' %}
-                    </p>
-
-                    <ul>
-                        <li><span class="code">{s}</span> -
-                            {% trans "the current sequential bill number; this is required." context 'bill formatting help text' %}</li>
-                        <li><span class="code">%Y</span> -
-                            {% trans "current year" context 'bill formatting help text' %}</li>
-                        <li><span class="code">%m</span> -
-                            {% trans "current month with leading zeros" context 'bill formatting help text' %}
-                        </li>
-                        <li>{% trans "for more formatters see" context 'bill formatting help text' %}
-                            <a href="https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior" target="_blank">
-                                {% trans "this reference" context 'bill formatting help text' %}
-                            </a>
-                        </li>
-                    </ul>
-
-                    <h3>{% trans "Examples" context 'bill formatting help text' %}</h3>
-                    <p>{% trans "For example, the following bill is the 26th bill created on November 2nd, 2016." context 'bill formatting help text' %}</p>
-                    <ul>
-                        <li>
-                            <span class="code">{s}</span>
-                            {% trans "will be translated to" context 'bill formatting help text' %}
-                            <span class="code">26</span>
-                        </li>
-                        <li>
-                            <span class="code">%Y-{s}</span>
-                            {% trans "will be translated to" context 'bill formatting help text' %}
-                            <span class="code">2016-26</span>
-                        </li>
-                        <li>
-                            <span class="code">%Y%m:{s}</span>
-                            {% trans "will be translated to" context 'bill formatting help text' %}
-                            <span class="code">201511:26</span>
-                        </li>
-                    </ul>
-                    <p>{% trans "Note, bill number begins with 1 and is never reset." context 'bill formatting help text' %}</p>
-                </div>
+            <div id="bill_format_example" class="help-text">
+                {% trans 'Examples: ' %}
+                <ul class="example" data-format="yyyy-s">
+                    <li>2015-1056</li>
+                    <li>2015-1057</li>
+                    <li>2016-1</li>
+                    <li>2016-2</li>
+                </ul>
+                <ul class="example" data-format="s">
+                    <li>1056</li>
+                    <li>1057</li>
+                    <li>1058</li>
+                </ul>
+                <ul class="example" data-format="yyyy-m-s">
+                    <li>2015-3-650</li>
+                    <li>2015-3-651</li>
+                    <li>2015-4-1</li>
+                    <li>2015-4-2</li>
+                    <li>2015-5-1</li>
+                </ul>
             </div>
         </div>
     </div>
