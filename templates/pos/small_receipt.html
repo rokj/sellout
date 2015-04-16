@@ -46,12 +46,13 @@
                         <div class="item-name"></div>
                     </div>
                     <div class="second-row">
-                        <div class="item-price">{% trans 'Price' %}</div>
-                        <div class="item-quantity">{% trans 'Qty' %}</div>
-                        <div class="item-unit">&nbsp;{# unit has no label #}</div>
-                        <div class="item-discount">{% trans 'Discount' %}</div>
+                        {# divs are float: right; therefore they have to be reversed #}
+                        <div class="item-tax">&nbsp;</div>
                         <div class="item-amount">{% trans 'Amount' %}</div>
-                        <div class="item-tax"></div>
+                        <div class="item-discount">{% trans 'Discount' %}</div>
+                        <div class="item-unit">&nbsp;{# unit has no label #}</div>
+                        <div class="item-quantity">{% trans 'Qty' %}</div>
+                        <div class="item-price">{% trans 'Price' %}</div>
                     </div>
                 </div>
             </div>
@@ -59,14 +60,16 @@
             <div class="items-body">
                 {% for item in bill.items %}
                     <div class="receipt-row">
-                        <div class="second-row">
+                        <div class="first-row">
                             <div class="item-name">{{ item.name }}</div>
-                            <div class="item-price">{{ item.base }}</div>
-                            <div class="item-quantity">{{ item.quantity }}</div>
-                            <div class="item-unit">&nbsp;{# unit has no label #}</div>
-                            <div class="item-discount">{{ item.discount }}</div>
+                        </div>
+                        <div class="second-row">
+                            <div class="item-tax">{{ item.tax_rate_id }}</div> {# this is not necessarily visible #}
                             <div class="item-amount">{{ item.total }}</div>
-                            <div class="item-tax">{{ item.tax_rate_id }}</div>
+                            <div class="item-discount">{{ item.discount }}</div>
+                            <div class="item-unit">&nbsp;{# unit has no label #}</div>
+                            <div class="item-quantity">{{ item.quantity }}</div>
+                            <div class="item-price">{{ item.base }}</div>
                         </div>
                     </div>
                 {% endfor %}
