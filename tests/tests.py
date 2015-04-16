@@ -47,6 +47,7 @@ def encoded_dict(in_dict):
 try:
     ### btc price ###
     if "calculate_btc_price" in tests:
+        print "---"
         print "Will try to calculate BTC price..."
         btc_price = calculate_btc_price("EUR", 0.5)
         print "BTC price for 0.5 EUR is ", btc_price
@@ -55,6 +56,7 @@ try:
 
     ### btc address ###
     if "btc_address" in tests:
+        print "---"
         print "Will try to get new BTC address..."
         bitcoin_rpc = BitcoinRPC(settings.PAYMENT['bitcoin']['host'], settings.PAYMENT['bitcoin']['port'], settings.PAYMENT['bitcoin']['rpcuser'], settings.PAYMENT['bitcoin']['rpcpassword'])
         address = bitcoin_rpc.get_new_address("rokj_text")
@@ -63,6 +65,9 @@ try:
         print
 
     if "create_user" in tests:
+        print "---"
+        print "Will try create new user with email rok.jaklic@gmail.com..."
+
         my_dict = {
             u'email': u'rok.jaklic@gmail.com',
             u'first_name': u'Rok TEST',
@@ -108,9 +113,16 @@ try:
 
             raise Exception
 
+        print "New created successfully created..."
+        print "---"
+        print
+
 
     ### creating company ###
     if "create_company" in tests:
+        print "---"
+        print "Will try create new company Neko podjetje d.o.o...."
+
         my_dict = {
             u'website': 'http://www.spletna-stran.com',
             u'city': u'Velike Lasce',
@@ -145,6 +157,10 @@ try:
                 permission='admin',
             )
             default_permission.save()
+
+        print "New company successfully created..."
+        print "---"
+        print
 
     ### destroying data ###
     print "Will delete test data..."
