@@ -11,12 +11,12 @@ PIDFILE="$PROJDIR/pos.pid"
 
 cd $PROJDIR
 
-git pull
+git -c http.sslVerify=false pull
 
 if [ -f $PIDFILE ]; then
     # kill -9 `ps -aux | grep uwsgi | awk '{print $2}'
     echo "Stopping server for sellout.biz."
-    uwsgi --stop $PIDFILE
+    /usr/local/bin/uwsgi/uwsgi --stop $PIDFILE
     sleep 3
 fi
 
@@ -25,7 +25,7 @@ fi
 
 echo "Starting server for sellout.biz."
 cd $PROJDIR
-uwsgi --wsgi-file /usr/local/www/sellout_biz/wsgi.py --python-path /usr/local/www/ --fastcgi-socket --ini pos.ini
+/usr/local/bin/uwsgi/uwsgi --wsgi-file /usr/local/www/sellout_biz/wsgi.py --python-path /usr/local/www/ --fastcgi-socket --ini pos.ini
 
 echo "TESTS"
 echo "TESTS"

@@ -11,18 +11,18 @@ PIDFILE="$PROJDIR/spletna-blagajna.pid"
 
 cd $PROJDIR
 
-git pull
+git -c http.sslVerify=false pull
 
 if [ -f $PIDFILE ]; then
     # kill -9 `ps -aux | grep uwsgi | awk '{print $2}'
     echo "Stopping server for spletna-blagajna.si"
-    uwsgi --stop $PIDFILE
+    /usr/local/bin/uwsgi/uwsgi --stop $PIDFILE
     sleep 3
 fi
 
 echo "Starting server for spletna-blagajna.si."
 cd $PROJDIR
-uwsgi --wsgi-file /usr/local/www/sellout_biz/spletna_blagajna_wsgi.py --python-path /usr/local/www/ --fastcgi-socket --ini spletna-blagajna.ini
+/usr/local/bin/uwsgi/uwsgi --wsgi-file /usr/local/www/sellout_biz/spletna_blagajna_wsgi.py --python-path /usr/local/www/ --fastcgi-socket --ini spletna-blagajna.ini
 
 echo "TESTS"
 echo "TESTS"
