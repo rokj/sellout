@@ -3497,7 +3497,7 @@ msgstr "Blagajne"
 
 #: templates/pos/manage/registers.html:14
 msgid "Add register"
-msgstr "Dodaj tiskalnik"
+msgstr "Dodaj blagajno"
 
 #: templates/pos/manage/registers.html:25
 msgid "Register Name"
