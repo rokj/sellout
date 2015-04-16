@@ -4297,7 +4297,7 @@ msgstr "Izgled računov in terminala nastavite,<br />da zadovolji vašemuokusu."
 
 #: templates/web/index.html:469
 msgid "Supported hardware"
-msgstr ""
+msgstr "Podprta oprema"
 
 #: templates/web/index.html:470
 msgid ""
@@ -4305,6 +4305,9 @@ msgid ""
 "                            which we support for printing invoices.\n"
 "                            "
 msgstr ""
+"Ponujamo tudi termične tiskalnike, <br />\n"
+"                            ki jih podpiramo za tiskanje računov.\n"
+"                            "
 
 #: templates/web/index.html:473
 msgid "Check out supported hardware"
