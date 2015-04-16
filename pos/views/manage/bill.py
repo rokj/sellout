@@ -97,7 +97,7 @@ def list_bills(request, company):
         t = form.cleaned_data.get('serial')
         print t
         if t:
-            bills = bills.filter(formatted_serial__icontains=t)
+            bills = bills.filter(serial__icontains=t)
 
         # status
         t = form.cleaned_data.get('status')

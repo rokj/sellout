@@ -20,19 +20,6 @@ div.spacer.left{
     text-align: left;
 }
 
-.help-popup {
-    background-color: #f7f7f7;
-    padding: 5px;
-    position: relative;
-    color: #323232;
-}
+#bill_format_example {
 
-.help-popup * {
-    font-size: 90%;
-    margin: 5px;
-}
-
-.help-text-close {
-    position: absolute;
-    right: 5px;
 }

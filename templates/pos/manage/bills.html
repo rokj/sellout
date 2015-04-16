@@ -196,7 +196,7 @@
                 <tbody>
                     {% for bill in bills %}
                         <tr class="bill-list item">
-                            <td class="column serial">{{ bill.formatted_serial }}</td>
+                            <td class="column serial">{{ bill.serial}}</td>
                             <td class="column status">{{ bill.payment.status }}</td>
                             <td class="column user">{{ bill.user_name }}</td>
                             <td class="column date">{{ bill.timestamp }}</td>

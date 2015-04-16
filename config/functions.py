@@ -37,8 +37,8 @@ company_defaults = {
     'pos_payment_bitcoin_address': '',
     'pos_payment_paypal_address': '',
 
-    # strftime() format string, {s} - bill serial
-    'pos_bill_serial_format': '%Y-' + g.BILL_SERIAL_FORMAT_PLACEHOLDER,
+    # bill serial format: one of the available options
+    'pos_bill_serial_format': g.BILL_FORMAT_OPTIONS[0][0]
 }
 
 user_defaults = {
