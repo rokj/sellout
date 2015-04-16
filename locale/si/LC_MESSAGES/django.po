@@ -4738,3 +4738,6 @@ msgstr "To polje je obvezno."
 
 msgid "Invalid CAPTCHA"
 msgstr "Nisi pravilno izračunal/a"
+
+msgid "Color"
+msgstr "Barva"
