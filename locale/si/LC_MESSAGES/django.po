@@ -667,7 +667,7 @@ msgstr ""
 
 #: common/globals.py:346
 msgid "Free"
-msgstr "Brezplačna"
+msgstr "Brezplačno"
 
 #: common/globals.py:347
 msgid "First time"
