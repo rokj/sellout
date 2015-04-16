@@ -667,7 +667,7 @@ msgstr ""
 
 #: common/globals.py:346
 msgid "Free"
-msgstr ""
+msgstr "Brezplačna"
 
 #: common/globals.py:347
 msgid "First time"
@@ -4062,6 +4062,9 @@ msgstr "Pozabljeno geslo?"
 
 #: templates/web/index.html:256
 msgid "Cloud Point Of Sale application."
+msgstr "Spletna in mobilna blagajna."
+
+msgid "Free Cloud Point Of Sale application."
 msgstr "Spletna in mobilna blagajna."
 
 #: templates/web/index.html:257

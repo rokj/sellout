@@ -379,9 +379,9 @@ div.step-connector{
     text-align: left;
 }
 
-#pricing_section div.row .col:first-child {
-    width: 48%;
-}
+/*#pricing_section div.row .col:first-child {*/
+    /*width: 48%;*/
+/*}*/
 
 div.payment-option-nowrap{
     white-space: nowrap;
@@ -554,19 +554,20 @@ div#payment_options_boxes {
 
 div#payment_options_boxes .akcija-big {
     text-transform: uppercase;
-    background: url('/static/images/index/akcija_trak_02.png') no-repeat;
-    position: absolute;
+    /*background: url('/static/images/index/akcija_trak_02.png') no-repeat;*/
+    /*position: absolute;*/
     top: 117px;
     left: -27px;
     color: #ffffff;
     font-weight: bold;
-    font-size: 18px;
     width: 558px;
     height: 62px;
-    text-align: center;
-    padding-top: 23px;
+    text-align: left;
+    /*padding-top: 23px;*/
     opacity: 0.88;
     z-index: 1;
+    color: rgb(100, 100, 100);
+    font-size: 30px;
 }
 
 section#budget_section a.pricing, section#hardware_support_section a.supported-hardware, section#hardware_support_section a.supported-hardware:link {

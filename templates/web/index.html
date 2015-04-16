@@ -259,7 +259,7 @@
 
     <section id="welcome_section" class="full-height">
         <div class="container-fluid">
-            <h1 class="text-center">{% trans 'Cloud Point Of Sale application.' %}</h1>
+            <h1 class="text-center">{% trans 'Free Cloud Point Of Sale application.' %}</h1>
             <h2 class="text-center">{% trans 'Your perfect business partner.' %}</h2>
         </div>
 
@@ -522,41 +522,14 @@
         <a name="pricing"></a>
         <div class="container">
             <div class="row">
-                <div class="col col-md-7 col-sm-6 col-xs-12">
+                <div class="col col-md-4 col-sm-4 col-xs-12">
                     <h3 class="dark-fg">{% trans 'Packages & Pricing' %}</h3>
                     <div id="payment_options_boxes"> {# payment options #}
-                        <div class="akcija-big">{% trans "Free while in beta" %}</div>
-
-                        <div class="payment-option-nowrap">
-                            <div class="payment-option">
-                                <div class="payment-duration"> {% trans '1 month' %}</div>
-                                <div class="payment-price">20 &euro;</div>
-                            </div>
-                            <div class="payment-option">
-                                <div class="payment-duration"> {% trans '2 months' %} </div>
-                                <div class="payment-price">38 &euro;</div>
-                            </div>
-                            <div class="payment-option">
-                                <div class="payment-duration"> {% trans '3 months' %} </div>
-                                <div class="payment-price">55 &euro;</div>
-                            </div>
-                        </div>
-
-                        <div class="payment-option-nowrap">
-                            <div class="payment-option">
-                                <div class="payment-duration"> {% trans '6 months' %} </div>
-                                <div class="payment-price">100 &euro;</div>
-                            </div>
-
-                            <div class="payment-option">
-                                <div class="payment-duration"> {% trans '1 year' %} </div>
-                                <div class="payment-price">166 &euro;</div>
-                            </div>
-                        </div>
+                        <div class="akcija-big">{% trans "Free" %}</div>
                     </div>
                 </div>
 
-                <div class="col col-md-3 col-sm-3 col-xs-12">
+                <div class="col col-md-4 col-sm-4 col-xs-12">
                     <h3 class="dark-fg">{% trans 'What you get' %}</h3>
                     <div class="payment-features-container">
                         <ul class="payment-features">
@@ -569,7 +542,7 @@
                     </div>
                 </div>
 
-                <div class="col col-md-3 col-sm-3 col-xs-12">
+                <div class="col col-md-4 col-sm-4 col-xs-12">
                     <h3 class="dark-fg">{% trans 'Payment options' %}</h3>
                     <img src="{% static 'images/index/payment-types.png' %}"
                          alt="{% trans 'Payment options' %}" />
@@ -581,7 +554,7 @@
     <section id="banner_section">
         <div class="container">
             <input type="button" value="{% trans 'Register' %}" class="register-shortcut" />
-            <h3>{% trans 'Start your <b>FREE</b> ... while in beta!' %}</h3>
+            <h3>{% trans 'Free!' %}</h3>
         </div>
     </section>
 
