@@ -167,6 +167,8 @@ $(window).load(function(){
 
 {% endblock %}
 
+{% block status_bar_title %} {{ company.name }} {% endblock %}
+
 {% block terminal_menu %}
     {# this has been replaced with a 'terminal' menu #}
     <div id="status_bar_company"></div>
@@ -625,6 +627,7 @@ $(window).load(function(){
 
                 <div>{# discounts section #}
                     <p class="details-title">{% trans 'Discounts' %}</p>
+
                     <ul class="discounts">
                         {# discounts that are already on the products will be added on the fly #}
                         <li class="select-existing">
@@ -633,6 +636,9 @@ $(window).load(function(){
                             </select>
                             <button class="add-discount">+</button>
                         </li>
+                    </ul>
+
+                    <ul class="discounts">
                         <li class="add-new">
                             {# just an input box and select for type of discount #}
                             <input type="text" class="description" placeholder="{% trans 'Description' %}" /><br />

@@ -117,7 +117,7 @@ Bill = function(g){
         item.item_row.remove();
         remove_from_array(p.items, i);
         delete p.items_by_serial[item.serial];
-        delete p.items_by_id[item.product.id];
+        delete p.items_by_id[item.product.data.id];
 
         item = null;
 

@@ -53,6 +53,8 @@ RULE #1:
                         <div class="item-name"></div>
                     </div>
                     <div class="second-row">
+                        {% trans 'Name' context 'Item name on printed bill' %}
+
                         {# divs are float: right; therefore they have to be reversed #}
                         {# #1 #}
                         {% if not bill.issuer.tay_payer %}

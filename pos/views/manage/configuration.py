@@ -7,7 +7,7 @@ from django import forms
 from pos.models import Company
 from common.functions import has_permission, no_permission_view
 from common import globals as g
-from config.functions import set_user_value, get_user_value, get_company_value, set_company_value
+from config.functions import set_user_value, get_user_value, get_company_value, save_company_config
 from config.currencies import currency_choices
 
 import pytz
@@ -90,11 +90,7 @@ def company_settings(request, company):
     if not has_permission(request.user, c, 'config', 'edit'):
         return no_permission_view(request, c, _("You have no permission to edit system configuration."))
 
-    # get config: specify initial data manually (also for security reasons,
-    # to not accidentally include secret data in request.POST or whatever)
-
-    # this may be a little wasteful on resources, but config is only edited once in a lifetime or so
-    # get_value is needed because dict['key'] will fail if new keys are added but not yet saved
+    # get config
     initial = {
         'date_format': get_company_value(request.user, c, 'pos_date_format'),
         'time_format': get_company_value(request.user, c, 'pos_time_format'),
@@ -108,15 +104,13 @@ def company_settings(request, company):
     }
 
     if request.method == 'POST':
-        try:
-            form = ConfigForm(request.POST)
-            if form.is_valid():
-                for key in initial:
-                    set_company_value(request.user, c, "pos_" + key, form.cleaned_data[key])
-            else:
-                print form.errors
-        except Exception as e:
-            print e
+        form = ConfigForm(request.POST)
+        new_config = {}
+        if form.is_valid():
+            for key in initial:
+                new_config['pos_' + key] = form.cleaned_data[key]
+
+            save_company_config(request.user, c, new_config)
 
     else:
         form = ConfigForm(initial=initial)  # An unbound form
@@ -152,9 +146,12 @@ def user_settings(request, company):
 
     if request.method == 'POST':
         form = UserForm(request.POST)
+        new_config = {}
         if form.is_valid():
             for key in initial:
                 set_user_value(request.user, "pos_" + key, form.cleaned_data[key])
+                # TODO: user settings
+                # new_config['pos_' + key] = form.cleaned_data[key]
     else:
         form = UserForm(initial=initial)  # An unbound form
 
