@@ -89,6 +89,7 @@ def validate_discount(data, user, company, android=False, discount=None):
                                  day=end_date[2])
             else:
                 end = None
+
             form.cleaned_data['start_date'] = start
             form.cleaned_data['end_date'] = end
             form.start_date = start
