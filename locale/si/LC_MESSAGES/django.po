@@ -1073,11 +1073,11 @@ msgstr ""
 
 #: pos/models.py:194
 msgid "Product name"
-msgstr ""
+msgstr "Ime artikla/storitve"
 
 #: pos/models.py:195
 msgid "Product description"
-msgstr ""
+msgstr "Opis artikla/storitve"
 
 #: pos/models.py:196
 msgid "Notes (only for internal use)"
@@ -4758,3 +4758,7 @@ msgstr "Nisi pravilno izračunal/a"
 
 msgid "Color"
 msgstr "Barva"
+
+msgctxt "Item name on printed bill"
+msgid "Name"
+msgstr "Naziv"
