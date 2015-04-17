@@ -4762,3 +4762,9 @@ msgstr "Barva"
 msgctxt "Item name on printed bill"
 msgid "Name"
 msgstr "Naziv"
+
+msgid "Add an already defined discount to this product;"
+msgstr "Tukaj lahko dodaš popust na artikel"
+
+msgid "Select a discount to add and click the + button."
+msgstr "Izberi popust in klikni + gumb."
