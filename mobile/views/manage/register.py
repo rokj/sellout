@@ -25,8 +25,6 @@ def mobile_get_register(request, company_id):
     data = JsonParse(request.POST['data'])
     device_id = data['device_id']
 
-    print device_id
-
     try:
         register = Register.objects.get(company=c, device_id=device_id)
         r = {
@@ -55,7 +53,6 @@ def mobile_add_register(request, company_id):
         return JsonError(_("You have no permission to edit registers"))
 
     data = JsonParse(request.POST['data'])
-    print data
     valid = validate_register(request.user, c, data)
 
     if not valid.get('status'):

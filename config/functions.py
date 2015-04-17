@@ -115,7 +115,6 @@ def save_company_config(user, company, data):
     try:
         c = CompanyConfig.objects.get(company=company)
         c.data = json.dumps(data)
-        print data
         c.save()
     except CompanyConfig.DoesNotExist:
         c = CompanyConfig(created_by=user, company=company, data=json.dumps(data))
