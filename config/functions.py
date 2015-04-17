@@ -124,7 +124,7 @@ def save_company_config(user, company, data):
         print e
 
     # delete cache
-    cache.delete(company_cache_key(user))
+    cache.delete(company_cache_key(company))
 
 
 def get_user_config(user):
