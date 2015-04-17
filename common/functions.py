@@ -3,19 +3,16 @@ import os
 import string
 import json
 import random
-import psycopg2
 from decimal import Decimal, ROUND_DOWN
 from django import forms
 
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMultiAlternatives
-from django.core.urlresolvers import reverse
 from django.db import connection, IntegrityError, connections
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.template.defaultfilters import floatformat
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import ugettext as _
 
@@ -97,10 +94,10 @@ def format_number(user, company, n, high_precision=False):
     if not n:
         return '0'
 
-    if not high_precision:
-        s = str(n.quantize(Decimal('1.'+'0'*p)))
+    if high_precision:
+        s = str(n.quantize(Decimal('1.'+'0'*2*p)))
     else:
-        s = str(n.normalize())
+        s = str(n.quantize(Decimal('1.' + '0' * p)))
 
     return s.replace('.', sep)
 
