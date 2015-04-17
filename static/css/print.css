@@ -180,7 +180,11 @@
 .receipt-80mm .receipt-items .items-footer .receipt-total{
     text-align: right;
     font-weight: bold;
-    margin-right: 5%; /* the width of .item-tax column */
+}
+
+.receipt-80mm .receipt-total-tax-margin {
+    width: 5%;
+    display: inline-block;
 }
 
 .receipt-80mm .receipt-cashier{

@@ -297,9 +297,9 @@ Bill = function(g){
         if(p.data && !isNaN(p.data.id)) id = p.data.id;
         else id = -1;
 
-        // timestamp: send an array of numbers: year, month, day, hour, minute, second
+        // timestamp: send an array of numbers: year, month (zero-based!), day, hour, minute, second
         var d = new Date();
-        var timestamp = [d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()];
+        var timestamp = [d.getFullYear(), d.getMonth()+1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()];
 
         // issuer: the current company, in view
 

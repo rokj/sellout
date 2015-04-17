@@ -2,6 +2,12 @@
 {% load i18n %}
 {% load static %}
 
+{% comment %}
+slovenski računi:
+RULE #1:
+  če firma NI davčni zavezanec (company.tax_payer = False), se z računa skrijejo vsi podatki o davkih
+{% endcomment %}
+
 {% block content %}
     <div class="receipt-fullpage">
         <table class="receipt-header">
@@ -112,7 +118,11 @@
                     </td>
                     <td class="amount">
                         <div class="item-amount">{{ item.total }}</div>
-                        <div class="item-tax">{{ item.tax_rate_id }}</div>
+                        {# #1 #}
+                        {% if bill.issuer.tax_payer %}
+                            <div class="item-tax">{{ item.tax_rate_id }}</div>
+                        {% endif %}
+
                     </td>
                 </tr>
             {% endfor %}
@@ -121,39 +131,41 @@
         </table>
 
         {# tax rates #}
-        <table class="tax-rates">
-            <thead>
-            <tr class="tax-row header">
-                <td class="tax-id">&nbsp;</td>
-                <td class="tax-percent">{% trans 'Rate' %}</td>
-                <td class="tax-net">{% trans 'Subtotal' %}</td>
-                <td class="tax-absolute">{% trans 'Tax' %}</td>
-                <td class="tax-gross">{% trans 'Total' %}</td>
-            </tr>
-            </thead>
-
-            <tfoot>
-            <tr class="tax-row footer">
-                <td class="tax-id">{% trans 'Sum' context 'Tax rates table footer' %}</td>
-                <td class="tax-percent">&nbsp;</td>
-                <td class="tax-net">{{ bill.tax_sums.net_sum }}</td>
-                <td class="tax-absolute">{{ bill.tax_sums.tax_sum }}</td>
-                <td class="tax-gross">{{ bill.tax_sums.gross_sum }}</td>
-            </tr>
-            </tfoot>
-
-            <tbody class="tax-body">
-            {% for rate in bill.tax_rates %}
+        {% if bill.issuer.tax_payer %}
+            <table class="tax-rates">
+                <thead>
                 <tr class="tax-row header">
-                    <td class="tax-id">{{ rate.id }}</td>
-                    <td class="tax-percent">{{ rate.amount }} %</td>
-                    <td class="tax-net">{{ rate.net_sum }}</td>
-                    <td class="tax-absolute">{{ rate.tax_sum }}</td>
-                    <td class="tax-gross">{{ rate.gross_sum }}</td>
+                    <td class="tax-id">&nbsp;</td>
+                    <td class="tax-percent">{% trans 'Rate' %}</td>
+                    <td class="tax-net">{% trans 'Subtotal' %}</td>
+                    <td class="tax-absolute">{% trans 'Tax' %}</td>
+                    <td class="tax-gross">{% trans 'Total' %}</td>
                 </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+
+                <tfoot>
+                <tr class="tax-row footer">
+                    <td class="tax-id">{% trans 'Sum' context 'Tax rates table footer' %}</td>
+                    <td class="tax-percent">&nbsp;</td>
+                    <td class="tax-net">{{ bill.tax_sums.net_sum }}</td>
+                    <td class="tax-absolute">{{ bill.tax_sums.tax_sum }}</td>
+                    <td class="tax-gross">{{ bill.tax_sums.gross_sum }}</td>
+                </tr>
+                </tfoot>
+
+                <tbody class="tax-body">
+                {% for rate in bill.tax_rates %}
+                    <tr class="tax-row header">
+                        <td class="tax-id">{{ rate.id }}</td>
+                        <td class="tax-percent">{{ rate.amount }} %</td>
+                        <td class="tax-net">{{ rate.net_sum }}</td>
+                        <td class="tax-absolute">{{ rate.tax_sum }}</td>
+                        <td class="tax-gross">{{ rate.gross_sum }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
 
         <div class="receipt-footer">
             To je drobni tisk. To je drobni tisk. To je drobni tisk. To je drobni tisk. To je drobni tisk. To je drobni tisk. To je drobni tisk. To je drobni tisk.
