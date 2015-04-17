@@ -3748,7 +3748,7 @@ msgstr ""
 #: templates/pos/terminal.html:269
 msgctxt "More button in bill item"
 msgid "More"
-msgstr ""
+msgstr "Dodatno"
 
 #: templates/pos/terminal.html:278
 msgid "No more in stock"
@@ -4084,7 +4084,7 @@ msgstr "Preveri več"
 
 #: templates/web/index.html:261
 msgid "More"
-msgstr ""
+msgstr "Dodatno"
 
 #: templates/web/index.html:266
 msgid "Meet Sellout,"
