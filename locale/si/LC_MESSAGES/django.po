@@ -3762,7 +3762,7 @@ msgstr "Potrdi"
 #: templates/pos/terminal.html:325
 msgctxt "bill options button text"
 msgid "Bill"
-msgstr "Računi"
+msgstr "Račun"
 
 #: templates/pos/terminal.html:330
 msgid "Select client"
