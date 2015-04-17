@@ -2,11 +2,12 @@ from datetime import datetime as dtm, datetime
 from decimal import Decimal, ROUND_UP
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.template import TemplateDoesNotExist
 
 from common.decorators import login_required
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse, HttpResponse
-from django.template.loader import render_to_string
+from django.template.loader import render_to_string, get_template
 from django.utils.translation import ugettext as _
 
 from payment.models import Payment
@@ -48,7 +49,7 @@ def bill_item_to_dict(user, company, item):
     i['bill_notes'] = item.bill_notes
 
     i['base'] = format_number(user, company, item.base)
-    i['quantity'] = format_number(user, company, item.quantity)
+    i['quantity'] = format_number(user, company, item.quantity, high_precision=True)
     i['tax_rate'] = format_number(user, company, item.tax_rate)
 
     i['batch'] = format_number(user, company, item.batch)
@@ -212,28 +213,42 @@ def payment_to_dict(user, company, payment):
         'status': payment.get_status_display()
     }
 
+
 def create_printable_bill(user, company, bill, receipt_format=None, esc=False):
     # get the template and some other details
     logo = None
 
     if not receipt_format:
         receipt_format = bill.register.receipt_format
+
+    # choose the bill according to company's country
+    t = 'pos/print/' + bill.company.country.lower() + '/'
+
+    # choose receipt format
     if receipt_format == 'Page':
-        t = 'pos/large_receipt.html'
+        t += 'large_receipt.html'
 
         if company.color_logo:
             logo = company.color_logo.url
 
     elif receipt_format == 'Thermal':
-        t = 'pos/small_receipt.html'
+        t += 'small_receipt.html'
 
         if company.monochrome_logo:
             logo = company.monochrome_logo.url
-
     else:
         return {
             'status': 'Unsupported_bill_format',
             'message': _("Unsupported bill format") + ": " + str(bill.register.receipt_format)
+        }
+
+    # check if the template we've decided to need exists
+    try:
+        get_template(t)
+    except TemplateDoesNotExist:
+        return {
+            'status': 'Template not found',
+            'message': _("Template does not exist") + ": " + t
         }
 
     # get the data
@@ -250,6 +265,7 @@ def create_printable_bill(user, company, bill, receipt_format=None, esc=False):
     }
     if esc:
         data['esc'] = esc_format(user, company, bill, receipt_format, esc_commands=True)
+
     return data
 
 
@@ -514,7 +530,7 @@ def create_bill_(request, c):
 
             'discounts': [],  # validated discounts (FK in database)
 
-            # prices: will be calculated after discounts are ready
+            # prices: will be calculated when discounts are ready
             'base': None,
             'quantity': None,
             'tax_rate': None,
@@ -579,7 +595,6 @@ def create_bill_(request, c):
             return item_error(e.message, product)
 
     # at this point, everything is fine, insert into database
-
     if existing_bill:
         existing_bill.delete()
 

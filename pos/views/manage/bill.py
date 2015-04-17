@@ -29,8 +29,8 @@ class BillSearchForm(CompanyUserForm):
     amount_to = CustomDecimalField(max_length=g.DECIMAL['currency_digits'], required=False)
     user_name = forms.CharField(max_length=128, required=False)
 
-    sort_by = forms.ChoiceField(choices=(("serial", _("Number")), ("date", _("Date")), ("amount", _("Amount")),))
-    sort_order = forms.ChoiceField(choices=(("desc", _("Descending")), ("asc", _("Ascending")),))
+    sort_by = forms.ChoiceField(choices=(("serial", _("Number")), ("date", _("Date")), ("amount", _("Amount")),), initial="date")
+    sort_order = forms.ChoiceField(choices=(("desc", _("Descending")), ("asc", _("Ascending")),), initial="desc")
 
     page = forms.IntegerField(required=False, widget=forms.HiddenInput)
 

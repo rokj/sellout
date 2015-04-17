@@ -35,7 +35,7 @@ def set_serial(instance, **kwargs):
     elif bill_format == 'yyyy-s':
         prefix = str(instance.timestamp.year) + '-'
     elif bill_format == 'yyyy-m-s':
-        prefix = str(instance.timestamp.year) + '-' + str(instance.timestamp.month+1) + '-'
+        prefix = str(instance.timestamp.year) + '-' + str(instance.timestamp.month) + '-'
     else:
         raise ValueError("Unknown bill prefix type")
 
