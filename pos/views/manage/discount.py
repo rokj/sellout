@@ -276,10 +276,6 @@ def edit_discount(request, company, discount_id):
     if discount.company != c:
         raise Http404
         
-    # check if user has permissions to change contacts
-    if not request.user.has_perm('pos.change_discount'):
-        return no_permission_view(request, c, _("You have no permission to edit discounts."))
-
     if request.method == 'POST':
         # submit data
         form = DiscountForm(data=request.POST,

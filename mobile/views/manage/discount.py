@@ -52,9 +52,6 @@ def mobile_delete_discount(request, company):
     except Discount.DoesNotExist:
         return JsonError(_("Discount does not exist"))
 
-    if not request.user.has_perm('pos.delete_discount'):
-        return JsonError(_("You have no permission to delete discounts."))
-
     d.delete()
 
     return JsonOk(extra=discount_to_dict(request.user, c, d, android=True))
