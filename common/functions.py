@@ -439,11 +439,19 @@ def send_email(sender, to=None, bcc=None, subject=None, txt=None, html=None, att
     sender example: 'Rok Jaklič <rok@internet.com>'
     receiver: ['email-1@email.net', ['email-2@email.net', ...]
     """
+    try:
+        """
+        txt = txt.decode("utf-8")
+        html = html.decode("utf-8")
+        subject = subject.decode("utf-8")
+        """
+        message = EmailMultiAlternatives(subject, txt, sender, to, bcc, headers={'Reply-To': sender})
+        message.attach_alternative(html, "text/html")
+        message.content_subtype = "html"
+        message.send()
+    except Exception as e:
+        print e
 
-    message = EmailMultiAlternatives(subject, txt, sender, to, bcc, headers={'Reply-To': sender})
-    message.attach_alternative(html, "text/html")
-    message.content_subtype = "html"
-    message.send()
 
 """
 def get_subscription_btc_price(from_what="from_eur", for_duration=1, his_price=0, nr_people=1):
