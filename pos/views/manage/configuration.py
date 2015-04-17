@@ -110,6 +110,7 @@ def company_settings(request, company):
     if request.method == 'POST':
         try:
             form = ConfigForm(request.POST)
+            print request.POST
             if form.is_valid():
                 for key, value in initial.iteritems():
                     print "%s: %s" % ("pos_" + key, form.cleaned_data[key])
