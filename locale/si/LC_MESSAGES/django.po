@@ -506,19 +506,19 @@ msgstr ""
 
 #: common/globals.py:36
 msgid "Piece"
-msgstr ""
+msgstr "Kos"
 
 #: common/globals.py:59
 msgid "Hour"
-msgstr ""
+msgstr "Ura"
 
 #: common/globals.py:60
 msgid "Other"
-msgstr ""
+msgstr "Ostalo"
 
 #: common/globals.py:71
 msgid "Percentage"
-msgstr ""
+msgstr "Procent"
 
 #: common/globals.py:72
 msgid "Absolute value"
@@ -589,7 +589,7 @@ msgstr ""
 #: common/globals.py:213 pos/views/bill.py:355 pos/views/bill.py:942
 #: templates/pos/large_receipt.html:43 templates/pos/small_receipt.html:118
 msgid "Cashier"
-msgstr ""
+msgstr "Prodajalec"
 
 #: common/globals.py:214
 msgid "Seller"
@@ -667,7 +667,7 @@ msgstr ""
 
 #: common/globals.py:346
 msgid "Free"
-msgstr ""
+msgstr "Brezplačno"
 
 #: common/globals.py:347
 msgid "First time"
@@ -802,11 +802,11 @@ msgstr ""
 #: mobile/views/manage/contact.py:53 pos/views/manage/product.py:512
 #: pos/views/manage/stock.py:511
 msgid "You have no permission to add products"
-msgstr ""
+msgstr "Nimaš dovoljenja za dodajanje artiklov/storitev"
 
 #: mobile/views/manage/contact.py:109
 msgid "Contact doest not exist"
-msgstr ""
+msgstr "Kontakt ne obstaja"
 
 #: mobile/views/manage/contact.py:149
 msgid "delete contacts"
@@ -814,7 +814,7 @@ msgstr ""
 
 #: mobile/views/manage/contact.py:157
 msgid "Contact does not exist"
-msgstr ""
+msgstr "Kontakt ne obstaja"
 
 #: mobile/views/manage/discount.py:24 mobile/views/manage/discount.py:46
 #: mobile/views/manage/product.py:85 mobile/views/views.py:38
@@ -990,13 +990,13 @@ msgstr ""
 
 #: pos/models.py:71
 msgid "Category name"
-msgstr ""
+msgstr "Ime kategorije"
 
 #: pos/models.py:72 templates/pos/manage/discounts.html:142
 #: templates/pos/manage/products.html:1461
 #: templates/pos/manage/products.html:1545 templates/pos/terminal.html:667
 msgid "Description"
-msgstr ""
+msgstr "Opis"
 
 #: pos/models.py:84 pos/views/manage/category.py:227
 #: templates/pos/base.html:129 templates/pos/manage/categories.html:291
@@ -1005,15 +1005,15 @@ msgstr "Kategorije"
 
 #: pos/models.py:125
 msgid "Discount description"
-msgstr ""
+msgstr "Opis popusta"
 
 #: pos/models.py:126 templates/pos/manage/products.html:1711
 msgid "Code"
-msgstr ""
+msgstr "Koda"
 
 #: pos/models.py:127
 msgid "Discount type"
-msgstr ""
+msgstr "Tip popusta"
 
 #: pos/models.py:129 pos/views/bill.py:308 pos/views/bill.py:893
 #: pos/views/manage/bill.py:32
@@ -1063,7 +1063,7 @@ msgstr "Davki"
 #: pos/models.py:192 templates/pos/manage/products.html:1452
 #: templates/pos/manage/products.html:1552 templates/pos/terminal.html:272
 msgid "Product code"
-msgstr ""
+msgstr "Koda artikla/storitve"
 
 #: pos/models.py:193
 msgid "Store's internal product number"
@@ -1099,11 +1099,11 @@ msgstr ""
 
 #: pos/models.py:402
 msgid "Price per unit, excluding tax"
-msgstr ""
+msgstr "Cena po kosu, brez davka"
 
 #: pos/models.py:408
 msgid "Purchase price per unit, excluding tax"
-msgstr ""
+msgstr "Nakupna cena po kosu, brez davka"
 
 #: pos/models.py:415
 msgid "Type of contact"
@@ -1383,7 +1383,7 @@ msgstr "Cena"
 #: templates/pos/large_receipt.html:68 templates/pos/small_receipt.html:52
 #: templates/pos/terminal.html:248 templates/pos/terminal.html.py:331
 msgid "Discount"
-msgstr ""
+msgstr "Popust"
 
 #: pos/views/bill.py:327 pos/views/bill.py:335 pos/views/bill.py:913
 #: pos/views/bill.py:922
@@ -1442,10 +1442,8 @@ msgid "Invalid contact"
 msgstr ""
 
 #: pos/views/bill.py:472
-#, fuzzy
-#| msgid "Invalid e-mail"
 msgid "Invalid timestamp"
-msgstr "Napačen e-mail"
+msgstr "Napačna ura"
 
 #: pos/views/bill.py:476
 msgid "Invalid grand total value"
@@ -1584,19 +1582,19 @@ msgstr ""
 #: pos/views/manage/category.py:268 templates/pos/manage/categories.html:296
 #: templates/pos/manage/category.html:44
 msgid "Add category"
-msgstr ""
+msgstr "Dodaj kategorijo"
 
 #: pos/views/manage/category.py:306
 msgid "You have no permission to edit categories."
-msgstr ""
+msgstr "Nimaš dovoljenja za urejanje kategorije"
 
 #: pos/views/manage/category.py:335 templates/pos/manage/category.html:46
 msgid "Edit category"
-msgstr ""
+msgstr "Uredi kategorijo"
 
 #: pos/views/manage/category.py:353
 msgid "You have no permission to delete categories"
-msgstr ""
+msgstr "Nimaš dovoljenja za izbris kategorije"
 
 #: pos/views/manage/category.py:361
 msgid "You have no permission to delete this category"
@@ -1604,7 +1602,7 @@ msgstr ""
 
 #: pos/views/manage/category.py:363
 msgid "No category specified"
-msgstr ""
+msgstr "Nastavi kategorijo"
 
 #: pos/views/manage/category.py:366
 msgid "Cannot delete category with subcategories"
@@ -1886,13 +1884,13 @@ msgstr ""
 #: pos/views/manage/product.py:115 pos/views/manage/stock.py:115
 msgid ""
 "There are no taxes defined. Please go to tax management and define them."
-msgstr ""
+msgstr "Ni nastavljenih nobenih davkov. Pojdi v urejanje davkov in jih nekaj naredi."
 
 #: pos/views/manage/product.py:119 pos/views/manage/stock.py:119
 msgid ""
 "There are no categories defined, please go to category management to define "
 "them."
-msgstr ""
+msgstr "Ni nastavljenjih nobenih kategorij. Pojdi v urejanje kategorij in jih nekaj nastavi."
 
 #: pos/views/manage/product.py:134 pos/views/manage/stock.py:134
 #: templates/pos/base.html:130 templates/pos/manage/products.html:1431
@@ -1902,7 +1900,7 @@ msgstr "Artikli/storitve"
 #: pos/views/manage/product.py:179 pos/views/manage/product.py:182
 #: pos/views/manage/stock.py:179 pos/views/manage/stock.py:182
 msgid "No product specified"
-msgstr ""
+msgstr "Ni definiranih nobenih artiklov/storitev"
 
 #: pos/views/manage/product.py:356 pos/views/manage/stock.py:356
 msgid "Wrong product id"
@@ -1958,11 +1956,11 @@ msgstr ""
 
 #: pos/views/manage/product.py:437 pos/views/manage/stock.py:437
 msgid "No code entered"
-msgstr ""
+msgstr "Vnesi kodo"
 
 #: pos/views/manage/product.py:440 pos/views/manage/stock.py:440
 msgid "Code too long"
-msgstr ""
+msgstr "Koda predolga"
 
 #: pos/views/manage/product.py:448 pos/views/manage/stock.py:448
 msgid "A product with this code already exists: "
@@ -2336,7 +2334,7 @@ msgstr ""
 
 #: subscription/templates/subscription/subscription.html:912
 msgid "total price"
-msgstr ""
+msgstr "Končna cena"
 
 #: subscription/templates/subscription/subscription.html:916
 #: subscription/templates/subscription/subscription.html:917
@@ -2744,15 +2742,15 @@ msgstr ""
 #: templates/pos/manage/products.html:1569
 #: templates/pos/manage/products.html:1691
 msgid "Category"
-msgstr ""
+msgstr "Kategorija"
 
 #: support/models.py:13
 msgid "Title"
-msgstr ""
+msgstr "Naslov"
 
 #: support/models.py:14 templates/support/search_results.html:20
 msgid "Question"
-msgstr ""
+msgstr "Vprašanje"
 
 #: support/models.py:24
 msgid "Up votes"
@@ -2988,19 +2986,17 @@ msgid "Bill no."
 msgstr ""
 
 #: templates/pos/manage/bills.html:89
-#, fuzzy
-#| msgid "State"
 msgid "Status:"
-msgstr "Pokrajina"
+msgstr "Status:"
 
 #: templates/pos/manage/bills.html:99
 msgid "Amount: from"
-msgstr ""
+msgstr "Cena: od"
 
 #: templates/pos/manage/bills.html:135 templates/pos/manage/contacts.html:66
 #: templates/pos/manage/discounts.html:73
 msgid "Clear results"
-msgstr ""
+msgstr "Pobriši"
 
 #: templates/pos/manage/bills.html:141 templates/pos/manage/contacts.html:60
 #: templates/pos/manage/discounts.html:67
@@ -3045,11 +3041,10 @@ msgid "Serial"
 msgstr ""
 
 #: templates/pos/manage/bills.html:186
-#, fuzzy
 #| msgid "State"
 msgctxt "bill management"
 msgid "Status"
-msgstr "Pokrajina"
+msgstr "Status"
 
 #: templates/pos/manage/bills.html:187
 msgctxt "bill management"
@@ -3292,15 +3287,15 @@ msgstr ""
 
 #: templates/pos/manage/products.html:189
 msgid "No products found"
-msgstr ""
+msgstr "Ni vnešenega še nobenega artikla/storitve"
 
 #: templates/pos/manage/products.html:346
 msgid "Results found"
-msgstr ""
+msgstr "Najdenih"
 
 #: templates/pos/manage/products.html:383
 msgid "Search failed"
-msgstr ""
+msgstr "Iskanje ni uspelo"
 
 #: templates/pos/manage/products.html:501
 msgid "Favorite could not be set"
@@ -3309,11 +3304,11 @@ msgstr ""
 #: templates/pos/manage/products.html:517
 msgctxt "confirmation dialog title"
 msgid "Are you sure?"
-msgstr ""
+msgstr "Si prepričan/a?"
 
 #: templates/pos/manage/products.html:518
 msgid "Delete product "
-msgstr ""
+msgstr "Izbriši artikel/storitev"
 
 #: templates/pos/manage/products.html:524
 msgid "Error deleting product"
@@ -3342,7 +3337,7 @@ msgstr ""
 
 #: templates/pos/manage/products.html:936
 msgid "Please check product price"
-msgstr ""
+msgstr "Nastavi ceno artikla/storitve"
 
 #: templates/pos/manage/products.html:951
 #: templates/pos/manage/products.html:966
@@ -3351,12 +3346,12 @@ msgstr ""
 
 #: templates/pos/manage/products.html:1043
 msgid "Edit product"
-msgstr ""
+msgstr "Uredi artikel"
 
 #: templates/pos/manage/products.html:1044
 #: templates/pos/manage/products.html:1433
 msgid "Add product"
-msgstr ""
+msgstr "Dodaj artikel"
 
 #: templates/pos/manage/products.html:1223
 msgid "Error while setting tax"
@@ -3377,25 +3372,25 @@ msgstr ""
 #: templates/pos/manage/products.html:1444
 msgctxt "search products"
 msgid "Enter query"
-msgstr ""
+msgstr "Vnesi text"
 
 #: templates/pos/manage/products.html:1455
 #: templates/pos/manage/products.html:1614
 #: templates/pos/manage/products.html:1716
 msgid "Shortcut"
-msgstr ""
+msgstr "Bližnjica"
 
 #: templates/pos/manage/products.html:1473
 msgid "Discount code"
-msgstr ""
+msgstr "Koda popusta"
 
 #: templates/pos/manage/products.html:1481
 msgid "Advanced"
-msgstr ""
+msgstr "Napredno"
 
 #: templates/pos/manage/products.html:1485
 msgid "Basic"
-msgstr ""
+msgstr "Osnovno"
 
 #: templates/pos/manage/products.html:1507
 msgid "Edit all results"
@@ -3403,19 +3398,19 @@ msgstr ""
 
 #: templates/pos/manage/products.html:1575
 msgid "Stock"
-msgstr ""
+msgstr "Zaloga"
 
 #: templates/pos/manage/products.html:1580
 msgid "Unit"
-msgstr ""
+msgstr "Enota"
 
 #: templates/pos/manage/products.html:1589
 msgid "Purchase price"
-msgstr ""
+msgstr "Nakupna cena"
 
 #: templates/pos/manage/products.html:1594
 msgid "per"
-msgstr ""
+msgstr "po"
 
 #: templates/pos/manage/products.html:1602
 msgid "Sell price (excl. tax)"
@@ -3432,18 +3427,22 @@ msgid ""
 "in the same order as shown here.\n"
 "                    "
 msgstr ""
+"\n"
+"Povleci za spremembo vrstnega reda. Celoten popust bo bil izračunan "
+"v istem vrstnem redu, kot je prikazano tukaj.\n"
+"                    "
 
 #: templates/pos/manage/products.html:1637
 msgid "Total price"
-msgstr ""
+msgstr "Končna cena"
 
 #: templates/pos/manage/products.html:1641 templates/pos/manage/stats.html:49
 msgid "Profit"
-msgstr ""
+msgstr "Zaslužek"
 
 #: templates/pos/manage/products.html:1649
 msgid "Private notes"
-msgstr ""
+msgstr "Interne opombe"
 
 #: templates/pos/manage/products.html:1676
 msgid "Favorite this product: it will be displayed by default in terminal"
@@ -3497,7 +3496,7 @@ msgstr "Blagajne"
 
 #: templates/pos/manage/registers.html:14
 msgid "Add register"
-msgstr "Dodaj tiskalnik"
+msgstr "Dodaj blagajno"
 
 #: templates/pos/manage/registers.html:25
 msgid "Register Name"
@@ -3572,39 +3571,39 @@ msgstr ""
 
 #: templates/pos/manage/tax.html:148
 msgid "Saving tax failed"
-msgstr ""
+msgstr "Davka ni bilo mogoče shraniti"
 
 #: templates/pos/manage/tax.html:180
 msgid "Cannot edit tax"
-msgstr ""
+msgstr "Ni možno urejati davka"
 
 #: templates/pos/manage/tax.html:263
 msgid "Could not set default tax"
-msgstr ""
+msgstr "Neuspešno nastavljanje privzetega davka"
 
 #: templates/pos/manage/tax.html:279
 msgid "Add Tax"
-msgstr ""
+msgstr "Dodaj davek"
 
 #: templates/pos/manage/tax.html:283
 msgid "Choose default tax"
-msgstr ""
+msgstr "Izberi privzet davek"
 
 #: templates/pos/manage/tax.html:285
 msgid "This will be chosen by default when adding new products"
-msgstr ""
+msgstr "Ta bo izbran privzeto, ob dodajanju novega artikla/storitve"
 
 #: templates/pos/manage/tax.html:294
 msgid "Name (optional)"
-msgstr ""
+msgstr "Ime (opcijsko)"
 
 #: templates/pos/manage/users.html:41
 msgid "Saving failed"
-msgstr ""
+msgstr "Neuspešno shranjevanje"
 
 #: templates/pos/manage/users.html:60
 msgid "Edit permission"
-msgstr ""
+msgstr "Uredi dovoljenja"
 
 #: templates/pos/manage/users.html:62
 msgid "OK"
@@ -3692,7 +3691,7 @@ msgstr "Račun"
 
 #: templates/pos/small_receipt.html:50 templates/pos/terminal.html:239
 msgid "Qty"
-msgstr "Količina"
+msgstr "Kol"
 
 #: templates/pos/small_receipt.html:78 templates/pos/small_receipt.html:91
 msgctxt "Receipt footer text"
@@ -3793,7 +3792,7 @@ msgstr "Nazaj na nadkategorijo"
 
 #: templates/pos/terminal.html:419
 msgid "Search"
-msgstr ""
+msgstr "Išči"
 
 #: templates/pos/terminal.html:421
 msgctxt "Search button text"
@@ -3838,23 +3837,23 @@ msgstr ""
 
 #: templates/pos/terminal.html:545
 msgid "Choose payment type"
-msgstr ""
+msgstr "Izberi način plačila"
 
 #: templates/pos/terminal.html:561
 msgid "Received"
-msgstr ""
+msgstr "Prejel"
 
 #: templates/pos/terminal.html:566
 msgid "Change due"
-msgstr ""
+msgstr "Vračilo"
 
 #: templates/pos/terminal.html:574
 msgid "Connect your POS Terminal"
-msgstr ""
+msgstr "Poveži POS terminal"
 
 #: templates/pos/terminal.html:580
 msgid "Customer email"
-msgstr ""
+msgstr "Email stranke"
 
 #: templates/pos/terminal.html:583
 msgid "Send invoice"
@@ -4063,6 +4062,9 @@ msgstr "Pozabljeno geslo?"
 
 #: templates/web/index.html:256
 msgid "Cloud Point Of Sale application."
+msgstr "Spletna in mobilna blagajna."
+
+msgid "Free Cloud Point Of Sale application."
 msgstr "Spletna in mobilna blagajna."
 
 #: templates/web/index.html:257
@@ -4298,7 +4300,7 @@ msgstr "Izgled računov in terminala nastavite,<br />da zadovolji vašemuokusu."
 
 #: templates/web/index.html:469
 msgid "Supported hardware"
-msgstr ""
+msgstr "Podprta oprema"
 
 #: templates/web/index.html:470
 msgid ""
@@ -4306,6 +4308,9 @@ msgid ""
 "                            which we support for printing invoices.\n"
 "                            "
 msgstr ""
+"Ponujamo tudi termične tiskalnike, <br />\n"
+"                            ki jih podpiramo za tiskanje računov.\n"
+"                            "
 
 #: templates/web/index.html:473
 msgid "Check out supported hardware"
@@ -4316,7 +4321,6 @@ msgid "Mobile application"
 msgstr "Spletna in mobilna blagajna."
 
 #: templates/web/index.html:494
-#, fuzzy
 #| msgid ""
 #| "\n"
 #| "                                You will upload your company's logo after "
@@ -4331,11 +4335,10 @@ msgid ""
 "                            and you can get it by clicking following icon.\n"
 "                            "
 msgstr ""
-"\n"
-"                                Logo podjetja boš lahko prenesl/a pouspešni "
-"registraciji.\n"
-"                                Poišči nastavitve za podjetje v meniju za "
-"upravljanje.\n"
+"Nimaš računalnika? Ne skrbi!<br /> <br/>\n"
+"                            Razvili smo tudi mobilno aplikacijo, "
+"<br />\n"
+"                            ki si jo lahko preneseš na svojo na napravo že s klikom na naslednjo ikono.\n"
 "                            "
 
 #: templates/web/index.html:520
@@ -4702,46 +4705,49 @@ msgstr "Nepričakovana napaka. Prosimo te, obvesti nas"
 msgid "Message from website"
 msgstr ""
 
-#~ msgctxt "tax rates table footer"
-#~ msgid "Sum"
-#~ msgstr "Seštevek"
+msgctxt "tax rates table footer"
+msgid "Sum"
+msgstr "Seštevek"
 
-#~ msgid "Cash. Credit card. Paypal. Bitcoin."
-#~ msgstr "Gotovina. Kreditna kartica. Paypal. Bitcoin."
+msgid "Cash. Credit card. Paypal. Bitcoin."
+msgstr "Gotovina. Kreditna kartica. Paypal. Bitcoin."
 
-#~ msgid "The perfect partner."
-#~ msgstr "Popoln partner"
+msgid "The perfect partner."
+msgstr "Popoln partner"
 
-#~ msgid ""
-#~ "Sellout is for anyone who runs a profitable business and needs to "
-#~ "regularly issue invoices.\n"
-#~ "                    It is ideal for freelancers, small companies and "
-#~ "start-ups.\n"
-#~ "                    "
-#~ msgstr ""
-#~ "Spletna blagajna je za vsakogar, ki donosno posluje in rednoizdaja "
-#~ "račune.\n"
-#~ "                    Spletna blagajna je idealna za samostojne podjetnike, "
-#~ "majhna podjetja, starup-e in srednja velika podjetja.                    "
+msgid ""
+"Sellout is for anyone who runs a profitable business and needs to "
+"regularly issue invoices.\n"
+"                    It is ideal for freelancers, small companies and "
+"start-ups.\n"
+"                    "
+msgstr ""
+"Spletna blagajna je za vsakogar, ki donosno posluje in rednoizdaja "
+"račune.\n"
+"                    Spletna blagajna je idealna za samostojne podjetnike, "
+"majhna podjetja, starup-e in srednja velika podjetja.                    "
 
-#~ msgid "Ease up your everyday life."
-#~ msgstr "Poenostavite vaše vsakodnevno poslovanje."
+msgid "Ease up your everyday life."
+msgstr "Poenostavite vaše vsakodnevno poslovanje."
 
-#~ msgid "Printer driver"
-#~ msgstr "Gonilnik tiskalnika"
+msgid "Printer driver"
+msgstr "Gonilnik tiskalnika"
 
-#~ msgid "Printer Name"
-#~ msgstr "Ime tiskalnika"
+msgid "Printer Name"
+msgstr "Ime tiskalnika"
 
-#~ msgctxt "bill options button text"
-#~ msgid "Bill..."
-#~ msgstr "Račun..."
+msgctxt "bill options button text"
+msgid "Bill..."
+msgstr "Račun..."
 
-#~ msgid "Support center"
-#~ msgstr "Pomoč in podpora"
+msgid "Support center"
+msgstr "Pomoč in podpora"
 
-#~ msgid "This field is required."
-#~ msgstr "To polje je obvezno."
+msgid "This field is required."
+msgstr "To polje je obvezno."
 
-#~ msgid "Invalid CAPTCHA"
-#~ msgstr "Nisi pravilno izračunal/a"
+msgid "Invalid CAPTCHA"
+msgstr "Nisi pravilno izračunal/a"
+
+msgid "Color"
+msgstr "Barva"

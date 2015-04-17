@@ -70,7 +70,7 @@ class Category(SkeletonU):
     parent = models.ForeignKey('self', blank=True, null=True)
     name = models.CharField(_("Category name"), max_length=100, null=False, blank=False)
     description = models.TextField(_("Description"), null=True, blank=True)
-    color = models.CharField(default=g.CATEGORY_COLORS[0], blank=False, null=False, max_length=6)
+    color = models.CharField(_("Color"), default=g.CATEGORY_COLORS[0], blank=False, null=False, max_length=6)
 
     # image has been replaced by color
     # image = models.ImageField(_("Icon"),

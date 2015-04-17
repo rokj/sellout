@@ -21,7 +21,7 @@ RULE #1:
 
             <div class="details">
                 {{ bill.issuer.street }}, {{ bill.issuer.postcode }} {{ bill.issuer.city }}<br/>
-                {{ bill.issuer.state }} {{ bill.issuer.country }} <br/>
+                {{ bill.issuer.state }} {{ bill.issuer.country_name }} <br/>
                 {% trans 'VAT' %}: {{ bill.issuer.vat_no }}
                 {{ bill.issuer.website }}
             </div>
@@ -142,11 +142,10 @@ RULE #1:
 
         <div class="receipt-footer">
             {% comment %}misc stuff that goes on a receipt, such as:
-        - gifts
-        - coupons
-        - pictures of horses
-        {% endcomment %}
-            <img src="{% static 'images/bill_horse.jpg' %}" alt="" class="horse-picture"/>
+                - gifts
+                - coupons
+                - pictures of horses
+            {% endcomment %}
         </div>
     </div>
 {% endblock %}
