@@ -92,10 +92,10 @@ def format_number(user, company, n, high_precision=False):
     if not n:
         return '0'
 
-    if high_precision:
-        s = str(n.quantize(Decimal('1.'+'0'*p*2)))  # for calculation, use more decimal places
-    else:
+    if not high_precision:
         s = str(n.quantize(Decimal('1.'+'0'*p)))
+    else:
+        s = str(n.normalize())
 
     return s.replace('.', sep)
 

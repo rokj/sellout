@@ -30,7 +30,7 @@ Terminal = function(g){
         select_register: $("#select_register"),
 
         /* terminal status */
-        current_till: $("#current_till"),
+        current_till: $("#current_register"),
         current_date: $("#current_date"),
         current_time: $("#current_time"),
 
@@ -215,6 +215,7 @@ Terminal = function(g){
         // if there's only one register, use that
         if(p.g.data.registers.length == 1){
             p.set_register(p.g.data.registers[0]);
+            return;
         }
 
         var i;

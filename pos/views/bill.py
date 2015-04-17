@@ -49,7 +49,7 @@ def bill_item_to_dict(user, company, item):
     i['bill_notes'] = item.bill_notes
 
     i['base'] = format_number(user, company, item.base)
-    i['quantity'] = format_number(user, company, item.quantity)
+    i['quantity'] = format_number(user, company, item.quantity, high_precision=True)
     i['tax_rate'] = format_number(user, company, item.tax_rate)
 
     i['batch'] = format_number(user, company, item.batch)
@@ -530,7 +530,7 @@ def create_bill_(request, c):
 
             'discounts': [],  # validated discounts (FK in database)
 
-            # prices: will be calculated after discounts are ready
+            # prices: will be calculated when discounts are ready
             'base': None,
             'quantity': None,
             'tax_rate': None,
@@ -595,7 +595,6 @@ def create_bill_(request, c):
             return item_error(e.message, product)
 
     # at this point, everything is fine, insert into database
-
     if existing_bill:
         existing_bill.delete()
 

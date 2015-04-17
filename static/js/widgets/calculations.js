@@ -85,8 +85,7 @@ function calculate_item(item, decimal_places){
     // discounts are subtracted, get the item's shit together;
     // multiply everything by quantity and round to desired decimal places;
     // in real life, one would first multiply by quantity and then calculate with 4 decimal
-    // places instead of 2 (depending on config), but we have Big() that uses 'infinite'
-    // amount of decimal places for exact calculation
+    // places instead of 2 (depending on config), but we have Big() that does some sufficiently 'exact' magic
     item.batch = item.base.times(item.quantity).round(decimal_places); // ! never round quantity
     item.discount = item.discount.times(item.quantity).round(decimal_places);
     item.tax = get_tax(item.net, item.tax_rate).times(item.quantity).round(decimal_places);

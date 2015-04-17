@@ -184,7 +184,8 @@
 
 .receipt-80mm .receipt-total-tax-margin {
     width: 5%;
-    display: inline-block;
+    display: block;
+    float: right
 }
 
 .receipt-80mm .receipt-cashier{
