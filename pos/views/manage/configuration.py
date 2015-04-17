@@ -113,6 +113,8 @@ def company_settings(request, company):
             if form.is_valid():
                 for key in initial:
                     set_company_value(request.user, c, "pos_" + key, form.cleaned_data[key])
+            else:
+                print form.errors
         except Exception as e:
             print e
 
