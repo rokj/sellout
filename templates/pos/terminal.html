@@ -628,6 +628,11 @@ $(window).load(function(){
                 <div>{# discounts section #}
                     <p class="details-title">{% trans 'Discounts' %}</p>
 
+                    <div class="help-text">
+                        {% trans 'Add a discount that is already defined to this product;' %}
+                        {% trans 'Select a discount to add and click the + button.' %}
+                    </div>
+
                     <ul class="discounts">
                         {# discounts that are already on the products will be added on the fly #}
                         <li class="select-existing">
@@ -637,6 +642,11 @@ $(window).load(function(){
                             <button class="add-discount">+</button>
                         </li>
                     </ul>
+
+                    <div class="help-text">
+                        {% trans 'Define a quick discount on-the-fly.' %}
+                        {% trans 'Type a short description, value and discount type. It will be added on save.il' %}
+                    </div>
 
                     <ul class="discounts">
                         <li class="add-new">
