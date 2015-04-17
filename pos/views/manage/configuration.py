@@ -85,14 +85,14 @@ class UserForm(forms.Form):
 @login_required
 def company_settings(request, company):
     c = get_object_or_404(Company, url_name=company)
-    
+
     # permissions
     if not has_permission(request.user, c, 'config', 'edit'):
         return no_permission_view(request, c, _("You have no permission to edit system configuration."))
-    
+
     # get config: specify initial data manually (also for security reasons,
     # to not accidentally include secret data in request.POST or whatever)
-    
+
     # this may be a little wasteful on resources, but config is only edited once in a lifetime or so
     # get_value is needed because dict['key'] will fail if new keys are added but not yet saved
     initial = {
@@ -108,10 +108,16 @@ def company_settings(request, company):
     }
 
     if request.method == 'POST':
-        form = ConfigForm(request.POST)
-        if form.is_valid():
-            for key in initial:
-                set_company_value(request.user, c, "pos_" + key, form.cleaned_data[key])
+        try:
+            form = ConfigForm(request.POST)
+            if form.is_valid():
+                for key in initial:
+                    set_company_value(request.user, c, "pos_" + key, form.cleaned_data[key])
+            else:
+                print form.errors
+        except Exception as e:
+            print e
+
     else:
         form = ConfigForm(initial=initial)  # An unbound form
 
