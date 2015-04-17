@@ -1029,15 +1029,15 @@ msgstr "Znesek"
 #: pos/models.py:141
 #: subscription/templates/subscription/subscriptions.html:366
 msgid "Start date"
-msgstr ""
+msgstr "Začetni datum"
 
 #: pos/models.py:142
 msgid "End date"
-msgstr ""
+msgstr "Končni datum"
 
 #: pos/models.py:143
 msgid "Enabled"
-msgstr ""
+msgstr "Vklopljeno"
 
 #: pos/models.py:178
 msgid "Tax amount"
@@ -2190,6 +2190,9 @@ msgstr ""
 msgid "Unknown unlock type"
 msgstr ""
 
+msgid "Unknown"
+msgstr ""
+
 #: pos/views/terminal.py:240
 msgid "This user is not active."
 msgstr ""
@@ -3005,7 +3008,7 @@ msgstr "Pobriši"
 #: templates/pos/manage/products.html:1494
 msgctxt "submit button label"
 msgid "Search"
-msgstr ""
+msgstr "Išči"
 
 #: templates/pos/manage/bills.html:153 templates/pos/manage/discounts.html:86
 msgid "Results found: "
@@ -3203,13 +3206,13 @@ msgstr ""
 #: templates/pos/manage/contacts.html:97
 #: templates/support/search_results.html:8
 msgid "Search results"
-msgstr ""
+msgstr "Rezultat iskanja"
 
 #: templates/pos/manage/contacts.html:103
 #: templates/pos/manage/products.html:342
 #: templates/support/search_results.html:15
 msgid "No results found"
-msgstr ""
+msgstr "Ni zadetkov"
 
 #: templates/pos/manage/contacts.html:139
 msgctxt "contact type"
@@ -3223,31 +3226,31 @@ msgstr "Podjetje"
 
 #: templates/pos/manage/discounts.html:23
 msgid "Add Discount"
-msgstr ""
+msgstr "Dodaj popust"
 
 #: templates/pos/manage/discounts.html:111
 msgid "Recent discounts"
-msgstr ""
+msgstr "Zadnji popusti"
 
 #: templates/pos/manage/discounts.html:131
 msgid "Delete discount: "
-msgstr ""
+msgstr "Izbriši popust"
 
 #: templates/pos/manage/discounts.html:146
 msgid "Starts"
-msgstr ""
+msgstr "Se začne"
 
 #: templates/pos/manage/discounts.html:150
 msgid "Ends"
-msgstr ""
+msgstr "Konča"
 
 #: templates/pos/manage/discounts.html:161
 msgid "Active"
-msgstr ""
+msgstr "Aktiven"
 
 #: templates/pos/manage/discounts.html:174
 msgid "No discounts found."
-msgstr ""
+msgstr "Ni popustov"
 
 #: templates/pos/manage/manage.html:29
 msgctxt "delete confirmation dialog text"
@@ -3698,7 +3701,7 @@ msgstr "Kol"
 #: templates/pos/small_receipt.html:78 templates/pos/small_receipt.html:91
 msgctxt "Receipt footer text"
 msgid "Total"
-msgstr "Bruto"
+msgstr "Skupaj"
 
 #: templates/pos/terminal.html:30
 msgid "Out of stock"
