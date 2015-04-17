@@ -220,8 +220,8 @@ def invite_users(request, company):
             'login_url': settings.SITE_URL + reverse('web:select_company'),
         }
 
-        message_html = render_to_string(template_html, mail_context).encode('utf8')
-        message_text = render_to_string(template_text, mail_context).encode('utf8')
+        message_html = render_to_string(template_html, mail_context)
+        message_text = render_to_string(template_text, mail_context)
 
         if settings.DEBUG:
             print "============="
@@ -231,7 +231,7 @@ def invite_users(request, company):
             print "============="
         else:
             send_email(settings.EMAIL_FROM, [email], None,
-                       settings.EMAIL_SUBJECT_PREFIX + " " + _("Invitation to join company on").encode('utf8') + " " + settings.SITE_URL,
+                       settings.EMAIL_SUBJECT_PREFIX + " " + _("Invitation to join company on") + " " + settings.SITE_URL,
                        message_text, message_html)
 
     return JsonOk()

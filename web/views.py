@@ -398,11 +398,11 @@ def send_contact_message(request):
                 'status': 'not_valid_email',
         })
 
-    subject = _('Message from website').encode('utf8')
+    subject = _('Message from website')
     message = d.get('message')
 
     message_html = message.replace("\r\n", "<br />")
-    message_html = message_html.replace("\n", "<br />").encode('utf8')
+    message_html = message_html.replace("\n", "<br />")
 
     if settings.DEBUG:
         print "We are sending email with subject:"
