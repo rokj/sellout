@@ -556,7 +556,7 @@ msgstr "Termični (80mm)"
 
 #: common/globals.py:94
 msgid "Printed"
-msgstr ""
+msgstr "Natiskan"
 
 #: common/globals.py:105 templates/pos/terminal.html:546
 msgid "Cash"
