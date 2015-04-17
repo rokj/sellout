@@ -582,7 +582,7 @@ def calculate_btc_price(currency="EUR", price=0):
         if settings.DEBUG:
             print subject
         else:
-            send_email(settings.EMAIL_FROM, [settings.EMAIL_FROM], None, subject, message_txt, message_html)
+            send_email(settings.EMAIL_FROM, [settings.EMAIL_FROM], None, subject, message_txt, message_html).encode('utf8')
 
         return btc_price
 

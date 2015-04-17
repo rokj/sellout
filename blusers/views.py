@@ -277,8 +277,8 @@ def try_register(user_form):
 
     subject = settings.EMAIL_SUBJECT_PREFIX + " " + _("Registration successful")
 
-    message_html = render_to_string('email/email_verification.html', mail_context)
-    message_text = render_to_string('email/email_verification.txt', mail_context)
+    message_html = render_to_string('email/email_verification.html', mail_context).encode('utf8')
+    message_text = render_to_string('email/email_verification.txt', mail_context).encode('utf8')
 
     if settings.DEBUG:
         print message_text
@@ -318,8 +318,8 @@ def send_reactivation_key(request, bluser):
 
     subject = settings.EMAIL_SUBJECT_PREFIX + " " + _("Recover lost password")
 
-    message_html = render_to_string('email/lost_password.html', mail_context)
-    message_text = render_to_string('email/lost_password.txt', mail_context)
+    message_html = render_to_string('email/lost_password.html', mail_context).encode('utf8')
+    message_text = render_to_string('email/lost_password.txt', mail_context).encode('utf8')
 
     if settings.DEBUG:
         print "sending register email"

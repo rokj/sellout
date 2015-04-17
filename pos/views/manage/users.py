@@ -220,8 +220,8 @@ def invite_users(request, company):
             'login_url': settings.SITE_URL + reverse('web:select_company'),
         }
 
-        message_html = render_to_string(template_html, mail_context)
-        message_text = render_to_string(template_text, mail_context)
+        message_html = render_to_string(template_html, mail_context).encode('utf8')
+        message_text = render_to_string(template_text, mail_context).encode('utf8')
 
         if settings.DEBUG:
             print "============="

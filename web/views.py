@@ -402,7 +402,7 @@ def send_contact_message(request):
     message = d.get('message')
 
     message_html = message.replace("\r\n", "<br />")
-    message_html = message_html.replace("\n", "<br />")
+    message_html = message_html.replace("\n", "<br />").encode('utf8')
 
     if settings.DEBUG:
         print "We are sending email with subject:"
