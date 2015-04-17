@@ -407,15 +407,25 @@ button.more{
 }
 
 .details-box button.add-discount{
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     font-size: 20px;
     background-color: #22e693;
     line-height: 20px;
+    position: relative;
+    top: 3px;
 }
 
 .details-box .details-footer{
     margin-top: 15px;
+}
+
+.details-box .select-existing select{
+    width: 70%;
+}
+
+.details-box .add-new select{
+    width: 40px;
 }
 
 /* bill summary */

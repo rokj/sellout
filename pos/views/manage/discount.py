@@ -174,7 +174,7 @@ def list_discounts(request, company):
         # enabled
         t = form.cleaned_data.get('enabled')
         if t is not None:
-            discounts = discounts.filter(active=t)
+            discounts = discounts.filter(enabled=t)
 
         page = form.cleaned_data.get('page')
         searched = True  # search results are being displayed

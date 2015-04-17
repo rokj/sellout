@@ -600,7 +600,7 @@ def edit_product_(request, c, android=False):
     # see if product exists in database
     product_id = data['id']
     try:
-        product = Product.objects.get(id=product_id)
+        product = Product.objects.get(company=c, id=product_id)
     except:
         return JsonError(_("Product does not exist"))
     

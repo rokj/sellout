@@ -624,7 +624,7 @@ Item = function(bill, product) {
         if(!p.data) return;
 
         // the 'usual' item data
-        p.items.name.text(p.data.name);
+        p.items.name.text(p.data.name).attr("title", p.data.name).tooltip();
         p.items.code.text(p.data.code);
 
         // quantity: never round numbers
