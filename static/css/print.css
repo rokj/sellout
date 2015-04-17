@@ -207,8 +207,6 @@
 .receipt-80mm .receipt-footer{
     clear: both;
     margin-top: 3mm;
-    margin-bottom: 15mm;
-    
     text-align: center;
 }
 
@@ -250,6 +248,12 @@
 .receipt-80mm .horse-picture{
     width: 60%;
     margin: 0 auto;
+}
+
+.receipt-80mm .bottom-margin {
+    color: #fdfdfd;
+    font-size: 15mm;
+    text-align: center;
 }
 
 /*                       */
