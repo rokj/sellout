@@ -117,6 +117,7 @@ def save_company_config(user, company, data):
         c.data = json.dumps(data)
         c.save()
     except CompanyConfig.DoesNotExist:
+        print data
         c = CompanyConfig(created_by=user, company=company, data=json.dumps(data))
         c.save()
     except Exception as e:
