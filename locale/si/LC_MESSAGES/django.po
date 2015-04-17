@@ -2156,7 +2156,7 @@ msgstr ""
 
 #: pos/views/manage/users.py:232
 msgid "Invitation to join company on"
-msgstr "Povabljen/a si, da se pridružiš sledečemu podjetju:"
+msgstr "Povabljen/a si, da se pridružiš sledečemu podjetju"
 
 #: pos/views/manage/users.py:261
 msgid "Invite does not exist"
@@ -2888,7 +2888,7 @@ msgstr ""
 
 #: templates/email/invitation_for_non_registered_users.html:7
 msgid "You have been invited to join a company on: "
-msgstr "Povabljen/a si, da se pridružiš sledečemu podjetju:"
+msgstr "Povabljen/a si, da se pridružiš sledečemu podjetju: "
 
 #: templates/email/invitation_for_non_registered_users.html:9
 msgid "But first you have to register by clicking on the following link: "
@@ -2902,17 +2902,17 @@ msgstr "Registracija"
 #: templates/email/invitation_for_registered_users.html:7
 #: templates/email/invitation_for_registered_users.txt:6
 msgid "You have been invited to join a company on"
-msgstr "Povabljen/a si, da se pridružiš sledečemu podjetju:"
+msgstr "Povabljen/a si, da se pridružiš sledečemu podjetju"
 
 #: templates/email/invitation_for_non_registered_users.txt:9
 msgid "But first you have to register on the following link: "
-msgstr ""
+msgstr "Ampak najprej se moraš registrirati na naslednji spletni strani:"
 
 #: templates/email/invitation_for_registered_users.html:9
 #: templates/email/invitation_for_registered_users.txt:8
 msgid ""
 "You can accept or decline this invitation by logging in Sellout application."
-msgstr ""
+msgstr "Lahko sprejmeš ali zavrneš povabilo v sami spletni aplikaciji"
 
 #: templates/email/invitation_for_registered_users.html:10
 #: templates/web/index.html:243
@@ -3984,7 +3984,7 @@ msgstr ""
 
 #: templates/support/question.html:86 templates/web/select_company.html:90
 msgid "Accept"
-msgstr ""
+msgstr "Sprejmi"
 
 #: templates/support/question.html:107
 msgid "Add your comment"
@@ -4517,7 +4517,7 @@ msgstr "Obvestila"
 
 #: templates/web/select_company.html:87
 msgid "You have been invited to join a company: "
-msgstr "Povabljen/a si, da se pridružiš sledečemu podjetju:"
+msgstr "Povabljen/a si, da se pridružiš sledečemu podjetju: "
 
 #: templates/web/select_company.html:91
 msgid "Decline"
