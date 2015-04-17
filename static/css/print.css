@@ -251,9 +251,10 @@
 }
 
 .receipt-80mm .bottom-margin {
+    /* the printer cuts the paper right after the last character */
+    margin-top: 15mm;
+    font-size: 0.1mm;
     color: #fdfdfd;
-    font-size: 15mm;
-    text-align: center;
 }
 
 /*                       */
