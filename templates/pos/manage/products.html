@@ -216,7 +216,7 @@
             }
 
             // in the end, make all products equally high
-            $("div.product-details").height(max_height);
+            //$("div.product-details").height(max_height);  // not sure why i thought this was important
         }
 
         function parse_product_data(product){
@@ -279,7 +279,8 @@
                 edit_container: $("#mass_edit_container"),
                 edit_title: $("#mass_edit_title"),
                 edit_taxes: $("#mass_edit_tax"),
-                edit_discounts: $("#mass_edit_discount")
+                edit_discounts: $("#mass_edit_discount"),
+                mass_delete: $("#mass_edit_delete")
             };
 
             // methods
@@ -456,11 +457,13 @@
                     p.items.edit_title.hide();
                     p.items.edit_taxes.show();
                     p.items.edit_discounts.show();
+                    p.items.mass_delete.show();
                 })
                 .mouseout(function(){
                     p.items.edit_title.show();
                     p.items.edit_taxes.hide();
                     p.items.edit_discounts.hide();
+                    p.items.mass_delete.hide();
                 });
 
             // prevent any fake links from doing anything
@@ -578,7 +581,7 @@
 
             // empty parent and copy all stuff from #product_details_template to it
             p.items.container.empty();
-            p.items.container.append($("div.title, div.product-details-image, table.details", "#product_details_template").clone());
+            p.items.container.append($("div.title, div.product-details-image, div.details", "#product_details_template").clone());
 
             // title (only the row, does not include text)
             p.items.title = $(".title", p.items.container);
@@ -1403,6 +1406,64 @@
             });
         };
 
+        MassDelete = function(){
+            var p = this;
+
+            p.items = {
+                delete_link: $("#mass_edit_delete")
+            }
+
+            //
+            // methods
+            //
+            p.get_products = function(){
+                var ids = [];
+
+                if(products.length == 0) return null;
+
+                for(var i = 0; i < products.length; i++){
+                    ids.push(products[i].data.id);
+                }
+
+                return ids;
+            };
+
+            //
+            // init
+            //
+            p.items.delete_link.unbind().click(function(){
+                // a very very dangerous job to do, ask very cautiously
+                confirmation_dialog(
+                    "{% trans 'Delete multiple products' %}",
+                    "{% trans 'Are you sure you want to delete all products that are currently displayed? This cannot be undone.' %}",
+                        function(){
+                            // send a delete message to server with all products
+                            var ids = p.get_products();
+                            if(!ids) return;
+
+                            var data = {
+                                products: ids,
+                                action: "delete"
+                            };
+
+                            send_data("{% url 'pos:mass_edit' company.url_name %}", data,
+                                "{{ csrf_token }}", function(response){
+                                if(response.status != 'ok'){
+                                    error_message("{% trans 'Error while deleting products' %}", response.message);
+                                }
+                                else{
+                                   // search again
+                                    search.update_products();
+                                }
+                            });
+                        },
+                        function(){
+                            // the user changed his mind
+                        }
+                );
+            });
+        };
+
         /////////////////////////////////////////////////////
         //
         // data from template... make it useful
@@ -1435,6 +1496,7 @@
         var product_details = null; // ProductDetails() object
         var mass_tax = new MassTaxes();
         var mass_discount = new MassDiscounts();
+        var mass_delete = new MassDelete();
 
         var add_product_button = $("#add_product");
 
@@ -1547,8 +1609,13 @@
                 <a href="#" id="mass_edit_tax" class="fake mass-edit tax hoverable hidden">
                     {% trans 'Taxes' %}
                 </a>
+
                 <a href="#" id="mass_edit_discount" class="fake mass-edit discount hoverable hidden">
                     {% trans 'Discounts' %}
+                </a>
+
+                <a href="#" id="mass_edit_delete" class="fake mass-edit delete hoverable hidden">
+                    {% trans 'Delete' %}
                 </a>
             </div>
         </div>
@@ -1573,43 +1640,43 @@
                 <input type="hidden" class="product-id"/>
             </div>
 
-            <table class="details">
+            <div class="details">
+                {# on the right: image #}
+                <div class="product-image">
+                    {# product image #}
+                </div>
 
-                <tr>
-                    <td colspan="2" class="padded"> {# category #}
+                {# first row: category and tax #}
+                <div class="details-row">
+                    <div class="details-category">
                         <p class="product-category"></p>
-
                         <p class="details-label">{% trans 'Category' %}</p>
-                    </td>
-                    <td class="padded"> {# tax #}
+                    </div>
+                    <div class="details-tax">
                         <p class="product-tax"></p>
-
                         <p class="details-label">{% trans 'Tax' %}</p>
-                    </td>
-                    <td rowspan="2" class="product-image">
-                        {# product image #}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="padded"> {# price #}
+                    </div>
+                </div>
+
+                {# second row: price, code, shortcut #}
+                <div class="details-row">
+                    <div class="details-price">
                         <p class="product-price"></p>
-
                         <p class="details-label">{% trans 'Price' %}</p>
-                    </td>
-                    <td class="padded"> {# code #}
+                    </div>
+
+                    <div class="details-code">
                         <p class="product-code"></p>
-
                         <p class="details-label">{% trans 'Code' %}</p>
-                    </td>
-                    <td class="padded"> {# shortcut #}
+                    </div>
+
+                    <div class="details-shortcut">
                         <p class="product-shortcut"></p>
-
                         <p class="details-label">{% trans 'Shortcut' %}</p>
-                    </td>
-                </tr>
-            </table>
+                    </div>
+                </div>
+            </div>
         </div>
-
     </div>
 
     {% comment %} a dummy div for creating new products {% endcomment %}

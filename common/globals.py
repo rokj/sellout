@@ -63,7 +63,7 @@ UNIT_CODES = [x[0] for x in UNITS]
 
 # products
 SEARCH_RESULTS = {
-    'products': 50,  # return max 100 products from search
+    'products': 200,  # return max 100 products from search
 }
 
 

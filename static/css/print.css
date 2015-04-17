@@ -207,6 +207,7 @@
 .receipt-80mm .receipt-footer{
     clear: both;
     margin-top: 3mm;
+    margin-bottom: 15mm;
     
     text-align: center;
 }

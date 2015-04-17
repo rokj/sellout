@@ -1,10 +1,21 @@
 from django.db import transaction, IntegrityError
 from django.utils.translation import ugettext as _
+from common.functions import max_field_length
 import common.globals as g
 import decimal
 
 from pos.models import Company, Category, Tax, Product, Price, PurchasePrice
 import xlrd
+
+
+class XlsImportError(Exception):
+    def __init__(self, status, *args, **kwargs):
+
+        # Call the base class constructor with the parameters it needs
+        super(XlsImportError, self).__init__(status, *args, **kwargs)
+
+        # Now for your custom code...
+        self.status = status
 
 
 def xls_import(filename, company, user):
@@ -26,22 +37,30 @@ def xls_import(filename, company, user):
         book = data.sheet_by_index(0)
     except:
         err(_("Opening the file failed"))
-        return status
+        raise XlsImportError(status)
 
-    def value(ir, ic, product_name=None):
+    def value(ir, ic, product_name=None, check_col_len=None):
         # returns cell value at specified row/column, formatted as text
         #if book.cell_type(ir, ic) != xlrd.XL_CELL_TEXT:
         # this is obviously not working since nothing is formatted as text at all
         #    info(_("Cell value is not formatted as text"), product_name, ir, ic)
 
-        return unicode(book.cell_value(ir, ic)).strip()
+        v = unicode(book.cell_value(ir, ic)).strip()
+
+        if check_col_len: # if there's a maximum length of field
+            l = max_field_length(Product, check_col_len) - 1
+            if l:
+                return v[-l:]
+
+        return v  # or don't truncate it at all
 
     nrows = book.nrows
     ncols = book.ncols
 
     # exact number of columns required: 12
-    if ncols != 12:
-        return err(_("Invalid number of columns, 12 required"), None, None)
+    if ncols < 12:
+        err(_("Invalid number of columns, 12 required") + " (this file: " + str(ncols) + ")", None, None)
+        raise XlsImportError(status)
 
     # a collection of all valid data;
     # if everything validates successfully, this will be inserted into database
@@ -51,7 +70,7 @@ def xls_import(filename, company, user):
         # Name
         # check if a product with that name exists already
         icol = 0
-        cell = value(irow, icol)
+        cell = value(irow, icol, check_col_len='name')
 
         name = cell
 
@@ -64,7 +83,7 @@ def xls_import(filename, company, user):
 
         # Code
         icol = 2
-        cell = value(irow, icol, product_name=name)
+        cell = value(irow, icol, product_name=name, check_col_len='code')
 
         code = cell
         if Product.objects.filter(company=company, code=code).exists():
@@ -154,7 +173,7 @@ def xls_import(filename, company, user):
 
         # Shortcut
         icol = 10
-        cell = value(irow, icol, product_name=name)
+        cell = value(irow, icol, product_name=name, check_col_len='shortcut')
 
         shortcut = cell
 
@@ -189,7 +208,7 @@ def xls_import(filename, company, user):
     # if there was no error, start inserting stuff into database;
     # keep all in the same transaction
     if not status['success']:
-        return status
+        raise XlsImportError(status)
 
     try:
         with transaction.atomic():
@@ -215,5 +234,6 @@ def xls_import(filename, company, user):
 
             # that's it
             return status
-    except IntegrityError:
-        return status
+    except IntegrityError as ie:
+        err(_("Error while saving to database"), ie.message, None, None)
+        raise XlsImportError(status)

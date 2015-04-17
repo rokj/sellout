@@ -788,6 +788,13 @@ def mass_edit(request, company):
 
         return JsonOk()
 
+    elif action == 'delete':
+        # delete all products in the list
+        for p in products:
+            p.delete()
+
+        return JsonOk()
+
     else:
         return JsonError(_("Unsupported mass edit action"))
 

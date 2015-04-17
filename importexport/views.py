@@ -16,7 +16,7 @@ import shutil
 from contextlib import contextmanager
 
 # the actual import function
-from xlsimport import xls_import
+from xlsimport import xls_import, XlsImportError
 
 
 @contextmanager
@@ -54,7 +54,10 @@ def import_xls(request, company):
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
             with temp_input(request.FILES['xlsfile'].file) as tempfilename:
-                context['results'] = xls_import(tempfilename, c, request.user)
+                try:
+                    context['results'] = xls_import(tempfilename, c, request.user)
+                except XlsImportError as xe:
+                    context['results'] = xe.status
     else:
         form = FileUploadForm()
 

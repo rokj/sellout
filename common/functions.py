@@ -77,7 +77,12 @@ def JsonParse(string_data):
 
 # misc
 def max_field_length(model, field_name):
-    return model._meta.get_field(field_name).max_length
+    l = model._meta.get_field(field_name).max_length
+
+    if l:
+        return l
+    else:
+        return None
 
 
 # numbers
