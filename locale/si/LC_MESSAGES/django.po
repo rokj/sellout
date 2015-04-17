@@ -4038,13 +4038,15 @@ msgstr ""
 
 #: templates/web/index.html:225
 msgid "Login failed. Check your user name and password."
-msgstr ""
+msgstr "Prijava ni uspela. Preveri uporabniško ime in geslo."
 
 #: templates/web/index.html:227
 msgid ""
 "You registered with Google. Please use the google login button below to log "
 "in."
 msgstr ""
+"Na to spletno mesto si se registriral/a z Googlovim računom. Za prijavi spodnji Googlov gumb."
+""
 
 #: templates/web/index.html:230
 msgid ""
