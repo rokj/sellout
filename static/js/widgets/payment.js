@@ -344,8 +344,8 @@ Payment = function(g, bill){
                 // create some fine html graphics
                 // create a HTML receipt and issue javascript print() method and that's it
                 receipt.html(html);
-                //var myWindow = window.open("", "MsgWindow");
-                //myWindow.document.write(html);
+                // var myWindow = window.open("", "MsgWindow");
+                // myWindow.document.write(html);
                 receipt.printThis();
                 break;
             default:

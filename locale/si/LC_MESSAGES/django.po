@@ -4764,7 +4764,16 @@ msgid "Name"
 msgstr "Naziv"
 
 msgid "Add an already defined discount to this product;"
-msgstr "Tukaj lahko dodaš popust na artikel"
+msgstr "Tukaj lahko dodaš popust na artikel;"
 
 msgid "Select a discount to add and click the + button."
-msgstr "Izberi popust in klikni + gumb."
+msgstr "Izberi popust in klikni gumb +."
+
+msgid "Define a quick discount on-the-fly."
+msgstr "Lahko pa na hitro nastaviš popust kar tukaj."
+
+msgid "Type a short description, value and discount type."
+msgstr "Dodaj kratek opis, vrednost in tip popusta."
+
+msgid "It will be added on save."
+msgstr "Dodan bo bil, ko boš kliknila na gumb shrani."
