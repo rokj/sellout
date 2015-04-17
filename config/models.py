@@ -22,12 +22,3 @@ class CompanyConfig(SkeletonU):
 
     def __unicode__(self):
         return str(self.company.id) + ":" + self.app
-
-    @property
-    def currency(self):
-        data = json.loads(self.data)
-
-        if "pos_currency" in data:
-            return data["pos_currency"]
-
-        return ""

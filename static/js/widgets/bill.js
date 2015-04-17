@@ -1381,7 +1381,6 @@ BillOptions = function(bill){
     };
 
     p.cancel_action = function(){
-
         p.close_dialog();
     };
 

@@ -25,6 +25,8 @@ function custom_dialog(title, content, width, buttons){
 
     var body = $("body");
 
+    var content_parent = content.parent();
+
     if(!width) width = 500; // a 'reasonable' default
 
     title_container.text(title);
@@ -60,7 +62,7 @@ function custom_dialog(title, content, width, buttons){
             shadow.remove();
         });
 
-        content.hide().detach(); // content will stay in parent's variable
+        content.hide().appendTo(content_parent); // content will stay in parent's variable
         container.remove();
 
         window.keyboard.remove(ok_message);

@@ -457,7 +457,7 @@ def create_bill_(request, c):
         'contact': bill_contact,
         'user_id': request.user.id,
         'user_name': str(request.user),
-        'notes': data.get('notes')[:max_field_length(Bill, 'notes')],
+        'notes': data.get('notes', '')[:max_field_length(Bill, 'notes')],
 
         'type': g.CASH,
         'status': g.WAITING,
