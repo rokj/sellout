@@ -25,8 +25,6 @@ function custom_dialog(title, content, width, buttons){
 
     var body = $("body");
 
-    var content_parent = content.parent();
-
     if(!width) width = 500; // a 'reasonable' default
 
     title_container.text(title);
@@ -35,7 +33,13 @@ function custom_dialog(title, content, width, buttons){
     container.append(dialog);
 
     // content can be a jquery object or just some text
-    if(!(content instanceof jQuery)) content = $("<div>").text(content);
+    var content_parent = null;
+    if(!(content instanceof jQuery)){
+        content = $("<div>").text(content);
+    }
+    else{
+        content_parent = content.parent();
+    }
 
     content.show();
     dialog.append(content);
@@ -62,7 +66,10 @@ function custom_dialog(title, content, width, buttons){
             shadow.remove();
         });
 
-        content.hide().appendTo(content_parent); // content will stay in parent's variable
+        content.hide().detach();
+
+        if(content_parent) content_parent.appendTo(content_parent);
+
         container.remove();
 
         window.keyboard.remove(ok_message);
