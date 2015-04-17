@@ -245,16 +245,9 @@
     border-top: 0.5mm dotted black;
 }
 
-.receipt-80mm .horse-picture{
-    width: 60%;
-    margin: 0 auto;
-}
-
-.receipt-80mm .bottom-margin {
-    /* the printer cuts the paper right after the last character */
+.receipt-80mm .receipt-footer {
     margin-top: 15mm;
-    font-size: 1mm;
-    color: #fdfdfd;
+    color: #cccccc;
 }
 
 /*                       */
