@@ -231,7 +231,7 @@ def invite_users(request, company):
             print "============="
         else:
             send_email(settings.EMAIL_FROM, [email], None,
-                       settings.EMAIL_SUBJECT_PREFIX + " " + _("Invitation to join company on") + " " + settings.SITE_URL,
+                       settings.EMAIL_SUBJECT_PREFIX + " " + _("Invitation to join company on").encode('utf8') + " " + settings.SITE_URL,
                        message_text, message_html)
 
     return JsonOk()

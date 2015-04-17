@@ -575,7 +575,7 @@ def calculate_btc_price(currency="EUR", price=0):
     if diff_minutes > settings.MAX_BTC_PRICE_UPDATE_INTERVAL:
         btc_price = -1
 
-        subject = "BTC price was not updated for some time (check %s)." % (str(settings.MAX_BTC_PRICE_UPDATE_INTERVAL))
+        subject = "BTC price was not updated for some time (check %s)." % (str(settings.MAX_BTC_PRICE_UPDATE_INTERVAL)).encode('utf8')
         message_txt = "Look subject!"
         message_html = message_txt
 

@@ -275,7 +275,7 @@ def try_register(user_form):
         'site_url': settings.SITE_URL,
     }
 
-    subject = settings.EMAIL_SUBJECT_PREFIX + " " + _("Registration successful")
+    subject = settings.EMAIL_SUBJECT_PREFIX + " " + _("Registration successful").encode('utf8')
 
     message_html = render_to_string('email/email_verification.html', mail_context).encode('utf8')
     message_text = render_to_string('email/email_verification.txt', mail_context).encode('utf8')
@@ -316,7 +316,7 @@ def send_reactivation_key(request, bluser):
         'site_url': settings.SITE_URL,
     }
 
-    subject = settings.EMAIL_SUBJECT_PREFIX + " " + _("Recover lost password")
+    subject = settings.EMAIL_SUBJECT_PREFIX + " " + _("Recover lost password").encode('utf8')
 
     message_html = render_to_string('email/lost_password.html', mail_context).encode('utf8')
     message_text = render_to_string('email/lost_password.txt', mail_context).encode('utf8')
