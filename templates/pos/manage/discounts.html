@@ -152,7 +152,7 @@
                             <tr>
                                 <td class="details-label">{% trans 'Amount' %}</td>
                                 <td>
-                                    {{ d.amount }}
+                                    {{ d.amount|floatformat }}
                                     {% if d.type == "Absolute" %}{{ currency }}{% else %}%{% endif %}
                                 </td>
                             </tr>
