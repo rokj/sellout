@@ -4777,3 +4777,4 @@ msgstr "Dodaj kratek opis, vrednost in tip popusta."
 
 msgid "It will be added on save."
 msgstr "Dodan bo bil, ko boš kliknila na gumb shrani."
+
