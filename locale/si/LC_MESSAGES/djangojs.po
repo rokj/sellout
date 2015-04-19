@@ -499,11 +499,11 @@ msgstr ""
 
 #: static/js/widgets/payment.js:367
 msgid "Confirm cancellation"
-msgstr ""
+msgstr "Prekliči račun (storno)"
 
 #: static/js/widgets/payment.js:368
 msgid "Are you sure you want to cancel this bill?"
-msgstr ""
+msgstr "Si prepričan preklicati ta račun?"
 
 #: static/js/widgets/payment.js:380
 msgid "Could not update bill status"

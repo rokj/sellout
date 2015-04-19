@@ -3878,11 +3878,11 @@ msgstr ""
 
 #: templates/pos/terminal.html:626
 msgid " Discount (applied to bill's total) "
-msgstr ""
+msgstr " Popust (uporabljen na skupnem znesku)"
 
 #: templates/pos/terminal.html:638
 msgid "Notes on this bill"
-msgstr ""
+msgstr "Opombe na tem računu"
 
 #: templates/pos/terminal.html:684
 msgid "Explode"
@@ -4777,3 +4777,4 @@ msgstr "Dodaj kratek opis, vrednost in tip popusta."
 
 msgid "It will be added on save."
 msgstr "Dodan bo bil, ko boš kliknila na gumb shrani."
+
