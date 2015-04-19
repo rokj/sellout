@@ -36,7 +36,7 @@ body{
 #splitter img{
     position: relative;
     top: 50%;
-    left: 1px;
+    left: 7px;
 }
 
 #splitter.ui-draggable-dragging{

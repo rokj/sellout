@@ -1,5 +1,5 @@
 // Big() setup
-Big.RM = 1; // ROUND_HALF_UP, away from zero (must match settings in python)
+Big.RM = 2; // ROUND_HALF_EVEN
 
 /*
 
@@ -86,12 +86,12 @@ function calculate_item(item, decimal_places){
     // multiply everything by quantity and round to desired decimal places;
     // in real life, one would first multiply by quantity and then calculate with 4 decimal
     // places instead of 2 (depending on config), but we have Big() that does some sufficiently 'exact' magic
-    item.batch = item.base.times(item.quantity).round(decimal_places); // ! never round quantity
-    item.discount = item.discount.times(item.quantity).round(decimal_places);
-    item.tax = get_tax(item.net, item.tax_rate).times(item.quantity).round(decimal_places);
-    item.net = item.net.times(item.quantity).round(decimal_places);
+    item.batch = item.base.times(item.quantity);
+    item.discount = item.discount.times(item.quantity);
+    item.tax = get_tax(item.net, item.tax_rate).times(item.quantity);
+    item.net = item.net.times(item.quantity);
 
-    item.total = item.batch.minus(item.discount).plus(item.tax).round(decimal_places);
+    item.total = item.batch.minus(item.discount).plus(item.tax);
 
     return item;
 }
@@ -108,7 +108,7 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
     }
 
     // 2. calculate bill's total
-    function get_total(){
+    function get_total(round){
         base = Big(0);
         discount = Big(0);
         tax = Big(0);
@@ -121,13 +121,20 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
             discount = discount.plus(item.discount);
             tax = tax.plus(item.tax);
             total = total.plus(item.total);
+
+            if(round){
+              base = base.round(decimal_places);
+              discount = discount.round(decimal_places);
+              tax = tax.round(decimal_places);
+              total = total.round(decimal_places);
+            }
         }
     }
 
-    get_total();
+    get_total(false); // no rounding yet
 
     // 3. bill discount:
-    if(bill_discount_amount.cmp(Big(0)) != 0){
+    if(bill_discount_amount.cmp(Big(0)) != 0 && total.cmp(Big(0)) > 0){
         if(bill_discount_type == 'Absolute'){
             // convert absolute discount to relative using current total
             bill_discount_amount = bill_discount_amount.div(total);
@@ -152,15 +159,15 @@ function calculate_bill(items, bill_discount_amount, bill_discount_type, decimal
                 amount: new_discount
             });
 
-            item.discount = item.discount.plus(new_discount).round(decimal_places);
-            item.net = item.net.minus(new_discount).round(decimal_places);
-            item.tax = item.net.times(item.tax_rate.div(100)).round(decimal_places);
-            item.total = item.net.plus(item.tax).round(decimal_places);
+            item.discount = item.discount.plus(new_discount);
+            item.net = item.net.minus(new_discount);
+            item.tax = item.net.times(item.tax_rate.div(100));
+            item.total = item.net.plus(item.tax);
         }
     }
 
-    // 4. the new total is here.
-    get_total();
+    // 4. the new total is here. round it for display.
+    get_total(true);
 
     return {
         base: base,

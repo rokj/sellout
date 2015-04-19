@@ -34,11 +34,11 @@ function custom_dialog(title, content, width, buttons){
 
     // content can be a jquery object or just some text
     var content_parent = null;
-    if(!(content instanceof jQuery)){
-        content = $("<div>").text(content);
+    if(content instanceof jQuery){
+        content_parent = content.parent();
     }
     else{
-        content_parent = content.parent();
+        content = $("<div>").text(content);
     }
 
     content.show();
@@ -68,7 +68,7 @@ function custom_dialog(title, content, width, buttons){
 
         content.hide().detach();
 
-        if(content_parent) content_parent.appendTo(content_parent);
+        if(content_parent) content.appendTo(content_parent);
 
         container.remove();
 

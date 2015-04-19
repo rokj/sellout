@@ -123,6 +123,8 @@ Bill = function(g){
 
         // updated bill
         p.bill.saved = false;
+
+        p.update();
     };
 
     p.get_discount = function(){
