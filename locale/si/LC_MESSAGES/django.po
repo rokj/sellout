@@ -621,7 +621,7 @@ msgstr ""
 #: common/globals.py:355
 #: subscription/templates/subscription/subscriptions.html:529
 msgid "Canceled"
-msgstr ""
+msgstr "Preklican"
 
 #: common/globals.py:280
 msgid "Seen"
@@ -657,7 +657,7 @@ msgstr ""
 
 #: common/globals.py:342 common/globals.py:354 templates/pos/terminal.html:604
 msgid "Paid"
-msgstr ""
+msgstr "Plačan"
 
 #: common/globals.py:344
 msgid "No money arrived"
@@ -1545,20 +1545,26 @@ msgid "Any"
 msgstr ""
 
 #: pos/views/manage/bill.py:32
+msgctxt "bill search form"
 msgid "Number"
-msgstr ""
+msgstr "Po številki"
 
 #: pos/views/manage/bill.py:32
+msgctxt "bill search form"
 msgid "Date"
-msgstr ""
+msgstr "Po datumu"
+
+msgctxt "bill search form"
+msgid "Amount"
+msgstr "Po znesku"
 
 #: pos/views/manage/bill.py:33
 msgid "Descending"
-msgstr ""
+msgstr "Padajoče"
 
 #: pos/views/manage/bill.py:33
 msgid "Ascending"
-msgstr ""
+msgstr "Naraščajoče"
 
 #: pos/views/manage/bill.py:147 templates/pos/base.html:135
 #: templates/pos/manage/bills.html:42
@@ -2978,17 +2984,17 @@ msgstr "Išči"
 
 #: templates/pos/manage/bills.html:57
 msgid "Bill issue date: from"
-msgstr ""
+msgstr "Datum računa: od"
 
 #: templates/pos/manage/bills.html:62 templates/pos/manage/bills.html:104
 #: templates/pos/manage/stats.html:34 templates/pos/manage/stats.html.py:69
 msgid "To:"
-msgstr ""
+msgstr "Do:"
 
 #: templates/pos/manage/bills.html:84
 msgctxt "bill search form"
 msgid "Bill no."
-msgstr ""
+msgstr "Številka računa"
 
 #: templates/pos/manage/bills.html:89
 msgid "Status:"
@@ -3012,7 +3018,7 @@ msgstr "Išči"
 
 #: templates/pos/manage/bills.html:153 templates/pos/manage/discounts.html:86
 msgid "Results found: "
-msgstr ""
+msgstr "Najdenih: "
 
 #: templates/pos/manage/bills.html:161 templates/pos/manage/bills.html:162
 #: templates/pos/manage/discounts.html:94
@@ -3023,11 +3029,11 @@ msgstr ""
 
 #: templates/pos/manage/bills.html:165 templates/pos/manage/discounts.html:98
 msgid "Page"
-msgstr ""
+msgstr "Stran"
 
 #: templates/pos/manage/bills.html:165 templates/pos/manage/discounts.html:98
 msgid "of"
-msgstr ""
+msgstr "od"
 
 #: templates/pos/manage/bills.html:172 templates/pos/manage/bills.html:173
 #: templates/pos/manage/discounts.html:105
@@ -3043,7 +3049,7 @@ msgstr ""
 #: templates/pos/manage/bills.html:185
 msgctxt "bill management"
 msgid "Serial"
-msgstr ""
+msgstr "Številka"
 
 #: templates/pos/manage/bills.html:186
 #| msgid "State"
@@ -3053,18 +3059,18 @@ msgstr "Status"
 
 #: templates/pos/manage/bills.html:187
 msgctxt "bill management"
-msgid "User"
-msgstr ""
+msgid "Cashier"
+msgstr "Prodajalec"
 
 #: templates/pos/manage/bills.html:188
 msgctxt "bill management"
 msgid "Issue date"
-msgstr ""
+msgstr "Datum računa"
 
 #: templates/pos/manage/bills.html:189
 msgctxt "bill management"
 msgid "Contact name"
-msgstr ""
+msgstr "Kupec"
 
 #: templates/pos/manage/bills.html:190
 msgctxt "bill management"
@@ -3074,7 +3080,7 @@ msgstr "Skupaj"
 #: templates/pos/manage/bills.html:191
 msgctxt "bill management"
 msgid "Items"
-msgstr ""
+msgstr "Artiklov"
 
 #: templates/pos/manage/bills.html:209 templates/pos/manage/bills.html:210
 #: templates/pos/receipt_template.html:52
@@ -4778,3 +4784,5 @@ msgstr "Dodaj kratek opis, vrednost in tip popusta."
 msgid "It will be added on save."
 msgstr "Dodan bo bil, ko boš kliknila na gumb shrani."
 
+msgid "Item code"
+msgstr "Koda artikla"

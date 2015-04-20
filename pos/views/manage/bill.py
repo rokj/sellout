@@ -3,6 +3,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
+from django.utils.translation import pgettext
 from django import forms
 from common.globals import PAID
 from config.functions import get_date_format, get_company_value
@@ -21,18 +22,18 @@ class BillSearchForm(CompanyUserForm):
     # search bill by:
     issued_from = CustomDateField(max_length=10, required=False)
     issued_to = CustomDateField(max_length=20, required=False)
-    item_code = forms.CharField(max_length=max_field_length(Product, 'code'), required=False)
-    contact = forms.CharField(max_length=128, required=False)
-    serial = forms.CharField(required=False)
-    status = forms.ChoiceField(choices=payment_status_choices, required=False, initial=PAID)
-    amount_from = CustomDecimalField(max_length=g.DECIMAL['currency_digits'], required=False)
-    amount_to = CustomDecimalField(max_length=g.DECIMAL['currency_digits'], required=False)
-    user_name = forms.CharField(max_length=128, required=False)
+    item_code = forms.CharField(label=_('Item code'), max_length=max_field_length(Product, 'code'), required=False)
+    contact = forms.CharField(label=_('Contact'), max_length=128, required=False)
+    serial = forms.CharField(label=_('Serial'), required=False)
+    status = forms.ChoiceField(label=_('Status'), choices=payment_status_choices, required=False, initial=PAID)
+    amount_from = CustomDecimalField(label=_('Amount from'), max_length=g.DECIMAL['currency_digits'], required=False)
+    amount_to = CustomDecimalField(label=_('Amount to'), max_length=g.DECIMAL['currency_digits'], required=False)
+    user_name = forms.CharField(label=_('Cashier'), max_length=128, required=False)
 
-    sort_by = forms.ChoiceField(choices=(("serial", _("Number")), ("date", _("Date")), ("amount", _("Amount")),), initial="date")
-    sort_order = forms.ChoiceField(choices=(("desc", _("Descending")), ("asc", _("Ascending")),), initial="desc")
+    sort_by = forms.ChoiceField(label=_('Sortiraj po'), choices=(("serial", pgettext("bill search form", "Number")), ("date", pgettext("bill search form", "Date")), ("amount", pgettext("bill search form", "Amount")),), initial="date")
+    sort_order = forms.ChoiceField(label=_('Vrstni red'), choices=(("desc", _("Descending")), ("asc", _("Ascending")),), initial="desc")
 
-    page = forms.IntegerField(required=False, widget=forms.HiddenInput)
+    page = forms.IntegerField(label=_('Page'), required=False, widget=forms.HiddenInput)
 
 
 ###
@@ -95,7 +96,6 @@ def list_bills(request, company):
 
         # bill number
         t = form.cleaned_data.get('serial')
-        print t
         if t:
             bills = bills.filter(serial__icontains=t)
 
