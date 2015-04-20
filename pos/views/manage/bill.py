@@ -125,7 +125,7 @@ def list_bills(request, company):
         form = BillSearchForm(data=None, user=request.user, company=c)
         page = 1
 
-        bills = Bill.objects.filter(company=c).order_by('-timestamp')[:N]
+        bills = Bill.objects.filter(company=c).order_by('-timestamp')
 
     # format all bills manually
     bills = [bill_to_dict(request.user, c, b) for b in bills]

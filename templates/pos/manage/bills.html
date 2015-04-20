@@ -149,34 +149,29 @@
     <div id="content">
         <div id="container">
             <div class="results-header">
-                {% if searched %}
-                    {% trans 'Results found: ' %}{{ bills.paginator.count }}
+                {% trans 'Results found: ' %}{{ bills.paginator.count }}
 
-                    <div class="pagination">
-                        <a href="#"
-                           class="fake paginator {% if not bills.has_previous %}disabled{% endif %}"
-                           data-action="previous">
-                            <img src="{% static 'icons/back_black.png' %}"
-                                 class="hoverable"
-                                 alt="{% trans 'Back' context 'Paginator page button' %}"
-                                 title="{% trans 'Back' context 'Paginator page button' %}"/>
-                        </a>
+                <div class="pagination">
+                    <a href="#"
+                       class="fake paginator {% if not bills.has_previous %}disabled{% endif %}"
+                       data-action="previous">
+                        <img src="{% static 'icons/back_black.png' %}"
+                             class="hoverable"
+                             alt="{% trans 'Back' context 'Paginator page button' %}"
+                             title="{% trans 'Back' context 'Paginator page button' %}"/>
+                    </a>
 
-                        {% trans 'Page' %} {{ bills.number }} {% trans 'of' %} {{ bills.paginator.num_pages }}
+                    {% trans 'Page' %} {{ bills.number }} {% trans 'of' %} {{ bills.paginator.num_pages }}
 
-                        <a href="#"
-                           class="fake paginator {% if not bills.has_next %}disabled{% endif %}"
-                           data-action="next">
-                            <img src="{% static 'icons/forward_black.png' %}"
-                                 class="hoverable"
-                                 alt="{% trans 'Forward' context 'Paginator page button' %}"
-                                 title="{% trans 'Forward' context 'Paginator page button' %}"/>
-                        </a>
-                    </div>
-                {% else %}
-                    {# only display last few bills #}
-                    {% trans 'Recent bills' %}
-                {% endif %}
+                    <a href="#"
+                       class="fake paginator {% if not bills.has_next %}disabled{% endif %}"
+                       data-action="next">
+                        <img src="{% static 'icons/forward_black.png' %}"
+                             class="hoverable"
+                             alt="{% trans 'Forward' context 'Paginator page button' %}"
+                             title="{% trans 'Forward' context 'Paginator page button' %}"/>
+                    </a>
+                </div>
             </div>
 
             <table id="bills_container">

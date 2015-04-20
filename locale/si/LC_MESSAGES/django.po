@@ -677,7 +677,7 @@ msgstr ""
 
 #: common/globals.py:353
 msgid "Awaiting payment"
-msgstr ""
+msgstr "Čakajoč na plačilo"
 
 #: config/currencies.py:5
 msgid "United States Dollar"
@@ -1542,7 +1542,7 @@ msgstr ""
 
 #: pos/views/manage/bill.py:19
 msgid "Any"
-msgstr ""
+msgstr "Vsi"
 
 #: pos/views/manage/bill.py:32
 msgctxt "bill search form"
