@@ -3080,7 +3080,7 @@ msgstr "Skupaj"
 #: templates/pos/manage/bills.html:191
 msgctxt "bill management"
 msgid "Items"
-msgstr "Artiklov"
+msgstr "Artikli"
 
 #: templates/pos/manage/bills.html:209 templates/pos/manage/bills.html:210
 #: templates/pos/receipt_template.html:52

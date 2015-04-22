@@ -28,6 +28,10 @@
     top: 3px;
 }
 
+.bill-list .column.view.all {
+    background-color: orangered;
+}
+
 /* columns: width and text align */
 .bill-list .column.user{ padding-left: 20px;}
 

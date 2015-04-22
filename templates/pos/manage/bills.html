@@ -184,7 +184,13 @@
                         <td class="column contact">{% trans 'Contact name' context 'bill management' %}</td>
                         <td class="column total">{% trans 'Total' context 'bill management' %}</td>
                         <td class="column count">{% trans 'Items' context 'bill management' %}</td>
-                        <td class="column view">&nbsp;</td>
+                        <td class="column view all">
+                            <img src="{% static 'icons/print_black.png' %}"
+                                 class="print-bill hoverable "
+                                 alt="{% trans 'Print all' %}"
+                                 title="{% trans 'Print all' %}"
+                                 data-id="{{ bill.id }}" />
+                        </td>
                     </tr>
                 </thead>
 
