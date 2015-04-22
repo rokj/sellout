@@ -13,6 +13,7 @@ pip install django-social-auth python-social-auth
 pip install pytz
 pip install jsonrpc
 pip install xlrd
+pip install django-oauth2-provider
 
 Additionaly you have to manually install:
 python-bitcoinrpc

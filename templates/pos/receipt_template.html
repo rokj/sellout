@@ -18,7 +18,7 @@
             background-color: #ffffff;
         }
 
-        #print{
+        .print{
             cursor: pointer;
             position: absolute;
             top: 10px;
@@ -26,12 +26,12 @@
             opacity: 0.2;
         }
 
-        #print:hover {
+        .print:hover {
             opacity: 1;
         }
 
         @media print{ /* hide the print button when printing */
-            #print{
+            .print{
                 display: none;
             }
         }
@@ -39,7 +39,7 @@
 
     <script language="javascript">
         $(document).ready(function(){
-            $("#print").click(function(){
+            $(".print").click(function(){
                 window.print();
             });
         });
@@ -51,7 +51,7 @@
     <img src="{% static 'icons/print_black.png' %}"
          alt="{% trans 'Print' %}"
          title="{% trans 'Print' %}"
-         id="print" />
+         class="print" />
 
     {% comment %} for printing from javascript, cut off everything up to this line {% endcomment %}
     <!-- JS CUTOFF TO -->

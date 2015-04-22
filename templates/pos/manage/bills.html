@@ -32,6 +32,19 @@
                 );
             });
 
+            // printing function
+            $(".print-all-bills").click(function(){
+                // fetch json with bill data from the server and print
+                var url = "{% url 'pos:view_all_bills' company.url_name %}";
+                // url += '?' + $.param({bill_id: id});
+
+                window.open(url, // window url
+                        "{% trans 'Viewing Bills' %}", // window title
+                        "menubar=yes, toolbar=no", // formatters etc.
+                        true // replace previous window when opening a new one
+                );
+            });
+
             {% include 'pos/manage/pagination.js' %}
 
         });
@@ -186,7 +199,7 @@
                         <td class="column count">{% trans 'Items' context 'bill management' %}</td>
                         <td class="column view all">
                             <img src="{% static 'icons/print_black.png' %}"
-                                 class="print-bill hoverable "
+                                 class="print-all-bills hoverable "
                                  alt="{% trans 'Print all' %}"
                                  title="{% trans 'Print all' %}"
                                  data-id="{{ bill.id }}" />

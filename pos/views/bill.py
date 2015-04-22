@@ -860,6 +860,35 @@ def view_bill(request, company):
     return HttpResponse(create_bill_html(request.user, c, bill))
 
 
+@login_required
+def view_all_bills(request, company):
+    """
+    returns html-formatted bills
+
+    TODO: must include GET parameteres
+    """
+
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+    # get the bill
+    try:
+        bills = Bill.objects.filter(company=c)
+    except Bill.DoesNotExist:
+        return JsonError(_("Bill does not exist"))
+
+    html = ""
+    for bill in bills:
+        html += create_bill_html(request.user, c, bill) + "<hr>"
+
+    html = html[:-4]
+
+    return HttpResponse(html)
+
+
+
 def esc_format(user, company, bill, format, line_char_no=48, esc_commands=False):
 
     if format == "Page":
