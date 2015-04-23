@@ -2,7 +2,12 @@
 from django.utils.translation import ugettext as _, ugettext
 
 # Common stuff to be used anywhere throughout the site
-SITE_TITLE = "Sellout"
+import settings
+
+if settings.LANGUAGE_CODE == "en":
+    SITE_TITLE = "Sellout"
+elif settings.LANGUAGE_CODE == "si":
+    SITE_TITLE = "spletna-blagajna.si"
 
 # directories
 DIRS = {  # all go to MEDIA folder
@@ -189,7 +194,6 @@ DATE = {
 # misc
 MISC = {
     'company_url_length': 50,
-    'site_title': 'webpos',
     'management_url': 'admin',  # must not be empty!
                                 # (to differentiate between company and management sites)
     'max_upload_image_size': 20*2**20,  # 2 megabytes
@@ -198,6 +202,11 @@ MISC = {
     'discounts_per_page': 12,
     'bills_per_page': 25,
 }
+
+if settings.LANGUAGE_CODE == "en":
+    MISC['site_title'] = "Sellout"
+elif settings.LANGUAGE_CODE == "si":
+    MISC['site_title'] = "spletna-blagajna.si"
 
 IMAGE_DIMENSIONS = {
     'color_logo': (180, 180),
