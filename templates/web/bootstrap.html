@@ -11,7 +11,17 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>{% block title %}Sellout{% endblock %}</title>
+    {% if LANGUAGE_CODE == "en" %}
+        <meta name="description" content="Sellout free POS system">
+        <meta name="keywords" content="sellout, pos, free pos system">
+        <meta name="author" content="Blocklogic d.o.o.">
+    {% elif LANGUAGE_CODE == "si" %}
+        <meta name="description" content="brezplačna spletna blagajna">
+        <meta name="keywords" content="brezplačna spletna blagajna, POS, blagajna, brezplačna">
+        <meta name="author" content="Blocklogic d.o.o.">
+    {% endif %}
+
+    <title>{% if LANGUAGE_CODE == "en" %}{% block title %}Sellout{% endblock %}{% elif LANGUAGE_CODE == "si" %}{% block title %}spletna-blagajna.si{% endblock %}{% endif %}</title>
 
     {# scripts #}
     <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
