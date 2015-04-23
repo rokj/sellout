@@ -21,7 +21,7 @@
         <meta name="author" content="Blocklogic d.o.o.">
     {% endif %}
 
-    <title>{% if LANGUAGE_CODE == "en" %}{% block title %}Sellout{% endblock %}{% elif LANGUAGE_CODE == "si" %}{% block title %}spletna-blagajna.si{% endblock %}{% endif %}</title>
+    <title>{% block title %}{% if LANGUAGE_CODE == "en" %}Sellout{% elif LANGUAGE_CODE == "si" %}spletna-blagajna.si{% endif %}{% endblock %}</title>
 
     {# scripts #}
     <script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' %}"></script>
