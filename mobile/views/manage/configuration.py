@@ -20,7 +20,7 @@ def get_mobile_config(request, company_id):
     if not has_permission(request.user, c, 'config', 'edit'):
         return no_permission_view(request, c, _("You have no permission to edit system configuration."))
 
-    return JsonOk(extra=company_config_to_dict(request.user, Company.objects.get(url_name=company)))
+    return JsonOk(extra=company_config_to_dict(request.user, c))
 
 
 def company_config_to_dict(user, company):
@@ -32,6 +32,9 @@ def company_config_to_dict(user, company):
         'pos_date_format': get_company_value(user, company, 'pos_date_format'),
         'pos_timezone': get_company_value(user, company, 'pos_timezone'),
         'pos_currency': get_company_value(user, company, 'pos_currency'),
+        'pos_bill_serial_format': get_company_value(user, company, 'pos_bill_serial_format'),
+        'pos_payment_bitcoin_address': get_company_value(user, company, 'pos_payment_bitcoin_address'),
+        'pos_payment_paypal_address': get_company_value(user, company, 'pos_payment_paypal_address')
     }
 
 
