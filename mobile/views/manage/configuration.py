@@ -2,25 +2,9 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from config.functions import get_company_value, set_company_value
-from pos.models import Company, Tax
+from pos.models import Company
 from common.functions import JsonError, has_permission, JsonOk, no_permission_view, JsonParse
 from django.utils.translation import ugettext as _
-
-
-
-@api_view(['GET', 'POST'])
-@permission_classes((IsAuthenticated,))
-def get_mobile_config(request, company_id):
-    try:
-        c = Company.objects.get(id=company_id)
-    except Company.DoesNotExist:
-        return JsonError(_("Company does not exist"))
-
-    # permissions
-    if not has_permission(request.user, c, 'config', 'edit'):
-        return no_permission_view(request, c, _("You have no permission to edit system configuration."))
-
-    return JsonOk(extra=company_config_to_dict(request.user, c))
 
 
 def company_config_to_dict(user, company):
@@ -36,6 +20,21 @@ def company_config_to_dict(user, company):
         'pos_payment_bitcoin_address': get_company_value(user, company, 'pos_payment_bitcoin_address'),
         'pos_payment_paypal_address': get_company_value(user, company, 'pos_payment_paypal_address')
     }
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated,))
+def get_mobile_config(request, company_id):
+    try:
+        c = Company.objects.get(id=company_id)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist"))
+
+    # permissions
+    if not has_permission(request.user, c, 'config', 'edit'):
+        return no_permission_view(request, c, _("You have no permission to edit system configuration."))
+
+    return JsonOk(extra=company_config_to_dict(request.user, c))
 
 
 @api_view(['POST'])
