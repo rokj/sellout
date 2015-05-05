@@ -13,7 +13,7 @@ from blusers.views import try_register, unset_language, send_reactivation_key
 from django.contrib.auth.decorators import login_required as login_required_nolocking
 from django.contrib.auth import logout as django_logout
 from action.models import Action
-from common.functions import send_email, JSON_parse
+from common.functions import send_email, JSON_parse, JsonOk
 
 import common.globals as g
 from config.functions import get_user_value, set_user_value
@@ -304,7 +304,7 @@ def recover_password(request, key):
     return render(request, 'web/recover_password.html', context)
 
 
-def handle_invitation(request, reference, user_response):
+def handle_invitation(request, reference, user_response, mobile=False):
     try:
         action = Action.objects.get(receiver=request.user.email,
                                     reference=reference,
@@ -337,19 +337,21 @@ def handle_invitation(request, reference, user_response):
     # else: if the invite was declined, just update its status (which must be done anyway)
     action.status = user_response
     action.save()
-
-    return redirect('web:select_company')
-
-
-@login_required_nolocking
-def accept_invitation(request, reference):
-    return handle_invitation(request, reference, g.ACTION_ACCEPTED)
-
+    if mobile:
+        return JsonOk()
+    else:
+        return redirect('web:select_company')
 
 
 @login_required_nolocking
-def decline_invitation(request, reference):
-    return handle_invitation(request, reference, g.ACTION_DECLINED)
+def accept_invitation(request, reference, mobile=False):
+    return handle_invitation(request, reference, g.ACTION_ACCEPTED, mobile=mobile)
+
+
+
+@login_required_nolocking
+def decline_invitation(request, reference, mobile=False):
+    return handle_invitation(request, reference, g.ACTION_DECLINED, mobile=mobile)
 
 
 @login_required_nolocking

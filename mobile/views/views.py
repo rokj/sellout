@@ -60,7 +60,7 @@ def mobile_get_cut(request, company_id):
 def mobile_accept_invitation(request):
     data = JsonParse(request.POST['data'])
     key = data['key']
-    return accept_invitation(request, key)
+    return accept_invitation(request, key, mobile=True)
 
 
 @api_view(['POST'])
@@ -68,5 +68,5 @@ def mobile_accept_invitation(request):
 def mobile_decline_invitation(request):
     data = JsonParse(request.POST['data'])
     key = data['key']
-    return decline_invitation(request, key)
+    return decline_invitation(request, key, mobile=True)
 
