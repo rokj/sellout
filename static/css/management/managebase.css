@@ -250,3 +250,28 @@ div.clear-results a{
     z-index: -1;
 }
 
+/* ugly ugly ugly, but we are in a hurry */
+.user-profile div.form-field {
+    margin-top: 0px;
+    max-width: 200px;
+}
+
+.user-profile .cancel {
+    text-align: center;
+    display: block;
+    width: 100%;
+    color: #ffffff;
+    height: 40px;
+    font-size: inherit;
+    text-transform: uppercase;
+    border: none;
+    /* box-shadow: 0 2px 0 rgba(0,0,0,0.2); */
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    vertical-align: middle;
+    padding-top: 4px;
+}
+
+.user-profile .split-cell:nth-child(2) {
+    padding-top: 5px;
+    margin-left: 20px;
+}

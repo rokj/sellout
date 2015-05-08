@@ -2,42 +2,86 @@
 {% load static %}
 {% load i18n %}
 
-{% block navbar_buttons %}
+{% block head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/managebase.css' %}" />
 
+    <link href="{% static 'css/statusbar.css' %}" rel="stylesheet" />
+
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $("#user_button").simpleMenu($("#user_menu"));
+    });
+    </script>
+{% endblock %}
+
+{% block navbar_buttons %}
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            <div id="user_button" class="button-container simple-menu-button">
+                <div class="vertical-separator"></div>
+
+                <a class="custom nav-button button-text" href="#">{{ request.user }}</a>
+
+                <ul id="user_menu" class="drop-down">
+                    <li><a href="{% url 'web:logout' %}">{% trans 'Log out' %}</a></li>
+                </ul>
+            </div>
+        </li>
+    </ul>
 {% endblock %}
 
 {% block content %}
     <form action="#" method="post">
-    <section class="container">
-        <h2>{% trans 'User settings' %}</h2>
+        <section class="user-profile container left-column">
+            <h2>{% trans 'User settings' %}</h2>
 
-        <div class="row">
-
-            <div class="col-md-6">
-                first_name: {{ user.first_name }}
-                last_name: {{ user.last_name }}
-                sex: {{ user.sex }}
-                country: {{ user.country }}
-            </div>
-
-            <div class="col-md-6">
-                <strong>email: {{ user.email }}</strong>
-            </div>
-        </div>
-    </section>
-
-    <section class="footer">
-        <div class="container">
             <div class="row">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                    <a href="{% url 'web:select_company' %}" class="buttons cancel">{% trans 'Back' %}</a>
-                </div>
+                <div class="col-md-4">
+                    <h4>{{ user.email }}</h4>
 
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right">
-                    <input type="submit" value="{% trans 'Submit' %}" class="button ok" />
+                    <br />
+
+                    <div class="form-field">
+                        {{ user_form.first_name.label_tag }}
+                        {{ user_form.first_name }}
+
+                        <div class="field-errors">
+                            {{ user_form.first_name.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        {{ user_form.last_name.label_tag }}
+                        {{ user_form.last_name }}
+
+                        <div class="field-errors">
+                            {{ user_form.last_name.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        {{ user_form.country.label_tag }}
+                        {{ user_form.country }}
+
+                        <div class="field-errors">
+                            {{ user_form.country.errors }}
+                        </div>
+                    </div>
+
+                    <br />
+                    <br />
+
+                    <div class="form-field">
+                        <div class="split-cell">
+                            <a href="{% url 'web:select_company' %}" class="buttons cancel">{% trans 'Back' %}</a>
+                        </div>
+
+                        <div class="split-cell">
+                            <input type="submit" value="{% trans 'Submit' %}" class="button ok" />
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
     </form>
 {% endblock %}

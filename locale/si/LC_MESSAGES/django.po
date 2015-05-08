@@ -3553,7 +3553,7 @@ msgstr "Od:"
 #: templates/support/ask.html:22 templates/support/question.html:115
 #: templates/web/user_profile.html:40
 msgid "Submit"
-msgstr ""
+msgstr "Potrdi"
 
 #: templates/pos/manage/stats.html:41
 msgid "Income"

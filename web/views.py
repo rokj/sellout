@@ -354,7 +354,14 @@ def decline_invitation(request, reference):
 
 @login_required_nolocking
 def user_profile(request):
+    if request.method == 'POST':
+        user_form = BlocklogicUserForm(request.POST)
+        user_form.set_request(request)
+    else:
+        user_form = BlocklogicUserForm()
+
     context = {
+        'user_form': user_form,
         'user': request.user
     }
 

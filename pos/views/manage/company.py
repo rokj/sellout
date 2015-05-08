@@ -391,8 +391,6 @@ def edit_company(request, company):
         'pos_url': get_terminal_url(request),
     }
 
-    print get_terminal_url(request)
-    
     if request.method == 'POST':
         # submit data
         form = CompanyForm(request.POST, request.FILES, instance=c)
