@@ -275,3 +275,38 @@ div.clear-results a{
     padding-top: 5px;
     margin-left: 20px;
 }
+
+.user-profile .row.profile {
+    display: block;
+}
+
+.user-profile .row.password {
+    display: none;
+}
+
+.user-profile h4 button.selector {
+    color: #323232;
+    height: 100%;
+    font-size: inherit;
+    text-transform:  none;
+    border: none;
+    /* box-shadow: 0 2px 0 rgba(0,0,0,0.2); */
+    box-shadow: none;
+    padding: 6px;
+    background-color: transparent;
+}
+
+
+.user-profile h4 button.selector.active, .user-profile h4 button.selector:not(.active):hover {
+    background-color: #D3D3D3;
+    padding: 6px;
+    border-radius: 3px;
+}
+
+.user-profile h4 button.selector.active:hover {
+    cursor: auto;
+}
+
+.user-profile h4 button.selector:not(.active):hover {
+    cursor: pointer;
+}

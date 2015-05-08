@@ -602,3 +602,14 @@ def calculate_btc_price(currency="EUR", price=0):
 
 def JSON_parse(string_data):
     return json.loads(string_data)
+
+def JSON_error(status="error", message=""):
+    return JsonResponse({'status': status, 'message': message})
+
+def JSON_ok(message=""):
+    data = {'status': 'ok'}
+
+    if message != "":
+        data['message'] = message
+
+    return JsonResponse(data)

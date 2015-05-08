@@ -1,69 +1,28 @@
 import json
+import urllib
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
-from django.http import JsonResponse
+from django.http import JsonResponse, QueryDict
 from django.shortcuts import redirect, render
 from bl_auth import User
-from blusers.forms import LoginForm, BlocklogicUserForm, ResetPasswordForm
+from blusers.forms import LoginForm, BlocklogicUserForm, ResetPasswordForm, BlocklogicUserChangeForm
 from django.utils.translation import ugettext as _
 from blusers.models import BlocklogicUser
 from blusers.views import try_register, unset_language, send_reactivation_key
-from django.contrib.auth.decorators import login_required as login_required_nolocking
+from django.contrib.auth.decorators import login_required as login_required_nolocking, login_required
 from django.contrib.auth import logout as django_logout
 from action.models import Action
-from common.functions import send_email, JSON_parse, JsonOk
+from common.functions import send_email, JSON_parse, JsonOk, min_password_requirments, JSON_error, JSON_ok
+from django.contrib.auth import authenticate as django_authenticate
+
 
 import common.globals as g
 from config.functions import get_user_value, set_user_value
 from pos.models import Permission
 
 import settings
-
-
-def index(request):
-    message = None
-    next = None
-    action = ''
-
-    # if the user is already logged in, redirect to select_company
-    if request.user.is_authenticated():
-        return redirect('web:select_company')
-
-    if request.method == 'POST':
-        action = 'login'
-
-        if request.POST.get('next', '') != '':
-            next = request.POST.get('next')
-
-        login_form = LoginForm(request.POST)
-
-        if login_form.is_valid():
-            from blusers.views import login
-            message, next = login(request, login_form.cleaned_data)
-
-            if message == 'logged-in':
-                return redirect('web:select_company')
-    else:
-        login_form = LoginForm()
-
-    if request.GET.get('next') != '' and request.GET.get('next') != reverse('web:logout'):
-        next = request.GET.get('next')
-
-    context = {
-        'user': request.user,
-        'action': action,
-        'next': next,
-        'login_message': message,
-        'login_form': login_form,
-        'client_id': settings.GOOGLE_API['client_id'],
-        'site_title': g.SITE_TITLE,
-        'STATIC_URL': settings.STATIC_URL,
-        'GOOGLE_API': settings.GOOGLE_API
-    }
-
-    return render(request, "web/index.html", context)
 
 
 def index(request):
@@ -280,8 +239,6 @@ def recover_password(request, key):
             # passwords are the same
             password = form.cleaned_data['new_password_1']
 
-            print password
-
             # reset key has been checked in form validation
             bluser = BlocklogicUser.objects.get(password_reset_key=key)
             bluser.set_password(password)
@@ -356,15 +313,34 @@ def decline_invitation(request, reference, mobile=False):
 
 @login_required_nolocking
 def user_profile(request):
+    user = BlocklogicUser.objects.get(email=request.user.email)
+
     if request.method == 'POST':
-        user_form = BlocklogicUserForm(request.POST)
+        my_dict = {
+            'country': request.POST['country'],
+            'first_name': user.first_name,
+            'last_name': request.POST['last_name'],
+            'sex': user.sex
+        }
+
+        query_string = urllib.urlencode(my_dict)
+        query_dict = QueryDict(query_string)
+
+        user_form = BlocklogicUserChangeForm(query_dict)
         user_form.set_request(request)
+
+        if user_form.is_valid():
+            user.last_name = my_dict['last_name']
+            user.country = my_dict['country']
+            user.save()
+        else:
+            user_form = BlocklogicUserChangeForm(initial={'last_name': my_dict['last_name'], 'country': my_dict['country']})
     else:
-        user_form = BlocklogicUserForm()
+        user_form = BlocklogicUserChangeForm(initial={'last_name': user.last_name, 'country': user.country})
 
     context = {
         'user_form': user_form,
-        'user': request.user
+        'user': user
     }
 
     return render(request, 'web/user_profile.html', context)
@@ -430,3 +406,35 @@ def supported_hardware(request):
 
 def robots(request):
     return render(request, 'web/robots.txt', content_type='text/plain')
+
+
+@login_required(ajax=True)
+def update_password(request):
+    if not request.method == 'POST':
+        return JSON_error("error")
+
+    d = JSON_parse(request.POST.get('data'))
+
+    if 'current_password' not in d or 'password1' not in d or 'password2' not in d:
+        return JSON_error('error', _('Something went wrong during password saving. Contact support.'))
+
+    if d['password1'] != d['password2']:
+        return JSON_error('new_password_mismatch', _('New passwords do not match'))
+
+    if not min_password_requirments(d['password1']):
+        return JSON_error('min_pass_requirement_failed', _('Password minimal requirments failed.'))
+
+    user = django_authenticate(username=request.user.email, password=d['current_password'])
+    if user is None:
+        return JSON_error('wrong_current_password')
+
+    if user is not None:
+        # saves in django table
+        user.set_password(d['password1'])
+        user.save()
+
+        user.update_user_profile()
+
+        return JSON_ok()
+
+    return JSON_error('error', _('Something went wrong during password saving. Contact support.'))

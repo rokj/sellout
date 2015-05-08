@@ -9,7 +9,35 @@
 
     <script type="text/javascript">
     $(document).ready(function(){
-        $("#user_button").simpleMenu($("#user_menu"));
+        var items = {
+            user_button: $("#user_button"),
+            settings_selector: $(".user-profile h4 button.selector"),
+            settings_password: $(".user-profile .row.password"),
+            settings_profile: $(".user-profile .row.profile"),
+            update_password: $(".user-profile .update-password")
+        };
+
+        items.user_button.simpleMenu($("#user_menu"));
+        items.settings_selector.click(function() {
+            $(".user-profile h4 button.selector").removeClass("active");
+            $(this).addClass("active");
+
+            if ($(this).hasClass("profile")) {
+                items.settings_profile.show();
+                items.settings_password.hide();
+            } else if ($(this).hasClass("password")) {
+                items.settings_profile.hide();
+                items.settings_password.show();
+            }
+
+            return false;
+        });
+
+        items.update_password.click(function() {
+            alert('sdfsdf');
+
+            return false;
+        });
     });
     </script>
 {% endblock %}
@@ -31,23 +59,64 @@
 {% endblock %}
 
 {% block content %}
-    <form action="#" method="post">
+    <form action="" method="post">
+        {% csrf_token %}
+
         <section class="user-profile container left-column">
             <h2>{% trans 'User settings' %}</h2>
 
-            <div class="row">
-                <div class="col-md-4">
-                    <h4>{{ user.email }}</h4>
+            <h4><button class="selector active profile">{% trans "Profile" %}</button> | <button class="selector password">{% trans "Password" %}</button></h4>
 
+            <div class="row password">
+                <div class="col-md-4">
+                    <div class="form-field">
+                        <label for="id_current_password">{% trans "Current password" %}:</label>
+                        <input id="id_current_password" name="current_password" type="password">
+
+                        <div class="field-errors">
+
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        {{ user_form.password1.label_tag }}
+                        {{ user_form.password1 }}
+
+                        <div class="field-errors">
+                            {{ user_form.password1.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        {{ user_form.password2.label_tag }}
+                        {{ user_form.password2 }}
+
+                        <div class="field-errors">
+                            {{ user_form.password2.errors }}
+                        </div>
+                    </div>
+
+                    <br />
                     <br />
 
                     <div class="form-field">
-                        {{ user_form.first_name.label_tag }}
-                        {{ user_form.first_name }}
-
-                        <div class="field-errors">
-                            {{ user_form.first_name.errors }}
+                        <div class="split-cell">
+                            <input type="submit" value="{% trans 'Submit' %}" class="button ok update-password" />
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row profile">
+                <div class="col-md-4">
+                    <div class="form-field">
+                        <label for="id_email">{% trans "Email" %}:</label>
+                        <strong>{{ user.email }}</strong>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="id_first_name">{% trans "First name" %}:</label>
+                        <strong>{{ user.first_name }}</strong>
                     </div>
 
                     <div class="form-field">
