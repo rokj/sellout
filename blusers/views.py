@@ -11,8 +11,10 @@ from action.functions import action_to_dict
 from action.models import Action
 from bl_auth import User
 from blusers.forms import BlocklogicUserForm, BlocklogicUserBaseForm
+from common.decorators import login_required
 
-from common.functions import JsonParse, JsonError, get_random_string, send_email, JsonOk, min_password_requirments
+from common.functions import JsonParse, JsonError, get_random_string, send_email, JsonOk, min_password_requirments, \
+    JSON_error, JSON_parse, JSON_ok
 from common.globals import GOOGLE
 
 from django.core.files.base import ContentFile
@@ -373,6 +375,37 @@ def get_actions(user):
         data.append(action_to_dict(user, a, android=True))
 
     return data
+
+@login_required
+def update_password(request):
+    if not request.method == 'POST':
+        return JSON_error("error")
+
+    d = JSON_parse(request.POST.get('data'))
+
+    if 'current_password' not in d or 'password1' not in d or 'password2' not in d:
+        return JSON_error('error', _('Something went wrong during password saving. Contact support.'))
+
+    if d['password1'] != d['password2']:
+        return JSON_error('new_password_mismatch', _('New passwords do not match'))
+
+    if not min_password_requirments(d['password1']):
+        return JSON_error('min_pass_requirement_failed', _('Password minimal requirments failed.'))
+
+    user = django_authenticate(username=request.user.email, password=d['current_password'])
+    if user is None:
+        return JSON_error('wrong_current_password')
+
+    if user is not None:
+        # saves in django table
+        user.set_password(d['password1'])
+        user.save()
+
+        user.update_user_profile()
+
+        return JSON_ok()
+
+    return JSON_error('error', _('Something went wrong during password saving. Contact support.'))
 
 
 class ObtainAuthToken(APIView):

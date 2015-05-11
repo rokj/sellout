@@ -250,3 +250,72 @@ div.clear-results a{
     z-index: -1;
 }
 
+/* ugly ugly ugly, but we are in a hurry */
+.user-profile div.form-field {
+    margin-top: 0px;
+    max-width: 320px;
+}
+
+.user-profile .cancel {
+    text-align: center;
+    display: block;
+    width: 100%;
+    color: #ffffff;
+    height: 40px;
+    font-size: inherit;
+    text-transform: uppercase;
+    border: none;
+    /* box-shadow: 0 2px 0 rgba(0,0,0,0.2); */
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    vertical-align: middle;
+    padding-top: 4px;
+}
+
+.user-profile .split-cell:nth-child(2) {
+    padding-top: 5px;
+    margin-left: 20px;
+}
+
+.user-profile .row.profile {
+    display: block;
+}
+
+.user-profile .row.password {
+    display: none;
+}
+
+.user-profile h4 button.selector {
+    color: #323232;
+    height: 100%;
+    font-size: inherit;
+    text-transform:  none;
+    border: none;
+    /* box-shadow: 0 2px 0 rgba(0,0,0,0.2); */
+    box-shadow: none;
+    padding: 6px;
+    background-color: transparent;
+}
+
+
+.user-profile h4 button.selector.active, .user-profile h4 button.selector:not(.active):hover {
+    background-color: #D3D3D3;
+    padding: 6px;
+    border-radius: 3px;
+}
+
+.user-profile h4 button.selector.active:hover {
+    cursor: auto;
+}
+
+.user-profile h4 button.selector:not(.active):hover {
+    cursor: pointer;
+}
+
+.user-profile .password .back-to-profile {
+    display: none;
+}
+
+.user-profile .password .password-changed-successfully {
+    color: #22e693;
+    display: none;
+}

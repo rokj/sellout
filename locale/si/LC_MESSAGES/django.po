@@ -219,7 +219,7 @@ msgstr ""
 #: blusers/templates/blusers/settings.html:438
 #: subscription/templates/subscription/subscription_copy.html:383
 msgid "Profile"
-msgstr ""
+msgstr "Profil"
 
 #: blusers/templates/blusers/settings.html:449
 msgid "Change photo"
@@ -348,7 +348,7 @@ msgstr "Spremeni geslo"
 
 #: blusers/templates/blusers/settings.html:552
 msgid "Password changed successfully!"
-msgstr "Geslo uspešno spremenjeno"
+msgstr "Geslo uspešno spremenjeno!"
 
 #: blusers/templates/blusers/settings.html:561 pos/models.py:28
 msgid "Website"
@@ -3553,7 +3553,7 @@ msgstr "Od:"
 #: templates/support/ask.html:22 templates/support/question.html:115
 #: templates/web/user_profile.html:40
 msgid "Submit"
-msgstr ""
+msgstr "Potrdi"
 
 #: templates/pos/manage/stats.html:41
 msgid "Income"
@@ -4544,7 +4544,7 @@ msgstr "Nastavitve"
 
 #: templates/web/select_company.html:110
 msgid "User profile"
-msgstr "Profil uporabnika"
+msgstr "Nastavitve uporabnika"
 
 #: templates/web/select_company.html:121
 msgid "Run tutorial"

@@ -2,42 +2,240 @@
 {% load static %}
 {% load i18n %}
 
-{% block navbar_buttons %}
+{% block head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/managebase.css' %}" />
 
+    <link href="{% static 'css/statusbar.css' %}" rel="stylesheet" />
+
+    <script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function(){
+        var items = {
+            user_button: $("#user_button"),
+            settings_selector: $(".user-profile h4 button.selector"),
+            settings_password: $(".user-profile .row.password"),
+            settings_profile: $(".user-profile .row.profile"),
+            update_password: $(".user-profile .update-password"),
+            current_password: $("#id_current_password"),
+            password1: $("#id_password1"),
+            password2: $("#id_password2"),
+            current_password_error: $(".current-password .field-errors"),
+            new_password2_error: $(".new-password2 .field-errors"),
+            back_to_profile: $(".back-to-profile"),
+            password_changed_successfully: $(".password-changed-successfully")
+        };
+
+        items.user_button.simpleMenu($("#user_menu"));
+        items.settings_selector.click(function() {
+            $(".user-profile h4 button.selector").removeClass("active");
+            $(this).addClass("active");
+
+            if ($(this).hasClass("profile")) {
+                items.settings_profile.show();
+                items.settings_password.hide();
+            } else if ($(this).hasClass("password")) {
+                items.settings_profile.hide();
+                items.settings_password.show();
+
+                items.current_password.val("");
+                items.password1.val("");
+                items.password2.val("");
+                items.password_changed_successfully.hide();
+            }
+
+            return false;
+        });
+
+        function show_current_password_error(text) {
+            items.current_password_error.text(text);
+            items.current_password_error.show();
+        }
+
+        function show_new_password_error(text) {
+            items.new_password2_error.text(text);
+            items.new_password2_error.show();
+        }
+
+        function update_user_password(data) {
+            send_data('{% url "blusers:update-password" %}', data, "{{ csrf_token }}",
+                function(response) {
+                    hide_password_messages();
+
+                    if (response.status == "ok") {
+                        items.current_password.val("");
+                        items.password1.val("");
+                        items.password2.val("");
+                        items.password_changed_successfully.show();
+                    } else {
+                        if (response.status == 'wrong_current_password') {
+                            show_current_password_error("{% trans "Wrong current password." %}");
+                        } else if (response.status == 'new_password_mismatch') {
+                            show_new_password_error("{% trans "New passwords should match each other." %}");
+                        } else if (response.status == 'min_pass_requirement_failed') {
+                            show_new_password_error("{% trans "Password should be at least 6 characters long and can contain digits, letters and following @#$%^&+=" %}");
+                        } else {
+                            // TODO: nice alert message
+                            alert("{% trans "Something went wrong, contact support." %}");
+                        }
+                    }
+                }
+            );
+        }
+
+        function hide_password_messages() {
+            items.current_password_error.hide();
+            items.new_password2_error.hide();
+            items.password_changed_successfully.hide();
+        }
+
+        items.update_password.click(function() {
+            var error = false;
+
+            var data = {
+                current_password: items.current_password.val(),
+                password1: items.password1.val(),
+                password2: items.password2.val()
+            };
+
+            hide_password_messages();
+
+            if (data["current_password"] == "") {
+                show_current_password_error(gettext("Current password field must not be empty!"));
+
+                error = true;
+            }
+
+            if (data["password1"] != data["password2"]) {
+                show_new_password_error(gettext("New passwords should match. Now, they do not."));
+
+                error = true;
+            }
+
+            if (error == true) {
+                return false;
+            }
+
+            update_user_password(data);
+
+            return false;
+        });
+    });
+    </script>
+{% endblock %}
+
+{% block navbar_buttons %}
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            <div id="user_button" class="button-container simple-menu-button">
+                <div class="vertical-separator"></div>
+
+                <a class="custom nav-button button-text" href="#">{{ request.user }}</a>
+
+                <ul id="user_menu" class="drop-down">
+                    <li><a href="{% url 'web:logout' %}">{% trans 'Log out' %}</a></li>
+                </ul>
+            </div>
+        </li>
+    </ul>
 {% endblock %}
 
 {% block content %}
-    <form action="#" method="post">
-    <section class="container">
-        <h2>{% trans 'User settings' %}</h2>
+    <form action="" method="post">
+        {% csrf_token %}
 
-        <div class="row">
+        <section class="user-profile container left-column">
+            <h2>{% trans 'User settings' %}</h2>
 
-            <div class="col-md-6">
-                first_name: {{ user.first_name }}
-                last_name: {{ user.last_name }}
-                sex: {{ user.sex }}
-                country: {{ user.country }}
-            </div>
+            <h4><button class="selector active profile">{% trans "Profile" %}</button> | <button class="selector password">{% trans "Password" %}</button></h4>
 
-            <div class="col-md-6">
-                <strong>email: {{ user.email }}</strong>
-            </div>
-        </div>
-    </section>
+            <div class="row password">
+                <div class="col-md-5">
+                    <div class="form-field password-changed-successfully">
+                        <h4>{% trans "Password changed successfully!" %}</h4>
+                    </div>
 
-    <section class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                    <a href="{% url 'web:select_company' %}" class="buttons cancel">{% trans 'Back' %}</a>
+                    <div class="form-field current-password">
+                        <label for="id_current_password">{% trans "Current password" %}:</label>
+                        <input id="id_current_password" name="current_password" type="password">
+
+                        <div class="field-errors">
+                        </div>
+                    </div>
+
+                    <div class="form-field new-password1">
+                        {{ user_form.password1.label_tag }}
+                        {{ user_form.password1 }}
+
+                        <div class="field-errors">
+                            {{ user_form.password1.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-field new-password2">
+                        {{ user_form.password2.label_tag }}
+                        {{ user_form.password2 }}
+
+                        <div class="field-errors">
+                            {{ user_form.password2.errors }}
+                        </div>
+                    </div>
+
+                    <br />
+                    <br />
+
+                    <div class="form-field">
+                        <div class="split-cell">
+                            <input type="submit" value="{% trans 'Submit' %}" class="button ok update-password" />
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right">
-                    <input type="submit" value="{% trans 'Submit' %}" class="button ok" />
+            <div class="row profile">
+                <div class="col-md-4">
+                    <div class="form-field">
+                        <label for="id_email">{% trans "Email" %}:</label>
+                        <strong>{{ user.email }}</strong>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="id_first_name">{% trans "First name" %}:</label>
+                        <strong>{{ user.first_name }}</strong>
+                    </div>
+
+                    <div class="form-field">
+                        {{ user_form.last_name.label_tag }}
+                        {{ user_form.last_name }}
+
+                        <div class="field-errors">
+                            {{ user_form.last_name.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        {{ user_form.country.label_tag }}
+                        {{ user_form.country }}
+
+                        <div class="field-errors">
+                            {{ user_form.country.errors }}
+                        </div>
+                    </div>
+
+                    <br />
+                    <br />
+
+                    <div class="form-field">
+                        <div class="split-cell">
+                            <a href="{% url 'web:select_company' %}" class="buttons cancel">{% trans 'Back' %}</a>
+                        </div>
+
+                        <div class="split-cell">
+                            <input type="submit" value="{% trans 'Submit' %}" class="button ok" />
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
     </form>
 {% endblock %}
