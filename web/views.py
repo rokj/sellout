@@ -408,7 +408,7 @@ def robots(request):
     return render(request, 'web/robots.txt', content_type='text/plain')
 
 
-@login_required(ajax=True)
+@login_required
 def update_password(request):
     if not request.method == 'POST':
         return JSON_error("error")

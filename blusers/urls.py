@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url
 
-import views
+from blusers import views as blusers_views
+import settings
 
 urlpatterns = patterns('',
     # url(r'^$', views.register, name='register'),
@@ -8,6 +9,8 @@ urlpatterns = patterns('',
 
     # mobile registration
     # url(r'^mobile-register', views.mobile_register, name='mobile-register'),
+
+    url(r'^update-password/$', blusers_views.update_password, name="update-password"),  # settings
 
     #API
     # url(r'api-token-auth/?$', views.obtain_auth_token)

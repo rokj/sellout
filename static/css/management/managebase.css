@@ -253,7 +253,7 @@ div.clear-results a{
 /* ugly ugly ugly, but we are in a hurry */
 .user-profile div.form-field {
     margin-top: 0px;
-    max-width: 200px;
+    max-width: 320px;
 }
 
 .user-profile .cancel {
@@ -309,4 +309,13 @@ div.clear-results a{
 
 .user-profile h4 button.selector:not(.active):hover {
     cursor: pointer;
+}
+
+.user-profile .password .back-to-profile {
+    display: none;
+}
+
+.user-profile .password .password-changed-successfully {
+    color: #22e693;
+    display: none;
 }

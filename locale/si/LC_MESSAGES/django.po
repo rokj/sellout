@@ -348,7 +348,7 @@ msgstr "Spremeni geslo"
 
 #: blusers/templates/blusers/settings.html:552
 msgid "Password changed successfully!"
-msgstr "Geslo uspešno spremenjeno"
+msgstr "Geslo uspešno spremenjeno!"
 
 #: blusers/templates/blusers/settings.html:561 pos/models.py:28
 msgid "Website"
