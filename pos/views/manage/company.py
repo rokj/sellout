@@ -308,7 +308,6 @@ def mobile_register_company(request):
             # add 'admin' permissions for the user that registered this company
             default_permission = Permission(
                 created_by=request.user,
-
                 user=request.user,
                 company=company,
                 permission='admin',
@@ -318,7 +317,8 @@ def mobile_register_company(request):
             return JsonOk(extra=company_to_dict(request.user, company, True, True))
 
         else:
-            return JsonError(message='register failed')
+            print form.errors.as_data().keys()
+            return JsonError(message='register failed', extra=form.errors.as_data().keys())
 
     return JsonResponse({'error': "should not happen"})
 

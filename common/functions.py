@@ -52,8 +52,16 @@ def JsonStringify(data):
     return s
 
 
-def JsonError(message):
-    return JsonResponse({'status': 'error', 'message': message})
+def JsonError(message, extra=None):
+    d = {
+        'status': 'error',
+        'message': message
+    }
+
+    if extra:
+        d['extra'] = extra
+
+    return JsonResponse(d)
 
 
 def JsonOk(extra=None, safe=True):
