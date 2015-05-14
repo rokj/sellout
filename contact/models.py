@@ -10,7 +10,7 @@ class ContactRegistry(models.Model):
     # e.g. in Slovenia there is AJPES and DURS which provide information about busniess entities
     type = models.CharField(_("Type of contact"), max_length=20, choices=g.CONTACT_TYPES,
                             null=False, blank=False, default=g.CONTACT_TYPES[0][0])
-    company_name = models.CharField(_("Company name"), max_length=50, null=True, blank=True)
+    company_name = models.CharField(_("Company name"), max_length=200, null=True, blank=True)
     first_name = models.CharField(_("First name"), max_length=50, null=True, blank=True)
     last_name = models.CharField(_("Last name"), max_length=50, null=True, blank=True)
     sex = models.CharField(max_length=1, choices=g.SEXES, null=True, blank=True)

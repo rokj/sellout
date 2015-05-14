@@ -1,19 +1,21 @@
 # -*- coding:utf-8 -*-
+import json
 import os
 
 import django
 import regex
 import requests
 import zipfile, os.path
-from contact.models import ContactRegistry
-import settings
-
-import common.globals as g
 
 django.setup()
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webpos.settings")
+
+from contact.models import ContactRegistry
+import settings
+
+import common.globals as g
 
 download_dir = '/home/rokj/tmp/durs'
 
@@ -24,6 +26,8 @@ files = {
         'pravne_osebe': {'url': 'http://datoteke.durs.gov.si/DURS_zavezanci_PO.zip', 'filename': 'DURS_zavezanci_PO.txt'}
     }
 }
+
+settings.DEBUG = False
 
 def unzip(source_filename, dest_dir):
     with zipfile.ZipFile(source_filename) as zf:
@@ -96,6 +100,7 @@ def import_durs_fo(filename):
             contact_registry.postcode = postna_stevilka,
             contact_registry.city = posta
             contact_registry.country = "SI"
+            contact_registry.vat = davcna_stevilka
             contact_registry.save()
         except ContactRegistry.DoesNotExist:
             contact_registry = ContactRegistry(
@@ -109,23 +114,159 @@ def import_durs_fo(filename):
             )
             contact_registry.save()
 
-
-
-
 def import_durs_dej(filename):
-    pass
+    with open(filename) as f:
+        lines = f.readlines()
+
+    for line in lines:
+        davcna_stevilka = line[0:8]
+        if settings.DEBUG:
+            print("davcna stevilka: |%s|" % (davcna_stevilka))
+
+        maticna_stevilka = line[9:19]
+        if settings.DEBUG:
+            print("maticna stevilka: |%s|" % (maticna_stevilka))
+
+        dejavnost = line[20:26]
+        if settings.DEBUG:
+            print("dejavnost: |%s|" % (dejavnost))
+
+        podjetje = line[27:128].strip()
+        if settings.DEBUG:
+            print("podjetje: |%s|" % (podjetje.decode("utf-8", "replace")))
+
+        __naslov = line[129:242].strip().split(',')
+        naslov = __naslov[0].strip()
+        if settings.DEBUG:
+            print("naslov: |%s|" % (naslov))
+
+        postna_stevilka = ""
+        posta = ""
+
+        if naslov != "":
+            postna_stevilka = regex.findall(r'\d+', __naslov[-1])
+            if settings.DEBUG:
+                print("postna stevilka: |%s|" % (postna_stevilka))
+
+            if len(postna_stevilka) > 0:
+                postna_stevilka = postna_stevilka[0]
+                posta = __naslov[1].replace(postna_stevilka, "").strip()
+                if settings.DEBUG:
+                    print("posta: |%s|" % (posta))
+
+        additional_info = {
+            'maticna_stevilka': maticna_stevilka,
+            'dejavnost': dejavnost
+        }
+
+        try:
+            contact_registry = ContactRegistry.objects.get(vat=davcna_stevilka)
+            contact_registry.company_name = podjetje.decode("utf-8", "replace")
+            contact_registry.postcode = postna_stevilka,
+            contact_registry.city = posta
+            contact_registry.country = "SI"
+            contact_registry.vat = davcna_stevilka
+            contact_registry.additional_info = json.dumps(additional_info)
+            contact_registry.save()
+        except ContactRegistry.DoesNotExist:
+            contact_registry = ContactRegistry(
+                type=g.CONTACT_TYPES[0][0],
+                company_name=podjetje.decode("utf-8", "replace"),
+                postcode=postna_stevilka,
+                city=posta,
+                country="SI",
+                vat=davcna_stevilka,
+                additional_info=json.dumps(additional_info)
+            )
+            contact_registry.save()
 
 def import_durs_po(filename):
-    pass
+    with open(filename) as f:
+        lines = f.readlines()
+
+    for line in lines:
+        davcni_zavezanec = line[0:3]
+        if "*" in davcni_zavezanec:
+            davcni_zavezanec = "yes"
+        else:
+            davcni_zavezanec = "no"
+
+        if settings.DEBUG:
+            print("davcni zavezanec: |%s|" % (davcni_zavezanec))
+
+        davcna_stevilka = line[4:11]
+        if settings.DEBUG:
+            print("davcna stevilka: |%s|" % (davcna_stevilka))
+
+        maticna_stevilka = line[13:22]
+        if settings.DEBUG:
+            print("maticna stevilka: |%s|" % (maticna_stevilka))
+
+        dejavnost = line[35:41]
+        if settings.DEBUG:
+            print("dejavnost: |%s|" % (dejavnost))
+
+        podjetje = line[42:143].strip()
+        if settings.DEBUG:
+            print("podjetje: |%s|" % (podjetje.decode("utf-8", "replace")))
+
+        __naslov = line[144:257].strip().split(',')
+        naslov = __naslov[0].strip()
+        if settings.DEBUG:
+            print("naslov: |%s|" % (naslov))
+
+        postna_stevilka = ""
+        posta = ""
+
+        if naslov != "":
+            postna_stevilka = regex.findall(r'\d+', __naslov[-1])
+            if settings.DEBUG:
+                print("postna stevilka: |%s|" % (postna_stevilka))
+
+            if len(postna_stevilka) > 0:
+                postna_stevilka = postna_stevilka[0]
+                posta = __naslov[1].replace(postna_stevilka, "").strip()
+                if settings.DEBUG:
+                    print("posta: |%s|" % (posta))
+
+        additional_info = {
+            'maticna_stevilka': maticna_stevilka,
+            'dejavnost': dejavnost
+        }
+
+        try:
+            contact_registry = ContactRegistry.objects.get(vat=davcna_stevilka)
+            contact_registry.company_name = podjetje.decode("utf-8", "replace")
+            contact_registry.postcode = postna_stevilka,
+            contact_registry.city = posta
+            contact_registry.country = "SI"
+            contact_registry.vat = davcna_stevilka
+            contact_registry.tax_payer = davcni_zavezanec
+            contact_registry.additional_info = json.dumps(additional_info)
+            contact_registry.save()
+        except ContactRegistry.DoesNotExist:
+            contact_registry = ContactRegistry(
+                type=g.CONTACT_TYPES[0][0],
+                company_name=podjetje.decode("utf-8", "replace"),
+                postcode=postna_stevilka,
+                city=posta,
+                country="SI",
+                vat=davcna_stevilka,
+                tax_payer = davcni_zavezanec,
+                additional_info=json.dumps(additional_info),
+            )
+            contact_registry.save()
 
 for key, fileinfo in files['durs'].iteritems():
     if key == 'fizicne_osebe':
         download(fileinfo['url'], fileinfo['filename'])
-        import_durs_fo(download_dir + "/" + fileinfo['filename'])
+        # import_durs_fo(download_dir + "/" + fileinfo['filename'])
     elif key == 'dejavnosti':
-        import_durs_dej(fileinfo['filename'])
+        download(fileinfo['url'], fileinfo['filename'])
+        # import_durs_dej(download_dir + "/" + fileinfo['filename'])
     elif key == 'pravne_osebe':
-        import_durs_po(fileinfo['filename'])
+        download(fileinfo['url'], fileinfo['filename'])
+        import_durs_po(download_dir + "/" + fileinfo['filename'])
 
 
 
