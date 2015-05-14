@@ -12,12 +12,13 @@ from common.functions import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
                            max_field_length, error, JsonStringify
+from pos.stock import Document
 from pos.views.manage.discount import discount_to_dict, get_all_discounts
 from pos.views.manage.category import get_subcategories, get_all_categories
 from pos.views.manage.tax import get_default_tax, get_all_taxes
 
 from common import globals as g
-from config.functions import get_company_value
+from config.functions import get_company_value, get_date_format
 
 import decimal
 from sorl.thumbnail import get_thumbnail
@@ -767,4 +768,44 @@ def mass_edit(request, company):
 
     else:
         return JsonError(_("Unsupported mass edit action"))
+
+
+###
+### views
+###
+@login_required
+def list_stock(request, company):
+    c = get_object_or_404(Company, url_name=company)
+
+    # check permissions: needs to be guest
+    if not has_permission(request.user, c, 'stock', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view stock."))
+
+    stock = {}
+
+    documents = Document.objects.filter(company=c).order_by('-entry_date')
+
+    """
+    paginator = Paginator(bills, g.MISC['bills_per_page'])
+    if page:
+        bills = paginator.page(page)
+    else:
+        bills = paginator.page(1)
+    """
+
+    context = {
+        'company': c,
+
+        'stock': stock,
+
+        # 'searched': searched,
+        # 'filter_form': form,
+
+        'title': _("Stock"),
+        'site_title': g.MISC['site_title'],
+        'date_format_django': get_date_format(request.user, c, 'django'),
+        'date_format_js': get_date_format(request.user, c, 'js'),
+    }
+
+    return render(request, 'pos/manage/stock.html', context)
 

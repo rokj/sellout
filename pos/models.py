@@ -14,10 +14,9 @@ from config.countries import country_choices, country_by_code
 import datetime as dtm
 import random
 
-
 ### company ###
 class CompanyAbstract(models.Model):
-    # abstract: used in  for Company and BillCompany
+    # abstract: used in for Company and BillCompany
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
     street = models.CharField(_("Street address"), max_length=200, null=False, blank=False)
     postcode = models.CharField(_("Postal code"), max_length=20, null=False, blank=False)
@@ -28,8 +27,7 @@ class CompanyAbstract(models.Model):
     website = models.CharField(_("Website"), max_length=256, null=True, blank=True)
     phone = models.CharField(_("Phone number"), max_length=30, null=True, blank=True)
     vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=False, blank=False)
-
-    tax_payer = models.BooleanField(_("Tax payer"), blank=False, null=False, default=False)
+    tax_payer = models.CharField(_("Tax payer"), max_length=3, choices=g.TAX_PAYER_CHOICES, blank=False, null=False, default="no")
 
     class Meta:
         abstract = True
@@ -196,10 +194,10 @@ class ProductAbstract(models.Model):
     private_notes = models.TextField(_("Notes (only for internal use)"), null=True, blank=True)
     unit_type = models.CharField(_("Product unit type"), max_length=15,
         choices=g.UNITS, blank=False, null=False, default=g.UNITS[0][0])
-    stock = models.DecimalField(_("Number of items left in stock"),
-        max_digits=g.DECIMAL['quantity_digits'],
-        decimal_places=g.DECIMAL['quantity_decimal_places'],
-        null=False, blank=False)
+    # stock = models.DecimalField(_("Number of items left in stock"),
+    #    max_digits=g.DECIMAL['quantity_digits'],
+    #    decimal_places=g.DECIMAL['quantity_decimal_places'],
+    #    null=False, blank=False)
 
     # price - in a separate model
     
@@ -427,6 +425,8 @@ class ContactAbstract(models.Model):
     email = models.CharField(_("E-mail address"), max_length=255, blank=True, null=True)
     phone = models.CharField(_("Telephone number"), max_length=30, blank=True, null=True)
     vat = models.CharField(_("VAT identification number"), max_length=30, null=True, blank=True)
+    tax_payer = models.CharField(_("Tax payer"), max_length=3, choices=g.TAX_PAYER_CHOICES, blank=False, null=False, default="no")
+    additional_info = models.TextField(blank=True, null=True)
 
     @property
     def country_name(self):
@@ -716,5 +716,7 @@ class BillItem(SkeletonU, ProductAbstract): # include all data from Product
 class BillItemDiscount(SkeletonU, DiscountAbstract):
     # inherits everything from DiscountAbstract
     bill_item = models.ForeignKey(BillItem)
+
+import stock
 
 import signals

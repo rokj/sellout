@@ -235,20 +235,20 @@ PERMISSIONS = {
         'edit': (),
         },
     'cashier': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register','stats',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register','stats', 'stock'),
         'edit': ('bill', 'terminal', 'contact'),  # cashiers must write bills
         },
     'seller': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register','stats',),
-        'edit': ('bill', 'product', 'terminal', 'manage', 'contact',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register','stats', 'stock',),
+        'edit': ('bill', 'product', 'terminal', 'manage', 'contact', 'stock', ),
         },
     'manager': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register','stats',),
-        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register', 'stats', 'stock'),
+        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register', 'stock',),
         },
     'admin': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user','stats',),
-        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user','stats',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user', 'stats', 'stock',),
+        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user', 'stats', 'stock',),
         },
 }
 
@@ -371,4 +371,10 @@ BILL_FORMAT_OPTIONS = (  # the first is the default
     ("yyyy-s", _("Year and serial, resets every year")),
     ("s", _("Serial only, never resets")),
     ("yyyy-m-s", _("Year, month and serial, resets every month")),
+)
+
+TAX_PAYER_CHOICES = (
+    ("yes", _("Yes")),
+    ("no", _("No")),
+    ("eu", _("EU")),
 )

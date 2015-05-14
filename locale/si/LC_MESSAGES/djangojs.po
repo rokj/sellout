@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-05 14:11+0100\n"
+"POT-Creation-Date: 2015-05-13 13:13+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -128,8 +128,8 @@ msgid "Noon"
 msgstr ""
 
 #: admin/js/admin/DateTimeShortcuts.js:92
-#: admin/js/admin/DateTimeShortcuts.js:204 static/js/widgets/bill.js:426
-#: static/js/widgets/bill.js.c:1355
+#: admin/js/admin/DateTimeShortcuts.js:204 static/js/widgets/bill.js:433
+#: static/js/widgets/bill.js.c:1358
 msgid "Cancel"
 msgstr ""
 
@@ -168,25 +168,33 @@ msgstr "Prikaži"
 msgid "Hide"
 msgstr "Skrij"
 
-#: static/js/common.js:140 static/js/widgets/unlock.js:112
+#: static/js/common.js:149 static/js/widgets/unlock.js:115
 msgid "OK"
 msgstr ""
 
-#: static/js/common.js:145
+#: static/js/common.js:154
 msgid "Yes"
 msgstr "Da"
 
-#: static/js/common.js:146
+#: static/js/common.js:155
 msgid "No"
 msgstr "Ne"
 
-#: static/js/common.js:159
+#: static/js/common.js:168
 msgid "File too large"
 msgstr "Datoteka je prevelika"
 
-#: static/js/common.js:160
+#: static/js/common.js:169
 msgid "Maximum file size is"
 msgstr "Največja dovoljenja velikost datoteke je"
+
+#: static/js/common.js:684
+msgid "Email must be valid"
+msgstr ""
+
+#: static/js/common.js:741
+msgid "Ask us anything"
+msgstr ""
 
 #: static/js/tutorial.js:213
 msgid "Help"
@@ -329,118 +337,110 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: static/js/widgets/bill.js:361
+#: static/js/widgets/bill.js:368
 msgid "Cannot create bill"
 msgstr "Ne morem narediti računa"
 
-#: static/js/widgets/bill.js:362
+#: static/js/widgets/bill.js:369
 msgid "The bill is empty"
 msgstr "Nič na računu"
 
-#: static/js/widgets/bill.js:373
+#: static/js/widgets/bill.js:380
 msgid "Could not create bill"
 msgstr "Ne morem narediti računa"
 
-#: static/js/widgets/bill.js:400
+#: static/js/widgets/bill.js:407
 msgid "Save Bill"
 msgstr "Shrani račun"
 
-#: static/js/widgets/bill.js:404 static/js/widgets/bill.js.c:517
-#: static/js/widgets/bill.js:1354
+#: static/js/widgets/bill.js:411 static/js/widgets/bill.js.c:524
+#: static/js/widgets/bill.js:1357
 msgid "Save"
 msgstr "Shrani"
 
-#: static/js/widgets/bill.js:413
+#: static/js/widgets/bill.js:420
 msgid "Saving bill failed"
 msgstr ""
 
-#: static/js/widgets/bill.js:443
+#: static/js/widgets/bill.js:450
 msgid "Loading bills failed"
 msgstr ""
 
-#: static/js/widgets/bill.js:473
+#: static/js/widgets/bill.js:480
 msgid "Delete this bill?"
 msgstr ""
 
-#: static/js/widgets/bill.js:479
+#: static/js/widgets/bill.js:486
 msgid "Deleting bill failed"
 msgstr ""
 
-#: static/js/widgets/bill.js:504
+#: static/js/widgets/bill.js:511
 msgid "Load bill"
 msgstr ""
 
-#: static/js/widgets/bill.js:514
+#: static/js/widgets/bill.js:521
 msgid "The current bill is not saved"
 msgstr ""
 
-#: static/js/widgets/bill.js:515
+#: static/js/widgets/bill.js:522
 msgid "Do you wish to save or clear it?"
 msgstr ""
 
-#: static/js/widgets/bill.js:521
+#: static/js/widgets/bill.js:528
 msgid "Clear"
 msgstr ""
 
-#: static/js/widgets/bill.js:566
+#: static/js/widgets/bill.js:573
 msgid "Confirm bill clear"
 msgstr ""
 
-#: static/js/widgets/bill.js:567
+#: static/js/widgets/bill.js:574
 msgid "Are you sure you want to clear bill? All items will be removed."
 msgstr ""
 
-#: static/js/widgets/bill.js:675
+#: static/js/widgets/bill.js:682
 msgid "Invalid quantity"
 msgstr ""
 
-#: static/js/widgets/bill.js:679 static/js/widgets/bill.js.c:1368
+#: static/js/widgets/bill.js:686 static/js/widgets/bill.js.c:1371
 msgid "Wrong number format"
 msgstr ""
 
-#: static/js/widgets/bill.js:695
+#: static/js/widgets/bill.js:703
 msgid "Quantity cannot be zero or less"
 msgstr ""
 
-#: static/js/widgets/bill.js:828
-msgid "Remove bill item"
-msgstr ""
-
-#: static/js/widgets/bill.js:829
-msgid "Remove bill item: %(name)s?"
-msgstr ""
-
-#: static/js/widgets/bill.js:1036
+#: static/js/widgets/bill.js:1039
 msgid "Wrong item format"
 msgstr ""
 
-#: static/js/widgets/bill.js:1037
+#: static/js/widgets/bill.js:1040
 msgid "Please check discount number format"
 msgstr ""
 
-#: static/js/widgets/bill.js:1275
+#: static/js/widgets/bill.js:1278
 msgid "Invalid discount"
 msgstr ""
 
-#: static/js/widgets/bill.js:1276
+#: static/js/widgets/bill.js:1279
 msgid "Please check discount format and type"
 msgstr ""
 
-#: static/js/widgets/bill.js:1297
+#: static/js/widgets/bill.js:1300
 msgid "Confirm explode"
 msgstr ""
 
-#: static/js/widgets/bill.js:1298
+#: static/js/widgets/bill.js:1301
 msgid ""
 "You have made changes to this item that will not be saved to the new item. "
 "Continue?"
 msgstr ""
 
-#: static/js/widgets/bill.js:1353
+#: static/js/widgets/bill.js:1356
 msgid "Bill options"
 msgstr "Možnosti na računu"
 
-#: static/js/widgets/bill.js:1369
+#: static/js/widgets/bill.js:1372
 msgid "Please check discount amount"
 msgstr "Prosim, preveri popust"
 
@@ -449,7 +449,6 @@ msgid "Products in this category"
 msgstr "Artikli v tej kategoriji"
 
 #: static/js/widgets/categories.js:37
-#| msgid "Favorite products"
 msgid "All products"
 msgstr "Priljubljeni artikli"
 
@@ -497,19 +496,19 @@ msgid ""
 "Try later, or be nice and contact support."
 msgstr ""
 
-#: static/js/widgets/payment.js:367
+#: static/js/widgets/payment.js:369
 msgid "Confirm cancellation"
 msgstr "Prekliči račun (storno)"
 
-#: static/js/widgets/payment.js:368
+#: static/js/widgets/payment.js:370
 msgid "Are you sure you want to cancel this bill?"
 msgstr "Si prepričan preklicati ta račun?"
 
-#: static/js/widgets/payment.js:380
+#: static/js/widgets/payment.js:382
 msgid "Could not update bill status"
 msgstr ""
 
-#: static/js/widgets/payment.js:422
+#: static/js/widgets/payment.js:424
 msgid "Could not save bill"
 msgstr ""
 
@@ -518,12 +517,10 @@ msgid "No products found"
 msgstr "Ni najdenih artiklov"
 
 #: static/js/widgets/terminal.js:202
-#| msgid "Printer is required"
 msgid "Register required"
 msgstr "Nastavi blagajno"
 
 #: static/js/widgets/terminal.js:203
-#| msgid "There are no printers defined, please add one"
 msgid "There are no registers defined, please add one"
 msgstr "Pred uporabo je potrebno nastaviti blagajno"
 
@@ -531,25 +528,25 @@ msgstr "Pred uporabo je potrebno nastaviti blagajno"
 msgid "Go"
 msgstr "Pojdi"
 
-#: static/js/widgets/terminal.js:240
+#: static/js/widgets/terminal.js:241
 msgid "Register could not be set"
 msgstr "Napaka pri nastavljanju blagajne"
 
-#: static/js/widgets/terminal.js:241
+#: static/js/widgets/terminal.js:242
 msgid "There was an error while setting your register, "
 msgstr ""
 
-#: static/js/widgets/terminal.js:285
+#: static/js/widgets/terminal.js:283
 msgid "Choose a printer"
 msgstr "Izberi tiskalnik"
 
-#: static/js/widgets/unlock.js:109
+#: static/js/widgets/unlock.js:112
 msgid "Could not unlock"
 msgstr ""
 
-#: static/js/widgets/unlock.js:168
+#: static/js/widgets/unlock.js:171
 msgid "Locking failed"
 msgstr ""
 
-msgid "Current password field must not be empty!"
-msgstr "Za spremembo gesla moraš vnesti trenutno geslo!"
+#~ msgid "Current password field must not be empty!"
+#~ msgstr "Za spremembo gesla moraš vnesti trenutno geslo!"

@@ -17,6 +17,7 @@ from pos.views.manage import tax
 from pos.views.manage import configuration
 from pos.views.manage import register
 from pos.views.manage import bill
+from pos.views.manage import stock
 from pos.views.manage import users
 
 from pos.views import bill as terminal_bill
@@ -94,6 +95,7 @@ urlpatterns = patterns('',
 
     # bill management
     url(r_company + '/' + r_manage + _('/bills') + '/$', bill.list_bills, name='list_bills'),
+    url(r_company + '/' + r_manage + _('/stock') + '/$', stock.list_stock, name='list_stock'),
 
     # user
     url(r_company + '/' + r_manage + _('/user-settings') + '/$', configuration.user_settings, name='user_settings'),  # user settings

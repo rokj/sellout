@@ -1,0 +1,124 @@
+{% extends "pos/manage/manage.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block section_head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/stock.css' %}"/>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            {% include 'pos/manage/pagination.js' %}
+
+            var keyboard = new Keyboard();
+
+            var items = {
+                add_document: $("#documents button#add"),
+                document_input: $("#documents table tr#document_input"),
+                document_number: $("#document_number"),
+                document_date: $("#document_date"),
+                entry_date: $("#entry_date")
+            };
+
+            items.add_document.click(function() {
+                if (items.document_input.is(":hidden")) {
+                    items.document_input.show();
+
+                    keyboard.add("cancel-when-adding-document", 'escape', function () {
+                        items.add_document.click();
+                    });
+                } else {
+                    items.document_input.hide();
+
+                    keyboard.remove("cancel-when-adding-document");
+                }
+            });
+
+            items.document_number.on('focus', function() {
+                if ($(this).val() == gettext("document number from supplier")) {
+                    $(this).val("");
+                }
+            });
+
+            items.document_number.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("document number from supplier"));
+                }
+            });
+
+            items.document_date.on('focus', function() {
+                if ($(this).val() == gettext("document date")) {
+                    $(this).val("");
+                }
+            });
+
+            items.document_date.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("document date"));
+                }
+            });
+
+            items.entry_date.on('focus', function() {
+                if ($(this).val() == gettext("entry date")) {
+                    $(this).val("");
+                }
+            });
+
+            items.entry_date.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("entry date"));
+                }
+            });
+
+            $("#document_date, #entry_date").datepicker({
+                dateFormat:"{{ date_format_js|escapejs }}"
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block status_bar_title %}
+    {% trans 'Stock' %}
+{% endblock %}
+
+{% block manage_content %}
+    <div class="left-column">
+        <div id="filter_form" class="fake-form">
+            <h3>{% trans "Search" %}</h3>
+
+            <input id="general_filter" class="search-filter" type="text" placeholder="{% trans "Search query" context 'search documents' %}">
+
+            <div id="filter_form_controls">
+                <div class="split-cell last">
+                    <input type="button" id="update_results" class="ok hoverable" value="{% trans "Search" %}">
+                </div>
+
+                <div class="cleared"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="documents">
+        <button type="button" id="add">{% trans "Add document" %}</button>
+
+        <div id="documents_list">
+            <table>
+                <thead>
+                    <tr>
+                        <th>{% trans "Document number" %}</th>
+                        <th>{% trans "Document date" %}</th>
+                        <th>{% trans "Entry date" %}</th>
+                        <th>{% trans "Supplier" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="document_input">
+                        <td><input type="text" id="document_number" name="document_number" value="{% trans "document number from supplier" %}"/></td>
+                        <td><input type="text" id="document_date" name="document_date" value="{% trans "document date" %}"/></td>
+                        <td><input type="text" id="entry_date" name="entry_date" value="{% trans "entry date" %}"/></td>
+                        <td><input type="text" id="supplier" name="supplier" value="{% trans "supplier" %}"/></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

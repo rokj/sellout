@@ -2066,7 +2066,7 @@ msgstr ""
 #: pos/views/manage/stats.py:174 templates/pos/base.html:136
 #: templates/pos/manage/stats.html:18
 msgid "Stats"
-msgstr ""
+msgstr "Statistika"
 
 #: pos/views/manage/stock.py:493
 msgid "Stock cannot be negative"

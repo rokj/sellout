@@ -1,0 +1,8 @@
+#documents button#add:hover {
+    cursor: pointer;
+    background-color: rosybrown;
+}
+
+#documents #document_input {
+    display: none;
+}

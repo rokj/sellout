@@ -124,6 +124,7 @@ blocks:
                     <li class="store"><a href="{% url 'pos:list_registers' company.url_name %}">{% trans 'Cash Registers' %}</a></li>
                     <li class="store"><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
                     <li class="store"><a href="{% url 'pos:list_bills' company.url_name %}">{% trans 'Bills' %}</a></li>
+                    <li class="store"><a href="{% url 'pos:list_stock' company.url_name %}">{% trans 'Stock' %}</a></li>
                     <li class="store"><a href="{% url 'pos:stats' company.url_name %}">{% trans 'Stats' %}</a></li>
                     {# company-related stuff #}
                     <li class="company separator"><a href="{% url 'pos:company_settings' company.url_name %}">{% trans 'Configuration' %}</a></li>
