@@ -16,7 +16,8 @@
                 document_input: $("#documents table tr#document_input"),
                 document_number: $("#document_number"),
                 document_date: $("#document_date"),
-                entry_date: $("#entry_date")
+                entry_date: $("#entry_date"),
+                supplier: $("#supplier")
             };
 
             items.add_document.click(function() {
@@ -68,6 +69,94 @@
                     $(this).val(gettext("entry date"));
                 }
             });
+
+            items.supplier.on('focus', function() {
+                if ($(this).val() == gettext("supplier")) {
+                    $(this).val("");
+                }
+            });
+
+            items.supplier.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("supplier"));
+                }
+            });
+
+            function parse_data(data, search_term) {
+                var string = "";
+
+                string = data.company_name + ", ";
+
+                if (data.first_name && data.last_name) {
+                    string = string + data.first_name + " " + data.last_name + ", "
+                }
+
+                if (data.street_address && data.city && data.postcode) {
+                    string = string + data.street_address + ", " + data.postcode + " " + data.city + ", ";
+                }
+
+                if (data.vat) {
+                    string = string + data.vat;
+                }
+
+                return string;
+            }
+
+            function autoCompleteRender(ul, item) {
+                var searchTerm = this.term;
+                var itemLabel = item.label;
+                itemLabel = itemLabel.replace(new RegExp("(" + searchTerm + ")", "gi"), '<strong class="search-term">$1</strong>');
+
+                return $("<li></li>").data("item.autocomplete", item).append('<a>' + itemLabel + '</a>').appendTo(ul);
+            }
+
+            function contacts_autocomplete(element) {
+                if(element.data('ui-autocomplete')) {
+                    element.autocomplete("destroy");
+                }
+
+                element.autocomplete({
+                    source: function(request, response) {
+                        var data = {search_term: request.term};
+                        var sd = {data: JSON.stringify(data), csrfmiddlewaretoken: "{{ csrf_token }}"};
+
+                        $.ajax({
+                            type: "POST",
+                            dataType: "json",
+                            url: "{% url 'pos:get-contacts' company.url_name %}",
+                            data: sd,
+                            timeout: 30000,
+                            success: function(response_data){
+                                if (response_data.status == "ok") {
+                                    var data = [];
+                                    if (response_data.data) {
+                                        var durs_contacts = $.parseJSON(response_data.data.durs_contacts);
+                                        var my_contacts = $.parseJSON(response_data.data.my_contacts);
+
+                                        $.each(durs_contacts, function(key, value) {
+                                            data.push(parse_data(value, request.term));
+                                            console.log(value);
+                                        });
+                                    }
+
+                                    response(data);
+                                }
+                            }
+                            /*,
+                            error: function(xhr, textStatus, error){
+                                console.error("AJAX Error: " + JSON.stringify({
+                                    xhr: xhr, status: textStatus, error: error
+                                }));
+                            }*/
+                        });
+
+                    },
+                    minLength: 2,
+                    delay: 350
+                }).data("ui-autocomplete")._renderItem = autoCompleteRender;
+            }
+
+            contacts_autocomplete(items.supplier);
 
             $("#document_date, #entry_date").datepicker({
                 dateFormat:"{{ date_format_js|escapejs }}"

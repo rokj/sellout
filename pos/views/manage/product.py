@@ -78,8 +78,6 @@ def product_to_dict(user, company, product, android=False):
     # tax: it's a not-null foreign key
     ret['tax_id'] = product.tax.id
     ret['tax'] = format_number(user, company, product.tax.amount)
-    # stock: it cannot be 'undefined'
-    ret['stock'] = format_number(user, company, product.stock)
 
     # category?
     if product.category:
@@ -96,7 +94,8 @@ def product_to_dict(user, company, product, android=False):
     ret['private_notes'] = product.private_notes
     ret['unit_type'] = product.unit_type
     ret['unit_type_display'] = product.get_unit_type_display()
-    ret['stock'] = format_number(user, company, product.stock)
+    # stock: it cannot be 'undefined'
+    # ret['stock'] = format_number(user, company, product.stock)
     ret['color'] = product.color
     ret['favorite'] = product.favorite
     return ret

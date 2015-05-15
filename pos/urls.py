@@ -20,6 +20,8 @@ from pos.views.manage import bill
 from pos.views.manage import stock
 from pos.views.manage import users
 
+from contact.views import get_contacts
+
 from pos.views import bill as terminal_bill
 
 from importexport import views as importviews
@@ -95,7 +97,7 @@ urlpatterns = patterns('',
 
     # bill management
     url(r_company + '/' + r_manage + _('/bills') + '/$', bill.list_bills, name='list_bills'),
-    url(r_company + '/' + r_manage + _('/stock') + '/$', stock.list_stock, name='list_stock'),
+    url(r_company + '/' + r_manage + _('/stock') + '/$', stock.stock, name='stock'),
 
     # user
     url(r_company + '/' + r_manage + _('/user-settings') + '/$', configuration.user_settings, name='user_settings'),  # user settings
@@ -142,4 +144,6 @@ urlpatterns = patterns('',
 
     # and finally: home: POS terminal, directly
     url(r_company + '/$', terminal.terminal, name='terminal'),  # by url_name
+
+    url(r_company + r'/get-contacts/$', get_contacts, name='get-contacts'),  # by url_name
 )

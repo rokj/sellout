@@ -17,8 +17,9 @@ class ContactRegistry(models.Model):
     date_of_birth = models.DateField(_("Date of birth"), null=True, blank=True)
     street_address = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
     postcode = models.CharField(_("Post code/ZIP"), max_length=12, null=True, blank=True)
-    city = models.CharField(_("City"), max_length=50, null=True, blank=True)
+    city = models.CharField(_("City"), max_length=100, null=True, blank=True)
     state = models.CharField(_("State"), max_length=50, null=True, blank=True)
+    # country of input data
     country = models.CharField(max_length=2, choices=country_choices)
     email = models.CharField(_("E-mail address"), max_length=255, blank=True, null=True)
     phone = models.CharField(_("Telephone number"), max_length=30, blank=True, null=True)
@@ -32,6 +33,9 @@ class ContactRegistry(models.Model):
 
     def __unicode__(self):
         if self.type == "Individual":
-            return "Individual: " + self.first_name + " " + self.last_name
+            if self.first_name and self.last_name:
+                return "Individual: " + self.first_name + " " + self.last_name
+            else:
+                return self.company_name
         else:
             return "Company: " + str(self.company_name)

@@ -85,19 +85,22 @@ def import_durs_fo(filename):
         posta = ""
 
         if naslov != "":
-            postna_stevilka = regex.findall(r'\d+', __naslov[-1])[0]
-            if settings.DEBUG:
-                print("postna stevilka: |%s|" % (postna_stevilka))
+            postna_stevilka = regex.findall(r'\d+', __naslov[-1])
 
-            posta = __naslov[1].replace(postna_stevilka, "").strip()
-            if settings.DEBUG:
-                print("posta: |%s|" % (posta))
+            if len(postna_stevilka) > 0:
+                postna_stevilka = postna_stevilka[0]
+                posta = __naslov[1].replace(postna_stevilka, "").strip()
+
+                if settings.DEBUG:
+                    print("posta: |%s|" % (posta))
+                    print("postna stevilka: |%s|" % (postna_stevilka))
 
         try:
             contact_registry = ContactRegistry.objects.get(vat=davcna_stevilka)
             contact_registry.first_name = ime_priimek.split(" ")[0]
             contact_registry.last_name = ime_priimek.split(" ")[1]
-            contact_registry.postcode = postna_stevilka,
+            contact_registry.street_address = naslov.decode("utf-8", "replace")
+            contact_registry.postcode = postna_stevilka
             contact_registry.city = posta
             contact_registry.country = "SI"
             contact_registry.vat = davcna_stevilka
@@ -107,6 +110,7 @@ def import_durs_fo(filename):
                 type=g.CONTACT_TYPES[0][0],
                 first_name=ime_priimek.split(" ")[0],
                 last_name=ime_priimek.split(" ")[1],
+                street_address=naslov.decode("utf-8", "replace"),
                 postcode=postna_stevilka,
                 city=posta,
                 country="SI",
@@ -145,13 +149,13 @@ def import_durs_dej(filename):
 
         if naslov != "":
             postna_stevilka = regex.findall(r'\d+', __naslov[-1])
-            if settings.DEBUG:
-                print("postna stevilka: |%s|" % (postna_stevilka))
 
             if len(postna_stevilka) > 0:
                 postna_stevilka = postna_stevilka[0]
                 posta = __naslov[1].replace(postna_stevilka, "").strip()
+
                 if settings.DEBUG:
+                    print("postna stevilka: |%s|" % (postna_stevilka))
                     print("posta: |%s|" % (posta))
 
         additional_info = {
@@ -162,7 +166,8 @@ def import_durs_dej(filename):
         try:
             contact_registry = ContactRegistry.objects.get(vat=davcna_stevilka)
             contact_registry.company_name = podjetje.decode("utf-8", "replace")
-            contact_registry.postcode = postna_stevilka,
+            contact_registry.street_address = naslov.decode("utf-8", "replace")
+            contact_registry.postcode = postna_stevilka
             contact_registry.city = posta
             contact_registry.country = "SI"
             contact_registry.vat = davcna_stevilka
@@ -173,6 +178,7 @@ def import_durs_dej(filename):
                 type=g.CONTACT_TYPES[0][0],
                 company_name=podjetje.decode("utf-8", "replace"),
                 postcode=postna_stevilka,
+                stret_address=naslov.decode("utf-8", "replace"),
                 city=posta,
                 country="SI",
                 vat=davcna_stevilka,
@@ -220,13 +226,13 @@ def import_durs_po(filename):
 
         if naslov != "":
             postna_stevilka = regex.findall(r'\d+', __naslov[-1])
-            if settings.DEBUG:
-                print("postna stevilka: |%s|" % (postna_stevilka))
 
             if len(postna_stevilka) > 0:
                 postna_stevilka = postna_stevilka[0]
                 posta = __naslov[1].replace(postna_stevilka, "").strip()
+
                 if settings.DEBUG:
+                    print("postna stevilka: |%s|" % (postna_stevilka))
                     print("posta: |%s|" % (posta))
 
         additional_info = {
@@ -237,7 +243,8 @@ def import_durs_po(filename):
         try:
             contact_registry = ContactRegistry.objects.get(vat=davcna_stevilka)
             contact_registry.company_name = podjetje.decode("utf-8", "replace")
-            contact_registry.postcode = postna_stevilka,
+            contact_registry.street_address = naslov.decode("utf-8", "replace")
+            contact_registry.postcode = postna_stevilka
             contact_registry.city = posta
             contact_registry.country = "SI"
             contact_registry.vat = davcna_stevilka
@@ -248,6 +255,7 @@ def import_durs_po(filename):
             contact_registry = ContactRegistry(
                 type=g.CONTACT_TYPES[0][0],
                 company_name=podjetje.decode("utf-8", "replace"),
+                street_address=naslov.decode("utf-8", "replace"),
                 postcode=postna_stevilka,
                 city=posta,
                 country="SI",
@@ -259,14 +267,20 @@ def import_durs_po(filename):
 
 for key, fileinfo in files['durs'].iteritems():
     if key == 'fizicne_osebe':
+        print "Doing fizicne osebe"
         download(fileinfo['url'], fileinfo['filename'])
-        # import_durs_fo(download_dir + "/" + fileinfo['filename'])
+        import_durs_fo(download_dir + "/" + fileinfo['filename'])
+        print "Finished fizicne osebe"
     elif key == 'dejavnosti':
+        print "Doing po dejavnostih"
         download(fileinfo['url'], fileinfo['filename'])
-        # import_durs_dej(download_dir + "/" + fileinfo['filename'])
+        import_durs_dej(download_dir + "/" + fileinfo['filename'])
+        print "Finished po dejavnostih"
     elif key == 'pravne_osebe':
+        print "Doing pravne osebe"
         download(fileinfo['url'], fileinfo['filename'])
         import_durs_po(download_dir + "/" + fileinfo['filename'])
+        print "Finished pravne osebe"
 
 
 

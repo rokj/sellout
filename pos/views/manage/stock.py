@@ -774,7 +774,7 @@ def mass_edit(request, company):
 ### views
 ###
 @login_required
-def list_stock(request, company):
+def stock(request, company):
     c = get_object_or_404(Company, url_name=company)
 
     # check permissions: needs to be guest

@@ -419,7 +419,7 @@ class ContactAbstract(models.Model):
     date_of_birth = models.DateField(_("Date of birth"), null=True, blank=True)
     street_address = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
     postcode = models.CharField(_("Post code/ZIP"), max_length=12, null=True, blank=True)
-    city = models.CharField(_("City"), max_length=50, null=True, blank=True)
+    city = models.CharField(_("City"), max_length=100, null=True, blank=True)
     state = models.CharField(_("State"), max_length=50, null=True, blank=True)
     country = models.CharField(max_length=2, choices=country_choices)
     email = models.CharField(_("E-mail address"), max_length=255, blank=True, null=True)

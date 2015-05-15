@@ -6,3 +6,21 @@
 #documents #document_input {
     display: none;
 }
+
+.ui-autocomplete {
+    max-height: 300px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: auto;
+    /* add padding to account for vertical scrollbar */
+    padding-right: 20px;
+    width: 300px !important;
+}
+
+.ui-autocomplete .search-term {
+    background-color: palevioletred;
+}
+
+#supplier {
+    min-width: 440px;
+}
