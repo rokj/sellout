@@ -214,12 +214,9 @@
 
                     send_data("{% url 'pos:save_document' company.url_name %}", data, "{{ csrf_token }}", function(response) {
                         if (response && 'data' in response && 'redirect_url' in response.data) {
-                            window.location.href = response.data.redirect_url;
-
-                            var hash = get_url_hash();
-                            if (hash != "") {
-                                location.reload();
-                            }
+                            removeHash();
+                            window.location.hash = 'invalidtag';
+                            window.location.replace(response.data.redirect_url);
                         }
                     });
                 }
@@ -244,8 +241,6 @@
 
                 if ($(this).hasClass("disabled")) return;
             });
-
-            var page = {{ documents.number }};
         });
     </script>
 {% endblock %}

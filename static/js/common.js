@@ -225,6 +225,10 @@ function get_url_hash() {
     return window.location.hash.replace(/^#/,'');
 }
 
+function removeHash () {
+    history.pushState("", document.title, window.location.pathname + window.location.search);
+}
+
 //
 // manipulation of arrays of objects:
 // data is an array of objects, each object has the 'id' property

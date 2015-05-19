@@ -782,7 +782,7 @@ def stock(request, company, page):
     if not has_permission(request.user, c, 'stock', 'view'):
         return no_permission_view(request, c, _("You have no permission to view stock."))
 
-    documents = Document.objects.filter(company=c).order_by('-entry_date')
+    documents = Document.objects.filter(company=c).order_by('-number')
 
     paginator = Paginator(documents, g.MISC['documents_per_page'])
 
@@ -858,21 +858,32 @@ def save_document(request, company):
         return JsonError('could_not_save_document')
 
 
-    documents = Document.objects.filter(company=c).order_by('-entry_date')
+    documents = Document.objects.filter(company=c).order_by('-number')
     page = 1
     i = 0
 
     for d in documents:
-        if d == document:
-            break
+        print i
+        print g.MISC['documents_per_page']
+        print i%g.MISC['documents_per_page']
 
-        if i == g.MISC['documents_per_page']:
+        if i > 0 and i%g.MISC['documents_per_page'] == 0:
             page += 1
-            i = 0
+
+        print page
+        print "-----------------"
+
+
+        if d == document:
+            print "breaking"
+            break
 
         i += 1
 
-    redirect_url = reverse('pos:stock', args=[c.url_name, page]) + "#" + str(document.id)
+
+    redirect_url = reverse('pos:stock_page', kwargs={'company': c.url_name, 'page': page}) + "#" + str(document.id)
+
+    print redirect_url
 
     return JsonOk(extra={'redirect_url': redirect_url})
 
