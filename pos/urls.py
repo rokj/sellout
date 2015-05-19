@@ -100,7 +100,7 @@ urlpatterns = patterns('',
 
     # stock
     url(r_company + '/' + r_manage + _('/stock') + '/$', stock.stock, {'page': 1}, name='stock'),
-    url(r_company + '/' + r_manage + _('/stock') + '/(?P<page>\d+)/$', stock.stock, name='stock'),
+    url(r_company + '/' + r_manage + _('/stock') + '/(?P<page>\d+)/$', stock.stock, name='stock_page'),
     url(r_company + '/' + r_manage + _('/stock/save-document') + '/$', stock.save_document, name='save_document'),
 
     # user

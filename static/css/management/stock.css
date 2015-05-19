@@ -43,3 +43,7 @@
 input.error {
     border-bottom: 1px solid #ff0000;
 }
+
+#documents_list td.selected {
+    background-color: orangered;
+}

@@ -201,7 +201,7 @@ MISC = {
     'image_upload_formats': 'jpg|jpeg|gif|png|bmp|tiff',  # supported image formats (as regex "options")
     'discounts_per_page': 12,
     'bills_per_page': 25,
-    'documents_per_page': 25
+    'documents_per_page': 5
 }
 
 if settings.LANGUAGE_CODE == "en":

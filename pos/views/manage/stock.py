@@ -797,8 +797,9 @@ def stock(request, company, page):
         'documents': documents,
         # 'searched': searched,
         # 'filter_form': form,
-
         'title': _("Stock"),
+        'next_url': reverse('pos:stock_page', args=[c.url_name, int(page)+1]),
+        'prev_url': reverse('pos:stock_page', args=[c.url_name, int(page)-1]),
         'site_title': g.MISC['site_title'],
         'date_format_django': get_date_format(request.user, c, 'django'),
         'date_format_js': get_date_format(request.user, c, 'js'),
@@ -856,5 +857,22 @@ def save_document(request, company):
 
         return JsonError('could_not_save_document')
 
-    return JsonOk(extra={'redirect_url': reverse('pos:stock', args={c.url_name}) + "#" + str(document.id)})
+
+    documents = Document.objects.filter(company=c).order_by('-entry_date')
+    page = 1
+    i = 0
+
+    for d in documents:
+        if d == document:
+            break
+
+        if i == g.MISC['documents_per_page']:
+            page += 1
+            i = 0
+
+        i += 1
+
+    redirect_url = reverse('pos:stock', args=[c.url_name, page]) + "#" + str(document.id)
+
+    return JsonOk(extra={'redirect_url': redirect_url})
 

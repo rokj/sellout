@@ -26,6 +26,7 @@ def mobile_list_contacts(request, company_id):
     contacts = Contact.objects.filter(company=c)
 
     criteria = JsonParse(request.POST['data'])
+
     cs = []
     for contact in contacts:
         cs.append(contact_to_dict(request.user, c, contact))
