@@ -5,6 +5,7 @@ from django.utils.translation import ugettext as _
 from config.countries import country_choices, country_by_code
 import common.globals as g
 
+
 class ContactRegistry(models.Model):
     # this is used for storing contacs, business entities from busniess information authorities
     # e.g. in Slovenia there is AJPES and DURS which provide information about busniess entities
@@ -23,9 +24,12 @@ class ContactRegistry(models.Model):
     country = models.CharField(max_length=2, choices=country_choices)
     email = models.CharField(_("E-mail address"), max_length=255, blank=True, null=True)
     phone = models.CharField(_("Telephone number"), max_length=30, blank=True, null=True)
-    vat = models.CharField(_("VAT identification number"), max_length=30, null=True, blank=True, unique=True)
+    vat = models.CharField(_("VAT identification number"), max_length=30, null=True, blank=True)
     tax_payer = models.CharField(_("Tax payer"), max_length=3, choices=g.TAX_PAYER_CHOICES, blank=False, null=False, default="no")
     additional_info = models.TextField(blank=True, null=True)
+
+    class Meta:
+        unique_together = ('country', 'vat',)
 
     @property
     def country_name(self):

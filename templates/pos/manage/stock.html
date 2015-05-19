@@ -17,7 +17,9 @@
                 document_number: $("#document_number"),
                 document_date: $("#document_date"),
                 entry_date: $("#entry_date"),
-                supplier: $("#supplier")
+                supplier: $("#supplier"),
+                save_document: $("#save_document"),
+                documents_list: $("#documents_list table")
             };
 
             items.add_document.click(function() {
@@ -82,10 +84,50 @@
                 }
             });
 
+            function check_entry_data() {
+                var all_ok = true;
+
+                if (items.document_number.val() == gettext("document number from supplier") || items.document_number.val() == "") {
+                    items.document_number.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.document_number.removeClass("error");
+                }
+
+                if (items.document_date.val() == gettext("document date") || items.document_date.val() == "") {
+                    items.document_date.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.document_date.removeClass("error");
+                }
+
+                if (items.entry_date.val() == gettext("entry date") || items.entry_date.val() == "") {
+                    items.entry_date.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.entry_date.removeClass("error");
+                }
+
+                if (items.supplier.val() == gettext("supplier") || items.supplier.val() == "") {
+                    items.supplier.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.supplier.removeClass("error");
+                }
+
+                if (all_ok) {
+                    return true;
+                }
+
+                return false;
+            }
+
             function parse_data(data, search_term) {
                 var string = "";
 
-                string = data.company_name + ", ";
+                if (data.company_name) {
+                    string = data.company_name + ", ";
+                }
 
                 if (data.first_name && data.last_name) {
                     string = string + data.first_name + " " + data.last_name + ", "
@@ -95,6 +137,7 @@
                     string = string + data.street_address + ", " + data.postcode + " " + data.city + ", ";
                 }
 
+                // must be the last one
                 if (data.vat) {
                     string = string + data.vat;
                 }
@@ -135,7 +178,6 @@
 
                                         $.each(durs_contacts, function(key, value) {
                                             data.push(parse_data(value, request.term));
-                                            console.log(value);
                                         });
                                     }
 
@@ -151,10 +193,33 @@
                         });
 
                     },
+                    /*
+                    select: function(event, ui) {
+                        var text = ui.item.value;
+                    },
+                    */
                     minLength: 2,
                     delay: 350
                 }).data("ui-autocomplete")._renderItem = autoCompleteRender;
             }
+
+            items.save_document.click(function() {
+                if (check_entry_data()) {
+                    var data = {
+                        document_number: items.document_number.val(),
+                        document_date: items.document_date.val(),
+                        entry_date: items.entry_date.val(),
+                        supplier: items.supplier.val()
+                    };
+
+                    send_data("{% url 'pos:save_document' company.url_name %}", data, "{{ csrf_token }}", function(response) {
+                        if (response && 'data' in response && 'redirect_url' in response.data) {
+                            window.location.href = response.data.redirect_url;
+                            location.reload();
+                        }
+                    });
+                }
+            });
 
             contacts_autocomplete(items.supplier);
 
@@ -204,7 +269,10 @@
                         <td><input type="text" id="document_number" name="document_number" value="{% trans "document number from supplier" %}"/></td>
                         <td><input type="text" id="document_date" name="document_date" value="{% trans "document date" %}"/></td>
                         <td><input type="text" id="entry_date" name="entry_date" value="{% trans "entry date" %}"/></td>
-                        <td><input type="text" id="supplier" name="supplier" value="{% trans "supplier" %}"/></td>
+                        <td style="position: relative;" class="controls">
+                            <input type="text" id="supplier" name="supplier" value="{% trans "supplier" %}"/>
+                            <button id="save_document" class="save hoverable no-shadow"></button>
+                        </td>
                     </tr>
                 </tbody>
             </table>

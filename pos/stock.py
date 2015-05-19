@@ -12,8 +12,7 @@ class Document(SkeletonU):
     number = models.CharField(max_length=64, null=True)
     document_date = models.DateField(_("Document date"), null=True, blank=True)
     entry_date = models.DateField(_("Entry date"), null=True, blank=True)
-    # supplier is type of "durs|matična številka" or "authority|registration number"
-    supplier = models.CharField(max_length=50, null=True, blank=True)
+    supplier = models.ForeignKey(Contact, null=False, blank=False)
 
 class Stock(SkeletonU):
     document = models.ForeignKey(Document, null=False, blank=False)

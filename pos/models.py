@@ -15,6 +15,9 @@ import datetime as dtm
 import random
 
 ### company ###
+from registry.models import ContactRegistry
+
+
 class CompanyAbstract(models.Model):
     # abstract: used in for Company and BillCompany
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
@@ -431,6 +434,34 @@ class ContactAbstract(models.Model):
     @property
     def country_name(self):
         return country_by_code.get(self.country)
+
+    @staticmethod
+    def copy_from_contact_registry(request, company, vat):
+        try:
+            contact_registry = ContactRegistry.objects.get(vat=vat)
+        except ContactRegistry.DoesNotExist:
+            return
+
+        contact = Contact(
+            company=company,
+            created_by=request.user,
+            type=contact_registry.type,
+            company_name=company.name,
+            first_name=contact_registry.first_name,
+            last_name=contact_registry.last_name,
+            sex=contact_registry.sex,
+            street_address=contact_registry.street_address,
+            postcode=contact_registry.postcode,
+            city=contact_registry.city,
+            state=contact_registry.state,
+            country=contact_registry.country,
+            email=contact_registry.email,
+            phone=contact_registry.phone,
+            vat=contact_registry.vat,
+            tax_payer=contact_registry.tax_payer,
+            additional_info=contact_registry.additional_info
+        )
+        contact.save()
 
     def __unicode__(self):
         if self.type == "Individual":

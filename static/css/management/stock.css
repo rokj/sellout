@@ -24,3 +24,22 @@
 #supplier {
     min-width: 440px;
 }
+
+.controls button#save_document {
+    background-image: url("/static/icons/save.png");
+    position: absolute;
+    right: -40px;
+    top: 0px;
+}
+
+.controls button {
+    background-color: transparent;
+    background-position: center center;
+    background-repeat: no-repeat;
+    height: 40px;
+    width: 40px;
+}
+
+input.error {
+    border-bottom: 1px solid #ff0000;
+}

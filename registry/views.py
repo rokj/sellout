@@ -4,7 +4,7 @@ from django.utils.translation import ugettext as _
 
 from common.decorators import login_required
 from common.functions import JsonError, has_permission, JsonParse, JsonOk
-from contact.models import ContactRegistry
+from registry.models import ContactRegistry
 from pos.models import Company, Contact
 from pos.views.manage.contact import contact_to_dict
 

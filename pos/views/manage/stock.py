@@ -1,4 +1,5 @@
 import base64
+from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
@@ -7,7 +8,7 @@ from django.utils.translation import ugettext as _
 from django.db.models import Q
 from common.images import image_dimensions, import_color_image, create_file_from_image
 
-from pos.models import Company, Category, Product, Price, PurchasePrice, Tax, Discount, ProductDiscount
+from pos.models import Company, Category, Product, Price, PurchasePrice, Tax, Discount, ProductDiscount, Contact
 from common.functions import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
@@ -774,30 +775,26 @@ def mass_edit(request, company):
 ### views
 ###
 @login_required
-def stock(request, company):
+def stock(request, company, page):
     c = get_object_or_404(Company, url_name=company)
 
     # check permissions: needs to be guest
     if not has_permission(request.user, c, 'stock', 'view'):
         return no_permission_view(request, c, _("You have no permission to view stock."))
 
-    stock = {}
-
     documents = Document.objects.filter(company=c).order_by('-entry_date')
 
-    """
-    paginator = Paginator(bills, g.MISC['bills_per_page'])
+    paginator = Paginator(documents, g.MISC['documents_per_page'])
+
     if page:
-        bills = paginator.page(page)
+        documents = paginator.page(page)
     else:
-        bills = paginator.page(1)
-    """
+        documents = paginator.page(1)
 
     context = {
         'company': c,
-
         'stock': stock,
-
+        'documents': documents,
         # 'searched': searched,
         # 'filter_form': form,
 
@@ -808,4 +805,56 @@ def stock(request, company):
     }
 
     return render(request, 'pos/manage/stock.html', context)
+
+
+@login_required
+def save_document(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist."))
+
+    # permissions
+    if not has_permission(request.user, c, 'document', 'edit'):
+        return JsonError(_("You have no permission to add contacts"))
+
+    data = JsonParse(request.POST.get('data'))
+    supplier = data['supplier']
+    supplier = supplier.split(',')
+
+    if len(supplier) == 0:
+        return JsonError("invalid_supplier")
+
+    vat = supplier[-1].strip()
+
+    if not vat.isdigit():
+        return JsonError("invalid_supplier")
+
+    try:
+        contact = Contact.objects.get(vat=vat)
+    except Contact.DoesNotExist:
+        Contact.copy_from_contact_registry(request, c, vat)
+
+        try:
+            contact = Contact.objects.get(vat=vat)
+        except Contact.DoesNotExist:
+            return JsonError("contact_does_not_exists")
+
+    try:
+        document = Document(
+            company=c,
+            number=data['document_number'],
+            entry_date=data['entry_date'],
+            document_date=data['document_date'],
+            supplier=contact,
+            created_by=request.user
+        )
+        document.save()
+    except Exception as e:
+        print "Error saving document"
+        print "e"
+
+        return JsonError('could_not_save_document')
+
+    return JsonOk(extra={'redirect_url': reverse('pos:stock', args={c.url_name}) + "#" + str(document.id)})
 

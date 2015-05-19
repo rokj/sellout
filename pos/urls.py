@@ -20,7 +20,7 @@ from pos.views.manage import bill
 from pos.views.manage import stock
 from pos.views.manage import users
 
-from contact.views import get_contacts
+from registry.views import get_contacts
 
 from pos.views import bill as terminal_bill
 
@@ -97,7 +97,11 @@ urlpatterns = patterns('',
 
     # bill management
     url(r_company + '/' + r_manage + _('/bills') + '/$', bill.list_bills, name='list_bills'),
-    url(r_company + '/' + r_manage + _('/stock') + '/$', stock.stock, name='stock'),
+
+    # stock
+    url(r_company + '/' + r_manage + _('/stock') + '/$', stock.stock, {'page': 1}, name='stock'),
+    url(r_company + '/' + r_manage + _('/stock') + '/(?P<page>\d+)/$', stock.stock, name='stock'),
+    url(r_company + '/' + r_manage + _('/stock/save-document') + '/$', stock.save_document, name='save_document'),
 
     # user
     url(r_company + '/' + r_manage + _('/user-settings') + '/$', configuration.user_settings, name='user_settings'),  # user settings

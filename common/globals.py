@@ -201,6 +201,7 @@ MISC = {
     'image_upload_formats': 'jpg|jpeg|gif|png|bmp|tiff',  # supported image formats (as regex "options")
     'discounts_per_page': 12,
     'bills_per_page': 25,
+    'documents_per_page': 25
 }
 
 if settings.LANGUAGE_CODE == "en":
@@ -235,20 +236,20 @@ PERMISSIONS = {
         'edit': (),
         },
     'cashier': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register','stats', 'stock'),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register','stats', 'stock', 'document', ),
         'edit': ('bill', 'terminal', 'contact'),  # cashiers must write bills
         },
     'seller': {
         'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register','stats', 'stock',),
-        'edit': ('bill', 'product', 'terminal', 'manage', 'contact', 'stock', ),
+        'edit': ('bill', 'product', 'terminal', 'manage', 'contact', 'stock', 'document', ),
         },
     'manager': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register', 'stats', 'stock'),
-        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register', 'stock',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register', 'stats', 'stock', 'document', ),
+        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register', 'stock', 'document', ),
         },
     'admin': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user', 'stats', 'stock',),
-        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user', 'stats', 'stock',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user', 'stats', 'stock', 'document', ),
+        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user', 'stats', 'stock', 'document', ),
         },
 }
 

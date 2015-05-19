@@ -12,7 +12,7 @@ django.setup()
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webpos.settings")
 
-from contact.models import ContactRegistry
+from registry.models import ContactRegistry
 import settings
 
 import common.globals as g
@@ -175,10 +175,10 @@ def import_durs_dej(filename):
             contact_registry.save()
         except ContactRegistry.DoesNotExist:
             contact_registry = ContactRegistry(
-                type=g.CONTACT_TYPES[0][0],
+                type=g.CONTACT_TYPES[0][1],
                 company_name=podjetje.decode("utf-8", "replace"),
                 postcode=postna_stevilka,
-                stret_address=naslov.decode("utf-8", "replace"),
+                street_address=naslov.decode("utf-8", "replace"),
                 city=posta,
                 country="SI",
                 vat=davcna_stevilka,
@@ -253,7 +253,7 @@ def import_durs_po(filename):
             contact_registry.save()
         except ContactRegistry.DoesNotExist:
             contact_registry = ContactRegistry(
-                type=g.CONTACT_TYPES[0][0],
+                type=g.CONTACT_TYPES[0][1],
                 company_name=podjetje.decode("utf-8", "replace"),
                 street_address=naslov.decode("utf-8", "replace"),
                 postcode=postna_stevilka,
