@@ -184,20 +184,9 @@
                                     response(data);
                                 }
                             }
-                            /*,
-                            error: function(xhr, textStatus, error){
-                                console.error("AJAX Error: " + JSON.stringify({
-                                    xhr: xhr, status: textStatus, error: error
-                                }));
-                            }*/
                         });
 
                     },
-                    /*
-                    select: function(event, ui) {
-                        var text = ui.item.value;
-                    },
-                    */
                     minLength: 2,
                     delay: 350
                 }).data("ui-autocomplete")._renderItem = autoCompleteRender;
@@ -214,9 +203,7 @@
 
                     send_data("{% url 'pos:save_document' company.url_name %}", data, "{{ csrf_token }}", function(response) {
                         if (response && 'data' in response && 'redirect_url' in response.data) {
-                            removeHash();
-                            window.location.hash = 'invalidtag';
-                            window.location.replace(response.data.redirect_url);
+                            location.replace("{% url 'web:redirect_page' %}?url=" + encodeURIComponent(response.data.redirect_url));
                         }
                     });
                 }

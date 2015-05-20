@@ -35,6 +35,9 @@ urlpatterns = patterns('',
 
     url(r'^robots.txt$', views.robots, name='robots'),
 
+    # redirect
+    url(r'^redirect/$', views.redirect_page, name='redirect_page'),
+
     # index
     url(r'^$', views.index, name='index'),
 )

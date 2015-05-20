@@ -438,3 +438,8 @@ def update_password(request):
         return JSON_ok()
 
     return JSON_error('error', _('Something went wrong during password saving. Contact support.'))
+
+def redirect_page(request):
+    url = request.GET['url']
+
+    return redirect(url)

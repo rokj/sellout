@@ -37,6 +37,7 @@ urlpatterns = patterns('',
 
     # web: everything that happens before user enters a specific company
     url(r'^google-login/$', blusers_views.google_login_or_register, name='google-login'),  # login function (url not visibles)
+
     url(r'^', include('web.urls', namespace='web')),
 )
 
