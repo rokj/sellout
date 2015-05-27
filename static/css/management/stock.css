@@ -1,4 +1,4 @@
-#documents button#add:hover {
+#documents button#add:hover, #stock button#add:hover {
     cursor: pointer;
     background-color: rosybrown;
 }
@@ -25,7 +25,11 @@
     min-width: 440px;
 }
 
-.controls button#save_document {
+.controls {
+    position: relative;
+}
+
+.controls button#save_document, .controls button#save_stock {
     background-image: url("/static/icons/save.png");
     position: absolute;
     right: -40px;
@@ -46,4 +50,87 @@ input.error {
 
 #documents_list td.selected {
     background-color: orangered;
+}
+
+.manage-stock-header {
+    display: block;
+    width: 100px;
+    float: left;
+    height: 100px;
+}
+
+.manage-stock-header li.active {
+    background-color: lightgoldenrodyellow;
+}
+
+#stock table tr#stock_input {
+    display: none;
+}
+
+#stock_section select#document {
+    display: block;
+    max-width: 300px;
+}
+
+#select_product {
+    width: 100px;
+    color: #000000;
+    font-weight: bold;
+}
+
+#select_product:hover {
+    cursor: pointer;
+    background-color: #e4b9c0;
+}
+
+.controls div#for_product_wrapper {
+    display: none;
+    position: absolute;
+    top: 0px;
+    right: -454px;
+    width: 453px;
+    height: 250px;
+    background-color: lightgoldenrodyellow;
+    z-index: 1;
+}
+
+.controls div#for_product_wrapper #selected_products {
+    width: 40%;
+    height: auto;
+    min-height: 1px;
+    float: left;
+    display: block;
+}
+
+#deduction {
+    width: 30px;
+    height: 10px;
+    font-size: 10px;
+}
+
+#add_to_selected_products {
+    background-color: crimson;
+}
+
+ol#selected_products {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+    font-size: 10px;
+}
+
+.controls div#for_product_wrapper #searcher {
+    width: 50%;
+    float: left;
+    background-color: greenyellow;
+    height: 100%;
+}
+
+input#for_product {
+    padding: 4px 0px 4px 0px;
+}
+
+ol#selected_products .deduction  {
+    display: inline-block;
+    float: right;
 }

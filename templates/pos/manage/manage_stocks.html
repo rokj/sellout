@@ -1,0 +1,442 @@
+{% extends "pos/manage/manage.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block section_head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/stock.css' %}"/>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            {% include 'pos/manage/pagination.js' %}
+
+            var keyboard = new Keyboard();
+
+            var items = {
+                add_stock: $("#stock_section button#add"),
+                stock_input: $("#stock_section table tr#stock_input"),
+                stock_name: $("#stock_name"),
+                quantity: $("#quantity"),
+                stock: $("#stock"),
+                type: $("#type"),
+                unit: $("#unit"),
+                purchase_price: $("#purchase_price"),
+                for_product: $("#for_product"),
+                save_stock: $("#save_stock"),
+                stock_list: $("#stock_list table"),
+                document: $("#document"),
+                select_product: $("button#select_product"),
+                for_product_wrapper: $("div#for_product_wrapper"),
+                add_to_selected_products: $("button#add_to_selected_products"),
+                selected_products: $("ol#selected_products"),
+                deduction: $("#deduction")
+            };
+
+            var selected_product = '';
+
+            items.add_stock.click(function() {
+                if (items.stock_input.is(":hidden")) {
+                    items.stock_input.show();
+
+                    keyboard.add("cancel-when-adding-stock", 'escape', function () {
+                        items.add_stock.click();
+                    });
+                } else {
+                    items.stock_input.hide();
+
+                    keyboard.remove("cancel-when-adding-stock");
+                }
+            });
+
+            items.stock_name.on('focus', function() {
+                if ($(this).val() == gettext("name")) {
+                    $(this).val("");
+                }
+            });
+
+            items.stock_name.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("name"));
+                }
+            });
+
+            items.quantity.on('focus', function() {
+                if ($(this).val() == gettext("quantity")) {
+                    $(this).val("");
+                }
+            });
+
+            items.quantity.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("quantity"));
+                }
+            });
+
+            items.stock.on('focus', function() {
+                if ($(this).val() == gettext("stock")) {
+                    $(this).val("");
+                }
+            });
+
+            items.stock.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("stock"));
+                }
+            });
+
+            items.for_product.on('focus', function() {
+                if ($(this).val() == gettext("select product")) {
+                    $(this).val("");
+                }
+            });
+
+            items.for_product.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("select product"));
+                }
+            });
+
+            items.purchase_price.on('focus', function() {
+                if ($(this).val() == gettext("purchase price")) {
+                    $(this).val("");
+                }
+            });
+
+            items.purchase_price.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("purchase price"));
+                }
+            });
+
+            function check_entry_data() {
+                var all_ok = true;
+
+                if (items.stock_name.val() == gettext("name") || items.stock_name.val() == "") {
+                    items.stock_name.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.stock_name.removeClass("error");
+                }
+
+                if (items.quantity.val() == gettext("quantity") || items.quantity.val() == "") {
+                    items.quantity.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.quantity.removeClass("error");
+                }
+
+                if (items.stock.val() == gettext("stock") || items.stock.val() == "") {
+                    items.stock.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.stock.removeClass("error");
+                }
+
+                if (items.for_product.val() == gettext("select product") || items.for_product.val() == "") {
+                    items.for_product.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.for_product.removeClass("error");
+                }
+
+                if (items.purchase_price.val() == gettext("purchase price") || items.purchase_price.val() == "") {
+                    items.purchase_price.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.purchase_price.removeClass("error");
+                }
+
+                if (all_ok) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            function autoCompleteRender(ul, item) {
+                var searchTerm = this.term;
+                var itemLabel = item.label;
+
+                // hehe
+                var product_id = itemLabel.split(",").pop();
+                itemLabel = itemLabel.replace("," + product_id, "");
+
+                itemLabel = itemLabel.replace(new RegExp("(" + searchTerm + ")", "gi"), '<strong class="search-term">$1</strong>');
+
+                return $("<li></li>").data("item.autocomplete", item).append('<a>' + itemLabel + '</a>').appendTo(ul);
+            }
+
+            function products_autocomplete(element) {
+                if(element.data('ui-autocomplete')) {
+                    element.autocomplete("destroy");
+                }
+
+                element.autocomplete({
+                    source: function(request, response) {
+                        var data = {name_filter: request.term};
+                        var sd = {data: JSON.stringify(data), csrfmiddlewaretoken: "{{ csrf_token }}"};
+
+                        $.ajax({
+                            type: "POST",
+                            dataType: "json",
+                            url: "{% url 'pos:search_products' company.url_name %}",
+                            data: sd,
+                            timeout: 30000,
+                            success: function(response_data){
+                                if (response_data) {
+                                    var data = [];
+
+                                    $.each(response_data, function(key, value) {
+                                        var parsed_data = parse_product_data(value, "{{ separator }}");
+                                        data.push(parsed_data.name + " " + parsed_data.price + "{{ currency_symbol }}" + "," + parsed_data.id);
+                                    });
+
+                                    response(data);
+                                }
+                            }
+                        });
+
+                    },
+                    minLength: 0,
+                    delay: 250,
+                    select: function(event, ui) {
+                        var text = ui.item.value;
+                        var product_id = text.split(",").pop();
+
+                        selected_product = product_id;
+
+                        text = text.replace("," + product_id, "");
+                        items.for_product.val(text);
+
+                        if (items.type.val() == "ingredient") {
+                            if (items.stock_name.val() == gettext("name")) {
+                                items.stock_name.val("");
+                            }
+                        }
+
+                        return false;
+                    },
+                    change: function(event, ui) {
+                    }
+                }).data("ui-autocomplete")._renderItem = autoCompleteRender;
+            }
+
+            items.save_stock.click(function() {
+                if (check_entry_data()) {
+                    var data = {
+                        document: items.document.val(),
+                        stock_name: items.stock_name.val(),
+                        quantity: items.quantity.val(),
+                        stock: items.stock.val(),
+                        type: items.type.val(),
+                        unit: items.unit.val(),
+                        for_product: selected_product,
+                        purchase_price: items.purchase_price.val()
+                    };
+
+                    send_data("{% url 'pos:save_stock' company.url_name %}", data, "{{ csrf_token }}", function(response) {
+                        if (response && 'data' in response && 'redirect_url' in response.data) {
+                            location.replace("{% url 'web:redirect_page' %}?url=" + encodeURIComponent(response.data.redirect_url));
+                        }
+                    });
+                }
+            });
+
+            items.type.on('change', function() {
+                if ($(this).val() == "item") {
+                    items.stock_name.prop("disabled", true);
+                    items.stock_name.val(items.for_product.val());
+
+                    items.stock.prop("disabled", true);
+                    if (items.quantity.val() == gettext("quantity")) {
+                        items.stock.val(gettext("will be the same as quantity"));
+                    }
+                } else {
+                    items.stock_name.prop("disabled", false);
+                    items.stock_name.val("");
+
+                    items.stock.prop("disabled", false);
+                    items.stock.val("");
+                }
+            });
+
+            items.quantity.on('input', function() {
+                if (items.type.val() == "item") {
+                    items.stock.val(items.quantity.val());
+                }
+            });
+
+            items.select_product.on('click', function() {
+                if (items.for_product_wrapper.is(':visible')) {
+                    items.for_product_wrapper.hide();
+                } else {
+                    items.for_product_wrapper.show();
+                }
+            });
+
+            items.add_to_selected_products.on('click', function() {
+                var to_product = selected_product;
+                var deduction = items.deduction.val();
+                var html = '';
+
+                if (items.selected_products.find('li').length == 0) {
+                    html = html + '<li class="header">' + gettext('for product') + '<span class="deduction">' + gettext('deduction') + '</li>';
+                }
+
+                html = html + '<li class="data" data-product="' + to_product + '" data-deduction="' + deduction + '">' + items.for_product.val() + '<span class="deduction">' + deduction + '</span></li>';
+
+                items.selected_products.append(html);
+            });
+
+            products_autocomplete(items.for_product);
+
+            var hash = get_url_hash();
+            var element = $("#document_" + hash);
+
+            if (element.length > 0) {
+                element.children().addClass("selected");
+                $('html,body').animate({scrollTop: element.offset().top}, 'fast');
+            }
+
+            $("a.paginator").unbind().click(function(e) {
+                e.preventDefault();
+
+                if ($(this).hasClass("disabled")) {
+                    return false;
+                }
+            });
+
+            items.type.change();
+        });
+    </script>
+{% endblock %}
+
+{% block status_bar_title %}
+    {% trans 'Stock' %}
+{% endblock %}
+
+{% block manage_content %}
+    <div class="left-column">
+        <div id="filter_form" class="fake-form">
+            <h3>{% trans "Search" %}</h3>
+
+            <input id="general_filter" class="search-filter" type="text" placeholder="{% trans "Search query" context 'search documents' %}">
+
+            <div id="filter_form_controls">
+                <div class="split-cell last">
+                    <input type="button" id="update_results" class="ok hoverable" value="{% trans "Search" %}">
+                </div>
+
+                <div class="cleared"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="stock_section">
+        {% include "pos/manage/stock_header.html" %}
+
+        <button type="button" id="add">{% trans "Add stock" %}</button>
+
+        <select id="document">
+            <option value=""></option>
+
+            {% for document in documents %}
+                <option value="{{ document.id }}">
+                    {{ document.number }}, {{ document.supplier.company_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <div id="stock_list">
+            <table>
+                <thead>
+                    <tr>
+                        <th>{% trans "Name" %}</th>
+                        <th>{% trans "Quantity" %}</th>
+                        <th>{% trans "Stock" %}</th>
+                        <th>{% trans "Left if stock" %}</th>
+                        <th>{% trans "Type" %}</th>
+                        <th>{% trans "Unit" %}</th>
+                        <th>{% trans "For product" %}</th>
+                        <th>{% trans "Purchase price" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="stock_input">
+                        <td><input type="text" id="stock_name" name="stock_name" value="{% trans "name" %}"/></td>
+                        <td><input type="text" id="quantity" name="quantity" value="{% trans "quantity" %}"/></td>
+                        <td><input type="text" id="stock" name="stock" value="{% trans "stock" %}"/></td>
+                        <td>&nbsp;</td>
+                        <td>
+                            <select id="type" name="type">
+                                {% for type in stock_types  %}
+                                    <option value="{{ type.0 }}">{% if type.0 == 'item' %}{% trans "as item" %}{% elif type.0 == 'ingredient' %}{% trans "as ingredient" %}{% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <select id="unit" name="unit">
+                                {% for unit in units %}
+                                    <option value="{{ unit.0 }}">{{ unit.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td class="controls">
+                            <button type="button" id="select_product" name="select_product" >{% trans "select products" %}</button>
+
+                            <div id="for_product_wrapper">
+                                <ol id="selected_products">
+                                </ol>
+                                <div id="searcher">
+                                    <div id="search_input">
+                                        <button id="add_to_selected_products"><-</button><input type="text" id="for_product" name="for_product" value="{% trans "select product" %}" /><input type="text" id="deduction" />
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="controls">
+                            <input type="text" id="purchase_price" name="purchase_price" value="{% trans "purchase price" %}" />
+                            <button id="save_stock" class="save hoverable no-shadow"></button>
+                        </td>
+                    </tr>
+
+                    {% for stock in stocks %}
+                        <tr id="stock_{{ stock.id }}">
+                            <td>{{ stock.name }}</td>
+                            <td>{{ stock.quantity }}</td>
+                            <td>{{ stock.stock}}</td>
+                            <td>{{ stock.left_stock }}</td>
+                            <td>{{ stock.stock_type }}</td>
+                            <td>{{ stock.unit_type }}</td>
+                            <td>{{ stock.for_product.name }}</td>
+                            <td>{% if stock.purchase_price %}{{ stock.purchase_price }}{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% trans 'Stock: ' %}{{ stock.paginator.count }}
+
+            <div class="pagination">
+                <a href="{{ prev_url }}"
+                   class="paginator {% if not stock.has_previous %}disabled{% endif %}"
+                   data-action="previous">
+                    <img src="{% static 'icons/back_black.png' %}"
+                         class="hoverable"
+                         alt="{% trans 'Back' context 'Paginator page button' %}"
+                         title="{% trans 'Back' context 'Paginator page button' %}"/>
+                </a>
+
+                {% trans 'Page' %} {{ stock.number }} {% trans 'of' %} {{ stock.paginator.num_pages }}
+
+                <a href="{{ next_url }}"
+                   class="paginator {% if not stock.has_next %}disabled{% endif %}"
+                   data-action="next">
+                    <img src="{% static 'icons/forward_black.png' %}"
+                         class="hoverable"
+                         alt="{% trans 'Forward' context 'Paginator page button' %}"
+                         title="{% trans 'Forward' context 'Paginator page button' %}"/>
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

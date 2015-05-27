@@ -234,7 +234,8 @@ class Product(SkeletonU, ProductAbstract):
     def get_purchase_price(self):
         """ get product's current purchase price """
         try:
-            return PurchasePrice.objects.filter(product=self).order_by('-datetime_updated')[0].unit_price
+            # return PurchasePrice.objects.filter(product=self).order_by('-datetime_updated')[0].unit_price
+            return None
         except:
             return None
 
@@ -405,9 +406,9 @@ class Price(SkeletonU, PriceAbstract):
 
 
 ### purchase prices ###
-class PurchasePrice(SkeletonU, PriceAbstract):
-    unit_price = models.DecimalField(_("Purchase price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],
-                                     decimal_places=g.DECIMAL['currency_decimal_places'], blank=False, null=False)
+# class PurchasePrice(SkeletonU, PriceAbstract):
+#     unit_price = models.DecimalField(_("Purchase price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],
+#                                      decimal_places=g.DECIMAL['currency_decimal_places'], blank=False, null=False)
 
 
 ### contacts ###
@@ -446,7 +447,7 @@ class ContactAbstract(models.Model):
             company=company,
             created_by=request.user,
             type=contact_registry.type,
-            company_name=company.name,
+            company_name=contact_registry.company_name,
             first_name=contact_registry.first_name,
             last_name=contact_registry.last_name,
             sex=contact_registry.sex,
@@ -465,7 +466,7 @@ class ContactAbstract(models.Model):
 
     def __unicode__(self):
         if self.type == "Individual":
-            return "Individual: " + self.first_name + " " + self.last_name
+            return "Individual: " + str(self.first_name) + " " + str(self.last_name)
         else:
             return "Company: " + str(self.company_name)
 

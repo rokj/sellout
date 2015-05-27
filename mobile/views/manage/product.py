@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.utils.translation import ugettext as _
 from django.db.models import Q
 
-from pos.models import Company, Category, Discount, Product, ProductDiscount, Price, PurchasePrice, Tax
+from pos.models import Company, Category, Discount, Product, ProductDiscount, Price, Tax
 from pos.views.manage.product import JSON_units, get_product, search_products, create_product, edit_product, \
     delete_product, product_to_dict, toggle_favorite, get_product_, search_products_, create_product_, edit_product_, \
     delete_product_, toggle_favorite_

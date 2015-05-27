@@ -508,7 +508,7 @@ msgstr ""
 
 #: common/globals.py:36
 msgid "Piece"
-msgstr "Kos"
+msgstr "Kom"
 
 #: common/globals.py:59
 msgid "Hour"
@@ -1065,7 +1065,7 @@ msgstr "Davki"
 #: pos/models.py:192 templates/pos/manage/products.html:1452
 #: templates/pos/manage/products.html:1552 templates/pos/terminal.html:272
 msgid "Product code"
-msgstr "Koda artikla/storitve"
+msgstr "Šifra artikla/storitve"
 
 #: pos/models.py:193
 msgid "Store's internal product number"
@@ -1964,7 +1964,7 @@ msgstr ""
 
 #: pos/views/manage/product.py:437 pos/views/manage/stock.py:437
 msgid "No code entered"
-msgstr "Vnesi kodo"
+msgstr "Vnesi šifro"
 
 #: pos/views/manage/product.py:440 pos/views/manage/stock.py:440
 msgid "Code too long"
@@ -4785,4 +4785,4 @@ msgid "It will be added on save."
 msgstr "Dodan bo bil, ko boš kliknila na gumb shrani."
 
 msgid "Item code"
-msgstr "Koda artikla"
+msgstr "Šifra artikla"

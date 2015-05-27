@@ -98,10 +98,13 @@ urlpatterns = patterns('',
     # bill management
     url(r_company + '/' + r_manage + _('/bills') + '/$', bill.list_bills, name='list_bills'),
 
-    # stock
-    url(r_company + '/' + r_manage + _('/stock') + '/$', stock.stock, {'page': 1}, name='stock'),
-    url(r_company + '/' + r_manage + _('/stock') + '/(?P<page>\d+)/$', stock.stock, name='stock_page'),
-    url(r_company + '/' + r_manage + _('/stock/save-document') + '/$', stock.save_document, name='save_document'),
+    # stock - documents
+    url(r_company + '/' + r_manage + _('/stock/documents/') + '(?P<page>\d+)/$', stock.manage_documents, name='manage_documents'),
+    url(r_company + '/' + r_manage + _('/stock/documents/save-document') + '/$', stock.save_document, name='save_document'),
+
+    # stock - stock
+    url(r_company + '/' + r_manage + _('/stock') + '/(?P<page>\d+)/$', stock.manage_stock, name='manage_stock'),
+    url(r_company + '/' + r_manage + _('/stock/save-stock') + '/$', stock.save_stock, name='save_stock'),
 
     # user
     url(r_company + '/' + r_manage + _('/user-settings') + '/$', configuration.user_settings, name='user_settings'),  # user settings

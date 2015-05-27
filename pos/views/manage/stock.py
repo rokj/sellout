@@ -3,17 +3,19 @@ from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
+from pyatspi import document
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
 from common.images import image_dimensions, import_color_image, create_file_from_image
+from config.currencies import currencies
 
-from pos.models import Company, Category, Product, Price, PurchasePrice, Tax, Discount, ProductDiscount, Contact
+from pos.models import Company, Category, Product, Price, Tax, Discount, ProductDiscount, Contact
 from common.functions import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
                            max_field_length, error, JsonStringify
-from pos.stock import Document
+from pos.stock import Document, Stock, PurchasePrice
 from pos.views.manage.discount import discount_to_dict, get_all_discounts
 from pos.views.manage.category import get_subcategories, get_all_categories
 from pos.views.manage.tax import get_default_tax, get_all_taxes
@@ -544,11 +546,12 @@ def create_product_(request, c, android=False):
         product.delete()
         return JsonError(_("Error while setting purchase price"))
 
-    if data.get('purchase_price'):
-        price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
-        if not price:
-            product.delete()
-            return JsonError(_("Error while setting sell price"))
+
+    #if data.get('purchase_price'):
+    #    price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
+    #    if not price:
+    #        product.delete()
+    #        return JsonError(_("Error while setting sell price"))
     
     # add image, if it's there
     if data['change_image']:
@@ -621,8 +624,8 @@ def edit_product_(request, c, android=False):
 
     # price has to be updated separately
     product.price = product.update_price(Price, request.user, data['price'])
-    if data.get('purchase_price'):
-        product.price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
+    # if data.get('purchase_price'):
+    #     product.price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
 
     product.updated_by = request.user
     product.save()
@@ -775,7 +778,7 @@ def mass_edit(request, company):
 ### views
 ###
 @login_required
-def stock(request, company, page):
+def manage_documents(request, company, page):
     c = get_object_or_404(Company, url_name=company)
 
     # check permissions: needs to be guest
@@ -792,20 +795,20 @@ def stock(request, company, page):
         documents = paginator.page(1)
 
     context = {
+        'managing': 'documents',
         'company': c,
-        'stock': stock,
         'documents': documents,
         # 'searched': searched,
         # 'filter_form': form,
         'title': _("Stock"),
-        'next_url': reverse('pos:stock_page', args=[c.url_name, int(page)+1]),
-        'prev_url': reverse('pos:stock_page', args=[c.url_name, int(page)-1]),
+        'next_url': reverse('pos:manage_documents', args=[c.url_name, int(page)+1]),
+        'prev_url': reverse('pos:manage_documents', args=[c.url_name, int(page)-1]),
         'site_title': g.MISC['site_title'],
         'date_format_django': get_date_format(request.user, c, 'django'),
         'date_format_js': get_date_format(request.user, c, 'js'),
     }
 
-    return render(request, 'pos/manage/stock.html', context)
+    return render(request, 'pos/manage/manage_documents.html', context)
 
 
 @login_required
@@ -841,6 +844,8 @@ def save_document(request, company):
         except Contact.DoesNotExist:
             return JsonError("contact_does_not_exists")
 
+    # TODO: validate with forms
+
     try:
         document = Document(
             company=c,
@@ -853,7 +858,7 @@ def save_document(request, company):
         document.save()
     except Exception as e:
         print "Error saving document"
-        print "e"
+        print e
 
         return JsonError('could_not_save_document')
 
@@ -863,27 +868,142 @@ def save_document(request, company):
     i = 0
 
     for d in documents:
-        print i
-        print g.MISC['documents_per_page']
-        print i%g.MISC['documents_per_page']
-
         if i > 0 and i%g.MISC['documents_per_page'] == 0:
             page += 1
 
-        print page
-        print "-----------------"
-
-
         if d == document:
-            print "breaking"
             break
 
         i += 1
 
-
-    redirect_url = reverse('pos:stock_page', kwargs={'company': c.url_name, 'page': page}) + "#" + str(document.id)
-
-    print redirect_url
+    redirect_url = reverse('pos:manage_documents', kwargs={'company': c.url_name, 'page': page}) + "#" + str(document.id)
 
     return JsonOk(extra={'redirect_url': redirect_url})
 
+
+@login_required
+def manage_stock(request, company, page):
+    c = get_object_or_404(Company, url_name=company)
+
+    # check permissions: needs to be guest
+    if not has_permission(request.user, c, 'stock', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view stock."))
+
+    documents = Document.objects.filter(company=c).order_by('-number')
+
+    stocks = Stock.objects.filter(company=c).order_by('-datetime_created')
+
+    paginator = Paginator(stocks, g.MISC['stocks_per_page'])
+
+    if page:
+        stocks = paginator.page(page)
+    else:
+        stocks  = paginator.page(1)
+
+    currency = get_company_value(request.user, c, 'pos_currency')
+
+    context = {
+        'separator': get_company_value(request.user, c, 'pos_decimal_separator'),
+        'currency': currency,
+        'currency_symbol': currencies[currency][1],
+        'documents': documents,
+        'managing': 'stock',
+        'units': g.UNITS,
+        'stock_types': g.STOCK_TYPE,
+        'company': c,
+        'stocks': stocks,
+        # 'searched': searched,
+        # 'filter_form': form,
+        'title': _("Stock"),
+        'next_url': reverse('pos:manage_stock', args=[c.url_name, int(page)+1]),
+        'prev_url': reverse('pos:manage_stock', args=[c.url_name, int(page)-1]),
+        'site_title': g.MISC['site_title'],
+        'date_format_django': get_date_format(request.user, c, 'django'),
+        'date_format_js': get_date_format(request.user, c, 'js'),
+    }
+
+    return render(request, 'pos/manage/manage_stocks.html', context)
+
+
+@login_required
+def save_stock(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist."))
+
+    # permissions
+    if not has_permission(request.user, c, 'document', 'edit'):
+        return JsonError(_("You have no permission to edit documents"))
+
+    if not has_permission(request.user, c, 'stock', 'edit'):
+        return JsonError(_("You have no permission to edit stock"))
+
+    data = JsonParse(request.POST.get('data'))
+
+    document = None
+
+    if 'document' in data and data['document'] == '':
+        document = None
+
+    for_product = Product.objects.get(id=data['for_product'], company=c)
+
+    # TODO: validate with forms
+
+    try:
+        stock = Stock(
+            company=c,
+            document=document,
+            for_product=for_product,
+            name=data['stock_name'],
+            quantity=data['quantity'],
+            stock=data['stock'],
+            left_stock=data['stock'],
+            stock_type=data['type'],
+            unit_type=data['unit'],
+            created_by=request.user
+        )
+        stock.save()
+
+        purchase_price = PurchasePrice(
+            unit_price=data['purchase_price'],
+            stock_item = stock,
+            created_by=request.user
+        )
+        purchase_price.save()
+    except Exception as e:
+        print "Error saving stock or saving purchase price"
+        print e
+
+        return JsonError('could_not_save_stock')
+
+    try:
+        purchase_price = PurchasePrice(
+            unit_price=data['purchase_price'],
+            stock_item = stock,
+            created_by=request.user
+        )
+        purchase_price.save()
+    except Exception as e:
+        print "Error saving purchase price"
+        print e
+
+        return JsonError('could_not_save_purchase_price')
+
+    stocks = Stock.objects.filter(company=c).order_by('-datetime_created')
+    page = 1
+    i = 0
+
+
+    for s in stocks:
+        if i > 0 and i%g.MISC['stocks_per_page'] == 0:
+            page += 1
+
+        if s == stock:
+            break
+
+        i += 1
+
+    redirect_url = reverse('pos:manage_stock', kwargs={'company': c.url_name, 'page': page}) + "#" + str(stock.id)
+
+    return JsonOk(extra={'redirect_url': redirect_url})

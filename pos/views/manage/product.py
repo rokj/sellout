@@ -7,7 +7,7 @@ from django.utils.translation import ugettext as _
 from django.db.models import Q
 from common.images import image_dimensions, import_color_image, create_file_from_image
 
-from pos.models import Company, Category, Product, Price, PurchasePrice, Tax, Discount, ProductDiscount
+from pos.models import Company, Category, Product, Price, Tax, Discount, ProductDiscount
 from common.functions import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
@@ -499,15 +499,15 @@ def validate_product(user, company, data):
     data['tax'] = tax
     
     # stock
-    if len(data['stock']) > g.DECIMAL['quantity_digits']:
-        return r(False, _("Stock number too big"))
+    # if len(data['stock']) > g.DECIMAL['quantity_digits']:
+    #    return r(False, _("Stock number too big"))
     
-    ret = parse_decimal(user, company, data['stock'],
-        g.DECIMAL['quantity_digits']-g.DECIMAL['quantity_decimal_places']-1)
-    if not ret['success']:
-        return r(False, _("Check stock notation"))
-    else:
-        data['stock'] = ret['number']
+    # ret = parse_decimal(user, company, data['stock'],
+    #    g.DECIMAL['quantity_digits']-g.DECIMAL['quantity_decimal_places']-1)
+    #if not ret['success']:
+    #    return r(False, _("Check stock notation"))
+    #else:
+    #    data['stock'] = ret['number']
         # it cannot be negative
         # EDIT: stock can be negative
         #if data['stock'] < decimal.Decimal('0'):
@@ -548,7 +548,7 @@ def create_product_(request, c, android=False):
         shortcut=data.get('shortcut'),
         description=data.get('description'),
         private_notes=data.get('private_notes'),
-        stock=data.get('stock'),
+    #     stock=data.get('stock'),
         tax=data.get('tax'),
         unit_type=data.get('unit_type')
     )
@@ -563,11 +563,12 @@ def create_product_(request, c, android=False):
         product.delete()
         return JsonError(_("Error while setting purchase price"))
 
-    if data.get('purchase_price'):
-        price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
-        if not price:
-            product.delete()
-            return JsonError(_("Error while setting sell price"))
+
+    # if data.get('purchase_price'):
+    #     price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
+    #     if not price:
+    #         product.delete()
+    #         return JsonError(_("Error while setting sell price"))
     
     # add image, if it's there
     if data['change_image']:
@@ -641,8 +642,8 @@ def edit_product_(request, c, android=False):
 
     # price has to be updated separately
     product.price = product.update_price(Price, request.user, data['price'])
-    if data.get('purchase_price'):
-        product.price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
+    # if data.get('purchase_price'):
+    #     product.price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
 
     product.updated_by = request.user
     product.save()

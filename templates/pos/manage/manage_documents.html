@@ -223,10 +223,12 @@
                 $('html,body').animate({scrollTop: element.offset().top}, 'fast');
             }
 
-            $("a.fake.paginator").unbind().click(function(e) {
+            $("a.paginator").unbind().click(function(e) {
                 e.preventDefault();
 
-                if ($(this).hasClass("disabled")) return;
+                if ($(this).hasClass("disabled")) {
+                    return false;
+                }
             });
         });
     </script>
@@ -254,6 +256,8 @@
     </div>
 
     <div id="documents">
+        {% include "pos/manage/stock_header.html" %}
+
         <button type="button" id="add">{% trans "Add document" %}</button>
 
         <div id="documents_list">
@@ -272,7 +276,8 @@
                         <td><input type="text" id="document_number" name="document_number" value="{% trans "document number from supplier" %}"/></td>
                         <td><input type="text" id="document_date" name="document_date" value="{% trans "document date" %}"/></td>
                         <td><input type="text" id="entry_date" name="entry_date" value="{% trans "entry date" %}"/></td>
-                        <td style="position: relative;" class="controls">
+                        <td>&nbsp;</td>
+                        <td class="controls">
                             <input type="text" id="supplier" name="supplier" value="{% trans "supplier" %}"/>
                             <button id="save_document" class="save hoverable no-shadow"></button>
                         </td>

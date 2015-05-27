@@ -286,6 +286,30 @@ function get_number(string, separator){
     }
 }
 
+function parse_product_data(product, separator){
+    // convert all text numbers in product to Big() numbers
+    // price, purchase_price, stock, tax, discounts[amount]
+    if(typeof product.price == "string")
+        product.price = get_number(product.price, separator);
+
+    if(typeof product.purchase_price == "string")
+        product.purchase_price = get_number(product.purchase_price, separator);
+
+    if(typeof product.stock== "string")
+        product.stock = get_number(product.stock, separator);
+
+    if(typeof product.tax == "string")
+        product.tax = get_number(product.tax, separator);
+
+    for(var i = 0; i < product.discounts.length; i++){
+        if(typeof product.discounts[i].amount == "string")
+            product.discounts[i].amount =
+                    get_number(product.discounts[i].amount, separator);
+    }
+
+    return product;
+}
+
 function display_number(number, separator, decimal_places){
     // receives a BigNumber as a parameter and returns a string with user specified decimal separator
     if(number) return number.toFixed(decimal_places).replace('.', separator);

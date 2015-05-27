@@ -219,30 +219,6 @@
             //$("div.product-details").height(max_height);  // not sure why i thought this was important
         }
 
-        function parse_product_data(product){
-            // convert all text numbers in product to Big() numbers
-            // price, purchase_price, stock, tax, discounts[amount]
-            if(typeof product.price == "string")
-                product.price = get_number(product.price, "{{ separator }}");
-
-            if(typeof product.purchase_price == "string")
-                product.purchase_price = get_number(product.purchase_price, "{{ separator }}");
-
-            if(typeof product.stock== "string")
-                product.stock = get_number(product.stock, "{{ separator }}");
-
-            if(typeof product.tax == "string")
-                product.tax = get_number(product.tax, "{{ separator }}");
-
-            for(var i = 0; i < product.discounts.length; i++){
-                if(typeof product.discounts[i].amount == "string")
-                    product.discounts[i].amount =
-                            get_number(product.discounts[i].amount, "{{ separator }}");
-            }
-
-            return product;
-        }
-
         //
         // objects
         //
@@ -490,7 +466,7 @@
 
             p.data = data;
 
-            parse_product_data(data);
+            parse_product_data(data, "{{ separator }}");
 
             p.parent = $("#products_list");
             p.items = {};
@@ -598,7 +574,9 @@
             show_image(p.items.image, p.data.image, p.data.name);
 
             p.items.price = $(".product-price", p.items.container);
-            p.items.price.text(p.data.price);
+            p.items.price.text(display_number(
+                    p.data.price.times(Big(1).plus(p.data.tax.div(Big(100)))),
+                        "{{ separator }}", {{ decimal_places }}));
 
             p.items.category = $(".product-category", p.items.container);
             p.items.category.text(p.data.category);
@@ -663,7 +641,7 @@
 
             p.data = data;
 
-            parse_product_data(data);
+            parse_product_data(data, "{{ separator }}");
 
             p.container = $("#edit_dialog");
             p.items = {
@@ -697,6 +675,12 @@
 
             var i, o;
 
+            var keyboard = new Keyboard();
+
+            keyboard.add("cancel-when-editing-product", 'escape', function () {
+                p.cancel_button_action();
+            });
+
             //
             // methods
             //
@@ -723,9 +707,10 @@
                 p.close_dialog();
             };
 
-            p.close_dialog = function(){
+            p.close_dialog = function() {
                 p.container.hide();
                 p.items.shadow.fadeOut("fast");
+                keyboard.remove("cancel-when-editing-product", 'escape');
             };
 
             p.update_unit_types = function(){
@@ -1518,7 +1503,6 @@
                     .unbind()
                     .prop("disabled", true);
         }
-
     });
     </script>
 {% endblock %}
@@ -1773,32 +1757,17 @@
                     <input type="text" id="edit_product_category" name="edit_product_category"/>
                 </div>
 
+                <!-- tukaj vmes pride stock -->
                 <div class="form-field">
-                    <div class="split-cell first">
+                    <div class="">
                         <label for="edit_product_stock">{% trans 'Stock' %}:</label>
-                        <input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}"/>
                     </div>
 
-                    <div class="split-cell last">
-                        <label for="edit_product_unit_type">{% trans 'Unit' %}</label>
-                        <select id="edit_product_unit_type"></select>
+                    <div id="edit_stock_dialog">
+                        <input type="text" id="edit_product_unit_type" name="edit_product_unit_type" value="Piece" />
                     </div>
-
-                    <div class="cleared"></div>
                 </div>
-
-                <div class="form-field">
-                    <div class="split-cell first">
-                        <label for="edit_product_purchase_price">{% trans 'Purchase price' %}: </label>
-                        <input type="text" id="edit_product_purchase_price"
-                               maxlength="{{ field_lengths.purchase_price }}"/>
-                    </div>
-                    <div class="split-cell last read-only-field">
-                        {{ currency }} {% trans 'per' %} <span class="unit-readonly">?</span>
-                    </div>
-
-                    <div class="cleared"></div>
-                </div>
+                <!-- tukaj vmes pride stock -->
 
                 <div class="form-field">
                     <div class="split-cell first">

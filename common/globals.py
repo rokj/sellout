@@ -201,7 +201,8 @@ MISC = {
     'image_upload_formats': 'jpg|jpeg|gif|png|bmp|tiff',  # supported image formats (as regex "options")
     'discounts_per_page': 12,
     'bills_per_page': 25,
-    'documents_per_page': 5
+    'documents_per_page': 5,
+    'stocks_per_page': 5
 }
 
 if settings.LANGUAGE_CODE == "en":
@@ -240,7 +241,7 @@ PERMISSIONS = {
         'edit': ('bill', 'terminal', 'contact'),  # cashiers must write bills
         },
     'seller': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register','stats', 'stock',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register','stats', 'stock', 'document',),
         'edit': ('bill', 'product', 'terminal', 'manage', 'contact', 'stock', 'document', ),
         },
     'manager': {
@@ -378,4 +379,9 @@ TAX_PAYER_CHOICES = (
     ("yes", _("Yes")),
     ("no", _("No")),
     ("eu", _("EU")),
+)
+
+STOCK_TYPE = (
+    ("item", _("Item")),
+    ("ingredient", _("Ingrediant")),
 )
