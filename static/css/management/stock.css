@@ -95,7 +95,8 @@ input.error {
 }
 
 .controls div#for_product_wrapper #selected_products {
-    width: 40%;
+    width: 45%;
+    margin-right: 5%;
     height: auto;
     min-height: 1px;
     float: left;
@@ -110,6 +111,20 @@ input.error {
 
 #add_to_selected_products {
     background-color: crimson;
+}
+
+ol#selected_products li.data {
+    position: relative;
+}
+
+ol#selected_products .remove {
+    background: url('/static/icons/delete_active.png') no-repeat;
+    position: absolute;
+    top: 0px;
+    right: -19px;
+    width: 15px;
+    height: 15px;
+    background-size: 100% 100%;
 }
 
 ol#selected_products {
@@ -134,3 +149,21 @@ ol#selected_products .deduction  {
     display: inline-block;
     float: right;
 }
+
+#stock_list table div.info {
+    background-color: lightpink;
+    position: absolute;
+    display: none;
+}
+
+#stock_list td.for-products {
+    position: relative;
+}
+
+#stock_list div.info ol {
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+    font-size: 10px;
+}
+

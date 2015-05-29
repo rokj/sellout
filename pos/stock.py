@@ -17,7 +17,6 @@ class Document(SkeletonU):
 class Stock(SkeletonU):
     document = models.ForeignKey(Document, null=True, blank=True)
     company = models.ForeignKey(Company, null=False, blank=False)
-    for_product = models.ForeignKey(Product, help_text=_("For product"), null=False, blank=False)
     name = models.CharField(_("Name"), help_text=_("Name of a stock"), max_length=100, null=True, blank=True)
     quantity = models.DecimalField(_("Number of items put in stock"),
         max_digits=g.DECIMAL['quantity_digits'],
@@ -36,7 +35,6 @@ class Stock(SkeletonU):
     unit_type = models.CharField(_("Product unit type"), max_length=15,
         choices=g.UNITS, blank=False, null=False, default=g.UNITS[0][0])
 
-
     @property
     def purchase_price(self):
         return self.get_purchase_price()
@@ -47,6 +45,22 @@ class Stock(SkeletonU):
             return PurchasePrice.objects.filter(stock_item=self).order_by('-datetime_updated')[0].unit_price
         except:
             return None
+
+
+class StockProduct(SkeletonU):
+    """
+    must be fast
+    """
+    stock = models.ForeignKey(Stock, null=False, blank=False)
+    product = models.ForeignKey(Product, null=False, blank=False)
+    deduction = models.DecimalField(_("Stock"),
+        max_digits=g.DECIMAL['deduction_digits'],
+        decimal_places=g.DECIMAL['deduction_decimal_places'],
+        null=False, blank=False)
+
+    class Meta:
+        unique_together = (('stock', 'product'),)
+
 
 class PurchasePrice(SkeletonU):
     unit_price = models.DecimalField(_("Purchase price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],

@@ -28,7 +28,11 @@
                 for_product_wrapper: $("div#for_product_wrapper"),
                 add_to_selected_products: $("button#add_to_selected_products"),
                 selected_products: $("ol#selected_products"),
-                deduction: $("#deduction")
+                deduction: $("#deduction"),
+                hidden_selected_product: $("ol#selected_products li.hidden"),
+                remove_from_selected_products: $("ol#selected_products button.remove"),
+                management_content: $("#management_content"),
+                for_products: $("#stock_list td.for-products")
             };
 
             var selected_product = '';
@@ -186,8 +190,8 @@
                                     var data = [];
 
                                     $.each(response_data, function(key, value) {
-                                        var parsed_data = parse_product_data(value, "{{ separator }}");
-                                        data.push(parsed_data.name + " " + parsed_data.price + "{{ currency_symbol }}" + "," + parsed_data.id);
+                                        var parsed_data = parse_product_data(value, "{{ separator }}", {{ decimal_places }});
+                                        data.push(parsed_data.name + " " + parsed_data.tax_price + "{{ currency_symbol }}" + "," + parsed_data.id);
                                     });
 
                                     response(data);
@@ -222,6 +226,12 @@
 
             items.save_stock.click(function() {
                 if (check_entry_data()) {
+                    var for_product = [];
+
+                    $.each(items.selected_products.find('li.data'), function() {
+                        for_product.push([$(this).attr("data-product"), $(this).attr("data-deduction")]);
+                    });
+
                     var data = {
                         document: items.document.val(),
                         stock_name: items.stock_name.val(),
@@ -229,7 +239,7 @@
                         stock: items.stock.val(),
                         type: items.type.val(),
                         unit: items.unit.val(),
-                        for_product: selected_product,
+                        for_product: for_product,
                         purchase_price: items.purchase_price.val()
                     };
 
@@ -273,18 +283,64 @@
                 }
             });
 
+            function already_selected(to_product) {
+                var inside = false;
+
+                $.each(items.selected_products.find('li.data'), function() {
+                    if ($(this).attr("data-product") == to_product) {
+                        inside = true;
+
+                        return false;
+                    }
+                });
+
+                return inside;
+            }
+
             items.add_to_selected_products.on('click', function() {
                 var to_product = selected_product;
                 var deduction = items.deduction.val();
                 var html = '';
 
-                if (items.selected_products.find('li').length == 0) {
-                    html = html + '<li class="header">' + gettext('for product') + '<span class="deduction">' + gettext('deduction') + '</li>';
+                if (already_selected(to_product)) {
+                    return;
                 }
 
-                html = html + '<li class="data" data-product="' + to_product + '" data-deduction="' + deduction + '">' + items.for_product.val() + '<span class="deduction">' + deduction + '</span></li>';
+                if (items.selected_products.find('li:not(.hidden)').length == 0) {
+                    var hidden_header_selected_product = items.hidden_selected_product.clone();
+
+                    hidden_header_selected_product.removeClass("hidden").addClass("header").html(gettext('for product') + '<span class="deduction">' + gettext('deduction') + '</span>');
+                    html = html + hidden_header_selected_product.prop('outerHTML');
+                }
+
+                var hidden_selected_product = items.hidden_selected_product.clone();
+
+                hidden_selected_product.removeClass("hidden").addClass("data");
+
+                hidden_selected_product.attr("data-product", to_product);
+                hidden_selected_product.attr("data-deduction", deduction);
+
+                hidden_selected_product.html(items.for_product.val() + '<span class="deduction">' + deduction + '</span>');
+
+                hidden_selected_product.append('<button class="remove"></button>');
+
+                html = html + hidden_selected_product.prop('outerHTML');
 
                 items.selected_products.append(html);
+            });
+
+            $(document).on('click', items.remove_from_selected_products.selector, function() {
+                $(this).parent().remove();
+
+                if (items.selected_products.find('li:not(.hidden):not(.header)').length == 0) {
+                    items.selected_products.find('li.header').remove();
+                }
+            });
+
+            items.for_products.on('mouseover', function() {
+                $(this).find('div.info').show();
+            }).on('mouseleave', function() {
+                $(this).find('div.info').hide();
             });
 
             products_autocomplete(items.for_product);
@@ -306,6 +362,7 @@
             });
 
             items.type.change();
+            items.management_content.css("overflow", "visible");
         });
     </script>
 {% endblock %}
@@ -385,6 +442,7 @@
 
                             <div id="for_product_wrapper">
                                 <ol id="selected_products">
+                                    <li class="hidden"></li>
                                 </ol>
                                 <div id="searcher">
                                     <div id="search_input">
@@ -407,7 +465,17 @@
                             <td>{{ stock.left_stock }}</td>
                             <td>{{ stock.stock_type }}</td>
                             <td>{{ stock.unit_type }}</td>
-                            <td>{{ stock.for_product.name }}</td>
+                            <td class="for-products">{{ stock.for_products|length }}
+                                {% if stock.for_products|length > 0 %}
+                                    <div class="info">
+                                        <ol>
+                                            {% for sp in stock.for_products %}
+                                                <li>{{ sp.product.name }} {{ sp.deduction }}</li>
+                                            {% endfor %}
+                                        </ol>
+                                    </div>
+                                {% endif %}
+                            </td>
                             <td>{% if stock.purchase_price %}{{ stock.purchase_price }}{% endif %}</td>
                         </tr>
                     {% endfor %}

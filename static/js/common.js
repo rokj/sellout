@@ -286,7 +286,7 @@ function get_number(string, separator){
     }
 }
 
-function parse_product_data(product, separator){
+function parse_product_data(product, separator, decimal_places) {
     // convert all text numbers in product to Big() numbers
     // price, purchase_price, stock, tax, discounts[amount]
     if(typeof product.price == "string")
@@ -300,6 +300,10 @@ function parse_product_data(product, separator){
 
     if(typeof product.tax == "string")
         product.tax = get_number(product.tax, separator);
+
+    if (product.price && product.tax) {
+        product.tax_price = display_number(product.price.times(Big(1).plus(product.tax.div(Big(100)))), separator, decimal_places);
+    }
 
     for(var i = 0; i < product.discounts.length; i++){
         if(typeof product.discounts[i].amount == "string")

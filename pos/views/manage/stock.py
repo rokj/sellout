@@ -1,6 +1,7 @@
 import base64
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from pyatspi import document
@@ -15,7 +16,7 @@ from common.functions import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
                            max_field_length, error, JsonStringify
-from pos.stock import Document, Stock, PurchasePrice
+from pos.stock import Document, Stock, PurchasePrice, StockProduct
 from pos.views.manage.discount import discount_to_dict, get_all_discounts
 from pos.views.manage.category import get_subcategories, get_all_categories
 from pos.views.manage.tax import get_default_tax, get_all_taxes
@@ -900,11 +901,15 @@ def manage_stock(request, company, page):
     else:
         stocks  = paginator.page(1)
 
+    for s in stocks:
+        s.for_products = StockProduct.objects.filter(stock=s)
+
     currency = get_company_value(request.user, c, 'pos_currency')
 
     context = {
         'separator': get_company_value(request.user, c, 'pos_decimal_separator'),
         'currency': currency,
+        'decimal_places': get_company_value(request.user, c, 'pos_decimal_places'),
         'currency_symbol': currencies[currency][1],
         'documents': documents,
         'managing': 'stock',
@@ -946,15 +951,12 @@ def save_stock(request, company):
     if 'document' in data and data['document'] == '':
         document = None
 
-    for_product = Product.objects.get(id=data['for_product'], company=c)
-
     # TODO: validate with forms
 
     try:
         stock = Stock(
             company=c,
             document=document,
-            for_product=for_product,
             name=data['stock_name'],
             quantity=data['quantity'],
             stock=data['stock'],
@@ -990,10 +992,28 @@ def save_stock(request, company):
 
         return JsonError('could_not_save_purchase_price')
 
+    if 'for_product' in data:
+        for fp in data['for_product']:
+            product_id = fp[0]
+            deduction = fp[1]
+
+            try:
+                product = Product.objects.get(id=int(product_id))
+            except Product.DoesNotExist:
+                continue
+
+            try:
+                stock_product = StockProduct(stock=stock, product=product, deduction=deduction, created_by=request.user)
+                stock_product.save()
+            except Exception as e:
+                print "Error saving stock product"
+                print e
+
+                return JsonError('could_not_save_stock_product')
+
     stocks = Stock.objects.filter(company=c).order_by('-datetime_created')
     page = 1
     i = 0
-
 
     for s in stocks:
         if i > 0 and i%g.MISC['stocks_per_page'] == 0:

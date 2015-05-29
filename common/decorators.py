@@ -21,13 +21,13 @@ def login_required(view):
                     return JsonResponse({
                         'status': 'session_locked',
                         'message': _("This session is locked"),
-                        'redirect_url': reverse('pos:locked_session', kwargs=kwargs),
+                        'redirect_url': reverse('pos:locked_session', kwargs={'company': kwargs.get('company')}),
                         'original_url': request.session['original_url'],
                     })
                 else:
                     # redirect to the unlock screen
                     return HttpResponseRedirect(
-                        reverse('pos:locked_session', kwargs=kwargs) +
+                        reverse('pos:locked_session', kwargs={'company': kwargs.get('company')}) +
                         '?next=' + request.session['original_url']
                     )
             else:

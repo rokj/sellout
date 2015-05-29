@@ -33,6 +33,8 @@ DECIMAL = {
     'percentage_decimal_places': 8,  # number of decimal places for percentage values
     'quantity_digits': 24,
     'quantity_decimal_places': 8,
+    'deduction_digits': 24,
+    'deduction_decimal_places': 8
 }
 
 # unit types

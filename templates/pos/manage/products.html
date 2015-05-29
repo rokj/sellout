@@ -466,7 +466,7 @@
 
             p.data = data;
 
-            parse_product_data(data, "{{ separator }}");
+            parse_product_data(data, "{{ separator }}", {{ decimal_places }});
 
             p.parent = $("#products_list");
             p.items = {};
@@ -641,7 +641,7 @@
 
             p.data = data;
 
-            parse_product_data(data, "{{ separator }}");
+            parse_product_data(data, "{{ separator }}", {{ decimal_places }});
 
             p.container = $("#edit_dialog");
             p.items = {
