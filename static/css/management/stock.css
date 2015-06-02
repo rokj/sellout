@@ -57,6 +57,9 @@ input.error {
     width: 100px;
     float: left;
     height: 100px;
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
 }
 
 .manage-stock-header li.active {
@@ -167,3 +170,6 @@ ol#selected_products .deduction  {
     font-size: 10px;
 }
 
+#documents {
+    margin-left: 340px;
+}

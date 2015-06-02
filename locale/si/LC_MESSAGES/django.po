@@ -4798,3 +4798,7 @@ msgstr "Zaloga +"
 
 msgid "Add document"
 msgstr "Dodaj dobavnico"
+
+msgctxt "search documents"
+msgid "Search query"
+msgstr "Vnesi nek podatek"
