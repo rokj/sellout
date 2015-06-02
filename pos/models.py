@@ -231,13 +231,45 @@ class Product(SkeletonU, ProductAbstract):
         except:
             return None
 
+    def destockify(self, quantity):
+        for s in self.get_stock():
+            s.stock.left_stock = s.stock.left_stock-(quantity*s.deduction)
+            s.stock.save()
+
+    @property
+    def stock(self):
+        return self.get_stock()
+
+    def get_stock(self):
+        stock_products = StockProduct.objects.filter(product=self)
+
+        return stock_products
+
+    @property
+    def purchase_price(self):
+        return self.get_purchase_price()
+
     def get_purchase_price(self):
         """ get product's current purchase price """
         try:
             # return PurchasePrice.objects.filter(product=self).order_by('-datetime_updated')[0].unit_price
-            return None
-        except:
-            return None
+            purchase_price = None
+
+            for sp in self.get_stock():
+                if sp.stock.purchase_price:
+                    pp = sp.deduction*sp.stock.purchase_price
+
+                    if purchase_price is None:
+                        purchase_price = pp
+                    else:
+                        purchase_price += pp
+
+            return purchase_price
+
+        except StockProduct.DoesNotExist:
+            pass
+
+        return None
 
     def update_price(self, model, user, new_unit_price):
         """ set a new price for product:
@@ -749,6 +781,56 @@ class BillItemDiscount(SkeletonU, DiscountAbstract):
     # inherits everything from DiscountAbstract
     bill_item = models.ForeignKey(BillItem)
 
-import stock
+###
+# stock stock stock
+# stock stock stock
+# stock stock stock
+###
+class Document(SkeletonU):
+    company = models.ForeignKey(Company, null=False, blank=False)
+    number = models.CharField(max_length=64, null=True)
+    document_date = models.DateField(_("Document date"), null=True, blank=True)
+    entry_date = models.DateField(_("Entry date"), null=True, blank=True)
+    supplier = models.ForeignKey(Contact, null=False, blank=False)
+
+class Stock(SkeletonU):
+    document = models.ForeignKey(Document, null=True, blank=True)
+    company = models.ForeignKey(Company, null=False, blank=False)
+    name = models.CharField(_("Name"), help_text=_("Name of a stock"), max_length=100, null=True, blank=True)
+    quantity = models.DecimalField(_("Number of items put in stock"),
+        max_digits=g.DECIMAL['quantity_digits'],
+        decimal_places=g.DECIMAL['quantity_decimal_places'],
+        null=False, blank=False)
+    stock = models.DecimalField(_("Stock"),
+        max_digits=g.DECIMAL['quantity_digits'],
+        decimal_places=g.DECIMAL['quantity_decimal_places'],
+        null=False, blank=False)
+    left_stock = models.DecimalField(_("Number of items left in stock"),
+        max_digits=g.DECIMAL['quantity_digits'],
+        decimal_places=g.DECIMAL['quantity_decimal_places'],
+        null=False, blank=False)
+    stock_type = models.CharField(_("Stock type"), max_length=10,
+        choices=g.STOCK_TYPE, blank=False, null=False, default=g.STOCK_TYPE[0][0])
+    unit_type = models.CharField(_("Product unit type"), max_length=15,
+        choices=g.UNITS, blank=False, null=False, default=g.UNITS[0][0])
+    purchase_price = models.DecimalField(_("Purchase price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],
+                                     decimal_places=g.DECIMAL['currency_decimal_places'], blank=True, null=True)
+
+class StockProduct(SkeletonU):
+    """
+    must be fast
+    """
+    stock = models.ForeignKey(Stock, null=False, blank=False)
+    product = models.ForeignKey(Product, null=False, blank=False)
+    deduction = models.DecimalField(_("Stock"),
+        max_digits=g.DECIMAL['deduction_digits'],
+        decimal_places=g.DECIMAL['deduction_decimal_places'],
+        null=False, blank=False)
+
+    def __unicode__(self):
+        return self.stock.name + " " + _("for") + " " + self.product.name
+
+    class Meta:
+        unique_together = (('stock', 'product'),)
 
 import signals

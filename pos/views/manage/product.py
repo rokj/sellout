@@ -12,6 +12,7 @@ from common.functions import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
                            max_field_length, error, JsonStringify
+from pos.models import StockProduct
 from pos.views.manage.discount import discount_to_dict, get_all_discounts
 from pos.views.manage.category import get_subcategories, get_all_categories
 from pos.views.manage.tax import get_default_tax, get_all_taxes
@@ -69,6 +70,7 @@ def product_to_dict(user, company, product, android=False):
     ret['discounts'] = discounts
     if product.image:  # check if product's image exists:
         if android:
+            # uf, if images are big, then what, at least we should thumnbnail-it
             with open(product.image.path, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read())
             ret['image'] = encoded_string
@@ -98,6 +100,20 @@ def product_to_dict(user, company, product, android=False):
     # ret['stock'] = format_number(user, company, product.stock)
     ret['color'] = product.color
     ret['favorite'] = product.favorite
+
+    if hasattr(product, 'stock_products'):
+        stock_products = []
+
+        for sp in product.stock_products:
+            stock_product = {}
+            stock_product['stock_name'] = sp.stock.name
+            stock_product['deduction'] = sp.deduction
+            stock_product['left_stock'] = sp.stock.left_stock
+            stock_product['stock_unit_type'] = sp.stock.unit_type
+            stock_products.append(stock_product)
+
+        ret['stock_products'] = stock_products
+
     return ret
 
 
@@ -142,7 +158,7 @@ def products(request, company):
         'name': max_field_length(Product, 'name'),
         'tax': g.DECIMAL['percentage_decimal_places'] + 4,  # up to '100.' + 'decimal_digits'
     }
-    
+
     context = {
         'company': c,
         'title': _("Products"),
@@ -169,6 +185,7 @@ def products(request, company):
         'default_tax_id': get_default_tax(request.user, c)['id'],
         'decimal_places': get_company_value(request.user, c, 'pos_decimal_places')*2,  # ACHTUNG: rounding comes at the end
     }
+
     return render(request, 'pos/manage/products.html', context)
 
 
@@ -337,6 +354,7 @@ def search_products_(request, c, android=False):
     # return serialized products
     ps = []
     for p in products:
+        p.stock_products = StockProduct.objects.filter(product=p)
         ps.append(product_to_dict(request.user, c, p, android=android))
 
     return JsonResponse(ps, safe=False)
@@ -618,7 +636,7 @@ def edit_product_(request, c, android=False):
     product.shortcut = data.get('shortcut')
     product.description = data.get('description')
     product.private_notes = data.get('private_notes')
-    product.stock = data.get('stock')
+    # product.stock = data.get('stock')
     product.tax = data.get('tax')
     
     # update discounts
@@ -680,6 +698,10 @@ def delete_product_(request, c):
 
 def get_all_products(user, company):
     products = Product.objects.filter(company=company)
+
+    # maybe we'll need this in the future
+    # for p in products:
+    #   p.stock_products = StockProduct.objects.filter(product=p)
 
     r = []
     for p in products:

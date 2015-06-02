@@ -32,7 +32,7 @@
                 hidden_selected_product: $("ol#selected_products li.hidden"),
                 remove_from_selected_products: $("ol#selected_products button.remove"),
                 management_content: $("#management_content"),
-                for_products: $("#stock_list td.for-products")
+                stock_products: $("#stock_list td.stock-products")
             };
 
             var selected_product = '';
@@ -337,7 +337,7 @@
                 }
             });
 
-            items.for_products.on('mouseover', function() {
+            items.stock_products.on('mouseover', function() {
                 $(this).find('div.info').show();
             }).on('mouseleave', function() {
                 $(this).find('div.info').hide();
@@ -465,11 +465,11 @@
                             <td>{{ stock.left_stock }}</td>
                             <td>{{ stock.stock_type }}</td>
                             <td>{{ stock.unit_type }}</td>
-                            <td class="for-products">{{ stock.for_products|length }}
-                                {% if stock.for_products|length > 0 %}
+                            <td class="stock-products">{{ stock.stock_products|length }}
+                                {% if stock.stock_products|length > 0 %}
                                     <div class="info">
                                         <ol>
-                                            {% for sp in stock.for_products %}
+                                            {% for sp in stock.stock_products %}
                                                 <li>{{ sp.product.name }} {{ sp.deduction }}</li>
                                             {% endfor %}
                                         </ol>

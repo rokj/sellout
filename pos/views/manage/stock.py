@@ -11,12 +11,13 @@ from django.db.models import Q
 from common.images import image_dimensions, import_color_image, create_file_from_image
 from config.currencies import currencies
 
-from pos.models import Company, Category, Product, Price, Tax, Discount, ProductDiscount, Contact
+from pos.models import Company, Category, Product, Price, Tax, Discount, ProductDiscount, Contact, Document, Stock, \
+    StockProduct
 from common.functions import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
                            max_field_length, error, JsonStringify
-from pos.stock import Document, Stock, PurchasePrice, StockProduct
+
 from pos.views.manage.discount import discount_to_dict, get_all_discounts
 from pos.views.manage.category import get_subcategories, get_all_categories
 from pos.views.manage.tax import get_default_tax, get_all_taxes
@@ -902,7 +903,7 @@ def manage_stock(request, company, page):
         stocks  = paginator.page(1)
 
     for s in stocks:
-        s.for_products = StockProduct.objects.filter(stock=s)
+        s.stock_products = StockProduct.objects.filter(stock=s)
 
     currency = get_company_value(request.user, c, 'pos_currency')
 
@@ -963,34 +964,16 @@ def save_stock(request, company):
             left_stock=data['stock'],
             stock_type=data['type'],
             unit_type=data['unit'],
+            purchase_price=data['purchase_price'],
             created_by=request.user
         )
         stock.save()
 
-        purchase_price = PurchasePrice(
-            unit_price=data['purchase_price'],
-            stock_item = stock,
-            created_by=request.user
-        )
-        purchase_price.save()
     except Exception as e:
         print "Error saving stock or saving purchase price"
         print e
 
         return JsonError('could_not_save_stock')
-
-    try:
-        purchase_price = PurchasePrice(
-            unit_price=data['purchase_price'],
-            stock_item = stock,
-            created_by=request.user
-        )
-        purchase_price.save()
-    except Exception as e:
-        print "Error saving purchase price"
-        print e
-
-        return JsonError('could_not_save_purchase_price')
 
     if 'for_product' in data:
         for fp in data['for_product']:

@@ -42,7 +42,7 @@ def bill_item_to_dict(user, company, item):
     i['description'] = item.description
     i['private_notes'] = item.private_notes
     i['unit_type'] = item.unit_type
-    i['stock'] = format_number(user, company, item.stock)
+    # i['stock'] = format_number(user, company, item.stock)
 
     # values from bill Item
     i['bill_id'] = item.bill.id
@@ -512,7 +512,10 @@ def create_bill_(request, c):
         quantity = r['number']
 
         # remove from stock; TODO: check negative quantities (?)
-        product.stock = product.stock - quantity
+        # actually we leave negative quantities as they are or
+        # when stock is empty, we leave it at 0
+
+        product.destockify(quantity)
         product.save()
 
         item = {
@@ -638,7 +641,6 @@ def create_bill_(request, c):
             description=item['description'],
             private_notes=item['private_notes'],
             unit_type=item['unit_type'],
-            stock=item['stock'],
             bill=db_bill,
             bill_notes=item['bill_notes'],
             product_id=item['product_id'],

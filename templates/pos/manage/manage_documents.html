@@ -12,7 +12,7 @@
             var keyboard = new Keyboard();
 
             var items = {
-                add_document: $("#documents button#add"),
+                add_document: $("a#add_document"),
                 document_input: $("#documents table tr#document_input"),
                 document_number: $("#document_number"),
                 document_date: $("#document_date"),
@@ -34,6 +34,8 @@
 
                     keyboard.remove("cancel-when-adding-document");
                 }
+
+                return false;
             });
 
             items.document_number.on('focus', function() {
@@ -234,6 +236,10 @@
     </script>
 {% endblock %}
 
+{% block extra_button %}
+    <a id="add_document" class="extra-button">{% trans 'Add document' %}</a>
+{% endblock %}
+
 {% block status_bar_title %}
     {% trans 'Stock' %}
 {% endblock %}
@@ -257,8 +263,6 @@
 
     <div id="documents">
         {% include "pos/manage/stock_header.html" %}
-
-        <button type="button" id="add">{% trans "Add document" %}</button>
 
         <div id="documents_list">
             <table>

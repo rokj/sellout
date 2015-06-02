@@ -3425,11 +3425,11 @@ msgstr "po"
 
 #: templates/pos/manage/products.html:1602
 msgid "Sell price (excl. tax)"
-msgstr ""
+msgstr "Prodajna cena (brez davka)"
 
 #: templates/pos/manage/products.html:1606
 msgid "Sell price (incl. tax)"
-msgstr ""
+msgstr "Prodajna cena (z davkom)"
 
 #: templates/pos/manage/products.html:1625
 msgid ""
@@ -4786,3 +4786,15 @@ msgstr "Dodan bo bil, ko boš kliknila na gumb shrani."
 
 msgid "Item code"
 msgstr "Šifra artikla"
+
+msgid "You can add new stock to the product after you create product"
+msgstr "Lahko dodaš zalogo na artikel/storitev šele potem, ko ga dodaš"
+
+msgid "Purchase price (approximately if calculated from ingredients)"
+msgstr "Nabavna cena (približno, če je artikel/storitev sestavljen iz večih sestavin)"
+
+msgid "Stock +"
+msgstr "Zaloga +"
+
+msgid "Add document"
+msgstr "Dodaj dobavnico"
