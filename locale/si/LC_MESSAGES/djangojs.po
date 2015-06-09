@@ -548,5 +548,32 @@ msgstr ""
 msgid "Locking failed"
 msgstr ""
 
+msgid "select product"
+msgstr "izberi artikel/storitev"
+
+msgid "deduction"
+msgstr "odbitek"
+
+msgid "for product"
+msgstr "za artikel/storitev"
+
+msgid "quantity"
+msgstr "količina"
+
+msgid "stock"
+msgstr "zaloga"
+
+msgid "will be the same as quantity"
+msgstr "bo isto kot količina"
+
+msgid "purchase price"
+msgstr "nakupna cena"
+
+msgid "You cannot add more than one item to stock with type item."
+msgstr "Ne moreš dodati več kot eno stvar na zalogo na produkt s tipom predmet."
+
+msgid "Piece"
+msgstr "Kom"
+
 #~ msgid "Current password field must not be empty!"
 #~ msgstr "Za spremembo gesla moraš vnesti trenutno geslo!"

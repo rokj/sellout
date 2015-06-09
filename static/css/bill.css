@@ -232,6 +232,13 @@ button.more{
     text-align: center;
 }
 
+.item-val.quantity div.unit-type {
+    left: 45px;
+    top: 14px;
+    text-transform: lowercase;
+    position: absolute;
+}
+
 .item-val.quantity button{
     color: #ffffff;
     border: none;

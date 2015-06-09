@@ -121,14 +121,21 @@
 }
 
 .receipt-80mm .receipt-items .item-price{
-    width: 35%;
+    width: 19%;
     text-align: right;
 }
 
 
 .receipt-80mm .receipt-items .item-quantity{
     text-align: right;
-    width: 15%;
+    width: 20%;
+    position: relative;
+    overflow: visible;
+}
+
+.receipt-80mm .receipt-items .item-quantity .unit-type {
+    position: absolute;
+    right: -14px;
 }
 
 .receipt-80mm .receipt-items .item-unit{

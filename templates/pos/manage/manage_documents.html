@@ -270,24 +270,52 @@
         {% include "pos/manage/stock_header.html" %}
 
         <div id="documents_list">
+            <div class="results-header">
+                {% trans 'Results found: ' %}{{ documents.paginator.count }}
+
+                <div class="pagination">
+                    <a href="{{ prev_url }}"
+                       class="paginator {% if not documents.has_previous %}disabled{% endif %}"
+                       data-action="previous">
+                        <img src="{% static 'icons/back_black.png' %}"
+                             class="hoverable"
+                             alt="{% trans 'Back' context 'Paginator page button' %}"
+                             title="{% trans 'Back' context 'Paginator page button' %}"/>
+                    </a>
+
+                    {% trans 'Page' %} {{ documents.number }} {% trans 'of' %} {{ documents.paginator.num_pages }}
+
+                    <a href="{{ next_url }}"
+                       class="paginator {% if not documents.has_next %}disabled{% endif %}"
+                       data-action="next">
+                        <img src="{% static 'icons/forward_black.png' %}"
+                             class="hoverable"
+                             alt="{% trans 'Forward' context 'Paginator page button' %}"
+                             title="{% trans 'Forward' context 'Paginator page button' %}"/>
+                    </a>
+                </div>
+            </div>
+
             <table>
                 <thead>
                     <tr>
-                        <th>{% trans "Document number" %}</th>
-                        <th>{% trans "Document date" %}</th>
-                        <th>{% trans "Entry date" %}</th>
-                        <th>{% trans "Datetime created" %}</th>
-                        <th>{% trans "Supplier" %}</th>
+                        <td colspan="5">{% trans "Document" context "stock" %}</td>
+                    </tr>
+                    <tr>
+                        <td>{% trans "Number" context "stock" %}</td>
+                        <td>{% trans "Document date" context "stock" %}</td>
+                        <td>{% trans "Entry date" context "stock" %}</td>
+                        <td>{% trans "Supplier" context "stock" %}</td>
                     </tr>
                 </thead>
                 <tbody>
                     <tr id="document_input">
-                        <td><input type="text" id="document_number" name="document_number" value="{% trans "document number from supplier" %}"/></td>
-                        <td><input type="text" id="document_date" name="document_date" value="{% trans "document date" %}"/></td>
-                        <td><input type="text" id="entry_date" name="entry_date" value="{% trans "entry date" %}"/></td>
+                        <td><input type="text" id="document_number" name="document_number" value="{% trans "document number from supplier" context "stock" %}"/></td>
+                        <td><input type="text" id="document_date" name="document_date" value="{% trans "document date" context "stock" %}"/></td>
+                        <td><input type="text" id="entry_date" name="entry_date" value="{% trans "entry date" context "stock" %}"/></td>
                         <td>&nbsp;</td>
                         <td class="controls">
-                            <input type="text" id="supplier" name="supplier" value="{% trans "supplier" %}"/>
+                            <input type="text" id="supplier" name="supplier" value="{% trans "supplier" context "stock" %}"/>
                             <button id="save_document" class="save hoverable no-shadow"></button>
                         </td>
                     </tr>
@@ -296,7 +324,6 @@
                             <td>{{ document.number }}</td>
                             <td>{{ document.document_date }}</td>
                             <td>{{ document.entry_date }}</td>
-                            <td>{{ document.datetime_created }}</td>
                             <td>
                                 {% if document.supplier.first_name and document.supplier.last_name %}
                                     {{ document.supplier.first_name }} {{ document.supplier.last_name }}
@@ -308,30 +335,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-
-            {% trans 'Documents: ' %}{{ documents.paginator.count }}
-
-            <div class="pagination">
-                <a href="{{ prev_url }}"
-                   class="paginator {% if not documents.has_previous %}disabled{% endif %}"
-                   data-action="previous">
-                    <img src="{% static 'icons/back_black.png' %}"
-                         class="hoverable"
-                         alt="{% trans 'Back' context 'Paginator page button' %}"
-                         title="{% trans 'Back' context 'Paginator page button' %}"/>
-                </a>
-
-                {% trans 'Page' %} {{ documents.number }} {% trans 'of' %} {{ documents.paginator.num_pages }}
-
-                <a href="{{ next_url }}"
-                   class="paginator {% if not documents.has_next %}disabled{% endif %}"
-                   data-action="next">
-                    <img src="{% static 'icons/forward_black.png' %}"
-                         class="hoverable"
-                         alt="{% trans 'Forward' context 'Paginator page button' %}"
-                         title="{% trans 'Forward' context 'Paginator page button' %}"/>
-                </a>
-            </div>
         </div>
     </div>
 {% endblock %}

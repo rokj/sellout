@@ -87,8 +87,8 @@ RULE #1:
 
                             <div class="item-amount">{{ item.total }}</div>
                             <div class="item-discount">{{ item.discount }}</div>
-                            <div class="item-unit">&nbsp;{# unit has no label #}</div>
-                            <div class="item-quantity">{{ item.quantity }}</div>
+                            <div class="item-unit">&nbsp;</div>
+                            <div class="item-quantity">{{ item.quantity }}{% trans "Piece" as piece %}{% if item.unit_type != piece %} <span class="unit-type">{{ item.unit_type }}</span>{% endif %}</div>
                             <div class="item-price">
                             {# #1 #}
                                 {% if bill.issuer.tax_payer %} {{ item.base }} {% endif %}

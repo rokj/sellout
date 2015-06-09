@@ -54,16 +54,28 @@ input.error {
 
 .manage-stock-header {
     display: block;
-    width: 100px;
-    float: left;
-    height: 100px;
     list-style: none;
     padding: 0px;
     margin: 0px;
 }
 
 .manage-stock-header li.active {
-    background-color: lightgoldenrodyellow;
+    padding: 0px 10px 0px 10px;
+}
+
+.manage-stock-header li:nth-child(1) {
+    padding-left: 0px;
+}
+
+.manage-stock-header li {
+    display: inline-block;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.manage-stock-header li a {
+    font-weight: normal;
+    text-decoration: underline;
 }
 
 #stock table tr#stock_input {
@@ -73,28 +85,31 @@ input.error {
 #stock_section select#document {
     display: block;
     max-width: 300px;
+    float: right;
 }
 
 #select_product {
-    width: 100px;
+    width: 83%;
     color: #000000;
     font-weight: bold;
+    margin: 5px 5px;
 }
 
 #select_product:hover {
     cursor: pointer;
-    background-color: #e4b9c0;
+    background-color: #c8c8c8;
 }
 
 .controls div#for_product_wrapper {
     display: none;
     position: absolute;
     top: 0px;
-    right: -454px;
+    left: -454px;
     width: 453px;
     height: 250px;
-    background-color: lightgoldenrodyellow;
+    background-color: #e0e0e0;
     z-index: 1;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
 
 .controls div#for_product_wrapper #selected_products {
@@ -107,17 +122,33 @@ input.error {
 }
 
 #deduction {
-    width: 30px;
-    height: 10px;
-    font-size: 10px;
+    width: 42px;
+    height: 39px;
+    font-size: 12px;
+    padding: 4px 0px 4px 0px;
+    margin: 0px;
+    padding: 0px;
+    float: right;
+    margin-top: 2px;
+    margin-right: 8px;
+    text-align: center;
 }
 
 #add_to_selected_products {
-    background-color: crimson;
+    background: url('/static/icons/forward_black.png') no-repeat 11px;
+    float: right;
+    margin-right: 9px;
+    margin-top: 6px;
+    background-color: rgb(221, 221, 221);
+}
+
+#add_to_selected_products:hover {
+    cursor: pointer;
 }
 
 ol#selected_products li.data {
     position: relative;
+    padding-top: 3px;
 }
 
 ol#selected_products .remove {
@@ -128,6 +159,8 @@ ol#selected_products .remove {
     width: 15px;
     height: 15px;
     background-size: 100% 100%;
+    border: none;
+    box-shadow: none;
 }
 
 ol#selected_products {
@@ -140,23 +173,34 @@ ol#selected_products {
 .controls div#for_product_wrapper #searcher {
     width: 50%;
     float: left;
-    background-color: greenyellow;
+    background-color: rgb(192, 192, 192);
     height: 100%;
 }
 
 input#for_product {
-    padding: 4px 0px 4px 0px;
+    padding: 4px 0px 4px 4px;
+    height: 39px;
+    margin-top: 2px;
 }
 
-ol#selected_products .deduction  {
+ol#selected_products .deduction {
     display: inline-block;
     float: right;
 }
 
+ol#selected_products li.header {
+    font-weight: bold;
+}
+
+
 #stock_list table div.info {
-    background-color: lightpink;
+    background-color: #c8c8c8;
     position: absolute;
     display: none;
+    padding: 7px;
+    margin: 2px;
+    font-size: 12px;
+    padding-top: 3px;
 }
 
 #stock_list td.for-products {
@@ -170,6 +214,78 @@ ol#selected_products .deduction  {
     font-size: 10px;
 }
 
-#documents {
+#stock_list div.info ol li {
+    font-size: 11px;
+}
+
+#stock_list div.info ol li span.product-name {
+    display: inline-block;
+    text-align: left;
+}
+
+#stock_list div.info ol li span.product-deduction {
+    display: inline-block;
+    text-align: right;
+    float: right;
+    padding-left: 40px;
+}
+
+#documents, #stock_section {
     margin-left: 340px;
+}
+
+.results-header {
+    color: #646464;
+    padding-top: 0px;
+}
+
+.results-header .pagination {
+    display: inline;
+    margin-left: 20px;
+}
+
+#documents_list table {
+    margin-right: 40px;
+    margin-top: 17px;
+    width: 100%;
+}
+
+#documents_list, #stock_list {
+    padding-top: 30px;
+}
+
+#documents_list table tr:nth-child(1) td {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    background-color: #DDDDDD;
+}
+
+#stock_list table.list {
+    padding-top: 16px;
+}
+
+#stock_list table:not(.list) td {
+    border: none;
+    height: auto;
+}
+
+#document_wrapper {
+    max-width: 1200px;
+    text-align: right;
+    display: block;
+    position: absolute;
+    right: 342px;
+    top: 106px;
+}
+
+#document_wrapper span {
+    line-height: 41px;
+    display: inline-block;
+    height: 41px;
+    padding-right: 10px;
+}
+
+td.unit-type {
+    text-transform: lowercase;
 }

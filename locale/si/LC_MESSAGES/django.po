@@ -1211,7 +1211,7 @@ msgstr ""
 #: pos/models.py:669 pos/views/bill.py:308 pos/views/bill.py:893
 #: templates/pos/large_receipt.html:69
 msgid "Quantity"
-msgstr ""
+msgstr "Količina"
 
 #: pos/models.py:674
 msgid "Tax in percent, copied from product's tax rate"
@@ -4802,3 +4802,106 @@ msgstr "Dodaj dobavnico"
 msgctxt "search documents"
 msgid "Search query"
 msgstr "Vnesi nek podatek"
+
+msgctxt "stock"
+msgid "Documents"
+msgstr "Dobavnice"
+
+msgctxt "stock"
+msgid "Date"
+msgstr "Številka dok."
+
+msgctxt "stock"
+msgid "Entry date"
+msgstr "Datum vnosa"
+
+msgctxt "stock"
+msgid "Datetime created"
+msgstr "Datum vnosa"
+
+msgctxt "stock"
+msgid "Supplier"
+msgstr "Dobavitelj"
+
+msgctxt "stock"
+msgid "document number from supplier"
+msgstr "številka dokumenta od dobavitelja"
+
+msgctxt "stock"
+msgid "document date"
+msgstr "datum dokumenta"
+
+msgctxt "stock"
+msgid "Document date"
+msgstr "Datum dobavnice"
+
+msgctxt "stock"
+msgid "entry date"
+msgstr "datum vnosa"
+
+msgctxt "stock"
+msgid "supplier"
+msgstr "dobavitelj"
+
+msgid "Add stock"
+msgstr "Dodaj zalogo"
+
+msgctxt "stock"
+msgid "Document"
+msgstr "Dobavnica"
+
+msgid  "Using register: "
+msgstr ""
+
+msgid "May"
+msgstr "Maj"
+
+msgctxt "stock"
+msgid "Number"
+msgstr "Številka"
+
+msgid "Stock: "
+msgstr "Zaloga: "
+
+msgid "quantity"
+msgstr "količina"
+
+msgid "Left in stock"
+msgstr "Na zalogi"
+
+msgid "ingredient"
+msgstr "sestavina"
+
+msgid "as item"
+msgstr "kot predmet"
+
+msgid "as ingredient"
+msgstr "kot sestavina"
+
+msgid "select product"
+msgstr "izberi artikel/storitev"
+
+msgid "stock"
+msgstr "zaloga"
+
+msgid "Type"
+msgstr "Tip"
+
+msgid "For product"
+msgstr "Za artikel/storitev"
+
+msgid "select products"
+msgstr "izberi artikel"
+
+msgctxt "stock"
+msgid "all documents"
+msgstr "vse dobavnice"
+
+msgid "purchase price"
+msgstr "nakupna cena"
+
+msgid "deduction"
+msgstr "odbitek"
+
+msgid "item"
+msgstr "predmet"

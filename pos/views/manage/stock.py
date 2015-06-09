@@ -980,6 +980,9 @@ def save_stock(request, company):
             product_id = fp[0]
             deduction = fp[1]
 
+            if deduction == "":
+                deduction = 1
+
             try:
                 product = Product.objects.get(id=int(product_id))
             except Product.DoesNotExist:

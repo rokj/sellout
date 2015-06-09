@@ -2,6 +2,6 @@
 {% load i18n %}
 
 <ol class="manage-stock-header">
-  <li class="{% if managing == 'documents' %}active{% endif %}">{% if managing != 'documents' %}<a href="{% url "pos:manage_documents" company.url_name 1 %}">{% endif %}{% trans "Documents" %}{% if managing != 'documents' %}</a>{% endif %}</li>
+  <li class="{% if managing == 'documents' %}active{% endif %}">{% if managing != 'documents' %}<a href="{% url "pos:manage_documents" company.url_name 1 %}">{% endif %}{% trans "Documents" context "stock" %}{% if managing != 'documents' %}</a>{% endif %}</li>
   <li class="{% if managing == 'stock' %}active{% endif %}">{% if managing != 'stock' %}<a href="{% url "pos:manage_stock" company.url_name 1 %}">{% endif %}{% trans "Stock" %}{% if managing != 'stock' %}</a>{% endif %}</li>
 </ol>

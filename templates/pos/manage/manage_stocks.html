@@ -12,7 +12,7 @@
             var keyboard = new Keyboard();
 
             var items = {
-                add_stock: $("#stock_section button#add"),
+                add_stock: $("a#add_stock"),
                 stock_input: $("#stock_section table tr#stock_input"),
                 stock_name: $("#stock_name"),
                 quantity: $("#quantity"),
@@ -52,14 +52,14 @@
             });
 
             items.stock_name.on('focus', function() {
-                if ($(this).val() == gettext("name")) {
+                if ($(this).val() == gettext("select product")) {
                     $(this).val("");
                 }
             });
 
             items.stock_name.on('blur', function() {
                 if ($(this).val() == "") {
-                    $(this).val(gettext("name"));
+                    $(this).val(gettext("select product"));
                 }
             });
 
@@ -198,7 +198,6 @@
                                 }
                             }
                         });
-
                     },
                     minLength: 0,
                     delay: 250,
@@ -278,8 +277,27 @@
             items.select_product.on('click', function() {
                 if (items.for_product_wrapper.is(':visible')) {
                     items.for_product_wrapper.hide();
+
+                    keyboard.remove("cancel-when-selecting-products");
                 } else {
                     items.for_product_wrapper.show();
+
+                    if (items.type.val() == "item") {
+                        items.deduction.prop("disabled", true);
+                        if (items.deduction.val() == "" && items.unit.val() == "Piece") {
+                            items.deduction.val("1");
+                        } else {
+                            items.deduction.val("");
+                        }
+                    } else {
+                        items.deduction.prop("disabled", false);
+                    }
+
+                    keyboard.add("cancel-when-selecting-products", 'escape', function () {
+                        items.select_product.click();
+
+                        keyboard.remove("cancel-when-selecting-products");
+                    });
                 }
             });
 
@@ -303,6 +321,12 @@
                 var html = '';
 
                 if (already_selected(to_product)) {
+                    return;
+                }
+
+                if (items.type.val() == "item" && (items.selected_products.find('li.data').length > 0)) {
+                    custom_dialog(gettext("Info"), "You cannot add more than one item to stock with type item.", 300, {ok: gettext("OK") });
+
                     return;
                 }
 
@@ -367,6 +391,10 @@
     </script>
 {% endblock %}
 
+{% block extra_button %}
+    <a id="add_stock" class="extra-button">{% trans 'Add stock' %}</a>
+{% endblock %}
+
 {% block status_bar_title %}
     {% trans 'Stock' %}
 {% endblock %}
@@ -374,13 +402,18 @@
 {% block manage_content %}
     <div class="left-column">
         <div id="filter_form" class="fake-form">
-            <h3>{% trans "Search" %}</h3>
+            <h2>{% trans "Search" %}</h2>
 
-            <input id="general_filter" class="search-filter" type="text" placeholder="{% trans "Search query" context 'search documents' %}">
+            <div class="form-field">
+                <div class="error"></div>
 
-            <div id="filter_form_controls">
-                <div class="split-cell last">
-                    <input type="button" id="update_results" class="ok hoverable" value="{% trans "Search" %}">
+                <input id="general_filter" class="search-filter" maxlength="30" type="text" placeholder="{% trans "Search query" context 'search documents' %}">
+            </div>
+
+
+            <div class="form-field">
+                <div class="split-cell first">
+                    <input type="submit" id="update_results" value="{% trans "Search" %}" class="hoverable">
                 </div>
 
                 <div class="cleared"></div>
@@ -391,30 +424,58 @@
     <div id="stock_section">
         {% include "pos/manage/stock_header.html" %}
 
-        <button type="button" id="add">{% trans "Add stock" %}</button>
+        <div id="document_wrapper">
+            <span>{% trans "Document" context "stock" %}:</span>
 
-        <select id="document">
-            <option value=""></option>
+            <select id="document">
+                <option value="all">{% trans "all documents" context "stock" %}</option>
 
-            {% for document in documents %}
-                <option value="{{ document.id }}">
-                    {{ document.number }}, {{ document.supplier.company_name }}
-                </option>
-            {% endfor %}
-        </select>
+                {% for document in documents %}
+                    <option value="{{ document.id }}">
+                        {{ document.number }} - {{ document.supplier.company_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
 
         <div id="stock_list">
-            <table>
+            <div class="results-header">
+                {% trans 'Results found: ' %}{{ stocks.paginator.count }}
+
+                <div class="pagination">
+                    <a href="{{ prev_url }}"
+                       class="paginator {% if not stocks.has_previous %}disabled{% endif %}"
+                       data-action="previous">
+                        <img src="{% static 'icons/back_black.png' %}"
+                             class="hoverable"
+                             alt="{% trans 'Back' context 'Paginator page button' %}"
+                             title="{% trans 'Back' context 'Paginator page button' %}"/>
+                    </a>
+
+                    {% trans 'Page' %} {{ stocks.number }} {% trans 'of' %} {{ stocks.paginator.num_pages }}
+
+                    <a href="{{ next_url }}"
+                       class="paginator {% if not stock.has_next %}disabled{% endif %}"
+                       data-action="next">
+                        <img src="{% static 'icons/forward_black.png' %}"
+                             class="hoverable"
+                             alt="{% trans 'Forward' context 'Paginator page button' %}"
+                             title="{% trans 'Forward' context 'Paginator page button' %}"/>
+                    </a>
+                </div>
+            </div>
+
+            <table class="list">
                 <thead>
                     <tr>
-                        <th>{% trans "Name" %}</th>
-                        <th>{% trans "Quantity" %}</th>
-                        <th>{% trans "Stock" %}</th>
-                        <th>{% trans "Left if stock" %}</th>
-                        <th>{% trans "Type" %}</th>
-                        <th>{% trans "Unit" %}</th>
-                        <th>{% trans "For product" %}</th>
-                        <th>{% trans "Purchase price" %}</th>
+                        <td>{% trans "Name" %}</td>
+                        <td>{% trans "Quantity" %}</td>
+                        <td>{% trans "Stock" %}</td>
+                        <td>{% trans "Left in stock" %}</td>
+                        <td>{% trans "Type" %}</td>
+                        <td>{% trans "Unit" %}</td>
+                        <td>{% trans "For product" %}</td>
+                        <td>{% trans "Purchase price" %}</td>
                     </tr>
                 </thead>
                 <tbody>
@@ -441,14 +502,33 @@
                             <button type="button" id="select_product" name="select_product" >{% trans "select products" %}</button>
 
                             <div id="for_product_wrapper">
+                                <div id="searcher">
+                                    <div id="search_input">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <td>&nbsp;</td>
+                                                    <td>{% trans "deduction" %}</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><input type="text" id="for_product" name="for_product" value="{% trans "select product" %}" /></td>
+                                                    <td><input type="text" id="deduction" /></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>&nbsp;</td>
+                                                    <td>
+                                                        <button id="add_to_selected_products"></button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                                 <ol id="selected_products">
                                     <li class="hidden"></li>
                                 </ol>
-                                <div id="searcher">
-                                    <div id="search_input">
-                                        <button id="add_to_selected_products"><-</button><input type="text" id="for_product" name="for_product" value="{% trans "select product" %}" /><input type="text" id="deduction" />
-                                    </div>
-                                </div>
                             </div>
                         </td>
                         <td class="controls">
@@ -459,20 +539,48 @@
 
                     {% for stock in stocks %}
                         <tr id="stock_{{ stock.id }}">
-                            <td>{{ stock.name }}</td>
+                            <td>
+                                {% if stock.stock_type == "item" %}
+                                    {% if stock.stock_products|length > 0 %}
+                                        {{ stock.stock_products.0.product.name }}
+                                    {% endif %}
+                                {% elif stock.stock_type == "ingredient" %}
+                                    {{ stock.name }}
+                                {% endif %}
+                            </td>
                             <td>{{ stock.quantity }}</td>
                             <td>{{ stock.stock}}</td>
                             <td>{{ stock.left_stock }}</td>
-                            <td>{{ stock.stock_type }}</td>
-                            <td>{{ stock.unit_type }}</td>
+                            <td>
+                                {% if stock.stock_type == "item" %}
+                                    {% trans "item" %}
+                                {% elif stock.stock_type == "ingredient" %}
+                                    {% trans "ingredient" %}
+                                {% endif %}
+                            </td>
+                            <td class="unit-type">{% trans stock.unit_type %}</td>
                             <td class="stock-products">{{ stock.stock_products|length }}
                                 {% if stock.stock_products|length > 0 %}
                                     <div class="info">
-                                        <ol>
-                                            {% for sp in stock.stock_products %}
-                                                <li>{{ sp.product.name }} {{ sp.deduction }}</li>
-                                            {% endfor %}
-                                        </ol>
+                                        {% if stock.stock_type == "item" and stock.unit_type == "kg" %}
+                                            {{ stock.stock_products.0.product.name }}
+                                        {% else %}
+                                            <ol>
+                                                <li><span class="product-name"></span> <span class="product-deduction"><strong>{% trans "deduction" %}</strong></span></li>
+
+                                                {% for sp in stock.stock_products %}
+                                                    <li>
+                                                        <span class="product-name">{{ sp.product.name }}</span> <span class="product-deduction">
+                                                            {% if sp.deduction %}
+                                                                {% if sp.deduction and stock.stock_type == "item" and stock.unit_type != "kg" %}
+                                                                    {{ sp.deduction }}
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        </span>
+                                                    </li>
+                                                {% endfor %}
+                                            </ol>
+                                        {% endif %}
                                     </div>
                                 {% endif %}
                             </td>
@@ -481,30 +589,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-
-            {% trans 'Stock: ' %}{{ stock.paginator.count }}
-
-            <div class="pagination">
-                <a href="{{ prev_url }}"
-                   class="paginator {% if not stock.has_previous %}disabled{% endif %}"
-                   data-action="previous">
-                    <img src="{% static 'icons/back_black.png' %}"
-                         class="hoverable"
-                         alt="{% trans 'Back' context 'Paginator page button' %}"
-                         title="{% trans 'Back' context 'Paginator page button' %}"/>
-                </a>
-
-                {% trans 'Page' %} {{ stock.number }} {% trans 'of' %} {{ stock.paginator.num_pages }}
-
-                <a href="{{ next_url }}"
-                   class="paginator {% if not stock.has_next %}disabled{% endif %}"
-                   data-action="next">
-                    <img src="{% static 'icons/forward_black.png' %}"
-                         class="hoverable"
-                         alt="{% trans 'Forward' context 'Paginator page button' %}"
-                         title="{% trans 'Forward' context 'Paginator page button' %}"/>
-                </a>
-            </div>
         </div>
     </div>
 {% endblock %}

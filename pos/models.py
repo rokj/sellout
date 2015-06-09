@@ -825,7 +825,7 @@ class StockProduct(SkeletonU):
     deduction = models.DecimalField(_("Stock"),
         max_digits=g.DECIMAL['deduction_digits'],
         decimal_places=g.DECIMAL['deduction_decimal_places'],
-        null=False, blank=False)
+        null=True, blank=True)
 
     def __unicode__(self):
         return self.stock.name + " " + _("for") + " " + self.product.name
