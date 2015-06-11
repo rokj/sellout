@@ -1,10 +1,8 @@
 import base64
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
-from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
-from pyatspi import document
 from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
