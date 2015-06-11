@@ -12,3 +12,5 @@ alter table pos_contact drop column company_name;
 alter table pos_contact add column company_name character varying (200);
 alter table pos_contact drop column city;
 alter table pos_contact add column city character varying (100);
+
+alter table pos_billcontact add column tax_payer character varying(3) not null default 'no';
