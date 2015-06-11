@@ -668,8 +668,8 @@ msgid "Not enough money arrived"
 msgstr ""
 
 #: common/globals.py:346
-msgid "Free"
-msgstr "Brezplačno"
+msgid "Free!"
+msgstr "Brezplačno!"
 
 #: common/globals.py:347
 msgid "First time"
@@ -4078,7 +4078,7 @@ msgid "Cloud Point Of Sale application."
 msgstr "Spletna in mobilna blagajna."
 
 msgid "Free Cloud Point Of Sale application."
-msgstr "Spletna in mobilna blagajna."
+msgstr "Brezplačna spletna in mobilna blagajna."
 
 #: templates/web/index.html:257
 msgid "Your perfect business partner."
@@ -4173,17 +4173,8 @@ msgid "Seriously low prices"
 msgstr "Nizka cena"
 
 #: templates/web/index.html:316
-msgid ""
-"\n"
-"                        Get started from as low as 7&euro; per month.<br />\n"
-"                        It doesn't get much better than this.\n"
-"                    "
-msgstr ""
-"\n"
-"                        Že za 20&euro; na mesec, na spletu ali mobilnem "
-"telefonu.<br />\n"
-"                        Bolje, hitreje in ceneje.\n"
-"                    "
+msgid "Get started for free, on web or on your mobile phone or tablet.<br /> It doesn't get much better than this."
+msgstr "Brezplačno, v vašem priljubljenem brskalniku ali na vaših mobilnih napravah.<br />Bolje, hitreje, ceneje."
 
 #: templates/web/index.html:320
 msgid "Check out other offers"

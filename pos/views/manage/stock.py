@@ -893,7 +893,17 @@ def manage_stock(request, company, page):
 
     documents = Document.objects.filter(company=c).order_by('-number')
 
-    stocks = Stock.objects.filter(company=c).order_by('-datetime_created')
+    search = request.GET.get('search', '')
+    document = request.GET.get('document', '')
+
+    if search == "":
+        if document == "" or document == "all":
+            stocks = Stock.objects.filter(company=c).order_by('-datetime_created')
+        else:
+            stocks = Stock.objects.filter(company=c, document=document).order_by('-datetime_created')
+    else:
+        stock_products = StockProduct.objects.filter(product__name__icontains=search, stock__in=[s.id for s in Stock.objects.filter(company=c)])
+        stocks = Stock.objects.filter(Q(name__icontains=search) | Q(id__in=[sp.id for sp in stock_products]), Q(company=c)).order_by('-datetime_created')
 
     paginator = Paginator(stocks, g.MISC['stocks_per_page'])
 
@@ -949,8 +959,10 @@ def save_stock(request, company):
 
     document = None
 
-    if 'document' in data and data['document'] == '':
+    if 'document' in data and data['document'] == '' or data['document'] == 'all':
         document = None
+    else:
+        document = Document.objects.get(id=data['document'])
 
     # TODO: validate with forms
 

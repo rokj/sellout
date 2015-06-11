@@ -19,7 +19,8 @@
                 entry_date: $("#entry_date"),
                 supplier: $("#supplier"),
                 save_document: $("#save_document"),
-                documents_list: $("#documents_list table")
+                documents_list: $("#documents_list table"),
+                management_content: $("#management_content")
             };
 
             items.add_document.click(function() {
@@ -232,6 +233,8 @@
                     return false;
                 }
             });
+
+            items.management_content.css("overflow", "visible");
         });
     </script>
 {% endblock %}
@@ -310,18 +313,17 @@
                 </thead>
                 <tbody>
                     <tr id="document_input">
-                        <td><input type="text" id="document_number" name="document_number" value="{% trans "document number from supplier" context "stock" %}"/></td>
-                        <td><input type="text" id="document_date" name="document_date" value="{% trans "document date" context "stock" %}"/></td>
-                        <td><input type="text" id="entry_date" name="entry_date" value="{% trans "entry date" context "stock" %}"/></td>
-                        <td>&nbsp;</td>
-                        <td class="controls">
-                            <input type="text" id="supplier" name="supplier" value="{% trans "supplier" context "stock" %}"/>
+                        <td><input type="text" id="document_number" name="document_number" placeholder="{% trans "document number from supplier" context "stock" %}"/></td>
+                        <td><input type="text" id="document_date" name="document_date" placeholder="{% trans "document date" context "stock" %}"/></td>
+                        <td><input type="text" id="entry_date" name="entry_date" placeholder="{% trans "entry date" context "stock" %}"/></td>
+                        <td class="controls" colspan="2">
+                            <input type="text" id="supplier" name="supplier" placeholder="{% trans "supplier" context "stock" %}"/>
                             <button id="save_document" class="save hoverable no-shadow"></button>
                         </td>
                     </tr>
                     {% for document in documents %}
                         <tr id="document_{{ document.id }}">
-                            <td>{{ document.number }}</td>
+                            <td><a href="{% url "pos:manage_stock" company.url_name 1 %}?document={{ document.id }}">{{ document.number }}</a></td>
                             <td>{{ document.document_date }}</td>
                             <td>{{ document.entry_date }}</td>
                             <td>

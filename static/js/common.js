@@ -1,7 +1,7 @@
 // used for all dialogs and pop-up screens
 window.last_dialog_zindex = 15000;
 
-function custom_dialog(title, content, width, buttons){
+function custom_dialog(title, content, width, buttons, close_function){
     // display a dialog with arbitrary content and few different button options
     // title: dialog title, text only
     // content: text or jQuery object
@@ -779,3 +779,18 @@ ContactForm = function(g) {
     p.reset_inputs();
     p.show_contact_dialog();
 };
+
+function getUrlParameter(sParam) {
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++)
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam)
+        {
+            return sParameterName[1];
+        }
+    }
+
+    return "";
+}

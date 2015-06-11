@@ -15,6 +15,8 @@
     /* add padding to account for vertical scrollbar */
     padding-right: 20px;
     width: 300px !important;
+    z-index: 99999;
+    background: rgb(224, 224, 224);
 }
 
 .ui-autocomplete .search-term {
@@ -49,7 +51,11 @@ input.error {
 }
 
 #documents_list td.selected {
-    background-color: orangered;
+    background-color: rgb(255, 223, 211);
+}
+
+#documents_list td a:hover {
+    text-decoration: underline;
 }
 
 .manage-stock-header {
@@ -57,6 +63,10 @@ input.error {
     list-style: none;
     padding: 0px;
     margin: 0px;
+    width: 300px;
+    float: left;
+    display: block;
+    padding-top: 6px;
 }
 
 .manage-stock-header li.active {
@@ -128,33 +138,30 @@ input.error {
     padding: 4px 0px 4px 0px;
     margin: 0px;
     padding: 0px;
-    float: right;
-    margin-top: 2px;
-    margin-right: 8px;
+    /* float: right; */
+    /* margin-top: 2px; */
+    /* margin-right: 8px; */
     text-align: center;
 }
 
 #add_to_selected_products {
     background: url('/static/icons/forward_black.png') no-repeat 11px;
-    float: right;
-    margin-right: 9px;
-    margin-top: 6px;
+    /* float: right; */
+    /* margin-right: 9px; */
+    /* margin-top: 6px; */
     background-color: rgb(221, 221, 221);
+    width: 40px;
+    margin: 0 auto;
 }
 
 #add_to_selected_products:hover {
     cursor: pointer;
 }
 
-ol#selected_products li.data {
-    position: relative;
-    padding-top: 3px;
-}
-
-ol#selected_products .remove {
+#selected_products .remove {
     background: url('/static/icons/delete_active.png') no-repeat;
     position: absolute;
-    top: 0px;
+    top: 12px;
     right: -19px;
     width: 15px;
     height: 15px;
@@ -163,7 +170,7 @@ ol#selected_products .remove {
     box-shadow: none;
 }
 
-ol#selected_products {
+#selected_products {
     list-style-type: none;
     padding: 0px;
     margin: 0px;
@@ -183,15 +190,14 @@ input#for_product {
     margin-top: 2px;
 }
 
-ol#selected_products .deduction {
-    display: inline-block;
-    float: right;
+#selected_products .deduction {
+    position: relative;
+    text-align: center;
 }
 
 ol#selected_products li.header {
     font-weight: bold;
 }
-
 
 #stock_list table div.info {
     background-color: #c8c8c8;
@@ -250,8 +256,12 @@ ol#selected_products li.header {
     width: 100%;
 }
 
-#documents_list, #stock_list {
-    padding-top: 30px;
+#stock_list {
+    padding-top: 74px;
+}
+
+#documents_list {
+    padding-top: 74px;
 }
 
 #documents_list table tr:nth-child(1) td {
@@ -271,12 +281,8 @@ ol#selected_products li.header {
 }
 
 #document_wrapper {
-    max-width: 1200px;
-    text-align: right;
-    display: block;
-    position: absolute;
-    right: 342px;
-    top: 106px;
+    padding-top: 13px;
+    max-width: 400px;
 }
 
 #document_wrapper span {
@@ -288,4 +294,37 @@ ol#selected_products li.header {
 
 td.unit-type {
     text-transform: lowercase;
+}
+
+td span.searched {
+    background-color: rgb(250, 250, 183);
+}
+
+#searcher {
+    float: left;
+    width: 380px;
+}
+
+#selected_products {
+    float: left;
+    width: 400px;
+    padding-left: 15px;
+}
+
+#search_input table tr:last-child td {
+    border: none;
+}
+
+#selected_products table thead td {
+    font-size: 16px;
+}
+
+#selected_products table {
+    max-height: 300px;
+    display: block;
+    overflow: auto;
+}
+
+#selected_products table td {
+    width: 80%;
 }

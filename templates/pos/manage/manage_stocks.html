@@ -27,12 +27,15 @@
                 select_product: $("button#select_product"),
                 for_product_wrapper: $("div#for_product_wrapper"),
                 add_to_selected_products: $("button#add_to_selected_products"),
-                selected_products: $("ol#selected_products"),
+                selected_products: $("#selected_products"),
                 deduction: $("#deduction"),
-                hidden_selected_product: $("ol#selected_products li.hidden"),
-                remove_from_selected_products: $("ol#selected_products button.remove"),
+                hidden_selected_product: $("#selected_products table tr.hidden"),
+                remove_from_selected_products: $("#selected_products button.remove"),
                 management_content: $("#management_content"),
-                stock_products: $("#stock_list td.stock-products")
+                stock_products: $("#stock_list td.stock-products"),
+                search_stock_input: $("#search_stock_input"),
+                search_stock: $("#search_stock"),
+                stock_td_list: $("#stock_list table.list td:nth-child(1)")
             };
 
             var selected_product = '';
@@ -227,7 +230,7 @@
                 if (check_entry_data()) {
                     var for_product = [];
 
-                    $.each(items.selected_products.find('li.data'), function() {
+                    $.each(items.selected_products.find('table .data'), function() {
                         for_product.push([$(this).attr("data-product"), $(this).attr("data-deduction")]);
                     });
 
@@ -275,36 +278,24 @@
             });
 
             items.select_product.on('click', function() {
-                if (items.for_product_wrapper.is(':visible')) {
-                    items.for_product_wrapper.hide();
+                custom_dialog(gettext("Select product for stock"), items.for_product_wrapper, 800, {});
 
-                    keyboard.remove("cancel-when-selecting-products");
-                } else {
-                    items.for_product_wrapper.show();
-
-                    if (items.type.val() == "item") {
-                        items.deduction.prop("disabled", true);
-                        if (items.deduction.val() == "" && items.unit.val() == "Piece") {
-                            items.deduction.val("1");
-                        } else {
-                            items.deduction.val("");
-                        }
+                if (items.type.val() == "item") {
+                    items.deduction.prop("disabled", true);
+                    if (items.deduction.val() == "" && items.unit.val() == "Piece") {
+                        items.deduction.val("1");
                     } else {
-                        items.deduction.prop("disabled", false);
+                        items.deduction.val("");
                     }
-
-                    keyboard.add("cancel-when-selecting-products", 'escape', function () {
-                        items.select_product.click();
-
-                        keyboard.remove("cancel-when-selecting-products");
-                    });
+                } else {
+                    items.deduction.prop("disabled", false);
                 }
             });
 
             function already_selected(to_product) {
                 var inside = false;
 
-                $.each(items.selected_products.find('li.data'), function() {
+                $.each(items.selected_products.find('table .data'), function() {
                     if ($(this).attr("data-product") == to_product) {
                         inside = true;
 
@@ -313,6 +304,14 @@
                 });
 
                 return inside;
+            }
+
+            function update_select_product_text() {
+                if (items.selected_products.find('table .data').length == 0) {
+                    items.select_product.text(gettext("select product"));
+                } else {
+                    items.select_product.text(items.selected_products.find('table .data').length + " " + gettext("selected product/s"));
+                }
             }
 
             items.add_to_selected_products.on('click', function() {
@@ -324,17 +323,18 @@
                     return;
                 }
 
-                if (items.type.val() == "item" && (items.selected_products.find('li.data').length > 0)) {
-                    custom_dialog(gettext("Info"), "You cannot add more than one item to stock with type item.", 300, {ok: gettext("OK") });
-
+                if (items.for_product.val() == gettext("select product")) {
                     return;
                 }
 
-                if (items.selected_products.find('li:not(.hidden)').length == 0) {
-                    var hidden_header_selected_product = items.hidden_selected_product.clone();
+                if (selected_product == "") {
+                    return;
+                }
 
-                    hidden_header_selected_product.removeClass("hidden").addClass("header").html(gettext('for product') + '<span class="deduction">' + gettext('deduction') + '</span>');
-                    html = html + hidden_header_selected_product.prop('outerHTML');
+                if (items.type.val() == "item" && (items.selected_products.find('table .data').length > 0)) {
+                    custom_dialog(gettext("Info"), "You cannot add more than one item to stock with type item.", 300, {ok: gettext("OK")});
+
+                    return;
                 }
 
                 var hidden_selected_product = items.hidden_selected_product.clone();
@@ -344,27 +344,35 @@
                 hidden_selected_product.attr("data-product", to_product);
                 hidden_selected_product.attr("data-deduction", deduction);
 
-                hidden_selected_product.html(items.for_product.val() + '<span class="deduction">' + deduction + '</span>');
-
-                hidden_selected_product.append('<button class="remove"></button>');
+                hidden_selected_product.find('.for-product').text(items.for_product.val());
+                hidden_selected_product.find('.deduction').html(deduction + '<button class="remove"></button>');
 
                 html = html + hidden_selected_product.prop('outerHTML');
 
-                items.selected_products.append(html);
+                items.selected_products.find('tbody').append(html);
+
+                update_select_product_text();
             });
 
             $(document).on('click', items.remove_from_selected_products.selector, function() {
-                $(this).parent().remove();
+                $(this).parent().parent().remove();
 
-                if (items.selected_products.find('li:not(.hidden):not(.header)').length == 0) {
-                    items.selected_products.find('li.header').remove();
-                }
+                update_select_product_text();
             });
 
             items.stock_products.on('mouseover', function() {
                 $(this).find('div.info').show();
             }).on('mouseleave', function() {
                 $(this).find('div.info').hide();
+            });
+
+            items.search_stock.click(function() {
+                location.replace("{% url 'pos:manage_stock' company.url_name 1 %}?search=" + encodeURIComponent(items.search_stock_input.val()));
+            });
+
+            items.document.change(function() {
+                var document_id = $(this).val();
+                location.replace("{% url 'pos:manage_stock' company.url_name 1 %}?document=" + document_id);
             });
 
             products_autocomplete(items.for_product);
@@ -387,6 +395,28 @@
 
             items.type.change();
             items.management_content.css("overflow", "visible");
+            items.stock_input.hide();
+
+            keyboard.add("enter-when-search-focused", 'enter', function () {
+                if (items.search_stock_input.is(":focus")) {
+                    items.search_stock.click();
+                }
+            });
+
+            var search_param = decodeURIComponent(getUrlParameter('search'));
+            if (search_param != "") {
+                items.search_stock_input.val(search_param);
+
+                items.stock_td_list.each(function() {
+                    var td_text = $(this).html();
+
+                    td_text = td_text.replace(new RegExp("(" + search_param + ")", 'gi'), '<span class="searched">$1</span>');
+                    $(this).html(td_text);
+                });
+            }
+
+            var document_param = decodeURIComponent(getUrlParameter('document'));
+            items.document.val(document_param);
         });
     </script>
 {% endblock %}
@@ -407,13 +437,13 @@
             <div class="form-field">
                 <div class="error"></div>
 
-                <input id="general_filter" class="search-filter" maxlength="30" type="text" placeholder="{% trans "Search query" context 'search documents' %}">
+                <input id="search_stock_input" class="search-stock-input" maxlength="30" type="text" placeholder="{% trans "Search query" context 'search documents' %}">
             </div>
 
 
             <div class="form-field">
                 <div class="split-cell first">
-                    <input type="submit" id="update_results" value="{% trans "Search" %}" class="hoverable">
+                    <input type="submit" id="search_stock" value="{% trans "Search" %}" class="hoverable">
                 </div>
 
                 <div class="cleared"></div>
@@ -423,20 +453,6 @@
 
     <div id="stock_section">
         {% include "pos/manage/stock_header.html" %}
-
-        <div id="document_wrapper">
-            <span>{% trans "Document" context "stock" %}:</span>
-
-            <select id="document">
-                <option value="all">{% trans "all documents" context "stock" %}</option>
-
-                {% for document in documents %}
-                    <option value="{{ document.id }}">
-                        {{ document.number }} - {{ document.supplier.company_name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
 
         <div id="stock_list">
             <div class="results-header">
@@ -465,6 +481,20 @@
                 </div>
             </div>
 
+            <div id="document_wrapper">
+                <span>{% trans "Document" context "stock" %}:</span>
+
+                <select id="document">
+                    <option value="all">{% trans "all documents" context "stock" %}</option>
+
+                    {% for document in documents %}
+                        <option value="{{ document.id }}">
+                            {{ document.number }} - {{ document.supplier.company_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <table class="list">
                 <thead>
                     <tr>
@@ -480,9 +510,9 @@
                 </thead>
                 <tbody>
                     <tr id="stock_input">
-                        <td><input type="text" id="stock_name" name="stock_name" value="{% trans "name" %}"/></td>
-                        <td><input type="text" id="quantity" name="quantity" value="{% trans "quantity" %}"/></td>
-                        <td><input type="text" id="stock" name="stock" value="{% trans "stock" %}"/></td>
+                        <td><input type="text" id="stock_name" name="stock_name" placeholder="{% trans "name" %}" /></td>
+                        <td><input type="text" id="quantity" name="quantity" placeholder="{% trans "quantity" %}" /></td>
+                        <td><input type="text" id="stock" name="stock" placeholder="{% trans "stock" %}" /></td>
                         <td>&nbsp;</td>
                         <td>
                             <select id="type" name="type">
@@ -526,13 +556,26 @@
                                         </table>
                                     </div>
                                 </div>
-                                <ol id="selected_products">
-                                    <li class="hidden"></li>
-                                </ol>
+                                <div id="selected_products">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <td>{% trans "for product" %}</td>
+                                                    <td>{% trans "deduction" %}</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="hidden">
+                                                    <td class="for-product"></td>
+                                                    <td class="deduction"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                </div>
                             </div>
                         </td>
                         <td class="controls">
-                            <input type="text" id="purchase_price" name="purchase_price" value="{% trans "purchase price" %}" />
+                            <input type="text" id="purchase_price" name="purchase_price" placeholder="{% trans "purchase price" %}" />
                             <button id="save_stock" class="save hoverable no-shadow"></button>
                         </td>
                     </tr>

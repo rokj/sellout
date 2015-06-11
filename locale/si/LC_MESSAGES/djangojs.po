@@ -575,5 +575,9 @@ msgstr "Ne moreš dodati več kot eno stvar na zalogo na produkt s tipom predmet
 msgid "Piece"
 msgstr "Kom"
 
+msgctxt "search documents"
+msgid "Search query"
+msgstr "Vnesi ime zaloge"
+
 #~ msgid "Current password field must not be empty!"
 #~ msgstr "Za spremembo gesla moraš vnesti trenutno geslo!"
