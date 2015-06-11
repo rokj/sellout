@@ -13,7 +13,7 @@ from django.http import QueryDict
 from bl_auth import User
 from blusers.forms import BlocklogicUserBaseForm
 from blusers.models import BlocklogicUser
-from pos.models import Permission
+from pos.models import Permission, Company
 from pos.views.manage.company import CompanyForm
 from payment.service.Bitcoin import BitcoinRPC
 from common.functions import calculate_btc_price, get_random_string
@@ -166,7 +166,15 @@ try:
             )
             default_permission.save()
 
-        print "New company successfully created..."
+            print "New company successfully created..."
+        else:
+            print "---"
+            print "Company form not valid"
+
+            Company.objects.get(url_name='neko-podjetje').delete()
+
+            raise Exception
+
         print "---"
         print
 
