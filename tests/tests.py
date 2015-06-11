@@ -170,6 +170,7 @@ try:
         else:
             print "---"
             print "Company form not valid"
+            print form.errors
 
             Company.objects.get(url_name='neko-podjetje').delete()
 
