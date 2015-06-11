@@ -141,7 +141,7 @@ try:
             u'vat_no': u'SI20453213',
             u'phone': u'041256411',
             u'street': u'Rasica 13',
-            u'tax_payer': u'False',
+            u'tax_payer': u'no',
             u'postcode': u'1315',
             u'email': u'rok.jaklic@gmail.com'
         }
