@@ -102,6 +102,7 @@ urlpatterns = patterns('',
     url(r_company + '/' + r_manage + _('/stock/documents/') + '(?P<page>\d+)/$', stock.manage_documents, name='manage_documents'),
     url(r_company + '/' + r_manage + _('/stock/documents/save-document') + '/$', stock.save_document, name='save_document'),
     url(r_company + '/' + r_manage + _('/stock/documents/update-document') + '/$', stock.update_document, name='update_document'),
+    url(r_company + '/' + r_manage + _('/stock/documents/delete-document') + '/$', stock.delete_document, name='delete_document'),
 
     # stock - stock
     url(r_company + '/' + r_manage + _('/stock') + '/(?P<page>\d+)/$', stock.manage_stock, name='manage_stock'),

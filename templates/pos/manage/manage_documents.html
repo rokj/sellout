@@ -242,10 +242,7 @@
                     };
 
                     send_data("{% url 'pos:update_document' company.url_name %}", data, "{{ csrf_token }}", function(response) {
-                        console.log(response);
-
                         if (response && 'status' in response && response.status == 'ok') {
-                            console.log('dfsdfs');
                             current_row.find(".data.document-number a").text(data.document_number);
                             current_row.find(".document-date .data").text(data.document_date);
                             current_row.find(".entry-date .data").text(data.entry_date);
@@ -339,6 +336,30 @@
 
             items.cancel_editing.click(function() {
                 click("esc");
+            });
+
+            items.remove_document.click(function() {
+                var row = $(this).closest('tr.document');
+
+                if (row.length == 1) {
+                    row.each(function() {
+                        var document_id = $(this).attr("id").replace("document_", "");
+
+                        confirmation_dialog(gettext("Delete document and all asociated stock?"), "",
+                            function() {
+                                send_data("{% url 'pos:delete_document' company.url_name %}", {document_id: document_id},
+                                    "{{ csrf_token }}", function(response) {
+                                        if(response.status != 'ok'){
+                                            error_message(gettext("Deleting documents and its asociated stock failed"), "");
+                                        } else {
+                                            row.remove();
+                                        }
+                                    });
+                            },
+                            function(){ }
+                        );
+                    });
+                }
             });
 
             var hash = get_url_hash();

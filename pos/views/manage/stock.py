@@ -936,6 +936,40 @@ def update_document(request, company):
 
 
 @login_required
+def delete_document(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist."))
+
+    if not has_permission(request.user, c, 'document', 'edit'):
+        return JsonError(_("You have no permission to edit document"))
+
+    if not has_permission(request.user, c, 'stock', 'edit'):
+        return JsonError(_("You have no permission to edit stock"))
+
+    data = JsonParse(request.POST.get('data'))
+
+    try:
+        document = Document.objects.get(id=data['document_id'], company=c)
+    except Document.DoesNotExist:
+        print "document does not exist"
+
+        return JsonError('document_does_not_exist')
+
+    try:
+        Stock.objects.filter(document=document, company=c).delete()
+    except Exception as e:
+        print "error deleting stock"
+        print e
+
+        return JsonError('could_not_delete_stock')
+
+    document.delete()
+
+    return JsonOk()
+
+@login_required
 def manage_stock(request, company, page):
     c = get_object_or_404(Company, url_name=company)
 
