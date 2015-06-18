@@ -10,6 +10,7 @@
             {% include 'pos/manage/pagination.js' %}
 
             var keyboard = new Keyboard();
+            var selected_supplier = "";
 
             var items = {
                 add_document: $("a#add_document"),
@@ -17,10 +18,16 @@
                 document_number: $("#document_number"),
                 document_date: $("#document_date"),
                 entry_date: $("#entry_date"),
-                supplier: $("#supplier"),
+                supplier: $(".supplier"),
                 save_document: $("#save_document"),
                 documents_list: $("#documents_list table"),
-                management_content: $("#management_content")
+                management_content: $("#management_content"),
+                controls: $("span.controls"),
+                edit_document: $("span.controls .edit"),
+                remove_document: $("span.controls .remove"),
+                update_document: $("span.controls .update"),
+                cancel_editing: $(".controls .cancel"),
+                edit_supplier: $("input.edit-input.supplier")
             };
 
             items.add_document.click(function() {
@@ -39,6 +46,7 @@
                 return false;
             });
 
+            /*
             items.document_number.on('focus', function() {
                 if ($(this).val() == gettext("document number from supplier")) {
                     $(this).val("");
@@ -86,36 +94,37 @@
                     $(this).val(gettext("supplier"));
                 }
             });
+            */
 
-            function check_entry_data() {
+            function check_entry_data(current_row) {
                 var all_ok = true;
 
-                if (items.document_number.val() == gettext("document number from supplier") || items.document_number.val() == "") {
-                    items.document_number.addClass("error");
+                if (current_row.find("input.document-number").val() == gettext("document number from supplier") || current_row.find("input.document-number").val() == "") {
+                    current_row.find("input.document-number").addClass("error");
                     all_ok = false;
                 } else {
-                    items.document_number.removeClass("error");
+                    current_row.find("input.document-number").removeClass("error");
                 }
 
-                if (items.document_date.val() == gettext("document date") || items.document_date.val() == "") {
-                    items.document_date.addClass("error");
+                if (current_row.find("input.document-date").val() == gettext("document date") || current_row.find("input.document-date").val() == "") {
+                    current_row.find("input.document-number").addClass("error");
                     all_ok = false;
                 } else {
-                    items.document_date.removeClass("error");
+                    current_row.find("input.document-number").removeClass("error");
                 }
 
-                if (items.entry_date.val() == gettext("entry date") || items.entry_date.val() == "") {
-                    items.entry_date.addClass("error");
+                if (current_row.find("input.entry-date").val() == gettext("entry date") || current_row.find("input.entry-date").val() == "") {
+                    current_row.find("input.entry-date").addClass("error");
                     all_ok = false;
                 } else {
-                    items.entry_date.removeClass("error");
+                    current_row.find("input.entry-date").removeClass("error");
                 }
 
-                if (items.supplier.val() == gettext("supplier") || items.supplier.val() == "") {
-                    items.supplier.addClass("error");
+                if (current_row.find("input.supplier").val() == gettext("supplier") || current_row.find("input.supplier").val() == "") {
+                    current_row.find("input.supplier").addClass("error");
                     all_ok = false;
                 } else {
-                    items.supplier.removeClass("error");
+                    current_row.find("input.supplier").removeClass("error");
                 }
 
                 if (all_ok) {
@@ -190,18 +199,20 @@
                         });
 
                     },
-                    minLength: 2,
-                    delay: 350
+                    minLength: 0,
+                    delay: 250
                 }).data("ui-autocomplete")._renderItem = autoCompleteRender;
             }
 
             items.save_document.click(function() {
                 if (check_entry_data()) {
+                    var current_row = $(this).parent().parent().parent();
+
                     var data = {
-                        document_number: items.document_number.val(),
-                        document_date: items.document_date.val(),
-                        entry_date: items.entry_date.val(),
-                        supplier: items.supplier.val()
+                        document_number: current_row.find("input.document-number").val(),
+                        document_date: current_row.find("input.document-date").val(),
+                        entry_date: current_row.find("input.entry-date").val(),
+                        supplier: current_row.find("input.supplier").val()
                     };
 
                     send_data("{% url 'pos:save_document' company.url_name %}", data, "{{ csrf_token }}", function(response) {
@@ -212,19 +223,56 @@
                 }
             });
 
-            contacts_autocomplete(items.supplier);
+            items.update_document.click(function() {
+                var current_row = $(this).parent().parent().parent().parent();
 
-            $("#document_date, #entry_date").datepicker({
-                dateFormat:"{{ date_format_js|escapejs }}"
+                if (check_entry_data(current_row)) {
+                    var document_id = current_row.attr("id").replace("document_", "");
+
+                    if (!(document_id && valid(document_id, "only_digits"))) {
+                        return;
+                    }
+
+                    var data = {
+                        document_id: document_id,
+                        document_number: current_row.find("input.document-number").val(),
+                        document_date: current_row.find("input.document-date").val(),
+                        entry_date: current_row.find("input.entry-date").val(),
+                        supplier: current_row.find("input.supplier").val()
+                    };
+
+                    send_data("{% url 'pos:update_document' company.url_name %}", data, "{{ csrf_token }}", function(response) {
+                        console.log(response);
+
+                        if (response && 'status' in response && response.status == 'ok') {
+                            console.log('dfsdfs');
+                            current_row.find(".data.document-number a").text(data.document_number);
+                            current_row.find(".document-date .data").text(data.document_date);
+                            current_row.find(".entry-date .data").text(data.entry_date);
+                            current_row.find(".data.supplier").text(data.supplier);
+
+                            click("esc");
+                        }
+                    });
+                }
             });
 
-            var hash = get_url_hash();
-            var element = $("#document_" + hash);
+            items.edit_document.click(function() {
+                $(this).closest('tr.document').find('.data').each(function() {
+                    var data = $(this).text();
+                });
+            });
 
-            if (element.length > 0) {
-                element.children().addClass("selected");
-                $('html,body').animate({scrollTop: element.offset().top}, 'fast');
-            }
+            items.edit_supplier.on('focus', function() {
+                $(this).val("");
+            });
+
+            contacts_autocomplete(items.supplier);
+
+            $(".document-date, .entry-date").datepicker({
+                dateFormat:"{{ date_format_js|escapejs }}",
+                defaultDate: $(this).val()
+            });
 
             $("a.paginator").unbind().click(function(e) {
                 e.preventDefault();
@@ -234,7 +282,72 @@
                 }
             });
 
+            function show_hide_row(el, show) {
+                if (show) {
+                    el.find('td').addClass('hover');
+                    el.find('td span.controls').css('visibility', 'visible');
+                } else {
+                    el.find('td').removeClass('hover');
+                    el.find('td span.controls').css('visibility', 'hidden');
+                }
+            }
+
+            function bind_rows(bind) {
+                if (bind) {
+                    items.documents_list.find('tr').on('mouseover', function () {
+                        show_hide_row($(this), true);
+                    }).on('mouseleave', function () {
+                        show_hide_row($(this), false);
+                    });
+                } else {
+                    items.documents_list.find('tr').off();
+                }
+            }
+
+            bind_rows(true);
+
             items.management_content.css("overflow", "visible");
+
+            function cancel_editing(el) {
+                bind_rows(true);
+
+                el.closest('tr.document').find('.data').show();
+                el.closest('tr.document').find('.edit-input').hide();
+
+                items.documents_list.find('tr td').removeClass("hover");
+                items.controls.css('z-index', '1');
+
+                el.parent().find('.editing').hide();
+            }
+
+            items.edit_document.click(function() {
+                var el = $(this);
+                el.closest('tr.document').find('.data').hide();
+                el.closest('tr.document').find('.edit-input').show();
+
+                items.controls.css('visibility', 'hidden');
+                // items.controls.css('z-index', '-1');
+
+                el.parent().find('.editing').show().css("visibility", "visible");
+
+                bind_rows(false);
+
+                keyboard.add("cancel-when-editing-document", 'escape', function () {
+                    cancel_editing(el);
+                });
+            });
+
+            items.cancel_editing.click(function() {
+                click("esc");
+            });
+
+            var hash = get_url_hash();
+            var element = $("#document_" + hash);
+
+            if (element.length > 0) {
+                element.children().addClass("selected");
+                $('html,body').animate({scrollTop: element.offset().top}, 'fast');
+            }
         });
     </script>
 {% endblock %}
@@ -313,25 +426,42 @@
                 </thead>
                 <tbody>
                     <tr id="document_input">
-                        <td><input type="text" id="document_number" name="document_number" placeholder="{% trans "document number from supplier" context "stock" %}"/></td>
-                        <td><input type="text" id="document_date" name="document_date" placeholder="{% trans "document date" context "stock" %}"/></td>
-                        <td><input type="text" id="entry_date" name="entry_date" placeholder="{% trans "entry date" context "stock" %}"/></td>
+                        <td><input type="text" class="document-number" placeholder="{% trans "document number from supplier" context "stock" %}"/></td>
+                        <td><input type="text" class="document-date" placeholder="{% trans "document date" context "stock" %}"/></td>
+                        <td><input type="text" class="entry-date" placeholder="{% trans "entry date" context "stock" %}"/></td>
                         <td class="controls" colspan="2">
-                            <input type="text" id="supplier" name="supplier" placeholder="{% trans "supplier" context "stock" %}"/>
-                            <button id="save_document" class="save hoverable no-shadow"></button>
+                            <input type="text" class="supplier" placeholder="{% trans "supplier" context "stock" %}" />
+                            <span class="">
+                                <button id="cancel_document" class="cancel hoverable no-shadow"></button>
+                                <button id="save_document" class="save hoverable no-shadow"></button>
+                            </span>
                         </td>
                     </tr>
                     {% for document in documents %}
-                        <tr id="document_{{ document.id }}">
-                            <td><a href="{% url "pos:manage_stock" company.url_name 1 %}?document={{ document.id }}">{{ document.number }}</a></td>
-                            <td>{{ document.document_date }}</td>
-                            <td>{{ document.entry_date }}</td>
+                        <tr id="document_{{ document.id }}" class="document">
+                            <td><span class="data document-number"><a href="{% url "pos:manage_stock" company.url_name 1 %}?document={{ document.id }}">{{ document.number }}</a></span><input type="text" class="edit-input document-number" value="{{ document.number }}" /></td>
+                            <td class="document-date"><span class="data">{{ document.document_date|date:"Y-m-d" }}</span><input type="text" class="edit-input document-date" value="{{ document.document_date|date:"Y-m-d" }}" /></td>
+                            <td class="entry-date"><span class="data">{{ document.entry_date|date:"Y-m-d" }}</span><input type="text" class="edit-input entry-date" value="{{ document.entry_date|date:"Y-m-d" }}" /></td>
                             <td>
-                                {% if document.supplier.first_name and document.supplier.last_name %}
-                                    {{ document.supplier.first_name }} {{ document.supplier.last_name }}
-                                {% else %}
-                                    {{ document.supplier.company_name }}
-                                {% endif %}
+                                <span class="data supplier">
+                                    {% if document.supplier.first_name and document.supplier.last_name %}
+                                        {{ document.supplier.first_name }} {{ document.supplier.last_name }}, {{ document.supplier.street_address }}, {{ document.supplier.postcode }} {{ document.supplier.city }}, {{ document.supplier.vat }}
+                                    {% else %}
+                                        {{ document.supplier.company_name }}, {{ document.supplier.street_address }}, {{ document.supplier.postcode }} {{ document.supplier.city }}, {{ document.supplier.vat }}
+                                    {% endif %}
+                                </span>
+
+                                <input type="text" class="edit-input supplier" placeholder="{% if document.supplier.first_name and document.supplier.last_name %}{{ document.supplier.first_name }} {{ document.supplier.last_name }}{% else %}{{ document.supplier.company_name }}{% endif %}" value="{% if document.supplier.first_name and document.supplier.last_name %}{{ document.supplier.first_name }} {{ document.supplier.last_name }}{% else %}{{ document.supplier.company_name }}{% endif %}, {{ document.supplier.street_address }}, {{ document.supplier.postcode }} {{ document.supplier.city }}, {{ document.supplier.vat }}" />
+
+                                <span class="controls">
+                                    <button class="edit" title="{% trans "Edit" %}"></button>
+                                    <button class="remove" title="{% trans "Delete" %}"></button>
+
+                                    <span class="editing">
+                                        <button class="cancel" title="{% trans "Cancel" %}"></button>
+                                        <button class="update" title="{% trans "Update" %}"></button>
+                                    </span>
+                                </span>
                             </td>
                         </tr>
                     {% endfor %}

@@ -60,6 +60,7 @@ function custom_dialog(title, content, width, buttons, close_function){
     var unique_id = Math.random().toString();
     var ok_message = "custom-dialog-ok-" + unique_id;
     var cancel_message = "custom-dialog-cancel-" + unique_id;
+    var esc_message = "custom-dialog-esc-" + unique_id;
 
     content.close_dialog = function(){
         shadow.fadeOut("fast", function(){
@@ -74,9 +75,12 @@ function custom_dialog(title, content, width, buttons, close_function){
 
         window.keyboard.remove(ok_message);
         window.keyboard.remove(cancel_message);
+        window.keyboard.remove(esc_message);
     };
 
     close_button.unbind().click(content.close_dialog);
+
+    window.keyboard.add(esc_message, 'escape', content.close_dialog);
 
     // clicks, keys and document events
     function bind_key(button, action, auto_close, message_code, key_code){
@@ -793,4 +797,75 @@ function getUrlParameter(sParam) {
     }
 
     return "";
+}
+
+function valid(value, type, password_length) {
+    var re;
+
+    if (type == "email") {
+        if (email_valid(value)) {
+            return true;
+        }
+    }
+
+    if (type == "not_empty") {
+        if (value != "") {
+            return true;
+        }
+    }
+
+    // only letters and digits plus space
+    if (type == "only_lds") {
+        re = /^[\u00C0-\u1FFF\u2C00-\uD7FF\w0-9 ]+$/;
+        return re.test(value);
+    }
+
+    // only letters, digits, dashes, commas and spaces
+    if (type == "only_ldscd") {
+        re = /^[\u00C0-\u1FFF\u2C00-\uD7FF\w0-9-, ]+$/;
+        return re.test(value);
+    }
+
+    if (type == "only_digits") {
+        re = /^[0-9]+$/;
+        return re.test(value);
+    }
+
+    if (type == "only_letters") {
+        re = /^[\u00C0-\u1FFF\u2C00-\uD7FF\w]+$/;
+        return re.test(value);
+    }
+
+    // only letters plus space
+    if (type == "only_ls") {
+        re = /^[\u00C0-\u1FFF\u2C00-\uD7FF\w ]+$/;
+        return re.test(value);
+    }
+
+    if (type == "password") {
+        re = /^.*(?=.{4,})(?=.*[a-zA-Z-_!#$%&? "]).*$/;
+        return re.test(value);
+
+    }
+
+    if (type == "url") {
+        // re = /(http|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/;
+        re = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
+
+        return re.test(value);
+    }
+
+    if (type == "decimal") {
+        re = /^\d+\.?\d*$/;
+        return re.test(value);
+    }
+
+    return false;
+};
+
+function click(key) {
+    if (key == "esc") {
+        var esc = $.Event("keydown", { keyCode: 27 });
+        $("body").trigger(esc);
+    }
 }

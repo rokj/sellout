@@ -9,8 +9,6 @@
         $(document).ready(function(){
             {% include 'pos/manage/pagination.js' %}
 
-            var keyboard = new Keyboard();
-
             var items = {
                 add_stock: $("a#add_stock"),
                 stock_input: $("#stock_section table tr#stock_input"),
@@ -44,13 +42,13 @@
                 if (items.stock_input.is(":hidden")) {
                     items.stock_input.show();
 
-                    keyboard.add("cancel-when-adding-stock", 'escape', function () {
+                    window.keyboard.add("cancel-when-adding-stock", 'escape', function () {
                         items.add_stock.click();
                     });
                 } else {
                     items.stock_input.hide();
 
-                    keyboard.remove("cancel-when-adding-stock");
+                    window.keyboard.remove("cancel-when-adding-stock");
                 }
             });
 
@@ -386,16 +384,21 @@
             }
 
             $("a.paginator").unbind().click(function(e) {
-                e.preventDefault();
-
                 if ($(this).hasClass("disabled")) {
                     return false;
                 }
+
+                var url = $(this).attr("href") + window.location.search;
+                location.replace(url);
+
+                return false;
             });
 
             items.type.change();
             items.management_content.css("overflow", "visible");
             items.stock_input.hide();
+
+            var keyboard = new Keyboard();
 
             keyboard.add("enter-when-search-focused", 'enter', function () {
                 if (items.search_stock_input.is(":focus")) {
@@ -471,7 +474,7 @@
                     {% trans 'Page' %} {{ stocks.number }} {% trans 'of' %} {{ stocks.paginator.num_pages }}
 
                     <a href="{{ next_url }}"
-                       class="paginator {% if not stock.has_next %}disabled{% endif %}"
+                       class="paginator {% if not stocks.has_next %}disabled{% endif %}"
                        data-action="next">
                         <img src="{% static 'icons/forward_black.png' %}"
                              class="hoverable"

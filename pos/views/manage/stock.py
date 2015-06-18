@@ -882,6 +882,60 @@ def save_document(request, company):
 
 
 @login_required
+def update_document(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist."))
+
+    # permissions
+    if not has_permission(request.user, c, 'document', 'edit'):
+        return JsonError(_("You have no permission to add contacts"))
+
+    data = JsonParse(request.POST.get('data'))
+    supplier = data['supplier']
+    supplier = supplier.split(',')
+
+    contact = None
+    if len(supplier) > 0:
+        vat = supplier[-1].strip()
+
+        if not vat.isdigit():
+            return JsonError("invalid_supplier")
+
+        try:
+            contact = Contact.objects.get(vat=vat)
+        except Contact.DoesNotExist:
+            Contact.copy_from_contact_registry(request, c, vat)
+
+            try:
+                contact = Contact.objects.get(vat=vat)
+            except Contact.DoesNotExist:
+                return JsonError("contact_does_not_exists")
+
+    # TODO: validate with forms
+
+    try:
+        document = Document.objects.get(id=data['document_id'], company=c)
+        document.number = data['document_number']
+        document.entry_date = data['entry_date']
+        document.document_date = data['document_date']
+
+        if contact is not None:
+            document.supplier = contact
+
+        document.updated_by = request.user
+        document.save()
+    except Exception as e:
+        print "Error updating document"
+        print e
+
+        return JsonError('could_not_save_document')
+
+    return JsonOk()
+
+
+@login_required
 def manage_stock(request, company, page):
     c = get_object_or_404(Company, url_name=company)
 

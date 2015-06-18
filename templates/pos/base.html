@@ -116,20 +116,37 @@ blocks:
 
             {% if company %} {# company does not exist when registering #}
                 <ul id="management_menu" class="drop-down">
-                    {# store-related stuff #}
-                    <li class="store"><a href="{% url 'pos:list_bills' company.url_name %}">{% trans 'Bills' %}</a></li>
-                    <li class="store"><a href="{% url 'pos:list_registers' company.url_name %}">{% trans 'Cash Registers' %}</a></li>
-                    <li class="store separator"><a href="{% url 'pos:list_categories' company.url_name %}">{% trans 'Categories' %}</a></li>
-                    <li class="store"><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
-                    <li class="store"><a href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Discounts' %}</a></li>
-                    <li class="store"><a href="{% url 'pos:products' company.url_name %}">{% trans 'Products' %}</a></li>
-                    <li class="store"><a href="{% url 'pos:stats' company.url_name %}">{% trans 'Stats' %}</a></li>
-                    <li class="store"><a href="{% url 'pos:manage_documents' company.url_name 1 %}">{% trans 'Stock' %}</a></li>
-                    <li class="store"><a href="{% url 'pos:list_taxes' company.url_name %}">{% trans 'Taxes' %}</a></li>
-                    {# company-related stuff #}
-                    <li class="company separator"><a href="{% url 'pos:company_settings' company.url_name %}">{% trans 'Configuration' %}</a></li>
-                    <li class="company"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
-                    <li class="company"><a href="{% url 'pos:list_users' company.url_name %}">{% trans 'Users' %}</a></li>
+                    {% if LANGUAGE_CODE == "si" %}
+                        {# store-related stuff #}
+                        <li class="store"><a href="{% url 'pos:products' company.url_name %}">{% trans 'Products' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:list_taxes' company.url_name %}">{% trans 'Taxes' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:list_registers' company.url_name %}">{% trans 'Cash Registers' %}</a></li>
+                        <li class="store separator"><a href="{% url 'pos:list_categories' company.url_name %}">{% trans 'Categories' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Discounts' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:list_bills' company.url_name %}">{% trans 'Bills' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:stats' company.url_name %}">{% trans 'Stats' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:manage_documents' company.url_name 1 %}">{% trans 'Stock' %}</a></li>
+                        {# company-related stuff #}
+                        <li class="company separator"><a href="{% url 'pos:company_settings' company.url_name %}">{% trans 'Configuration' %}</a></li>
+                        <li class="company"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
+                        <li class="company"><a href="{% url 'pos:list_users' company.url_name %}">{% trans 'Users' %}</a></li>
+                    {% else %}
+                        {# store-related stuff #}
+                        <li class="store"><a href="{% url 'pos:list_bills' company.url_name %}">{% trans 'Bills' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:list_registers' company.url_name %}">{% trans 'Cash Registers' %}</a></li>
+                        <li class="store separator"><a href="{% url 'pos:list_categories' company.url_name %}">{% trans 'Categories' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:list_contacts' company.url_name %}">{% trans 'Contacts' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:list_discounts' company.url_name %}">{% trans 'Discounts' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:products' company.url_name %}">{% trans 'Products' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:stats' company.url_name %}">{% trans 'Stats' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:manage_documents' company.url_name 1 %}">{% trans 'Stock' %}</a></li>
+                        <li class="store"><a href="{% url 'pos:list_taxes' company.url_name %}">{% trans 'Taxes' %}</a></li>
+                        {# company-related stuff #}
+                        <li class="company separator"><a href="{% url 'pos:company_settings' company.url_name %}">{% trans 'Configuration' %}</a></li>
+                        <li class="company"><a href="{% url 'pos:edit_company' company.url_name %}">{% trans 'Company' %}</a></li>
+                        <li class="company"><a href="{% url 'pos:list_users' company.url_name %}">{% trans 'Users' %}</a></li>
+                    {% endif %}
                 </ul>
             {% endif %}
         </div>

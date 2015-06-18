@@ -38,6 +38,35 @@
     top: 0px;
 }
 
+.controls button.update {
+    background-image: url("/static/icons/save.png");
+    position: absolute;
+    right: -85px;
+    top: -2px;
+    box-shadow: none;
+}
+
+.controls button.cancel {
+    background-image: url("/static/icons/cancel.png");
+    position: absolute;
+    right: -45px;
+    box-shadow: none;
+    top: -3px;
+}
+
+.controls .editing {
+    display: none;
+}
+
+#document_input .controls button.cancel {
+    right: -42px;
+    top: 0px;
+}
+
+#document_input .controls button.save {
+    right: -82px;
+}
+
 .controls button {
     background-color: transparent;
     background-position: center center;
@@ -258,10 +287,12 @@ ol#selected_products li.header {
 
 #stock_list {
     padding-top: 74px;
+    padding-right: 100px;
 }
 
 #documents_list {
     padding-top: 74px;
+    padding-right: 100px;
 }
 
 #documents_list table tr:nth-child(1) td {
@@ -327,4 +358,47 @@ td span.searched {
 
 #selected_products table td {
     width: 80%;
+}
+
+#documents_list table td.hover {
+    background-color: #DDDDDD
+}
+
+#documents_list table tr td:last-child {
+    position: relative;
+}
+
+span.controls {
+    float: right;
+    visibility: hidden;
+}
+
+span.controls button.edit {
+    background: url('/static/icons/edit_black.png') no-repeat 50% 50%;
+    background-size: 100%;
+    border: none;
+    box-shadow: none;
+    padding: 1px;
+    margin: 0px;
+    width: 30px;
+    height: 30px;
+}
+
+span.controls button.remove {
+    background: url('/static/icons/delete_black.png') no-repeat 50% 50%;
+    /*background-size: 40%;*/
+    border: none;
+    box-shadow: none;
+    padding: 0px;
+    margin: 0px;
+    width: 30px;
+    height: 30px;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+input.edit-input {
+    display: none;
 }

@@ -250,7 +250,7 @@ def contact_to_dict(user, company, c):
     if c.vat:
         ret['vat'] = c.vat
     if c.additional_info:
-        ret['additional_inof'] = c.additional_info
+        ret['additional_info'] = c.additional_info
 
     return ret
 
