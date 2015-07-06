@@ -107,6 +107,8 @@ urlpatterns = patterns('',
     # stock - stock
     url(r_company + '/' + r_manage + _('/stock') + '/(?P<page>\d+)/$', stock.manage_stock, name='manage_stock'),
     url(r_company + '/' + r_manage + _('/stock/save-stock') + '/$', stock.save_stock, name='save_stock'),
+    url(r_company + '/' + r_manage + _('/stock/remove-stock') + '/$', stock.remove_stock, name='remove_stock'),
+    url(r_company + '/' + r_manage + _('/stock/update-stock') + '/$', stock.update_stock, name='update_stock'),
 
     # user
     url(r_company + '/' + r_manage + _('/user-settings') + '/$', configuration.user_settings, name='user_settings'),  # user settings

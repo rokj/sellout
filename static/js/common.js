@@ -62,6 +62,10 @@ function custom_dialog(title, content, width, buttons, close_function){
     var cancel_message = "custom-dialog-cancel-" + unique_id;
     var esc_message = "custom-dialog-esc-" + unique_id;
 
+    close = function() {
+        content.close_dialog();
+    };
+
     content.close_dialog = function(){
         shadow.fadeOut("fast", function(){
             shadow.remove();

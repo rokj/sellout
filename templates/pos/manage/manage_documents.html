@@ -345,7 +345,7 @@
                     row.each(function() {
                         var document_id = $(this).attr("id").replace("document_", "");
 
-                        confirmation_dialog(gettext("Delete document and all asociated stock?"), "",
+                        confirmation_dialog(gettext("Delete document and all associated stock?"), "",
                             function() {
                                 send_data("{% url 'pos:delete_document' company.url_name %}", {document_id: document_id},
                                     "{{ csrf_token }}", function(response) {

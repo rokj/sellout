@@ -1,4 +1,5 @@
 import base64
+import json
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
@@ -10,7 +11,7 @@ from common.images import image_dimensions, import_color_image, create_file_from
 from config.currencies import currencies
 
 from pos.models import Company, Category, Product, Price, Tax, Discount, ProductDiscount, Contact, Document, Stock, \
-    StockProduct
+        StockProduct, StockUpdateHistory
 from common.functions import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
@@ -27,6 +28,10 @@ import decimal
 from sorl.thumbnail import get_thumbnail
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+
+from django.core import serializers
+
+from decimal import Decimal
 
 ###############
 ## products ###
@@ -1111,3 +1116,100 @@ def save_stock(request, company):
     redirect_url = reverse('pos:manage_stock', kwargs={'company': c.url_name, 'page': page}) + "#" + str(stock.id)
 
     return JsonOk(extra={'redirect_url': redirect_url})
+
+
+@login_required
+def remove_stock(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist."))
+
+    # permissions
+    if not has_permission(request.user, c, 'stock', 'edit'):
+        return JsonError(_("You have no permission to edit stock"))
+
+    data = JsonParse(request.POST.get('data'))
+
+    # TODO: validate with forms
+
+    try:
+        stock = Stock.objects.get(id=data['stock_id'], company=c)
+        StockProduct.objects.filter(stock=stock).delete()
+        stock.delete()
+    except Stock.DoesNotExist:
+        print "stock does not exist"
+
+        return JsonError('stock_does_not_exist')
+
+    return JsonOk()
+
+
+@login_required
+def update_stock(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist."))
+
+    if not has_permission(request.user, c, 'stock', 'edit'):
+        return JsonError(_("You have no permission to edit stock"))
+
+    data = JsonParse(request.POST.get('data'))
+
+    try:
+        stock = Stock.objects.get(id=data['stock_id'], company=c)
+
+        history_info = {'previous_state': serializers.serialize("json", [stock])}
+
+        if "stock_left" in data and "stock_purchase_price" in data:
+            if Decimal(data["stock_left"]) > stock.stock:
+                return JsonError("left_stock_bigger_than_stock")
+
+            stock.left_stock = data["stock_left"]
+            stock.purchase_price = data["stock_purchase_price"]
+            stock.save()
+        else:
+            return JsonError("stock_left_or_stock_purchase_price_missing")
+
+        history_info['new_state'] = serializers.serialize("json", [stock])
+        history_info['reason'] = data['reason']
+
+        stock_history = StockUpdateHistory(stock=stock, history_info=json.dumps(history_info), created_by=request.user)
+        stock_history.save()
+
+    except Exception as e:
+        print "Error updating stock"
+        print e
+
+        return JsonError('could_not_update_stock')
+
+    """
+    if 'for_product' in data:
+        for fp in data['for_product']:
+            product_id = fp[0]
+            deduction = fp[1]
+
+            if deduction == "":
+                deduction = 1
+
+            try:
+                product = Product.objects.get(id=int(product_id))
+            except Product.DoesNotExist:
+                continue
+
+            try:
+                stock_product = StockProduct(stock=stock, product=product, deduction=deduction, created_by=request.user)
+                stock_product.save()
+            except Exception as e:
+                print "Error saving stock product"
+                print e
+
+                return JsonError('could_not_save_stock_product')
+
+    stocks = Stock.objects.filter(company=c).order_by('-datetime_created')
+    page = 1
+    i = 0
+    """
+
+    return JsonOk(extra={'stock_history': json.dumps(stock.stock_history)})

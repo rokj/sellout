@@ -1,6 +1,7 @@
 {% extends "pos/manage/manage.html" %}
 {% load static %}
 {% load i18n %}
+{% load common_tags %}
 
 {% block section_head %}
     <link type="text/css" rel="stylesheet" href="{% static 'css/management/stock.css' %}"/>
@@ -33,7 +34,13 @@
                 stock_products: $("#stock_list td.stock-products"),
                 search_stock_input: $("#search_stock_input"),
                 search_stock: $("#search_stock"),
-                stock_td_list: $("#stock_list table.list td:nth-child(1)")
+                stock_td_list: $("#stock_list table.list td:nth-child(1)"),
+                edit_stock: $("span.controls .edit"),
+                remove_stock: $("span.controls .remove"),
+                controls: $("span.controls"),
+                cancel_editing: $(".controls .cancel"),
+                update_stock: $("span.controls .update"),
+                stock_history: $("button.stock-history")
             };
 
             var selected_product = '';
@@ -42,13 +49,13 @@
                 if (items.stock_input.is(":hidden")) {
                     items.stock_input.show();
 
-                    window.keyboard.add("cancel-when-adding-stock", 'escape', function () {
+                    keyboard.add("cancel-when-adding-stock", 'escape', function () {
                         items.add_stock.click();
                     });
                 } else {
                     items.stock_input.hide();
 
-                    window.keyboard.remove("cancel-when-adding-stock");
+                    keyboard.remove("cancel-when-adding-stock");
                 }
             });
 
@@ -373,6 +380,28 @@
                 location.replace("{% url 'pos:manage_stock' company.url_name 1 %}?document=" + document_id);
             });
 
+            function show_hide_row(el, show) {
+                if (show) {
+                    el.find('td').addClass('hover');
+                    el.find('td span.controls').css('visibility', 'visible');
+                } else {
+                    el.find('td').removeClass('hover');
+                    el.find('td span.controls').css('visibility', 'hidden');
+                }
+            }
+
+            function bind_rows(bind) {
+                if (bind) {
+                    items.stock_list.find('tr').on('mouseover', function () {
+                        show_hide_row($(this), true);
+                    }).on('mouseleave', function () {
+                        show_hide_row($(this), false);
+                    });
+                } else {
+                    items.stock_list.find('tr').off();
+                }
+            }
+
             products_autocomplete(items.for_product);
 
             var hash = get_url_hash();
@@ -418,8 +447,164 @@
                 });
             }
 
+            bind_rows(true);
+
+            items.edit_stock.click(function() {
+                var el = $(this);
+
+                if (el.closest('tr.stock').attr("data-type") == "item") {
+                    el.closest('tr.stock').find('.data').hide();
+                    el.closest('tr.stock').find('.edit-input.stock-left').show();
+                    el.closest('tr.stock').find('.edit-input.stock-purchase-price').show();
+                } else {
+                    el.closest('tr.stock').find('.data').hide();
+                    el.closest('tr.stock').find('.edit-input').show();
+                }
+
+                el.closest('button.stock-history').hide();
+
+                items.controls.css('visibility', 'hidden');
+                // items.controls.css('z-index', '-1');
+
+                el.parent().find('.editing').show().css("visibility", "visible");
+
+                bind_rows(false);
+
+                keyboard.add("cancel-when-editing-stock", 'escape', function () {
+                    cancel_editing(el);
+                });
+            });
+
+            items.remove_stock.click(function() {
+                var row = $(this).closest('tr.stock');
+
+                if (row.length == 1) {
+                    row.each(function() {
+                        var stock_id = $(this).attr("id").replace("stock_", "");
+
+                        confirmation_dialog(gettext("Remove from stock?"), "",
+                            function() {
+                                send_data("{% url 'pos:remove_stock' company.url_name %}", {stock_id: stock_id},
+                                    "{{ csrf_token }}", function(response) {
+                                        if(response.status != 'ok'){
+                                            error_message(gettext("Removing of stock failed"), "");
+                                        } else {
+                                            row.remove();
+                                        }
+                                    });
+                            },
+                            function(){ }
+                        );
+                    });
+                }
+            });
+
+            items.update_stock.click(function() {
+                var current_row = $(this).parent().parent().parent().parent();
+
+                current_row.find("input.stock-left").removeClass("error");
+
+                if (current_row.attr("data-type") == "item") {
+                    var data = {
+                        stock_id: current_row.attr("id").replace("stock_", ""),
+                        stock_left: current_row.find("input.stock-left").val(),
+                        stock_purchase_price: current_row.find("input.stock-purchase-price").val()
+                    };
+
+                    if (Big(data['stock_left']).cmp(current_row.attr("data-stock")) == 1 ) {
+                        current_row.find("input.stock-left").addClass("error");
+
+                        return false;
+                    }
+
+                    var textarea = $('<textarea class="reason" rows="4" cols="50" placeholder="' + gettext('tell te reason why e.g. wrong input or broke 2 bottles') + '"></textarea>');
+
+                    var dialog = custom_dialog(gettext("Why do you want to change this?"), textarea, 500, {
+                        yes: gettext("Confirm"),
+                        yes_action: function() {
+                            data['reason'] = textarea.val();
+                            send_data("{% url 'pos:update_stock' company.url_name %}", data, "{{ csrf_token }}", function(response) {
+                                if (response && response['status'] == 'ok') {
+                                    var stock_history = jQuery.parseJSON(response['data']['stock_history']);
+
+                                    if (stock_history.length > 0) {
+                                        current_row.find('.stock-history ol').html("");
+
+                                        var html = '';
+
+                                        for (var i = 0; i < stock_history.length; i++) {
+                                            html = html + '<li><span class="datetime-created">' + stock_history[i]['datetime_created'] + '</span> ' + gettext('quantity') + ' ' + stock_history[i]['previous_state']['quantity'] + ' -> ' + stock_history[i]['new_state']['quantity'] + '</li>';
+                                            html = html + '<li><span class="datetime-created"></span> ' + gettext('purchase price') + ' ' + stock_history[i]['previous_state']['purchase_price'] + ' -> ' + stock_history[i]['new_state']['purchase_price'] + '</li>';
+                                            html = html + '<li><span class="datetime-created"></span> ' + gettext('left in stock') + ' ' + stock_history[i]['previous_state']['left_stock'] + ' -> ' + stock_history[i]['new_state']['left_stock'] + '</li>';
+
+                                            if (stock_history[i]['reason'] != '') {
+                                                html = html + '<li><span class="datetime-created"></span> ' + stock_history[i]['reason'] + '</li>';
+                                            }
+
+                                            html = html + "<li>---</li>";
+
+                                            if (i == 0) {
+                                                current_row.find('.data.stock-left').text(stock_history[i]['new_state']['left_stock']);
+                                                current_row.find('.data.stock-purchase-price').text(stock_history[i]['new_state']['purchase_price']);
+                                            }
+                                        }
+
+                                        current_row.find('.stock-history ol').html(html);
+
+                                        current_row.find('button.stock-history').show();
+                                    }
+
+                                    items.cancel_editing.click();
+                                }
+                            });
+                        },
+                        no: gettext("Cancel"),
+                        no_action: function() {
+                            keyboard.remove('cancel-when-adding-reason');
+                        }
+                    });
+
+                    keyboard.add("cancel-when-adding-reason", 'escape', function () {
+                        $(".custom-dialog-close-button").click();
+
+                        keyboard.remove('cancel-when-adding-reason');
+                    });
+                }
+            });
+
+            function cancel_editing(el) {
+                bind_rows(true);
+
+                el.closest('tr.stock').find('.data').show();
+                el.closest('tr.stock').find('.edit-input').hide();
+
+                items.stock_list.find('tr td').removeClass("hover");
+                items.controls.css('z-index', '1');
+
+                el.parent().find('.editing').hide();
+
+                el.closest('button.stock-history').show();
+
+                keyboard.remove("cancel-when-editing-stock");
+            }
+
+            items.stock_history.on('mouseover', function() {
+                $(this).next('.stock-history').show();
+            }).on('mouseleave', function() {
+                $(this).next('.stock-history').hide();
+            });
+
+
+            items.cancel_editing.click(function() {
+                click("esc");
+            });
+
             var document_param = decodeURIComponent(getUrlParameter('document'));
-            items.document.val(document_param);
+            if (document_param != "") {
+                items.document.val(document_param);
+            } else {
+                items.document.val("all");
+            }
         });
     </script>
 {% endblock %}
@@ -584,7 +769,7 @@
                     </tr>
 
                     {% for stock in stocks %}
-                        <tr id="stock_{{ stock.id }}">
+                        <tr id="stock_{{ stock.id }}" class="stock" data-type="{{ stock.stock_type }}" data-quantity="{{ stock.quantity }}" data-stock="{{ stock.stock }}">
                             <td>
                                 {% if stock.stock_type == "item" %}
                                     {% if stock.stock_products|length > 0 %}
@@ -593,10 +778,35 @@
                                 {% elif stock.stock_type == "ingredient" %}
                                     {{ stock.name }}
                                 {% endif %}
+
+                                <input type="text" class="edit-input stock-name" value="{{ stock.name }}" />
                             </td>
-                            <td>{{ stock.quantity }}</td>
-                            <td>{{ stock.stock}}</td>
-                            <td>{{ stock.left_stock }}</td>
+                            <td>
+                                {% if stock.stock_type == "item" %}
+
+                                {% else %}
+                                    {{ stock.quantity|format_number }} <input type="text" class="edit-input stock-quantity" value="{{ stock.quantity|format_number }}" />
+                                {% endif %}
+                            </td>
+                            <td>{{ stock.stock|format_number }} <input type="text" class="edit-input stock-stock" value="{{ stock.stock|format_number }}" /> </td>
+                            <td class="relative">
+                                <span class="data stock-left">{{ stock.left_stock|format_number }}</span> <input type="text" class="edit-input stock-left" value="{{ stock.left_stock|format_number }}" />
+
+                                <button class="stock-history {% if stock.stock_history|length == 0 %}hidden{% endif %}"></button>
+
+                                <div class="stock-history {% if stock.stock_history|length == 0 %}hidden{% endif %}" style="">
+                                    <ol>
+                                        {% for sh in stock.stock_history %}
+                                            <li><span class="datetime-created">{{ sh.datetime_created }}</span> {% trans "quantity" %} {{ sh.previous_state.quantity|format_number }} -> {{ sh.new_state.quantity }}</li>
+                                            <li><span class="datetime-created"></span> {% trans "purchase price" %} {{ sh.previous_state.purchase_price }} -> {{ sh.new_state.purchase_price }}</li>
+                                            <li><span class="datetime-created"></span> {% trans "left in stock" %} {{ sh.previous_state.left_stock }} -> {{ sh.new_state.left_stock }}</li>
+
+                                            {% if sh.reason and sh.reason != '' %}<li><span class="datetime-created"></span> {% trans "reason" %} {{ sh.reason }}</li>{% endif %}
+                                            <li>---</li>
+                                        {% endfor %}
+                                    </ol>
+                                </div>
+                            </td>
                             <td>
                                 {% if stock.stock_type == "item" %}
                                     {% trans "item" %}
@@ -630,7 +840,21 @@
                                     </div>
                                 {% endif %}
                             </td>
-                            <td>{% if stock.purchase_price %}{{ stock.purchase_price }}{% endif %}</td>
+                            <td class="relative">
+                                <span class="data stock-purchase-price">{% if stock.purchase_price %}{{ stock.purchase_price|format_number }}{% endif %}</span>
+
+                                <input type="text" class="edit-input stock-purchase-price" value="{{ stock.purchase_price|format_number }}" />
+
+                                 <span class="controls">
+                                    <button class="edit" title="{% trans "Edit" %}"></button>
+                                    <button class="remove" title="{% trans "Delete" %}"></button>
+
+                                    <span class="editing">
+                                        <button class="cancel" title="{% trans "Cancel" %}"></button>
+                                        <button class="update" title="{% trans "Update" %}"></button>
+                                    </span>
+                                </span>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>

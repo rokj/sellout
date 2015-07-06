@@ -4896,3 +4896,6 @@ msgstr "odbitek"
 
 msgid "item"
 msgstr "predmet"
+
+msgid "left in stock"
+msgstr "na zalogi"

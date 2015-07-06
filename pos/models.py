@@ -1,7 +1,7 @@
 from django.db import models
+from django.template import defaultfilters
 from django.utils.translation import ugettext as _
-from django.db.models.signals import pre_save, pre_delete, post_save, post_delete
-from django.dispatch import receiver
+from django.core import serializers
 from sorl import thumbnail
 from blusers.models import BlocklogicUser
 from common.functions import ImagePath
@@ -13,8 +13,10 @@ from config.countries import country_choices, country_by_code
 
 import datetime as dtm
 import random
+import json
 
 ### company ###
+from pos.templatetags.common_tags import format_number
 from registry.models import ContactRegistry
 
 
@@ -232,16 +234,32 @@ class Product(SkeletonU, ProductAbstract):
             return None
 
     def destockify(self, quantity):
+        deduction = None
+        previous = None
+
         for s in self.get_stock():
-            s.stock.left_stock = s.stock.left_stock-(quantity*s.deduction)
+            if deduction is not None:
+                s.stock.left_stock = s.stock.left_stock-(abs(deduction))
+                previous.stock.left_stock = 0
+                previous.stock.save()
+            else:
+                s.stock.left_stock = s.stock.left_stock-(quantity*s.deduction)
             s.stock.save()
+
+            if s.stock.left_stock < 0:
+                deduction = s.stock.left_stock
+                previous = s
+            else:
+                break
 
     @property
     def stock(self):
         return self.get_stock()
 
     def get_stock(self):
-        stock_products = StockProduct.objects.filter(product=self)
+        # FIFO
+        # do not change this, unless you know what are you doing. self.destockify is based on this order
+        stock_products = StockProduct.objects.filter(product=self).order_by("stock__datetime_created")
 
         return stock_products
 
@@ -816,6 +834,38 @@ class Stock(SkeletonU):
     purchase_price = models.DecimalField(_("Purchase price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],
                                      decimal_places=g.DECIMAL['currency_decimal_places'], blank=True, null=True)
 
+    @property
+    def stock_history(self):
+        return self.get_stock_history()
+
+    def get_stock_history(self):
+        stock_history = []
+
+        for sh in StockUpdateHistory.objects.filter(stock=self).order_by('-datetime_created'):
+            history_info = json.loads(sh.history_info)
+
+            data = {}
+            data['previous_state'] = {}
+            data['new_state'] = {}
+            data['datetime_created'] = str(defaultfilters.date(sh.datetime_created, "Y-m-d H:m"))
+            data['reason'] = str(history_info['reason'])
+
+            for obj in serializers.deserialize("json", history_info['previous_state']):
+                data['previous_state']['quantity'] = str(format_number(obj.object.quantity))
+                data['previous_state']['stock'] = str(format_number(obj.object.stock))
+                data['previous_state']['left_stock'] = str(format_number(obj.object.left_stock))
+                data['previous_state']['purchase_price'] = str(format_number(obj.object.purchase_price))
+
+            for obj in serializers.deserialize("json", history_info['new_state']):
+                data['new_state']['quantity'] = str(format_number(obj.object.quantity))
+                data['new_state']['stock'] = str(format_number(obj.object.stock))
+                data['new_state']['left_stock'] = str(format_number(obj.object.left_stock))
+                data['new_state']['purchase_price'] = str(format_number(obj.object.purchase_price))
+
+            stock_history.append(data)
+
+        return stock_history
+
 class StockProduct(SkeletonU):
     """
     must be fast
@@ -832,5 +882,10 @@ class StockProduct(SkeletonU):
 
     class Meta:
         unique_together = (('stock', 'product'),)
+
+
+class StockUpdateHistory(SkeletonU):
+    stock = models.ForeignKey(Stock, null=False, blank=False)
+    history_info = models.TextField(null=False, blank=True)
 
 import signals
