@@ -40,7 +40,9 @@
                 controls: $("span.controls"),
                 cancel_editing: $(".controls .cancel"),
                 update_stock: $("span.controls .update"),
-                stock_history: $("button.stock-history")
+                stock_history: $("button.stock-history"),
+                unit_text: $(".unit-text"),
+                without_backslash_unit_text: $(".without-backslash.unit-text")
             };
 
             var selected_product = '';
@@ -129,12 +131,12 @@
                     items.stock_name.removeClass("error");
                 }
 
-                if (items.quantity.val() == gettext("quantity") || items.quantity.val() == "") {
-                    items.quantity.addClass("error");
-                    all_ok = false;
-                } else {
-                    items.quantity.removeClass("error");
-                }
+{#                if (items.quantity.val() == gettext("quantity") || items.quantity.val() == "") {#}
+{#                    items.quantity.addClass("error");#}
+{#                    all_ok = false;#}
+{#                } else {#}
+{#                    items.quantity.removeClass("error");#}
+{#                }#}
 
                 if (items.stock.val() == gettext("stock") || items.stock.val() == "") {
                     items.stock.addClass("error");
@@ -242,7 +244,7 @@
                     var data = {
                         document: items.document.val(),
                         stock_name: items.stock_name.val(),
-                        quantity: items.quantity.val(),
+{#                        quantity: items.quantity.val(),#}
                         stock: items.stock.val(),
                         type: items.type.val(),
                         unit: items.unit.val(),
@@ -263,7 +265,8 @@
                     items.stock_name.prop("disabled", true);
                     items.stock_name.val(items.for_product.val());
 
-                    items.stock.prop("disabled", true);
+                    items.stock.prop("disabled", false);
+
                     if (items.quantity.val() == gettext("quantity")) {
                         items.stock.val(gettext("will be the same as quantity"));
                     }
@@ -274,12 +277,23 @@
                     items.stock.prop("disabled", false);
                     items.stock.val("");
                 }
+
+                change_unit();
             });
+
+            function change_unit() {
+                items.unit_text.text(" / " + gettext(items.unit.val()));
+                items.without_backslash_unit_text.text(gettext(items.unit.val()));
+            }
 
             items.quantity.on('input', function() {
                 if (items.type.val() == "item") {
                     items.stock.val(items.quantity.val());
                 }
+            });
+
+            items.unit.on('change', function() {
+                change_unit()
             });
 
             items.select_product.on('click', function() {
@@ -342,6 +356,10 @@
                     return;
                 }
 
+                if (items.type.val() == "item") {
+                    items.stock_name.val(items.for_product.val());
+                }
+
                 var hidden_selected_product = items.hidden_selected_product.clone();
 
                 hidden_selected_product.removeClass("hidden").addClass("data");
@@ -361,6 +379,10 @@
 
             $(document).on('click', items.remove_from_selected_products.selector, function() {
                 $(this).parent().parent().remove();
+
+                if (items.type.val() == "item") {
+                    items.stock_name.val("");
+                }
 
                 update_select_product_text();
             });
@@ -530,12 +552,13 @@
                                     if (stock_history.length > 0) {
                                         current_row.find('.stock-history ol').html("");
 
-                                        var html = '';
+                                        var html = '<li class="history>' + gettext('history') + '</li>';
+                                        html = html + "<li>&nbsp;</li>";
 
                                         for (var i = 0; i < stock_history.length; i++) {
-                                            html = html + '<li><span class="datetime-created">' + stock_history[i]['datetime_created'] + '</span> ' + gettext('quantity') + ' ' + stock_history[i]['previous_state']['quantity'] + ' -> ' + stock_history[i]['new_state']['quantity'] + '</li>';
+{#                                            html = html + '<li><span class="datetime-created"></span> ' + gettext('quantity') + ' ' + stock_history[i]['previous_state']['quantity'] + ' -> ' + stock_history[i]['new_state']['quantity'] + '</li>';#}
+                                            html = html + '<li><span class="datetime-created">' + stock_history[i]['datetime_created'] + '</span> ' + gettext('left in stock') + ' ' + stock_history[i]['previous_state']['left_stock'] + ' -> ' + stock_history[i]['new_state']['left_stock'] + '</li>';
                                             html = html + '<li><span class="datetime-created"></span> ' + gettext('purchase price') + ' ' + stock_history[i]['previous_state']['purchase_price'] + ' -> ' + stock_history[i]['new_state']['purchase_price'] + '</li>';
-                                            html = html + '<li><span class="datetime-created"></span> ' + gettext('left in stock') + ' ' + stock_history[i]['previous_state']['left_stock'] + ' -> ' + stock_history[i]['new_state']['left_stock'] + '</li>';
 
                                             if (stock_history[i]['reason'] != '') {
                                                 html = html + '<li><span class="datetime-created"></span> ' + stock_history[i]['reason'] + '</li>';
@@ -687,7 +710,7 @@
                 <thead>
                     <tr>
                         <td>{% trans "Name" %}</td>
-                        <td>{% trans "Quantity" %}</td>
+{#                        <td>{% trans "Quantity" %}</td>#}
                         <td>{% trans "Stock" %}</td>
                         <td>{% trans "Left in stock" %}</td>
                         <td>{% trans "Type" %}</td>
@@ -699,8 +722,12 @@
                 <tbody>
                     <tr id="stock_input">
                         <td><input type="text" id="stock_name" name="stock_name" placeholder="{% trans "name" %}" /></td>
-                        <td><input type="text" id="quantity" name="quantity" placeholder="{% trans "quantity" %}" /></td>
-                        <td><input type="text" id="stock" name="stock" placeholder="{% trans "stock" %}" /></td>
+{#                        <td><input type="text" id="quantity" name="quantity" placeholder="{% trans "quantity" %}" /></td>#}
+                        <td>
+                            <input type="text" id="stock" name="stock" placeholder="{% trans "stock" %}" />
+
+                            <span class="unit-text without-backslash">Kom</span>
+                        </td>
                         <td>&nbsp;</td>
                         <td>
                             <select id="type" name="type">
@@ -732,7 +759,7 @@
                                             <tbody>
                                                 <tr>
                                                     <td><input type="text" id="for_product" name="for_product" value="{% trans "select product" %}" /></td>
-                                                    <td><input type="text" id="deduction" /></td>
+                                                    <td><input type="text" id="deduction" /><span class="unit-text without-backslash"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td>&nbsp;</td>
@@ -764,6 +791,9 @@
                         </td>
                         <td class="controls">
                             <input type="text" id="purchase_price" name="purchase_price" placeholder="{% trans "purchase price" %}" />
+
+                            <span class="unit-text">Kom</span>
+
                             <button id="save_stock" class="save hoverable no-shadow"></button>
                         </td>
                     </tr>
@@ -781,13 +811,13 @@
 
                                 <input type="text" class="edit-input stock-name" value="{{ stock.name }}" />
                             </td>
-                            <td>
-                                {% if stock.stock_type == "item" %}
-
-                                {% else %}
-                                    {{ stock.quantity|format_number }} <input type="text" class="edit-input stock-quantity" value="{{ stock.quantity|format_number }}" />
-                                {% endif %}
-                            </td>
+{#                            <td>#}
+{#                                {% if stock.stock_type == "item" %}#}
+{##}
+{#                                {% else %}#}
+{#                                    {{ stock.quantity|format_number }} <input type="text" class="edit-input stock-quantity" value="{{ stock.quantity|format_number }}" />#}
+{#                                {% endif %}#}
+{#                            </td>#}
                             <td>{{ stock.stock|format_number }} <input type="text" class="edit-input stock-stock" value="{{ stock.stock|format_number }}" /> </td>
                             <td class="relative">
                                 <span class="data stock-left">{{ stock.left_stock|format_number }}</span> <input type="text" class="edit-input stock-left" value="{{ stock.left_stock|format_number }}" />
@@ -796,10 +826,13 @@
 
                                 <div class="stock-history {% if stock.stock_history|length == 0 %}hidden{% endif %}" style="">
                                     <ol>
+                                        <li class="history">{% trans "history" %}</li>
+                                        <li class="history">&nbsp;</li>
+
                                         {% for sh in stock.stock_history %}
-                                            <li><span class="datetime-created">{{ sh.datetime_created }}</span> {% trans "quantity" %} {{ sh.previous_state.quantity|format_number }} -> {{ sh.new_state.quantity }}</li>
+{#                                            <li><span class="datetime-created">{{ sh.datetime_created }}</span> {% trans "quantity" %} {{ sh.previous_state.quantity|format_number }} -> {{ sh.new_state.quantity }}</li>#}
+                                            <li><span class="datetime-created">{{ sh.datetime_created }}</span> {% trans "left in stock" %} {{ sh.previous_state.left_stock }} -> {{ sh.new_state.left_stock }}</li>
                                             <li><span class="datetime-created"></span> {% trans "purchase price" %} {{ sh.previous_state.purchase_price }} -> {{ sh.new_state.purchase_price }}</li>
-                                            <li><span class="datetime-created"></span> {% trans "left in stock" %} {{ sh.previous_state.left_stock }} -> {{ sh.new_state.left_stock }}</li>
 
                                             {% if sh.reason and sh.reason != '' %}<li><span class="datetime-created"></span> {% trans "reason" %} {{ sh.reason }}</li>{% endif %}
                                             <li>---</li>
@@ -845,9 +878,11 @@
 
                                 <input type="text" class="edit-input stock-purchase-price" value="{{ stock.purchase_price|format_number }}" />
 
-                                 <span class="controls">
+                                <span class="unit-text"></span>
+
+                                <span class="controls">
                                     <button class="edit" title="{% trans "Edit" %}"></button>
-                                    <button class="remove" title="{% trans "Delete" %}"></button>
+                                    <!-- <button class="remove" title="{% trans "Delete" %}"></button> -->
 
                                     <span class="editing">
                                         <button class="cancel" title="{% trans "Cancel" %}"></button>

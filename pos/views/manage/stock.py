@@ -1062,7 +1062,7 @@ def save_stock(request, company):
             company=c,
             document=document,
             name=data['stock_name'],
-            quantity=data['quantity'],
+            # quantity=data['quantity'],
             stock=data['stock'],
             left_stock=data['stock'],
             stock_type=data['type'],

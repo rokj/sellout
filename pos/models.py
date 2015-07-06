@@ -818,7 +818,7 @@ class Stock(SkeletonU):
     quantity = models.DecimalField(_("Number of items put in stock"),
         max_digits=g.DECIMAL['quantity_digits'],
         decimal_places=g.DECIMAL['quantity_decimal_places'],
-        null=False, blank=False)
+        null=True, blank=True)
     stock = models.DecimalField(_("Stock"),
         max_digits=g.DECIMAL['quantity_digits'],
         decimal_places=g.DECIMAL['quantity_decimal_places'],

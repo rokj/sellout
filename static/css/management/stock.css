@@ -378,7 +378,8 @@ span.controls {
     visibility: hidden;
     display: block;
     position: absolute;
-    right: -10px;
+    /*right: -10px;*/
+    right: -45px;
     top: 4px;
     width: 80px;
 }
@@ -450,4 +451,16 @@ div.stock-history ol {
 div.stock-history span.datetime-created {
     min-width: 100px;
     display: inline-block;
+}
+
+div.stock-history li.history {
+    text-align: center;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.unit-text {
+    font-size: 12px;
+    text-transform: lowercase;
+    color: #646464;
 }
