@@ -34,24 +34,24 @@
 .controls button#save_document, .controls button#save_stock {
     background-image: url("/static/icons/save.png");
     position: absolute;
-    right: -40px;
-    top: 0px;
+    right: -42px;
+    top: -6px;
 }
 
 .controls button.update {
     background-image: url("/static/icons/save.png");
     position: absolute;
-    right: -85px;
-    top: -2px;
+    right: -42px;
+    top: -6px;
     box-shadow: none;
 }
 
 .controls button.cancel {
     background-image: url("/static/icons/cancel.png");
     position: absolute;
-    right: -45px;
+    right: 0px;
     box-shadow: none;
-    top: -3px;
+    top: -5px;
 }
 
 .controls .editing {
@@ -127,14 +127,14 @@ input.error {
     float: right;
 }
 
-#select_product {
-    width: 83%;
+.select-products {
+    width: 83% !important;
     color: #000000;
     font-weight: bold;
     margin: 5px 5px;
 }
 
-#select_product:hover {
+.select-products:hover {
     cursor: pointer;
     background-color: #c8c8c8;
 }
@@ -380,7 +380,7 @@ span.controls {
     position: absolute;
     /*right: -10px;*/
     right: -45px;
-    top: 4px;
+    top: 10px;
     width: 80px;
 }
 
@@ -463,4 +463,12 @@ div.stock-history li.history {
     font-size: 12px;
     text-transform: lowercase;
     color: #646464;
+}
+
+.deduction.unit-text {
+    padding-left: 6px;
+}
+
+button.select-products {
+    display: none;
 }

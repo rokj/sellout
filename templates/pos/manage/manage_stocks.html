@@ -10,6 +10,8 @@
         $(document).ready(function(){
             {% include 'pos/manage/pagination.js' %}
 
+            window.keyboard = new Keyboard();
+
             var items = {
                 add_stock: $("a#add_stock"),
                 stock_input: $("#stock_section table tr#stock_input"),
@@ -23,7 +25,7 @@
                 save_stock: $("#save_stock"),
                 stock_list: $("#stock_list table"),
                 document: $("#document"),
-                select_product: $("button#select_product"),
+                select_product: $("button.select-products"),
                 for_product_wrapper: $("div#for_product_wrapper"),
                 add_to_selected_products: $("button#add_to_selected_products"),
                 selected_products: $("#selected_products"),
@@ -48,16 +50,30 @@
             var selected_product = '';
 
             items.add_stock.click(function() {
+                if (already_editing()) {
+                    return false;
+                }
+
                 if (items.stock_input.is(":hidden")) {
                     items.stock_input.show();
 
-                    keyboard.add("cancel-when-adding-stock", 'escape', function () {
+                    items.stock_input.find('.controls').css("visibility", "visible");
+
+                    window.keyboard.add("cancel-when-adding-stock", 'escape', function () {
                         items.add_stock.click();
                     });
+
+                    items.stock_input.find('.select-products').show();
+
+                    bind_rows(false);
+                    bind_stock_products(false);
                 } else {
                     items.stock_input.hide();
 
                     keyboard.remove("cancel-when-adding-stock");
+
+                    bind_rows(true);
+                    bind_stock_products(true);
                 }
             });
 
@@ -296,8 +312,31 @@
                 change_unit()
             });
 
+            function fill_for_selection(el) {
+                items.selected_products.find('tbody tr:not(.hidden)').remove();
+
+                el.find('ol li:not(.header)').each(function() {
+                    var product_name = $(this).attr("data-product-name");
+                    var deduction = $(this).attr("data-deduction");
+
+                    var new_element = items.selected_products.find('tbody tr.hidden').clone();
+                    new_element.find('.for-product').html(product_name);
+                    new_element.find('.deduction').html(deduction + '<button class="remove" data-stock="' + $(this).attr("data-stock") + '" data-stock-product="' + $(this).attr("data-stock-product") + '"></button>');
+                    new_element.removeClass('hidden');
+
+                    var html = new_element.prop('outerHTML');
+
+                    items.selected_products.find('tbody').append(html);
+                });
+            }
+
             items.select_product.on('click', function() {
                 custom_dialog(gettext("Select product for stock"), items.for_product_wrapper, 800, {});
+
+                if ($(this).hasClass("edit-input")) {
+                    fill_for_selection($(this).parent().find('.info'));
+                } else {
+                }
 
                 if (items.type.val() == "item") {
                     items.deduction.prop("disabled", true);
@@ -380,6 +419,13 @@
             $(document).on('click', items.remove_from_selected_products.selector, function() {
                 $(this).parent().parent().remove();
 
+                var stock_id = $(this).attr("data-stock");
+                var stock_product_id = $(this).attr("data-stock-product");
+
+                $('div.info[data-stock="' + stock_id + '"] li[data-stock-product="' + stock_product_id + '"]').each(function() {
+                    $(this).remove();
+                });
+
                 if (items.type.val() == "item") {
                     items.stock_name.val("");
                 }
@@ -387,11 +433,19 @@
                 update_select_product_text();
             });
 
-            items.stock_products.on('mouseover', function() {
-                $(this).find('div.info').show();
-            }).on('mouseleave', function() {
-                $(this).find('div.info').hide();
-            });
+            function bind_stock_products(bind) {
+                if (bind) {
+                    items.stock_products.on('mouseover', function() {
+                        $(this).find('div.info').show();
+                    }).on('mouseleave', function() {
+                        $(this).find('div.info').hide();
+                    });
+                } else {
+                    items.stock_products.off();
+                }
+            }
+
+            bind_stock_products(true);
 
             items.search_stock.click(function() {
                 location.replace("{% url 'pos:manage_stock' company.url_name 1 %}?search=" + encodeURIComponent(items.search_stock_input.val()));
@@ -449,9 +503,7 @@
             items.management_content.css("overflow", "visible");
             items.stock_input.hide();
 
-            var keyboard = new Keyboard();
-
-            keyboard.add("enter-when-search-focused", 'enter', function () {
+            window.keyboard.add("enter-when-search-focused", 'enter', function () {
                 if (items.search_stock_input.is(":focus")) {
                     items.search_stock.click();
                 }
@@ -471,30 +523,61 @@
 
             bind_rows(true);
 
+            function already_editing() {
+                var already_editing = false;
+
+                items.stock_list.find('tr.stock').each(function() {
+                    if ($(this).hasClass("active")) {
+                        already_editing = true;
+
+                        return false;
+                    }
+                });
+
+                return already_editing;
+            }
+
             items.edit_stock.click(function() {
                 var el = $(this);
 
-                if (el.closest('tr.stock').attr("data-type") == "item") {
-                    el.closest('tr.stock').find('.data').hide();
-                    el.closest('tr.stock').find('.edit-input.stock-left').show();
-                    el.closest('tr.stock').find('.edit-input.stock-purchase-price').show();
+                if (el.closest('tr.stock').hasClass('active')) {
+                    el.closest('tr.stock').removeClass('active');
+                    click('esc');
                 } else {
-                    el.closest('tr.stock').find('.data').hide();
-                    el.closest('tr.stock').find('.edit-input').show();
+                    el.closest('tr.stock').addClass('active');
+
+                    if (el.closest('tr.stock').attr("data-type") == "item") {
+                        el.closest('tr.stock').find('.data:not(.stock-name)').hide();
+                        el.closest('tr.stock').find('.edit-input.stock-left').show();
+                        el.closest('tr.stock').find('.edit-input.stock-purchase-price').show();
+                    } else {
+                        el.closest('tr.stock').find('.data').hide();
+
+                        el.closest('tr.stock').find('.edit-input').show();
+                    }
+
+                    var stock_products_length = el.closest('tr.stock').find('.stock-products .stock-products-length').text();
+
+                    if (stock_products_length == "0") {
+                        el.closest('tr.stock').find('button.select-products').text(gettext("select product"));
+                    } else {
+                        el.closest('tr.stock').find('button.select-products').text(stock_products_length + " " + gettext("selected product/s"));
+                    }
+
+                    el.closest('button.stock-history').hide();
+
+                    // items.controls.css('visibility', 'hidden');
+                    // items.controls.css('z-index', '-1');
+
+                    el.parent().find('.editing').show().css("visibility", "visible");
+
+                    bind_rows(false);
+                    bind_stock_products(false);
+
+                    window.keyboard.add("cancel-when-editing-stock", 'escape', function () {
+                        cancel_editing(el);
+                    });
                 }
-
-                el.closest('button.stock-history').hide();
-
-                items.controls.css('visibility', 'hidden');
-                // items.controls.css('z-index', '-1');
-
-                el.parent().find('.editing').show().css("visibility", "visible");
-
-                bind_rows(false);
-
-                keyboard.add("cancel-when-editing-stock", 'escape', function () {
-                    cancel_editing(el);
-                });
             });
 
             items.remove_stock.click(function() {
@@ -587,7 +670,7 @@
                         }
                     });
 
-                    keyboard.add("cancel-when-adding-reason", 'escape', function () {
+                    window.keyboard.add("cancel-when-adding-reason", 'escape', function () {
                         $(".custom-dialog-close-button").click();
 
                         keyboard.remove('cancel-when-adding-reason');
@@ -597,6 +680,11 @@
 
             function cancel_editing(el) {
                 bind_rows(true);
+                bind_stock_products(true);
+
+                items.stock_list.find('tr.stock').each(function() {
+                    $(this).removeClass('active');
+                });
 
                 el.closest('tr.stock').find('.data').show();
                 el.closest('tr.stock').find('.edit-input').hide();
@@ -616,7 +704,6 @@
             }).on('mouseleave', function() {
                 $(this).next('.stock-history').hide();
             });
-
 
             items.cancel_editing.click(function() {
                 click("esc");
@@ -726,7 +813,7 @@
                         <td>
                             <input type="text" id="stock" name="stock" placeholder="{% trans "stock" %}" />
 
-                            <span class="unit-text without-backslash">Kom</span>
+                            <span class="unit-text without-backslash">{% trans "Piece" %}</span>
                         </td>
                         <td>&nbsp;</td>
                         <td>
@@ -744,7 +831,7 @@
                             </select>
                         </td>
                         <td class="controls">
-                            <button type="button" id="select_product" name="select_product" >{% trans "select products" %}</button>
+                            <button type="button" class="select-products">{% trans "select products" %}</button>
 
                             <div id="for_product_wrapper">
                                 <div id="searcher">
@@ -759,7 +846,7 @@
                                             <tbody>
                                                 <tr>
                                                     <td><input type="text" id="for_product" name="for_product" value="{% trans "select product" %}" /></td>
-                                                    <td><input type="text" id="deduction" /><span class="unit-text without-backslash"></span></td>
+                                                    <td><input type="text" id="deduction" /><span class="deduction unit-text without-backslash"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td>&nbsp;</td>
@@ -792,22 +879,27 @@
                         <td class="controls">
                             <input type="text" id="purchase_price" name="purchase_price" placeholder="{% trans "purchase price" %}" />
 
-                            <span class="unit-text">Kom</span>
+                            <span class="unit-text">{% trans "Piece" %}</span>
 
-                            <button id="save_stock" class="save hoverable no-shadow"></button>
+                            <span class="controls">
+                                <button class="cancel" title="{% trans "Cancel" %}"></button>
+                                <button id="save_stock" class="save hoverable no-shadow"></button>
+                            </span>
                         </td>
                     </tr>
 
                     {% for stock in stocks %}
                         <tr id="stock_{{ stock.id }}" class="stock" data-type="{{ stock.stock_type }}" data-quantity="{{ stock.quantity }}" data-stock="{{ stock.stock }}">
                             <td>
-                                {% if stock.stock_type == "item" %}
-                                    {% if stock.stock_products|length > 0 %}
-                                        {{ stock.stock_products.0.product.name }}
+                                <span class="data stock-name">
+                                    {% if stock.stock_type == "item" %}
+                                        {% if stock.stock_products|length > 0 %}
+                                            {{ stock.stock_products.0.product.name }}
+                                        {% endif %}
+                                    {% elif stock.stock_type == "ingredient" %}
+                                        {{ stock.name }}
                                     {% endif %}
-                                {% elif stock.stock_type == "ingredient" %}
-                                    {{ stock.name }}
-                                {% endif %}
+                                </span>
 
                                 <input type="text" class="edit-input stock-name" value="{{ stock.name }}" />
                             </td>
@@ -818,7 +910,7 @@
 {#                                    {{ stock.quantity|format_number }} <input type="text" class="edit-input stock-quantity" value="{{ stock.quantity|format_number }}" />#}
 {#                                {% endif %}#}
 {#                            </td>#}
-                            <td>{{ stock.stock|format_number }} <input type="text" class="edit-input stock-stock" value="{{ stock.stock|format_number }}" /> </td>
+                            <td>{{ stock.stock|format_number }}</td>
                             <td class="relative">
                                 <span class="data stock-left">{{ stock.left_stock|format_number }}</span> <input type="text" class="edit-input stock-left" value="{{ stock.left_stock|format_number }}" />
 
@@ -848,22 +940,20 @@
                                 {% endif %}
                             </td>
                             <td class="unit-type">{% trans stock.unit_type %}</td>
-                            <td class="stock-products">{{ stock.stock_products|length }}
+                            <td class="stock-products"><span class="stock-products-length data">{{ stock.stock_products|length }}</span>
                                 {% if stock.stock_products|length > 0 %}
-                                    <div class="info">
+                                    <div class="info" data-stock="{{ stock.id }}">
                                         {% if stock.stock_type == "item" and stock.unit_type == "kg" %}
                                             {{ stock.stock_products.0.product.name }}
                                         {% else %}
                                             <ol>
-                                                <li><span class="product-name"></span> <span class="product-deduction"><strong>{% trans "deduction" %}</strong></span></li>
+                                                <li class="header"><span class="product-name"></span> <span class="product-deduction"><strong>{% trans "deduction" %}</strong></span></li>
 
                                                 {% for sp in stock.stock_products %}
-                                                    <li>
+                                                    <li data-stock="{{ stock.id }}" data-stock-product="{{ sp.id }}" data-product-name="{{ sp.product.name }}" data-deduction="{{ sp.deduction|format_number }}">
                                                         <span class="product-name">{{ sp.product.name }}</span> <span class="product-deduction">
                                                             {% if sp.deduction %}
-                                                                {% if sp.deduction and stock.stock_type == "item" and stock.unit_type != "kg" %}
-                                                                    {{ sp.deduction }}
-                                                                {% endif %}
+                                                                {{ sp.deduction|format_number }}
                                                             {% endif %}
                                                         </span>
                                                     </li>
@@ -872,6 +962,8 @@
                                         {% endif %}
                                     </div>
                                 {% endif %}
+
+                                <button type="button" class="select-products edit-input" data-stock="{{ stock.id }}">{% trans "select products" %}</button>
                             </td>
                             <td class="relative">
                                 <span class="data stock-purchase-price">{% if stock.purchase_price %}{{ stock.purchase_price|format_number }}{% endif %}</span>
