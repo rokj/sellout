@@ -55,6 +55,7 @@
                 }
 
                 if (items.stock_input.is(":hidden")) {
+                    items.stock_input.addClass("active");
                     items.stock_input.show();
 
                     items.stock_input.find('.controls').css("visibility", "visible");
@@ -68,6 +69,7 @@
                     bind_rows(false);
                     bind_stock_products(false);
                 } else {
+                    items.stock_input.removeClass("active");
                     items.stock_input.hide();
 
                     keyboard.remove("cancel-when-adding-stock");
@@ -365,10 +367,29 @@
             }
 
             function update_select_product_text() {
-                if (items.selected_products.find('table .data').length == 0) {
-                    items.select_product.text(gettext("select product"));
-                } else {
-                    items.select_product.text(items.selected_products.find('table .data').length + " " + gettext("selected product/s"));
+                /*
+                fuck is this ugly
+
+                first we check if we are editing or adding new stock, so we update text based on that
+                 */
+                if (already_editing()) {
+                    items.stock_list.find('tr.stock.active').each(function() {
+                        var length = $(this).find('div.info ol li:not(.header)').length;
+
+                        if (length == 0) {
+                            items.select_product.text(gettext("select product"));
+                        } else {
+                            items.select_product.text(length + " " + gettext("selected product/s"));
+                        }
+
+                        return false;
+                    });
+                } else if (items.stock_input.hasClass("active")) {
+                    if (items.selected_products.find('table .data').length == 0) {
+                        items.select_product.text(gettext("select product"));
+                    } else {
+                        items.select_product.text(items.selected_products.find('table .data').length + " " + gettext("selected product/s"));
+                    }
                 }
             }
 
