@@ -33,6 +33,8 @@ from django.core import serializers
 
 from decimal import Decimal
 
+from pos.templatetags.common_tags import format_number as fn
+
 ###############
 ## products ###
 ###############
@@ -1003,8 +1005,23 @@ def manage_stock(request, company, page):
     else:
         stocks  = paginator.page(1)
 
+    stocks_json = {}
+
     for s in stocks:
-        s.stock_products = StockProduct.objects.filter(stock=s)
+        s.stock_products = StockProduct.objects.filter(stock=s).order_by('product__name')
+        __stock_products = {}
+
+        for sp in s.stock_products:
+            __stock_products[str(sp.id)] = {'product_id': str(sp.product.id), 'product_name': str(sp.product.name), 'deduction': str(fn(sp.deduction))}
+
+        stocks_json[s.id] = {
+            'id': str(s.id),
+            'stock_type': s.stock_type,
+            'unit_type': s.unit_type,
+            'stock': fn(s.stock),
+            'left_stock': fn(s.left_stock),
+            'stock_products': __stock_products
+        }
 
     currency = get_company_value(request.user, c, 'pos_currency')
 
@@ -1019,6 +1036,7 @@ def manage_stock(request, company, page):
         'stock_types': g.STOCK_TYPE,
         'company': c,
         'stocks': stocks,
+        'stocks_json': json.dumps(stocks_json),
         # 'searched': searched,
         # 'filter_form': form,
         'title': _("Stock"),
@@ -1159,6 +1177,13 @@ def update_stock(request, company):
 
     try:
         stock = Stock.objects.get(id=data['stock_id'], company=c)
+        StockProduct.objects.filter(stock=stock).delete()
+
+        for key, value in data['stock_products'].iteritems():
+            product = Product.objects.get(id=value['product_id'], company=c)
+
+            stock_product = StockProduct(stock=stock, product=product, deduction=value['deduction'], created_by=request.user)
+            stock_product.save()
 
         history_info = {'previous_state': serializers.serialize("json", [stock])}
 
@@ -1177,6 +1202,10 @@ def update_stock(request, company):
 
         stock_history = StockUpdateHistory(stock=stock, history_info=json.dumps(history_info), created_by=request.user)
         stock_history.save()
+
+        stock_products = []
+        for sp in StockProduct.objects.filter(stock=stock):
+            stock_products.append({"stock_id": str(sp.stock.id), "stock_product_id": str(sp.id), "product_id": str(sp.product.id), "product_name": sp.product.name, "deduction": str(sp.deduction)})
 
     except Exception as e:
         print "Error updating stock"
@@ -1212,4 +1241,4 @@ def update_stock(request, company):
     i = 0
     """
 
-    return JsonOk(extra={'stock_history': json.dumps(stock.stock_history)})
+    return JsonOk(extra={'stock_products': json.dumps(stock_products), 'stock_history': json.dumps(stock.stock_history)})
