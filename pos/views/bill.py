@@ -820,6 +820,7 @@ def finish_bill_(request, c, android=False):
             # bill.payment.transaction_reference = d.get('payment_reference')
     else:
         bill.status = g.CANCELED
+        bill.stockify()
 
     bill.payment.save()
     bill.save()

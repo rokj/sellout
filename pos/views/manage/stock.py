@@ -1177,6 +1177,9 @@ def update_stock(request, company):
 
     try:
         stock = Stock.objects.get(id=data['stock_id'], company=c)
+        stock.name = data['stock_name']
+        stock.save()
+
         StockProduct.objects.filter(stock=stock).delete()
 
         for key, value in data['stock_products'].iteritems():
@@ -1241,4 +1244,4 @@ def update_stock(request, company):
     i = 0
     """
 
-    return JsonOk(extra={'stock_products': json.dumps(stock_products), 'stock_history': json.dumps(stock.stock_history)})
+    return JsonOk(extra={'stock_name': stock.name, 'stock_products': json.dumps(stock_products), 'stock_history': json.dumps(stock.stock_history)})

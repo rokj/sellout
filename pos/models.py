@@ -249,8 +249,6 @@ class Product(SkeletonU, ProductAbstract):
             if s.stock.left_stock < 0:
                 deduction = s.stock.left_stock
                 previous = s
-            else:
-                break
 
     @property
     def stock(self):
@@ -730,6 +728,24 @@ class Bill(SkeletonU, RegisterAbstract):
         except Payment.DoesNotExist:
             pass
 
+    def stockify(self):
+        """
+        now if someone changes deduction, this can be his fucking problem, so we (well I :)) have put this on TODO
+        """
+
+        bill_items = BillItem.objects.filter(bill=self)
+
+        for bi in bill_items:
+            try:
+                product = Product.objects.get(id=bi.product_id)
+
+                for sp in product.get_stock():
+                    sp.stock.left_stock += bi.quantity*sp.deduction
+                    sp.stock.save()
+
+            except Product.DoesNotExist:
+                pass
+
 
 class BillItem(SkeletonU, ProductAbstract): # include all data from Product
     bill = models.ForeignKey(Bill)
@@ -848,7 +864,7 @@ class Stock(SkeletonU):
             data['previous_state'] = {}
             data['new_state'] = {}
             data['datetime_created'] = str(defaultfilters.date(sh.datetime_created, "Y-m-d H:m"))
-            data['reason'] = str(history_info['reason'])
+            data['reason'] = history_info['reason']
 
             for obj in serializers.deserialize("json", history_info['previous_state']):
                 data['previous_state']['quantity'] = str(format_number(obj.object.quantity))

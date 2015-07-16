@@ -299,12 +299,12 @@
                     items.stock.val("");
                 }
 
-                change_unit();
+                // change_unit();
             });
 
-            function change_unit() {
-                // items.unit_text.text(" / " + gettext(items.unit.val()));
-                // items.without_backslash_unit_text.text(gettext(items.unit.val()));
+            function change_unit(row) {
+                row.find(".unit-text").text("{{ currency_symbol }} / " + gettext(items.unit.val()));
+                row.find(".without-backslash.unit-text").text(gettext(items.unit.val()));
             }
 
             items.quantity.on('input', function() {
@@ -314,7 +314,9 @@
             });
 
             items.unit.on('change', function() {
-                change_unit()
+                var current_row = $(this).parent().parent();
+
+                change_unit(current_row);
             });
 
             function fill_for_selection(stock_id) {
@@ -597,7 +599,7 @@
                     bind_stock_products(false);
 
                     window.keyboard.add("cancel-when-editing-stock", 'escape', function () {
-                        cancel_editing(el);
+                        cancel_editing(el.parent().parent().parent().parent());
                     });
                 }
             });
@@ -635,7 +637,8 @@
                     stock_id: $(this).attr("data-stock"),
                     stock_left: current_row.find("input.stock-left").val(),
                     stock_purchase_price: current_row.find("input.stock-purchase-price").val(),
-                    stock_products: tmp_stock['stock_products']
+                    stock_products: tmp_stock['stock_products'],
+                    stock_name: current_row.find("input.stock-name").val()
                 };
 
                 if (Big(data['stock_left']).cmp(current_row.attr("data-stock")) == 1 ) {
@@ -654,6 +657,7 @@
                             if (response && response['status'] == 'ok') {
                                 var stock_history = jQuery.parseJSON(response['data']['stock_history']);
                                 var stock_products = jQuery.parseJSON(response['data']['stock_products']);
+                                stocks[data['stock_id']]['stock_name'] = response['data']['stock_name']
 
                                 if (stock_history.length > 0) {
                                     current_row.find('.stock-history ol').html("");
@@ -692,14 +696,14 @@
                                         var product_id = stock_products[i]['product_id'];
                                         var product_name = stock_products[i]['product_name'];
 
-                                        stocks[data['stock_id']]['stock_products'][stock_product_id] = {}
+                                        stocks[data['stock_id']]['stock_products'][stock_product_id] = {};
                                         stocks[data['stock_id']]['stock_products'][stock_product_id]['deduction'] = deduction;
                                         stocks[data['stock_id']]['stock_products'][stock_product_id]['product_id'] = product_id;
                                         stocks[data['stock_id']]['stock_products'][stock_product_id]['product_name'] = product_name;
                                     }
                                 }
 
-                                update_row(tmp_stock['id']);
+                                update_row(data['stock_id']);
                                 cancel_editing(current_row);
                             }
                         });
@@ -718,7 +722,23 @@
             });
 
             function update_row(id) {
-                // yead
+                var stock_products_length = Object.keys(stocks[id]['stock_products']).length;
+                var stock_name = stocks[id]['stock_name'];
+
+                $("tr#stock_" + id + " .stock-products-length.data").text(stock_products_length);
+                $("tr#stock_" + id + " .stock-name.data").text(stock_name);
+
+                var html = '';
+
+                for (var key in stocks[id]['stock_products']) {
+                    html = html + '<li data-stock="' + id + '" data-stock-product="' + key + '" data-product-name="' + stocks[id]['stock_products'][key]['product_name'] + '" data-deduction="' + stocks[id]['stock_products'][key]['deduction'] + '">';
+                    html = html + '<span class="product-name">' + stocks[id]['stock_products'][key]['product_name'] + '</span> <span class="product-deduction">' + stocks[id]['stock_products'][key]['deduction'] + '</span>';
+                    html = html + '</li>';
+                }
+
+                $("tr#stock_" + id + " .stock-products div.info ol li:not(.header)").remove();
+
+                $("tr#stock_" + id + " .stock-products div.info ol").append(html);
             }
 
             function cancel_editing(el) {
@@ -749,7 +769,6 @@
             });
 
             items.cancel_editing.click(function() {
-                console.log('here');
                 click("esc");
             });
 
@@ -923,7 +942,7 @@
                         <td class="controls">
                             <input type="text" id="purchase_price" name="purchase_price" placeholder="{% trans "purchase price" %}" />
 
-                            <span class="unit-text">{% trans "Piece" %}</span>
+                            <span class="unit-text">{{ currency_symbol }} / {% trans "Piece" %}</span>
 
                             <span class="controls">
                                 <button class="cancel" title="{% trans "Cancel" %}"></button>
@@ -963,7 +982,7 @@
                                 <div class="stock-history {% if stock.stock_history|length == 0 %}hidden{% endif %}" style="">
                                     <ol>
                                         <li class="history">{% trans "history" %}</li>
-                                        <li class="history">&nbsp;</li>
+                                        <li class="history do-not-touch">&nbsp;</li>
 
                                         {% for sh in stock.stock_history %}
 {#                                            <li><span class="datetime-created">{{ sh.datetime_created }}</span> {% trans "quantity" %} {{ sh.previous_state.quantity|format_number }} -> {{ sh.new_state.quantity }}</li>#}
@@ -1014,7 +1033,7 @@
 
                                 <input type="text" class="edit-input stock-purchase-price" value="{{ stock.purchase_price|format_number }}" />
 
-                                <span class="unit-text">{% trans stock.unit_type %}</span>
+                                <span class="unit-text">{{ currency_symbol }} / {% trans stock.unit_type %}</span>
 
                                 <span class="controls">
                                     <button class="edit" title="{% trans "Edit" %}" data-stock="{{ stock.id }}"></button>
