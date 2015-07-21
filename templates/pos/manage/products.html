@@ -219,30 +219,6 @@
             //$("div.product-details").height(max_height);  // not sure why i thought this was important
         }
 
-        function parse_product_data(product){
-            // convert all text numbers in product to Big() numbers
-            // price, purchase_price, stock, tax, discounts[amount]
-            if(typeof product.price == "string")
-                product.price = get_number(product.price, "{{ separator }}");
-
-            if(typeof product.purchase_price == "string")
-                product.purchase_price = get_number(product.purchase_price, "{{ separator }}");
-
-            if(typeof product.stock== "string")
-                product.stock = get_number(product.stock, "{{ separator }}");
-
-            if(typeof product.tax == "string")
-                product.tax = get_number(product.tax, "{{ separator }}");
-
-            for(var i = 0; i < product.discounts.length; i++){
-                if(typeof product.discounts[i].amount == "string")
-                    product.discounts[i].amount =
-                            get_number(product.discounts[i].amount, "{{ separator }}");
-            }
-
-            return product;
-        }
-
         //
         // objects
         //
@@ -490,7 +466,7 @@
 
             p.data = data;
 
-            parse_product_data(data);
+            parse_product_data(data, "{{ separator }}", {{ decimal_places }});
 
             p.parent = $("#products_list");
             p.items = {};
@@ -590,7 +566,6 @@
             if(is_dark(p.data.color)) p.items.title.addClass("dark");
             else p.items.title.removeClass("dark");
 
-
             p.items.name = $(".product-name", p.items.container);
             p.items.name.text(p.data.name);
 
@@ -598,7 +573,9 @@
             show_image(p.items.image, p.data.image, p.data.name);
 
             p.items.price = $(".product-price", p.items.container);
-            p.items.price.text(p.data.price);
+            p.items.price.text(display_number(
+                    p.data.price.times(Big(1).plus(p.data.tax.div(Big(100)))),
+                        "{{ separator }}", {{ decimal_places }}));
 
             p.items.category = $(".product-category", p.items.container);
             p.items.category.text(p.data.category);
@@ -616,7 +593,6 @@
 
             p.items.code = $(".product-code", p.items.container);
             p.items.code.text(p.data.code);
-
 
             // bind buttons
             p.items.edit_button = $(".product-edit-button", p.items.container);
@@ -663,7 +639,7 @@
 
             p.data = data;
 
-            parse_product_data(data);
+            parse_product_data(data, "{{ separator }}", {{ decimal_places }});
 
             p.container = $("#edit_dialog");
             p.items = {
@@ -675,7 +651,8 @@
                 category: $("#edit_product_category", p.container),
                 stock: $("#edit_product_stock", p.container),
                 unit_sel: $("#edit_product_unit_type", p.container),
-                purchase_price: $("#edit_product_purchase_price", p.container),
+                purchase_price: $("#purchase_price", p.container),
+                purchase_price_field: $(".purchase-price-field", p.container),
                 base: $("#edit_product_price_without_tax", p.container),
                 tax_price: $("#edit_product_price_with_tax", p.container),
                 shortcut: $("#edit_product_shortcut", p.container),
@@ -683,6 +660,13 @@
                 total_price: $("#total_price", p.container),
                 profit: $("#profit", p.container),
                 notes: $("#edit_product_private_notes", p.container),
+
+                stock_products: $("#stock_products", p.container),
+                stock_product_hidden_element: $("#stock_products li.hidden", p.container),
+
+                new_stock_text: $("#new_stock"),
+
+                add_stock: $("#stock_dialog .add-stock"),
 
                 image: $("#edit_product_image", p.container),
                 upload_image: $("#edit_product_image_upload", p.container),
@@ -696,6 +680,12 @@
             };
 
             var i, o;
+
+            var keyboard = new Keyboard();
+
+            keyboard.add("cancel-when-editing-product", 'escape', function () {
+                p.cancel_button_action();
+            });
 
             //
             // methods
@@ -723,9 +713,10 @@
                 p.close_dialog();
             };
 
-            p.close_dialog = function(){
+            p.close_dialog = function() {
                 p.container.hide();
                 p.items.shadow.fadeOut("fast");
+                keyboard.remove("cancel-when-editing-product", 'escape');
             };
 
             p.update_unit_types = function(){
@@ -813,9 +804,9 @@
                     else{
                         p.items.profit.removeClass("negative-profit");
                     }
-                }
-                else{
+                } else {
                     p.items.profit.text("");
+                    p.items.profit.removeClass("negative-profit");
                 }
             };
 
@@ -1104,7 +1095,21 @@
             }
 
             // stock
-            p.items.stock.val(display_number(p.data.stock, "{{ separator }}", {{ decimal_places }}));
+            // p.items.stock.val(display_number(p.data.stock, "manjka eden { separator } manjka eden", manjka eden { decimal_places } manjka eden));
+            p.items.stock_products.find('li:not(.hidden)').remove();
+
+            if ('stock_products' in data) {
+                for (sp in data.stock_products) {
+                    var el = p.items.stock_product_hidden_element.clone();
+
+                    el.removeClass("hidden");
+                    el.find('.stock-name').text(data.stock_products[sp].stock_name);
+                    el.find('.left-stock').text(get_number(data.stock_products[sp].left_stock, "{{ separator }}"));
+
+                    p.items.stock_products.append(el);
+                }
+            }
+            // var stock_product = p.items.stock_product_hidden_element.clo
 
             // ... per unit (listbox with unit types)
             p.items.unit_sel.empty();
@@ -1121,6 +1126,9 @@
 
             // purchase price
             p.items.purchase_price.val(p.data.purchase_price);
+            if (p.items.purchase_price.val() == "") {
+                p.items.purchase_price.val("0");
+            }
 
             // base price (excluding tax
             p.items.base.val(p.data.price);
@@ -1131,6 +1139,19 @@
             // when units change
             p.items.unit_sel.unbind().change(p.update_unit_types);
             p.update_unit_types();
+
+            // adding new product
+            if (p.data.id == -1) {
+                p.items.new_stock_text.show();
+                p.items.stock_products.hide();
+                p.items.purchase_price_field.hide();
+                p.items.add_stock.hide();
+            } else {
+                p.items.new_stock_text.hide();
+                p.items.stock_products.show();
+                p.items.purchase_price_field.show();
+                p.items.add_stock.show();
+            }
 
             // when prices change
             $()
@@ -1505,12 +1526,13 @@
                 var new_product = {
                     id: -1,
                     discounts: [],
-                    tax_id: {{ default_tax_id }}
+                    tax_id: {{ default_tax_id }},
+                    unit_type: "Piece",
+                    price: 0
                 };
 
                 if(product_details) product_details.close_dialog();
                 product_details = new ProductDetails(new_product);
-
             });
         }
         else{
@@ -1518,7 +1540,6 @@
                     .unbind()
                     .prop("disabled", true);
         }
-
     });
     </script>
 {% endblock %}
@@ -1774,30 +1795,34 @@
                 </div>
 
                 <div class="form-field">
-                    <div class="split-cell first">
-                        <label for="edit_product_stock">{% trans 'Stock' %}:</label>
-                        <input type="text" id="edit_product_stock" maxlength="{{ field_lengths.stock }}"/>
-                    </div>
+                    {% comment %} list of tax rates {% endcomment %}
+                    <label for="edit_product_unit_type">{% trans 'Unit' %}</label>
+                    <select id="edit_product_unit_type" name="edit_product_unit_type">
 
-                    <div class="split-cell last">
-                        <label for="edit_product_unit_type">{% trans 'Unit' %}</label>
-                        <select id="edit_product_unit_type"></select>
-                    </div>
-
-                    <div class="cleared"></div>
+                    </select>
                 </div>
 
                 <div class="form-field">
-                    <div class="split-cell first">
-                        <label for="edit_product_purchase_price">{% trans 'Purchase price' %}: </label>
-                        <input type="text" id="edit_product_purchase_price"
-                               maxlength="{{ field_lengths.purchase_price }}"/>
-                    </div>
-                    <div class="split-cell last read-only-field">
-                        {{ currency }} {% trans 'per' %} <span class="unit-readonly">?</span>
+                    <div class="">
+                        <label for="edit_product_stock">{% trans 'Stock' %}:</label>
                     </div>
 
-                    <div class="cleared"></div>
+                    <div id="stock_dialog">
+                        <p id="new_stock" class="custom-label description">{% trans "You can add new stock to the product after you create product" %}</p>
+
+                        <ol id="stock_products" class="custom-label description">
+                            <li class="hidden"><span class="stock-name"></span><span class="left-stock"></span></li>
+                        </ol>
+
+                        <div class="add-stock"><a href="{% url "pos:manage_stock" company.url_name 1 %}" title="{% trans "Stock +" %}" style="" class="">{% trans "Stock +" %}</a></div>
+                    </div>
+                </div>
+
+                <div class="form-field purchase-price-field">
+                    <div class="">
+                        <label for="purchase_price">{% trans 'Purchase price (approximately if calculated from ingredients)' %}:</label>
+                        <input type="text" id="purchase_price" title="{% trans "You will see this price if you add stock to this product" %}" disabled />
+                    </div>
                 </div>
 
                 <div class="form-field">

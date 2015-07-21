@@ -19,7 +19,7 @@ from pos.views.manage.company import company_to_dict
 from pos.views.manage.contact import contact_to_dict
 from pos.views.manage.register import register_to_dict
 from common.functions import has_permission, JsonOk, JsonParse, JsonError, \
-    format_number, parse_decimal, format_date, format_time, parse_decimal_exc, max_field_length
+    format_number, parse_decimal, format_date, format_time, parse_decimal_exc, max_field_length, drop_trailing_zeros
 from config.functions import get_company_value
 import common.globals as g
 
@@ -42,14 +42,14 @@ def bill_item_to_dict(user, company, item):
     i['description'] = item.description
     i['private_notes'] = item.private_notes
     i['unit_type'] = item.unit_type
-    i['stock'] = format_number(user, company, item.stock)
+    # i['stock'] = format_number(user, company, item.stock)
 
     # values from bill Item
     i['bill_id'] = item.bill.id
     i['bill_notes'] = item.bill_notes
 
     i['base'] = format_number(user, company, item.base)
-    i['quantity'] = format_number(user, company, item.quantity, high_precision=True)
+    i['quantity'] = drop_trailing_zeros(format_number(user, company, item.quantity, high_precision=True))
     i['tax_rate'] = format_number(user, company, item.tax_rate)
 
     i['batch'] = format_number(user, company, item.batch)
@@ -263,6 +263,7 @@ def create_printable_bill(user, company, bill, receipt_format=None, esc=False):
         'html': render_to_string(t, context),
         'status': 'ok'
     }
+
     if esc:
         data['esc'] = esc_format(user, company, bill, receipt_format, esc_commands=True)
 
@@ -512,7 +513,10 @@ def create_bill_(request, c):
         quantity = r['number']
 
         # remove from stock; TODO: check negative quantities (?)
-        product.stock = product.stock - quantity
+        # actually we leave negative quantities as they are or
+        # when stock is empty, we leave it at 0
+
+        product.destockify(quantity)
         product.save()
 
         item = {
@@ -638,7 +642,6 @@ def create_bill_(request, c):
             description=item['description'],
             private_notes=item['private_notes'],
             unit_type=item['unit_type'],
-            stock=item['stock'],
             bill=db_bill,
             bill_notes=item['bill_notes'],
             product_id=item['product_id'],
@@ -817,6 +820,7 @@ def finish_bill_(request, c, android=False):
             # bill.payment.transaction_reference = d.get('payment_reference')
     else:
         bill.status = g.CANCELED
+        bill.stockify()
 
     bill.payment.save()
     bill.save()

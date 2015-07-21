@@ -7,11 +7,12 @@ from django.utils.translation import ugettext as _
 from django.db.models import Q
 from common.images import image_dimensions, import_color_image, create_file_from_image
 
-from pos.models import Company, Category, Product, Price, PurchasePrice, Tax, Discount, ProductDiscount
+from pos.models import Company, Category, Product, Price, Tax, Discount, ProductDiscount
 from common.functions import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
                            max_field_length, error, JsonStringify
+from pos.models import StockProduct
 from pos.views.manage.discount import discount_to_dict, get_all_discounts
 from pos.views.manage.category import get_subcategories, get_all_categories
 from pos.views.manage.tax import get_default_tax, get_all_taxes
@@ -69,6 +70,7 @@ def product_to_dict(user, company, product, android=False):
     ret['discounts'] = discounts
     if product.image:  # check if product's image exists:
         if android:
+            # uf, if images are big, then what, at least we should thumnbnail-it
             with open(product.image.path, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read())
             ret['image'] = encoded_string
@@ -78,8 +80,6 @@ def product_to_dict(user, company, product, android=False):
     # tax: it's a not-null foreign key
     ret['tax_id'] = product.tax.id
     ret['tax'] = format_number(user, company, product.tax.amount)
-    # stock: it cannot be 'undefined'
-    ret['stock'] = format_number(user, company, product.stock)
 
     # category?
     if product.category:
@@ -96,9 +96,24 @@ def product_to_dict(user, company, product, android=False):
     ret['private_notes'] = product.private_notes
     ret['unit_type'] = product.unit_type
     ret['unit_type_display'] = product.get_unit_type_display()
-    ret['stock'] = format_number(user, company, product.stock)
+    # stock: it cannot be 'undefined'
+    # ret['stock'] = format_number(user, company, product.stock)
     ret['color'] = product.color
     ret['favorite'] = product.favorite
+
+    if hasattr(product, 'stock_products'):
+        stock_products = []
+
+        for sp in product.stock_products:
+            stock_product = {}
+            stock_product['stock_name'] = sp.stock.name
+            stock_product['deduction'] = sp.deduction
+            stock_product['left_stock'] = sp.stock.left_stock
+            stock_product['stock_unit_type'] = sp.stock.unit_type
+            stock_products.append(stock_product)
+
+        ret['stock_products'] = stock_products
+
     return ret
 
 
@@ -143,7 +158,7 @@ def products(request, company):
         'name': max_field_length(Product, 'name'),
         'tax': g.DECIMAL['percentage_decimal_places'] + 4,  # up to '100.' + 'decimal_digits'
     }
-    
+
     context = {
         'company': c,
         'title': _("Products"),
@@ -170,6 +185,7 @@ def products(request, company):
         'default_tax_id': get_default_tax(request.user, c)['id'],
         'decimal_places': get_company_value(request.user, c, 'pos_decimal_places')*2,  # ACHTUNG: rounding comes at the end
     }
+
     return render(request, 'pos/manage/products.html', context)
 
 
@@ -338,6 +354,7 @@ def search_products_(request, c, android=False):
     # return serialized products
     ps = []
     for p in products:
+        p.stock_products = StockProduct.objects.filter(product=p)
         ps.append(product_to_dict(request.user, c, p, android=android))
 
     return JsonResponse(ps, safe=False)
@@ -500,15 +517,15 @@ def validate_product(user, company, data):
     data['tax'] = tax
     
     # stock
-    if len(data['stock']) > g.DECIMAL['quantity_digits']:
-        return r(False, _("Stock number too big"))
+    # if len(data['stock']) > g.DECIMAL['quantity_digits']:
+    #    return r(False, _("Stock number too big"))
     
-    ret = parse_decimal(user, company, data['stock'],
-        g.DECIMAL['quantity_digits']-g.DECIMAL['quantity_decimal_places']-1)
-    if not ret['success']:
-        return r(False, _("Check stock notation"))
-    else:
-        data['stock'] = ret['number']
+    # ret = parse_decimal(user, company, data['stock'],
+    #    g.DECIMAL['quantity_digits']-g.DECIMAL['quantity_decimal_places']-1)
+    #if not ret['success']:
+    #    return r(False, _("Check stock notation"))
+    #else:
+    #    data['stock'] = ret['number']
         # it cannot be negative
         # EDIT: stock can be negative
         #if data['stock'] < decimal.Decimal('0'):
@@ -549,7 +566,7 @@ def create_product_(request, c, android=False):
         shortcut=data.get('shortcut'),
         description=data.get('description'),
         private_notes=data.get('private_notes'),
-        stock=data.get('stock'),
+    #     stock=data.get('stock'),
         tax=data.get('tax'),
         unit_type=data.get('unit_type')
     )
@@ -564,11 +581,12 @@ def create_product_(request, c, android=False):
         product.delete()
         return JsonError(_("Error while setting purchase price"))
 
-    if data.get('purchase_price'):
-        price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
-        if not price:
-            product.delete()
-            return JsonError(_("Error while setting sell price"))
+
+    # if data.get('purchase_price'):
+    #     price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
+    #     if not price:
+    #         product.delete()
+    #         return JsonError(_("Error while setting sell price"))
     
     # add image, if it's there
     if data['change_image']:
@@ -618,7 +636,7 @@ def edit_product_(request, c, android=False):
     product.shortcut = data.get('shortcut')
     product.description = data.get('description')
     product.private_notes = data.get('private_notes')
-    product.stock = data.get('stock')
+    # product.stock = data.get('stock')
     product.tax = data.get('tax')
     
     # update discounts
@@ -642,8 +660,8 @@ def edit_product_(request, c, android=False):
 
     # price has to be updated separately
     product.price = product.update_price(Price, request.user, data['price'])
-    if data.get('purchase_price'):
-        product.price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
+    # if data.get('purchase_price'):
+    #     product.price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
 
     product.updated_by = request.user
     product.save()
@@ -680,6 +698,10 @@ def delete_product_(request, c):
 
 def get_all_products(user, company):
     products = Product.objects.filter(company=company)
+
+    # maybe we'll need this in the future
+    # for p in products:
+    #   p.stock_products = StockProduct.objects.filter(product=p)
 
     r = []
     for p in products:

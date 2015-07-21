@@ -1,0 +1,1054 @@
+{% extends "pos/manage/manage.html" %}
+{% load static %}
+{% load i18n %}
+{% load common_tags %}
+
+{% block section_head %}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/management/stock.css' %}"/>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            {% include 'pos/manage/pagination.js' %}
+
+            window.keyboard = new Keyboard();
+
+            var items = {
+                add_stock: $("a#add_stock"),
+                stock_input: $("#stock_section table tr#stock_input"),
+                stock_name: $("#stock_name"),
+                quantity: $("#quantity"),
+                stock: $("#stock"),
+                type: $("#type"),
+                unit: $("#unit"),
+                purchase_price: $("#purchase_price"),
+                for_product: $("#for_product"),
+                save_stock: $("#save_stock"),
+                stock_list: $("#stock_list table"),
+                document: $("#document"),
+                select_product: $("button.select-products"),
+                for_product_wrapper: $("div#for_product_wrapper"),
+                add_to_selected_products: $("button#add_to_selected_products"),
+                selected_products: $("#selected_products"),
+                deduction: $("#deduction"),
+                hidden_selected_product: $("#selected_products table tr.hidden"),
+                remove_from_selected_products: $("#selected_products button.remove"),
+                management_content: $("#management_content"),
+                stock_products: $("#stock_list td.stock-products"),
+                search_stock_input: $("#search_stock_input"),
+                search_stock: $("#search_stock"),
+                stock_td_list: $("#stock_list table.list td:nth-child(1)"),
+                edit_stock: $("span.controls .edit"),
+                remove_stock: $("span.controls .remove"),
+                controls: $("span.controls"),
+                cancel_editing: $(".controls .cancel"),
+                update_stock: $("span.controls .update"),
+                stock_history: $("button.stock-history"),
+                unit_text: $(".unit-text"),
+                without_backslash_unit_text: $(".without-backslash.unit-text")
+            };
+
+            var selected_product = '';
+            var stocks = {{ stocks_json|safe }};
+
+            var tmp_stock = {};
+
+            items.add_stock.click(function() {
+                if (already_editing()) {
+                    return false;
+                }
+
+                if (items.stock_input.is(":hidden")) {
+                    items.stock_input.addClass("active");
+                    items.stock_input.show();
+
+                    items.stock_input.find('.controls').css("visibility", "visible");
+
+                    window.keyboard.add("cancel-when-adding-stock", 'escape', function () {
+                        items.add_stock.click();
+                    });
+
+                    items.stock_input.find('.select-products').show();
+
+                    bind_rows(false);
+                    bind_stock_products(false);
+                } else {
+                    items.stock_input.removeClass("active");
+                    items.stock_input.hide();
+
+                    keyboard.remove("cancel-when-adding-stock");
+
+                    bind_rows(true);
+                    bind_stock_products(true);
+                }
+            });
+
+            items.stock_name.on('focus', function() {
+                if ($(this).val() == gettext("select product")) {
+                    $(this).val("");
+                }
+            });
+
+            items.stock_name.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("select product"));
+                }
+            });
+
+            items.quantity.on('focus', function() {
+                if ($(this).val() == gettext("quantity")) {
+                    $(this).val("");
+                }
+            });
+
+            items.quantity.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("quantity"));
+                }
+            });
+
+            items.stock.on('focus', function() {
+                if ($(this).val() == gettext("stock")) {
+                    $(this).val("");
+                }
+            });
+
+            items.stock.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("stock"));
+                }
+            });
+
+            items.for_product.on('focus', function() {
+                if ($(this).val() == gettext("select product")) {
+                    $(this).val("");
+                }
+            });
+
+            items.for_product.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("select product"));
+                }
+            });
+
+            items.purchase_price.on('focus', function() {
+                if ($(this).val() == gettext("purchase price")) {
+                    $(this).val("");
+                }
+            });
+
+            items.purchase_price.on('blur', function() {
+                if ($(this).val() == "") {
+                    $(this).val(gettext("purchase price"));
+                }
+            });
+
+            function check_entry_data() {
+                var all_ok = true;
+
+                if (items.stock_name.val() == gettext("name") || items.stock_name.val() == "") {
+                    items.stock_name.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.stock_name.removeClass("error");
+                }
+
+{#                if (items.quantity.val() == gettext("quantity") || items.quantity.val() == "") {#}
+{#                    items.quantity.addClass("error");#}
+{#                    all_ok = false;#}
+{#                } else {#}
+{#                    items.quantity.removeClass("error");#}
+{#                }#}
+
+                if (items.stock.val() == gettext("stock") || items.stock.val() == "") {
+                    items.stock.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.stock.removeClass("error");
+                }
+
+                if (items.for_product.val() == gettext("select product") || items.for_product.val() == "") {
+                    items.for_product.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.for_product.removeClass("error");
+                }
+
+                if (items.purchase_price.val() == gettext("purchase price") || items.purchase_price.val() == "") {
+                    items.purchase_price.addClass("error");
+                    all_ok = false;
+                } else {
+                    items.purchase_price.removeClass("error");
+                }
+
+                if (all_ok) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            function autoCompleteRender(ul, item) {
+                var searchTerm = this.term;
+                var itemLabel = item.label;
+
+                // hehe
+                var product_id = itemLabel.split(",").pop();
+                itemLabel = itemLabel.replace("," + product_id, "");
+
+                itemLabel = itemLabel.replace(new RegExp("(" + searchTerm + ")", "gi"), '<strong class="search-term">$1</strong>');
+
+                return $("<li></li>").data("item.autocomplete", item).append('<a>' + itemLabel + '</a>').appendTo(ul);
+            }
+
+            function products_autocomplete(element) {
+                if(element.data('ui-autocomplete')) {
+                    element.autocomplete("destroy");
+                }
+
+                element.autocomplete({
+                    source: function(request, response) {
+                        var data = {name_filter: request.term};
+                        var sd = {data: JSON.stringify(data), csrfmiddlewaretoken: "{{ csrf_token }}"};
+
+                        $.ajax({
+                            type: "POST",
+                            dataType: "json",
+                            url: "{% url 'pos:search_products' company.url_name %}",
+                            data: sd,
+                            timeout: 30000,
+                            success: function(response_data){
+                                if (response_data) {
+                                    var data = [];
+
+                                    $.each(response_data, function(key, value) {
+                                        var parsed_data = parse_product_data(value, "{{ separator }}", {{ decimal_places }});
+                                        data.push(parsed_data.name + " " + parsed_data.tax_price + "{{ currency_symbol }}" + "," + parsed_data.id);
+                                    });
+
+                                    response(data);
+                                }
+                            }
+                        });
+                    },
+                    minLength: 0,
+                    delay: 250,
+                    select: function(event, ui) {
+                        var text = ui.item.value;
+                        var product_id = text.split(",").pop();
+
+                        selected_product = product_id;
+
+                        text = text.replace("," + product_id, "");
+                        items.for_product.val(text);
+
+                        if (items.type.val() == "ingredient") {
+                            if (items.stock_name.val() == gettext("name")) {
+                                items.stock_name.val("");
+                            }
+                        }
+
+                        return false;
+                    },
+                    change: function(event, ui) {
+                    }
+                }).data("ui-autocomplete")._renderItem = autoCompleteRender;
+            }
+
+            items.save_stock.click(function() {
+                if (check_entry_data()) {
+                    var for_product = [];
+
+                    $.each(items.selected_products.find('table .data'), function() {
+                        for_product.push([$(this).attr("data-product"), $(this).attr("data-deduction")]);
+                    });
+
+                    var data = {
+                        document: items.document.val(),
+                        stock_name: items.stock_name.val(),
+{#                        quantity: items.quantity.val(),#}
+                        stock: items.stock.val(),
+                        type: items.type.val(),
+                        unit: items.unit.val(),
+                        for_product: for_product,
+                        purchase_price: items.purchase_price.val()
+                    };
+
+                    send_data("{% url 'pos:save_stock' company.url_name %}", data, "{{ csrf_token }}", function(response) {
+                        if (response && 'data' in response && 'redirect_url' in response.data) {
+                            location.replace("{% url 'web:redirect_page' %}?url=" + encodeURIComponent(response.data.redirect_url));
+                        }
+                    });
+                }
+            });
+
+            items.type.on('change', function() {
+                if ($(this).val() == "item") {
+                    items.stock_name.prop("disabled", true);
+                    items.stock_name.val(items.for_product.val());
+
+                    items.stock.prop("disabled", false);
+
+                    if (items.quantity.val() == gettext("quantity")) {
+                        items.stock.val(gettext("will be the same as quantity"));
+                    }
+                } else {
+                    items.stock_name.prop("disabled", false);
+                    items.stock_name.val("");
+
+                    items.stock.prop("disabled", false);
+                    items.stock.val("");
+                }
+
+                // change_unit();
+            });
+
+            function change_unit(row) {
+                row.find(".unit-text").text("{{ currency_symbol }} / " + gettext(items.unit.val()));
+                row.find(".without-backslash.unit-text").text(gettext(items.unit.val()));
+            }
+
+            items.quantity.on('input', function() {
+                if (items.type.val() == "item") {
+                    items.stock.val(items.quantity.val());
+                }
+            });
+
+            items.unit.on('change', function() {
+                var current_row = $(this).parent().parent();
+
+                change_unit(current_row);
+            });
+
+            function fill_for_selection(stock_id) {
+                items.selected_products.find('tbody tr:not(.hidden)').remove();
+
+                for (key in tmp_stock['stock_products']) {
+                    var product_name = tmp_stock['stock_products'][key]['product_name'];
+                    var deduction = tmp_stock['stock_products'][key]['deduction'];
+
+                    var new_element = items.selected_products.find('tbody tr.hidden').clone();
+                    new_element.find('.for-product').html(product_name);
+                    new_element.find('.deduction').html(deduction + '<button class="remove" data-stock="' + stock_id + '" data-stock-product="' + key + '"></button>');
+                    new_element.removeClass('hidden');
+
+                    var html = new_element.prop('outerHTML');
+
+                    items.selected_products.find('tbody').append(html);
+                }
+            }
+
+            items.select_product.on('click', function() {
+                custom_dialog(gettext("Select product for stock"), items.for_product_wrapper, 800, {});
+
+                var stock_id = $(this).attr("data-stock");
+
+                if ($(this).hasClass("edit-input")) {
+                    fill_for_selection(stock_id);
+                } else {
+                }
+
+                if (tmp_stock['stock_type'] == "item") {
+                    items.deduction.prop("disabled", true);
+                    if (items.deduction.val() == "" && items.unit.val() == gettext("Piece")) {
+                        items.deduction.val("1");
+                    } else {
+                        items.deduction.val("");
+                    }
+                } else {
+                    items.deduction.prop("disabled", false);
+                }
+            });
+
+            function already_selected(to_product) {
+                var inside = false;
+
+                $.each(items.selected_products.find('table .data'), function() {
+                    if ($(this).attr("data-product") == to_product) {
+                        inside = true;
+
+                        return false;
+                    }
+                });
+
+                return inside;
+            }
+
+            function update_select_product_text() {
+                var stock_products_length = Object.keys(tmp_stock['stock_products']).length;
+
+                if (stock_products_length == 0) {
+                    items.select_product.text(gettext("select product"));
+                } else {
+                    items.select_product.text(stock_products_length + " " + gettext("selected product/s"));
+                }
+            }
+
+            function get_new_key(o) {
+                var i = 1;
+                var key = "new" + i;
+
+                while (key in o) {
+                    i++;
+                    key = "new" + i;
+                }
+
+                return key;
+            }
+
+            items.add_to_selected_products.on('click', function() {
+                var to_product = selected_product;
+                var deduction = items.deduction.val();
+                var html = '';
+
+                if (already_selected(to_product)) {
+                    return;
+                }
+
+                if (items.for_product.val() == gettext("select product")) {
+                    return;
+                }
+
+                if (selected_product == "") {
+                    return;
+                }
+
+                if (items.type.val() == "item" && (items.selected_products.find('table .data').length > 0)) {
+                    custom_dialog(gettext("Info"), "You cannot add more than one item to stock with type item.", 300, {ok: gettext("OK")});
+
+                    return;
+                }
+
+                if (items.type.val() == "item") {
+                    items.stock_name.val(items.for_product.val());
+                }
+
+                var hidden_selected_product = items.hidden_selected_product.clone();
+
+                hidden_selected_product.removeClass("hidden").addClass("data");
+
+                hidden_selected_product.attr("data-product", to_product);
+                hidden_selected_product.attr("data-deduction", deduction);
+
+                hidden_selected_product.find('.for-product').text(items.for_product.val());
+                hidden_selected_product.find('.deduction').html(deduction + '<button class="remove"></button>');
+
+                html = html + hidden_selected_product.prop('outerHTML');
+
+                items.selected_products.find('tbody').append(html);
+
+                var new_key = get_new_key(tmp_stock['stock_products']);
+
+                tmp_stock['stock_products'][new_key] = {};
+                tmp_stock['stock_products'][new_key]['deduction'] = deduction;
+                tmp_stock['stock_products'][new_key]['product_id'] = to_product;
+                tmp_stock['stock_products'][new_key]['product_name'] = items.for_product.val();
+
+                update_select_product_text();
+            });
+
+            $(document).on('click', items.remove_from_selected_products.selector, function() {
+                $(this).parent().parent().remove();
+
+                var stock_product_id = $(this).attr("data-stock-product");
+
+                if (stock_product_id in tmp_stock['stock_products']) {
+                    delete tmp_stock['stock_products'][stock_product_id];
+                }
+
+                if (items.type.val() == "item") {
+                    items.stock_name.val("");
+                }
+
+                update_select_product_text();
+            });
+
+            function bind_stock_products(bind) {
+                if (bind) {
+                    items.stock_products.on('mouseover', function() {
+                        $(this).find('div.info').show();
+                    }).on('mouseleave', function() {
+                        $(this).find('div.info').hide();
+                    });
+                } else {
+                    items.stock_products.off();
+                }
+            }
+
+            bind_stock_products(true);
+
+            items.search_stock.click(function() {
+                location.replace("{% url 'pos:manage_stock' company.url_name 1 %}?search=" + encodeURIComponent(items.search_stock_input.val()));
+            });
+
+            items.document.change(function() {
+                var document_id = $(this).val();
+                location.replace("{% url 'pos:manage_stock' company.url_name 1 %}?document=" + document_id);
+            });
+
+            function show_hide_row(el, show) {
+                if (show) {
+                    el.find('td').addClass('hover');
+                    el.find('td span.controls').css('visibility', 'visible');
+                } else {
+                    el.find('td').removeClass('hover');
+                    el.find('td span.controls').css('visibility', 'hidden');
+                }
+            }
+
+            function bind_rows(bind) {
+                if (bind) {
+                    items.stock_list.find('tr').on('mouseover', function () {
+                        show_hide_row($(this), true);
+                    }).on('mouseleave', function () {
+                        show_hide_row($(this), false);
+                    });
+                } else {
+                    items.stock_list.find('tr').off();
+                }
+            }
+
+            products_autocomplete(items.for_product);
+
+            var hash = get_url_hash();
+            var element = $("#document_" + hash);
+
+            if (element.length > 0) {
+                element.children().addClass("selected");
+                $('html,body').animate({scrollTop: element.offset().top}, 'fast');
+            }
+
+            $("a.paginator").unbind().click(function(e) {
+                if ($(this).hasClass("disabled")) {
+                    return false;
+                }
+
+                var url = $(this).attr("href") + window.location.search;
+                location.replace(url);
+
+                return false;
+            });
+
+            items.type.change();
+            items.management_content.css("overflow", "visible");
+            items.stock_input.hide();
+
+            window.keyboard.add("enter-when-search-focused", 'enter', function () {
+                if (items.search_stock_input.is(":focus")) {
+                    items.search_stock.click();
+                }
+            });
+
+            var search_param = decodeURIComponent(getUrlParameter('search'));
+            if (search_param != "") {
+                items.search_stock_input.val(search_param);
+
+                items.stock_td_list.each(function() {
+                    var td_text = $(this).html();
+
+                    td_text = td_text.replace(new RegExp("(" + search_param + ")", 'gi'), '<span class="searched">$1</span>');
+                    $(this).html(td_text);
+                });
+            }
+
+            bind_rows(true);
+
+            function already_editing() {
+                var already_editing = false;
+
+                items.stock_list.find('tr.stock').each(function() {
+                    if ($(this).hasClass("active")) {
+                        already_editing = true;
+
+                        return false;
+                    }
+                });
+
+                return already_editing;
+            }
+
+            items.edit_stock.click(function() {
+                var el = $(this);
+
+                if (el.closest('tr.stock').hasClass('active')) {
+                    el.closest('tr.stock').removeClass('active');
+                    click('esc');
+                } else {
+                    el.closest('tr.stock').addClass('active');
+
+                    if (el.closest('tr.stock').attr("data-type") == "item") {
+                        el.closest('tr.stock').find('.data:not(.stock-name)').hide();
+                        el.closest('tr.stock').find('.edit-input.stock-left').show();
+                        el.closest('tr.stock').find('.edit-input.stock-purchase-price').show();
+                    } else {
+                        el.closest('tr.stock').find('.data').hide();
+
+                        el.closest('tr.stock').find('.edit-input').show();
+                    }
+
+                    var stock_id = $(this).attr("data-stock");
+                    // this is where we temporary store data
+                    tmp_stock = jQuery.extend(true, {}, stocks[stock_id]);
+
+                    update_select_product_text();
+
+                    el.closest('button.stock-history').hide();
+
+                    el.parent().find('.editing').show().css("visibility", "visible");
+
+                    bind_rows(false);
+                    bind_stock_products(false);
+
+                    window.keyboard.add("cancel-when-editing-stock", 'escape', function () {
+                        cancel_editing(el.parent().parent().parent().parent());
+                    });
+                }
+            });
+
+            items.remove_stock.click(function() {
+                var row = $(this).closest('tr.stock');
+
+                if (row.length == 1) {
+                    row.each(function() {
+                        var stock_id = $(this).attr("id").replace("stock_", "");
+
+                        confirmation_dialog(gettext("Remove from stock?"), "",
+                            function() {
+                                send_data("{% url 'pos:remove_stock' company.url_name %}", {stock_id: stock_id},
+                                    "{{ csrf_token }}", function(response) {
+                                        if(response.status != 'ok'){
+                                            error_message(gettext("Removing of stock failed"), "");
+                                        } else {
+                                            row.remove();
+                                        }
+                                    });
+                            },
+                            function(){ }
+                        );
+                    });
+                }
+            });
+
+            items.update_stock.click(function() {
+                var current_row = $(this).parent().parent().parent().parent();
+
+                current_row.find("input.stock-left").removeClass("error");
+
+                var data = {
+                    stock_id: $(this).attr("data-stock"),
+                    stock_left: current_row.find("input.stock-left").val(),
+                    stock_purchase_price: current_row.find("input.stock-purchase-price").val(),
+                    stock_products: tmp_stock['stock_products'],
+                    stock_name: current_row.find("input.stock-name").val()
+                };
+
+                if (Big(data['stock_left']).cmp(current_row.attr("data-stock")) == 1 ) {
+                    current_row.find("input.stock-left").addClass("error");
+
+                    return false;
+                }
+
+                var textarea = $('<textarea class="reason" rows="4" cols="50" placeholder="' + gettext('tell te reason why e.g. wrong input or broke 2 bottles') + '"></textarea>');
+
+                var dialog = custom_dialog(gettext("Why do you want to change this?"), textarea, 500, {
+                    yes: gettext("Confirm"),
+                    yes_action: function() {
+                        data['reason'] = textarea.val();
+                        send_data("{% url 'pos:update_stock' company.url_name %}", data, "{{ csrf_token }}", function(response) {
+                            if (response && response['status'] == 'ok') {
+                                var stock_history = jQuery.parseJSON(response['data']['stock_history']);
+                                var stock_products = jQuery.parseJSON(response['data']['stock_products']);
+                                stocks[data['stock_id']]['stock_name'] = response['data']['stock_name']
+
+                                if (stock_history.length > 0) {
+                                    current_row.find('.stock-history ol').html("");
+
+                                    var html = '<li class="history>' + gettext('history') + '</li>';
+                                    html = html + "<li>&nbsp;</li>";
+
+                                    for (var i = 0; i < stock_history.length; i++) {
+{#                                            html = html + '<li><span class="datetime-created"></span> ' + gettext('quantity') + ' ' + stock_history[i]['previous_state']['quantity'] + ' -> ' + stock_history[i]['new_state']['quantity'] + '</li>';#}
+                                        html = html + '<li><span class="datetime-created">' + stock_history[i]['datetime_created'] + '</span> ' + gettext('left in stock') + ' ' + stock_history[i]['previous_state']['left_stock'] + ' -> ' + stock_history[i]['new_state']['left_stock'] + '</li>';
+                                        html = html + '<li><span class="datetime-created"></span> ' + gettext('purchase price') + ' ' + stock_history[i]['previous_state']['purchase_price'] + ' -> ' + stock_history[i]['new_state']['purchase_price'] + '</li>';
+
+                                        if (stock_history[i]['reason'] != '') {
+                                            html = html + '<li><span class="datetime-created"></span> ' + stock_history[i]['reason'] + '</li>';
+                                        }
+
+                                        html = html + "<li>---</li>";
+
+                                        if (i == 0) {
+                                            current_row.find('.data.stock-left').text(stock_history[i]['new_state']['left_stock']);
+                                            current_row.find('.data.stock-purchase-price').text(stock_history[i]['new_state']['purchase_price']);
+                                        }
+                                    }
+
+                                    current_row.find('.stock-history ol').html(html);
+
+                                    current_row.find('button.stock-history').show();
+                                }
+
+                                if (stock_products.length > 0) {
+                                    stocks[data['stock_id']]['stock_products'] = {}
+
+                                    for (var i = 0; i < stock_products.length; i++) {
+                                        var stock_product_id = stock_products[i]['stock_product_id'];
+                                        var deduction = stock_products[i]['deduction'];
+                                        var product_id = stock_products[i]['product_id'];
+                                        var product_name = stock_products[i]['product_name'];
+
+                                        stocks[data['stock_id']]['stock_products'][stock_product_id] = {};
+                                        stocks[data['stock_id']]['stock_products'][stock_product_id]['deduction'] = deduction;
+                                        stocks[data['stock_id']]['stock_products'][stock_product_id]['product_id'] = product_id;
+                                        stocks[data['stock_id']]['stock_products'][stock_product_id]['product_name'] = product_name;
+                                    }
+                                }
+
+                                update_row(data['stock_id']);
+                                cancel_editing(current_row);
+                            }
+                        });
+                    },
+                    no: gettext("Cancel"),
+                    no_action: function() {
+                        keyboard.remove('cancel-when-adding-reason');
+                    }
+                });
+
+                window.keyboard.add("cancel-when-adding-reason", 'escape', function () {
+                    $(".custom-dialog-close-button").click();
+
+                    keyboard.remove('cancel-when-adding-reason');
+                });
+            });
+
+            function update_row(id) {
+                var stock_products_length = Object.keys(stocks[id]['stock_products']).length;
+                var stock_name = stocks[id]['stock_name'];
+
+                $("tr#stock_" + id + " .stock-products-length.data").text(stock_products_length);
+                $("tr#stock_" + id + " .stock-name.data").text(stock_name);
+
+                var html = '';
+
+                for (var key in stocks[id]['stock_products']) {
+                    html = html + '<li data-stock="' + id + '" data-stock-product="' + key + '" data-product-name="' + stocks[id]['stock_products'][key]['product_name'] + '" data-deduction="' + stocks[id]['stock_products'][key]['deduction'] + '">';
+                    html = html + '<span class="product-name">' + stocks[id]['stock_products'][key]['product_name'] + '</span> <span class="product-deduction">' + stocks[id]['stock_products'][key]['deduction'] + '</span>';
+                    html = html + '</li>';
+                }
+
+                $("tr#stock_" + id + " .stock-products div.info ol li:not(.header)").remove();
+
+                $("tr#stock_" + id + " .stock-products div.info ol").append(html);
+            }
+
+            function cancel_editing(el) {
+                bind_rows(true);
+                bind_stock_products(true);
+
+                items.stock_list.find('tr.stock').each(function() {
+                    $(this).removeClass('active');
+                });
+
+                el.find('.data').show();
+                el.find('.edit-input').hide();
+
+                items.stock_list.find('tr td').removeClass("hover");
+                items.controls.css('z-index', '1');
+
+                el.find('.editing').hide();
+
+                el.closest('button.stock-history').show();
+
+                keyboard.remove("cancel-when-editing-stock");
+            }
+
+            items.stock_history.on('mouseover', function() {
+                $(this).next('.stock-history').show();
+            }).on('mouseleave', function() {
+                $(this).next('.stock-history').hide();
+            });
+
+            items.cancel_editing.click(function() {
+                click("esc");
+            });
+
+            var document_param = decodeURIComponent(getUrlParameter('document'));
+            if (document_param != "") {
+                items.document.val(document_param);
+            } else {
+                items.document.val("all");
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block extra_button %}
+    <a id="add_stock" class="extra-button">{% trans 'Add stock' %}</a>
+{% endblock %}
+
+{% block status_bar_title %}
+    {% trans 'Stock' %}
+{% endblock %}
+
+{% block manage_content %}
+    <div class="left-column">
+        <div id="filter_form" class="fake-form">
+            <h2>{% trans "Search" %}</h2>
+
+            <div class="form-field">
+                <div class="error"></div>
+
+                <input id="search_stock_input" class="search-stock-input" maxlength="30" type="text" placeholder="{% trans "Search query" context 'search documents' %}">
+            </div>
+
+
+            <div class="form-field">
+                <div class="split-cell first">
+                    <input type="submit" id="search_stock" value="{% trans "Search" %}" class="hoverable">
+                </div>
+
+                <div class="cleared"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="stock_section">
+        {% include "pos/manage/stock_header.html" %}
+
+        <div id="stock_list">
+            <div class="results-header">
+                {% trans 'Results found: ' %}{{ stocks.paginator.count }}
+
+                <div class="pagination">
+                    <a href="{{ prev_url }}"
+                       class="paginator {% if not stocks.has_previous %}disabled{% endif %}"
+                       data-action="previous">
+                        <img src="{% static 'icons/back_black.png' %}"
+                             class="hoverable"
+                             alt="{% trans 'Back' context 'Paginator page button' %}"
+                             title="{% trans 'Back' context 'Paginator page button' %}"/>
+                    </a>
+
+                    {% trans 'Page' %} {{ stocks.number }} {% trans 'of' %} {{ stocks.paginator.num_pages }}
+
+                    <a href="{{ next_url }}"
+                       class="paginator {% if not stocks.has_next %}disabled{% endif %}"
+                       data-action="next">
+                        <img src="{% static 'icons/forward_black.png' %}"
+                             class="hoverable"
+                             alt="{% trans 'Forward' context 'Paginator page button' %}"
+                             title="{% trans 'Forward' context 'Paginator page button' %}"/>
+                    </a>
+                </div>
+            </div>
+
+            <div id="document_wrapper">
+                <span>{% trans "Document" context "stock" %}:</span>
+
+                <select id="document">
+                    <option value="all">{% trans "all documents" context "stock" %}</option>
+
+                    {% for document in documents %}
+                        <option value="{{ document.id }}">
+                            {{ document.number }} - {{ document.supplier.company_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <table class="list">
+                <thead>
+                    <tr>
+                        <td>{% trans "Name" %}</td>
+{#                        <td>{% trans "Quantity" %}</td>#}
+                        <td>{% trans "Stock" %}</td>
+                        <td>{% trans "Left in stock" %}</td>
+                        <td>{% trans "Type" %}</td>
+                        <td>{% trans "Unit" %}</td>
+                        <td>{% trans "For product" %}</td>
+                        <td>{% trans "Purchase price" %}</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="stock_input">
+                        <td><input type="text" id="stock_name" name="stock_name" placeholder="{% trans "name" %}" /></td>
+{#                        <td><input type="text" id="quantity" name="quantity" placeholder="{% trans "quantity" %}" /></td>#}
+                        <td>
+                            <input type="text" id="stock" name="stock" placeholder="{% trans "stock" %}" />
+
+                            <span class="unit-text without-backslash">{% trans "Piece" %}</span>
+                        </td>
+                        <td>&nbsp;</td>
+                        <td>
+                            <select id="type" name="type">
+                                {% for type in stock_types  %}
+                                    <option value="{{ type.0 }}">{% if type.0 == 'item' %}{% trans "as item" %}{% elif type.0 == 'ingredient' %}{% trans "as ingredient" %}{% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <select id="unit" name="unit">
+                                {% for unit in units %}
+                                    <option value="{{ unit.0 }}">{{ unit.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td class="controls">
+                            <button type="button" class="select-products">{% trans "select products" %}</button>
+
+                            <div id="for_product_wrapper">
+                                <div id="searcher">
+                                    <div id="search_input">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <td>&nbsp;</td>
+                                                    <td>{% trans "deduction" %}</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><input type="text" id="for_product" name="for_product" value="{% trans "select product" %}" /></td>
+                                                    <td><input type="text" id="deduction" /><span class="deduction unit-text without-backslash"></span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>&nbsp;</td>
+                                                    <td>
+                                                        <button id="add_to_selected_products"></button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div id="selected_products">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <td>{% trans "for product" %}</td>
+                                                    <td>{% trans "deduction" %}</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="hidden">
+                                                    <td class="for-product"></td>
+                                                    <td class="deduction"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="controls">
+                            <input type="text" id="purchase_price" name="purchase_price" placeholder="{% trans "purchase price" %}" />
+
+                            <span class="unit-text">{{ currency_symbol }} / {% trans "Piece" %}</span>
+
+                            <span class="controls">
+                                <button class="cancel" title="{% trans "Cancel" %}"></button>
+                                <button id="save_stock" class="save hoverable no-shadow"></button>
+                            </span>
+                        </td>
+                    </tr>
+
+                    {% for stock in stocks %}
+                        <tr id="stock_{{ stock.id }}" class="stock" data-type="{{ stock.stock_type }}" data-stock="{{ stock.stock }}">
+                            <td>
+                                <span class="data stock-name">
+                                    {% if stock.stock_type == "item" %}
+                                        {% if stock.stock_products|length > 0 %}
+                                            {{ stock.stock_products.0.product.name }}
+                                        {% endif %}
+                                    {% elif stock.stock_type == "ingredient" %}
+                                        {{ stock.name }}
+                                    {% endif %}
+                                </span>
+
+                                <input type="text" class="edit-input stock-name" value="{{ stock.name }}" />
+                            </td>
+{#                            <td>#}
+{#                                {% if stock.stock_type == "item" %}#}
+{##}
+{#                                {% else %}#}
+{#                                    {{ stock.quantity|format_number }} <input type="text" class="edit-input stock-quantity" value="{{ stock.quantity|format_number }}" />#}
+{#                                {% endif %}#}
+{#                            </td>#}
+                            <td>{{ stock.stock|format_number }}</td>
+                            <td class="relative">
+                                <span class="data stock-left">{{ stock.left_stock|format_number }}</span> <input type="text" class="edit-input stock-left" value="{{ stock.left_stock|format_number }}" />
+
+                                <button class="stock-history {% if stock.stock_history|length == 0 %}hidden{% endif %}"></button>
+
+                                <div class="stock-history {% if stock.stock_history|length == 0 %}hidden{% endif %}" style="">
+                                    <ol>
+                                        <li class="history">{% trans "history" %}</li>
+                                        <li class="history do-not-touch">&nbsp;</li>
+
+                                        {% for sh in stock.stock_history %}
+{#                                            <li><span class="datetime-created">{{ sh.datetime_created }}</span> {% trans "quantity" %} {{ sh.previous_state.quantity|format_number }} -> {{ sh.new_state.quantity }}</li>#}
+                                            <li><span class="datetime-created">{{ sh.datetime_created }}</span> {% trans "left in stock" %} {{ sh.previous_state.left_stock }} -> {{ sh.new_state.left_stock }}</li>
+                                            <li><span class="datetime-created"></span> {% trans "purchase price" %} {{ sh.previous_state.purchase_price }} -> {{ sh.new_state.purchase_price }}</li>
+
+                                            {% if sh.reason and sh.reason != '' %}<li><span class="datetime-created"></span> {% trans "reason" %} {{ sh.reason }}</li>{% endif %}
+                                            <li>---</li>
+                                        {% endfor %}
+                                    </ol>
+                                </div>
+                            </td>
+                            <td>
+                                {% if stock.stock_type == "item" %}
+                                    {% trans "item" %}
+                                {% elif stock.stock_type == "ingredient" %}
+                                    {% trans "ingredient" %}
+                                {% endif %}
+                            </td>
+                            <td class="unit-type">{% trans stock.unit_type %}</td>
+                            <td class="stock-products"><span class="stock-products-length data">{{ stock.stock_products|length }}</span>
+                                {% if stock.stock_products|length > 0 %}
+                                    <div class="info" data-stock="{{ stock.id }}">
+                                        {% if stock.stock_type == "item" and stock.unit_type == "kg" %}
+                                            {{ stock.stock_products.0.product.name }}
+                                        {% else %}
+                                            <ol>
+                                                <li class="header"><span class="product-name"></span> <span class="product-deduction"><strong>{% trans "deduction" %}</strong></span></li>
+
+                                                {% for sp in stock.stock_products %}
+                                                    <li data-stock="{{ stock.id }}" data-stock-product="{{ sp.id }}" data-product-name="{{ sp.product.name }}" data-deduction="{{ sp.deduction|format_number }}">
+                                                        <span class="product-name">{{ sp.product.name }}</span> <span class="product-deduction">
+                                                            {% if sp.deduction %}
+                                                                {{ sp.deduction|format_number }}
+                                                            {% endif %}
+                                                        </span>
+                                                    </li>
+                                                {% endfor %}
+                                            </ol>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+
+                                <button type="button" class="select-products edit-input" data-stock="{{ stock.id }}">{% trans "select products" %}</button>
+                            </td>
+                            <td class="relative">
+                                <span class="data stock-purchase-price">{% if stock.purchase_price %}{{ stock.purchase_price|format_number }}{% endif %}</span>
+
+                                <input type="text" class="edit-input stock-purchase-price" value="{{ stock.purchase_price|format_number }}" />
+
+                                <span class="unit-text">{{ currency_symbol }} / {% trans stock.unit_type %}</span>
+
+                                <span class="controls">
+                                    <button class="edit" title="{% trans "Edit" %}" data-stock="{{ stock.id }}"></button>
+                                    <!-- <button class="remove" title="{% trans "Delete" %}"></button> -->
+
+                                    <span class="editing">
+                                        <button class="cancel" title="{% trans "Cancel" %}"></button>
+                                        <button class="update" title="{% trans "Update" %}" data-stock="{{ stock.id }}"></button>
+                                    </span>
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

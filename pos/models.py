@@ -1,7 +1,7 @@
 from django.db import models
+from django.template import defaultfilters
 from django.utils.translation import ugettext as _
-from django.db.models.signals import pre_save, pre_delete, post_save, post_delete
-from django.dispatch import receiver
+from django.core import serializers
 from sorl import thumbnail
 from blusers.models import BlocklogicUser
 from common.functions import ImagePath
@@ -13,11 +13,15 @@ from config.countries import country_choices, country_by_code
 
 import datetime as dtm
 import random
-
+import json
 
 ### company ###
+from pos.templatetags.common_tags import format_number
+from registry.models import ContactRegistry
+
+
 class CompanyAbstract(models.Model):
-    # abstract: used in  for Company and BillCompany
+    # abstract: used in for Company and BillCompany
     name = models.CharField(_("Company name"), max_length=200, null=False, blank=False)
     street = models.CharField(_("Street address"), max_length=200, null=False, blank=False)
     postcode = models.CharField(_("Postal code"), max_length=20, null=False, blank=False)
@@ -28,8 +32,7 @@ class CompanyAbstract(models.Model):
     website = models.CharField(_("Website"), max_length=256, null=True, blank=True)
     phone = models.CharField(_("Phone number"), max_length=30, null=True, blank=True)
     vat_no = models.CharField(_("VAT exemption number"), max_length=30, null=False, blank=False)
-
-    tax_payer = models.BooleanField(_("Tax payer"), blank=False, null=False, default=False)
+    tax_payer = models.CharField(_("Tax payer"), max_length=3, choices=g.TAX_PAYER_CHOICES, blank=False, null=False, default="no")
 
     class Meta:
         abstract = True
@@ -196,10 +199,10 @@ class ProductAbstract(models.Model):
     private_notes = models.TextField(_("Notes (only for internal use)"), null=True, blank=True)
     unit_type = models.CharField(_("Product unit type"), max_length=15,
         choices=g.UNITS, blank=False, null=False, default=g.UNITS[0][0])
-    stock = models.DecimalField(_("Number of items left in stock"),
-        max_digits=g.DECIMAL['quantity_digits'],
-        decimal_places=g.DECIMAL['quantity_decimal_places'],
-        null=False, blank=False)
+    # stock = models.DecimalField(_("Number of items left in stock"),
+    #    max_digits=g.DECIMAL['quantity_digits'],
+    #    decimal_places=g.DECIMAL['quantity_decimal_places'],
+    #    null=False, blank=False)
 
     # price - in a separate model
     
@@ -230,12 +233,59 @@ class Product(SkeletonU, ProductAbstract):
         except:
             return None
 
+    def destockify(self, quantity):
+        deduction = None
+        previous = None
+
+        for s in self.get_stock():
+            if deduction is not None:
+                s.stock.left_stock = s.stock.left_stock-(abs(deduction))
+                previous.stock.left_stock = 0
+                previous.stock.save()
+            else:
+                s.stock.left_stock = s.stock.left_stock-(quantity*s.deduction)
+            s.stock.save()
+
+            if s.stock.left_stock < 0:
+                deduction = s.stock.left_stock
+                previous = s
+
+    @property
+    def stock(self):
+        return self.get_stock()
+
+    def get_stock(self):
+        # FIFO
+        # do not change this, unless you know what are you doing. self.destockify is based on this order
+        stock_products = StockProduct.objects.filter(product=self).order_by("stock__datetime_created")
+
+        return stock_products
+
+    @property
+    def purchase_price(self):
+        return self.get_purchase_price()
+
     def get_purchase_price(self):
         """ get product's current purchase price """
         try:
-            return PurchasePrice.objects.filter(product=self).order_by('-datetime_updated')[0].unit_price
-        except:
-            return None
+            # return PurchasePrice.objects.filter(product=self).order_by('-datetime_updated')[0].unit_price
+            purchase_price = None
+
+            for sp in self.get_stock():
+                if sp.stock.purchase_price:
+                    pp = sp.deduction*sp.stock.purchase_price
+
+                    if purchase_price is None:
+                        purchase_price = pp
+                    else:
+                        purchase_price += pp
+
+            return purchase_price
+
+        except StockProduct.DoesNotExist:
+            pass
+
+        return None
 
     def update_price(self, model, user, new_unit_price):
         """ set a new price for product:
@@ -404,9 +454,9 @@ class Price(SkeletonU, PriceAbstract):
 
 
 ### purchase prices ###
-class PurchasePrice(SkeletonU, PriceAbstract):
-    unit_price = models.DecimalField(_("Purchase price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],
-                                     decimal_places=g.DECIMAL['currency_decimal_places'], blank=False, null=False)
+# class PurchasePrice(SkeletonU, PriceAbstract):
+#     unit_price = models.DecimalField(_("Purchase price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],
+#                                      decimal_places=g.DECIMAL['currency_decimal_places'], blank=False, null=False)
 
 
 ### contacts ###
@@ -414,27 +464,57 @@ class ContactAbstract(models.Model):
     # used for Contact and BillContact
     type = models.CharField(_("Type of contact"), max_length=20, choices=g.CONTACT_TYPES,
                             null=False, blank=False, default=g.CONTACT_TYPES[0][0])
-    company_name = models.CharField(_("Company name"), max_length=50, null=True, blank=True)
+    company_name = models.CharField(_("Company name"), max_length=200, null=True, blank=True)
     first_name = models.CharField(_("First name"), max_length=50, null=True, blank=True)
     last_name = models.CharField(_("Last name"), max_length=50, null=True, blank=True)
     sex = models.CharField(max_length=1, choices=g.SEXES, null=True, blank=True)
     date_of_birth = models.DateField(_("Date of birth"), null=True, blank=True)
     street_address = models.CharField(_("Street and house number"), max_length=200, null=True, blank=True)
     postcode = models.CharField(_("Post code/ZIP"), max_length=12, null=True, blank=True)
-    city = models.CharField(_("City"), max_length=50, null=True, blank=True)
+    city = models.CharField(_("City"), max_length=100, null=True, blank=True)
     state = models.CharField(_("State"), max_length=50, null=True, blank=True)
     country = models.CharField(max_length=2, choices=country_choices)
     email = models.CharField(_("E-mail address"), max_length=255, blank=True, null=True)
     phone = models.CharField(_("Telephone number"), max_length=30, blank=True, null=True)
     vat = models.CharField(_("VAT identification number"), max_length=30, null=True, blank=True)
+    tax_payer = models.CharField(_("Tax payer"), max_length=3, choices=g.TAX_PAYER_CHOICES, blank=False, null=False, default="no")
+    additional_info = models.TextField(blank=True, null=True)
 
     @property
     def country_name(self):
         return country_by_code.get(self.country)
 
+    @staticmethod
+    def copy_from_contact_registry(request, company, vat):
+        try:
+            contact_registry = ContactRegistry.objects.get(vat=vat)
+        except ContactRegistry.DoesNotExist:
+            return
+
+        contact = Contact(
+            company=company,
+            created_by=request.user,
+            type=contact_registry.type,
+            company_name=contact_registry.company_name,
+            first_name=contact_registry.first_name,
+            last_name=contact_registry.last_name,
+            sex=contact_registry.sex,
+            street_address=contact_registry.street_address,
+            postcode=contact_registry.postcode,
+            city=contact_registry.city,
+            state=contact_registry.state,
+            country=contact_registry.country,
+            email=contact_registry.email,
+            phone=contact_registry.phone,
+            vat=contact_registry.vat,
+            tax_payer=contact_registry.tax_payer,
+            additional_info=contact_registry.additional_info
+        )
+        contact.save()
+
     def __unicode__(self):
         if self.type == "Individual":
-            return "Individual: " + self.first_name + " " + self.last_name
+            return "Individual: " + str(self.first_name) + " " + str(self.last_name)
         else:
             return "Company: " + str(self.company_name)
 
@@ -648,6 +728,24 @@ class Bill(SkeletonU, RegisterAbstract):
         except Payment.DoesNotExist:
             pass
 
+    def stockify(self):
+        """
+        now if someone changes deduction, this can be his fucking problem, so we (well I :)) have put this on TODO
+        """
+
+        bill_items = BillItem.objects.filter(bill=self)
+
+        for bi in bill_items:
+            try:
+                product = Product.objects.get(id=bi.product_id)
+
+                for sp in product.get_stock():
+                    sp.stock.left_stock += bi.quantity*sp.deduction
+                    sp.stock.save()
+
+            except Product.DoesNotExist:
+                pass
+
 
 class BillItem(SkeletonU, ProductAbstract): # include all data from Product
     bill = models.ForeignKey(Bill)
@@ -716,5 +814,94 @@ class BillItem(SkeletonU, ProductAbstract): # include all data from Product
 class BillItemDiscount(SkeletonU, DiscountAbstract):
     # inherits everything from DiscountAbstract
     bill_item = models.ForeignKey(BillItem)
+
+###
+# stock stock stock
+# stock stock stock
+# stock stock stock
+###
+class Document(SkeletonU):
+    company = models.ForeignKey(Company, null=False, blank=False)
+    number = models.CharField(max_length=64, null=True)
+    document_date = models.DateField(_("Document date"), null=True, blank=True)
+    entry_date = models.DateField(_("Entry date"), null=True, blank=True)
+    supplier = models.ForeignKey(Contact, null=False, blank=False)
+
+class Stock(SkeletonU):
+    document = models.ForeignKey(Document, null=True, blank=True)
+    company = models.ForeignKey(Company, null=False, blank=False)
+    name = models.CharField(_("Name"), help_text=_("Name of a stock"), max_length=100, null=True, blank=True)
+    quantity = models.DecimalField(_("Number of items put in stock"),
+        max_digits=g.DECIMAL['quantity_digits'],
+        decimal_places=g.DECIMAL['quantity_decimal_places'],
+        null=True, blank=True)
+    stock = models.DecimalField(_("Stock"),
+        max_digits=g.DECIMAL['quantity_digits'],
+        decimal_places=g.DECIMAL['quantity_decimal_places'],
+        null=False, blank=False)
+    left_stock = models.DecimalField(_("Number of items left in stock"),
+        max_digits=g.DECIMAL['quantity_digits'],
+        decimal_places=g.DECIMAL['quantity_decimal_places'],
+        null=False, blank=False)
+    stock_type = models.CharField(_("Stock type"), max_length=10,
+        choices=g.STOCK_TYPE, blank=False, null=False, default=g.STOCK_TYPE[0][0])
+    unit_type = models.CharField(_("Product unit type"), max_length=15,
+        choices=g.UNITS, blank=False, null=False, default=g.UNITS[0][0])
+    purchase_price = models.DecimalField(_("Purchase price per unit, excluding tax"), max_digits=g.DECIMAL['currency_digits'],
+                                     decimal_places=g.DECIMAL['currency_decimal_places'], blank=True, null=True)
+
+    @property
+    def stock_history(self):
+        return self.get_stock_history()
+
+    def get_stock_history(self):
+        stock_history = []
+
+        for sh in StockUpdateHistory.objects.filter(stock=self).order_by('-datetime_created'):
+            history_info = json.loads(sh.history_info)
+
+            data = {}
+            data['previous_state'] = {}
+            data['new_state'] = {}
+            data['datetime_created'] = str(defaultfilters.date(sh.datetime_created, "Y-m-d H:m"))
+            data['reason'] = history_info['reason']
+
+            for obj in serializers.deserialize("json", history_info['previous_state']):
+                data['previous_state']['quantity'] = str(format_number(obj.object.quantity))
+                data['previous_state']['stock'] = str(format_number(obj.object.stock))
+                data['previous_state']['left_stock'] = str(format_number(obj.object.left_stock))
+                data['previous_state']['purchase_price'] = str(format_number(obj.object.purchase_price))
+
+            for obj in serializers.deserialize("json", history_info['new_state']):
+                data['new_state']['quantity'] = str(format_number(obj.object.quantity))
+                data['new_state']['stock'] = str(format_number(obj.object.stock))
+                data['new_state']['left_stock'] = str(format_number(obj.object.left_stock))
+                data['new_state']['purchase_price'] = str(format_number(obj.object.purchase_price))
+
+            stock_history.append(data)
+
+        return stock_history
+
+class StockProduct(SkeletonU):
+    """
+    must be fast
+    """
+    stock = models.ForeignKey(Stock, null=False, blank=False)
+    product = models.ForeignKey(Product, null=False, blank=False)
+    deduction = models.DecimalField(_("Stock"),
+        max_digits=g.DECIMAL['deduction_digits'],
+        decimal_places=g.DECIMAL['deduction_decimal_places'],
+        null=True, blank=True)
+
+    def __unicode__(self):
+        return self.stock.name + " " + _("for") + " " + self.product.name
+
+    class Meta:
+        unique_together = (('stock', 'product'),)
+
+
+class StockUpdateHistory(SkeletonU):
+    stock = models.ForeignKey(Stock, null=False, blank=False)
+    history_info = models.TextField(null=False, blank=True)
 
 import signals

@@ -90,6 +90,12 @@ def max_field_length(model, field_name):
         return None
 
 
+def drop_trailing_zeros(s):
+    if '.' in s:
+        return s.rstrip('0').rstrip('.')
+
+    return s
+
 # numbers
 def format_number(user, company, n, high_precision=False):
     """ returns formatted decimal number n;

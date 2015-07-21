@@ -4,7 +4,7 @@ from common.functions import max_field_length
 import common.globals as g
 import decimal
 
-from pos.models import Company, Category, Tax, Product, Price, PurchasePrice
+from pos.models import Company, Category, Tax, Product, Price
 import xlrd
 
 
@@ -228,9 +228,10 @@ def xls_import(filename, company, user):
                     err(_("Updating price failed"), product_name=p['name'])
                     raise Exception("Updating price failed")
 
-                if not product.update_price(PurchasePrice, user, purchase_price):
-                    err(_("Updating purchase price failed"), product_name=p['name'])
-                    raise Exception("Updating purchase price failed")
+                #
+                # if not product.update_price(PurchasePrice, user, purchase_price):
+                #    err(_("Updating purchase price failed"), product_name=p['name'])
+                #    raise Exception("Updating purchase price failed")
 
             # that's it
             return status

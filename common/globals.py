@@ -33,6 +33,8 @@ DECIMAL = {
     'percentage_decimal_places': 8,  # number of decimal places for percentage values
     'quantity_digits': 24,
     'quantity_decimal_places': 8,
+    'deduction_digits': 24,
+    'deduction_decimal_places': 8
 }
 
 # unit types
@@ -201,6 +203,8 @@ MISC = {
     'image_upload_formats': 'jpg|jpeg|gif|png|bmp|tiff',  # supported image formats (as regex "options")
     'discounts_per_page': 12,
     'bills_per_page': 25,
+    'documents_per_page': 15,
+    'stocks_per_page': 15
 }
 
 if settings.LANGUAGE_CODE == "en":
@@ -235,20 +239,20 @@ PERMISSIONS = {
         'edit': (),
         },
     'cashier': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register','stats',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'register','stats', 'stock', 'document', ),
         'edit': ('bill', 'terminal', 'contact'),  # cashiers must write bills
         },
     'seller': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register','stats',),
-        'edit': ('bill', 'product', 'terminal', 'manage', 'contact',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register','stats', 'stock', 'document',),
+        'edit': ('bill', 'product', 'terminal', 'manage', 'contact', 'stock', 'document', ),
         },
     'manager': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register','stats',),
-        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'tax', 'terminal', 'manage', 'register', 'stats', 'stock', 'document', ),
+        'edit': ('category', 'discount', 'product', 'contact', 'bill', 'tax', 'terminal', 'manage', 'register', 'stock', 'document', ),
         },
     'admin': {
-        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user','stats',),
-        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user','stats',),
+        'view': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user', 'stats', 'stock', 'document', ),
+        'edit': ('company', 'category', 'discount', 'product', 'contact', 'bill', 'config', 'terminal', 'manage', 'tax', 'register', 'user', 'stats', 'stock', 'document', ),
         },
 }
 
@@ -371,4 +375,15 @@ BILL_FORMAT_OPTIONS = (  # the first is the default
     ("yyyy-s", _("Year and serial, resets every year")),
     ("s", _("Serial only, never resets")),
     ("yyyy-m-s", _("Year, month and serial, resets every month")),
+)
+
+TAX_PAYER_CHOICES = (
+    ("yes", _("Yes")),
+    ("no", _("No")),
+    ("eu", _("EU")),
+)
+
+STOCK_TYPE = (
+    ("item", _("Item")),
+    ("ingredient", _("Ingrediant")),
 )

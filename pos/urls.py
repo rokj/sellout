@@ -17,7 +17,10 @@ from pos.views.manage import tax
 from pos.views.manage import configuration
 from pos.views.manage import register
 from pos.views.manage import bill
+from pos.views.manage import stock
 from pos.views.manage import users
+
+from registry.views import get_contacts
 
 from pos.views import bill as terminal_bill
 
@@ -95,6 +98,18 @@ urlpatterns = patterns('',
     # bill management
     url(r_company + '/' + r_manage + _('/bills') + '/$', bill.list_bills, name='list_bills'),
 
+    # stock - documents
+    url(r_company + '/' + r_manage + _('/stock/documents/') + '(?P<page>\d+)/$', stock.manage_documents, name='manage_documents'),
+    url(r_company + '/' + r_manage + _('/stock/documents/save-document') + '/$', stock.save_document, name='save_document'),
+    url(r_company + '/' + r_manage + _('/stock/documents/update-document') + '/$', stock.update_document, name='update_document'),
+    url(r_company + '/' + r_manage + _('/stock/documents/delete-document') + '/$', stock.delete_document, name='delete_document'),
+
+    # stock - stock
+    url(r_company + '/' + r_manage + _('/stock') + '/(?P<page>\d+)/$', stock.manage_stock, name='manage_stock'),
+    url(r_company + '/' + r_manage + _('/stock/save-stock') + '/$', stock.save_stock, name='save_stock'),
+    url(r_company + '/' + r_manage + _('/stock/remove-stock') + '/$', stock.remove_stock, name='remove_stock'),
+    url(r_company + '/' + r_manage + _('/stock/update-stock') + '/$', stock.update_stock, name='update_stock'),
+
     # user
     url(r_company + '/' + r_manage + _('/user-settings') + '/$', configuration.user_settings, name='user_settings'),  # user settings
 
@@ -140,4 +155,6 @@ urlpatterns = patterns('',
 
     # and finally: home: POS terminal, directly
     url(r_company + '/$', terminal.terminal, name='terminal'),  # by url_name
+
+    url(r_company + r'/get-contacts/$', get_contacts, name='get-contacts'),  # by url_name
 )

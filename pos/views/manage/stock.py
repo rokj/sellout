@@ -1,4 +1,6 @@
 import base64
+import json
+from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
@@ -6,23 +8,32 @@ from common.decorators import login_required
 from django.utils.translation import ugettext as _
 from django.db.models import Q
 from common.images import image_dimensions, import_color_image, create_file_from_image
+from config.currencies import currencies
 
-from pos.models import Company, Category, Product, Price, PurchasePrice, Tax, Discount, ProductDiscount
+from pos.models import Company, Category, Product, Price, Tax, Discount, ProductDiscount, Contact, Document, Stock, \
+        StockProduct, StockUpdateHistory
 from common.functions import JsonParse, JsonError, JsonOk, \
                            has_permission, no_permission_view, \
                            format_number, parse_decimal, \
                            max_field_length, error, JsonStringify
+
 from pos.views.manage.discount import discount_to_dict, get_all_discounts
 from pos.views.manage.category import get_subcategories, get_all_categories
 from pos.views.manage.tax import get_default_tax, get_all_taxes
 
 from common import globals as g
-from config.functions import get_company_value
+from config.functions import get_company_value, get_date_format
 
 import decimal
 from sorl.thumbnail import get_thumbnail
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+
+from django.core import serializers
+
+from decimal import Decimal
+
+from pos.templatetags.common_tags import format_number as fn
 
 ###############
 ## products ###
@@ -542,11 +553,12 @@ def create_product_(request, c, android=False):
         product.delete()
         return JsonError(_("Error while setting purchase price"))
 
-    if data.get('purchase_price'):
-        price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
-        if not price:
-            product.delete()
-            return JsonError(_("Error while setting sell price"))
+
+    #if data.get('purchase_price'):
+    #    price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
+    #    if not price:
+    #        product.delete()
+    #        return JsonError(_("Error while setting sell price"))
     
     # add image, if it's there
     if data['change_image']:
@@ -619,8 +631,8 @@ def edit_product_(request, c, android=False):
 
     # price has to be updated separately
     product.price = product.update_price(Price, request.user, data['price'])
-    if data.get('purchase_price'):
-        product.price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
+    # if data.get('purchase_price'):
+    #     product.price = product.update_price(PurchasePrice, request.user, data['purchase_price'])
 
     product.updated_by = request.user
     product.save()
@@ -768,3 +780,468 @@ def mass_edit(request, company):
     else:
         return JsonError(_("Unsupported mass edit action"))
 
+
+###
+### views
+###
+@login_required
+def manage_documents(request, company, page):
+    c = get_object_or_404(Company, url_name=company)
+
+    # check permissions: needs to be guest
+    if not has_permission(request.user, c, 'stock', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view stock."))
+
+    documents = Document.objects.filter(company=c).order_by('-number')
+
+    paginator = Paginator(documents, g.MISC['documents_per_page'])
+
+    if page:
+        documents = paginator.page(page)
+    else:
+        documents = paginator.page(1)
+
+    context = {
+        'managing': 'documents',
+        'company': c,
+        'documents': documents,
+        # 'searched': searched,
+        # 'filter_form': form,
+        'title': _("Stock"),
+        'next_url': reverse('pos:manage_documents', args=[c.url_name, int(page)+1]),
+        'prev_url': reverse('pos:manage_documents', args=[c.url_name, int(page)-1]),
+        'site_title': g.MISC['site_title'],
+        'date_format_django': get_date_format(request.user, c, 'django'),
+        'date_format_js': get_date_format(request.user, c, 'js'),
+    }
+
+    return render(request, 'pos/manage/manage_documents.html', context)
+
+
+@login_required
+def save_document(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist."))
+
+    # permissions
+    if not has_permission(request.user, c, 'document', 'edit'):
+        return JsonError(_("You have no permission to add contacts"))
+
+    data = JsonParse(request.POST.get('data'))
+    supplier = data['supplier']
+    supplier = supplier.split(',')
+
+    if len(supplier) == 0:
+        return JsonError("invalid_supplier")
+
+    vat = supplier[-1].strip()
+
+    if not vat.isdigit():
+        return JsonError("invalid_supplier")
+
+    try:
+        contact = Contact.objects.get(vat=vat)
+    except Contact.DoesNotExist:
+        Contact.copy_from_contact_registry(request, c, vat)
+
+        try:
+            contact = Contact.objects.get(vat=vat)
+        except Contact.DoesNotExist:
+            return JsonError("contact_does_not_exists")
+
+    # TODO: validate with forms
+
+    try:
+        document = Document(
+            company=c,
+            number=data['document_number'],
+            entry_date=data['entry_date'],
+            document_date=data['document_date'],
+            supplier=contact,
+            created_by=request.user
+        )
+        document.save()
+    except Exception as e:
+        print "Error saving document"
+        print e
+
+        return JsonError('could_not_save_document')
+
+
+    documents = Document.objects.filter(company=c).order_by('-number')
+    page = 1
+    i = 0
+
+    for d in documents:
+        if i > 0 and i%g.MISC['documents_per_page'] == 0:
+            page += 1
+
+        if d == document:
+            break
+
+        i += 1
+
+    redirect_url = reverse('pos:manage_documents', kwargs={'company': c.url_name, 'page': page}) + "#" + str(document.id)
+
+    return JsonOk(extra={'redirect_url': redirect_url})
+
+
+@login_required
+def update_document(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist."))
+
+    # permissions
+    if not has_permission(request.user, c, 'document', 'edit'):
+        return JsonError(_("You have no permission to add contacts"))
+
+    data = JsonParse(request.POST.get('data'))
+    supplier = data['supplier']
+    supplier = supplier.split(',')
+
+    contact = None
+    if len(supplier) > 0:
+        vat = supplier[-1].strip()
+
+        if not vat.isdigit():
+            return JsonError("invalid_supplier")
+
+        try:
+            contact = Contact.objects.get(vat=vat)
+        except Contact.DoesNotExist:
+            Contact.copy_from_contact_registry(request, c, vat)
+
+            try:
+                contact = Contact.objects.get(vat=vat)
+            except Contact.DoesNotExist:
+                return JsonError("contact_does_not_exists")
+
+    # TODO: validate with forms
+
+    try:
+        document = Document.objects.get(id=data['document_id'], company=c)
+        document.number = data['document_number']
+        document.entry_date = data['entry_date']
+        document.document_date = data['document_date']
+
+        if contact is not None:
+            document.supplier = contact
+
+        document.updated_by = request.user
+        document.save()
+    except Exception as e:
+        print "Error updating document"
+        print e
+
+        return JsonError('could_not_save_document')
+
+    return JsonOk()
+
+
+@login_required
+def delete_document(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist."))
+
+    if not has_permission(request.user, c, 'document', 'edit'):
+        return JsonError(_("You have no permission to edit document"))
+
+    if not has_permission(request.user, c, 'stock', 'edit'):
+        return JsonError(_("You have no permission to edit stock"))
+
+    data = JsonParse(request.POST.get('data'))
+
+    try:
+        document = Document.objects.get(id=data['document_id'], company=c)
+    except Document.DoesNotExist:
+        print "document does not exist"
+
+        return JsonError('document_does_not_exist')
+
+    try:
+        Stock.objects.filter(document=document, company=c).delete()
+    except Exception as e:
+        print "error deleting stock"
+        print e
+
+        return JsonError('could_not_delete_stock')
+
+    document.delete()
+
+    return JsonOk()
+
+@login_required
+def manage_stock(request, company, page):
+    c = get_object_or_404(Company, url_name=company)
+
+    # check permissions: needs to be guest
+    if not has_permission(request.user, c, 'stock', 'view'):
+        return no_permission_view(request, c, _("You have no permission to view stock."))
+
+    documents = Document.objects.filter(company=c).order_by('-number')
+
+    search = request.GET.get('search', '')
+    document = request.GET.get('document', '')
+
+    if search == "":
+        if document == "" or document == "all":
+            stocks = Stock.objects.filter(company=c).order_by('-datetime_created')
+        else:
+            stocks = Stock.objects.filter(company=c, document=document).order_by('-datetime_created')
+    else:
+        stock_products = StockProduct.objects.filter(product__name__icontains=search, stock__in=[s.id for s in Stock.objects.filter(company=c)])
+        stocks = Stock.objects.filter(Q(name__icontains=search) | Q(id__in=[sp.id for sp in stock_products]), Q(company=c)).order_by('-datetime_created')
+
+    paginator = Paginator(stocks, g.MISC['stocks_per_page'])
+
+    if page:
+        stocks = paginator.page(page)
+    else:
+        stocks  = paginator.page(1)
+
+    stocks_json = {}
+
+    for s in stocks:
+        s.stock_products = StockProduct.objects.filter(stock=s).order_by('product__name')
+        __stock_products = {}
+
+        for sp in s.stock_products:
+            __stock_products[str(sp.id)] = {'product_id': str(sp.product.id), 'product_name': str(sp.product.name), 'deduction': str(fn(sp.deduction))}
+
+        stocks_json[s.id] = {
+            'id': str(s.id),
+            'stock_type': s.stock_type,
+            'unit_type': s.unit_type,
+            'stock': fn(s.stock),
+            'left_stock': fn(s.left_stock),
+            'stock_products': __stock_products
+        }
+
+    currency = get_company_value(request.user, c, 'pos_currency')
+
+    context = {
+        'separator': get_company_value(request.user, c, 'pos_decimal_separator'),
+        'currency': currency,
+        'decimal_places': get_company_value(request.user, c, 'pos_decimal_places'),
+        'currency_symbol': currencies[currency][1],
+        'documents': documents,
+        'managing': 'stock',
+        'units': g.UNITS,
+        'stock_types': g.STOCK_TYPE,
+        'company': c,
+        'stocks': stocks,
+        'stocks_json': json.dumps(stocks_json),
+        # 'searched': searched,
+        # 'filter_form': form,
+        'title': _("Stock"),
+        'next_url': reverse('pos:manage_stock', args=[c.url_name, int(page)+1]),
+        'prev_url': reverse('pos:manage_stock', args=[c.url_name, int(page)-1]),
+        'site_title': g.MISC['site_title'],
+        'date_format_django': get_date_format(request.user, c, 'django'),
+        'date_format_js': get_date_format(request.user, c, 'js'),
+    }
+
+    return render(request, 'pos/manage/manage_stocks.html', context)
+
+
+@login_required
+def save_stock(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist."))
+
+    # permissions
+    if not has_permission(request.user, c, 'document', 'edit'):
+        return JsonError(_("You have no permission to edit documents"))
+
+    if not has_permission(request.user, c, 'stock', 'edit'):
+        return JsonError(_("You have no permission to edit stock"))
+
+    data = JsonParse(request.POST.get('data'))
+
+    document = None
+
+    if 'document' in data and data['document'] == '' or data['document'] == 'all':
+        document = None
+    else:
+        document = Document.objects.get(id=data['document'])
+
+    # TODO: validate with forms
+
+    try:
+        stock = Stock(
+            company=c,
+            document=document,
+            name=data['stock_name'],
+            # quantity=data['quantity'],
+            stock=data['stock'],
+            left_stock=data['stock'],
+            stock_type=data['type'],
+            unit_type=data['unit'],
+            purchase_price=data['purchase_price'],
+            created_by=request.user
+        )
+        stock.save()
+
+    except Exception as e:
+        print "Error saving stock or saving purchase price"
+        print e
+
+        return JsonError('could_not_save_stock')
+
+    if 'for_product' in data:
+        for fp in data['for_product']:
+            product_id = fp[0]
+            deduction = fp[1]
+
+            if deduction == "":
+                deduction = 1
+
+            try:
+                product = Product.objects.get(id=int(product_id))
+            except Product.DoesNotExist:
+                continue
+
+            try:
+                stock_product = StockProduct(stock=stock, product=product, deduction=deduction, created_by=request.user)
+                stock_product.save()
+            except Exception as e:
+                print "Error saving stock product"
+                print e
+
+                return JsonError('could_not_save_stock_product')
+
+    stocks = Stock.objects.filter(company=c).order_by('-datetime_created')
+    page = 1
+    i = 0
+
+    for s in stocks:
+        if i > 0 and i%g.MISC['stocks_per_page'] == 0:
+            page += 1
+
+        if s == stock:
+            break
+
+        i += 1
+
+    redirect_url = reverse('pos:manage_stock', kwargs={'company': c.url_name, 'page': page}) + "#" + str(stock.id)
+
+    return JsonOk(extra={'redirect_url': redirect_url})
+
+
+@login_required
+def remove_stock(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist."))
+
+    # permissions
+    if not has_permission(request.user, c, 'stock', 'edit'):
+        return JsonError(_("You have no permission to edit stock"))
+
+    data = JsonParse(request.POST.get('data'))
+
+    # TODO: validate with forms
+
+    try:
+        stock = Stock.objects.get(id=data['stock_id'], company=c)
+        StockProduct.objects.filter(stock=stock).delete()
+        stock.delete()
+    except Stock.DoesNotExist:
+        print "stock does not exist"
+
+        return JsonError('stock_does_not_exist')
+
+    return JsonOk()
+
+
+@login_required
+def update_stock(request, company):
+    try:
+        c = Company.objects.get(url_name=company)
+    except Company.DoesNotExist:
+        return JsonError(_("Company does not exist."))
+
+    if not has_permission(request.user, c, 'stock', 'edit'):
+        return JsonError(_("You have no permission to edit stock"))
+
+    data = JsonParse(request.POST.get('data'))
+
+    try:
+        stock = Stock.objects.get(id=data['stock_id'], company=c)
+        stock.name = data['stock_name']
+        stock.save()
+
+        StockProduct.objects.filter(stock=stock).delete()
+
+        for key, value in data['stock_products'].iteritems():
+            product = Product.objects.get(id=value['product_id'], company=c)
+
+            stock_product = StockProduct(stock=stock, product=product, deduction=value['deduction'], created_by=request.user)
+            stock_product.save()
+
+        history_info = {'previous_state': serializers.serialize("json", [stock])}
+
+        if "stock_left" in data and "stock_purchase_price" in data:
+            if Decimal(data["stock_left"]) > stock.stock:
+                return JsonError("left_stock_bigger_than_stock")
+
+            stock.left_stock = data["stock_left"]
+            stock.purchase_price = data["stock_purchase_price"]
+            stock.save()
+        else:
+            return JsonError("stock_left_or_stock_purchase_price_missing")
+
+        history_info['new_state'] = serializers.serialize("json", [stock])
+        history_info['reason'] = data['reason']
+
+        stock_history = StockUpdateHistory(stock=stock, history_info=json.dumps(history_info), created_by=request.user)
+        stock_history.save()
+
+        stock_products = []
+        for sp in StockProduct.objects.filter(stock=stock):
+            stock_products.append({"stock_id": str(sp.stock.id), "stock_product_id": str(sp.id), "product_id": str(sp.product.id), "product_name": sp.product.name, "deduction": str(sp.deduction)})
+
+    except Exception as e:
+        print "Error updating stock"
+        print e
+
+        return JsonError('could_not_update_stock')
+
+    """
+    if 'for_product' in data:
+        for fp in data['for_product']:
+            product_id = fp[0]
+            deduction = fp[1]
+
+            if deduction == "":
+                deduction = 1
+
+            try:
+                product = Product.objects.get(id=int(product_id))
+            except Product.DoesNotExist:
+                continue
+
+            try:
+                stock_product = StockProduct(stock=stock, product=product, deduction=deduction, created_by=request.user)
+                stock_product.save()
+            except Exception as e:
+                print "Error saving stock product"
+                print e
+
+                return JsonError('could_not_save_stock_product')
+
+    stocks = Stock.objects.filter(company=c).order_by('-datetime_created')
+    page = 1
+    i = 0
+    """
+
+    return JsonOk(extra={'stock_name': stock.name, 'stock_products': json.dumps(stock_products), 'stock_history': json.dumps(stock.stock_history)})

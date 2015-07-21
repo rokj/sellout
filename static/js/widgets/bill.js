@@ -613,7 +613,9 @@ Item = function(bill, product) {
 
         total: $("div.value.item.total", p.item_row),
 
-        more_button: $("button.more", p.item_row)
+        more_button: $("button.more", p.item_row),
+
+        unit_type: $("div.unit-type", p.item_row)
     };
 
     // properties of this item
@@ -647,6 +649,10 @@ Item = function(bill, product) {
         // out of stock class
         //if(p.data.quantity.cmp(p.product.data.stock) >= 0) p.item_row.addClass("out-of-stock");
         //else p.item_row.removeClass("out-of-stock");
+
+        if (p.data.unit_type != gettext("Piece")) {
+            p.items.unit_type.text(p.data.unit_type);
+        }
     };
 
     p.add_quantity = function(add){

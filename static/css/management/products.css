@@ -37,11 +37,15 @@
     width: 100%;
 }
 
-.negative-profit{
+.negative-profit {
     color:white;
     font-weight:bold;
-    background-color: #ec5449;
-    padding:2px;
+    background-color: #fa233d;
+    padding: 2px 2px 2px 5px;
+}
+
+#total_price {
+    padding-left: 5px;
 }
 
 #filter_form_controls{
@@ -172,6 +176,23 @@ input#edit_product_save, input#edit_product_cancel{
     overflow: hidden;
 }
 
+#stock_dialog {
+    height: auto;
+    max-height: 300px;
+    padding: 2px 2px 2px 5px;
+    border-top: 2px solid rgba(180,180,180,0.5);
+    background-color: #FCFCFC;
+}
+
+#stock_dialog #new_stock {
+    display: none;
+}
+
+#new_stock {
+    padding-top: 0px;
+    margin-top: 0px;
+}
+
 #edit_dialog_title{
     margin-right: 40px;
     margin-bottom: 20px;
@@ -272,4 +293,28 @@ h3, #results_info{
 #mass_discount_edit_dialog .clear-discounts-container a{
     color: #ff5a6e;
     font-size: 13px;
+}
+
+ol#stock_products {
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+    display: none;
+}
+
+ol#stock_products .left-stock {
+    float: right;
+}
+
+#stock_dialog .add-stock {
+    display: none;
+}
+
+#stock_dialog .add-stock a {
+    display: block;
+    font-size: 12px;
+    width: auto;
+    clear: both;
+    height: 18px;
+    text-align: right;
 }

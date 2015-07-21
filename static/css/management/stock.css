@@ -1,0 +1,474 @@
+#documents button#add:hover, #stock button#add:hover {
+    cursor: pointer;
+    background-color: rosybrown;
+}
+
+#documents #document_input {
+    display: none;
+}
+
+.ui-autocomplete {
+    max-height: 300px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: auto;
+    /* add padding to account for vertical scrollbar */
+    padding-right: 20px;
+    width: 300px !important;
+    z-index: 99999;
+    background: rgb(224, 224, 224);
+}
+
+.ui-autocomplete .search-term {
+    background-color: palevioletred;
+}
+
+#supplier {
+    min-width: 440px;
+}
+
+.controls {
+    position: relative;
+}
+
+.controls button#save_document, .controls button#save_stock {
+    background-image: url("/static/icons/save.png");
+    position: absolute;
+    right: -42px;
+    top: -6px;
+}
+
+.controls button.update {
+    background-image: url("/static/icons/save.png");
+    position: absolute;
+    right: -42px;
+    top: -6px;
+    box-shadow: none;
+}
+
+.controls button.cancel {
+    background-image: url("/static/icons/cancel.png");
+    position: absolute;
+    right: 0px;
+    box-shadow: none;
+    top: -5px;
+}
+
+.controls .editing {
+    display: none;
+}
+
+#document_input .controls button.cancel {
+    right: -42px;
+    top: 0px;
+}
+
+#document_input .controls button.save {
+    right: -82px;
+}
+
+.controls button {
+    background-color: transparent;
+    background-position: center center;
+    background-repeat: no-repeat;
+    height: 40px;
+    width: 40px;
+}
+
+input.error {
+    border-bottom: 1px solid #ff0000;
+}
+
+#documents_list td.selected {
+    background-color: rgb(255, 223, 211);
+}
+
+#documents_list td a:hover {
+    text-decoration: underline;
+}
+
+.manage-stock-header {
+    display: block;
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+    width: 300px;
+    float: left;
+    display: block;
+    padding-top: 6px;
+}
+
+.manage-stock-header li.active {
+    padding: 0px 10px 0px 10px;
+}
+
+.manage-stock-header li:nth-child(1) {
+    padding-left: 0px;
+}
+
+.manage-stock-header li {
+    display: inline-block;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.manage-stock-header li a {
+    font-weight: normal;
+    text-decoration: underline;
+}
+
+#stock table tr#stock_input {
+    display: none;
+}
+
+#stock_section select#document {
+    display: block;
+    max-width: 300px;
+    float: right;
+}
+
+.select-products {
+    width: 83% !important;
+    color: #000000;
+    font-weight: bold;
+    margin: 5px 5px;
+}
+
+.select-products:hover {
+    cursor: pointer;
+    background-color: #c8c8c8;
+}
+
+.controls div#for_product_wrapper {
+    display: none;
+    position: absolute;
+    top: 0px;
+    left: -454px;
+    width: 453px;
+    height: 250px;
+    background-color: #e0e0e0;
+    z-index: 1;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+
+.controls div#for_product_wrapper #selected_products {
+    width: 45%;
+    margin-right: 5%;
+    height: auto;
+    min-height: 1px;
+    float: left;
+    display: block;
+}
+
+#deduction {
+    width: 42px;
+    height: 39px;
+    font-size: 12px;
+    padding: 4px 0px 4px 0px;
+    margin: 0px;
+    padding: 0px;
+    /* float: right; */
+    /* margin-top: 2px; */
+    /* margin-right: 8px; */
+    text-align: center;
+}
+
+#add_to_selected_products {
+    background: url('/static/icons/forward_black.png') no-repeat 11px;
+    /* float: right; */
+    /* margin-right: 9px; */
+    /* margin-top: 6px; */
+    background-color: rgb(221, 221, 221);
+    width: 40px;
+    margin: 0 auto;
+}
+
+#add_to_selected_products:hover {
+    cursor: pointer;
+}
+
+#selected_products .remove {
+    background: url('/static/icons/delete_active.png') no-repeat;
+    position: absolute;
+    top: 12px;
+    right: -19px;
+    width: 15px;
+    height: 15px;
+    background-size: 100% 100%;
+    border: none;
+    box-shadow: none;
+}
+
+#selected_products {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+    font-size: 10px;
+}
+
+.controls div#for_product_wrapper #searcher {
+    width: 50%;
+    float: left;
+    background-color: rgb(192, 192, 192);
+    height: 100%;
+}
+
+input#for_product {
+    padding: 4px 0px 4px 4px;
+    height: 39px;
+    margin-top: 2px;
+}
+
+#selected_products .deduction {
+    position: relative;
+    text-align: center;
+}
+
+ol#selected_products li.header {
+    font-weight: bold;
+}
+
+#stock_list table div.info {
+    background-color: #c8c8c8;
+    position: absolute;
+    display: none;
+    padding: 7px;
+    margin: 2px;
+    font-size: 12px;
+    padding-top: 3px;
+    z-index: 2;
+}
+
+#stock_list td.for-products {
+    position: relative;
+}
+
+#stock_list div.info ol {
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+    font-size: 10px;
+}
+
+#stock_list div.info ol li {
+    font-size: 11px;
+}
+
+#stock_list div.info ol li span.product-name {
+    display: inline-block;
+    text-align: left;
+}
+
+#stock_list div.info ol li span.product-deduction {
+    display: inline-block;
+    text-align: right;
+    float: right;
+    padding-left: 40px;
+}
+
+#documents, #stock_section {
+    margin-left: 340px;
+}
+
+.results-header {
+    color: #646464;
+    padding-top: 0px;
+}
+
+.results-header .pagination {
+    display: inline;
+    margin-left: 20px;
+}
+
+#documents_list table {
+    margin-right: 40px;
+    margin-top: 17px;
+    width: 100%;
+}
+
+#stock_list {
+    padding-top: 74px;
+    padding-right: 100px;
+}
+
+#documents_list {
+    padding-top: 74px;
+    padding-right: 100px;
+}
+
+#documents_list table tr:nth-child(1) td {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    background-color: #DDDDDD;
+}
+
+#stock_list table.list {
+    padding-top: 16px;
+}
+
+#stock_list table:not(.list) td {
+    border: none;
+    height: auto;
+}
+
+#document_wrapper {
+    padding-top: 13px;
+    max-width: 400px;
+}
+
+#document_wrapper span {
+    line-height: 41px;
+    display: inline-block;
+    height: 41px;
+    padding-right: 10px;
+}
+
+td.unit-type {
+    text-transform: lowercase;
+}
+
+td span.searched {
+    background-color: rgb(250, 250, 183);
+}
+
+#searcher {
+    float: left;
+    width: 380px;
+}
+
+#selected_products {
+    float: left;
+    width: 400px;
+    padding-left: 15px;
+}
+
+#search_input table tr:last-child td {
+    border: none;
+}
+
+#selected_products table thead td {
+    font-size: 16px;
+}
+
+#selected_products table {
+    max-height: 300px;
+    display: block;
+    overflow: auto;
+}
+
+#selected_products table td {
+    width: 80%;
+}
+
+#documents_list table td.hover, #stock_list table td.hover {
+    background-color: #DDDDDD
+}
+
+#documents_list table tr td:last-child {
+    position: relative;
+}
+
+td.relative {
+    position: relative;
+}
+
+span.controls {
+    float: right;
+    visibility: hidden;
+    display: block;
+    position: absolute;
+    /*right: -10px;*/
+    right: -45px;
+    top: 10px;
+    width: 80px;
+}
+
+span.controls button.edit {
+    background: url('/static/icons/edit_black.png') no-repeat 50% 50%;
+    background-size: 100%;
+    border: none;
+    box-shadow: none;
+    padding: 1px;
+    margin: 0px;
+    width: 30px;
+    height: 30px;
+}
+
+span.controls button.remove {
+    background: url('/static/icons/delete_black.png') no-repeat 50% 50%;
+    /*background-size: 40%;*/
+    border: none;
+    box-shadow: none;
+    padding: 0px;
+    margin: 0px;
+    width: 30px;
+    height: 30px;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+input.edit-input {
+    display: none;
+}
+
+button.stock-history {
+    width: 18px;
+    height: 18px;
+    background: url('/static/icons/stock-history.png');
+    background-repeat: no-repeat;
+    background-size: 18px 18px;
+    box-shadow: none;
+    position: absolute;
+    right: 30px;
+    top: 12px;
+}
+
+button.stock-history:hover {
+    cursor: auto;
+}
+
+div.stock-history {
+    background-color: #c8c8c8;
+    position: absolute;
+    display: none;
+    padding: 7px;
+    margin: 2px;
+    font-size: 12px;
+    padding-top: 3px;
+    z-index: 2;
+}
+
+div.stock-history ol {
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+    min-width: 300px;
+}
+
+div.stock-history span.datetime-created {
+    min-width: 100px;
+    display: inline-block;
+}
+
+div.stock-history li.history {
+    text-align: center;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.unit-text {
+    font-size: 12px;
+    text-transform: lowercase;
+    color: #646464;
+}
+
+.deduction.unit-text {
+    padding-left: 6px;
+}
+
+button.select-products {
+    display: none;
+}

@@ -83,7 +83,6 @@ urlpatterns = patterns('',
     url(r_company + r'/manage/json/bill/change_payment_type?$', bill.change_payment_type, name='mobile_change_payment_type'),
     url(r_company + r'/manage/json/bill/paypal-send-invoice/$', bill.send_invoice, name='mobile_send_invoice'),
 
-
     # bill
     url(r_company + r'/manage/json/bill/list/?$', bill_management.list_bills, name='mobile_list_bills'),
     url(r_company + r'/manage/json/bill/print/?$', bill_management.print_bill, name='mobile_print_bill'),
