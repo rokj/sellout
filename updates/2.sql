@@ -15,3 +15,5 @@ alter table pos_contact add column city character varying (100);
 
 alter table pos_billcontact add column tax_payer character varying(3) not null default 'no';
 alter table pos_billcontact add column additional_info text;
+
+alter table pos_billitem drop column stock;
