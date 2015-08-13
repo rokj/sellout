@@ -183,8 +183,8 @@ TIME_FORMATS = {
 }
 
 ALPHABETS = {
-    'en': 'abcdefghijklmnopqrstuvwxyz',
-    'si': 'abcčdefghijklmnoprsštuvzž',
+    'en': u'abcdefghijklmnopqrstuvwxyz',
+    'si': u'abcčdefghijklmnoprsštuvzž',
 }
 
 PIN_LENGTH = 4
