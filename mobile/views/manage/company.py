@@ -50,6 +50,7 @@ def edit_company(request, company_id):
     c.notes = data.get('notes')
     c.tax_payer = data.get('tax_payer')
 
+
     if data.get('change_color_logo'):
         if data.get('color_logo'):
             d = {'image': data.get('color_logo')}
