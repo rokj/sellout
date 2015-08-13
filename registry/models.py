@@ -42,4 +42,4 @@ class ContactRegistry(models.Model):
             else:
                 return self.company_name
         else:
-            return "Company: " + str(self.company_name)
+            return "Company: " + self.company_name

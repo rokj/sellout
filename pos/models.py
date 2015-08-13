@@ -514,9 +514,9 @@ class ContactAbstract(models.Model):
 
     def __unicode__(self):
         if self.type == "Individual":
-            return "Individual: " + str(self.first_name) + " " + str(self.last_name)
+            return "Individual: " + self.first_name + " " + self.last_name
         else:
-            return "Company: " + str(self.company_name)
+            return "Company: " + self.company_name
 
     class Meta:
         abstract = True
