@@ -17,3 +17,4 @@ alter table pos_billcontact add column tax_payer character varying(3) not null d
 alter table pos_billcontact add column additional_info text;
 
 alter table pos_billitem drop column stock;
+ALTER TABLE pos_product DROP COLUMN stock;
