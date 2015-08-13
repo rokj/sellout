@@ -56,7 +56,8 @@ def product_to_dict(user, company, product, android=False):
 
     # sale price
     price = product.get_price()
-    if not price:
+
+    if price is None:
         ret['price'] = ''
     else:
         ret['price'] = format_number(user, company, price, True)
@@ -350,7 +351,7 @@ def search_products_(request, c, android=False):
             # omit search by tax, price, discount
 
     products = products.distinct().order_by('name')[:g.SEARCH_RESULTS['products']]
-    
+
     # return serialized products
     ps = []
     for p in products:
