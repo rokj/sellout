@@ -70,7 +70,7 @@ def mobile_add_contact(request, company_id):
         company=c,
         created_by=request.user,
         type=type,
-        company_name=data.get('company_name'),
+        name=data.get('company_name'),
         first_name=data.get('first_name'),
         last_name=data.get('last_name'),
         sex=data.get('sex'),
@@ -118,7 +118,7 @@ def mobile_edit_contact(request, company_id):
     contact.company = c
     contact.created_by = request.user
     contact.type = data.get('type')
-    contact.company_name = data.get('company_name')
+    contact.name = data.get('company_name')
     contact.first_name = data.get('first_name')
     contact.last_name = data.get('last_name')
     contact.sex = data.get('sex')
