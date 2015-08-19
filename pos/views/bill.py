@@ -217,6 +217,7 @@ def payment_to_dict(user, company, payment):
 def create_printable_bill(user, company, bill, receipt_format=None, esc=False):
     # get the template and some other details
     logo = None
+    location = None
 
     if not receipt_format:
         receipt_format = bill.register.receipt_format
@@ -257,6 +258,7 @@ def create_printable_bill(user, company, bill, receipt_format=None, esc=False):
     context = {
         'bill': bill_data,
         'logo': logo,
+        'location': location
     }
     data = {
         'bill': bill_data,

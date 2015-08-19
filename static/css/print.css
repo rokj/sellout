@@ -290,7 +290,7 @@
     padding-bottom: 5mm;
 }
 
-.receipt-fullpage .receipt-header .company{
+.receipt-fullpage .receipt-header td.company{
     width: 35%;
 }
 
@@ -388,6 +388,11 @@
     width: 4mm;
 }
 
+.receipt-fullpage .items-footer.total td {
+    font-size: 16px;
+    font-weight: bold;
+}
+
 .receipt-fullpage .items-footer tr td{
     padding-top: 2mm;
     padding-bottom: 2mm;
@@ -414,7 +419,7 @@
 }
 
 .receipt-fullpage table.tax-rates{
-    width: 50%;
+    width: 100%;
     margin-top: 10mm;
 }
 
