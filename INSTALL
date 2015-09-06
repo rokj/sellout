@@ -15,6 +15,4 @@ pip install jsonrpc
 pip install xlrd
 pip install django-oauth2-provider
 pip install pyatspi
-
-Additionaly you have to manually install:
-python-bitcoinrpc
+pip install python-bitcoinrpc
