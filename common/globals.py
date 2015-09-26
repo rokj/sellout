@@ -339,7 +339,7 @@ SEX = (
     (FEMALE, _("Female")),
 )
 
-TAX_PAYER_CHOICES=[('tax_payer', ugettext(u"Yes")), ('not_tax_payer', ugettext("No"))]
+TAX_PAYER_CHOICES=[('tax_payer', ugettext("Yes")), ('not_tax_payer', ugettext("No"))]
 
 WAITING = "waiting"
 PAID = "paid"  # when there >= 3 confirmations and bitcoin client
