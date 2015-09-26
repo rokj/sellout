@@ -11,7 +11,7 @@ from common.images import import_color_image, import_monochrome_image, resize_im
 from config.functions import get_company_config
 from mobile.views.manage.configuration import company_config_to_dict
 
-from pos.models import Company, Permission, Category, Tax
+from pos.models import Company, Permission, Category, Tax, Register
 
 from common.functions import JsonParse, has_permission, no_permission_view, JsonOk, JsonError, \
     max_field_length
@@ -380,6 +380,18 @@ def create_company_defaults(user, company):
     
     for c in default_categories:
         add_category(c)
+        
+    # cash register
+    # create a default, A4 cash register with data from company
+    register = Register(
+        created_by=user,
+        company=company,
+        name=_("Default"),
+        receipt_format=g.RECEIPT_FORMATS[0][0],
+        receipt_type=g.RECEIPT_TYPES[0][0],
+        location=True,
+        print_location=False)
+    register.save()
 
     
 @login_required
