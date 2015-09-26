@@ -20,3 +20,4 @@ pip install python-bitcoinrpc
 
 system dependencies:
 memcached
+postgresql_plpython
