@@ -358,6 +358,11 @@ Terminal = function(g){
 
     // controls menu items
     p.items.controls_change_register.unbind().click(function(){
+        if(p.g.data.registers.length == 1){
+            error_message(gettext("Can't change register"), gettext("There is only one register defined."));
+            return;
+        }
+    
         // clear register settings from memory and local storage so that the dialog will be shown
         p.register = null;
         clear_local('register_id');

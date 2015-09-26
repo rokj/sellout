@@ -158,6 +158,9 @@
                 source: categories_list,
                 minLength: 0,
                 delay: 500
+            })
+            .focus(function(){ // open categories on click (don't wait for a key to be pressed)
+                $(this).keydown();
             });
 
             if(preselected_id != null || preselected_id != -1){

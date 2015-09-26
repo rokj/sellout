@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 from django.core.files import File
 from django.db.models import FieldDoesNotExist
 from django.http import JsonResponse
@@ -10,7 +11,7 @@ from common.images import import_color_image, import_monochrome_image, resize_im
 from config.functions import get_company_config
 from mobile.views.manage.configuration import company_config_to_dict
 
-from pos.models import Company, Permission
+from pos.models import Company, Permission, Category, Tax, Register
 
 from common.functions import JsonParse, has_permission, no_permission_view, JsonOk, JsonError, \
     max_field_length
@@ -324,6 +325,75 @@ def mobile_register_company(request):
 
 
 # registration
+def create_company_defaults(user, company):
+    """ creates all initial data for a new company; """
+    # permissions
+    # add 'admin' permissions for the user that registered this company
+    default_permission = Permission(
+        created_by=user,
+
+        user=user,
+        company=company,
+        permission='admin',
+    )
+    default_permission.save()
+        ## assign pin number
+        #default_permission.create_pin()
+    
+    # taxes
+    # create a set of taxes depending on company's country
+    if company.country == 'SI':
+        tax = Tax(created_by=user, company=company, amount=22.0, name='Splošno', default=True)
+        tax.save()
+        
+        tax = Tax(created_by=user, company=company, amount=9.5, name='Znižana', default=False)
+        tax.save()
+        
+        tax = Tax(created_by=user, company=company, amount=0, name='Brez', default=False)
+        tax.save()
+
+    # categories
+    # create a fixed set of categories: {name, description, color, [children]}
+    default_categories = [
+        [_("Foods"), _("Everything edible"), 0, [
+            [_("Bread"), _("Stuff from the oven"), 1, []],
+            [_("Vegetables"), _("Oh so healthy"), 2, []],
+            [_("Fruit"), _("Oh so sweet"), 3, []],
+            [_("Drinks"), _("For the thirsty"), 4, []], ],
+        ],
+        [_("Electronics"), _("Fun fun fun"), 6, []],
+    ]
+    
+    def add_category(data, parent=None):
+        cat = Category(
+            created_by=user,
+            company=company,
+            parent=parent,
+            name=data[0],
+            description=data[1],
+            color=g.CATEGORY_COLORS[data[2]]
+        )
+        cat.save()
+        
+        for child in data[3]:
+            add_category(child, cat)
+    
+    for c in default_categories:
+        add_category(c)
+        
+    # cash register
+    # create a default, A4 cash register with data from company
+    register = Register(
+        created_by=user,
+        company=company,
+        name=_("Default"),
+        receipt_format=g.RECEIPT_FORMATS[0][0],
+        receipt_type=g.RECEIPT_TYPES[0][0],
+        location=True,
+        print_location=False)
+    register.save()
+
+    
 @login_required
 def register_company(request):
     # permissions: anybody can register a company
@@ -337,18 +407,7 @@ def register_company(request):
             company.created_by = request.user
             form.save()
             
-            # add 'admin' permissions for the user that registered this company
-            default_permission = Permission(
-                created_by=request.user,
-
-                user=request.user,
-                company=company,
-                permission='admin',
-            )
-            default_permission.save()
-
-            ## assign pin number
-            #default_permission.create_pin()
+            create_company_defaults(request.user, company)
 
             return redirect('pos:terminal', company=form.cleaned_data['url_name'])  # home page
     else:
