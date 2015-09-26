@@ -1,5 +1,6 @@
 To install you need:
 --------------------
+python dependencies:
 pip install django==1.7.1
 pip install sorl-thumbnail==11.12.1b # (starejse verzije ne delajo z django 1.7)
 pip install -I djangorestframework==2.3.12
@@ -16,3 +17,6 @@ pip install xlrd
 pip install django-oauth2-provider
 pip install pyatspi
 pip install python-bitcoinrpc
+
+system dependencies:
+memcached
