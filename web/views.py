@@ -142,6 +142,7 @@ def sign_up(request):
         'user_form': user_form,
         'client_id': settings.GOOGLE_API['client_id'],
         'title': _("Sign up"),
+        'site_title': g.SITE_TITLE,
         'GOOGLE_API': settings.GOOGLE_API
     }
 

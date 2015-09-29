@@ -202,7 +202,7 @@ country_list = (
     ("Singapore", "SG", "SGP"),
     ("Sint Maarten (Dutch part)", "SX", "SXM"),
     ("Slovakia", "SK", "SVK"),
-    ("Slovenia", "SI", "SVN"),
+    ("Slovenija", "SI", "SVN"),
     ("Solomon Islands", "SB", "SLB"),
     ("Somalia", "SO", "SOM"),
     ("South Africa", "ZA", "ZAF"),

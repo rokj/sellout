@@ -6,6 +6,18 @@
 
 {% block head %}
     <link rel="stylesheet" href="{% static 'bootstrap/sign_up.css' %}"/>
+
+    <script type="text/javascript">// <![CDATA[
+    $(document).ready(function() {
+        var items = {
+            country_list: $("#id_country")
+        };
+
+        // TODO: static since only Slovenia sedaj moja dezela
+        items.country_list.val("SI");
+    });
+    // ]]>
+    </script>
 {% endblock %}
 
 {% block content %}
