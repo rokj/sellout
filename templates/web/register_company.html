@@ -12,7 +12,8 @@
     $(document).ready(function(){
         var items = {
             suggestion_container: $("#suggestion_list_container"),
-            suggestion_list: $("#suggestion_list")
+            suggestion_list: $("#suggestion_list"),
+            country_list: $("#id_country")
         };
 
         function show_suggestions(data){
@@ -50,6 +51,10 @@
                     }
             );
         });
+
+        // static since only Slovenia sedaj moja dezela
+        items.country_list.val("SI");
+
         // initially, hide the list
         show_suggestions({suggestions: []});
     });
