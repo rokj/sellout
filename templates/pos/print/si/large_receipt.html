@@ -23,10 +23,11 @@ RULE #1:
                     {# company #}
                     <div class="company name">{{ bill.issuer.name }}</div>
                     <div class="company details">
-                        {{ bill.issuer.street }}, {{ bill.issure.postcode }} {{ bill.issuer.city }}<br/>
+                        {% if bill.issuer.notes %}{{ bill.issuer.notes }}<br />{% endif %}
+                        {{ bill.issuer.street }}, {{ bill.issuer.postcode }} {{ bill.issuer.city }}<br/>
                         {{ bill.issuer.state }} {{ bill.issuer.country_name }} <br/>
-                        {% trans 'VAT' %}: {{ bill.issuer.vat_no }}
-                        {{ bill.issuer.website }}
+                        {% trans 'VAT' %}: {{ bill.issuer.vat_no }}<br />
+                        {% if bill.issuer.website %}{{ bill.issuer.website }}<br />{% endif %}
                     </div>
                 </td>
                 <td class="client">

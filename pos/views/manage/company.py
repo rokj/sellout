@@ -249,16 +249,20 @@ def company_to_dict(user, company, android=False, with_config=False):
         'phone': company.phone,
         'vat_no': company.vat_no,
         'website': company.website,
-        'tax_payer': company.tax_payer,
+        'tax_payer': company.tax_payer
     }
+
+    if hasattr(company, 'company'):
+        c['notes'] = company.company.notes
+        c['url_name'] = company.company.url_name
 
     if with_config:
         c['config'] = get_company_config(user, company)
 
     try:
         # when using company_to_dict on BillCompany model, some properties are missing
-        c['url_name'] = company.url_name
-        c['notes'] = company.notes
+        # c['url_name'] = company.company.url_name
+        # c['notes'] = company.notes
 
         if company.color_logo:
             try:
