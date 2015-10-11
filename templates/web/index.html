@@ -18,6 +18,7 @@
     <link href="{% static 'css/fonts/fonts.css' %}" rel="stylesheet" />
     <link href="{% static 'css/fonts/montserrat.css' %}" rel="stylesheet" />
 
+    <script type="text/javascript" src="{% static 'js/common.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
 
     <style type="text/css">
@@ -495,11 +496,13 @@
                     <div class="center-block google-play-text">
                         <h3 class="dark-fg">{% trans 'Mobile application' %}</h3>
                         <p class="dark-fg">{% blocktrans %}You do not have a computer? Do not worry!<br /> <br/>
-                            We also developed Android mobile application, <br />
-                            and you can get it by clicking following icon.
+                            Android app is being developed, <br />
+                            and will be available very soon. <br />
+                            <br />
+                            Wamt to find out when? Just ask.
                             {% endblocktrans %}</p>
                         <p>
-                            <a target="_blank" class="google-play" href="https://play.google.com/store/apps/details?id=net.blocklogic.pos"><img src="{% static 'icons/google_play.png' %}" alt="google play" /></a>
+{#                            <a target="_blank" class="google-play" href="https://play.google.com/store/apps/details?id=net.blocklogic.pos"><img src="{% static 'icons/google_play.png' %}" alt="google play" /></a>#}
                         </p>
                     </div>
                 </div>
@@ -566,7 +569,7 @@
                             alt="Sellout logo"
                             id="footer_logo" />
                     {% elif LANGUAGE_CODE == "si" %}
-                        <img src="{% static 'images/index/logo-text.png' %}"
+                        <img src="{% static 'icons/spletna_blagajna_logo_white.png' %}"
                             alt="Sellout logo"
                             id="footer_logo" />
                     {% endif %}

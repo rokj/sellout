@@ -13,6 +13,7 @@
     padding: 0px;
     height: 35px;
     width: 124px;
+    display: none;
 }
 
 #google_signin_button span.icon {

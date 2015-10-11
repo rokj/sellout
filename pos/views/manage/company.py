@@ -359,13 +359,14 @@ def create_company_defaults(user, company):
     # categories
     # create a fixed set of categories: {name, description, color, [children]}
     default_categories = [
-        [_("Foods"), _("Everything edible"), 0, [
-            [_("Bread"), _("Stuff from the oven"), 1, []],
-            [_("Vegetables"), _("Oh so healthy"), 2, []],
-            [_("Fruit"), _("Oh so sweet"), 3, []],
-            [_("Drinks"), _("For the thirsty"), 4, []], ],
+        [
+            _("Foods"), _("Everything edible"), 10, [
+                # [_("Bread"), _("Stuff from the oven"), 1, []],
+                [_("Vegetables"), _("Oh so healthy"), 6, []],
+                [_("Fruit"), _("Oh so healthy"), 3, []],
+            ]
         ],
-        [_("Electronics"), _("Fun fun fun"), 6, []],
+        [_("Drinks"), _("For the thirsty"), 9, []]
     ]
     
     def add_category(data, parent=None):
@@ -393,8 +394,9 @@ def create_company_defaults(user, company):
         name=_("Default"),
         receipt_format=g.RECEIPT_FORMATS[0][0],
         receipt_type=g.RECEIPT_TYPES[0][0],
-        location=True,
-        print_location=False)
+        location="",
+        print_location=False,
+        printer_driver=g.PRINTER_DRIVERS[0][0])
     register.save()
 
     

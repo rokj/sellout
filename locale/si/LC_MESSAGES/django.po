@@ -4899,3 +4899,27 @@ msgstr "predmet"
 
 msgid "left in stock"
 msgstr "na zalogi"
+
+msgid "Foods"
+msgstr "Hrana"
+
+msgid "Vegetables"
+msgstr "Zelenjava"
+
+msgid "Fruit"
+msgstr "Sadje"
+
+msgid "Drinks"
+msgstr "Pijača"
+
+msgid "Everything edible"
+msgstr "Nekaj za pojest"
+
+msgid "Oh so healthy"
+msgstr "Nekaj zdravega"
+
+msgid "For the thirsty"
+msgstr "Nekaj za popit"
+
+msgid "No category"
+msgstr "Brez kategorije"

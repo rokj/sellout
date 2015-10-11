@@ -1,0 +1,4 @@
+Sometimes there are just fucking problems when deploying to virtual environemnts:
+
+Maybe this will help you:
+http://gotoanswer.com/?q=ImportError%3A+No+module+named+django.core.wsgi+for+uwsgi
