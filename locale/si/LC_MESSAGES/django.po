@@ -4039,11 +4039,11 @@ msgstr "E-mail"
 
 #: templates/web/contact.html:29
 msgid "Message"
-msgstr ""
+msgstr "Sporočilo"
 
 #: templates/web/contact.html:35
 msgid "Send"
-msgstr ""
+msgstr "Pošlji"
 
 #: templates/web/index.html:225
 msgid "Login failed. Check your user name and password."
@@ -4939,3 +4939,15 @@ msgstr "Nekaj za popit"
 
 msgid "No category"
 msgstr "Brez kategorije"
+
+msgid "Send a message"
+msgstr "Pošlji sporočilo"
+
+msgid "Your name"
+msgstr "Ime"
+
+msgid "Contact form"
+msgstr "Kontaktni obrazec"
+
+msgid "FAQ"
+msgstr "Pogosta vprašanja"

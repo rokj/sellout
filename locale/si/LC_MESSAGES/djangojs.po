@@ -581,3 +581,6 @@ msgstr "Vnesi ime zaloge"
 
 #~ msgid "Current password field must not be empty!"
 #~ msgstr "Za spremembo gesla moraš vnesti trenutno geslo!"
+
+msgid "Contact form"
+msgstr "Kontaktni obrazec"

@@ -778,7 +778,7 @@ ContactForm = function(g) {
         p.close_contact.unbind().click(p.close_contact_dialog);
     };
 
-    p.items.title.text(gettext("Ask us anything"));
+    p.items.title.text(gettext("Contact form"));
     p.items.title.show();
     p.items.info_data.show();
     p.items.send_message.show();
