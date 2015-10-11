@@ -277,7 +277,7 @@ CATEGORY_COLORS = [  # choices for category.color
     '5ad2fa',
 ]
 
-NO_CATEGORY_NAME = _("No Category")
+NO_CATEGORY_NAME = _("No category")
 
 ###
 ### actions

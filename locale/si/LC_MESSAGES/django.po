@@ -4247,7 +4247,7 @@ msgstr "Vse v oblaku"
 msgid ""
 "Any time, any place, Sellout is always available. <br />Never lose your data."
 msgstr ""
-"Kadarkoli, kjerkoli, Sellout je vedno dostopen. <br />Vedno varno shranjeni "
+"Kadarkoli, kjerkoli, spletna blagajna je vedno dostopna. <br />Vedno varno shranjeni "
 "podatki."
 
 #: templates/web/index.html:402
@@ -4345,6 +4345,22 @@ msgstr ""
 "                            ki si jo lahko preneseš na svojo na napravo že s klikom na naslednjo ikono.\n"
 "                            "
 
+msgid ""
+"You do not have a computer? Do not worry!<br /> <br/>\n"
+"                            Android app is being developed, <br />\n"
+"                            and will be available very soon. <br />\n"
+"                            <br />\n"
+"                            Want to find out when? Just ask.\n"
+"                            "
+
+msgstr ""
+"Nimaš računalnika? Brez skrbi!<br /> <br/>\n"
+"                            Razvijamo tudi mobilno aplikacijo, <br />\n"
+"                            ki jo bo možno uporabiti ze kmalu.<br />\n"
+"                            <br />\n"
+"                            Hočeš izvedeti kdaj ali pa jo želiš kar že testirati? <br />Pošlji nam sporočilo!"
+"                            "
+
 #: templates/web/index.html:520
 msgid "Packages & Pricing"
 msgstr "Paketi & Cena"
@@ -4379,7 +4395,7 @@ msgstr "Preizkusite <b>brezplačno</b>"
 
 #: templates/web/index.html:599
 msgid "Contact"
-msgstr "Kontakti"
+msgstr "Kontakt"
 
 #: templates/web/index.html:600
 msgid "About"
