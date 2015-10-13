@@ -319,3 +319,10 @@ div.clear-results a{
     color: #22e693;
     display: none;
 }
+
+.decimal-point-info {
+    padding-top: 2px;
+    color: #999999;
+    display: block;
+    font-size: 9px;
+}

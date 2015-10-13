@@ -108,6 +108,7 @@
 #tools input{
     width: 100%;
     margin-top: 10px;
+    color: #333 !important;
 }
 
 #tools .arrow{

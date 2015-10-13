@@ -1833,10 +1833,12 @@
                     <div class="split-cell first">
                         <label for="edit_product_price_without_tax">{% trans 'Sell price (excl. tax)' %}: </label>
                         <input type="text" id="edit_product_price_without_tax" maxlength="{{ field_lengths.price }}"/>
+                        <span class="decimal-point-info">{% trans "številka z decimalno piko npr. 12.99" %}</span>
                     </div>
                     <div class="split-cell last">
                         <label for="edit_product_price_with_tax">{% trans 'Sell price (incl. tax)' %}: </label>
                         <input type="text" id="edit_product_price_with_tax" maxlength="{{ field_lengths.price }}"/>
+                        <span class="decimal-point-info">{% trans "številka z decimalno piko npr. 12.99" %}</span>
                     </div>
 
                     <div class="cleared"></div>
