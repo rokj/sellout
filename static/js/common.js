@@ -738,6 +738,7 @@ ContactForm = function(g) {
 
         send_data(p.g.send_message_url, data, p.g.csrf_token, function(response) {
             if (response && response.status == 'ok') {
+                p.items.response_ok.text(gettext("Message sent!"));
                 p.items.response_ok.show();
                 p.items.title.text("");
             } else {

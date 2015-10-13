@@ -584,3 +584,6 @@ msgstr "Vnesi ime zaloge"
 
 msgid "Contact form"
 msgstr "Kontaktni obrazec"
+
+msgid "Message sent!"
+msgstr "Sporočilo poslano!"

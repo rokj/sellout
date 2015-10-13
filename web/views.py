@@ -384,7 +384,7 @@ def send_contact_message(request):
                 'status': 'not_valid_email',
         })
 
-    subject = _('Message from website')
+    subject = _('Message from') + " " + settings.SITE_URL
     message = d.get('message')
 
     message_html = message.replace("\r\n", "<br />")

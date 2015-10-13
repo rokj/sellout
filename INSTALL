@@ -17,6 +17,7 @@ pip install xlrd
 pip install django-oauth2-provider
 pip install pyatspi
 pip install python-bitcoinrpc
+pip install uwsgi # only for production
 
 system dependencies:
 memcached
