@@ -367,11 +367,6 @@ def send_contact_message(request):
                 'status': 'no_first_name',
         })
 
-    if "email" not in d:
-        return JsonResponse({
-                'status': 'no_email',
-        })
-
     if "message" not in d:
         return JsonResponse({
                 'status': 'no_message',
@@ -396,7 +391,7 @@ def send_contact_message(request):
         print "and message:"
         print message
     else:
-        send_email(settings.EMAIL_FROM, [settings.CONTACT_EMAIL], None, subject, message, message_html)
+        send_email(d.get('email'), [settings.CONTACT_EMAIL], None, subject, message, message_html)
 
     return JsonResponse({
             'status': 'ok'
