@@ -4951,3 +4951,61 @@ msgstr "Kontaktni obrazec"
 
 msgid "FAQ"
 msgstr "Pogosta vprašanja"
+
+msgid "Is this software really free of charge?"
+msgstr "Je ta spletna aplikacija res brezplačna?"
+
+msgid "Yes."
+msgstr "Da."
+
+msgid "Will it stay for free?"
+msgstr "Ali bo tudi ostala brezplačana?"
+
+msgid "I heared that source code is also available. Is this true?"
+msgstr "Slišal sem, da je izvorna koda za to spletno mesto prosto dostopna. Je to res?"
+
+msgid "Yes. You can get it here:"
+msgstr "Da. Lahko si jo preneseš od tukaj:"
+
+msgid "Is there a mobile version available?"
+msgstr "Je mobilna verzija tudi na voljo?"
+
+msgid "Yes, but it is in development state and not publicly available. But you can contact us if you would like to try it out anyway."
+msgstr "Je, vendar je še v razvojni različici. Lahko pa nas kontaktiraš, če bi jo rad vseeno preizkusil."
+
+msgid "I found a bug."
+msgstr "Našel sem hrošča."
+
+msgid "Do not hesitate to contact us."
+msgstr "Pošlji nam sporočilo o tem."
+
+msgid "I would like a feature x, y, z."
+msgstr "Rad bi dodatno stvar na tej aplikaciji."
+
+msgid "Read previous answer."
+msgstr "Beri prejšnji odgovor."
+
+msgid "Who are you?"
+msgstr "Kdo ste vi?"
+
+msgid "What can you do?"
+msgstr "Kaj znate?"
+
+msgid "We are really good at software development and designing stuff."
+msgstr "Zelo dobri smo v načrtovanju in izdelavi programov."
+
+msgid "What do you mean by really good?"
+msgstr "Kako mislite zelo dobri?"
+
+msgid "We get things done."
+msgstr "Cilje uresničimo."
+
+msgid "Are you for hire?"
+msgstr "Ali vas lahko najamemo?"
+
+msgid "Depends on what you want."
+msgstr "Odvisno od vaših želja."
+
+
+
+

@@ -577,14 +577,14 @@
 
                 <div class="col col-md-4 col-sm-6 col-xs-12">
                     <ul>
-                        <li><a href="#contact" class="contact">{% trans 'Contact' %}</a></li>
                         <li><a href="http://www.blocklogic.net">{% trans 'About' %}</a></li>
+                        <li><a href="#contact" class="contact">{% trans 'Contact' %}</a></li>
 {#                        <li><a href="#">{% trans 'Press kit' %}</a></li>#}
                     </ul>
                     <ul>
 {#                        <li><a href="">{% trans 'Terms & conditions' %}</a></li>#}
-                        <li><a href="">{% trans 'Privacy' %}</a></li>
-                        <li><a href="#faq">{% trans 'FAQ' %}</a></li>
+{#                        <li><a href="">{% trans 'Privacy' %}</a></li>#}
+                        <li><a href="{% url 'web:faq' %}">{% trans 'FAQ' %}</a></li>
                     </ul>
                 </div>
 

@@ -405,6 +405,9 @@ def send_contact_message(request):
 def supported_hardware(request):
     return render(request, 'web/supported_hardware.html')
 
+def faq(request):
+    return render(request, 'web/faq.html')
+
 def robots(request):
     return render(request, 'web/robots.txt', content_type='text/plain')
 
