@@ -4642,52 +4642,34 @@ msgstr "Vse pravice pridržane."
 
 #: templates/web/supported_hardware.html:45
 msgid "Choose your printer"
-msgstr ""
-
-#: templates/web/supported_hardware.html:51
-#, python-format
-msgid ""
-"Epson’s mPOS-friendly TM-T88V is the industry’s leading POS thermal printer. "
-"It is fast, reliable, easy to configure and supports all the leading mobile "
-"operating systems including iOS, Android and Windows. It features fast "
-"printing up to 300mm/second, best-in-class reliability, multiple ease-of-use "
-"features, dual interfaces and print options that reduce paper usage up to "
-"30%%."
-msgstr ""
+msgstr "Izberi tiskalnik"
 
 #: templates/web/supported_hardware.html:53
 #: templates/web/supported_hardware.html:72
 msgid "Print speed"
-msgstr "Natisni"
+msgstr "Hitrost tiksanja"
 
 #: templates/web/supported_hardware.html:53
 msgid "300mm/second graphics and text"
-msgstr ""
+msgstr "300mm/s grafike in teksta"
 
 #: templates/web/supported_hardware.html:54
 #: templates/web/supported_hardware.html:73
 msgid "Paper dimensions"
-msgstr ""
+msgstr "Dimenzije papirja"
 
 #: templates/web/supported_hardware.html:55
 #: templates/web/supported_hardware.html:74
 msgid "Overall dimensions"
-msgstr ""
-
-#: templates/web/supported_hardware.html:64
-#: templates/web/supported_hardware.html:83
-msgid "Request additional info"
-msgstr ""
+msgstr "Dimenzije tiskalnika"
 
 #: templates/web/supported_hardware.html:70
-msgid ""
-"Mini portable lightweight printer (SUP80M2-B), ready to use for small shops, "
-"restaurants and those selling on the street."
-msgstr ""
+msgid "Mini portable lightweight printer (SUP80M2-B), ready to use for small shops, restaurants and those selling on the street."
+msgstr "Mini prenosni tiskalnik (SUP80M2-B), primeren za majhne trgovine, restavracije in tiste, ki prodajajo na tržnicah."
 
 #: templates/web/supported_hardware.html:72
 msgid "90mm/second"
-msgstr ""
+msgstr "90mm/s"
 
 #: web/views.py:131
 msgid "Select company"
@@ -5011,3 +4993,6 @@ msgstr "Želim dodatne informacije"
 
 msgid "Epson’s mPOS-friendly TM-T88V is the industry’s leading POS thermal printer. It is fast, reliable, easy to configure and supports all the leading mobile operating systems including iOS, Android and Windows. It features fast printing up to 300mm/second, best-in-class reliability, multiple ease-of-use features, dual interfaces and print options that reduce paper usage up to 30%."
 msgstr "Epson TM-T88V je industrijski POS termalni tiskalnik. Je hiter, zanesljiv, preprost za namestitev and podpira vse vodilne operacijske sisteme kot so iOS, Android in Windows. Odlikuje ga hitro tiskanje do 300mm/s, v svoji kategoriji slovi po izjemni zanesljivosti in možnostih za nastavitev tiskanja, ki zmanjša porabo tiskalniškega papirja tudi do 30%."
+
+msgid "Epson TM-T88V printer"
+msgstr "Epson TM-T88V termalnik tiskalnik"
