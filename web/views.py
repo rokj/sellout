@@ -384,12 +384,19 @@ def send_contact_message(request):
 
     message_html = message.replace("\r\n", "<br />")
     message_html = message_html.replace("\n", "<br />")
+    message_html = message_html + "<br />"
+    message_html = message_html + _("Message was sent by:") + " " + d.get('first_last_name')
 
     if settings.DEBUG:
         print "We are sending email with subject:"
         print subject
         print "and message:"
+        print "--- text ---"
         print message
+        print "--- text ---"
+        print "--- html ---"
+        print message_html
+        print "--- html ---"
     else:
         send_email(d.get('email'), [settings.CONTACT_EMAIL], None, subject, message, message_html)
 
