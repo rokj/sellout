@@ -384,7 +384,7 @@ def send_contact_message(request):
 
     message_html = message.replace("\r\n", "<br />")
     message_html = message_html.replace("\n", "<br />")
-    message_html = message_html + "<br />"
+    message_html = message_html + "<br /><br />"
     message_html = message_html + _("Message was sent by:") + " " + d.get('first_last_name')
 
     if settings.DEBUG:

@@ -587,3 +587,6 @@ msgstr "Kontaktni obrazec"
 
 msgid "Message sent!"
 msgstr "Sporočilo poslano!"
+
+msgid "Message was sent by:"
+msgstr "Sporočilo je poslal: "
