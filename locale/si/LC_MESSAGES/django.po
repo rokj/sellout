@@ -4996,3 +4996,9 @@ msgstr "Epson TM-T88V je industrijski POS termalni tiskalnik. Je hiter, zaneslji
 
 msgid "Epson TM-T88V printer"
 msgstr "Epson TM-T88V termalnik tiskalnik"
+
+msgid "Message from"
+msgstr "Sporočilo iz"
+
+msgid "Message was sent by:"
+msgstr "Sporočilo je poslal: "
