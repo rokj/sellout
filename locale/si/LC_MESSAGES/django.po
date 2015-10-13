@@ -4998,7 +4998,7 @@ msgid "What do you mean by really good?"
 msgstr "Kako mislite zelo dobri?"
 
 msgid "We get things done."
-msgstr "Cilje uresničimo."
+msgstr "Uresničimo cilje."
 
 msgid "Are you for hire?"
 msgstr "Ali vas lahko najamemo?"
