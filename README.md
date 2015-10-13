@@ -1,4 +1,4 @@
-**Sellout** is simple web based POS system.
+**Sellout** is simple web based POS system with Bitcoin support.
 
 It is based on Django and many other smaller projects.
 
