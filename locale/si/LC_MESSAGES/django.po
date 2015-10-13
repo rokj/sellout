@@ -5006,6 +5006,8 @@ msgstr "Ali vas lahko najamemo?"
 msgid "Depends on what you want."
 msgstr "Odvisno od vaših želja."
 
+msgid "Request additional info"
+msgstr "Želim dodatne informacije"
 
-
-
+msgid "Epson’s mPOS-friendly TM-T88V is the industry’s leading POS thermal printer. It is fast, reliable, easy to configure and supports all the leading mobile operating systems including iOS, Android and Windows. It features fast printing up to 300mm/second, best-in-class reliability, multiple ease-of-use features, dual interfaces and print options that reduce paper usage up to 30%."
+msgstr "Epson TM-T88V je industrijski POS termalni tiskalnik. Je hiter, zanesljiv, preprost za namestitev and podpira vse vodilne operacijske sisteme kot so iOS, Android in Windows. Odlikuje ga hitro tiskanje do 300mm/s, v svoji kategoriji slovi po izjemni zanesljivosti in možnostih za nastavitev tiskanja, ki zmanjša porabo tiskalniškega papirja tudi do 30%."
