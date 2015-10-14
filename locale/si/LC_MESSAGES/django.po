@@ -4290,7 +4290,7 @@ msgstr "Več profilov dostopa"
 #: templates/web/index.html:435
 msgid "Define who has access to what.<br />Keep your company information safe."
 msgstr ""
-"Nastavite do dostopa do kam.<br />Pomembne informacije tako ostanejo varne."
+"Nastavite kdo dostopa do kam.<br />Pomembne informacije tako ostanejo varne."
 
 #: templates/web/index.html:444
 msgid "Customizable"
@@ -4300,7 +4300,7 @@ msgstr "Prilagodljiv"
 msgid ""
 "Set the layout of terminal and printed receipts <br /> to satisfy your "
 "requirements."
-msgstr "Izgled računov in terminala nastavite,<br />da zadovolji vašemuokusu."
+msgstr "Izgled računov in terminala nastavite,<br />da zadovolji vašemu okusu."
 
 #: templates/web/index.html:469
 msgid "Supported hardware"
