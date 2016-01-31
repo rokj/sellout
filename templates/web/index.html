@@ -186,7 +186,9 @@
                 return false;
             });
 
-            items.adsbygoogle.css("padding-top", $(window).height()-110 + "px" );
+            items.adsbygoogle.css("position", "absolute");
+            items.adsbygoogle.css("bottom", "15px");
+            items.adsbygoogle.css("left", ($(window).width()/2)-(items.adsbygoogle.width()/2)+ "px");
 
             match_url();
             $(window).on('hashchange', match_url);
