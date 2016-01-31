@@ -169,6 +169,20 @@ section {
     top: 30%;
 }
 
+@keyframes example {
+    from {bottom: 20px;}
+    to {bottom: 5px;}
+}
+
+@-moz-keyframes example {
+    from {bottom: 20px;}
+    to {bottom: 5px;}
+}
+@-webkit-keyframes example {
+    from {bottom: 20px;}
+    to {bottom: 5px;}
+}
+
 #more{
     position: absolute;
     left: 50%;
@@ -184,13 +198,17 @@ section {
 
 #more_icon {
     position: absolute;
-    left: 50%;
+    right: 2%;
     margin-left: -11px;
-    bottom: 9px;
+    bottom: 20px;
 
-    -webkit-transition: opacity 0.7s ease-in-out;
-    -moz-transition: opacity 0.7s ease-in-out;
-    transition: opacity 0.7s ease-in-out;
+    -webkit-animation: example 2s linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-direction: alternate;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
 }
 
 #more_icon.hover {

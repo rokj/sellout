@@ -73,7 +73,8 @@
                 beta_stripe: $("#beta_stripe"),
                 more_icon: $("#more_icon"),
                 contact: $("section#contact"),
-                contact_link: $("a.contact")
+                contact_link: $("a.contact"),
+                adsbygoogle: $(".adsbygoogle")
             };
 
             var g = {
@@ -185,6 +186,8 @@
                 return false;
             });
 
+            items.adsbygoogle.css("padding-top", $(window).height()-110 + "px" );
+
             match_url();
             $(window).on('hashchange', match_url);
         });
@@ -264,7 +267,18 @@
             <h2 class="text-center">{% trans 'Your perfect business partner.' %}</h2>
         </div>
 
-        <input type="button" value="{% trans 'Find out more' %}" id="more" class="extra-font buttons" />
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <!-- spletna-blagajna.si taglavni -->
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-6230682362613508"
+             data-ad-slot="9152393876"
+             data-ad-format="auto"></ins>
+        <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+
+{#        <input type="button" value="{% trans 'Find out more' %}" id="more" class="extra-font buttons" />#}
         <img src="{% static 'icons/arrow_white_down.png' %}" alt="{% trans "More" %}" id="more_icon" />
     </section>
 
